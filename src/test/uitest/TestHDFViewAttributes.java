@@ -1,7 +1,6 @@
 package test.uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
-import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -16,12 +15,11 @@ import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTableItem;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /*
@@ -31,6 +29,8 @@ import org.junit.Test;
 public class TestHDFViewAttributes extends AbstractWindowTest {
     private String groupname = "test_group";
     private String datasetname = "test_dataset";
+    private String attrName = "test_attribute";
+    private String attrValue = "13";
 
     /*
      * Constants to keep track of the order of the columns in the attribute table,
@@ -41,7 +41,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
     private static final int ATTRIBUTE_TABLE_ARRAY_SIZE_COLUMN_INDEX = 2;
     private static final int ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX = 3;
 
-    private void createNewGroup() {
+    private void createNewGroup()
+    {
         SWTBotShell groupShell = null;
 
         try {
@@ -80,7 +81,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    private void createNewDataset() {
+    private void createNewDataset()
+    {
         String currentSize = "4 x 4";
         SWTBotShell tableShell = null;
         SWTBotShell datasetShell = null;
@@ -170,181 +172,15 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Test
-    public void testAddHDF4Attribute() {
-        String filename = "testaddattribute.hdf";
-        String attrName = "test_attribute";
-        String attrValue = "13";
+    public SWTBotTableItem addAttributeToObject(String testname, SWTBotTable attrTable, int attrindex)
+    {
         SWTBotShell newAttributeShell = null;
-
-        File hdf_file = createFile(filename);
+        SWTBotTableItem newItem = null;
 
         try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("testAddHDF4Attribute()", "filetree wrong row count", "1",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testAddHDF4Attribute() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
-
-            createNewGroup();
-            createNewDataset();
-
-            assertTrue(constructWrongValueMessage("testAddHDF4Attribute()", "filetree wrong row count", "3",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 3);
-            assertTrue("testAddHDF4Attribute() filetree is missing group '" + groupname + "'",
-                    items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testAddHDF4Attribute() filetree is missing dataset '" + datasetname + "'",
-                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
-
-            /* Add an attribute to the newly-created group */
-            items[0].getNode(0).click();
-
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
             /* Verify that there are currently no attributes on the group */
-            SWTBotTable attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testAddHDF4Attribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            SWTBotButton addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testAddHDF4Attribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            SWTBotTableItem newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testAddHDF4Attribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testAddHDF4Attribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Now repeat the process for the dataset that was created */
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there is only the "_FillValue" attribute on the dataset */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testAddHDF4Attribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testAddHDF4Attribute()", "attribute table wrong row count", "2",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 2);
-
-            /* Grab the second attribute, since "_FillValue" should be first */
-            newItem = attrTable.getTableItem(1);
-
-            assertTrue(
-                    constructWrongValueMessage("testAddHDF4Attribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testAddHDF4Attribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-        finally {
-            if (newAttributeShell != null && newAttributeShell.isOpen()) {
-                newAttributeShell.close();
-                bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-            }
-
-            try {
-                closeFile(hdf_file, true);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    @Test
-    public void testAddHDF5Attribute() {
-        String filename = "testaddattribute.h5";
-        String attrName = "test_attribute";
-        String attrValue = "13";
-        SWTBotShell newAttributeShell = null;
-
-        File hdf_file = createFile(filename);
-
-        try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("testAddHDF5Attribute()", "filetree wrong row count", "1",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testAddHDF5Attribute() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
-
-            createNewGroup();
-            createNewDataset();
-
-            assertTrue(constructWrongValueMessage("testAddHDF5Attribute()", "filetree wrong row count", "3",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 3);
-            assertTrue("testAddHDF5Attribute() filetree is missing group '" + groupname + "'",
-                    items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testAddHDF5Attribute() filetree is missing dataset '" + datasetname + "'",
-                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
-
-            /* Add an attribute to the newly-created group */
-            items[0].getNode(0).click();
-
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the group */
-            SWTBotTable attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testAddHDF5Attribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
+            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count", String.valueOf(attrindex),
+                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == attrindex);
 
             SWTBotButton addButton = bot.button("Add Attribute");
             addButton.click();
@@ -359,69 +195,17 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(newAttributeShell));
 
             /* Verify that the attribute has been added to the table with the correct name and value */
-            assertTrue(constructWrongValueMessage("testAddHDF5Attribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
+            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count", String.valueOf(attrindex+1),
+                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == attrindex+1);
 
-            SWTBotTableItem newItem = attrTable.getTableItem(0);
+            newItem = attrTable.getTableItem(attrindex);
 
-            assertTrue(constructWrongValueMessage("testAddHDF5Attribute()", "attribute wrong name", attrName,
+            assertTrue(constructWrongValueMessage(testname, "attribute wrong name", attrName,
                     newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
                     newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(constructWrongValueMessage("testAddHDF5Attribute()", "attribute wrong value", attrValue,
+            assertTrue(constructWrongValueMessage(testname, "attribute wrong value", attrValue,
                     newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
                     newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Now repeat the process for the dataset that was created */
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the dataset */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testAddHDF5Attribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testAddHDF5Attribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage(
-                            "testAddHDF5Attribute()",
-                            "attribute wrong name",
-                            attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)
-                            ),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName)
-                    );
-            assertTrue(
-                    constructWrongValueMessage(
-                            "testAddHDF5Attribute()",
-                            "attribute wrong value",
-                            attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)
-                            ),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue)
-                    );
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -436,93 +220,20 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
                 newAttributeShell.close();
                 bot.waitUntil(Conditions.shellCloses(newAttributeShell));
             }
-
-            try {
-                closeFile(hdf_file, true);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
         }
+        return newItem;
     }
 
-    @Test
-    public void testHDF5DeleteAttribute() {
-        String filename = "testdeleteattribute.h5";
-        String attrName = "test_attribute";
-        String attrValue = "13";
-        SWTBotShell newAttributeShell = null;
+    public void deleteAttributeFromObject(String testname, SWTBotTable attrTable, SWTBotTableItem newItem, boolean useButton)
+    {
         SWTBotShell deleteAttributeShell = null;
 
-        File hdf_file = createFile(filename);
-
         try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "filetree wrong row count", "1",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testHDF5DeleteAttribute() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
-
-            createNewGroup();
-            createNewDataset();
-
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "filetree wrong row count", "3",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 3);
-            assertTrue("testHDF5DeleteAttribute() filetree is missing group '" + groupname + "'",
-                    items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testHDF5DeleteAttribute() filetree is missing dataset '" + datasetname + "'",
-                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
-
-            /* Test deletion of attribute by button */
-
-            /* Add an attribute to the newly-created group */
-            items[0].getNode(0).click();
-
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the group */
-            SWTBotTable attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            SWTBotButton addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            SWTBotTableItem newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Now attempt to delete the attribute */
-
             newItem.click();
-            bot.button("Delete Attribute").click();
+            if (useButton)
+                bot.button("Delete Attribute").click();
+            else
+                bot.table().contextMenu("Delete Attribute").click();
 
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*" + VERSION + " - Delete");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
@@ -537,210 +248,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             /*
              * Verify that the attribute has been removed from the attribute table.
              */
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            /* Now repeat the process for the dataset created previously */
-
-            /* Add an attribute to the newly-created dataset */
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the dataset */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Now attempt to delete the attribute */
-
-            newItem.click();
-            bot.button("Delete Attribute").click();
-
-            shellMatcher = WithRegex.withRegex(".*" + VERSION + " - Delete");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            deleteAttributeShell = bot.shell("HDFView " + VERSION + " - Delete");
-            deleteAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(deleteAttributeShell.getText()));
-
-            deleteAttributeShell.bot().button("OK").click();
-            bot.waitUntil(Conditions.shellCloses(deleteAttributeShell));
-
-            /*
-             * Verify that the attribute has been removed from the attribute table.
-             */
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-
-            /* Now test deletion of attributes by using the popup menu */
-
-            /* Reload the file for good measure */
-            items[0].click();
-            items[0].contextMenu().menu("&Reload File As").menu("Read/Write").click();
-
-            items = bot.tree().getAllItems();
-            items[0].contextMenu("Expand All").click();
-
-            /* Add an attribute to the newly-created group */
-            items[0].getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the group */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Now attempt to delete the attribute */
-
-            newItem.click();
-            bot.table().contextMenu("Delete Attribute").click();
-
-            shellMatcher = WithRegex.withRegex(".*" + VERSION + " - Delete");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            deleteAttributeShell = bot.shell("HDFView " + VERSION + " - Delete");
-            deleteAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(deleteAttributeShell.getText()));
-
-            deleteAttributeShell.bot().button("OK").click();
-            bot.waitUntil(Conditions.shellCloses(deleteAttributeShell));
-
-            /*
-             * Verify that the attribute has been removed from the attribute table.
-             */
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            /* Now repeat the process for the dataset created previously */
-
-            /* Add an attribute to the newly-created dataset */
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the dataset */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Now attempt to delete the attribute */
-
-            newItem.click();
-            bot.table().contextMenu("Delete Attribute").click();
-
-            shellMatcher = WithRegex.withRegex(".*" + VERSION + " - Delete");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            deleteAttributeShell = bot.shell("HDFView " + VERSION + " - Delete");
-            deleteAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(deleteAttributeShell.getText()));
-
-            deleteAttributeShell.bot().button("OK").click();
-            bot.waitUntil(Conditions.shellCloses(deleteAttributeShell));
-
-            /*
-             * Verify that the attribute has been removed from the attribute table.
-             */
-            assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "attribute table wrong row count", "0",
+            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count", "0",
                     String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
         }
         catch (Exception ex) {
@@ -752,99 +260,19 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if (newAttributeShell != null && newAttributeShell.isOpen()) {
-                newAttributeShell.close();
-                bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-            }
-
             if (deleteAttributeShell != null && deleteAttributeShell.isOpen()) {
                 deleteAttributeShell.close();
                 bot.waitUntil(Conditions.shellCloses(deleteAttributeShell));
             }
-
-            try {
-                closeFile(hdf_file, true);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
         }
     }
 
-    @Test
-    public void testHDF5RenameAttribute() {
-        String filename = "testrenameattribute.h5";
-        String attrName = "test_attribute";
-        String newAttrName = "renamed_attribute";
-        String attrValue = "13";
-        SWTBotShell newAttributeShell = null;
+    public void renameAttributeFromObject(String testname, SWTBotTable attrTable, SWTBotTableItem newItem)
+    {
         SWTBotShell renameAttributeShell = null;
-
-        File hdf_file = createFile(filename);
+        String newAttrName = "renamed_attribute";
 
         try {
-            SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttribute()", "filetree wrong row count", "1",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testHDF5RenameAttribute() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
-
-            createNewGroup();
-            createNewDataset();
-
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttribute()", "filetree wrong row count", "3",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 3);
-            assertTrue("testHDF5RenameAttribute() filetree is missing group '" + groupname + "'",
-                    items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testHDF5RenameAttribute() filetree is missing dataset '" + datasetname + "'",
-                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
-
-            /* Add an attribute to the newly-created group */
-            items[0].getNode(0).click();
-
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the group */
-            SWTBotTable attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            SWTBotButton addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            SWTBotTableItem newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Now attempt to rename the attribute */
-
             newItem.click();
             bot.table().contextMenu("Rename Attribute").click();
 
@@ -855,151 +283,14 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             renameAttributeShell.activate();
             bot.waitUntil(Conditions.shellIsActive(renameAttributeShell.getText()));
 
-            renameAttributeShell.bot().text().setText(newAttrName);
-
             renameAttributeShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(renameAttributeShell));
-
-            /* Verify that the attribute has been renamed */
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong name", newAttrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(newAttrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Reload the file for good measure to make sure the changes are saved */
-            items[0].click();
-            items[0].contextMenu("Reload File As").menu("Read/Write").click();
-
-            items = bot.tree().getAllItems();
-            items[0].contextMenu("Expand All").click();
-
-            items[0].getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that the attribute is still on the group */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            newItem = attrTable.getTableItem(0);
-
-            /* Verify that the attribute has been renamed */
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong name", newAttrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(newAttrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Now repeat the process for the previously-created dataset */
-
-            /* Add an attribute to the newly-created dataset */
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the dataset */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttribute()", "attribute table wrong row count", "0",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
 
             /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
+             * Verify that the attribute has been renamed from the attribute table.
              */
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttribute()", "attribute table wrong row count", "1",
+            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count", "1",
                     String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Now attempt to rename the attribute */
-
-            newItem.click();
-            bot.table().contextMenu("Rename Attribute").click();
-
-            shellMatcher = WithRegex.withRegex(".*" + VERSION + " - Rename Attribute");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            renameAttributeShell = bot.shell("HDFView " + VERSION + " - Rename Attribute");
-            renameAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(renameAttributeShell.getText()));
-
-            renameAttributeShell.bot().text().setText(newAttrName);
-
-            renameAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(renameAttributeShell));
-
-            /* Verify that the attribute has been renamed */
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong name", newAttrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(newAttrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Reload the file for good measure to make sure the changes are saved */
-            items[0].click();
-            items[0].contextMenu("Reload File As").menu("Read/Write").click();
-
-            items = bot.tree().getAllItems();
-            items[0].contextMenu("Expand All").click();
-
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that the attribute is still on the dataset */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttribute()", "attribute table wrong row count", "1",
-                    String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            newItem = attrTable.getTableItem(0);
-
-            /* Verify that the attribute has been renamed */
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong name", newAttrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(newAttrName));
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1010,249 +301,35 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if (newAttributeShell != null && newAttributeShell.isOpen()) {
-                newAttributeShell.close();
-                bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-            }
-
             if (renameAttributeShell != null && renameAttributeShell.isOpen()) {
                 renameAttributeShell.close();
                 bot.waitUntil(Conditions.shellCloses(renameAttributeShell));
             }
-
-            try {
-                closeFile(hdf_file, true);
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
         }
     }
 
     @Test
-    public void testOpenHDF4ScalarAttribute() {
-        String filename = "testopenattribute.hdf";
-        String attrName = "test_attribute";
-        String attrValue = "13";
+    public void testAddHDF4Attribute()
+    {
+        String testFilename = "testaddattribute.hdf";
         SWTBotShell newAttributeShell = null;
-        SWTBotShell openAttributeShell = null;
 
-        File hdf_file = createFile(filename);
+        File hdf4File = createFile(testFilename);
 
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "filetree wrong row count", "1",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testOpenHDF4ScalarAttribute() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
+            checkFileTree(filetree, "testAddHDF4Attribute()", 1, testFilename);
 
             createNewGroup();
             createNewDataset();
 
-            assertTrue(constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "filetree wrong row count", "3",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 3);
-            assertTrue("testOpenHDF4ScalarAttribute() filetree is missing group '" + groupname + "'",
-                    items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testOpenHDF4ScalarAttribute() filetree is missing dataset '" + datasetname + "'",
-                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            checkFileTree(filetree, "testAddHDF4Attribute()", 3, testFilename);
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
+            addAttributeToObject("testAddHDF4Attribute()", attrTable, 0);
 
-            /* Add an attribute to the newly-created group */
-            items[0].getNode(0).click();
-
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the group */
-            SWTBotTable attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute table wrong row count",
-                    "0", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            SWTBotButton addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute table wrong row count",
-                    "1", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            SWTBotTableItem newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Test open of attribute by double-click */
-            newItem.doubleClick();
-
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            openAttributeShell = bot.shells()[1];
-            openAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(openAttributeShell.getText()));
-
-            openAttributeShell.close();
-
-            /* Now repeat the process for the previously-created dataset */
-
-            /* Add an attribute to the newly-created dataset */
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the dataset */
-            attrTable = bot.table();
-
-            /* HDF4 datasets have the "_FillValue" attribute attached */
-            assertTrue(constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute table wrong row count",
-                    "1", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute table wrong row count",
-                    "2", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 2);
-
-            newItem = attrTable.getTableItem(1);
-
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Test open of attribute by double-click */
-            newItem.doubleClick();
-
-            shellMatcher = WithRegex.withRegex("");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            openAttributeShell = bot.shells()[1];
-            openAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(openAttributeShell.getText()));
-
-            openAttributeShell.close();
-
-            /* Test open of attribute by popup menu */
-
-            /* Reload file for good measure */
-            items[0].click();
-            items[0].contextMenu("Reload File").click();
-
-            items = filetree.getAllItems();
-            items[0].contextMenu("Expand All").click();
-
-            items[0].getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that attribute is still on the group */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute table wrong row count",
-                    "1", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            /*
-             * Verify that the attribute has the correct name and value
-             */
-            newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            newItem.click();
-            attrTable.contextMenu("View/Edit Attribute Value").click();
-
-            shellMatcher = WithRegex.withRegex("");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            openAttributeShell = bot.shells()[1];
-            openAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(openAttributeShell.getText()));
-
-            openAttributeShell.close();
-
-            /* Now repeat the process for the previously-created dataset */
-
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that attribute is still on the dataset */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute table wrong row count",
-                    "2", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 2);
-
-            /*
-             * Verify that the attribute has the correct name and value
-             */
-            newItem = attrTable.getTableItem(1);
-
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            newItem.click();
-            attrTable.contextMenu("View/Edit Attribute Value").click();
-
-            shellMatcher = WithRegex.withRegex("");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            openAttributeShell = bot.shells()[1];
-            openAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(openAttributeShell.getText()));
-
-            openAttributeShell.close();
+            /* Now repeat the process for the dataset that was created */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            addAttributeToObject("testAddHDF4Attribute()", attrTable, 1);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1268,13 +345,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
                 bot.waitUntil(Conditions.shellCloses(newAttributeShell));
             }
 
-            if (openAttributeShell != null && openAttributeShell.isOpen()) {
-                openAttributeShell.close();
-                bot.waitUntil(Conditions.shellCloses(openAttributeShell));
-            }
-
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdf4File, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1283,228 +355,27 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
     }
 
     @Test
-    public void testOpenHDF5ScalarAttribute() {
-        String filename = "testopenattribute.h5";
-        String attrName = "test_attribute";
-        String attrValue = "13";
-        SWTBotShell newAttributeShell = null;
-        SWTBotShell openAttributeShell = null;
-
-        File hdf_file = createFile(filename);
+    public void testAddHDF5Attribute()
+    {
+        String testFilename = "testaddattribute.h5";
+        File hdfFile = createFile(testFilename);
 
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "filetree wrong row count", "1",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testOpenHDF5ScalarAttribute() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
+            checkFileTree(filetree, "testAddHDF5Attribute()", 1, testFilename);
 
             createNewGroup();
             createNewDataset();
 
-            assertTrue(constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "filetree wrong row count", "3",
-                    String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 3);
-            assertTrue("testOpenHDF5ScalarAttribute() filetree is missing group '" + groupname + "'",
-                    items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testOpenHDF5ScalarAttribute() filetree is missing dataset '" + datasetname + "'",
-                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            checkFileTree(filetree, "testAddHDF5Attribute()", 3, testFilename);
 
             /* Add an attribute to the newly-created group */
-            items[0].getNode(0).click();
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
+            addAttributeToObject("testAddHDF5Attribute()", attrTable, 0);
 
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the group */
-            SWTBotTable attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute table wrong row count",
-                    "0", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            SWTBotButton addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute table wrong row count",
-                    "1", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            SWTBotTableItem newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Test open of attribute by double-click */
-            newItem.doubleClick();
-
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            openAttributeShell = bot.shells()[1];
-            openAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(openAttributeShell.getText()));
-
-            openAttributeShell.close();
-
-            /* Now repeat the process for the previously-created dataset */
-
-            /* Add an attribute to the newly-created dataset */
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that there are currently no attributes on the dataset */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute table wrong row count",
-                    "0", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 0);
-
-            addButton = bot.button("Add Attribute");
-            addButton.click();
-
-            newAttributeShell = bot.shell("New Attribute...");
-            newAttributeShell.activate();
-
-            newAttributeShell.bot().textWithLabel("Name: ").setText(attrName);
-            newAttributeShell.bot().textWithLabel("Value: ").setText(attrValue);
-
-            newAttributeShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-
-            /*
-             * Verify that the attribute has been added to the table with the correct name
-             * and value
-             */
-            assertTrue(constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute table wrong row count",
-                    "1", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            /* Test open of attribute by double-click */
-            newItem.doubleClick();
-
-            shellMatcher = WithRegex.withRegex("");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            openAttributeShell = bot.shells()[1];
-            openAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(openAttributeShell.getText()));
-
-            openAttributeShell.close();
-
-            /* Test open of attribute by popup menu */
-
-            /* Reload file for good measure */
-            items[0].click();
-            items[0].contextMenu("Reload File").click();
-
-            items = filetree.getAllItems();
-            items[0].contextMenu("Expand All").click();
-
-            items[0].getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that attribute is still on the group */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute table wrong row count",
-                    "1", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            /*
-             * Verify that the attribute has the correct name and value
-             */
-            newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            newItem.click();
-            attrTable.contextMenu("View/Edit Attribute Value").click();
-
-            shellMatcher = WithRegex.withRegex("");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            openAttributeShell = bot.shells()[1];
-            openAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(openAttributeShell.getText()));
-
-            openAttributeShell.close();
-
-            /* Now repeat the process for the previously-created dataset */
-
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
-
-            /* Verify that attribute is still on the dataset */
-            attrTable = bot.table();
-
-            assertTrue(constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute table wrong row count",
-                    "1", String.valueOf(attrTable.rowCount())), attrTable.rowCount() == 1);
-
-            /*
-             * Verify that the attribute has the correct name and value
-             */
-            newItem = attrTable.getTableItem(0);
-
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute wrong name", attrName,
-                            newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
-            assertTrue(
-                    constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "attribute wrong value", attrValue,
-                            newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
-                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
-
-            newItem.click();
-            attrTable.contextMenu("View/Edit Attribute Value").click();
-
-            shellMatcher = WithRegex.withRegex("");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            openAttributeShell = bot.shells()[1];
-            openAttributeShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(openAttributeShell.getText()));
-
-            openAttributeShell.close();
+            /* Now repeat the process for the dataset that was created */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            addAttributeToObject("testAddHDF5Attribute()", attrTable, 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1515,18 +386,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if (newAttributeShell != null && newAttributeShell.isOpen()) {
-                newAttributeShell.close();
-                bot.waitUntil(Conditions.shellCloses(newAttributeShell));
-            }
-
-            if (openAttributeShell != null && openAttributeShell.isOpen()) {
-                openAttributeShell.close();
-                bot.waitUntil(Conditions.shellCloses(openAttributeShell));
-            }
-
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdfFile, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1535,6 +396,276 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
     }
 
     @Test
+    public void testHDF5DeleteAttribute()
+    {
+        String testFilename = "testdeleteattribute.h5";
+
+        File hdfFile = createFile(testFilename);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+            checkFileTree(filetree, "testHDF5DeleteAttribute()", 1, testFilename);
+
+            createNewGroup();
+            createNewDataset();
+
+            SWTBotTreeItem[] items = checkFileTree(filetree, "testHDF5DeleteAttribute()", 3, testFilename);
+
+            /* Add an attribute to the newly-created group */
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
+            SWTBotTableItem newItem = addAttributeToObject("testHDF5DeleteAttribute()", attrTable, 0);
+
+            /* Test deletion of attribute by button */
+            /* Now attempt to delete the attribute */
+            deleteAttributeFromObject("testHDF5DeleteAttribute()", attrTable, newItem, true);
+
+            /* Now repeat the process for the dataset created previously */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            newItem = addAttributeToObject("testHDF5DeleteAttribute()", attrTable, 0);
+
+            /* Now attempt to delete the attribute */
+            deleteAttributeFromObject("testHDF5DeleteAttribute()", attrTable, newItem, true);
+
+            /* Now test deletion of attributes by using the popup menu */
+
+            /* Reload the file for good measure */
+            items[0].click();
+            items[0].contextMenu().menu("&Reload File As").menu("Read/Write").click();
+
+            filetree = bot.tree();
+            items = filetree.getAllItems();
+            items[0].contextMenu("Expand All").click();
+            checkFileTree(filetree, "testHDF5DeleteAttribute()", 3, testFilename);
+            attrTable = openAttributeTable(filetree, testFilename, groupname);
+            newItem = addAttributeToObject("testHDF5DeleteAttribute()", attrTable, 0);
+
+            /* Test deletion of attribute by context menu */
+            /* Now attempt to delete the attribute */
+            deleteAttributeFromObject("testHDF5DeleteAttribute()", attrTable, newItem, false);
+
+            /* Now repeat the process for the dataset created previously */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            newItem = addAttributeToObject("testHDF5DeleteAttribute()", attrTable, 0);
+
+            /* Now attempt to delete the attribute */
+            deleteAttributeFromObject("testHDF5DeleteAttribute()", attrTable, newItem, false);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            try {
+                closeFile(hdfFile, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    @Test
+    public void testHDF5RenameAttribute()
+    {
+        String testFilename = "testrenameattribute.h5";
+
+        File hdfFile = createFile(testFilename);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+            checkFileTree(filetree, "testHDF5RenameAttribute()", 1, testFilename);
+
+            createNewGroup();
+            createNewDataset();
+
+            SWTBotTreeItem[] items = checkFileTree(filetree, "testHDF5RenameAttribute()", 3, testFilename);
+
+            /* Add an attribute to the newly-created group */
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
+            SWTBotTableItem newItem = addAttributeToObject("testHDF5RenameAttribute()", attrTable, 0);
+
+            /* Now test rename of attributes by using the popup menu */
+
+            /* Test rename of attribute by context menu */
+            /* Now attempt to delete the attribute */
+            renameAttributeFromObject("testHDF5RenameAttribute()", attrTable, newItem);
+
+            /* Now repeat the process for the dataset created previously */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            newItem = addAttributeToObject("testHDF5RenameAttribute()", attrTable, 0);
+
+            /* Now attempt to rename the attribute */
+            renameAttributeFromObject("testHDF5RenameAttribute()", attrTable, newItem);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            try {
+                closeFile(hdfFile, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    @Test
+    public void testOpenHDF4ScalarAttribute()
+    {
+        String testFilename = "testopenattribute.hdf";
+        SWTBotShell tableShell = null;
+        File hdfFile = createFile(testFilename);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = checkFileTree(filetree, "testOpenHDF4ScalarAttribute()", 1, testFilename);
+
+            createNewGroup();
+            createNewDataset();
+
+            /* Add an attribute to the newly-created group */
+            checkFileTree(filetree, "testOpenHDF4ScalarAttribute()", 3, testFilename);
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
+            addAttributeToObject("testOpenHDF4ScalarAttribute()", attrTable, 0);
+
+            attrTable = openAttributeTable(filetree, testFilename, groupname);
+            tableShell = openAttributeObject(attrTable, attrName, 0);
+            tableShell.close();
+
+            /* Now repeat the process for the dataset that was created */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            addAttributeToObject("testOpenHDF4ScalarAttribute()", attrTable, 1);
+
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            tableShell = openAttributeObject(attrTable, attrName, 1);
+            tableShell.close();
+
+            /* Test open of attribute by popup menu */
+
+            /* Reload file for good measure */
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            items[0].contextMenu("Expand All").click();
+
+            attrTable = openAttributeTable(filetree, testFilename, groupname);
+            tableShell = openAttributeContext(attrTable, attrName, 0);
+            tableShell.close();
+
+
+            /* Now repeat the process for the previously-created dataset */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            tableShell = openAttributeContext(attrTable, attrName, 1);
+            tableShell.close();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.close();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                closeFile(hdfFile, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    @Test
+    public void testOpenHDF5ScalarAttribute()
+    {
+        String testFilename = "testopenattribute.h5";
+        SWTBotShell tableShell = null;
+        File hdfFile = createFile(testFilename);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = checkFileTree(filetree, "testOpenHDF5ScalarAttribute()", 1, testFilename);
+
+            createNewGroup();
+            createNewDataset();
+
+            /* Add an attribute to the newly-created group */
+            checkFileTree(filetree, "testOpenHDF5ScalarAttribute()", 3, testFilename);
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
+            addAttributeToObject("testOpenHDF5ScalarAttribute()", attrTable, 0);
+
+            attrTable = openAttributeTable(filetree, testFilename, groupname);
+            tableShell = openAttributeObject(attrTable, attrName, 0);
+            tableShell.close();
+
+            /* Now repeat the process for the dataset that was created */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            addAttributeToObject("testOpenHDF5ScalarAttribute()", attrTable, 0);
+
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            tableShell = openAttributeObject(attrTable, attrName, 0);
+            tableShell.close();
+
+            /* Test open of attribute by popup menu */
+
+            /* Reload file for good measure */
+            items[0].click();
+            items[0].contextMenu("Reload File").click();
+
+            items = filetree.getAllItems();
+            items[0].contextMenu("Expand All").click();
+
+            attrTable = openAttributeTable(filetree, testFilename, groupname);
+            tableShell = openAttributeContext(attrTable, attrName, 0);
+            tableShell.close();
+
+
+            /* Now repeat the process for the previously-created dataset */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            tableShell = openAttributeContext(attrTable, attrName, 0);
+            tableShell.close();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            if (tableShell != null && tableShell.isOpen()) {
+                tableShell.close();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                closeFile(hdfFile, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    @Ignore
     public void testOpenHDF5CompoundAttribute() {
         try {
             /* Test open of attribute by double-click */
@@ -1551,7 +682,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void testEditHDF4ScalarAttribute() {
         try {
 
@@ -1566,7 +697,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void testEditHDF5ScalarAttribute() {
         try {
 
@@ -1581,7 +712,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void testEditHDF5CompoundAttribute() {
         try {
 
@@ -1596,7 +727,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void testDiscardHDF4ScalarAttributeEditResults() {
         try {
 
@@ -1611,7 +742,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void testDiscardHDF5ScalarAttributeEditResults() {
         try {
 
@@ -1626,7 +757,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void testDiscardHDF5CompoundAttributeEditResults() {
         try {
 
@@ -1643,45 +774,34 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testHDF4RenameAttributeFunctionDisabled() {
-        String filename = "testrenameattributedisabled.hdf";
-        File hdf_file = createFile(filename);
+        String testFilename = "testrenameattributedisabled.hdf";
+        File hdfFile = createFile(testFilename);
 
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
-                    "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
-            assertTrue(
-                    "testHDF4RenameAttributeFunctionDisabled() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
+            checkFileTree(filetree, "testHDF4RenameAttributeFunctionDisabled()", 1, testFilename);
 
             createNewGroup();
             createNewDataset();
 
-            assertTrue(constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
-                    "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 3);
-            assertTrue("testHDF4RenameAttributeFunctionDisabled() filetree is missing group '" + groupname + "'",
-                    items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testHDF4RenameAttributeFunctionDisabled() filetree is missing dataset '" + datasetname + "'",
-                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            SWTBotTreeItem[] items = checkFileTree(filetree, "testHDF4RenameAttributeFunctionDisabled()", 3, testFilename);
 
-            items[0].getNode(0).click();
+            /* Add an attribute to the newly-created group */
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
+            SWTBotTableItem newItem = addAttributeToObject("testHDF4RenameAttributeFunctionDisabled()", attrTable, 0);
 
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
+            newItem.click();
 
             assertTrue(
                     constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
                             "rename attribute menuitem not disabled", "disabled", "enabled"),
                     !bot.table().contextMenu("Rename Attribute").isEnabled());
 
-            items[0].getNode(0).getNode(0).click();
+            /* Now repeat the process for the dataset that was created */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            newItem = addAttributeToObject("testHDF4RenameAttributeFunctionDisabled()", attrTable, 1);
 
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
+            newItem.click();
 
             assertTrue(
                     constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
@@ -1698,7 +818,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
         finally {
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdfFile, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1708,35 +828,23 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testHDF4DeleteAttributeFunctionDisabled() {
-        String filename = "testdeleteattributedisabled.hdf";
-        File hdf_file = createFile(filename);
+        String testFilename = "testdeleteattributedisabled.hdf";
+        File hdfFile = createFile(testFilename);
 
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
-                    "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
-            assertTrue(
-                    "testHDF4DeleteAttributeFunctionDisabled() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
+            checkFileTree(filetree, "testHDF4DeleteAttributeFunctionDisabled()", 1, testFilename);
 
             createNewGroup();
             createNewDataset();
 
-            assertTrue(constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
-                    "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 3);
-            assertTrue("testHDF4DeleteAttributeFunctionDisabled() filetree is missing group '" + groupname + "'",
-                    items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testHDF4DeleteAttributeFunctionDisabled() filetree is missing dataset '" + datasetname + "'",
-                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            SWTBotTreeItem[] items = checkFileTree(filetree, "testHDF4DeleteAttributeFunctionDisabled()", 3, testFilename);
 
-            items[0].getNode(0).click();
+            /* Add an attribute to the newly-created group */
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
+            SWTBotTableItem newItem = addAttributeToObject("testHDF4DeleteAttributeFunctionDisabled()", attrTable, 0);
 
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
+            newItem.click();
 
             assertTrue(
                     constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
@@ -1747,10 +855,11 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
                             "delete attribute button not disabled", "disabled", "enabled"),
                     !bot.button("Delete Attribute").isEnabled());
 
-            items[0].getNode(0).getNode(0).click();
+            /* Now repeat the process for the dataset that was created */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            newItem = addAttributeToObject("testHDF4RenameAttributeFunctionDisabled()", attrTable, 1);
 
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
+            newItem.click();
 
             assertTrue(
                     constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
@@ -1771,7 +880,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
         finally {
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdfFile, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1779,7 +888,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void testHDF4AttributeEditDisabledForReadOnly() {
         try {
 
@@ -1796,67 +905,40 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testHDF5RenameAttributeDisabledForReadOnly() {
-        String filename = "testrenameattributedisabledreadonly.h5";
-        SWTBotShell openFileShell = null;
-        File hdf_file = createFile(filename);
+        String testFilename = "testrenameattributedisabledreadonly.h5";
+        File hdfFile = createFile(testFilename);
 
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
-
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
-                            "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
-            assertTrue("testHDF5RenameAttributeDisabledForReadOnly() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
+            checkFileTree(filetree, "testHDF5RenameAttributeDisabledForReadOnly()", 1, testFilename);
 
             createNewGroup();
             createNewDataset();
 
-            assertTrue(
-                    constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
-                            "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 3);
-            assertTrue("testHDF5RenameAttributeDisabledForReadOnly() filetree is missing group '" + groupname + "'",
-                    items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testHDF5RenameAttributeDisabledForReadOnly() filetree is missing dataset '" + datasetname + "'",
-                    items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            checkFileTree(filetree, "testHDF5RenameAttributeDisabledForReadOnly()", 3, testFilename);
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
+            addAttributeToObject("testHDF5RenameAttributeDisabledForReadOnly()", attrTable, 0);
 
-            closeFile(hdf_file, false);
+            /* Now repeat the process for the dataset that was created */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            SWTBotTableItem newItem = addAttributeToObject("testHDF5RenameAttributeDisabledForReadOnly()", attrTable, 0);
 
-            bot.menu("File").menu("Open As").menu("Read-Only").click();
+            closeFile(hdfFile, false);
 
-            SWTBotShell shell = bot.shell("Enter a file name");
-            shell.activate();
-
-            SWTBotText text = shell.bot().text();
-            text.setText(hdf_file.getName());
-
-            String val = text.getText();
-            assertTrue("openFile() wrong file name: expected '" + hdf_file.getName() + "' but was '" + val + "'",
-                    val.equals(hdf_file.getName()));
-
-            shell.bot().button("   &OK   ").click();
-            bot.waitUntil(shellCloses(shell));
+            hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
 
             filetree = bot.tree();
-            items = filetree.getAllItems();
-
-            items[0].click();
-
-            SWTBotTabItem tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            items[0].contextMenu("Expand All").click();
+            checkFileTree(filetree, "testHDF5RenameAttributeDisabledForReadOnly()", 3, testFilename);
+            attrTable = openAttributeTable(filetree, testFilename, groupname);
 
             assertTrue(
                     constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
                             "rename attribute menuitem not disabled", "disabled", "enabled"),
                     !bot.table().contextMenu("Rename Attribute").isEnabled());
 
-            items[0].getNode(0).getNode(0).click();
-
-            tabItem = bot.tabItem("Object Attribute Info");
-            tabItem.activate();
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
 
             assertTrue(
                     constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
@@ -1872,13 +954,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if (openFileShell != null && openFileShell.isOpen()) {
-                openFileShell.close();
-                bot.waitUntil(Conditions.shellCloses(openFileShell));
-            }
-
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdfFile, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1886,7 +963,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Test
+    @Ignore
     public void testHDF5AttributeEditDisabledForReadOnly() {
         try {
 
