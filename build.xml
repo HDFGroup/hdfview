@@ -132,6 +132,9 @@
     <property name="build.dir" value="build" />
     <property name="classes.dir" value="${build.dir}/classes" />
     <property name="testclasses.dir" value="${build.dir}/classes/test" />
+    <property name="uitestclasses.dir" value="${build.dir}/classes/test/uitest" />
+    <property name="hdf4uitestclasses.dir" value="${build.dir}/classes/test/uitest/HDF4UITests" />
+    <property name="hdf5uitestclasses.dir" value="${build.dir}/classes/test/uitest/HDF5UITests" />
     <property name="exclasses.dir" value="${build.dir}/classes/examples" />
     <property name="jar.dir" value="${build.dir}/jar" />
     <property name="report.dir" value="${build.dir}/junitreport" />
@@ -192,6 +195,12 @@
     </path>
     <path id="ui-test-sources">
         <fileset dir="${src.dir}/" includes="**/uitest/*Test*.java" excludes="**/uitest/*CLGeometry.java **/uitest/*All*.java" />
+        <fileset dir="${src.dir}/" includes="**/uitest/HDF4UITests/*Test*.java" excludes="**/*All*.java" />
+        <fileset dir="${src.dir}/" includes="**/uitest/HDF4UITests/BugFixTests/*Test*.java" excludes="**/*All*.java" />
+        <fileset dir="${src.dir}/" includes="**/uitest/HDF4UITests/FeatureTests/*Test*.java" excludes="**/*All*.java" />
+        <fileset dir="${src.dir}/" includes="**/uitest/HDF5UITests/*Test*.java" excludes="**/*All*.java" />
+        <fileset dir="${src.dir}/" includes="**/uitest/HDF5UITests/BugFixTests/*Test*.java" excludes="**/*All*.java" />
+        <fileset dir="${src.dir}/" includes="**/uitest/HDF5UITests/FeatureTests/*Test*.java" excludes="**/*All*.java" />
     </path>
     <path id="project-classpath">
         <path refid="obj-classpath" />
@@ -226,7 +235,7 @@
      HDF5 version:     ${hdf5.version}
      Operating System: ${os.name} ${os.version} ${os.arch}
      Debug Build:      ${build.debug}
-  </echo>
+    </echo>
 
     <target name="clean" description="Cleans up the build directory">
         <delete dir="${classes.dir}" />
@@ -481,8 +490,8 @@
 
     <target name="compile-test" depends="compile">
         <mkdir dir="${testclasses.dir}" />
-        <javac srcdir="${test.dir}" destdir="${classes.dir}" includes="**/*.java" includeantruntime="false" debug="${build.debug}">
 
+        <javac srcdir="${test.dir}" destdir="${classes.dir}" includes="**/*.java" includeantruntime="false" debug="${build.debug}">
             <compilerarg value="-Xlint:deprecation" />
             <compilerarg value="-Xlint:unchecked" />
 
@@ -499,6 +508,7 @@
         </copy>
         <mkdir dir="${testclasses.dir}/lib/ext" />
     </target>
+
     <path id="alltest-classes" location="${testclasses.dir}" />
 
     <target name="clean-junit-uitest">
@@ -618,97 +628,190 @@
                 <flattenmapper />
             </mapper>
         </pathconvert>
+
         <!-- Emit the property to the ant console -->
         <echo message="Where TestName is the the base name of: ${filesetref}" />
         <fail message="You must run this target with -Dtest=TestName" />
     </target>
 
+    <!-- Macro for common code for running a junit task. The two attributes that are changeable
+         correspond to the HDFView sysproperties 'hdfview.root' and 'hdfview.workdir'. By changing
+         these to the appropriate paths, UI tests in different nested folder structures are able
+         to find the test files they are looking for simply by name, instead of having to specify
+         a relative pathname.  -->
+    <macrodef name="run-junit">
+        <attribute name="rootdir" default="${basedir}/${testclasses.dir}" />
+        <attribute name="workdir" default="${basedir}/${testclasses.dir}/uitest" />
+        <attribute name="includes" default="**/*Test*" />
+        <attribute name="excludes" default="**/*All* **/*$*" />
+        <attribute name="if" default="" />
+        <sequential>
+            <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
+                <!-- Run in debug logging level because trace generates way too much output.
+                     We will run manually using trace logging output when there are UI test failures. -->
+                <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
+                <jvmarg value="${XstartOnFirstThreadFlag}" />
+                <jvmarg line="${agentvmparam}" />
+
+                <classpath>
+                    <path refid="project-classpath" />
+                    <path refid="log-classpath" />
+                    <path refid="unit-classpath" />
+                    <path refid="swtbot-classpath" />
+                    <pathelement location="${classes.dir}" />
+                    <path refid="application" />
+                </classpath>
+
+                <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+                <sysproperty key="hdfview.root" path="@{rootdir}" />
+                <sysproperty key="hdfview.workdir" path="@{workdir}" />
+                <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+
+                <formatter type="xml" />
+                <formatter type="plain" />
+
+                <batchtest fork="yes" todir="${report.dir}" if="@{if}" >
+                    <fileset dir="${classes.dir}/" includes="@{includes}" excludes="@{excludes}" />
+                </batchtest>
+            </junit>
+        </sequential>
+    </macrodef>
+
     <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test-name">
         <mkdir dir="${report.dir}" />
-        <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-            <!-- Run in debug logging level because trace generates way too much output.
-                 We will run manually using trace logging output when there are UI test failures. -->
-            <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
-            <jvmarg value="${XstartOnFirstThreadFlag}" />
-            <jvmarg line="${agentvmparam}" />
-            <classpath>
-                <path refid="project-classpath" />
-                <path refid="log-classpath" />
-                <path refid="unit-classpath" />
-                <path refid="swtbot-classpath" />
-                <pathelement location="${classes.dir}" />
-                <path refid="application" />
-            </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <sysproperty key="hdfview.root" path="${basedir}/${testclasses.dir}" />
-            <sysproperty key="hdfview.workdir" path="${basedir}/${testclasses.dir}/uitest" />
-            <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
 
-            <formatter type="xml" />
-            <formatter type="plain" />
-            <batchtest fork="yes" todir="${report.dir}">
-                <fileset dir="${classes.dir}/" includes="**/uitest/${test}*" excludes="**/uitest/*$*" />
-            </batchtest>
-        </junit>
+        <run-junit 
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest"
+            includes="**/uitest/${test}*"
+            excludes="**/uitest/*$*"
+        />
+
+        <!-- Run any matching HDF4 UI test -->
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests"
+            includes="test/uitest/HDF4UITests/${test}.class"
+            excludes="**/*All* **/*$*"
+            if="h4path"
+        />
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/BugFixTests"
+            includes="test/uitest/HDF4UITests/BugFixTests/${test}.class"
+            excludes="**/*All* **/*$*"
+            if="h4path"
+        />
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/FeatureTests"
+            includes="test/uitest/HDF4UITests/FeatureTests/${test}.class"
+            excludes="**/*All* **/*$*"
+            if="h4path"
+        />
+
+        <!-- Run any matching HDF5 UI test -->
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests"
+            includes="test/uitest/HDF5UITests/${test}.class"
+            excludes="**/*All* **/*$*"
+        />
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/BugFixTests"
+            includes="test/uitest/HDF5UITests/BugFixTests/${test}.class"
+            excludes="**/*All* **/*$*"
+        />
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/FeatureTests"
+            includes="test/uitest/HDF5UITests/FeatureTests/${test}.class"
+            excludes="**/*All* **/*$*"
+        />
     </target>
 
-    <target name="junit-uitest" depends="jar,compile-test,clean-junit-uitest" description="Runs the UI tests">
+    <!-- Top-level target for UI tests. Calls separate targets for HDFView UI tests, HDF4 UI tests and HDF5 UI tests. -->
+    <target name="junit-uitest" depends="jar, compile-test, clean-junit-uitest, -hdfview-ui-tests, -hdf4-ui-tests, -hdf5-ui-tests" description="Runs the UI tests" />
+
+    <!-- Internal target to run HDFView UI tests that are independent of FileFormats. -->
+    <target name="-hdfview-ui-tests" depends="jar, compile-test, clean-junit-uitest">
         <mkdir dir="${report.dir}" />
-        <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-            <!-- Run in debug logging level because trace generates way too much output.
-                 We will run manually using trace logging output when there are UI test failures. -->
-            <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
-            <jvmarg value="${XstartOnFirstThreadFlag}" />
-            <jvmarg line="${agentvmparam}" />
-            <classpath>
-                <path refid="project-classpath" />
-                <path refid="log-classpath" />
-                <path refid="unit-classpath" />
-                <path refid="swtbot-classpath" />
-                <pathelement location="${classes.dir}" />
-                <path refid="application" />
-            </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <sysproperty key="hdfview.root" path="${basedir}/${testclasses.dir}" />
-            <sysproperty key="hdfview.workdir" path="${basedir}/${testclasses.dir}/uitest" />
-            <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
 
-            <formatter type="xml" />
-            <formatter type="plain" />
+        <run-junit 
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest"
+            includes="test/uitest/*Test*.class"
+            excludes="**/*AbstractWindowTest* **/*CLGeometry **/*All* **/*$*"
+        />
+    </target>
 
-            <batchtest fork="yes" todir="${report.dir}">
-                <fileset dir="${classes.dir}/" includes="**/uitest/*Test*" excludes="**/uitest/AbstractWindowTest* **/uitest/*CLGeometry **/uitest/*All* **/uitest/*$*" />
-            </batchtest>
-        </junit>
+    <!-- Internal target to run HDF4-related HDFView UI tests. -->
+    <target name="-hdf4-ui-tests" if="h4path">
+        <mkdir dir="${report.dir}" />
+
+        <!-- Run the top-level HDF4 UI tests -->
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests"
+            includes="test/uitest/HDF4UITests/*Test*.class"
+            excludes="**/*All* **/*$*"
+        />
+
+        <!-- Run the HDF4 bug fix tests -->
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/BugFixTests"
+            includes="test/uitest/HDF4UITests/BugFixTests/*Test*.class"
+            excludes="**/*All* **/*$*"
+        />
+
+        <!-- Run the HDF4 feature tests -->
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/FeatureTests"
+            includes="test/uitest/HDF4UITests/FeatureTests/*Test*.class"
+            excludes="**/*All* **/*$*"
+        />
+    </target>
+
+    <target name="-hdf5-ui-tests">
+        <mkdir dir="${report.dir}" />
+
+        <!-- Run the top-level HDF5 UI tests -->
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests"
+            includes="test/uitest/HDF5UITests/*Test*.class"
+            excludes="**/*All* **/*$*"
+        />
+
+        <!-- Run the HDF5 bug fix tests -->
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/BugFixTests"
+            includes="test/uitest/HDF5UITests/BugFixTests/*Test*.class"
+            excludes="**/*All* **/*$*"
+        />
+
+        <!-- Run the HDF5 feature tests -->
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/FeatureTests"
+            includes="test/uitest/HDF5UITests/FeatureTests/*Test*.class"
+            excludes="**/*All* **/*$*"
+        />
     </target>
 
     <target name="junit-uimodules" depends="jar,modulejar,compile-test,clean-junit-uitest" description="Runs the tests for the UI modules">
         <mkdir dir="${report.dir}" />
-        <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
-            <!-- Run in debug logging level because trace generates way too much output.
-                 We will run manually using trace logging output when there are UI test failures. -->
-            <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
-            <jvmarg value="${XstartOnFirstThreadFlag}" />
-            <classpath>
-                <path refid="project-classpath" />
-                <path refid="log-classpath" />
-                <path refid="unit-classpath" />
-                <path refid="swtbot-classpath" />
-                <pathelement location="${classes.dir}" />
-                <path refid="application" />
-            </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <sysproperty key="hdfview.root" path="${basedir}/${testclasses.dir}" />
-            <sysproperty key="hdfview.workdir" path="${basedir}/${testclasses.dir}/modules" />
-            <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
 
-            <formatter type="xml" />
-            <formatter type="plain" />
-
-            <batchtest fork="yes" todir="${report.dir}">
-                <fileset dir="${classes.dir}/" includes="**/modules/*Test*" excludes="**/modules/*$*" />
-            </batchtest>
-        </junit>
+        <run-junit
+            rootdir="${basedir}/${testclasses.dir}"
+            workdir="${basedir}/${testclasses.dir}/modules"
+            includes="**/modules/*Test*"
+            excludes="**/modules/*$*"
+        />
     </target>
 
     <target name="junitreport">
@@ -719,7 +822,16 @@
     </target>
 
     <target name="javadoc" depends="jar">
-        <javadoc packagenames="hdf.*" use="true" author="true" version="true" access="package" destdir="${javadoc.dir}" windowtitle="${ant.project.name} ${app.version}" noqualifier="java.*:javax.*:com.sun.*" linksource="true">
+        <javadoc
+            packagenames="hdf.*"
+            use="true"
+            author="true"
+            version="true"
+            access="package"
+            destdir="${javadoc.dir}"
+            windowtitle="${ant.project.name} ${app.version}"
+            noqualifier="java.*:javax.*:com.sun.*"
+            linksource="true">
 
             <fileset dir="${src.dir}/hdf">
                 <include name="object/**.java" />

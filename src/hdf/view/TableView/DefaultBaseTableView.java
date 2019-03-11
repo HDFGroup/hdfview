@@ -372,7 +372,7 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dims == null) {
             log.debug("data object has null dimensions");
             log.trace("exit");
-            viewer.showStatus("Error: Data object '" + ((HObject) dataObject).getName() + "' has null dimensions.");
+            viewer.showError("Error: Data object '" + ((HObject) dataObject).getName() + "' has null dimensions.");
             shell.dispose();
             Tools.showError(display.getActiveShell(), "Error", "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has null dimensions.");
@@ -388,7 +388,7 @@ public abstract class DefaultBaseTableView implements TableView {
         if (dataObject.getHeight() <= 0 || dataObject.getWidth() <= 0 || tsize <= 0) {
             log.debug("data object has dimension of size 0");
             log.trace("exit");
-            viewer.showStatus("Error: Data object '" + ((HObject) dataObject).getName() + "' has dimension of size 0.");
+            viewer.showError("Error: Data object '" + ((HObject) dataObject).getName() + "' has dimension of size 0.");
             shell.dispose();
             Tools.showError(display.getActiveShell(), "Error", "Could not open data object '" + ((HObject) dataObject).getName()
                     + "'. Data object has dimension of size 0.");
@@ -484,7 +484,7 @@ public abstract class DefaultBaseTableView implements TableView {
         catch (Exception ex) {
             log.debug("loadData(): data not loaded: ", ex);
             log.trace("exit");
-            viewer.showStatus("Error: unable to load table data");
+            viewer.showError("Error: unable to load table data");
             shell.dispose();
             Tools.showError(display.getActiveShell(), "Open", "An error occurred while loading data for the table:\n\n" + ex.getMessage());
             return;
@@ -513,7 +513,7 @@ public abstract class DefaultBaseTableView implements TableView {
             if (dataTable == null) {
                 log.debug("table creation for object {} failed", ((HObject) dataObject).getName());
                 log.trace("exit");
-                viewer.showStatus("Creating table for object '" + ((HObject) dataObject).getName() + "' failed.");
+                viewer.showError("Creating table for object '" + ((HObject) dataObject).getName() + "' failed.");
                 shell.dispose();
                 Tools.showError(display.getActiveShell(), "Open", "Failed to create Table object");
                 return;
@@ -1486,7 +1486,7 @@ public abstract class DefaultBaseTableView implements TableView {
     // out.flush();
     // out.close();
     //
-    // viewer.showStatus("Data save to: " + fname);
+    // viewer.showStatus("Data saved to: " + fname);
     //
     // try {
     // RandomAccessFile rf = new RandomAccessFile(chosenFile, "r");
@@ -1610,7 +1610,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 viewer.showStatus("Data saved to: " + fname);
             }
             else
-                viewer.showStatus("Data not saved - not a ScalarDS");
+                viewer.showError("Data not saved - not a ScalarDS");
         }
     }
 

@@ -391,7 +391,7 @@ public class DefaultTreeView implements TreeView {
                     selectedObject = (HObject) selectedItem.getData();
                 }
                 catch(NullPointerException ex) {
-                    ((HDFView) viewer).showStatus("Object " + selectedItem.getText() + " had no associated data.");
+                    viewer.showError("Object " + selectedItem.getText() + " had no associated data.");
                     return;
                 }
 
@@ -399,7 +399,7 @@ public class DefaultTreeView implements TreeView {
                     theFile = selectedObject.getFileFormat();
                 }
                 catch(NullPointerException ex) {
-                    ((HDFView) viewer).showStatus("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
+                    viewer.showError("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
                     return;
                 }
 
@@ -443,7 +443,7 @@ public class DefaultTreeView implements TreeView {
                     selectedObject = (HObject) selectedItem.getData();
                 }
                 catch(NullPointerException ex) {
-                    ((HDFView) viewer).showStatus("Object " + selectedItem.getText() + " had no associated data.");
+                    viewer.showError("Object " + selectedItem.getText() + " had no associated data.");
                     return;
                 }
 
@@ -451,7 +451,7 @@ public class DefaultTreeView implements TreeView {
                     theFile = selectedObject.getFileFormat();
                 }
                 catch(NullPointerException ex) {
-                    ((HDFView) viewer).showStatus("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
+                    viewer.showError("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
                     return;
                 }
 
@@ -1805,7 +1805,7 @@ public class DefaultTreeView implements TreeView {
                 int n = members.size();
                 for (int i = 0; i < n; i++) {
                     HObject theObj = (HObject) members.get(i);
-                    isOpen = (((HDFView) viewer).getDataView(theObj) != null);
+                    isOpen = (viewer.getDataView(theObj) != null);
                     if (isOpen) {
                         break;
                     }
@@ -1813,7 +1813,7 @@ public class DefaultTreeView implements TreeView {
             }
         }
         else {
-            return (((HDFView) viewer).getDataView(obj) != null);
+            return (viewer.getDataView(obj) != null);
         }
 
         return isOpen;
@@ -2254,7 +2254,7 @@ public class DefaultTreeView implements TreeView {
             Tools.showError(shell, "Save", ex.getMessage());
         }
 
-        ((HDFView) viewer).showStatus("Data saved to: " + filename);
+        viewer.showStatus("Data saved to: " + filename);
     }
 
     /** enable/disable GUI components */
@@ -2298,7 +2298,7 @@ public class DefaultTreeView implements TreeView {
         if (isNewFile) accessID = accessID - FileFormat.OPEN_NEW;
 
         if (isFileOpen(filename)) {
-            ((HDFView) viewer).showStatus("File is in use.");
+            viewer.showStatus("File is in use.");
             return null;
         }
 
@@ -2327,7 +2327,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (UnsatisfiedLinkError e) {
                     log.debug("openFile({}): HDF4 library link error:", filename, e);
-                    viewer.showStatus("Unable to open file '" + filename + "': HDF4 library linking error");
+                    viewer.showError("Unable to open file '" + filename + "': HDF4 library linking error");
                 }
                 catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
@@ -2345,7 +2345,7 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (UnsatisfiedLinkError e) {
                     log.debug("openFile({}): HDF5 library link error:", filename, e);
-                    viewer.showStatus("Unable to open file '" + filename + "': HDF5 library linking error");
+                    viewer.showError("Unable to open file '" + filename + "': HDF5 library linking error");
                 }
                 catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
@@ -2661,7 +2661,7 @@ public class DefaultTreeView implements TreeView {
         log.trace("isDefaultDisplay? {}", isDefaultDisplay);
 
         if (isDefaultDisplay) { /* Displaying a data object using the default display options */
-            DataView existingView = ((HDFView) viewer).getDataView((HObject) d);
+            DataView existingView = viewer.getDataView((HObject) d);
 
             /*
              * Check to make sure this data object isn't already opened in an existing
@@ -2726,7 +2726,7 @@ public class DefaultTreeView implements TreeView {
             }
             catch (Exception ex) {
                 log.debug("showDataContent(): error occurred while instantiating ImageView factory class", ex);
-                viewer.showStatus("Error occurred while instantiating ImageView factory class");
+                viewer.showError("Error occurred while instantiating ImageView factory class");
                 return null;
             }
 
@@ -2740,13 +2740,13 @@ public class DefaultTreeView implements TreeView {
 
                 if (theView == null) {
                     log.debug("showDataContent(): error occurred while instantiating ImageView class");
-                    viewer.showStatus("Error occurred while instantiating ImageView class");
+                    viewer.showError("Error occurred while instantiating ImageView class");
                     Tools.showError(shell, "Show Data", "Error occurred while instantiating ImageView class");
                 }
             }
             catch (ClassNotFoundException ex) {
                 log.debug("showDataContent(): no suitable ImageView class found");
-                viewer.showStatus("Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
+                viewer.showError("Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
                 Tools.showError(shell, "Show Data", "Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
                 theView = null;
             }
@@ -2758,7 +2758,7 @@ public class DefaultTreeView implements TreeView {
             }
             catch (Exception ex) {
                 log.debug("showDataContent(): error occurred while instantiating TableView factory class", ex);
-                viewer.showStatus("Error occurred while instantiating TableView factory class");
+                viewer.showError("Error occurred while instantiating TableView factory class");
                 return null;
             }
 
@@ -2772,13 +2772,13 @@ public class DefaultTreeView implements TreeView {
 
                 if (theView == null) {
                     log.debug("showDataContent(): error occurred while instantiating TableView class");
-                    viewer.showStatus("Error occurred while instantiating TableView class");
+                    viewer.showError("Error occurred while instantiating TableView class");
                     Tools.showError(shell, "Show Data", "Error occurred while instantiating TableView class");
                 }
             }
             catch (ClassNotFoundException ex) {
                 log.debug("showDataContent(): no suitable TableView class found");
-                viewer.showStatus("Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
+                viewer.showError("Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
                 Tools.showError(shell, "Show Data", "Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
                 theView = null;
             }
@@ -2813,7 +2813,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
-            viewer.showStatus("Error occurred while instantiating MetaDataView factory class");
+            viewer.showError("Error occurred while instantiating MetaDataView factory class");
             return null;
         }
 
@@ -2829,13 +2829,13 @@ public class DefaultTreeView implements TreeView {
 
             if (theView == null) {
                 log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
-                viewer.showStatus("Error occurred while instantiating MetaDataView class");
+                viewer.showError("Error occurred while instantiating MetaDataView class");
                 return null;
             }
         }
         catch (ClassNotFoundException ex) {
             log.debug("showMetaData(): no suitable MetaDataView class found");
-            viewer.showStatus("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
+            viewer.showError("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
             return null;
         }
 

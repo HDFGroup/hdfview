@@ -414,7 +414,7 @@ public class DefaultImageView implements ImageView {
         }
 
         if ((hobject == null) || !(hobject instanceof ScalarDS)) {
-            viewer.showStatus("Display data in image failed for - " + hobject);
+            viewer.showError("Display data in image failed for - " + hobject);
             return;
         }
 
@@ -438,7 +438,7 @@ public class DefaultImageView implements ImageView {
         }
 
         if (image == null) {
-            viewer.showStatus("Loading image failed - " + dataset.getName());
+            viewer.showError("Loading image failed - " + dataset.getName());
             dataset = null;
             return;
         }
@@ -1600,7 +1600,7 @@ public class DefaultImageView implements ImageView {
         }
         catch (Exception ex) {
             log.debug("showColorTable(): error occurred while instantiating PaletteView factory class", ex);
-            viewer.showStatus("Error occurred while instantiating PaletteView factory class");
+            viewer.showError("Error occurred while instantiating PaletteView factory class");
             return;
         }
 
@@ -1615,13 +1615,13 @@ public class DefaultImageView implements ImageView {
 
             if (theView == null) {
                 log.debug("showColorTable(): error occurred while instantiating PaletteView class");
-                viewer.showStatus("Error occurred while instantiating PaletteView class");
+                viewer.showError("Error occurred while instantiating PaletteView class");
                 Tools.showError(shell, "Show Palette", "Error occurred while instantiating PaletteView class");
             }
         }
         catch (ClassNotFoundException ex) {
             log.debug("showColorTable(): no suitable PaletteView class found");
-            viewer.showStatus("Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
+            viewer.showError("Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
             Tools.showError(shell, "Show Palette", "Unable to find suitable PaletteView class for object '" + dataset.getName() + "'");
         }
     }

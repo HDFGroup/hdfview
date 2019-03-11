@@ -17,8 +17,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
     @Test
     public void testLibVersion() {
         String testFilename = "test_libversion.h5";
-        String baseFilename = "test_libversion";
-        File hdfFile = createHDF5File(baseFilename);
+        File hdfFile = createFile(testFilename);
 
         try {
             closeFile(hdfFile, false);

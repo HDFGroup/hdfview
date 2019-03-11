@@ -66,12 +66,11 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             { "13", "14.0", "17", "18.0", "21", "22.0" },
             { "25", "26.0", "29", "30.0", "33", "34.0" },
             { "37", "38.0", "41", "42.0", "45", "46.0" } };
-    // TODO: update when paging fixed for compounds
     String[][] compound3DPage2ExpectedData = {
-            { "1", "2.0", "5", "6.0", "9", "10.0" },
-            { "13", "14.0", "17", "18.0", "21", "22.0" },
-            { "25", "26.0", "29", "30.0", "33", "34.0" },
-            { "37", "38.0", "41", "42.0", "45", "46.0" } };
+            { "3", "4.0", "7", "8.0", "11", "12.0" },
+            { "15", "16.0", "19", "20.0", "23", "24.0" },
+            { "27", "28.0", "31", "32.0", "35", "36.0" },
+            { "39", "40.0", "43", "44.0", "47", "48.0" } };
     String[][] enumExpectedData = {
             { "RED" }, { "RED" } };
     String[][] enum2DExpectedData = {
@@ -163,12 +162,11 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             { "mn", "rs", "vw" },
             { "AB", "EF", "IJ" },
             { "MN", "RS", "VW" } };
-    // TODO: update when paging fixed for strings
     String[][] string3DPage2ExpectedData = {
-            { "ab", "ef", "ij" },
-            { "mn", "rs", "vw" },
-            { "AB", "EF", "IJ" },
-            { "MN", "RS", "VW" } };
+            { "cd", "gh", "kl" },
+            { "pq", "tu", "xz" },
+            { "CD", "GH", "KL" },
+            { "PQ", "TU", "XZ" } };
     String[][] vlenExpectedData = {
             { "\\(1\\)" }, { "\\(2, 3\\)" } };
     String[][] vlen2DExpectedData = {
@@ -520,17 +518,17 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedAttrData);
 
-            openTAttr2AttributeTest(attrTable, 1, "openTAttr2Attribute()", "array", arrayExpectedData,  "array2D", array2DExpectedData,  "array3D", array3DPage1ExpectedData, array3DPage2ExpectedData);
-            openTAttr2AttributeTest(attrTable, 4, "openTAttr2Attribute()", "bitfield", bitfieldExpectedData,  "bitfield2D", bitfield2DExpectedData,  "bitfield3D", bitfield3DPage1ExpectedData, bitfield3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 0, "openTAttr2Attribute()", "array", arrayExpectedData,  "array2D", array2DExpectedData,  "array3D", array3DPage1ExpectedData, array3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 3, "openTAttr2Attribute()", "bitfield", bitfieldExpectedData,  "bitfield2D", bitfield2DExpectedData,  "bitfield3D", bitfield3DPage1ExpectedData, bitfield3DPage2ExpectedData);
             //TODO: attribute compound tables are broken
-            //openTAttr2AttributeCompoundTest(attrTable, 7, "openTAttr2Attribute()", "compound", compoundExpectedData,  "compound2D", compound2DExpectedData,  "compound3D", compound3DPage1ExpectedData, compound3DPage2ExpectedData);
-            openTAttr2AttributeTest(attrTable, 10, "openTAttr2Attribute()", "enum", enumExpectedData,  "enum2D", enum2DExpectedData,  "enum3D", enum3DPage1ExpectedData, enum3DPage2ExpectedData);
-            openTAttr2AttributeTest(attrTable, 13, "openTAttr2Attribute()", "float", floatExpectedData,  "float2D", float2DExpectedData,  "float3D", float3DPage1ExpectedData, float3DPage2ExpectedData);
-            openTAttr2AttributeTest(attrTable, 16, "openTAttr2Attribute()", "integer", integerExpectedData,  "integer2D", integer2DExpectedData,  "integer3D", integer3DPage1ExpectedData, integer3DPage2ExpectedData);
-            openTAttr2AttributeTest(attrTable, 19, "openTAttr2Attribute()", "opaque", opaqueExpectedData,  "opaque2D", opaque2DExpectedData,  "opaque3D", opaque3DPage1ExpectedData, opaque3DPage2ExpectedData);
-            openTAttr2AttributeTest(attrTable, 22, "openTAttr2Attribute()", "reference", referenceExpectedData,  "reference2D", reference2DExpectedData,  "reference3D", reference3DPage1ExpectedData, reference3DPage2ExpectedData);
-            openTAttr2AttributeTest(attrTable, 25, "openTAttr2Attribute()", "string", stringExpectedData,  "string2D", string2DExpectedData,  "string3D", string3DPage1ExpectedData, string3DPage2ExpectedData);
-            openTAttr2AttributeTest(attrTable, 28, "openTAttr2Attribute()", "vlen", vlenExpectedData,  "vlen2D", vlen2DExpectedData,  "vlen3D", vlen3DPage1ExpectedData, vlen3DPage2ExpectedData);
+            //openTAttr2AttributeCompoundTest(attrTable, 6, "openTAttr2Attribute()", "compound", compoundExpectedData,  "compound2D", compound2DExpectedData,  "compound3D", compound3DPage1ExpectedData, compound3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 9, "openTAttr2Attribute()", "enum", enumExpectedData,  "enum2D", enum2DExpectedData,  "enum3D", enum3DPage1ExpectedData, enum3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 12, "openTAttr2Attribute()", "float", floatExpectedData,  "float2D", float2DExpectedData,  "float3D", float3DPage1ExpectedData, float3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 15, "openTAttr2Attribute()", "integer", integerExpectedData,  "integer2D", integer2DExpectedData,  "integer3D", integer3DPage1ExpectedData, integer3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 18, "openTAttr2Attribute()", "opaque", opaqueExpectedData,  "opaque2D", opaque2DExpectedData,  "opaque3D", opaque3DPage1ExpectedData, opaque3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 21, "openTAttr2Attribute()", "reference", referenceExpectedData,  "reference2D", reference2DExpectedData,  "reference3D", reference3DPage1ExpectedData, reference3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 24, "openTAttr2Attribute()", "string", stringExpectedData,  "string2D", string2DExpectedData,  "string3D", string3DPage1ExpectedData, string3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 27, "openTAttr2Attribute()", "vlen", vlenExpectedData,  "vlen2D", vlen2DExpectedData,  "vlen3D", vlen3DPage1ExpectedData, vlen3DPage2ExpectedData);
         }
         catch (Exception ex) {
             ex.printStackTrace();

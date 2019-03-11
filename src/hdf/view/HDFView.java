@@ -313,7 +313,7 @@ public class HDFView implements DataViewManager {
                     urlBar.select(0);
                 }
                 catch (Exception ex) {
-                    showStatus(ex.toString());
+                    showError(ex.toString());
                 }
             }
             else {
@@ -1213,7 +1213,7 @@ public class HDFView implements DataViewManager {
         }
         catch (Exception ex) {
             log.debug("createContentArea(): error occurred while instantiating TreeView factory class", ex);
-            this.showStatus("Error occurred while instantiating TreeView factory class");
+            this.showError("Error occurred while instantiating TreeView factory class");
             return;
         }
 
@@ -1227,13 +1227,13 @@ public class HDFView implements DataViewManager {
 
             if (treeView == null) {
                 log.debug("createContentArea(): error occurred while instantiating TreeView class");
-                this.showStatus("Error occurred while instantiating TreeView class");
+                this.showError("Error occurred while instantiating TreeView class");
                 return;
             }
         }
         catch (ClassNotFoundException ex) {
             log.debug("createContentArea(): no suitable TreeView class found");
-            this.showStatus("Unable to find suitable TreeView class");
+            this.showError("Unable to find suitable TreeView class");
             return;
         }
 
@@ -1300,8 +1300,27 @@ public class HDFView implements DataViewManager {
         }
 
         status.append(msg);
+        status.append("\n");
+    }
+
+    /**
+     * Display error message
+     *
+     * @param errMsg
+     *            the error message to display
+     */
+    @Override
+    public void showError(String errMsg) {
+        if (status == null) {
+            log.debug("showError(): status area is null");
+            return;
+        }
+
+        status.append(" *** ");
+        status.append(errMsg);
         if (log.isDebugEnabled())
             status.append(" - see log for more info");
+        status.append(" *** ");
         status.append("\n");
     }
 
@@ -1319,7 +1338,7 @@ public class HDFView implements DataViewManager {
         }
         catch (Exception ex) {
             log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
-            this.showStatus("Error occurred while instantiating MetaDataView factory class");
+            this.showError("Error occurred while instantiating MetaDataView factory class");
             return;
         }
 
@@ -1334,13 +1353,13 @@ public class HDFView implements DataViewManager {
 
             if (theView == null) {
                 log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
-                this.showStatus("Error occurred while instantiating MetaDataView class");
+                this.showError("Error occurred while instantiating MetaDataView class");
                 return;
             }
         }
         catch (ClassNotFoundException ex) {
             log.debug("showMetaData(): no suitable MetaDataView class found");
-            this.showStatus("Unable to find suitable MetaDataView class");
+            this.showError("Unable to find suitable MetaDataView class");
             return;
         }
 
@@ -1944,7 +1963,7 @@ public class HDFView implements DataViewManager {
                 urlBar.select(0);
             }
             catch (Exception ex) {
-                showStatus(ex.toString());
+                showError(ex.toString());
             }
         }
     }

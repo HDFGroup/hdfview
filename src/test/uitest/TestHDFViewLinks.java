@@ -155,13 +155,12 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
     @Test
     public void testHardLinks() {
-        String filename = "testhardlinks";
-        String file_ext = ".h5";
+        String filename = "testhardlinks.h5";
         String group_link_name = "test_group_link";
         String dataset_link_name = "test_dataset_link";
         SWTBotShell tableShell = null;
 
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -169,7 +168,8 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("testHardLinks() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testHardLinks() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewHDF5Group();
             createNewHDF5Dataset();
@@ -334,13 +334,12 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
     @Test
     public void testSoftLinks() {
-        String filename = "testsoftlinks";
-        String file_ext = ".h5";
+        String filename = "testsoftlinks.h5";
         String group_link_name = "test_group_link";
         String dataset_link_name = "test_dataset_link";
         SWTBotShell tableShell = null;
 
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -348,7 +347,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("testSoftLinks() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("testSoftLinks() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             createNewHDF5Group();
             createNewHDF5Dataset();
@@ -534,14 +533,13 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
     @Test
     public void testExternalLinks() {
-        String filename = "testexternallinks";
-        String file_ext = ".h5";
+        String filename = "testexternallinks.h5";
         String file_link_name = "tintsize.h5";
         String file_dset_name = "DU08BITS";
         String dataset_link_name = "test_external_dataset_link";
         SWTBotShell tableShell = null;
 
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -549,8 +547,8 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "1",
                     String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testExternalLinks() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testExternalLinks() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewHDF5Group();
             createNewHDF5Dataset();

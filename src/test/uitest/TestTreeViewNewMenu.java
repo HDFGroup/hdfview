@@ -21,13 +21,12 @@ import org.junit.Test;
 public class TestTreeViewNewMenu extends AbstractWindowTest {
     @Test
     public void createNewHDF5Dataset() {
-        String filename = "testds";
-        String file_ext = ".h5";
+        String filename = "testds.h5";
         String groupname = "testgroupname";
         String datasetname = "testdatasetname";
         String datasetdimsize = "4 x 4";
         SWTBotShell tableShell = null;
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -35,7 +34,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
             items[0].contextMenu("New").menu("Group").click();
@@ -55,7 +54,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("createNewHDF5Dataset() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname)==0);
 
             items[0].getNode(0).click();
@@ -85,7 +84,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==3);
-            assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("createNewHDF5Dataset() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname)==0);
             assertTrue("createNewHDF5Dataset() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname)==0);
 
