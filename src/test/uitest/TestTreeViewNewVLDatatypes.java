@@ -15,11 +15,10 @@ import org.junit.Test;
 public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
     @Test
     public void createNewHDF5VLDatatype() {
-        String filename = "testvldt";
-        String file_ext = ".h5";
+        String filename = "testvldt.h5";
         String dtname = "testvldtname";
         SWTBotShell tableShell = null;
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -27,7 +26,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("createNewHDF5VLDatatype()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("createNewHDF5VLDatatype() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("createNewHDF5VLDatatype() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
             items[0].contextMenu("New").menu("Datatype").click();
@@ -48,7 +47,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("createNewHDF5VLDatatype()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("createNewHDF5VLDatatype() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("createNewHDF5VLDatatype() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("createNewHDF5VLDatatype() filetree is missing group '" + dtname + "'", items[0].getNode(0).getText().compareTo(dtname)==0);
         }
         catch (Exception ex) {
@@ -74,11 +73,10 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
     @Test
     public void createNewHDF5VLDataset() {
-        String filename = "testvldataset";
-        String file_ext = ".h5";
+        String filename = "testvldataset.h5";
         String dsname = "testvldatasetname";
         SWTBotShell tableShell = null;
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -86,7 +84,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
             items[0].contextMenu("New").menu("Dataset").click();
@@ -107,7 +105,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("createNewHDF5VLDataset() filetree is missing dataset '" + dsname + "'", items[0].getNode(0).getText().compareTo(dsname)==0);
         }
         catch (Exception ex) {
@@ -133,11 +131,10 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
     @Test
     public void createNewHDF5VLAttribute() {
-        String filename = "testvlattr";
-        String file_ext = ".h5";
+        String filename = "testvlattr.h5";
         String daname = "testvlattrname";
         SWTBotShell tableShell = null;
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -145,7 +142,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
 
@@ -170,7 +167,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
-            assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + file_ext + "'", items[0].getText().compareTo(filename + file_ext)==0);
+            assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
         }
         catch (Exception ex) {
             ex.printStackTrace();

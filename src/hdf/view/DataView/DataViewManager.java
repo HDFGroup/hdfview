@@ -49,10 +49,21 @@ public abstract interface DataViewManager {
      */
     public abstract DataView getDataView(HObject dataObject);
 
-    /** Display feedback message
-     * @param msg  the status message to display
+    /**
+     * Display feedback message
+     *
+     * @param msg
+     *            the status message to display
      */
     public abstract void showStatus(String msg);
+
+    /**
+     * Display error message
+     *
+     * @param errMsg
+     *            the error message to display
+     */
+    public abstract void showError(String errMsg);
 
     /** @return the current TreeView */
     public abstract TreeView getTreeView();

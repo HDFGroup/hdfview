@@ -796,17 +796,16 @@ public class TestTreeViewFiles extends AbstractWindowTest {
     @Ignore
     // TODO: disabled until import from template functionality is fixed
     public void openHDF5CompoundArrayImport() {
-        String filename = "tcmpdintsize";
-        String filename2 = "temp_cmpimport";
-        String file_ext = ".h5";
+        String filename = "tcmpdintsize.h5";
+        String filename2 = "temp_cmpimport.h5";
         String datasetname = "CompoundIntSize";
         String newDatasetName = "testcmpdname";
         String[] memberNames = {"DU08BITS", "DU16BITS", "DU32BITS", "DU64BITS", "DS08BITS", "DS16BITS", "DS32BITS", "DS64BITS"};
         SWTBotShell tableShell = null;
 
         try {
-            File source = new File(workDir, filename + file_ext);
-            File dest = new File(workDir, filename2 + file_ext);
+            File source = new File(workDir, filename);
+            File dest = new File(workDir, filename2);
 
             CopyOption[] options = new CopyOption[] {
                     StandardCopyOption.REPLACE_EXISTING,
@@ -827,7 +826,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5CompoundArrayImport()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==2);
-            assertTrue("openHDF5CompoundArrayImport() filetree is missing file '" + filename2 + file_ext + "'", items[0].getText().compareTo(filename2 + file_ext)==0);
+            assertTrue("openHDF5CompoundArrayImport() filetree is missing file '" + filename2 + "'", items[0].getText().compareTo(filename2)==0);
             assertTrue("openHDF5CompoundArrayImport() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
 
             items[0].click();
@@ -860,7 +859,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("openHDF5CompoundArrayImport()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==3);
-            assertTrue("openHDF5CompoundArrayImport() filetree is missing file '" + filename2 + file_ext + "'", items[0].getText().compareTo(filename2 + file_ext)==0);
+            assertTrue("openHDF5CompoundArrayImport() filetree is missing file '" + filename2 + "'", items[0].getText().compareTo(filename2)==0);
             assertTrue("openHDF5CompoundArrayImport() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
             assertTrue("openHDF5CompoundArrayImport() filetree is missing dataset '" + newDatasetName + "'", items[0].getNode(1).getText().compareTo(newDatasetName)==0);
 

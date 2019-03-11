@@ -172,13 +172,12 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testAddHDF4Attribute() {
-        String filename = "testaddattribute";
-        String file_ext = ".hdf";
+        String filename = "testaddattribute.hdf";
         String attrName = "test_attribute";
         String attrValue = "13";
         SWTBotShell newAttributeShell = null;
 
-        File hdf_file = createHDF4File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -186,8 +185,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testAddHDF4Attribute()", "filetree wrong row count", "1",
                     String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testAddHDF4Attribute() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testAddHDF4Attribute() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewGroup();
             createNewDataset();
@@ -309,13 +308,12 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testAddHDF5Attribute() {
-        String filename = "testaddattribute";
-        String file_ext = ".h5";
+        String filename = "testaddattribute.h5";
         String attrName = "test_attribute";
         String attrValue = "13";
         SWTBotShell newAttributeShell = null;
 
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -323,8 +321,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testAddHDF5Attribute()", "filetree wrong row count", "1",
                     String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testAddHDF5Attribute() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testAddHDF5Attribute() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewGroup();
             createNewDataset();
@@ -450,14 +448,13 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testHDF5DeleteAttribute() {
-        String filename = "testdeleteattribute";
-        String file_ext = ".h5";
+        String filename = "testdeleteattribute.h5";
         String attrName = "test_attribute";
         String attrValue = "13";
         SWTBotShell newAttributeShell = null;
         SWTBotShell deleteAttributeShell = null;
 
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -465,8 +462,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testHDF5DeleteAttribute()", "filetree wrong row count", "1",
                     String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testHDF5DeleteAttribute() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testHDF5DeleteAttribute() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewGroup();
             createNewDataset();
@@ -776,15 +773,14 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testHDF5RenameAttribute() {
-        String filename = "testrenameattribute";
-        String file_ext = ".h5";
+        String filename = "testrenameattribute.h5";
         String attrName = "test_attribute";
         String newAttrName = "renamed_attribute";
         String attrValue = "13";
         SWTBotShell newAttributeShell = null;
         SWTBotShell renameAttributeShell = null;
 
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -792,8 +788,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testHDF5RenameAttribute()", "filetree wrong row count", "1",
                     String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testHDF5RenameAttribute() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testHDF5RenameAttribute() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewGroup();
             createNewDataset();
@@ -1035,14 +1031,13 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testOpenHDF4ScalarAttribute() {
-        String filename = "testopenattribute";
-        String file_ext = ".hdf";
+        String filename = "testopenattribute.hdf";
         String attrName = "test_attribute";
         String attrValue = "13";
         SWTBotShell newAttributeShell = null;
         SWTBotShell openAttributeShell = null;
 
-        File hdf_file = createHDF4File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -1050,8 +1045,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testOpenHDF4ScalarAttribute()", "filetree wrong row count", "1",
                     String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testOpenHDF4ScalarAttribute() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testOpenHDF4ScalarAttribute() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewGroup();
             createNewDataset();
@@ -1289,14 +1284,13 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testOpenHDF5ScalarAttribute() {
-        String filename = "testopenattribute";
-        String file_ext = ".h5";
+        String filename = "testopenattribute.h5";
         String attrName = "test_attribute";
         String attrValue = "13";
         SWTBotShell newAttributeShell = null;
         SWTBotShell openAttributeShell = null;
 
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -1304,8 +1298,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             assertTrue(constructWrongValueMessage("testOpenHDF5ScalarAttribute()", "filetree wrong row count", "1",
                     String.valueOf(filetree.visibleRowCount())), filetree.visibleRowCount() == 1);
-            assertTrue("testOpenHDF5ScalarAttribute() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testOpenHDF5ScalarAttribute() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewGroup();
             createNewDataset();
@@ -1649,10 +1643,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testHDF4RenameAttributeFunctionDisabled() {
-        String filename = "testrenameattributedisabled";
-        String file_ext = ".hdf";
-
-        File hdf_file = createHDF4File(filename);
+        String filename = "testrenameattributedisabled.hdf";
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -1662,8 +1654,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
                     "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount() == 1);
             assertTrue(
-                    "testHDF4RenameAttributeFunctionDisabled() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+                    "testHDF4RenameAttributeFunctionDisabled() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewGroup();
             createNewDataset();
@@ -1716,10 +1708,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testHDF4DeleteAttributeFunctionDisabled() {
-        String filename = "testdeleteattributedisabled";
-        String file_ext = ".hdf";
-
-        File hdf_file = createHDF4File(filename);
+        String filename = "testdeleteattributedisabled.hdf";
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -1729,8 +1719,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
                     "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount() == 1);
             assertTrue(
-                    "testHDF4DeleteAttributeFunctionDisabled() filetree is missing file '" + filename + file_ext + "'",
-                    items[0].getText().compareTo(filename + file_ext) == 0);
+                    "testHDF4DeleteAttributeFunctionDisabled() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewGroup();
             createNewDataset();
@@ -1806,11 +1796,9 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
     @Test
     public void testHDF5RenameAttributeDisabledForReadOnly() {
-        String filename = "testrenameattributedisabledreadonly";
-        String file_ext = ".h5";
+        String filename = "testrenameattributedisabledreadonly.h5";
         SWTBotShell openFileShell = null;
-
-        File hdf_file = createHDF5File(filename);
+        File hdf_file = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -1820,8 +1808,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
                     constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
                             "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount() == 1);
-            assertTrue("testHDF5RenameAttributeDisabledForReadOnly() filetree is missing file '" + filename + file_ext
-                    + "'", items[0].getText().compareTo(filename + file_ext) == 0);
+            assertTrue("testHDF5RenameAttributeDisabledForReadOnly() filetree is missing file '" + filename + "'",
+                    items[0].getText().compareTo(filename) == 0);
 
             createNewGroup();
             createNewDataset();

@@ -239,40 +239,39 @@ public abstract class AbstractWindowTest {
         return hdf_file;
     }
 
-    protected File createFile(String name, boolean hdf4_type) {
-        String file_ext;
-        String file_type;
-        if (hdf4_type) {
-            file_ext = new String(".hdf");
-            file_type = new String("HDF4");
-        }
-        else {
-            file_ext = new String(".h5");
-            file_type = new String("HDF5");
-        }
+    protected File createFile(String name) {
+        boolean hdf4Type = (name.lastIndexOf(".hdf") >= 0);
+        boolean hdf5Type = (name.lastIndexOf(".h5") >= 0);
 
-        File hdf_file = new File(workDir, name + file_ext);
-        if (hdf_file.exists())
-            hdf_file.delete();
+        File hdfFile = new File(workDir, name);
+        if (hdfFile.exists())
+            hdfFile.delete();
 
         try {
-            SWTBotMenu fileMenuItem = bot.menu("File").menu("New").menu(file_type);
+            SWTBotMenu fileMenuItem;
+
+            if (hdf4Type)
+                fileMenuItem = bot.menu("File").menu("New").menu("HDF4");
+            else if (hdf5Type)
+                fileMenuItem = bot.menu("File").menu("New").menu("HDF5");
+            else
+                throw new IllegalArgumentException("unknown file type");
+
             fileMenuItem.click();
 
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
 
             SWTBotText text = shell.bot().text();
-            text.setText(name + file_ext);
+            text.setText(name);
 
             String val = text.getText();
-            assertTrue("createFile() wrong file name: expected '" + name + file_ext + "' but was '" + val + "'",
-                    val.equals(name + file_ext));
+            assertTrue("createFile() wrong file name: expected '" + name + "' but was '" + val + "'", val.equals(name));
 
             shell.bot().button("   &OK   ").click();
             shell.bot().waitUntil(shellCloses(shell));
 
-            assertTrue("createFile() File '" + hdf_file + "' not created", hdf_file.exists());
+            assertTrue("createFile() File '" + hdfFile + "' not created", hdfFile.exists());
             open_files++;
         }
         catch (Exception ex) {
@@ -282,15 +281,7 @@ public abstract class AbstractWindowTest {
             ae.printStackTrace();
         }
 
-        return hdf_file;
-    }
-
-    protected File createHDF4File(String name) {
-        return createFile(name, true);
-    }
-
-    protected File createHDF5File(String name) {
-        return createFile(name, false);
+        return hdfFile;
     }
 
     protected void closeFile(File hdfFile, boolean deleteFile) {
@@ -311,16 +302,20 @@ public abstract class AbstractWindowTest {
                 }
             }
 
-            assertTrue(constructWrongValueMessage("closeFile()", "filetree wrong row count", String.valueOf(open_files - 1), String.valueOf(filetree.rowCount())),
+            if (open_files > 0) {
+                assertTrue(constructWrongValueMessage("closeFile()", "filetree wrong row count", String.valueOf(open_files - 1), String.valueOf(filetree.rowCount())),
                     filetree.rowCount() == open_files - 1);
 
-            open_files--;
+                open_files--;
+            }
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            fail(ex.getMessage());
         }
         catch (AssertionError ae) {
             ae.printStackTrace();
+            fail(ae.getMessage());
         }
     }
 
@@ -399,8 +394,8 @@ public abstract class AbstractWindowTest {
         return bot.tabItem(tabName);
     }
 
-    protected SWTBotShell openAttributeObject(SWTBotTable attrTable, String objectName, int rowPosition) {
-        attrTable.doubleClick(rowPosition - 1, 0);
+    protected SWTBotShell openAttributeObject(SWTBotTable attrTable, String objectName, int rowIndex) {
+        attrTable.doubleClick(rowIndex, 0);
 
         return openDataObject(objectName);
     }
@@ -610,6 +605,12 @@ public abstract class AbstractWindowTest {
     }
 
     protected static String constructWrongValueMessage(String methodName, String message, String expected, String actual) {
-        return methodName.concat(" " + message + ": expected '" + expected + "' but was '" + actual + "'");
+        StringBuilder builder = new StringBuilder(methodName);
+        builder.append(" " + message + ": expected '" + expected + "' but was '" + actual + "'");
+
+        if (expected.equals(actual))
+            builder.append(" - possible regex mismatch due to non-escaped characters \\^${}[]()*+?|<>-&");
+
+        return builder.toString();
     }
 }
