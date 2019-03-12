@@ -159,6 +159,7 @@
     <property name="sonar.projectName" value="HDFView-development" />
     <property name="sonar.projectVersion" value="1.0" />
     <property name="sonar.sources" value="${src.dir}/hdf" />
+    <property name="sonar.java.binaries" value="${classes.dir}" />
     <property name="sonar.tests" value="${test.dir}" />
     <property name="sonar.sourceEncoding" value="UTF-8" />
     <property name="sonar.language" value="java" />
