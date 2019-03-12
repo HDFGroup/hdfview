@@ -1168,8 +1168,6 @@ public class DataProviderFactory {
             try {
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
-                bufIndex *= typeSize;
-
                 updateStringBytes(dataBuf, newValue, bufIndex);
             }
             catch (Exception ex) {
@@ -1185,8 +1183,6 @@ public class DataProviderFactory {
             log.trace("setDataValue({}, {}, {}): start", index, bufObject, newValue);
 
             try {
-                index *= typeSize;
-
                 updateStringBytes(bufObject, newValue, index);
             }
             catch (Exception ex) {
@@ -1207,6 +1203,8 @@ public class DataProviderFactory {
                 byte[] newValueBytes = ((String) newValue).getBytes();
                 byte[] curBytes = (byte[]) curBuf;
                 int n = Math.min(strLen, newValueBytes.length);
+
+                bufStartIndex *= typeSize;
 
                 System.arraycopy(newValueBytes, 0, curBytes, bufStartIndex, n);
 

@@ -986,7 +986,7 @@ public class DefaultImageView implements ImageView {
             item.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    MenuItem item = (MenuItem) e.item;
+                    MenuItem item = (MenuItem) e.widget;
                     animationSpeed = Integer.parseInt(item.getText());
                 }
             });

@@ -19,28 +19,67 @@ This release was built and tested with OpenJDK 11.
 
 Major Enhancements
 ==============================================================================
+    * Significantly reworked the TableView's DataProvider, DataValidator and
+      DataDisplayConverter code in order to reduce code duplication among the
+      different components and steps of retrieving HDF4 and HDF5 data and
+      converting it into a displayable format for a table. Also improved
+      support for displaying Arrays of Compounds due to the refactoring work.
+
     * Reworked the datatype class structure as well as the overall object and
       view class structure.
 
+    * Added a field under the "General Object Info" Metadata view tab to
+      display link creation order for groups. Also added a field under the
+      "Object Attribute Info" tab to display attribute creation order info.
+
     * Added build code to allow building HDFView without HDF4.
 
-    *
+    * Added support for building on PPC64LE systems with GTK+-3.0.
 
 
 Major Bug Fixes
 ==============================================================================
-    *
+    * Resolved a performance issue with scrolling and resizing of large
+      images.
+
+    * Fixed a bug with fill values for unsigned integer type HDF5 datasets.
+
+    * Fixed a bug with 'paging' through the 3rd dimension of String and
+      Compound type datasets.
+
+    * Fixed a bug with displaying HDF4 String (8-bit integer) attributes.
+
+    * Added check for existence of Image attributes using H5Aexists_by_name to
+      prevent various HDF5 error stacks from appearing when clicking on an
+      image.
+
+    * Fixed an issue with the Object library package depending on the View
+      package, as reported on the HDF Group forum.
+
+    * Fixed a bug with transposing/reshaping data for array datatype datasets.
 
 
 Limitations / Known Problems
 ==============================================================================
-    * Writing of variable-length types is currently unsupported
+    * HDFView currently cannot nicely handle large datasets when using the
+      default display mode, as the data is loaded in its entirety. To view
+      large datasets, it is recommended to right click on a data object and
+      use the "Open As" menu item, where a subset of data to view can be
+      selected.
+
+    * Writing of variable-length types other than variable-length strings is
+      currently unsupported.
+
+    * Object/region references can't be opened by a double-click or by
+      right-clicking and choosing "Show As Table/Image" when inside a compound
+      datatype.  
 
     * The 'Recent Files' button does not work on Mac due to a cross-platform
-      issue with SWT
+      issue with SWT.
 
     * Selecting and changing individual points in PaletteView for an image
-      palette is broken
+      palette is broken.
+
 
 Other Notes
 ==============================================================================
