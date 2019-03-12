@@ -121,6 +121,10 @@
         <matches pattern="ppc64le" string="${os.arch}" />
     </condition>
 
+    <condition property="machine.wix.arch" value="x64">
+        <equals arg1="${isWindows}" arg2="true" />
+    </condition>
+
     <!-- Sets variables which can later be used. -->
     <!-- The value of a property is accessed via ${} -->
 
@@ -1251,7 +1255,7 @@
             <arg value="-cg" />
             <arg value="MediaGroup" />
             <arg value="-platform" />
-            <arg value="${machine.arch}" />
+            <arg value="${machine.wix.arch}" />
             <arg value="-gg" />
             <arg value="-srd" />
             <arg value="-dr" />
@@ -1266,7 +1270,7 @@
         <!-- Compile all source files into .wixobj file -->
         <exec executable="${wix.dir}/candle.exe">
             <arg value="-arch" />
-            <arg value="${machine.arch}" />
+            <arg value="${machine.wix.arch}" />
             <arg value="-out" />
             <arg value=".\${build.dir}\allfiles.wixobj" />
             <arg value=".\${build.dir}\allfiles.wxs" />
@@ -1275,7 +1279,7 @@
         <!-- Compile build.wxs file into .wixobj file -->
         <exec executable="${wix.dir}/candle.exe">
             <arg value="-arch" />
-            <arg value="${machine.arch}" />
+            <arg value="${machine.wix.arch}" />
             <arg value="-dproductName=${ant.project.name}" />
             <arg value="-dreleasedir=.\${release.dir}" />
             <arg value="-dproductVersion=${app.version}" />
