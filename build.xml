@@ -552,8 +552,7 @@
         </delete>
     </target>
 
-    <target name="jacoco" depends="jacoco-skip, jacoco-run">
-    </target>
+    <target name="jacoco" depends="jacoco-skip, jacoco-run" />
 
     <!-- Define jacoco Scanner for Ant Target -->
     <target name="jacoco-run" if="${build.jacoco}">
@@ -568,7 +567,7 @@
         <property name="agentvmparam" value="" />
     </target>
 
-    <target name="junit-single-test" depends="jar,compile-test,clean-junit-uitest">
+    <target name="junit-single-test" depends="jar,compile-test,clean-junit-uitest,jacoco">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -589,7 +588,7 @@
         </junit>
     </target>
 
-    <target name="junit" depends="objectjar,compile-test,clean-junit-uitest" description="Runs the Object Library tests">
+    <target name="junit" depends="objectjar,compile-test,clean-junit-uitest,jacoco" description="Runs the Object Library tests">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -737,7 +736,7 @@
     </target>
 
     <!-- Top-level target for UI tests. Calls separate targets for HDFView UI tests, HDF4 UI tests and HDF5 UI tests. -->
-    <target name="junit-uitest" depends="jar, compile-test, clean-junit-uitest, -hdfview-ui-tests, -hdf4-ui-tests, -hdf5-ui-tests" description="Runs the UI tests" />
+    <target name="junit-uitest" depends="jar, compile-test, clean-junit-uitest, jacoco, -hdfview-ui-tests, -hdf4-ui-tests, -hdf5-ui-tests" description="Runs the UI tests" />
 
     <!-- Internal target to run HDFView UI tests that are independent of FileFormats. -->
     <target name="-hdfview-ui-tests" depends="jar, compile-test, clean-junit-uitest">
@@ -808,7 +807,7 @@
         />
     </target>
 
-    <target name="junit-uimodules" depends="jar,modulejar,compile-test,clean-junit-uitest" description="Runs the tests for the UI modules">
+    <target name="junit-uimodules" depends="jar,modulejar,compile-test,clean-junit-uitest,jacoco" description="Runs the tests for the UI modules">
         <mkdir dir="${report.dir}" />
 
         <run-junit

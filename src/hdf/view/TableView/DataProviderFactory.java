@@ -550,7 +550,7 @@ public class DataProviderFactory {
                  * index of the relevant compound field.
                  */
                 HDFDataProvider base = baseTypeProviders[providerIndex];
-                if (base.isContainerType)
+                if (base instanceof CompoundDataProvider)
                     /*
                      * Adjust the compound field index by subtracting the starting index of the
                      * nested compound that we are delegating to. When the nested compound's index
@@ -558,6 +558,8 @@ public class DataProviderFactory {
                      * among the nested compound's members.
                      */
                     theValue = base.getDataValue(colValue, fieldIdx - relCmpdStartIndexMap.get(fieldIdx), rowIdx);
+                else if (base instanceof ArrayDataProvider)
+                    theValue = base.getDataValue(colValue, columnIndex, rowIdx);
                 else
                     theValue = base.getDataValue(colValue, rowIdx);
             }
@@ -587,7 +589,7 @@ public class DataProviderFactory {
                  * index of the relevant compound field.
                  */
                 HDFDataProvider base = baseTypeProviders[providerIndex];
-                if (base.isContainerType)
+                if (base instanceof CompoundDataProvider)
                     /*
                      * Adjust the compound field index by subtracting the starting index of the
                      * nested compound that we are delegating to. When the nested compound's index
@@ -595,6 +597,8 @@ public class DataProviderFactory {
                      * among the nested compound's members.
                      */
                     theValue = base.getDataValue(colValue, columnIndex - relCmpdStartIndexMap.get(columnIndex), rowIndex);
+                else if (base instanceof ArrayDataProvider)
+                    theValue = base.getDataValue(colValue, columnIndex, rowIndex);
                 else
                     theValue = base.getDataValue(colValue, rowIndex);
             }

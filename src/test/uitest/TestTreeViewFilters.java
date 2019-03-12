@@ -43,18 +43,24 @@ public class TestTreeViewFilters extends AbstractWindowTest {
         File hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
 
         try {
+            TableDataRetriever retriever = null;
+            SWTBotNatTable dataTable = null;
+
             SWTBotTree filetree = bot.tree();
             checkFileTree(filetree, "openHDF5Filters()", 17, testFilename);
 
-            tableShell = openTreeviewObject(filetree, testFilename, "all");
-            SWTBotNatTable dataTable = getNatTable(tableShell);
-
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
-
-            retriever.testAllTableLocations(filtersExpectedData);
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
+            /*
+             * TODO: SZIP not available
+             * tableShell = openTreeviewObject(filetree, testFilename, "all");
+             * SWTBotNatTable dataTable = getNatTable(tableShell);
+             *
+             * TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+             *
+             * retriever.testAllTableLocations(filtersExpectedData);
+             *
+             * tableShell.bot().menu("Close").click();
+             * bot.waitUntil(Conditions.shellCloses(tableShell));
+             */
 
             tableShell = openTreeviewObject(filetree, testFilename, "alloc_time_early");
             dataTable = getNatTable(tableShell);
@@ -172,15 +178,18 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell.bot().menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
-            tableShell = openTreeviewObject(filetree, testFilename, "szip");
-            dataTable = getNatTable(tableShell);
-
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
-
-            retriever.testAllTableLocations(filtersExpectedData);
-
-            tableShell.bot().menu("Close").click();
-            bot.waitUntil(Conditions.shellCloses(tableShell));
+            /*
+             * TODO: SZIP not available
+             * tableShell = openTreeviewObject(filetree, testFilename, "szip");
+             * dataTable = getNatTable(tableShell);
+             *
+             * retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+             *
+             * retriever.testAllTableLocations(filtersExpectedData);
+             *
+             * tableShell.bot().menu("Close").click();
+             * bot.waitUntil(Conditions.shellCloses(tableShell));
+             */
         }
         catch (Exception ex) {
             ex.printStackTrace();
