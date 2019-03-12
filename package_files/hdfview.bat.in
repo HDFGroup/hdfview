@@ -25,7 +25,7 @@ pushd %~dp0
 
 rem Adjust the following variable to match your environment
 set INSTALLDIR=%cd%
-set PATH=%PATH%;%INSTALLDIR%\\lib
+set PATH=%INSTALLDIR%\\lib;%PATH%
 set JAVABIN=%INSTALLDIR%\\jre\\bin
 
 rem start "HDFView" "%JAVABIN%\\javaw.exe" %JAVAOPTS% -Xmx1024M -Djava.library.path="%INSTALLDIR%\\lib" -Dhdfview.root="%INSTALLDIR%" -jar "%INSTALLDIR%\\lib\\HDFView.jar" %*
