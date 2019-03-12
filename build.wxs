@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='windows-1252'?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <!-- Set product upgrade code for later upgrade of HDFView -->
-	<?define ProductUpgradeCode = "75386B8B-ABB3-492A-EF6B-75A62D699B65"?>
+    <?define ProductUpgradeCode = "75386B8B-ABB3-492A-EF6B-75A62D699B65"?>
 
 
-	<!-- Set variables to determine whether target platform is 32- or 64-bit -->
-	<?if $(sys.BUILDARCH) = x64 ?>
+    <!-- Set variables to determine whether target platform is 32- or 64-bit -->
+    <?if $(sys.BUILDARCH) = x64 ?>
       <?define Win64 = "yes" ?>
       <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
     <?else ?>
@@ -16,10 +16,10 @@
 
     <!-- Give an error if product name and version were not passed to candle.exe from within ANT -->
     <?ifndef productName ?>
-    	<?error productName must be defined. ?>
+        <?error productName must be defined. ?>
     <?endif?>
-	<?ifndef productVersion ?>
-    	<?error productVersion must be defined. ?>
+    <?ifndef productVersion ?>
+        <?error productVersion must be defined. ?>
     <?endif?>
 
 
@@ -44,8 +44,8 @@
 
 
         <Upgrade Id="$(var.ProductUpgradeCode)">
-            <UpgradeVersion Minimum="$(var.productVersion).0" OnlyDetect="yes" Property="NEWERVERSIONDETECTED" />
-            <UpgradeVersion Minimum="1.0.0" IncludeMinimum="yes" Maximum="$(var.productVersion).0" IncludeMaximum="no" Property="OLDERVERSIONBEINGUPGRADED" />
+            <UpgradeVersion Minimum="$(var.productVersion)" OnlyDetect="yes" Property="NEWERVERSIONDETECTED" />
+            <UpgradeVersion Minimum="1.0.0" IncludeMinimum="yes" Maximum="$(var.productVersion)" IncludeMaximum="no" Property="OLDERVERSIONBEINGUPGRADED" />
         </Upgrade>
 
         <InstallExecuteSequence>
@@ -63,7 +63,7 @@
 
 
         <!-- Property to set the default program installation folder name -->
-        <Property Id="ApplicationFolderName" Value="HDF_Group\$(var.productName)\$(var.productVersion).0" />
+        <Property Id="ApplicationFolderName" Value="HDF_Group\$(var.productName)\$(var.productVersion)" />
 
 
         <!-- Property to set the default installation type selection for per-machine
@@ -78,14 +78,14 @@
             <Directory Id="$(var.PlatformProgramFilesFolder)">
                 <Directory Id="HDFDir" Name="HDF_Group">
                     <Directory Id="HDFViewDir" Name="$(var.productName)">
-                        <Directory Id="APPLICATIONFOLDER" Name="$(var.productVersion).0" />
+                        <Directory Id="APPLICATIONFOLDER" Name="$(var.productVersion)" />
                     </Directory>
                 </Directory>
             </Directory>
 
             <!-- Folder to install to for Start Menu shortcut -->
             <Directory Id="ProgramMenuFolder">
-                <Directory Id="ApplicationProgramsFolder" Name="$(var.productName)-$(var.productVersion).0"/>
+                <Directory Id="ApplicationProgramsFolder" Name="$(var.productName)-$(var.productVersion)"/>
             </Directory>
 
             <!-- Folder to install to for Desktop shortcut -->
@@ -153,25 +153,25 @@
         <!-- Feature for adding Start Menu and Desktop Shortcuts if wanted -->
         <Feature Id="Shortcuts" Title="Create Start Menu and Desktop Shortcuts" Level="1">
             <Component Id="StartMenuShortcut" Directory="ApplicationProgramsFolder" Guid="A9B52E31-0ABA-4AC6-8723-9128E5574F8C">
-                <Shortcut Id="ApplicationStartMenuShortcut" 
-                     Name="$(var.productName)-$(var.productVersion).0"
-                     Description="$(var.productName)-$(var.productVersion).0, a visual tool for browsing and editing HDF files."
+                <Shortcut Id="ApplicationStartMenuShortcut"
+                     Name="$(var.productName)-$(var.productVersion)"
+                     Description="$(var.productName)-$(var.productVersion), a visual tool for browsing and editing HDF files."
                      Target="[APPLICATIONFOLDER]\hdfview.bat"
                      Icon="hdf_icon"
                      WorkingDirectory="APPLICATIONFOLDER"/>
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-                <RegistryValue Root="HKCU" Key="Software\HDF_Group\$(var.productName)-$(var.productVersion).0" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+                <RegistryValue Root="HKCU" Key="Software\HDF_Group\$(var.productName)-$(var.productVersion)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
            </Component>
            <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="F1BDA726-9967-4B3D-A4D6-3F1340B4DC50">
                <Shortcut Id="HDFViewDesktopShortcut"
                          Directory="DesktopFolder"
-                         Name="$(var.productName)-$(var.productVersion).0"
+                         Name="$(var.productName)-$(var.productVersion)"
                          WorkingDirectory="APPLICATIONFOLDER"
                          Target="[APPLICATIONFOLDER]\hdfview.bat"
-                         Description="$(var.productName)-$(var.productVersion).0, a visual tool for browsing and editing HDF files."
+                         Description="$(var.productName)-$(var.productVersion), a visual tool for browsing and editing HDF files."
                          Icon="hdf_icon"/>
-               <RemoveFile Id="HDFViewDesktopShortcut" Name="$(var.productName)-$(var.productVersion).0" On="uninstall"/>
-               <RegistryValue Root="HKCU" Key="Software\HDF_Group\$(var.productName)-$(var.productVersion).0" Name="App" Type="integer" Value="1" KeyPath="yes"/>
+               <RemoveFile Id="HDFViewDesktopShortcut" Name="$(var.productName)-$(var.productVersion)" On="uninstall"/>
+               <RegistryValue Root="HKCU" Key="Software\HDF_Group\$(var.productName)-$(var.productVersion)" Name="App" Type="integer" Value="1" KeyPath="yes"/>
            </Component>
         </Feature>
 
@@ -180,16 +180,16 @@
         <UI>
             <UIRef Id="WixUI_Advanced" />
             <Publish Dialog="ExitDialog"
-                Control="Finish" 
-                Event="DoAction" 
+                Control="Finish"
+                Event="DoAction"
                 Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
         </UI>
 
 
         <!-- Customize exit dialog text and ask user if they want to launch HDFView after install -->
         <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT"
-                  Value="$(var.productName)-$(var.productVersion).0 has been installed on your computer." />
-        <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.productName)-$(var.productVersion).0" />
+                  Value="$(var.productName)-$(var.productVersion) has been installed on your computer." />
+        <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.productName)-$(var.productVersion)" />
         <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
 
         <Property Id="WixShellExecTarget" Value="[#HDFViewBat]" />
