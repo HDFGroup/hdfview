@@ -80,7 +80,7 @@ public class TestHDFViewRefs extends AbstractWindowTest {
                 { "NULL" }, { "NULL" } };
         SWTBotShell tableShell = null;
         String filename = "tdatareg.h5";
-        String datasetName = "/Dataset1";
+        String datasetName = "Dataset1";
         File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {

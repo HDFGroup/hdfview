@@ -400,6 +400,13 @@ public abstract class AbstractWindowTest {
         return openDataObject(objectName);
     }
 
+    protected SWTBotShell openAttributeContext(SWTBotTable attrTable, String objectName, int rowIndex) {
+        attrTable.click(rowIndex, 0);
+        attrTable.contextMenu("View/Edit Attribute Value").click();
+
+        return openDataObject(objectName);
+    }
+
     protected SWTBotShell openTreeviewObject(SWTBotTree tree, String filename, String objectName) {
         SWTBotTreeItem fileItem = tree.getTreeItem(filename);
 

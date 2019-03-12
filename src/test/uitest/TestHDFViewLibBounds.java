@@ -24,10 +24,8 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             hdfFile = openFile(testFilename, FILE_MODE.READ_WRITE);
 
             SWTBotTree filetree = bot.tree();
-
             checkFileTree(filetree, "testLibVersion()", 1, testFilename);
             SWTBotTreeItem[] items = filetree.getAllItems();
-
             items[0].click();
             items[0].contextMenu("Set Lib version bounds").click();
 
@@ -40,7 +38,7 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             bot.waitUntil(shellCloses(libVersionShell));
 
-            SWTBotTabItem tabItem = bot.tabItem("General Object Info");
+            SWTBotTabItem tabItem = openMetadataTab(filetree, testFilename, "/", "General Object Info");
             tabItem.activate();
 
             String val = bot.textWithLabel("Library version bounds: ").getText();
