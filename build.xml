@@ -159,8 +159,8 @@
     <property name="sonar.host.url" value="http://localhost:9000" />
 
     <!-- Define the SonarQube project properties -->
-    <property name="sonar.projectKey" value="org.sonarqube:sonarqube-scanner-ant" />
-    <property name="sonar.projectName" value="HDFView-development" />
+    <property name="sonar.projectKey" value="HDFView3" />
+    <property name="sonar.projectName" value="HDFView3" />
     <property name="sonar.projectVersion" value="1.0" />
     <property name="sonar.sources" value="${src.dir}/hdf" />
     <property name="sonar.java.binaries" value="${classes.dir}" />
