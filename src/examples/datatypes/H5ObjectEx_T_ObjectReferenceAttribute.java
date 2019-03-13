@@ -68,13 +68,22 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
         H5Group grp = null;
         long[] dims = { DIM0 };
         long[] dset_data = new long[DIM0];
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 8, Datatype.ORDER_BE, -1);
-        final H5Datatype typeRef = new H5Datatype(Datatype.CLASS_REFERENCE, -1, -1, -1);
+        H5Datatype typeInt = null;
+        H5Datatype typeRef = null;
 
         // Create a new file using default properties.
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the base datatypes.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 8, Datatype.ORDER_BE, Datatype.NATIVE);
+            typeRef = new H5Datatype(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

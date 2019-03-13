@@ -15,13 +15,20 @@
 package hdf.view.TableView;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.data.validate.DataValidator;
 import org.eclipse.nebula.widgets.nattable.data.validate.ValidationFailedException;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 
-import hdf.object.CompoundDS;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.object.CompoundDataFormat;
+import hdf.object.DataFormat;
 import hdf.object.Datatype;
+import hdf.object.h5.H5Datatype;
 
 /**
  * A Factory class to return a DataValidator class for a NatTable instance based
@@ -33,31 +40,32 @@ import hdf.object.Datatype;
  */
 public class DataValidatorFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataValidatorFactory.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataValidatorFactory.class);
 
-    public static DataValidator getDataValidator(Datatype dtype) throws Exception {
-        if (dtype == null)
-            throw new Exception("DataValidatorFactory supplied with an invalid Datatype");
+    /*
+     * To keep things clean from an API perspective, keep a static reference to the
+     * last CompoundDataFormat that was passed in. This keeps us from needing to
+     * pass the CompoundDataFormat object as a parameter to every DataValidator
+     * class, since it's really only needed by the CompoundDataValidator.
+     */
+    private static DataFormat dataFormatReference = null;
 
-        DataValidator validator = null;
+    public static HDFDataValidator getDataValidator(final DataFormat dataObject) throws Exception {
+        log.trace("getDataValidator(DataFormat): start");
 
-        log.trace("getDataValidator(Datatype): start");
+        if (dataObject == null) {
+            log.debug("getDataValidator(DataFormat): data object is null");
+            throw new Exception("Must supply a valid DataFormat to the DataValidatorFactory");
+        }
 
+        dataFormatReference = dataObject;
+
+        HDFDataValidator validator = null;
         try {
-            if (dtype.isCompound())
-                throw new Exception("Incorrect method getDataValidator(Datatype) called for CompoundDS; use getDataValidator(CompoundDS) instead");
-
-            if (dtype.isArray())
-                validator = new ArrayDataValidator(dtype);
-            else if (dtype.isInteger() || dtype.isFloat())
-                validator = new NumericalDataValidator(dtype);
-            else if (dtype.isVLEN() && !dtype.isVarStr())
-                validator = new VlenDataValidator(dtype);
-            else if (dtype.isString())
-                validator = new StringDataValidator(dtype);
+            validator = getDataValidator(dataObject.getDatatype());
         }
         catch (Exception ex) {
-            log.debug("getDataValidator(Datatype): error occurred in retrieving a DataValidator: ", ex);
+            log.debug("getDataValidator(DataFormat): failed to retrieve a DataValidator: ", ex);
             validator = null;
         }
 
@@ -65,12 +73,53 @@ public class DataValidatorFactory {
          * By default, never validate if a proper DataValidator was not found.
          */
         if (validator == null) {
-            validator = new DataValidator() {
-                @Override
-                public boolean validate(int arg0, int arg1, Object arg2) {
-                    throw new ValidationFailedException("A proper DataValidator wasn't found for this type of data. Writing this type of data will be disabled.");
-                }
-            };
+            log.debug("getDataValidator(DataFormat): using a default data validator");
+
+            validator = new HDFDataValidator(dataObject.getDatatype());
+        }
+
+        log.trace("getDataValidator(DataFormat): finish");
+
+        return validator;
+    }
+
+    private static HDFDataValidator getDataValidator(Datatype dtype) throws Exception {
+        log.trace("getDataValidator(Datatype): start");
+
+        HDFDataValidator validator = null;
+
+        try {
+            if (dtype.isCompound())
+                validator = new CompoundDataValidator(dtype);
+            else if (dtype.isArray())
+                validator = new ArrayDataValidator(dtype);
+            else if (dtype.isVLEN() && !dtype.isVarStr())
+                validator = new VlenDataValidator(dtype);
+            else if (dtype.isString() || dtype.isVarStr())
+                validator = new StringDataValidator(dtype);
+            else if (dtype.isChar())
+                validator = new CharDataValidator(dtype);
+            else if (dtype.isInteger() || dtype.isFloat())
+                validator = new NumericalDataValidator(dtype);
+            else if (dtype.isEnum())
+                validator = new EnumDataValidator(dtype);
+            else if (dtype.isOpaque() || dtype.isBitField())
+                validator = new BitfieldDataValidator(dtype);
+            else if (dtype.isRef())
+                validator = new RefDataValidator(dtype);
+        }
+        catch (Exception ex) {
+            log.debug("getDataValidator(Datatype): failed to retrieve a DataValidator: ", ex);
+            validator = null;
+        }
+
+        /*
+         * By default, never validate if a proper DataValidator was not found.
+         */
+        if (validator == null) {
+            log.debug("getDataValidator(Datatype): using a default data validator");
+
+            validator = new HDFDataValidator(dtype);
         }
 
         log.trace("getDataValidator(Datatype): finish");
@@ -78,37 +127,48 @@ public class DataValidatorFactory {
         return validator;
     }
 
-    public static DataValidator getDataValidator(CompoundDS compoundDataset) throws Exception {
-        if (compoundDataset == null)
-            throw new Exception("Must supply a valid CompoundDS to the DataValidatorFactory");
+    public static class HDFDataValidator extends DataValidator {
 
-        DataValidator validator = null;
-
-        log.trace("getDataValidator(CompoundDS): start");
-
-        try {
-            validator = new CompoundDataValidator(compoundDataset);
-        }
-        catch (Exception ex) {
-            log.debug("getDataValidator(CompoundDS): error occurred in retrieving a DataValidator: ", ex);
-            validator = null;
-        }
+        protected org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDataValidator.class);
 
         /*
-         * By default, never validate if a proper DataValidator was not found.
+         * This field is only used for CompoundDataValidator, but when the top-level
+         * DataValidator is a "container" type, such as an ArrayDataValidator, we have
+         * to set this field and pass it through in case there is a
+         * CompoundDataValidator at the bottom of the chain.
          */
-        if (validator == null) {
-            validator = new DataValidator() {
-                @Override
-                public boolean validate(int arg0, int arg1, Object arg2) {
-                    throw new ValidationFailedException("A proper DataValidator wasn't found for this type of data. Writing this type of data will be disabled.");
-                }
-            };
+        protected int cellColIdx;
+
+        HDFDataValidator(final Datatype dtype) {
+            log.trace("constructor: start");
+
+            cellColIdx = -1;
+
+            log.trace("constructor: finish");
         }
 
-        log.trace("getDataValidator(CompoundDS): finish");
+        @Override
+        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+            throwValidationFailedException(rowIndex, colIndex, newValue,
+                    "A proper DataValidator wasn't found for this type of data. Writing this type of data will be disabled.");
 
-        return validator;
+            return false;
+        }
+
+        protected void checkValidValue(Object newValue) throws ValidationFailedException {
+            if (newValue == null)
+                throw new ValidationFailedException("value is null");
+
+            if (!(newValue instanceof String))
+                throw new ValidationFailedException("value is not a String");
+        }
+
+        protected void throwValidationFailedException(int rowIndex, int colIndex, Object newValue, String reason)
+                throws ValidationFailedException {
+            throw new ValidationFailedException("Failed to update value at " + "(" + rowIndex + ", "
+                    + colIndex + ") to '" + newValue.toString() + "': " + reason);
+        }
+
     }
 
     /*
@@ -119,40 +179,106 @@ public class DataValidatorFactory {
      * Compound datatype, and grabbing the correct validator from the stored
      * list of validators.
      */
-    private static class CompoundDataValidator extends DataValidator {
+    private static class CompoundDataValidator extends HDFDataValidator {
 
-        private final DataValidator[] memberValidators;
-        private final int numSelectedMembers;
+        private final HashMap<Integer, Integer> baseValidatorIndexMap;
+        private final HashMap<Integer, Integer> relCmpdStartIndexMap;
 
-        CompoundDataValidator(CompoundDS dset) throws Exception {
-            if (dset == null)
-                throw new Exception("CompoundDataValidator supplied with an invalid CompoundDS");
+        private final HDFDataValidator[]        memberValidators;
 
-            Datatype dtype = dset.getDatatype();
-            if (dtype == null)
-                throw new Exception("CompoundDataValidator's CompoundDS has an invalid Datatype");
+        private final int                       nTotFields;
 
-            log.trace("CompoundDataValidator: Datatype is {}", dtype.getDescription());
+        CompoundDataValidator(final Datatype dtype) throws Exception {
+            super(dtype);
 
-            Datatype[] selectedMembers = dset.getSelectedMemberTypes();
-            numSelectedMembers = selectedMembers.length;
-            memberValidators = new DataValidator[numSelectedMembers];
+            log = org.slf4j.LoggerFactory.getLogger(CompoundDataValidator.class);
 
-            log.trace("CompoundDataValidator: number of selected members {}", numSelectedMembers);
+            log.trace("constructor: start");
 
-            for (int i = 0; i < numSelectedMembers; i++) {
-                memberValidators[i] = DataValidatorFactory.getDataValidator(selectedMembers[i]);
+            if (!dtype.isCompound()) {
+                log.debug("datatype is not a compound type");
+                log.trace("constructor: finish");
+                throw new Exception("CompoundDataValidator: datatype is not a compound type");
             }
+
+            CompoundDataFormat compoundFormat = (CompoundDataFormat) dataFormatReference;
+
+            List<Datatype> localSelectedTypes = DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
+
+            log.trace("setting up {} base HDFDataValidators", localSelectedTypes.size());
+
+            memberValidators = new HDFDataValidator[localSelectedTypes.size()];
+            for (int i = 0; i < memberValidators.length; i++) {
+                log.trace("retrieving DataValidator for member {}", i);
+
+                try {
+                    memberValidators[i] = getDataValidator(localSelectedTypes.get(i));
+                }
+                catch (Exception ex) {
+                    log.debug("failed to retrieve DataValidator for member {}: ", i, ex);
+                    memberValidators[i] = null;
+                }
+            }
+
+            /*
+             * Build necessary index maps.
+             */
+            HashMap<Integer, Integer>[] maps = DataFactoryUtils.buildIndexMaps(compoundFormat, localSelectedTypes);
+            baseValidatorIndexMap = maps[DataFactoryUtils.COL_TO_BASE_CLASS_MAP_INDEX];
+            relCmpdStartIndexMap = maps[DataFactoryUtils.CMPD_START_IDX_MAP_INDEX];
+
+            log.trace("index maps built: baseValidatorIndexMap = {}, relColIdxMap = {}",
+                    baseValidatorIndexMap.toString(), relCmpdStartIndexMap.toString());
+
+            if (baseValidatorIndexMap.size() == 0) {
+                log.debug("base DataValidator index mapping is invalid - size 0");
+                log.trace("constructor: finish");
+                throw new Exception("CompoundDataValidator: invalid DataValidator mapping of size 0 built");
+            }
+
+            if (relCmpdStartIndexMap.size() == 0) {
+                log.debug("compound field start index mapping is invalid - size 0");
+                log.trace("constructor: finish");
+                throw new Exception("CompoundDataValidator: invalid compound field start index mapping of size 0 built");
+            }
+
+            nTotFields = baseValidatorIndexMap.size();
+
+            log.trace("constructor: finish");
+        }
+
+        @Override
+        public boolean validate(ILayerCell cell, IConfigRegistry configRegistry, Object newValue) {
+            cellColIdx = cell.getColumnIndex() % nTotFields;
+            return validate(cell.getColumnIndex(), cell.getRowIndex(), newValue);
         }
 
         @Override
         public boolean validate(int colIndex, int rowIndex, Object newValue) {
-            int fieldIdx = colIndex % numSelectedMembers;
-            if (!memberValidators[fieldIdx].validate(colIndex, rowIndex, newValue))
-                return false;
+            log.trace("validate({}, {}, {}): start", rowIndex, colIndex, newValue);
+
+            try {
+                super.checkValidValue(newValue);
+
+                if (cellColIdx >= nTotFields)
+                    cellColIdx %= nTotFields;
+
+                HDFDataValidator validator = memberValidators[baseValidatorIndexMap.get(cellColIdx)];
+                validator.cellColIdx = cellColIdx - relCmpdStartIndexMap.get(cellColIdx);
+
+                validator.validate(colIndex, rowIndex, newValue);
+            }
+            catch (Exception ex) {
+                log.debug("validate({}, {}, {}): failed to validate: ", rowIndex, colIndex, newValue, ex);
+                throw new ValidationFailedException(ex.getMessage(), ex);
+            }
+            finally {
+                log.trace("validate({}, {}, {}): finish", rowIndex, colIndex, newValue);
+            }
 
             return true;
         }
+
     }
 
     /*
@@ -160,46 +286,76 @@ public class DataValidatorFactory {
      * an ARRAY datatype by calling the appropriate validator (as determined
      * by the supplied datatype) on each of the array's elements.
      */
-    private static class ArrayDataValidator extends DataValidator {
+    private static class ArrayDataValidator extends HDFDataValidator {
 
-        private final DataValidator baseValidator;
+        private final HDFDataValidator baseValidator;
 
-        ArrayDataValidator(Datatype dtype) throws Exception {
-            if (dtype == null || !dtype.isArray())
-                throw new Exception("ArrayDataValidator supplied with an invalid array Datatype");
+        ArrayDataValidator(final Datatype dtype) throws Exception {
+            super(dtype);
+
+            log = org.slf4j.LoggerFactory.getLogger(ArrayDataValidator.class);
+
+            log.trace("constructor: start");
+
+            if (!dtype.isArray()) {
+                log.debug("datatype is not an array type");
+                log.trace("constructor: finish");
+                throw new Exception("ArrayDataValidator: datatype is not an array type");
+            }
 
             Datatype baseType = dtype.getDatatypeBase();
-            if (baseType == null)
-                throw new Exception("ArrayDataValidator's Array Datatype has an invalid base Datatype");
+            if (baseType == null) {
+                log.debug("base datatype is null");
+                log.trace("constructor: finish");
+                throw new Exception("ArrayDataValidator: base datatype is null");
+            }
 
             log.trace("ArrayDataValidator: base Datatype is {}", baseType.getDescription());
 
-            if (baseType.isArray())
-                this.baseValidator = new ArrayDataValidator(baseType);
-            else if (baseType.isInteger() || baseType.isFloat())
-                this.baseValidator = new NumericalDataValidator(baseType);
-            else if (baseType.isVLEN())
-                this.baseValidator = new VlenDataValidator(baseType);
-            else if (baseType.isString())
-                this.baseValidator = new StringDataValidator(baseType);
-            else
-                throw new Exception("Unable to find a suitable base validator class for this ArrayDataValidator");
+            try {
+                baseValidator = getDataValidator(baseType);
+            }
+            catch (Exception ex) {
+                log.debug("couldn't get DataValidator for base datatype: ", ex);
+                log.trace("constructor: finish");
+                throw new Exception("ArrayDataValidator: couldn't get DataValidator for base datatype: " + ex.getMessage());
+            }
+
+            log.trace("constructor: finish");
+        }
+
+        @Override
+        public boolean validate(ILayerCell cell, IConfigRegistry configRegistry, Object newValue) {
+            cellColIdx = cell.getColumnIndex();
+            return validate(cell.getColumnIndex(), cell.getRowIndex(), newValue);
         }
 
         @Override
         public boolean validate(int colIndex, int rowIndex, Object newValue) {
-            if (!(newValue instanceof String))
-                throw new ValidationFailedException("Cannot validate Array data input: data is not a String");
+            log.trace("validate({}, {}, {}): start", rowIndex, colIndex, newValue);
 
-            StringTokenizer elementReader = new StringTokenizer((String) newValue, " \t\n\r\f,");
-            while (elementReader.hasMoreTokens()) {
-                String nextToken = elementReader.nextToken();
-                if (!baseValidator.validate(colIndex, rowIndex, nextToken))
-                    return false;
+            try {
+                super.checkValidValue(newValue);
+
+                baseValidator.cellColIdx = cellColIdx;
+
+                StringTokenizer elementReader = new StringTokenizer((String) newValue, " \t\n\r\f,[]");
+                while (elementReader.hasMoreTokens()) {
+                    String nextToken = elementReader.nextToken();
+                    baseValidator.validate(colIndex, rowIndex, nextToken);
+                }
+            }
+            catch (Exception ex) {
+                log.debug("validate({}, {}, {}): failed to validate: ", rowIndex, colIndex, newValue, ex);
+                throw new ValidationFailedException(ex.getMessage(), ex);
+            }
+            finally {
+                log.trace("validate({}, {}, {}): finish", rowIndex, colIndex, newValue);
             }
 
             return true;
         }
+
     }
 
     /*
@@ -207,42 +363,71 @@ public class DataValidatorFactory {
      * a variable-length Datatype (note that this DataValidator should not
      * be used for String Datatypes that are variable-length).
      */
-    private static class VlenDataValidator extends DataValidator {
+    private static class VlenDataValidator extends HDFDataValidator {
 
-        private final DataValidator baseValidator;
+        private final HDFDataValidator baseValidator;
 
         VlenDataValidator(Datatype dtype) throws Exception {
-            if (dtype == null || !dtype.isVLEN())
-                throw new Exception("VlenDataValidator supplied with an invalid valid VLEN Datatype");
+            super(dtype);
+
+            log = org.slf4j.LoggerFactory.getLogger(VlenDataValidator.class);
+
+            log.trace("constructor: start");
+
+            if (!dtype.isVLEN() || dtype.isVarStr()) {
+                log.debug("datatype is not a variable-length type or is a variable-length string type (use StringDataValidator)");
+                log.trace("constructor: finish");
+                throw new Exception("VlenDataValidator: datatype is not a variable-length type or is a variable-length string type (use StringDataValidator)");
+            }
 
             Datatype baseType = dtype.getDatatypeBase();
-            if (baseType == null)
-                throw new Exception("VlenDataValidator's VLEN Datatype has an invalid base Datatype");
+            if (baseType == null) {
+                log.debug("base datatype is null");
+                log.trace("constructor: finish");
+                throw new Exception("VlenDataValidator: base datatype is null");
+            }
 
             log.trace("VlenDataValidator: base Datatype is {}", baseType.getDescription());
 
-            if (baseType.isArray())
-                this.baseValidator = new ArrayDataValidator(baseType);
-            else if (baseType.isInteger() || baseType.isFloat())
-                this.baseValidator = new NumericalDataValidator(baseType);
-            else if (baseType.isVLEN())
-                this.baseValidator = new VlenDataValidator(baseType);
-            else if (baseType.isString())
-                this.baseValidator = new StringDataValidator(baseType);
-            else
-                throw new Exception("Unable to find a suitable base validator class for this VlenDataValidator");
+            try {
+                baseValidator = getDataValidator(baseType);
+            }
+            catch (Exception ex) {
+                log.debug("couldn't get DataValidator for base datatype: ", ex);
+                log.trace("constructor: finish");
+                throw new Exception("VlenDataValidator: couldn't get DataValidator for base datatype: " + ex.getMessage());
+            }
+
+            log.trace("constructor: finish");
+        }
+
+        @Override
+        public boolean validate(ILayerCell cell, IConfigRegistry configRegistry, Object newValue) {
+            cellColIdx = cell.getColumnIndex();
+            return validate(cell.getColumnIndex(), cell.getRowIndex(), newValue);
         }
 
         @Override
         public boolean validate(int colIndex, int rowIndex, Object newValue) {
-            if (!(newValue instanceof String))
-                throw new ValidationFailedException("Cannot validate data input: data is not a String");
+            log.trace("validate({}, {}, {}): start", rowIndex, colIndex, newValue);
 
-            StringTokenizer elementReader = new StringTokenizer((String) newValue, " \t\n\r\f,{}");
-            while (elementReader.hasMoreTokens()) {
-                String nextToken = elementReader.nextToken();
-                if (!baseValidator.validate(colIndex, rowIndex, nextToken))
-                    return false;
+            try {
+                super.checkValidValue(newValue);
+
+                baseValidator.cellColIdx = cellColIdx;
+
+                StringTokenizer elementReader = new StringTokenizer((String) newValue, " \t\n\r\f,()");
+                while (elementReader.hasMoreTokens()) {
+                    String nextToken = elementReader.nextToken();
+                    baseValidator.validate(colIndex, rowIndex, nextToken);
+                }
+            }
+            catch (Exception ex) {
+                log.debug("validate({}, {}, {}): failed to validate: ", rowIndex, colIndex, newValue, ex);
+                throw new ValidationFailedException(ex.getMessage(), ex);
+            }
+            finally {
+                log.trace("validate({}, {}, {}): finish", rowIndex, colIndex, newValue);
             }
 
             return true;
@@ -250,28 +435,175 @@ public class DataValidatorFactory {
     }
 
     /*
-     * NatTable DataValidator to validate entered input for a dataset with
-     * a numerical Datatype.
+     * NatTable DataValidator to validate entered input for a dataset with a String
+     * Datatype (including Strings of variable-length).
      */
-    private static class NumericalDataValidator extends DataValidator {
+    private static class StringDataValidator extends HDFDataValidator {
 
         private final Datatype datasetDatatype;
 
-        NumericalDataValidator(Datatype dtype) throws Exception {
-            if (dtype == null || (!dtype.isInteger() && !dtype.isFloat()))
-                throw new Exception("NumericalDataValidator supplied with an invalid numerical Datatype");
+        private final boolean isH5String;
 
-            log.trace("NumericalDataValidator: base Datatype is {}", dtype.getDescription());
+        StringDataValidator(final Datatype dtype) throws Exception {
+            super(dtype);
+
+            log = org.slf4j.LoggerFactory.getLogger(StringDataValidator.class);
+
+            log.trace("constructor: start");
+
+            if (!dtype.isString()) {
+                log.debug("datatype is not a String type");
+                log.trace("constructor: finish");
+                throw new Exception("StringDataValidator: datatype is not a String type");
+            }
+
+            log.trace("StringDataValidator: base Datatype is {}", dtype.getDescription());
 
             this.datasetDatatype = dtype;
+
+            this.isH5String = (dtype instanceof H5Datatype);
+
+            log.trace("constructor: finish");
         }
 
         @Override
         public boolean validate(int colIndex, int rowIndex, Object newValue) {
-            if (!(newValue instanceof String))
-                throw new ValidationFailedException("Cannot validate numerical data input: data is not a String");
+            log.trace("validate({}, {}, {}): start", rowIndex, colIndex, newValue);
 
             try {
+                super.checkValidValue(newValue);
+
+                /*
+                 * If this is a fixed-length string type, check to make sure that the data
+                 * length does not exceed the datatype size.
+                 */
+                if (!datasetDatatype.isVarStr()) {
+                    long lenDiff = ((String) newValue).length() - datasetDatatype.getDatatypeSize();
+
+                    if (lenDiff > 0)
+                        throw new Exception("string size larger than datatype size by " + lenDiff
+                            + ((lenDiff > 1) ? " bytes." : " byte."));
+
+                    /*
+                     * TODO: Add Warning about overwriting NULL-terminator character.
+                     */
+                    if (lenDiff == 0 && isH5String) {
+                        H5Datatype h5Type = (H5Datatype) datasetDatatype;
+                        int strPad = h5Type.getNativeStrPad();
+
+                        if (strPad == HDF5Constants.H5T_STR_NULLTERM) {
+
+                        }
+                        else if (strPad == HDF5Constants.H5T_STR_NULLPAD) {
+
+                        }
+                        else if (strPad == HDF5Constants.H5T_STR_SPACEPAD) {
+
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) {
+                log.debug("validate({}, {}, {}): failed to validate: ", rowIndex, colIndex, newValue, ex);
+                super.throwValidationFailedException(rowIndex, colIndex, newValue, ex.getMessage());
+            }
+            finally {
+                log.trace("validate({}, {}, {}): finish", rowIndex, colIndex, newValue);
+            }
+
+            return true;
+        }
+    }
+
+    private static class CharDataValidator extends HDFDataValidator {
+
+        private final Datatype datasetDatatype;
+
+        CharDataValidator(final Datatype dtype) throws Exception {
+            super(dtype);
+
+            log = org.slf4j.LoggerFactory.getLogger(CharDataValidator.class);
+
+            log.trace("constructor: start");
+
+            if (!dtype.isChar()) {
+                log.debug("datatype is not a Character type");
+                log.trace("constructor: finish");
+                throw new Exception("CharDataValidator: datatype is not a Character type");
+            }
+
+            this.datasetDatatype = dtype;
+
+            log.trace("constructor: finish");
+        }
+
+        @Override
+        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+            log.trace("validate({}, {}, {}): start", rowIndex, colIndex, newValue);
+
+            try {
+                if (datasetDatatype.isUnsigned()) {
+                    /*
+                     * First try to parse as a larger type in order to catch a NumberFormatException
+                     */
+                    Short shortValue = Short.parseShort((String) newValue);
+                    if (shortValue < 0)
+                        throw new NumberFormatException("Invalid negative value for unsigned datatype");
+
+                    if (shortValue > (Byte.MAX_VALUE * 2) + 1)
+                        throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
+                }
+                else {
+                    Byte.parseByte((String) newValue);
+                }
+            }
+            catch (Exception ex) {
+                super.throwValidationFailedException(rowIndex, colIndex, newValue, ex.toString());
+            }
+            finally {
+                log.trace("validate({}, {}, {}): finish", rowIndex, colIndex, newValue);
+            }
+
+            return true;
+        }
+
+    }
+
+    /*
+     * NatTable DataValidator to validate entered input for a dataset with
+     * a numerical Datatype.
+     */
+    private static class NumericalDataValidator extends HDFDataValidator {
+
+        private final Datatype datasetDatatype;
+
+        NumericalDataValidator(Datatype dtype) throws Exception {
+            super(dtype);
+
+            log = org.slf4j.LoggerFactory.getLogger(NumericalDataValidator.class);
+
+            log.trace("constructor: start");
+
+            if (!dtype.isInteger() && !dtype.isFloat()) {
+                log.debug("datatype is not an integer or floating-point type");
+                log.trace("constructor: finish");
+                throw new Exception("NumericalDataValidator: datatype is not an integer or floating-point type");
+            }
+
+            log.trace("NumericalDataValidator: base Datatype is {}", dtype.getDescription());
+
+            this.datasetDatatype = dtype;
+
+            log.trace("constructor: finish");
+        }
+
+        @Override
+        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+            log.trace("validate({}, {}, {}): start", rowIndex, colIndex, newValue);
+
+            try {
+                super.checkValidValue(newValue);
+
                 switch ((int) datasetDatatype.getDatatypeSize()) {
                     case 1:
                         if (datasetDatatype.isUnsigned()) {
@@ -321,7 +653,7 @@ public class DataValidatorFactory {
                                     throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
                             }
                             else {
-                                Integer.parseInt((String) newValue, 10);
+                                Integer.parseInt((String) newValue);
                             }
                         }
                         else {
@@ -355,62 +687,60 @@ public class DataValidatorFactory {
                         break;
 
                     default:
-                        throw new Exception("No validation logic for numerical data of size " + datasetDatatype.getDatatypeSize());
+                        throw new ValidationFailedException("No validation logic for numerical data of size " + datasetDatatype.getDatatypeSize());
                 }
             }
             catch (Exception ex) {
-                throw new ValidationFailedException("Failed to update value at " + "(" + rowIndex + ", "
-                        + colIndex + ") to '" + newValue.toString() + "': " + ex.toString());
+                super.throwValidationFailedException(rowIndex, colIndex, newValue, ex.toString());
+            }
+            finally {
+                log.trace("validate({}, {}, {}): finish", rowIndex, colIndex, newValue);
             }
 
             return true;
         }
     }
 
-    /*
-     * NatTable DataValidator to validate entered input for a dataset with
-     * a String Datatype (including Strings of variable-length).
-     */
-    private static class StringDataValidator extends DataValidator {
+    private static class EnumDataValidator extends HDFDataValidator {
 
-        private final Datatype datasetDatatype;
+        EnumDataValidator(final Datatype dtype) {
+            super(dtype);
 
-        StringDataValidator(Datatype dtype) throws Exception {
-            if (dtype == null || !dtype.isString())
-                throw new Exception("StringDataValidator supplied with an invalid String Datatype");
+            log = org.slf4j.LoggerFactory.getLogger(EnumDataValidator.class);
 
-            log.trace("StringDataValidator: base Datatype is {}", dtype.getDescription());
+            log.trace("constructor: start");
 
-            this.datasetDatatype = dtype;
+            log.trace("constructor: finish");
         }
 
-        @Override
-        public boolean validate(int colIndex, int rowIndex, Object newValue) {
-            if (!(newValue instanceof String))
-                throw new ValidationFailedException("Cannot validate string data input: data is not a String");
+    }
 
-            try {
-                /*
-                 * If this is a fixed-length string type, check to make sure that the data
-                 * length does not exceed the datatype size.
-                 */
-                /*
-                 * TODO: Add warning about overwriting NULL-terminator for NULLTERM type strings
-                 */
-                if (!datasetDatatype.isVarStr()) {
-                    long lenDiff = ((String) newValue).length() - datasetDatatype.getDatatypeSize();
+    private static class BitfieldDataValidator extends HDFDataValidator {
 
-                    if (lenDiff > 0)
-                        throw new Exception("string size larger than datatype size by " + lenDiff + ((lenDiff > 1) ? " bytes." : " byte."));
-                }
-            }
-            catch (Exception ex) {
-                throw new ValidationFailedException("Failed to update value at " + "(" + rowIndex + ", "
-                        + colIndex + ") to '" + newValue.toString() + "': " + ex.getMessage());
-            }
+        BitfieldDataValidator(final Datatype dtype) {
+            super(dtype);
 
-            return true;
+            log = org.slf4j.LoggerFactory.getLogger(BitfieldDataValidator.class);
+
+            log.trace("constructor: start");
+
+            log.trace("constructor: finish");
         }
+
+    }
+
+    private static class RefDataValidator extends HDFDataValidator {
+
+        RefDataValidator(final Datatype dtype) {
+            super(dtype);
+
+            log = org.slf4j.LoggerFactory.getLogger(RefDataValidator.class);
+
+            log.trace("constructor: start");
+
+            log.trace("constructor: finish");
+        }
+
     }
 
 }

@@ -14,6 +14,7 @@
 
 package hdf.object;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +47,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     private static final long serialVersionUID = -581324710549963177L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
 
     /**
      * The default definition for datatype size, order, and sign.
@@ -189,8 +190,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * Determines whether this datatype is a variable-length type.
      */
-    protected boolean is_VLEN = false;
-    protected boolean is_variable_str = false;
+    protected boolean isVLEN = false;
+    protected boolean isVariableStr = false;
 
     /**
      * The (name, value) pairs of enum members.
@@ -247,101 +248,106 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
      * <p>
-     * The following is a list of a few example of H5Datatype.
+     * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE,
-     * SIGN_NONE);
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
-     * </ol>
-     *
-     * @param tclass
-     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
-     *            etc.
-     * @param tsize
-     *            the size of the datatype in bytes, e.g. for a 32-bit integer,
-     *            the size is 4.
-     * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE,
-     *            ORDER_BE, ORDER_VAX and ORDER_NONE
-     * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
-     *            and MSGN
-     */
-    public Datatype(int tclass, int tsize, int torder, int tsign) {
-        this(tclass, tsize, torder, tsign, null);
-    }
-
-    /**
-     * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
-     * The following is a list of a few example of H5Datatype.
-     * <ol>
-     * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE,
-     * SIGN_NONE);
-     * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
-     * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
-     * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
-     * </ol>
-     *
-     * @param tclass
-     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
-     *            etc.
-     * @param tsize
-     *            the size of the datatype in bytes, e.g. for a 32-bit integer,
-     *            the size is 4.
-     * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE,
-     *            ORDER_BE, ORDER_VAX and ORDER_NONE
-     * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2
-     *            and MSGN
-     * @param tbase
-     *            the base datatype of the new datatype
-     */
-    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) {
-        this(tclass, tsize, torder, tsign, tbase, null);
-    }
-
-    /**
-     * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
-     * The following is a list of a few example of H5Datatype.
-     * <ol>
-     * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
-     * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
-     * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
-     * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value.
      * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX and
-     *            ORDER_NONE
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and MSGN
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
+     */
+    public Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
+        this(tclass, tsize, torder, tsign, null);
+    }
+
+    /**
+     * Constructs a Datatype with specified class, size, byte order and sign.
+     * <p>
+     * The following is a list of a few examples of Datatype.
+     * <ol>
+     * <li>to create unsigned native integer<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
+     * <li>to create 16-bit signed integer with big endian<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
+     * <li>to create native float<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+     * <li>to create 64-bit double<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
+     * </ol>
+     *
+     * @param tclass
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
+     *            etc.
+     * @param tsize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer,
+     *            the size is 4.
+     *            Valid values are NATIVE or a positive value.
+     * @param torder
+     *            the byte order of the datatype. Valid values are ORDER_LE,
+     *            ORDER_BE, ORDER_VAX, ORDER_NONE and NATIVE.
+     * @param tsign
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
+     * @param tbase
+     *            the base datatype of the new datatype
+     */
+    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
+        this(tclass, tsize, torder, tsign, tbase, null);
+    }
+
+    /**
+     * Constructs a Datatype with specified class, size, byte order and sign.
+     * <p>
+     * The following is a list of a few examples of Datatype.
+     * <ol>
+     * <li>to create unsigned native integer<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
+     * <li>to create 16-bit signed integer with big endian<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
+     * <li>to create native float<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+     * <li>to create 64-bit double<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
+     * </ol>
+     *
+     * @param tclass
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
+     * @param tsize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value.
+     * @param torder
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
+     * @param tsign
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      * @param tbase
      *            the base datatype of the new datatype
      * @param pbase
      *            the parent datatype of the new datatype
      */
-    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) {
+    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
+        if ((tsize == 0) || (tsize < 0 && tsize != NATIVE))
+            throw new Exception("invalid datatype size - " + tsize);
+        if ((torder != ORDER_LE) && (torder != ORDER_BE) && (torder != ORDER_VAX)
+                && (torder != ORDER_NONE) && (torder != NATIVE))
+            throw new Exception("invalid datatype order - " + torder);
+        if ((tsign != SIGN_NONE) && (tsign != SIGN_2) && (tsign != NATIVE))
+            throw new Exception("invalid datatype sign - " + tsign);
+
         datatypeClass = tclass;
         datatypeSize = tsize;
         datatypeOrder = torder;
@@ -349,8 +355,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         enumMembers = null;
         baseType = tbase;
         arrayDims = null;
-        is_variable_str = (datatypeClass == Datatype.CLASS_STRING) && (tsize < 0);
-        is_VLEN = (datatypeClass == Datatype.CLASS_VLEN) || is_variable_str;
+        isVariableStr = (datatypeClass == Datatype.CLASS_STRING) && (tsize < 0);
+        isVLEN = (datatypeClass == Datatype.CLASS_VLEN) || isVariableStr;
+
+        compoundMemberNames = new ArrayList<>();
+        compoundMemberTypes = new ArrayList<>();
+        compoundMemberOffsets = new ArrayList<>();
 
         log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}",
                 datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
@@ -372,23 +382,21 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param tid
      *            the native datatype identifier.
      */
-    public Datatype(long tid) {
+    public Datatype(long tid) throws Exception {
         this(tid, null);
     }
 
     /**
      * Constructs a Datatype with a given native datatype identifier.
      * <p>
-     * For example, if the datatype identifier is a 32-bit unsigned integer created
-     * from HDF5,
+     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
      *
      * <pre>
      * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
      * Datatype dtype = new Datatype(tid);
      * </pre>
      *
-     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4,
-     * NATIVE, SIGN_NONE);
+     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
      *
      * @see #fromNative(long tid)
      * @param tid
@@ -396,7 +404,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param pbase
      *            the parent datatype of the new datatype
      */
-    public Datatype(long tid, Datatype pbase) {
+    public Datatype(long tid, Datatype pbase) throws Exception {
         this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE, null, pbase);
     }
 
@@ -471,7 +479,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Returns the sign (SIGN_NONE, SIGN_2 or NSGN) of an integer datatype.
+     * Returns the sign (SIGN_NONE, SIGN_2) of an integer datatype.
      *
      * @return the sign of the datatype.
      */
@@ -480,32 +488,32 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Returns the datatype of the elements for this datatype.
+     * Returns the base datatype for this datatype.
      * <p>
      * For example, in a dataset of type ARRAY of integer, the datatype of the dataset is ARRAY. The
      * datatype of the base type is integer.
      *
-     * @return the datatype of the contained datatype.
+     * @return the datatype of the contained basetype.
      */
     public Datatype getDatatypeBase() {
         return baseType;
     }
 
     /**
-     * Sets the (name, value) pairs of enum members for enum datatype.
+     * Sets the (key, value) pairs of enum members for enum datatype.
      * <p>
      * For Example,
      * <dl>
-     * <dt>setEnumMembers("lowTemp=-40, highTemp=90")</dt>
-     * <dd>sets the value of enum member lowTemp to -40 and highTemp to 90.</dd>
+     * <dt>setEnumMembers("-40=lowTemp, 90=highTemp")</dt>
+     * <dd>sets the key of enum member lowTemp to -40 and highTemp to 90.</dd>
      * <dt>setEnumMembers("lowTemp, highTemp")</dt>
-     * <dd>sets enum members to defaults, i.e. lowTemp=0 and highTemp=1</dd>
-     * <dt>setEnumMembers("lowTemp=10, highTemp")</dt>
+     * <dd>sets enum members to defaults, i.e. 0=lowTemp and 1=highTemp</dd>
+     * <dt>setEnumMembers("10=lowTemp, highTemp")</dt>
      * <dd>sets enum member lowTemp to 10 and highTemp to 11.</dd>
      * </dl>
      *
      * @param enumStr
-     *            the (name, value) pairs of enum members
+     *            the (key, value) pairs of enum members
      */
     public final void setEnumMembers(String enumStr) {
         log.trace("setEnumMembers: is_enum enum_members={}", enumStr);
@@ -513,8 +521,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         String[] entries = enumStr.split(",");
         for (String entry : entries) {
             String[] keyValue = entry.split("=");
-            enumMembers.put(keyValue[1].trim(), keyValue[0].trim());
-            log.trace("setEnumMembers: is_enum value={} name={}", keyValue[1].trim(), keyValue[0].trim());
+            enumMembers.put(keyValue[0].trim(), keyValue[1].trim());
+            if (log.isTraceEnabled())
+                log.trace("setEnumMembers: is_enum value={} name={}", keyValue[0].trim(), keyValue[1].trim());
         }
     }
 
@@ -539,10 +548,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * For Example,
      * <dl>
      * <dt>getEnumMembersAsString()</dt>
-     * <dd>returns "lowTemp=10, highTemp=40"</dd>
+     * <dd>returns "10=lowTemp, 40=highTemp"</dd>
      * </dl>
      *
-     * @return enumStr the (name, value) pairs of enum members
+     * @return enumStr the (key, value) pairs of enum members
      */
     @SuppressWarnings("rawtypes")
     public final String getEnumMembersAsString() {
@@ -552,19 +561,20 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             enumMembers.put("2", "1");
         }
 
-        String enumStr = new String();
+        StringBuilder enumStr = new StringBuilder();
         Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
         int i = enumMembers.size();
         while (entries.hasNext()) {
             Entry thisEntry = entries.next();
-            String memstr = (String) thisEntry.getKey();
-            String memname = (String) thisEntry.getValue();
-            enumStr += memname + "=" + memstr;
+            enumStr.append((String) thisEntry.getKey())
+                   .append("=")
+                   .append((String) thisEntry.getValue());
+
             i--;
             if (i > 0)
-                enumStr += ", ";
+                enumStr.append(", ");
         }
-        return enumStr;
+        return enumStr.toString();
     }
 
     /**
@@ -640,50 +650,80 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             return datatypeDescription;
         }
 
-        String description = null;
+        StringBuilder description = new StringBuilder();
 
         switch (datatypeClass) {
             case CLASS_CHAR:
-                description = "8-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                description.append("8-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
                 break;
             case CLASS_INTEGER:
-                description = String.valueOf(datatypeSize * 8) + "-bit " + (isUnsigned() ? "unsigned " : "") + "integer";
+                if (datatypeSize == NATIVE)
+                    description.append("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
+                else
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit ")
+                            .append((isUnsigned() ? "unsigned " : "")).append("integer");
                 break;
             case CLASS_FLOAT:
-                description = String.valueOf(datatypeSize * 8) + "-bit floating-point";
+                if (datatypeSize == NATIVE)
+                    description.append("native floating-point");
+                else
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit floating-point");
                 break;
             case CLASS_STRING:
-                description = "String";
+                description.append("String");
                 break;
             case CLASS_REFERENCE:
-                description = "Object reference";
+                description.append("Object reference");
+                break;
+            case CLASS_OPAQUE:
+                if (datatypeSize == NATIVE)
+                    description.append("native opaque");
+                else
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit opaque");
                 break;
             case CLASS_BITFIELD:
-                description = String.valueOf(datatypeSize * 8) + "-bit bitfield";
+                if (datatypeSize == NATIVE)
+                    description.append("native bitfield");
+                else
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit bitfield");
                 break;
             case CLASS_ENUM:
-                description = String.valueOf(datatypeSize * 8) + "-bit enum";
+                if (datatypeSize == NATIVE)
+                    description.append("native enum");
+                else
+                    description.append(String.valueOf(datatypeSize * 8)).append("-bit enum");
                 break;
             case CLASS_ARRAY:
-                description = "Array";
+                description.append("Array");
+
+                if (arrayDims != null) {
+                    description.append(" [");
+                    for (int i = 0; i < arrayDims.length; i++) {
+                        description.append(arrayDims[i]);
+                        if (i < arrayDims.length - 1)
+                            description.append(" x ");
+                    }
+                    description.append("]");
+                }
+
                 break;
             case CLASS_COMPOUND:
-                description = "Compound";
+                description.append("Compound");
                 break;
             case CLASS_VLEN:
-                description = "Variable-length";
+                description.append("Variable-length");
                 break;
             default:
-                description = "Unknown";
+                description.append("Unknown");
                 break;
         }
 
         if (baseType != null) {
-            description += " of " + baseType.getDescription();
+            description.append(" of " + baseType.getDescription());
         }
 
         log.trace("getDescription(): finish");
-        return description;
+        return description.toString();
     }
 
     /**
@@ -697,17 +737,17 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             return baseType.isUnsigned();
         else {
             if (isCompound()) {
-                if ((compoundMemberTypes != null) && (compoundMemberTypes.size() > 0)) {
-                    boolean all_members_unsigned = true;
+                if ((compoundMemberTypes != null) && !compoundMemberTypes.isEmpty()) {
+                    boolean allMembersUnsigned = true;
 
-                    Iterator<Datatype> cmpd_type_list_it = compoundMemberTypes.iterator();
-                    while (cmpd_type_list_it.hasNext()) {
-                        Datatype next = cmpd_type_list_it.next();
+                    Iterator<Datatype> cmpdTypeListIT = compoundMemberTypes.iterator();
+                    while (cmpdTypeListIT.hasNext()) {
+                        Datatype next = cmpdTypeListIT.next();
 
-                        all_members_unsigned = all_members_unsigned && next.isUnsigned();
+                        allMembersUnsigned = allMembersUnsigned && next.isUnsigned();
                     }
 
-                    return all_members_unsigned;
+                    return allMembersUnsigned;
                 }
                 else {
                     log.debug("isUnsigned(): compoundMemberTypes is null");
@@ -746,7 +786,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return true if the datatype is variable-length string; false otherwise
      */
     public boolean isVarStr() {
-        return is_variable_str;
+        return isVariableStr;
     }
 
     /**
@@ -755,7 +795,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return true if the datatype is variable-length; false otherwise
      */
     public boolean isVLEN() {
-        return is_VLEN;
+        return isVLEN;
     }
 
     /**

@@ -35,14 +35,13 @@ public class NC2Datatype extends Datatype {
      * following list a few example of how to create a Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * NC2Datatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE,
-     * SIGN_NONE);</li>
+     * NC2Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);</li>
      * <li>to create 16-bit signed integer with big endian<br>
-     * NC2Datatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);</li>
+     * NC2Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);</li>
      * <li>to create native float<br>
-     * NC2Datatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);</li>
+     * NC2Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);</li>
      * <li>to create 64-bit double<br>
-     * NC2Datatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);</li>
+     * NC2Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);</li>
      * </ol>
      *
      * @param tclass
@@ -54,7 +53,7 @@ public class NC2Datatype extends Datatype {
      * @param tsign
      *            the sign of the datatype.
      */
-    public NC2Datatype(int tclass, int tsize, int torder, int tsign) {
+    public NC2Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         super(tclass, tsize, torder, tsign);
         datatypeDescription = getDescription();
     }
@@ -65,7 +64,7 @@ public class NC2Datatype extends Datatype {
      * @param theType
      *            the netcdf native datatype.
      */
-    public NC2Datatype(DataType theType) {
+    public NC2Datatype(DataType theType) throws Exception {
         super(-1);
         nativeType = theType;
         fromNative(0);

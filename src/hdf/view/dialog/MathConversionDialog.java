@@ -50,7 +50,9 @@ public class MathConversionDialog extends Dialog {
 
     private Font        curFont;
 
-    private Text        aField, bField;
+    private Text        aField;
+
+    private Text        bField;
 
     private Text        infoArea;
 
@@ -91,7 +93,7 @@ public class MathConversionDialog extends Dialog {
         NT = ' ';
 
         String cName = data.getClass().getName();
-        int cIndex = cName.lastIndexOf("[");
+        int cIndex = cName.lastIndexOf('[');
         if (cIndex >= 0) {
             NT = cName.charAt(cIndex + 1);
         }
@@ -146,6 +148,7 @@ public class MathConversionDialog extends Dialog {
         functionListData.minimumWidth = 350;
         functionList.setLayoutData(functionListData);
         functionList.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 int index = functionList.getSelectionIndex();
                 infoArea.setText(functionDescription[index]);
@@ -209,6 +212,7 @@ public class MathConversionDialog extends Dialog {
         okButton.setText("   &OK   ");
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 isConverted = convertData();
 
@@ -221,6 +225,7 @@ public class MathConversionDialog extends Dialog {
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 isConverted = false;
 
@@ -231,6 +236,7 @@ public class MathConversionDialog extends Dialog {
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
+            @Override
             public void widgetDisposed(DisposeEvent e) {
                 if (curFont != null) curFont.dispose();
             }
@@ -295,7 +301,7 @@ public class MathConversionDialog extends Dialog {
                     }
 
                     bdata[i] = (byte) value;
-                } // for (int i=0; i<n; i++)
+                }
                 break;
             case 'S':
                 short[] sdata = (short[]) dataValue;
@@ -308,7 +314,7 @@ public class MathConversionDialog extends Dialog {
                     }
 
                     sdata[i] = (short) value;
-                } // for (int i=0; i<n; i++)
+                }
                 break;
             case 'I':
                 int[] idata = (int[]) dataValue;
@@ -321,7 +327,7 @@ public class MathConversionDialog extends Dialog {
                     }
 
                     idata[i] = (int) value;
-                } // for (int i=0; i<n; i++)
+                }
                 break;
             case 'J':
                 long[] ldata = (long[]) dataValue;
@@ -334,7 +340,7 @@ public class MathConversionDialog extends Dialog {
                     }
 
                     ldata[i] = (long) value;
-                } // for (int i=0; i<n; i++)
+                }
                 break;
             case 'F':
                 float[] fdata = (float[]) dataValue;
@@ -348,7 +354,7 @@ public class MathConversionDialog extends Dialog {
                     }
 
                     fdata[i] = (float) value;
-                } // for (int i=0; i<n; i++)
+                }
                 break;
             case 'D':
                 double[] ddata = (double[]) dataValue;
@@ -362,7 +368,7 @@ public class MathConversionDialog extends Dialog {
                     }
 
                     ddata[i] = value;
-                } // for (int i=0; i<n; i++)
+                }
                 break;
             default:
                 break;
@@ -411,7 +417,6 @@ public class MathConversionDialog extends Dialog {
                 y = Math.tan(x);
                 break;
             default:
-                y = x;
                 break;
         }
 

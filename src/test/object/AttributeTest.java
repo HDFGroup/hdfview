@@ -29,7 +29,7 @@ import hdf.object.h5.H5Group;
  *
  */
 public class AttributeTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AttributeTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AttributeTest.class);
     private static final H5File H5FILE = new H5File();
 
     private H5File testFile = null;
@@ -42,7 +42,7 @@ public class AttributeTest {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
-                System.out.println("AttributTest BeforeClass: Number of IDs still open: " + openID);
+                System.out.println("AttributeTest BeforeClass: Number of IDs still open: " + openID);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -61,7 +61,7 @@ public class AttributeTest {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
-                System.out.println("AttributTest AfterClass: Number of IDs still open: " + openID);
+                System.out.println("AttributeTest AfterClass: Number of IDs still open: " + openID);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -128,7 +128,15 @@ public class AttributeTest {
         long[] attrDims = { 1 };
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
-        Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+
+        Datatype attrType = null;
+        try {
+            attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            fail("new H5Datatype failed. " + ex);
+        }
+
         Attribute attr = new Attribute(null, attrName, attrType, attrDims);
         attr.setData(classValue);
         assertNotNull(attr);
@@ -159,7 +167,15 @@ public class AttributeTest {
         long[] attrDims = { 1 };
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
-        Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+
+        Datatype attrType = null;
+        try {
+            attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            fail("new H5Datatype failed. " + ex);
+        }
+
         Attribute attr = new Attribute(null, attrName, attrType, attrDims, classValue);
         assertNotNull(attr);
         assertEquals(classValue[0], attr.toString("|"));
@@ -376,7 +392,7 @@ public class AttributeTest {
     public void testGetType() {
         log.debug("testGetType");
         assertTrue(strAttr.getDatatype().getDescription()
-                .equals("String, length = 20, string padding = H5T_STR_NULLTERM"));
+                .equals("String, length = 20, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII"));
         assertTrue(arrayIntAttr.getDatatype().getDescription().equals("32-bit integer"));
         long nObjs = 0;
         try {

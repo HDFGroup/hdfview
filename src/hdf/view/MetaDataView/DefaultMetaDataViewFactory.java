@@ -35,7 +35,7 @@ import hdf.view.DataView.DataViewManager;
  */
 public class DefaultMetaDataViewFactory extends MetaDataViewFactory {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataViewFactory.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataViewFactory.class);
 
     @Override
     public MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj) throws ClassNotFoundException {

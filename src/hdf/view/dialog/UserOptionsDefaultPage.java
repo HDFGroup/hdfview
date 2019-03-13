@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Shell;
  */
 public abstract class UserOptionsDefaultPage extends PreferencePage {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDefaultPage.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDefaultPage.class);
 
     protected Shell                 shell;
 

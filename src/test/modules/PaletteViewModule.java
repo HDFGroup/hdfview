@@ -20,12 +20,11 @@ import hdf.view.PaletteView.PaletteView;
 public class PaletteViewModule implements PaletteView {
 
     public PaletteViewModule() {
-        // TODO Auto-generated constructor stub
+
     }
 
     @Override
     public HObject getDataObject() {
-        // TODO Auto-generated method stub
         return null;
     }
 

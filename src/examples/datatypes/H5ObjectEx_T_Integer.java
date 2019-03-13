@@ -34,7 +34,7 @@ public class H5ObjectEx_T_Integer {
         long dataset_id = -1;
         long[] dims = { DIM0, DIM1 };
         int[][] dset_data = new int[DIM0][DIM1];
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 8, Datatype.ORDER_BE, -1);
+        H5Datatype typeInt = null;
 
         // Initialize data.
         for (int indx = 0; indx < DIM0; indx++)
@@ -46,6 +46,14 @@ public class H5ObjectEx_T_Integer {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the base datatype.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 8, Datatype.ORDER_BE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

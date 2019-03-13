@@ -12,7 +12,6 @@
 
 package examples.datatypes;
 
-import java.util.Arrays;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
@@ -132,7 +131,7 @@ public class H5ObjectEx_T_CompoundAttribute {
         long[] dims = { DIM0 };
         Sensor[] object_data = new Sensor[DIM0];
         byte[] dset_data = null;
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, -1);
+        H5Datatype typeInt = null;
 
         // Initialize data.
         object_data[0] = new Sensor(1153, new String("Exterior (static)"), 53.23, 24.57);
@@ -144,6 +143,14 @@ public class H5ObjectEx_T_CompoundAttribute {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create integer datatype
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -34,7 +34,7 @@ import hdf.view.DataView.DataViewManager;
 
 public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultLinkMetaDataView.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultLinkMetaDataView.class);
 
     public DefaultLinkMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
@@ -113,19 +113,21 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
             return;
         }
 
-        if (linkTargetName != null) linkTargetName = linkTargetName.trim();
+        if (linkTargetName != null)
+            linkTargetName = linkTargetName.trim();
 
         int linkType = Group.LINK_TYPE_SOFT;
         if (dataObject.getLinkTargetObjName().contains(FileFormat.FILE_OBJ_SEP))
             linkType = Group.LINK_TYPE_EXTERNAL;
-        else if (linkTargetName.equals("/")) { // do not allow to link to the root
+        else if ((linkTargetName != null) && (linkTargetName.equals("/"))) { // do not allow to link to the root
             display.beep();
             Tools.showError(display.getShells()[0], "Select", "Link to root not allowed.\nLink target change failed.");
             return;
         }
 
         // no change
-        if (linkTargetName.equals(dataObject.getLinkTargetObjName())) return;
+        if ((linkTargetName != null) && (linkTargetName.equals(dataObject.getLinkTargetObjName())))
+            return;
 
         // invalid name
         if (linkTargetName == null || linkTargetName.length() < 1) return;

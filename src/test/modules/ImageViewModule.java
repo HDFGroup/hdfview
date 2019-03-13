@@ -23,66 +23,56 @@ import hdf.view.ImageView.ImageView;
 public class ImageViewModule implements ImageView {
 
     public ImageViewModule() {
-        // TODO Auto-generated constructor stub
+
     }
 
     @Override
     public HObject getDataObject() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Rectangle getSelectedArea() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean isTrueColor() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean isPlaneInterlace() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public Object getSelectedData() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Image getImage() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void setImage(Image img) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public byte[][] getPalette() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void setPalette(byte[][] palette) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public byte[] getImageByteData() {
-        // TODO Auto-generated method stub
         return null;
     }
 

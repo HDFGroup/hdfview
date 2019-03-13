@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -115,7 +114,7 @@ import hdf.view.dialog.NewLinkDialog;
  */
 public class DefaultTreeView implements TreeView {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
 
     private Shell                         shell;
 
@@ -149,13 +148,13 @@ public class DefaultTreeView implements TreeView {
     /** Maintains a list of TreeItems in the tree in breadth-first order
      * to prevent many calls of getAllItemsBreadthFirst.
      */
-    //private ArrayList<TreeItem>           breadthFirstItems = null;
+    //private ArrayList<TreeItem>         breadthFirstItems = null;
 
     /** A list of currently open files */
-    private final List<FileFormat>        fileList = new Vector<>();
+    private final List<FileFormat>        fileList = new ArrayList<>();
 
     /** A list of editing GUI components */
-    private List<MenuItem>                editGUIs = new Vector<>();
+    private List<MenuItem>                editGUIs = new ArrayList<>();
 
     /**
      * The popup menu used to display user choice of actions on data object.
@@ -287,7 +286,8 @@ public class DefaultTreeView implements TreeView {
         tree.addListener(SWT.Traverse, new Listener() {
             @Override
             public void handleEvent(Event event) {
-                if(!(event.detail == SWT.TRAVERSE_RETURN)) return;
+                if (event.detail != SWT.TRAVERSE_RETURN)
+                    return;
 
                 TreeItem item = selectedItem;
                 if(item == null) return;
@@ -315,10 +315,9 @@ public class DefaultTreeView implements TreeView {
                         loadDataThread = new LoadDataThread();
                         loadDataThread.start();
                     }
-                    catch (Throwable err) {
+                    catch (Exception err) {
                         shell.getDisplay().beep();
                         Tools.showError(shell, "Select", err.getMessage());
-                        return;
                     }
                 }
             }
@@ -382,7 +381,7 @@ public class DefaultTreeView implements TreeView {
                     return;
                 }
 
-                if(theItem.equals(selectedItem)) return;
+                if (theItem.equals(selectedItem)) return;
 
                 FileFormat theFile = null;
 
@@ -392,7 +391,7 @@ public class DefaultTreeView implements TreeView {
                     selectedObject = (HObject) selectedItem.getData();
                 }
                 catch(NullPointerException ex) {
-                    ((HDFView) viewer).showStatus("Object " + selectedItem.getText() + " had no associated data.");
+                    viewer.showError("Object " + selectedItem.getText() + " had no associated data.");
                     return;
                 }
 
@@ -400,7 +399,7 @@ public class DefaultTreeView implements TreeView {
                     theFile = selectedObject.getFileFormat();
                 }
                 catch(NullPointerException ex) {
-                    ((HDFView) viewer).showStatus("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
+                    viewer.showError("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
                     return;
                 }
 
@@ -444,7 +443,7 @@ public class DefaultTreeView implements TreeView {
                     selectedObject = (HObject) selectedItem.getData();
                 }
                 catch(NullPointerException ex) {
-                    ((HDFView) viewer).showStatus("Object " + selectedItem.getText() + " had no associated data.");
+                    viewer.showError("Object " + selectedItem.getText() + " had no associated data.");
                     return;
                 }
 
@@ -452,7 +451,7 @@ public class DefaultTreeView implements TreeView {
                     theFile = selectedObject.getFileFormat();
                 }
                 catch(NullPointerException ex) {
-                    ((HDFView) viewer).showStatus("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
+                    viewer.showError("Error retrieving FileFormat of HObject " + selectedObject.getName() + ".");
                     return;
                 }
 
@@ -561,10 +560,9 @@ public class DefaultTreeView implements TreeView {
                     loadDataThread = new LoadDataThread();
                     loadDataThread.start();
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "Open", err.getMessage());
-                    return;
                 }
             }
         });
@@ -580,11 +578,10 @@ public class DefaultTreeView implements TreeView {
                     loadDataThread = new LoadDataThread();
                     loadDataThread.start();
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     shell.getDisplay().beep();
                     err.printStackTrace();
                     Tools.showError(shell, "Open", err.getMessage());
-                    return;
                 }
             }
         });
@@ -711,7 +708,7 @@ public class DefaultTreeView implements TreeView {
 
                 DefaultFileFilter filter = null;
 
-                if(filetype == FileFormat.FILE_TYPE_HDF4) {
+                if (filetype.equals(FileFormat.FILE_TYPE_HDF4)) {
                     fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
                     filter = DefaultFileFilter.getFileFilterHDF4();
                 } else {
@@ -743,8 +740,8 @@ public class DefaultTreeView implements TreeView {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "Save", ex.getMessage() + "\n" + filename);
                 }
-
-                pasteObject(selectedItems, findTreeItem(dstFile.getRootObject()), dstFile);
+                if (dstFile != null)
+                    pasteObject(selectedItems, findTreeItem(dstFile.getRootObject()), dstFile);
             }
         });
 
@@ -1211,7 +1208,6 @@ public class DefaultTreeView implements TreeView {
         catch (Exception ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Create", ex.getMessage());
-            return;
         }
     }
 
@@ -1277,7 +1273,7 @@ public class DefaultTreeView implements TreeView {
 
     /** Copy selected objects */
     private void copyObject() {
-        if (moveFlag == true) {
+        if (moveFlag) {
             if(!Tools.showConfirm(shell, "Copy object", "Do you want to copy all the selected object(s) instead of move?"))
                 return;
         }
@@ -1288,7 +1284,7 @@ public class DefaultTreeView implements TreeView {
 
     /** Delete selected objects */
     private void cutObject() {
-        if (moveFlag == true) {
+        if (moveFlag) {
             if(!Tools.showConfirm(shell, "Delete object", "Do you want to delete all the selected object(s) instead of move?"))
                 return;
         }
@@ -1302,7 +1298,7 @@ public class DefaultTreeView implements TreeView {
     private void pasteObject() {
         log.trace("pasteObject(): start");
 
-        if (moveFlag == true) {
+        if (moveFlag) {
             HObject theObj = null;
             for (int i = 0; i < currentSelectionsForMove.length; i++) {
                 TreeItem currentItem = currentSelectionsForMove[i];
@@ -1352,7 +1348,7 @@ public class DefaultTreeView implements TreeView {
             return;
         }
 
-        if (moveFlag == true) {
+        if (moveFlag) {
             if (srcFile != dstFile) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Move", "Cannot move the selected object to different file");
@@ -1371,7 +1367,7 @@ public class DefaultTreeView implements TreeView {
         Group pgroup = (Group) pitem.getData();
         String fullPath = pgroup.getPath() + pgroup.getName();
         if (pgroup.isRoot()) {
-            fullPath = HObject.separator;
+            fullPath = HObject.SEPARATOR;
         }
 
         String msg = "";
@@ -1382,7 +1378,7 @@ public class DefaultTreeView implements TreeView {
         msg += "Do you want to copy the selected object(s) to \nGroup: " + fullPath + "\nFile: "
                 + dstFile.getFilePath();
 
-        if (moveFlag == true) {
+        if (moveFlag) {
             String moveMsg = "Do you want to move the selected object(s) to \nGroup: " + fullPath + "\nFile: "
                     + dstFile.getFilePath();
             if(!Tools.showConfirm(shell, "Move Object", moveMsg))
@@ -1395,7 +1391,7 @@ public class DefaultTreeView implements TreeView {
 
         pasteObject(objectsToCopy, pitem, dstFile);
 
-        if (moveFlag == true) {
+        if (moveFlag) {
             removeSelectedObjects();
             moveFlag = false;
             currentSelectionsForMove = null;
@@ -1455,7 +1451,7 @@ public class DefaultTreeView implements TreeView {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Paste", ex.getMessage());
             }
-        } // for (int i = 0; i < objList.length; i++)
+        } // (int i = 0; i < objList.length; i++)
 
         log.trace("pasteObject(...): finish");
     }
@@ -1464,7 +1460,7 @@ public class DefaultTreeView implements TreeView {
      * Rename the currently selected object.
      */
     private void renameObject() {
-        if (moveFlag == true) {
+        if (moveFlag) {
             if(!Tools.showConfirm(shell,  "Rename object", "Do you want to rename all the selected object(s) instead of move?"))
                 return;
         }
@@ -1519,13 +1515,13 @@ public class DefaultTreeView implements TreeView {
 
         TreeItem[] currentSelections = tree.getSelection();
 
-        if (moveFlag == true) {
+        if (moveFlag) {
             currentSelections = currentSelectionsForMove;
         }
         if ((currentSelections == null) || (currentSelections.length <= 0)) {
             return;
         }
-        if (moveFlag != true) {
+        if (!moveFlag) {
             if(!Tools.showConfirm(shell, "Remove object", "Do you want to remove all the selected object(s) ?"))
                 return;
         }
@@ -1542,7 +1538,7 @@ public class DefaultTreeView implements TreeView {
                 return;
             }
 
-            if (moveFlag != true) {
+            if (!moveFlag) {
                 if (isObjectOpen(theObj)) {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "Delete Objects", "Cannot delete the selected object: " + theObj
@@ -1573,7 +1569,7 @@ public class DefaultTreeView implements TreeView {
             }
 
             currentItem.dispose();
-        } // for (int i=0; i < currentSelections.length; i++) {
+        } // (int i=0; i < currentSelections.length; i++)
     }
 
     /**
@@ -1588,7 +1584,14 @@ public class DefaultTreeView implements TreeView {
     private TreeItem populateTree(FileFormat theFile) {
         log.trace("populateTree(): start");
 
-        if (theFile == null || theFile.getFID() < 0 || theFile.getRootObject() == null) {
+        if (theFile == null) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Open File", "Error opening file");
+            log.debug("Error populating tree, File root object was null.");
+            log.trace("populateTree(): exit");
+            return null;
+        }
+        else if ((theFile.getFID() < 0) || (theFile.getRootObject() == null)) {
             //TODO: Update FitsFile and NC2File to have a fid other than -1
             // so this check isn't needed
             if ((theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) ||
@@ -1596,7 +1599,7 @@ public class DefaultTreeView implements TreeView {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Open File", "Error opening file " + theFile.getName());
                 log.debug("Error populating tree for {}, File ID was wrong or File root object was null.", theFile.getFilePath());
-                log.trace("populateTree(): finish");
+                log.trace("populateTree(): exit");
                 return null;
             }
         }
@@ -1605,18 +1608,19 @@ public class DefaultTreeView implements TreeView {
 
         try {
             rootItem = insertObject(theFile.getRootObject(), null);
+            if (rootItem != null) {
+                Iterator<HObject> it = ((Group) rootItem.getData()).getMemberList().iterator();
+                while (it.hasNext()) {
+                    TreeItem newItem = null;
+                    HObject obj = it.next();
 
-            Iterator<HObject> it = ((Group) rootItem.getData()).getMemberList().iterator();
-            while(it.hasNext()) {
-                TreeItem newItem = null;
-                HObject obj = it.next();
+                    newItem = insertObject(obj, rootItem);
 
-                newItem = insertObject(obj, rootItem);
-
-                // Tell SWT how many members this group has so they can
-                // be populated when the group is expanded
-                if(obj instanceof Group)
-                    newItem.setItemCount(((Group) obj).getMemberList().size());
+                    // Tell SWT how many members this group has so they can
+                    // be populated when the group is expanded
+                    if (obj instanceof Group)
+                        newItem.setItemCount(((Group) obj).getMemberList().size());
+                }
             }
         }
         catch (Exception ex) {
@@ -1794,14 +1798,14 @@ public class DefaultTreeView implements TreeView {
         if (obj instanceof Group) {
             Group g = (Group) obj;
             List<?> members = g.getMemberList();
-            if ((members == null) || (members.size() == 0)) {
-                isOpen = false;
+            if ((members == null) || members.isEmpty()) {
+                return false;
             }
             else {
                 int n = members.size();
                 for (int i = 0; i < n; i++) {
                     HObject theObj = (HObject) members.get(i);
-                    isOpen = (((HDFView) viewer).getDataView(theObj) != null);
+                    isOpen = (viewer.getDataView(theObj) != null);
                     if (isOpen) {
                         break;
                     }
@@ -1809,7 +1813,7 @@ public class DefaultTreeView implements TreeView {
             }
         }
         else {
-            return !(((HDFView) viewer).getDataView(obj) == null);
+            return (viewer.getDataView(obj) != null);
         }
 
         return isOpen;
@@ -1865,7 +1869,7 @@ public class DefaultTreeView implements TreeView {
 
         log.trace("breadthFirstUserObjects(): start");
 
-        Vector<Object> list = new Vector<>();
+        ArrayList<Object> list = new ArrayList<>();
         list.add(item.getData()); // Add this item to the list first
 
         Iterator<TreeItem> it = getItemsBreadthFirst(item).iterator();
@@ -1892,7 +1896,10 @@ public class DefaultTreeView implements TreeView {
         if (objName == null || objName.length() <= 0 || parentItem == null) return null;
 
         HObject retObj = null;
-        boolean isFound = false, isPrefix = false, isSuffix = false, isContain = false;
+        boolean isFound = false;
+        boolean isPrefix = false;
+        boolean isSuffix = false;
+        boolean isContain = false;
 
         if (objName.equals("*")) return null;
 
@@ -2002,68 +2009,43 @@ public class DefaultTreeView implements TreeView {
         int length = 0;
         int bsize = 512;
         byte[] buffer;
-        BufferedInputStream bi = null;
-        BufferedOutputStream bo = null;
 
-        try {
-            bi = new BufferedInputStream(new FileInputStream(srcFile.getFilePath()));
+        try (BufferedInputStream bi = new BufferedInputStream(new FileInputStream(srcFile.getFilePath()))) {
+            try (BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(filename))) {
+                buffer = new byte[bsize];
+                try {
+                    length = bi.read(buffer, 0, bsize);
+                }
+                catch (Exception ex) {
+                    length = 0;
+                }
+                while (length > 0) {
+                    try {
+                        bo.write(buffer, 0, length);
+                        length = bi.read(buffer, 0, bsize);
+                    }
+                    catch (Exception ex) {
+                        length = 0;
+                    }
+                }
+
+                try {
+                    bo.flush();
+                }
+                catch (Exception ex) {
+                    log.debug("Output file:", ex);
+                }
+            }
+            catch (Exception ex) {
+                shell.getDisplay().beep();
+                Tools.showError(shell, "Save", ex.getMessage());
+                return;
+            }
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Save", ex.getMessage() + "\n" + filename);
             return;
-        }
-
-        try {
-            bo = new BufferedOutputStream(new FileOutputStream(filename));
-        }
-        catch (Exception ex) {
-            try {
-                bi.close();
-            }
-            catch (Exception ex2) {
-                log.debug("Output file force input close:", ex2);
-            }
-
-            shell.getDisplay().beep();
-            Tools.showError(shell, "Save", ex.getMessage());
-            return;
-        }
-
-        buffer = new byte[bsize];
-        try {
-            length = bi.read(buffer, 0, bsize);
-        }
-        catch (Exception ex) {
-            length = 0;
-        }
-        while (length > 0) {
-            try {
-                bo.write(buffer, 0, length);
-                length = bi.read(buffer, 0, bsize);
-            }
-            catch (Exception ex) {
-                length = 0;
-            }
-        }
-
-        try {
-            bo.flush();
-        }
-        catch (Exception ex) {
-            log.debug("Output file:", ex);
-        }
-        try {
-            bi.close();
-        }
-        catch (Exception ex) {
-            log.debug("Input file:", ex);
-        }
-        try {
-            bo.close();
-        }
-        catch (Exception ex) {
-            log.debug("Output file:", ex);
         }
 
         try {
@@ -2129,7 +2111,7 @@ public class DefaultTreeView implements TreeView {
 
         TreeItem rootItem = findTreeItem(root);
         int n = rootItem.getItemCount();
-        Vector<TreeItem> objList = new Vector<>(n);
+        ArrayList<TreeItem> objList = new ArrayList<>(n);
 
         try {
             for (int i = 0; i < n; i++) objList.add(rootItem.getItem(i));
@@ -2153,7 +2135,7 @@ public class DefaultTreeView implements TreeView {
         HObject pitem = newFile.getRootObject();
 
         pasteObject(objList.toArray(new TreeItem[0]), findTreeItem(pitem), newFile);
-        objList.setSize(0);
+        objList.clear();
 
         Group srcGroup = (Group) root;
         Group dstGroup = (Group) newFile.getRootObject();
@@ -2235,10 +2217,10 @@ public class DefaultTreeView implements TreeView {
         if(filename == null) return;
 
         // Check if the file is in use
-        List<?> fileList = viewer.getTreeView().getCurrentFiles();
-        if (fileList != null) {
+        List<?> saveFileList = viewer.getTreeView().getCurrentFiles();
+        if (saveFileList != null) {
             FileFormat theFile = null;
-            Iterator<?> iterator = fileList.iterator();
+            Iterator<?> iterator = saveFileList.iterator();
             while (iterator.hasNext()) {
                 theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(filename)) {
@@ -2272,7 +2254,7 @@ public class DefaultTreeView implements TreeView {
             Tools.showError(shell, "Save", ex.getMessage());
         }
 
-        ((HDFView) viewer).showStatus("Data saved to: " + filename);
+        viewer.showStatus("Data saved to: " + filename);
     }
 
     /** enable/disable GUI components */
@@ -2312,12 +2294,11 @@ public class DefaultTreeView implements TreeView {
     public FileFormat openFile(String filename, int accessID) throws Exception {
         log.trace("openFile: {},{}", filename, accessID);
         FileFormat fileFormat = null;
-        TreeItem fileRoot = null;
         boolean isNewFile = (FileFormat.OPEN_NEW == (accessID & FileFormat.OPEN_NEW));
         if (isNewFile) accessID = accessID - FileFormat.OPEN_NEW;
 
         if (isFileOpen(filename)) {
-            ((HDFView) viewer).showStatus("File is in use.");
+            viewer.showStatus("File is in use.");
             return null;
         }
 
@@ -2346,10 +2327,9 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (UnsatisfiedLinkError e) {
                     log.debug("openFile({}): HDF4 library link error:", filename, e);
-                    ((HDFView) viewer).showStatus("Unable to open file '" + filename
-                            + "': HDF4 library linking error - see log for more info");
+                    viewer.showError("Unable to open file '" + filename + "': HDF4 library linking error");
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
                 }
                 continue;
@@ -2365,10 +2345,9 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (UnsatisfiedLinkError e) {
                     log.debug("openFile({}): HDF5 library link error:", filename, e);
-                    ((HDFView) viewer).showStatus("Unable to open file '" + filename
-                            + "': HDF5 library linking error - see log for more info");
+                    viewer.showError("Unable to open file '" + filename + "': HDF5 library linking error");
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
                 }
                 continue;
@@ -2382,7 +2361,7 @@ public class DefaultTreeView implements TreeView {
                         break;
                     }
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
                 }
             }
@@ -2395,34 +2374,23 @@ public class DefaultTreeView implements TreeView {
             fileFormat.setIndexOrder(fileFormat.getIndexOrder(ViewProperties.getIndexOrder()));
         }
 
-        return openFile(fileFormat, accessID);
+        return initFile(fileFormat);
     }
 
     /**
-     * Opens a file with an existing FileFormat instance and retrieves the file structure of the file.
-     * It also can be used to create a new file by setting the accessID to FileFormat.CREATE.
+     * Initializes a FileFormat object by opening it and populating the file tree structure.
      *
-     * <p>
-     * Subclasses must implement this function to take appropriate steps to open a file.
-     * </p>
-     *
-     * @param fileformat
+     * @param fileFormat
      *            the file to open with an existing FileFormat instance.
-     * @param accessID
-     *            identifier for the file access. Valid value of accessID is:
-     *            <ul>
-     *            <li>FileFormat.READ --- allow read-only access to file.</li>
-     *            <li>FileFormat.WRITE --- allow read and write access to file.</li>
-     *            <li>FileFormat.CREATE --- create a new file.</li>
-     *            </ul>
      *
-     * @return the updated FileFormat of this file if successful; otherwise returns null.
+     * @return the initialized FileFormat of this file if successful; otherwise returns null.
      *
      * @throws Exception
      *             if a failure occurred
      */
-    public FileFormat openFile(FileFormat fileFormat, int accessID) throws Exception {
-        log.trace("openFile[format]: {},{}", fileFormat.getAbsolutePath(), accessID);
+    private FileFormat initFile(FileFormat fileFormat) throws Exception {
+        log.trace("initFile[{}] - start", fileFormat.getAbsolutePath());
+
         TreeItem fileRoot = null;
 
         shell.setCursor(Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT));
@@ -2432,19 +2400,7 @@ public class DefaultTreeView implements TreeView {
             fileFormat.setStartMembers(ViewProperties.getStartMembers());
 
             fileFormat.open();
-        }
-        catch (Exception ex) {
-            log.debug("openFile: FileFormat init and open error:", ex);
-            fileFormat = null;
-        }
-        finally {
-            shell.setCursor(null);
-        }
 
-        if (fileFormat == null) {
-            throw new java.io.IOException("openFile: Failed to open file - " + fileFormat.getAbsolutePath());
-        }
-        else  {
             fileRoot = populateTree(fileFormat);
 
             if (fileRoot != null) {
@@ -2454,33 +2410,41 @@ public class DefaultTreeView implements TreeView {
                     tree.getItem(currentRowCount - 1).setExpanded(true);
                 }
 
-                // If this is the first file opened, initialize the breadth-first
-                // list of TreeItems
-                //if(breadthFirstItems == null)
-                //    breadthFirstItems = getItemsBreadthFirst(fileRoot);
-
                 fileList.add(fileFormat);
             }
 
             tree.setItemCount(fileList.size());
+
+            log.trace("initFile[{}] - fileList items={}", fileFormat.getAbsolutePath(), fileList.size());
         }
+        catch (Exception ex) {
+            log.debug("initFile: FileFormat init error:", ex);
+            fileFormat = null;
+        }
+        finally {
+            shell.setCursor(null);
+        }
+
+        log.trace("initFile - finish");
 
         return fileFormat;
     }
 
     @Override
     public FileFormat reopenFile(FileFormat fileFormat, int newFileAccessMode) throws Exception {
+        String fileFormatName = fileFormat.getAbsolutePath();
+
         closeFile(fileFormat);
         ((HDFView) viewer).showMetaData(null);
 
         if (newFileAccessMode < 0) {
             if (ViewProperties.isReadOnly())
-                return openFile(fileFormat, FileFormat.READ);
+                return openFile(fileFormatName, FileFormat.READ);
             else
-                return openFile(fileFormat, FileFormat.WRITE);
+                return openFile(fileFormatName, FileFormat.WRITE);
         }
         else
-            return openFile(fileFormat, newFileAccessMode);
+            return openFile(fileFormatName, newFileAccessMode);
     }
 
     /**
@@ -2524,8 +2488,6 @@ public class DefaultTreeView implements TreeView {
                 break;
             }
         }
-
-        //if(fileList.size() <= 0) breadthFirstItems = null;
     }
 
     /**
@@ -2577,16 +2539,16 @@ public class DefaultTreeView implements TreeView {
         TreeItem[] fileRoots = tree.getItems();
         TreeItem rootItem = null;
         HObject rootObject = null;
-        for(int i = 0; i < fileRoots.length; i++) {
+        for (int i = 0; i < fileRoots.length; i++) {
             rootItem = fileRoots[i];
             rootObject = (HObject) rootItem.getData();
 
             if (rootObject == null) continue;
 
-            if(rootObject.getFileFormat().equals(obj.getFileFormat())) {
+            if (rootObject.getFileFormat().equals(obj.getFileFormat())) {
                 // If the object being looked for is a file root, return
                 // this found TreeItem
-                if(obj instanceof Group && ((Group) obj).isRoot()) {
+                if (obj instanceof Group && ((Group) obj).isRoot()) {
                     return rootItem;
                 }
 
@@ -2604,7 +2566,7 @@ public class DefaultTreeView implements TreeView {
         if (breadthFirstItems != null) {
             Iterator<TreeItem> it = getItemsBreadthFirst(rootItem).iterator();
 
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 theItem = it.next();
                 theObj = (HObject) theItem.getData();
 
@@ -2612,7 +2574,7 @@ public class DefaultTreeView implements TreeView {
                     continue;
                 }
 
-                if(theObj.equals(obj)) {
+                if (theObj.equals(obj)) {
                     return theItem;
                 }
             }
@@ -2699,7 +2661,7 @@ public class DefaultTreeView implements TreeView {
         log.trace("isDefaultDisplay? {}", isDefaultDisplay);
 
         if (isDefaultDisplay) { /* Displaying a data object using the default display options */
-            DataView existingView = ((HDFView) viewer).getDataView((HObject) d);
+            DataView existingView = viewer.getDataView((HObject) d);
 
             /*
              * Check to make sure this data object isn't already opened in an existing
@@ -2764,7 +2726,7 @@ public class DefaultTreeView implements TreeView {
             }
             catch (Exception ex) {
                 log.debug("showDataContent(): error occurred while instantiating ImageView factory class", ex);
-                viewer.showStatus("Error occurred while instantiating ImageView factory class - see log for more info");
+                viewer.showError("Error occurred while instantiating ImageView factory class");
                 return null;
             }
 
@@ -2778,13 +2740,13 @@ public class DefaultTreeView implements TreeView {
 
                 if (theView == null) {
                     log.debug("showDataContent(): error occurred while instantiating ImageView class");
-                    viewer.showStatus("Error occurred while instantiating ImageView class - see log for more info");
-                    Tools.showError(shell, "Show Data", "Error occurred while instantiating ImageView class - see log for more info");
+                    viewer.showError("Error occurred while instantiating ImageView class");
+                    Tools.showError(shell, "Show Data", "Error occurred while instantiating ImageView class");
                 }
             }
             catch (ClassNotFoundException ex) {
                 log.debug("showDataContent(): no suitable ImageView class found");
-                viewer.showStatus("Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
+                viewer.showError("Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
                 Tools.showError(shell, "Show Data", "Unable to find suitable ImageView class for object '" + dataObject.getName() + "'");
                 theView = null;
             }
@@ -2796,7 +2758,7 @@ public class DefaultTreeView implements TreeView {
             }
             catch (Exception ex) {
                 log.debug("showDataContent(): error occurred while instantiating TableView factory class", ex);
-                viewer.showStatus("Error occurred while instantiating TableView factory class - see log for more info");
+                viewer.showError("Error occurred while instantiating TableView factory class");
                 return null;
             }
 
@@ -2810,13 +2772,13 @@ public class DefaultTreeView implements TreeView {
 
                 if (theView == null) {
                     log.debug("showDataContent(): error occurred while instantiating TableView class");
-                    viewer.showStatus("Error occurred while instantiating TableView class - see log for more info");
-                    Tools.showError(shell, "Show Data", "Error occurred while instantiating TableView class - see log for more info");
+                    viewer.showError("Error occurred while instantiating TableView class");
+                    Tools.showError(shell, "Show Data", "Error occurred while instantiating TableView class");
                 }
             }
             catch (ClassNotFoundException ex) {
                 log.debug("showDataContent(): no suitable TableView class found");
-                viewer.showStatus("Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
+                viewer.showError("Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
                 Tools.showError(shell, "Show Data", "Unable to find suitable TableView class for object '" + dataObject.getName() + "'");
                 theView = null;
             }
@@ -2851,7 +2813,7 @@ public class DefaultTreeView implements TreeView {
         }
         catch (Exception ex) {
             log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
-            viewer.showStatus("Error occurred while instantiating MetaDataView factory class - see log for more info");
+            viewer.showError("Error occurred while instantiating MetaDataView factory class");
             return null;
         }
 
@@ -2867,13 +2829,13 @@ public class DefaultTreeView implements TreeView {
 
             if (theView == null) {
                 log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
-                viewer.showStatus("Error occurred while instantiating MetaDataView class - see log for more info");
+                viewer.showError("Error occurred while instantiating MetaDataView class");
                 return null;
             }
         }
         catch (ClassNotFoundException ex) {
             log.debug("showMetaData(): no suitable MetaDataView class found");
-            viewer.showStatus("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
+            viewer.showError("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
             return null;
         }
 
@@ -2909,27 +2871,28 @@ public class DefaultTreeView implements TreeView {
         if (theItem == null) {
             log.debug("updateItemIcon(): could not find TreeItem for HObject");
         }
-
-        if (obj instanceof Group && !(((Group) obj).isRoot())) {
-            if (theItem.getExpanded()) {
-                if (((MetaDataContainer) obj).hasAttribute()) {
-                    theItem.setImage(folderOpenIconA);
+        else {
+            if (obj instanceof Group && !(((Group) obj).isRoot())) {
+                if (theItem.getExpanded()) {
+                    if (((MetaDataContainer) obj).hasAttribute()) {
+                        theItem.setImage(folderOpenIconA);
+                    }
+                    else {
+                        theItem.setImage(folderOpenIcon);
+                    }
                 }
                 else {
-                    theItem.setImage(folderOpenIcon);
+                    if (((MetaDataContainer) obj).hasAttribute()) {
+                        theItem.setImage(folderCloseIconA);
+                    }
+                    else {
+                        theItem.setImage(folderCloseIcon);
+                    }
                 }
             }
             else {
-                if (((MetaDataContainer) obj).hasAttribute()) {
-                    theItem.setImage(folderCloseIconA);
-                }
-                else {
-                    theItem.setImage(folderCloseIcon);
-                }
+                theItem.setImage(getObjectTypeImage(obj));
             }
-        }
-        else {
-            theItem.setImage(getObjectTypeImage(obj));
         }
     }
 
@@ -2989,14 +2952,14 @@ public class DefaultTreeView implements TreeView {
 
         public void open() {
             Shell parent = getParent();
-            final Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-            shell.setFont(curFont);
-            shell.setText("Indexing options");
-            shell.setImage(ViewProperties.getHdfIcon());
-            shell.setLayout(new GridLayout(1, true));
+            final Shell openShell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+            openShell.setFont(curFont);
+            openShell.setText("Indexing options");
+            openShell.setImage(ViewProperties.getHdfIcon());
+            openShell.setLayout(new GridLayout(1, true));
 
             // Create main content region
-            Composite content = new Composite(shell, SWT.NONE);
+            Composite content = new Composite(openShell, SWT.NONE);
             content.setLayout(new GridLayout(1, true));
             content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -3044,7 +3007,7 @@ public class DefaultTreeView implements TreeView {
 
 
             // Create Ok/Cancel button region
-            Composite buttonComposite = new Composite(shell, SWT.NONE);
+            Composite buttonComposite = new Composite(openShell, SWT.NONE);
             buttonComposite.setLayout(new GridLayout(2, true));
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -3056,7 +3019,7 @@ public class DefaultTreeView implements TreeView {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
                     setIndexOptions();
-                    shell.dispose();
+                    openShell.dispose();
                 }
             });
 
@@ -3068,25 +3031,25 @@ public class DefaultTreeView implements TreeView {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
                     reloadFile = false;
-                    shell.dispose();
+                    openShell.dispose();
                 }
             });
 
-            shell.pack();
+            openShell.pack();
 
-            Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+            Point minimumSize = openShell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 
-            shell.setMinimumSize(minimumSize);
+            openShell.setMinimumSize(minimumSize);
 
             Rectangle parentBounds = parent.getBounds();
-            Point shellSize = shell.getSize();
-            shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+            Point shellSize = openShell.getSize();
+            openShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                     (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
-            shell.open();
+            openShell.open();
 
             Display display = parent.getDisplay();
-            while (!shell.isDisposed()) {
+            while (!openShell.isDisposed()) {
                 if (!display.readAndDispatch()) display.sleep();
             }
         }
@@ -3099,44 +3062,44 @@ public class DefaultTreeView implements TreeView {
 
         public void open() {
             Shell parent = getParent();
-            final Shell shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-            shell.setFont(curFont);
-            shell.setText("Set the library version bounds: ");
-            shell.setImage(ViewProperties.getHdfIcon());
-            shell.setLayout(new GridLayout(1, true));
+            final Shell openShell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+            openShell.setFont(curFont);
+            openShell.setText("Set the library version bounds: ");
+            openShell.setImage(ViewProperties.getHdfIcon());
+            openShell.setLayout(new GridLayout(1, true));
 
             String[] lowValues = { "Earliest", "V18", "V110", "Latest" };
             String[] highValues = { "V18", "V110", "Latest" };
 
             // Dummy label
-            new Label(shell, SWT.LEFT);
+            new Label(openShell, SWT.LEFT);
 
-            Label label = new Label(shell, SWT.LEFT);
+            Label label = new Label(openShell, SWT.LEFT);
             label.setFont(curFont);
             label.setText("Earliest Version: ");
 
-            final Combo earliestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+            final Combo earliestCombo = new Combo(openShell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
             earliestCombo.setFont(curFont);
             earliestCombo.setItems(lowValues);
             earliestCombo.select(0);
             earliestCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-            label = new Label(shell, SWT.LEFT);
+            label = new Label(openShell, SWT.LEFT);
             label.setFont(curFont);
             label.setText("Latest Version: ");
 
-            final Combo latestCombo = new Combo(shell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+            final Combo latestCombo = new Combo(openShell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
             latestCombo.setFont(curFont);
             latestCombo.setItems(highValues);
             latestCombo.select(0);
             latestCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             // Dummy label to consume remain space after resizing
-            new Label(shell, SWT.LEFT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            new Label(openShell, SWT.LEFT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 
             // Create Ok/Cancel button region
-            Composite buttonComposite = new Composite(shell, SWT.NONE);
+            Composite buttonComposite = new Composite(openShell, SWT.NONE);
             buttonComposite.setLayout(new GridLayout(2, true));
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -3150,13 +3113,13 @@ public class DefaultTreeView implements TreeView {
                     try {
                         selectedObject.getFileFormat().setLibBounds(earliestCombo.getItem(earliestCombo.getSelectionIndex()), latestCombo.getItem(latestCombo.getSelectionIndex()));
                     }
-                    catch (Throwable err) {
-                        shell.getDisplay().beep();
-                        Tools.showError(shell, "Version bounds", "Error when setting lib version bounds");
+                    catch (Exception err) {
+                        openShell.getDisplay().beep();
+                        Tools.showError(openShell, "Version bounds", "Error when setting lib version bounds");
                         return;
                     }
 
-                    shell.dispose();
+                    openShell.dispose();
 
                     ((HDFView) viewer).showMetaData(selectedObject);
                 }
@@ -3169,26 +3132,26 @@ public class DefaultTreeView implements TreeView {
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
-                    shell.dispose();
+                    openShell.dispose();
                 }
             });
 
-            shell.pack();
+            openShell.pack();
 
-            Point minimumSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+            Point minimumSize = openShell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 
-            shell.setMinimumSize(minimumSize);
-            shell.setSize(minimumSize.x + 50, minimumSize.y);
+            openShell.setMinimumSize(minimumSize);
+            openShell.setSize(minimumSize.x + 50, minimumSize.y);
 
             Rectangle parentBounds = parent.getBounds();
-            Point shellSize = shell.getSize();
-            shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+            Point shellSize = openShell.getSize();
+            openShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                     (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
-            shell.open();
+            openShell.open();
 
             Display display = parent.getDisplay();
-            while (!shell.isDisposed()) {
+            while (!openShell.isDisposed()) {
                 if (!display.readAndDispatch()) display.sleep();
             }
         }

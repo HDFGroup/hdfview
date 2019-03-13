@@ -102,8 +102,7 @@ public class H5ObjectEx_D_Sofloat {
         long[]  dims = { DIM_X, DIM_Y };
         long[]  chunk_dims = { CHUNK_X, CHUNK_Y };
         double[][] dset_data = new double[DIM_X][DIM_Y];
-        final H5Datatype typeFloat = new H5Datatype(Datatype.CLASS_FLOAT,
-                DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        H5Datatype typeFloat = null;
 
         //Initialize data.
         for (int indx = 0; indx < DIM_X; indx++)
@@ -132,6 +131,14 @@ public class H5ObjectEx_D_Sofloat {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create datatype.
+        try {
+            typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -40,7 +40,7 @@ public class H4Group extends Group
 {
     private static final long               serialVersionUID = 3785240955078867900L;
 
-    private final static org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4Group.class);
+    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4Group.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
@@ -52,7 +52,7 @@ public class H4Group extends Group
     private int                             nAttributes = -1;
 
     /** The default object ID for HDF4 objects */
-    private final static long[]             DEFAULT_OID = {0, 0};
+    private static final long[]             DEFAULT_OID = {0, 0};
 
     public H4Group(FileFormat theFile, String name, String path, Group parent)
     {
@@ -334,9 +334,9 @@ public class H4Group extends Group
             return null;
         }
 
-        String path = HObject.separator;
+        String path = HObject.SEPARATOR;
         if (!pgroup.isRoot()) {
-            path = pgroup.getPath()+pgroup.getName()+HObject.separator;
+            path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
         }
         long fileid = file.open();
         if (fileid < 0) {

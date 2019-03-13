@@ -46,7 +46,7 @@ public class FitsDataset extends ScalarDS
 {
     private static final long serialVersionUID = 3944770379558335171L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FitsDataset.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FitsDataset.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
@@ -68,7 +68,7 @@ public class FitsDataset extends ScalarDS
             BasicHDU hdu,
             String dName,
             long[] oid) {
-        super (fileFormat, dName, HObject.separator, oid);
+        super(fileFormat, dName, HObject.SEPARATOR, oid);
         unsignedConverted = false;
         nativeDataset = hdu;
     }
@@ -88,7 +88,7 @@ public class FitsDataset extends ScalarDS
     public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
             throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("copy operation unsupported for NetCDF.");
     }
 
     /*
@@ -98,7 +98,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public byte[] readBytes() throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("readBytes operation unsupported for NetCDF.");
     }
 
     /*
@@ -138,7 +138,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public void write(Object buf) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("write operation unsupported for NetCDF.");
     }
 
     /*
@@ -194,7 +194,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public void writeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("writeMetadata operation unsupported for NetCDF.");
     }
 
     /*
@@ -204,7 +204,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public void removeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("removeMetadata operation unsupported for NetCDF.");
     }
 
     /*
@@ -214,7 +214,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public void updateMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("updateMetadata operation unsupported for NetCDF.");
     }
 
     /*
@@ -229,7 +229,9 @@ public class FitsDataset extends ScalarDS
      * @see hdf.object.HObject#close(int)
      */
     @Override
-    public void close(long did) {}
+    public void close(long did) {
+        // Nothing to implement
+    }
 
     /*
      * (non-Javadoc)
@@ -370,8 +372,13 @@ public class FitsDataset extends ScalarDS
     @Override
     public Datatype getDatatype() {
         if (datatype == null) {
-            try {datatype = new FitsDatatype(nativeDataset.getBitPix());}
-            catch (Exception ex) {}
+            try {
+                datatype = new FitsDatatype(nativeDataset.getBitPix());
+            }
+            catch (Exception ex) {
+                log.debug("getDatatype(): failed to create datatype: ", ex);
+                datatype = null;
+            }
         }
 
         return datatype;

@@ -42,7 +42,7 @@ public class NC2Group extends Group {
     private List attributeList;
 
     /** The default object ID for HDF5 objects */
-    private final static long[] DEFAULT_OID = { 0 };
+    private static final long[] DEFAULT_OID = { 0 };
 
     /**
      * Constructs an HDF5 group with specific name, path, and parent.

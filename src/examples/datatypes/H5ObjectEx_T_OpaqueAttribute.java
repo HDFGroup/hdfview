@@ -38,7 +38,7 @@ public class H5ObjectEx_T_OpaqueAttribute {
         long[] dims = { DIM0 };
         byte[] dset_data = new byte[DIM0 * LEN];
         byte[] str_data = { 'O', 'P', 'A', 'Q', 'U', 'E' };
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, -1);
+        H5Datatype typeInt = null;
 
         // Initialize data.
         for (int indx = 0; indx < DIM0; indx++) {
@@ -51,6 +51,14 @@ public class H5ObjectEx_T_OpaqueAttribute {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the base datatype.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -40,7 +40,7 @@ import hdf.object.h5.H5Group;
  *
  */
 public class H5GroupTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5GroupTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5GroupTest.class);
     private static final H5File H5FILE = new H5File();
     private static final int NLOOPS = 5;
     private static final int TEST_VALUE_INT = Integer.MAX_VALUE;
@@ -101,9 +101,9 @@ public class H5GroupTest {
         testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
         assertNotNull(testFile);
 
-        typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, -1, -1);
-        typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, -1, -1);
-        typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, -1, -1);
+        typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
 
         testGroup = (H5Group) testFile.get(GNAME);
         assertNotNull(testGroup);
@@ -550,7 +550,7 @@ public class H5GroupTest {
                     fail("Out of memory");
                 }
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
@@ -626,7 +626,7 @@ public class H5GroupTest {
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
 
         // attache a new attribute
         attr = new Attribute(testGroup, "float attribute", typeFloat, new long[] { 1 },
@@ -705,7 +705,7 @@ public class H5GroupTest {
                     fail("Out of memory");
                 }
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
 
         // remove the new attribute
         try {
@@ -754,7 +754,7 @@ public class H5GroupTest {
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
             }
-        } // for (int i=0; i<n; i++) {
+        } //  (int i=0; i<n; i++) {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
