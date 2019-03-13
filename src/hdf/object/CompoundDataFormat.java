@@ -59,6 +59,13 @@ public interface CompoundDataFormat extends DataFormat {
     public abstract String[] getMemberNames();
 
     /**
+     * Returns an array of the names of the selected compound members.
+     *
+     * @return an array of the names of the selected compound members.
+     */
+    public abstract String[] getSelectedMemberNames();
+
+    /**
      * Checks if a member of the compound data object is selected for read/write.
      *
      * @param idx

@@ -33,7 +33,7 @@ import java.util.Vector;
 public abstract class ScalarDS extends Dataset {
     private static final long serialVersionUID = 8925371455928203981L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDS.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDS.class);
 
     /************************************************************
      * The following constant strings are copied from           *
@@ -44,13 +44,13 @@ public abstract class ScalarDS extends Dataset {
     /**
      * Indicates that the pixel RGB values are contiguous.
      */
-    public final static int INTERLACE_PIXEL = 0;
+    public static final int INTERLACE_PIXEL = 0;
 
     /** Indicates that each pixel component of RGB is stored as a scan line. */
     public static final int INTERLACE_LINE = 1;
 
     /** Indicates that each pixel component of RGB is stored as a plane. */
-    public final static int INTERLACE_PLANE = 2;
+    public static final int INTERLACE_PLANE = 2;
 
     /**
      * The interlace mode of the stored raster image data. Valid values are INTERLACE_PIXEL, INTERLACE_LINE and
@@ -195,7 +195,6 @@ public abstract class ScalarDS extends Dataset {
                     isFillValueConverted = true;
                 }
             }
-
         }
 
         log.trace("convertFromUnsignedC(): finish");

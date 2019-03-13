@@ -155,7 +155,7 @@ public class DebugHDF {
         // String fname = "g:\\temp\\dset.h5";
         // new File(fname).delete(); // clean up existing file
         //
-        // for (int i=0; i<10; i++)
+        //  (int i=0; i<10; i++)
         // testCreateDS(fname, "dset"+i);
         //
         //        } catch (Exception ex) {ex.printStackTrace();}
@@ -185,10 +185,10 @@ public class DebugHDF {
 
         // create a ref dataset
         Group grp = file.createGroup("grp", null);
-        Dataset ds = file.createScalarDS("dset", grp, new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), dims, maxdims, null, 0, data);
+        Dataset ds = file.createScalarDS("dset", grp, new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), dims, maxdims, null, 0, data);
         ref_buf[0] = H5.H5Rcreate(file.getFID(), grp.getFullName(), HDF5Constants.H5R_OBJECT, -1);
         ref_buf[1] = H5.H5Rcreate(file.getFID(), ds.getFullName(), HDF5Constants.H5R_OBJECT, -1);
-        ds = file.createScalarDS(dname, null, new H5Datatype(Datatype.CLASS_REFERENCE, -1, -1, -1), new long[] {2}, null, null, 0, ref_buf);
+        ds = file.createScalarDS(dname, null, new H5Datatype(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), new long[] {2}, null, null, 0, ref_buf);
 
         // create ref attributes
         Datatype attr_dtype = file.createDatatype( Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
@@ -372,7 +372,7 @@ public class DebugHDF {
 
         H5File file = new H5File(fname, H5File.CREATE);
         file.open();
-        file.createScalarDS(dname, null, new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), dims, maxdims, null, 0, data);
+        file.createScalarDS(dname, null, new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), dims, maxdims, null, 0, data);
         file.close();
 
         // reopen the file
@@ -690,7 +690,7 @@ public class DebugHDF {
         long fid = -1, did = -1, sid = -1;
         float[] buf = new float[SIZE];
 
-        // for (int i = 0; i < buf.length; i++)
+        //  (int i = 0; i < buf.length; i++)
         // buf[i] = i;
         //
         // try {
@@ -1162,7 +1162,7 @@ public class DebugHDF {
         for (int i=0; i<nhex; i++)
             hex[i] = (short)(0x0f & (v << (i*16) ));
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i=nhex-1; i>=0; i--) {
             switch (hex[i]) {
                 case 0:  sb.append("0000"); break;
@@ -1431,7 +1431,7 @@ public class DebugHDF {
                 long msid = H5.H5Screate_simple(ds.getRank(), selectionCount, null);
                 long fsid = H5.H5Dget_space(did);
                 long[] lsize = { selectionCount[0] * (selectionCount.length > 1 ? selectionCount[1] : 1) };
-                Object theData = datatype.allocateArray((int) lsize[0]);
+                Object theData = H5Datatype.allocateArray(datatype, (int) lsize[0]);
                 H5.H5Sselect_hyperslab(fsid, HDF5Constants.H5S_SELECT_SET, selectionStart, selectionStride,
                         selectionCount, null);
                 H5.H5Dread(did, nativeDatatype, msid, fsid, HDF5Constants.H5P_DEFAULT, theData);
@@ -1659,7 +1659,7 @@ public class DebugHDF {
 
         for (int i = 0; i < ncols; i++) {
             memberNames[i] = "m"+i;
-            memberDatatypes[i] = new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, -1);
+            memberDatatypes[i] = new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
             memberRanks[i] = 1;
             memDims[i][0] = 1;
         }
@@ -1970,7 +1970,7 @@ public class DebugHDF {
      *    <li> long[] uint32 = {4294967295L, 2147483648L, 2147483647, 0};
      * </ul>
      */
-    public final static void testConvertFromUnsignedC() {
+    public static final void testConvertFromUnsignedC() {
         byte[] int8 = {-1, -128, 127, 0};
         short[] int16 = {-1, -32768, 32767, 0};
         int[] int32 = {-1, -2147483648, 2147483647, 0};
@@ -2159,7 +2159,7 @@ public class DebugHDF {
             strs[i] = "";
         }
         final int max_str_len = 120;
-        final Datatype strType = new H5Datatype(Datatype.CLASS_STRING, max_str_len, -1, -1);
+        final Datatype strType = new H5Datatype(Datatype.CLASS_STRING, max_str_len, Datatype.NATIVE, Datatype.NATIVE);
         final Datatype[]  mdtypes = {strType};
         final String[] mnames = {"strings"};
         final Vector comp_data = new Vector();
@@ -2181,7 +2181,7 @@ public class DebugHDF {
         file.open();
 
         final int max_str_len = 120;
-        final Datatype strType = new H5Datatype(Datatype.CLASS_STRING, max_str_len, -1, -1);
+        final Datatype strType = new H5Datatype(Datatype.CLASS_STRING, max_str_len, Datatype.NATIVE, Datatype.NATIVE);
 
         final int size = 10000;
         final long dims[] = {size};
@@ -3014,107 +3014,107 @@ public class DebugHDF {
                 "NA12891",
         "NA12892"};
         final Datatype[] memberDatatypes = {
-                new H5Datatype(Datatype.CLASS_STRING, 12, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 4, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 6, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 10, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 2, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 10, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 10, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 60, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 60, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 60, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 4, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1),
-                new H5Datatype(Datatype.CLASS_STRING, 3, -1, -1)};
+                new H5Datatype(Datatype.CLASS_STRING, 12, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 4, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 6, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 10, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 2, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 10, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 10, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 60, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 60, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 60, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 4, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_STRING, 3, Datatype.NATIVE, Datatype.NATIVE)};
 
         final int[] memberSizes = new int[101];
         for (int i=0; i<101; i++) {
@@ -3153,7 +3153,7 @@ public class DebugHDF {
         final long[] dims2D = {20, 10};
         Datatype dtype = testFile.createDatatype( Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
         Dataset dataset = testFile.createScalarDS ("i20x10", root, dtype, dims2D, null, null, 0, null);
-        dtype = testFile.createDatatype( Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
+        dtype = testFile.createDatatype( Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
         dataset = testFile.createScalarDS ("d20x10", root, dtype, dims2D, null, null, 0, null);
         testFile.close();
 
@@ -3198,7 +3198,7 @@ public class DebugHDF {
         final long[] dims2D = {20, 10};
         Datatype dtype = testFile.createDatatype( Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
         Dataset dataset = testFile.createScalarDS ("i20x10", root, dtype, dims2D, null, null, 0, null);
-        dtype = testFile.createDatatype( Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
+        dtype = testFile.createDatatype( Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
         dataset = testFile.createScalarDS ("d20x10", root, dtype, dims2D, null, null, 0, null);
         testFile.close();
 
@@ -3332,8 +3332,8 @@ public class DebugHDF {
         final long[] dims = {DIM1, DIM2, DIM3};
         final String[] memberNames = {"x", "y"};
         final Datatype[] memberDatatypes = {
-                new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1),
-                new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1)
+                new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE),
+                new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE)
         };
         final int[] memberSizes = {1, 10};
 
@@ -3416,13 +3416,13 @@ public class DebugHDF {
 
         // create 2D 64-bit (8 bytes) double dataset of 20 by 10
         dtype = testFile.createDatatype(
-                Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
+                Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
         testFile.createScalarDS
                 ("2D double", g2, dtype, dims2D, null, null, 0, dataDouble);
 
         // create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
-                Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, -1);
+                Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
         testFile.createScalarDS
                 ("3D float", g2, dtype, dims3D, null, null, 0, null);
 
@@ -3482,13 +3482,13 @@ public class DebugHDF {
 
         // Create 2D 64-bit (8 bytes) double dataset of 20 by 10
         dtype = testFile.createDatatype(
-                Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, -1);
+                Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
         testFile.createScalarDS
                 ("2D 64-bit double 20x10", g2, dtype, dims2D, null, null, 0, null);
 
         // Create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(
-                Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, -1);
+                Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
         testFile.createScalarDS
                 ("3D 32-bit float  20x10x5", g2, dtype, dims3D, null, null, 0, null);
 
@@ -3498,7 +3498,7 @@ public class DebugHDF {
         {
             final int strlen = 5;
             dtype = testFile.createDatatype(
-                Datatype.CLASS_STRING, strlen, Datatype.NATIVE, -1);
+                Datatype.CLASS_STRING, strlen, Datatype.NATIVE, Datatype.NATIVE);
             testFile.createScalarDS
                 ("String 2", g3, dtype, dims1D, null, null, 0, data3);
         }
@@ -3569,20 +3569,20 @@ public class DebugHDF {
         final long[] attrDims = {1};
         final String attrName = "Test attribute";
         final String[] attrValue = {"Test for group attribute"};
-        final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, -1, -1);
+        final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, Datatype.NATIVE, Datatype.NATIVE);
         final Attribute attr = new Attribute(g1, attrName, attrType, attrDims);
         attr.setData(attrValue);
         attr.write();
 
-        file.createScalarDS(NAME_DATASET_INT, null, new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_INT);
-        file.createScalarDS(NAME_DATASET_FLOAT, null, new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_FLOAT);
-        file.createScalarDS(NAME_DATASET_CHAR, null, new H5Datatype(Datatype.CLASS_CHAR, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_BYTE);
-        file.createScalarDS(NAME_DATASET_STR, null, new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1), DIMs, null, CHUNKs, 9, DATA_STR);
-        file.createScalarDS(NAME_DATASET_ENUM, null, new H5Datatype(Datatype.CLASS_ENUM, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_ENUM);
-        file.createScalarDS(NAME_DATASET_SUB, g0, new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_INT);
-        file.createScalarDS(NAME_DATASET_SUB_SUB, g00, new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_FLOAT);
-        file.createImage(NAME_DATASET_ATTR, null, new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, -1), DIMs, null, CHUNKs, 9, 1, -1, DATA_BYTE);
-        final Datatype[]  mdtypes = {new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1), new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1)};
+        file.createScalarDS(NAME_DATASET_INT, null, new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_INT);
+        file.createScalarDS(NAME_DATASET_FLOAT, null, new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_FLOAT);
+        file.createScalarDS(NAME_DATASET_CHAR, null, new H5Datatype(Datatype.CLASS_CHAR, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_BYTE);
+        file.createScalarDS(NAME_DATASET_STR, null, new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_STR);
+        file.createScalarDS(NAME_DATASET_ENUM, null, new H5Datatype(Datatype.CLASS_ENUM, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_ENUM);
+        file.createScalarDS(NAME_DATASET_SUB, g0, new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_INT);
+        file.createScalarDS(NAME_DATASET_SUB_SUB, g00, new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_FLOAT);
+        file.createImage(NAME_DATASET_ATTR, null, new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, 1, -1, DATA_BYTE);
+        final Datatype[]  mdtypes = {new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE)};
         final String[] mnames = {"int", "float", "string"};
         file.createCompoundDS(NAME_DATASET_COMPOUND, null, DIMs, null, CHUNKs, 9, mnames, mdtypes, null, DATA_COMP);
 
@@ -3626,26 +3626,26 @@ public class DebugHDF {
 
         int tclass = Datatype.CLASS_INTEGER;
         int nosign = Datatype.SIGN_NONE;
-        file.createScalarDS("int8", null, new H5Datatype(tclass, 1, -1, -1), DIMs, null, CHUNKs, 9, DATA_INT);
-        file.createScalarDS("uint8", null, new H5Datatype(tclass, 1, -1, nosign), DIMs, null, CHUNKs, 9, DATA_INT);
-        file.createScalarDS("int16", null, new H5Datatype(tclass, 2, -1, -1), DIMs, null, CHUNKs, 9, DATA_INT);
-        file.createScalarDS("uint16", null, new H5Datatype(tclass, 2, -1, nosign), DIMs, null, CHUNKs, 9, DATA_INT);
-        file.createScalarDS("int32", null, new H5Datatype(tclass, 4, -1, -1), DIMs, null, CHUNKs, 9, DATA_INT);
-        file.createScalarDS("uint32", null, new H5Datatype(tclass, 4, -1, nosign), DIMs, null, CHUNKs, 9, DATA_INT);
-        file.createScalarDS("int64", null, new H5Datatype(tclass, 8, -1, -1), DIMs, null, CHUNKs, 9, DATA_INT);
+        file.createScalarDS("int8", null, new H5Datatype(tclass, 1, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_INT);
+        file.createScalarDS("uint8", null, new H5Datatype(tclass, 1, Datatype.NATIVE, nosign), DIMs, null, CHUNKs, 9, DATA_INT);
+        file.createScalarDS("int16", null, new H5Datatype(tclass, 2, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_INT);
+        file.createScalarDS("uint16", null, new H5Datatype(tclass, 2, Datatype.NATIVE, nosign), DIMs, null, CHUNKs, 9, DATA_INT);
+        file.createScalarDS("int32", null, new H5Datatype(tclass, 4, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_INT);
+        file.createScalarDS("uint32", null, new H5Datatype(tclass, 4, Datatype.NATIVE, nosign), DIMs, null, CHUNKs, 9, DATA_INT);
+        file.createScalarDS("int64", null, new H5Datatype(tclass, 8, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_INT);
 
         tclass = Datatype.CLASS_FLOAT;
-        file.createScalarDS("float32", null, new H5Datatype(tclass, 4, -1, -1), DIMs, null, CHUNKs, 9, DATA_FLOAT);
-        file.createScalarDS("float64", null, new H5Datatype(tclass, 8, -1, -1), DIMs, null, CHUNKs, 9, DATA_FLOAT);
+        file.createScalarDS("float32", null, new H5Datatype(tclass, 4, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_FLOAT);
+        file.createScalarDS("float64", null, new H5Datatype(tclass, 8, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_FLOAT);
 
         tclass = Datatype.CLASS_CHAR;
-        file.createScalarDS("char", null, new H5Datatype(tclass, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_BYTE);
-        file.createScalarDS("uchar", null, new H5Datatype(tclass, -1, -1, nosign), DIMs, null, CHUNKs, 9, DATA_BYTE);
+        file.createScalarDS("char", null, new H5Datatype(tclass, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_BYTE);
+        file.createScalarDS("uchar", null, new H5Datatype(tclass, Datatype.NATIVE, Datatype.NATIVE, nosign), DIMs, null, CHUNKs, 9, DATA_BYTE);
 
-        file.createScalarDS("str", null, new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1), DIMs, null, CHUNKs, 9, DATA_STR);
-        file.createScalarDS("enum", null, new H5Datatype(Datatype.CLASS_ENUM, -1, -1, -1), DIMs, null, CHUNKs, 9, DATA_ENUM);
-        file.createImage("image", null, new H5Datatype(Datatype.CLASS_INTEGER, 1, -1, -1), DIMs, null, CHUNKs, 9, 1, -1, DATA_BYTE);
-        final Datatype[]  mdtypes = {new H5Datatype(Datatype.CLASS_INTEGER, -1, -1, -1), new H5Datatype(Datatype.CLASS_FLOAT, -1, -1, -1), new H5Datatype(Datatype.CLASS_STRING, STR_LEN, -1, -1)};
+        file.createScalarDS("str", null, new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_STR);
+        file.createScalarDS("enum", null, new H5Datatype(Datatype.CLASS_ENUM, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, DATA_ENUM);
+        file.createImage("image", null, new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE), DIMs, null, CHUNKs, 9, 1, -1, DATA_BYTE);
+        final Datatype[]  mdtypes = {new H5Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), new H5Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE), new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE)};
         final String[] mnames = {"int", "float", "string"};
         file.createCompoundDS("compound", null, DIMs, null, CHUNKs, 9, mnames, mdtypes, null, DATA_COMP);
 

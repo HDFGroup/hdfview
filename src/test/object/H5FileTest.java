@@ -86,7 +86,7 @@ import hdf.object.h5.H5ScalarDS;
  * @author Peter Cao, The HDF Group
  */
 public class H5FileTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5FileTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5FileTest.class);
     private static final H5File H5FILE = new H5File();
     private static final int NLOOPS = 10;
     private static final int TEST_VALUE_INT = Integer.MAX_VALUE;
@@ -154,9 +154,9 @@ public class H5FileTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, -1, -1);
-        typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, -1, -1);
-        typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, -1, -1);
+        typeInt = new H5Datatype(Datatype.CLASS_INTEGER, H5TestFile.DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, H5TestFile.DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        typeStr = new H5Datatype(Datatype.CLASS_STRING, H5TestFile.STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
 
         testFile = new H5File(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
         assertNotNull(testFile);
@@ -238,7 +238,7 @@ public class H5FileTest {
             catch (final Exception ex) {
                 fail("file.close() failed. " + ex);
             }
-        } // for (int i=0; i<NLOOPS; i++)
+        } //  (int i=0; i<NLOOPS; i++)
 
         try {
             testFile.open();
@@ -1883,15 +1883,21 @@ public class H5FileTest {
         }
         assertNotNull(g1);
 
-        Attribute attr1 = new Attribute(g1, "intAttr", new H5Datatype(Datatype.CLASS_INTEGER, 4, -1, -1),
-                new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
-        Attribute attr2 = new Attribute(g1, "strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1),
-                new long[] { 1 },
-                new String[] { "String attribute." });
+        Datatype attrType1 = null;
+        Datatype attrType2 = null;
+        Datatype attrType3 = null;
+        try {
+            attrType1 = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
+            attrType2 = new H5Datatype(Datatype.CLASS_STRING, 20, Datatype.NATIVE, Datatype.NATIVE);
+            attrType3 = new H5Datatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            fail("new H5Datatype failed. " + ex);
+        }
 
-        Attribute attr3 = new Attribute(g1, "floatAttr", new H5Datatype(Datatype.CLASS_FLOAT, 4, -1, -1),
-                new long[] { 2 },
-                new float[] { 2, 4 });
+        Attribute attr1 = new Attribute(g1, "intAttr", attrType1, new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        Attribute attr2 = new Attribute(g1, "strAttr", attrType2, new long[] { 1 }, new String[] { "String attribute." });
+        Attribute attr3 = new Attribute(g1, "floatAttr", attrType3, new long[] { 2 }, new float[] { 2, 4 });
 
         try {
             attr1.write();
@@ -1989,9 +1995,15 @@ public class H5FileTest {
         }
         assertNotNull(d1);
 
-        Attribute attr1 = new Attribute(d1, "strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1),
-                new long[] { 1 },
-                new String[] { "String attribute." });
+        Datatype attrType = null;
+        try {
+            attrType = new H5Datatype(Datatype.CLASS_STRING, 20, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            fail("new H5Datatype failed. " + ex);
+        }
+
+        Attribute attr1 = new Attribute(d1, "strAttr", attrType, new long[] { 1 }, new String[] { "String attribute." });
 
         try {
             attr1.write();
@@ -2072,9 +2084,15 @@ public class H5FileTest {
         }
         assertNotNull(d1);
 
-        Attribute attr1 = new Attribute(g1, "strAttr", new H5Datatype(Datatype.CLASS_STRING, 20, -1, -1),
-                new long[] { 1 },
-                new String[] { "String attribute." });
+        Datatype attrType = null;
+        try {
+            attrType = new H5Datatype(Datatype.CLASS_STRING, 20, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            fail("new H5Datatype failed. " + ex);
+        }
+
+        Attribute attr1 = new Attribute(g1, "strAttr", attrType, new long[] { 1 }, new String[] { "String attribute." });
 
         try {
             attr1.write();

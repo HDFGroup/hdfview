@@ -30,7 +30,7 @@ import hdf.object.h5.H5File;
  *
  */
 public class DataFormatTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataFormatTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataFormatTest.class);
     private static final H5File H5FILE = new H5File();
 
     private H5File testFile = null;
@@ -209,7 +209,15 @@ public class DataFormatTest {
         long[] attrDims = { 1 };
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
-        Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+
+        Datatype attrType = null;
+        try {
+            attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            fail("new H5datatype failed. " + ex);
+        }
+
         Attribute attr = new Attribute((Group) testGroup, attrName, attrType, attrDims);
         assertNotNull(testGroup);
         assertNotNull(attr);

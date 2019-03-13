@@ -20,42 +20,36 @@ import hdf.view.TableView.TableView;
 public class TableViewModule implements TableView {
 
     public TableViewModule() {
-        // TODO Auto-generated constructor stub
+
     }
 
     @Override
     public HObject getDataObject() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Object getTable() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Object getSelectedData() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public int getSelectedColumnCount() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public int getSelectedRowCount() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public void updateValueInFile() {
-        // TODO Auto-generated method stub
 
     }
 

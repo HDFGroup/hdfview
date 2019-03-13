@@ -91,7 +91,7 @@ public class H4Vdata extends CompoundDS
 {
     private static final long serialVersionUID = -5978700886955419959L;
 
-    private final static org.slf4j.Logger       log = org.slf4j.LoggerFactory.getLogger(H4Vdata.class);
+    private static final org.slf4j.Logger       log = org.slf4j.LoggerFactory.getLogger(H4Vdata.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
@@ -171,8 +171,17 @@ public class H4Vdata extends CompoundDS
     @Override
     public Datatype getDatatype()
     {
+        if (!inited)
+            init();
+
         if (datatype == null) {
-            datatype = new H4Datatype(-1);
+            try {
+                datatype = new H4Datatype(-1);
+            }
+            catch (Exception ex) {
+                log.debug("getDatatype(): failed to create datatype: ", ex);
+                datatype = null;
+            }
         }
 
         return datatype;
@@ -294,7 +303,7 @@ public class H4Vdata extends CompoundDS
             if (member_data == null) {
                 String[] nullValues = new String[n];
                 for (int j=0; j<n; j++) {
-                    nullValues[j] = "*error*";
+                    nullValues[j] = "*ERROR*";
                 }
                 list.add(nullValues);
                 continue;
@@ -311,7 +320,13 @@ public class H4Vdata extends CompoundDS
                     // convert characters to string
                     log.trace("read(): convert characters to string");
                     member_data = Dataset.byteToString((byte[])member_data, memberOrders[i]);
-                    memberTypes[i] = new H4Datatype(Datatype.CLASS_STRING, memberOrders[i], -1, -1);
+                    try {
+                        memberTypes[i] = new H4Datatype(Datatype.CLASS_STRING, memberOrders[i], Datatype.NATIVE, Datatype.NATIVE);
+                    }
+                    catch (Exception ex) {
+                        log.debug("read(): failed to create datatype for member[{}]: ", i, ex);
+                        memberTypes[i] = null;
+                    }
                     memberOrders[i] = 1; //one String
                 }
                 else if (H4Datatype.isUnsigned(memberTIDs[i])) {
@@ -323,14 +338,14 @@ public class H4Vdata extends CompoundDS
             catch (HDFException ex) {
                 String[] nullValues = new String[n];
                 for (int j=0; j<n; j++) {
-                    nullValues[j] = "*error*";
+                    nullValues[j] = "*ERROR*";
                 }
                 list.add(nullValues);
                 continue;
             }
 
             list.add(member_data);
-        } // for (int i=0; i<numberOfMembers; i++)
+        } //  (int i=0; i<numberOfMembers; i++)
 
         close(id);
 
@@ -398,7 +413,7 @@ public class H4Vdata extends CompoundDS
             catch (HDFException ex) {
                 log.debug("write():", ex);
             }
-        } // for (int i=0; i<numberOfMembers; i++)
+        } //  (int i=0; i<numberOfMembers; i++)
 
         close(vid);
          */
@@ -503,8 +518,8 @@ public class H4Vdata extends CompoundDS
                         attr.setData(buf);
                         nleft--;
                     }
-                } // for (int i=0; i<n; i++)
-            } // for (int j=-1; j<numberOfMembers; j++)
+                } //  (int i=0; i<n; i++)
+            } //  (int j=-1; j<numberOfMembers; j++)
         }
         catch (Exception ex) {
             log.debug("getMetadata(): failure: ", ex);
@@ -660,23 +675,45 @@ public class H4Vdata extends CompoundDS
         memberOrders = new int[numberOfMembers];
         isMemberSelected = new boolean[numberOfMembers];
 
-        for (int i=0; i<numberOfMembers; i++) {
+        try {
+            datatype = new H4Datatype(Datatype.CLASS_COMPOUND, -1, Datatype.NATIVE, Datatype.NATIVE);
+        }
+        catch (Exception ex) {
+            log.debug("init(): failed to create compound datatype for VData");
+            datatype = null;
+        }
+
+        for (int i = 0; i < numberOfMembers; i++) {
             isMemberSelected[i] = true;
             try {
                 memberNames[i] = HDFLibrary.VFfieldname(id, i);
                 memberTIDs[i] = HDFLibrary.VFfieldtype(id, i);
-                memberTypes[i] = new H4Datatype(memberTIDs[i]);
+                try {
+                    memberTypes[i] = new H4Datatype(memberTIDs[i]);
+                }
+                catch (Exception ex) {
+                    log.debug("init(): failed to create datatype for member[{}]: ", i, ex);
+                    memberTypes[i] = null;
+                }
                 // mask off the litend bit
                 memberTIDs[i] = memberTIDs[i] & (~HDFConstants.DFNT_LITEND);
                 memberOrders[i] = HDFLibrary.VFfieldorder(id, i);
                 log.trace("init():{}> isMemberSelected[i]={} memberNames[i]={} memberTIDs[i]={} memberOrders[i]={}", i, isMemberSelected[i], memberNames[i], memberTIDs[i], memberOrders[i]);
+
+                /*
+                 * NOTE: An ugly workaround to get HDF4 "compound" datatypes to work correctly.
+                 */
+                if (datatype != null) {
+                    datatype.getCompoundMemberNames().add(memberNames[i]);
+                    datatype.getCompoundMemberTypes().add(memberTypes[i]);
+                }
             }
             catch (HDFException ex) {
                 log.debug("init(): member[{}]: ", i, ex);
                 log.trace("init(): continue");
                 continue;
             }
-        } // for (int i=0; i<numberOfMembers; i++)
+        } //  (int i=0; i<numberOfMembers; i++)
 
         inited = true;
 

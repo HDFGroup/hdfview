@@ -30,8 +30,8 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.object.h5.H5Datatype;
 
 /**
- * An attribute is a (name, value) pair of metadata attached to a primary data
- * object such as a dataset, group or named datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
+ * dataset, group or named datatype.
  * <p>
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
@@ -41,8 +41,7 @@ import hdf.object.h5.H5Datatype;
  * User's Guide</a>
  * <p>
  *
- * The following code is an example of an attribute with 1D integer array of two
- * elements.
+ * The following code is an example of an attribute with 1D integer array of two elements.
  *
  * <pre>
  * // Example of creating a new attribute
@@ -52,7 +51,7 @@ import hdf.object.h5.H5Datatype;
  * Datatype type = new Datatype(Datatype.CLASS_INTEGER, // class
  *                              1,                      // size in bytes
  *                              Datatype.ORDER_LE,      // byte order
- *                              Datatype.SIGN_NONE);    // signed or unsigned
+ *                              Datatype.SIGN_NONE);    // unsigned
  * // 1-D array of size two
  * long[] dims = {2};
  * // The value of the attribute
@@ -66,10 +65,10 @@ import hdf.object.h5.H5Datatype;
  * </pre>
  *
  *
- * For an atomic datatype, the value of an Attribute will be a 1D array of integers,
- * floats and strings. For a compound datatype, it will be a 1D array of strings
- * with field members separated by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}"
- * is a compound attribute of {int, float} of three data points.
+ * For an atomic datatype, the value of an Attribute will be a 1D array of integers, floats and
+ * strings. For a compound datatype, it will be a 1D array of strings with field members separated
+ * by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
+ * float} of three data points.
  *
  * @see hdf.object.Datatype
  *
@@ -80,13 +79,13 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
     private static final long serialVersionUID = 2072473407027648309L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
 
     /** The HObject to which this Attribute is attached */
     protected HObject         parentObject;
 
     /** additional information and properties for the attribute */
-    private Map<String, Object>  properties;
+    private transient Map<String, Object> properties;
 
     /**
      * Flag to indicate is the original unsigned C data is converted.
@@ -101,7 +100,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
     /**
      * A list of names of all compound fields including nested fields.
      * <p>
-     * The nested names are separated by CompoundDS.separator. For example, if
+     * The nested names are separated by CompoundDS.SEPARATOR. For example, if
      * compound attribute "A" has the following nested structure,
      *
      * <pre>
@@ -161,7 +160,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * The i-th element of the Object[] is an integer array (int[]) that contains
      * the dimension sizes of the i-th member.
      */
-    protected Object[] memberDims = null;
+    protected transient Object[] memberDims = null;
 
     /**
      * The datatypes of the compound attribute's members.
@@ -201,7 +200,11 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * long[] attrDims = { 1 };
      * String attrName = &quot;CLASS&quot;;
      * String[] classValue = { &quot;IMAGE&quot; };
-     * Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+     * Datatype attrType = null;
+     * try {
+     *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     * }
+     * catch (Exception ex) {}
      * Attribute attr = new Attribute(attrName, attrType, attrDims);
      * attr.setValue(classValue);
      * </pre>
@@ -236,7 +239,11 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * long[] attrDims = { 1 };
      * String attrName = &quot;CLASS&quot;;
      * String[] classValue = { &quot;IMAGE&quot; };
-     * Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, -1, -1);
+     * Datatype attrType = null;
+     * try {
+     *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     * }
+     * catch (Exception ex) {}
      * Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
      * </pre>
      *
@@ -406,7 +413,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
                 if (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND) {
                     // initialize member information
-                    ((H5Datatype) getDatatype()).extractCompoundInfo("", flatNameList, flatTypeList);
+                    H5Datatype.extractCompoundInfo((H5Datatype) getDatatype(), "", flatNameList, flatTypeList);
                     numberOfMembers = flatNameList.size();
                     log.trace("init(): numberOfMembers={}", numberOfMembers);
 
@@ -420,7 +427,15 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                     for (int i = 0; i < numberOfMembers; i++) {
                         isMemberSelected[i] = true;
                         memberTIDs[i] = flatTypeList.get(i).createNative();
-                        memberTypes[i] = new H5Datatype(memberTIDs[i]);
+
+                        try {
+                            memberTypes[i] = flatTypeList.get(i);
+                        }
+                        catch (Exception ex) {
+                            log.debug("init(): failed to create datatype for member[{}]: ", i, ex);
+                            memberTypes[i] = null;
+                        }
+
                         memberNames[i] = flatNameList.get(i);
                         memberOrders[i] = 1;
                         memberDims[i] = null;
@@ -451,7 +466,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                                 log.debug("init(): memberTIDs[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
                             }
                         }
-                    } // for (int i=0; i<numberOfMembers; i++)
+                    } // (int i=0; i<numberOfMembers; i++)
                 }
 
                 inited = true;
@@ -762,6 +777,29 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
     }
 
     /**
+     * Returns an array of the names of the selected members of the compound dataset.
+     *
+     * @return an array of the names of the selected members of the compound dataset.
+     */
+    public final String[] getSelectedMemberNames() {
+        if (isMemberSelected == null) {
+            log.debug("getSelectedMemberNames(): isMemberSelected array is null");
+            log.trace("getSelectedMemberNames(): finish");
+            return memberNames;
+        }
+
+        int idx = 0;
+        String[] names = new String[getSelectedMemberCount()];
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            if (isMemberSelected[i]) {
+                names[idx++] = memberNames[i];
+            }
+        }
+
+        return names;
+    }
+
+    /**
      * Checks if a member of the compound attribute is selected for read/write.
      *
      * @param idx
@@ -1005,16 +1043,34 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * @return true if the object is equal
      */
     @Override
-    public boolean equals(HObject obj) {
-        if (!this.getFullName().equals(obj.getFullName())) return false;
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
 
-        if (!this.getFileFormat().equals(obj.getFileFormat())) return false;
+        // checking if both the object references are
+        // referring to the same object.
+        if (this == obj)
+            return true;
+        if (obj instanceof Attribute) {
+            if (!this.getFullName().equals(((Attribute) obj).getFullName()))
+                return false;
 
-        if (!this.getDims().equals(((DataFormat) obj).getDims())) return false;
+            if (!this.getFileFormat().equals(((Attribute) obj).getFileFormat()))
+                return false;
 
-        if (!this.getParentObject().equals(((Attribute) obj).getParentObject())) return false;
+            if (!Arrays.equals(this.getDims(), ((DataFormat) obj).getDims()))
+                return false;
 
-        return true;
+            return (this.getParentObject().equals(((Attribute) obj).getParentObject()));
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+
+        // We are returning the OID as a hashcode value.
+        return super.hashCode();
     }
 
     /**
@@ -1079,18 +1135,17 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         }
 
         // attribute value is an array
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int n = Array.getLength(data);
-        if (maxItems > 0)
-            if (n > maxItems)
-                n = maxItems;
+        if ((maxItems > 0) && (n > maxItems))
+            n = maxItems;
 
         log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", getDatatype().isEnum(),
                 getDatatype().isUnsigned(), n);
 
         if (getDatatype().isEnum()) {
             String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: is_enum with cname={} dname={}", cname, dname);
 
             Map<String, String> map = this.getDatatype().getEnumMembers();
@@ -1187,7 +1242,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         }
         else if (getDatatype().isUnsigned()) {
             String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
 
             switch (dname) {

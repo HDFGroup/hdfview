@@ -36,13 +36,13 @@ public class FitsDatatype extends Datatype
      * The following list a few example of how to create a Datatype.
      * <OL>
      * <LI>to create unsigned native integer<br>
-     * FitsDatatype type = new H5Dataype(CLASS_INTEGER, NATIVE, NATIVE, SIGN_NONE);
+     * FitsDatatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
      * <LI>to create 16-bit signed integer with big endian<br>
-     * FitsDatatype type = new H5Dataype(CLASS_INTEGER, 2, ORDER_BE, NATIVE);
+     * FitsDatatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
      * <LI>to create native float<br>
-     * FitsDatatype type = new H5Dataype(CLASS_FLOAT, NATIVE, NATIVE, -1);
+     * FitsDatatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <LI>to create 64-bit double<br>
-     * FitsDatatype type = new H5Dataype(CLASS_FLOAT, 8, NATIVE, -1);
+     * FitsDatatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </OL>
      *
      * @param tclass the class of the datatype.
@@ -50,7 +50,7 @@ public class FitsDatatype extends Datatype
      * @param torder the order of the datatype.
      * @param tsign the sign of the datatype.
      */
-    public FitsDatatype(int tclass, int tsize, int torder, int tsign) {
+    public FitsDatatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         super(tclass, tsize, torder, tsign);
         datatypeDescription = getDescription();
     }
@@ -60,7 +60,7 @@ public class FitsDatatype extends Datatype
      *
      * @param theType the fits native datatype.
      */
-    public FitsDatatype(long theType) {
+    public FitsDatatype(long theType) throws Exception {
         super(-1);
         nativeType = theType;
         fromNative(0);
@@ -110,6 +110,8 @@ public class FitsDatatype extends Datatype
             case BasicHDU.BITPIX_DOUBLE:
                 data = new double[size];
                 break;
+            default:
+                break;
         }
 
         return data;
@@ -154,6 +156,8 @@ public class FitsDatatype extends Datatype
             case BasicHDU.BITPIX_DOUBLE:
                 datatypeClass = CLASS_FLOAT;
                 datatypeSize = 8;
+                break;
+            default:
                 break;
         }
     }
@@ -253,7 +257,9 @@ public class FitsDatatype extends Datatype
      * @see hdf.object.Datatype#close(int)
      */
     @Override
-    public void close(long id) {;}
+    public void close(long id) {
+        // Nothing to implement
+    }
 
     // Implementing DataFormat
     @SuppressWarnings("rawtypes")

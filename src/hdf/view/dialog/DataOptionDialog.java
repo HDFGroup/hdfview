@@ -83,70 +83,75 @@ import hdf.view.ImageView.DefaultImageView.Rotate90Filter;
  */
 public class DataOptionDialog extends Dialog {
 
-    private Shell                  shell;
+    private Shell               shell;
 
-    private Font                   curFont;
+    private Font                curFont;
 
     /** the rank of the dataset/image */
-    private int                    rank;
+    private int                 rank;
 
     /** the starting point of selected subset */
-    private long                   start[];
+    private long[]              start;
 
     /** the sizes of all dimensions */
-    private long                   dims[];
+    private long[]              dims;
 
     /** the selected sizes of all dimensions */
-    private long                   selected[];
+    private long[]              selected;
 
     /** the stride */
-    private long                   stride[];
+    private long[]              stride;
 
     /** the indices of the selected dimensions. */
-    private int                    selectedIndex[];
+    private int[]               selectedIndex;
+    private int[]               currentIndex;
 
-    private int                    currentIndex[];
+    private BitSet              bitmask;
 
-    private BitSet                 bitmask;
+    private Button              spreadsheetButton;
+    private Button              imageButton;
+    private Button              base1Button;
+    private Button              base0Button;
+    private Button              charCheckbox;
+    private Button              bitmaskHelp;
+    private Button              applyBitmaskButton;
+    private Button              extractBitButton;
+    private Button[]            bitmaskButtons;
 
-    private Button                 spreadsheetButton, imageButton, base1Button, base0Button;
-    private Button                 charCheckbox;
-    private Button                 bitmaskHelp;
-    private Button                 applyBitmaskButton, extractBitButton;
-    private Button[]               bitmaskButtons;
+    private Combo               choiceTableView;
+    private Combo               choiceImageView;
+    private Combo               choicePalette;
+    private Combo               transposeChoice;
+    private Combo[]             choices;
 
-    private Combo                  choiceTableView;
-    private Combo                  choiceImageView;
-    private Combo                  choicePalette;
-    private Combo                  transposeChoice;
-    private Combo[]                choices;
+    private boolean             isSelectionCancelled;
+    private boolean             isTrueColorImage;
+    private boolean             isH5;
+    private boolean             isImageDisplay = false;
+    private boolean             isDisplayTypeChar = false;
+    private boolean             isTransposed = false;
+    private boolean             isIndexBase1 = false;
+    private boolean             isApplyBitmaskOnly = false;
 
-    private boolean                isSelectionCancelled;
+    private String              dataViewName;
 
-    private boolean                isTrueColorImage;
+    private Label[]             maxLabels;
 
-    private boolean                isH5;
+    private Text[]              startFields;
+    private Text[]              endFields;
+    private Text[]              strideFields;
 
-    private boolean                isImageDisplay = false;
-    private boolean                isDisplayTypeChar = false;
-    private boolean                isTransposed = false;
-    private boolean                isIndexBase1 = false;
-    private boolean                isApplyBitmaskOnly = false;
+    private Text                dataRangeField;
+    private Text                fillValueField;
 
-    private String                 dataViewName;
+    private List                fieldList;
 
-    private Label                  maxLabels[];
+    private PreviewNavigator    navigator;
 
-    private Text                   startFields[], endFields[], strideFields[], dataRangeField, fillValueField;
-
-    private List                   fieldList;
-
-    private PreviewNavigator       navigator;
-
-    private int                    numberOfPalettes;
+    private int                 numberOfPalettes;
 
     /** the selected dataset/image */
-    private DataFormat             dataObject;
+    private DataFormat          dataObject;
 
 
     /**
@@ -564,7 +569,7 @@ public class DataOptionDialog extends Dialog {
             if (n2[i] <= 0) {
                 n2[i] = 1; // stride cannot be zero
             }
-        } // for (int i=0; i<n; i++)
+        } //  (int i=0; i<n; i++)
 
         if (dataObject instanceof CompoundDS) {
             CompoundDS d = (CompoundDS) dataObject;
@@ -592,7 +597,7 @@ public class DataOptionDialog extends Dialog {
                         min = Double.valueOf(st.nextToken());
                         max = Double.valueOf(st.nextToken());
                     }
-                    catch (Throwable ex) {
+                    catch (Exception ex) {
                     }
                     if (max > min)
                         ds.setImageDataRange(min, max);
@@ -604,7 +609,7 @@ public class DataOptionDialog extends Dialog {
                         x = Double.valueOf(st.nextToken());
                         ds.addFilteredImageValue(x);
                     }
-                    catch (Throwable ex) {
+                    catch (Exception ex) {
                     }
                 }
             }
@@ -644,22 +649,23 @@ public class DataOptionDialog extends Dialog {
         // clear the old data
         dataObject.clearData();
 
-        retVal = setBitmask();
+        setBitmask();
 
         return retVal;
     }
 
-    private boolean setBitmask() {
-        boolean isAll = false, isNothing = false;
+    private void setBitmask() {
+        boolean isAll = true;
+        boolean isNothing = true;
 
         if (bitmaskButtons == null) {
             bitmask = null;
-            return true;
+            return;
         }
 
         if (!(applyBitmaskButton.getSelection() || extractBitButton.getSelection())) {
             bitmask = null;
-            return true;
+            return;
         }
 
         int len = bitmaskButtons.length;
@@ -670,7 +676,7 @@ public class DataOptionDialog extends Dialog {
 
         if (isAll || isNothing) {
             bitmask = null;
-            return true;
+            return;
         }
 
         if (bitmask == null)
@@ -680,8 +686,6 @@ public class DataOptionDialog extends Dialog {
             /* Bitmask buttons are indexed from highest to lowest */
             bitmask.set(i, bitmaskButtons[len - i - 1].getSelection());
         }
-
-        return true;
     }
 
     /** @return true if the display option is image. */
@@ -787,12 +791,6 @@ public class DataOptionDialog extends Dialog {
         charCheckbox.setText("Show As &Char");
         charCheckbox.setSelection(false);
         charCheckbox.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
-        charCheckbox.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-
-            }
-        });
 
         if (dataObject.getDatatype().isChar()
                 || (dataObject.getDatatype().isInteger() && dataObject.getDatatype().getDatatypeSize() == 1)) {
@@ -868,7 +866,7 @@ public class DataOptionDialog extends Dialog {
 
         String minmaxStr = "min, max";
 
-        double minmax[] = ((ScalarDS) dataObject).getImageDataRange();
+        double[] minmax = ((ScalarDS) dataObject).getImageDataRange();
         if (minmax != null) {
             if (dataObject.getDatatype().isFloat())
                 minmaxStr = minmax[0] + "," + minmax[1];
@@ -1144,7 +1142,7 @@ public class DataOptionDialog extends Dialog {
         String[] columnNames = new String[names.length];
         for (int i = 0; i < names.length; i++) {
             columnNames[i] = new String(names[i]);
-            columnNames[i] = columnNames[i].replaceAll(CompoundDS.separator, "->");
+            columnNames[i] = columnNames[i].replaceAll(CompoundDS.SEPARATOR, "->");
         }
         fieldList = new List(membersGroup, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
         fieldList.setFont(curFont);
@@ -1876,7 +1874,7 @@ public class DataOptionDialog extends Dialog {
             try {
                 previewImage = Tools.toBufferedImage(Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(imageProducer, filter)));
             }
-            catch (Throwable err) {
+            catch (Exception err) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Apply Image Filter", err.getMessage());
                 status = false;

@@ -24,7 +24,7 @@ import hdf.object.h5.H5Group;
  *
  */
 public class ScalarDSTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDSTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDSTest.class);
     private static final H5File H5FILE = new H5File();
 
     private H5File testFile = null;

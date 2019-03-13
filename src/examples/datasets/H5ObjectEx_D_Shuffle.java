@@ -127,8 +127,7 @@ public class H5ObjectEx_D_Shuffle {
         long[] dims = { DIM_X, DIM_Y };
         long[] chunk_dims = { CHUNK_X, CHUNK_Y };
         int[][] dset_data = new int[DIM_X][DIM_Y];
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER,
-                DATATYPE_SIZE, Datatype.ORDER_LE, -1);
+        H5Datatype typeInt = null;
 
         // Initialize data.
         for (int indx = 0; indx < DIM_X; indx++)
@@ -139,6 +138,14 @@ public class H5ObjectEx_D_Shuffle {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create datatype.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

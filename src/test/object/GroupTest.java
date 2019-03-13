@@ -30,7 +30,7 @@ import hdf.object.h5.H5Group;
  *
  */
 public class GroupTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GroupTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GroupTest.class);
 
     private H5File testFile = null;
     private Group testGroup = null;

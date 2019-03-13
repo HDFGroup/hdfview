@@ -60,7 +60,7 @@ import hdf.view.ViewProperties;
  */
 public class NewAttributeDialog extends Dialog {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
 
     private Shell             shell;
 
@@ -84,7 +84,8 @@ public class NewAttributeDialog extends Dialog {
     private Text              lengthField;
 
     /** The Choice of the datatypes */
-    private Combo             classChoice, sizeChoice;
+    private Combo             classChoice;
+    private Combo             sizeChoice;
 
     /** The Choice of the object list */
     private Combo             objChoice;
@@ -438,7 +439,10 @@ public class NewAttributeDialog extends Dialog {
 
     @SuppressWarnings("unchecked")
     private boolean createAttribute() {
-        int tclass = -1, tsize = -1, torder = -1, tsign = -1;
+        int tclass = Datatype.CLASS_NO_CLASS;
+        int tsize = Datatype.NATIVE;
+        int torder = Datatype.NATIVE;
+        int tsign = Datatype.NATIVE;
         boolean isVLen = false;
         boolean isVlenStr = false;
         log.trace("createAttribute start");
@@ -553,6 +557,8 @@ public class NewAttributeDialog extends Dialog {
                     case 3:
                         tsize = 8;
                         break;
+                    default:
+                        break;
                 }
                 log.trace("Attribute VL-CLASS_INTEGER: tsize={}", tsize);
             }
@@ -625,6 +631,8 @@ public class NewAttributeDialog extends Dialog {
                         break;
                     case 3:
                         tsize = 8;
+                        break;
+                    default:
                         break;
                 }
                 log.trace("Attribute CLASS_INTEGER: tsize={}", tsize);
@@ -901,10 +909,9 @@ public class NewAttributeDialog extends Dialog {
 
                 if (ClassLoader.getSystemResource("hdf/view/HDFView.class").toString().startsWith("jar")) {
                     // Attempt to load HTML help file from jar
-                    try {
-                        InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewAttrHelp.html");
+                    try (InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewAttrHelp.html")) {
                         Scanner scan = new Scanner(in);
-                        StringBuffer buffer = new StringBuffer();
+                        StringBuilder buffer = new StringBuilder();
                         while(scan.hasNextLine()) {
                             buffer.append(scan.nextLine());
                         }
@@ -912,15 +919,14 @@ public class NewAttributeDialog extends Dialog {
                         browser.setText(buffer.toString());
 
                         scan.close();
-                        in.close();
                     }
                     catch (Exception e) {
-                        StringBuffer buff = new StringBuffer();
-                        buff.append("<html>");
-                        buff.append("<body>");
-                        buff.append("ERROR: cannot load help information.");
-                        buff.append("</body>");
-                        buff.append("</html>");
+                        StringBuilder buff = new StringBuilder();
+                        buff.append("<html>")
+                            .append("<body>")
+                            .append("ERROR: cannot load help information.")
+                            .append("</body>")
+                            .append("</html>");
                         browser.setText(buff.toString(), true);
                     }
                 }
@@ -951,20 +957,22 @@ public class NewAttributeDialog extends Dialog {
                         }
 
                         URL uu[] = { url, url2, url3 };
-                        URLClassLoader cl = new URLClassLoader(uu);
-                        URL u = cl.findResource("hdf/view/NewAttrHelp.html");
+                        try (URLClassLoader cl = new URLClassLoader(uu)) {
+                            URL u = cl.findResource("hdf/view/NewAttrHelp.html");
 
-                        browser.setUrl(u.toString());
-
-                        cl.close();
+                            browser.setUrl(u.toString());
+                        }
+                        catch (Exception ex) {
+                            log.trace("URLClassLoader failed:", ex);
+                        }
                     }
                     catch (Exception e) {
-                        StringBuffer buff = new StringBuffer();
-                        buff.append("<html>");
-                        buff.append("<body>");
-                        buff.append("ERROR: cannot load help information.");
-                        buff.append("</body>");
-                        buff.append("</html>");
+                        StringBuilder buff = new StringBuilder();
+                        buff.append("<html>")
+                            .append("<body>")
+                            .append("ERROR: cannot load help information.")
+                            .append("</body>")
+                            .append("</html>");
                         browser.setText(buff.toString(), true);
                     }
                 }

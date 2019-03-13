@@ -34,7 +34,7 @@ public class H5ObjectEx_T_Float {
         long dataset_id = -1;
         long[] dims = { DIM0, DIM1 };
         double[][] dset_data = new double[DIM0][DIM1];
-        final H5Datatype typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, 8, Datatype.ORDER_LE, -1);
+        H5Datatype typeFloat = null;
 
         // Initialize data.
         for (int indx = 0; indx < DIM0; indx++)
@@ -46,6 +46,14 @@ public class H5ObjectEx_T_Float {
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
             file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the base datatype.
+        try {
+            typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, 8, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -82,12 +82,12 @@ public abstract class HObject implements Serializable {
      */
     private static final long  serialVersionUID = -1723666708199882519L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HObject.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HObject.class);
 
     /**
      * The separator of object path, i.e. "/".
      */
-    public final static String separator = "/";
+    public static final String SEPARATOR = "/";
 
     /**
      * The full path of the file that contains the object.
@@ -188,46 +188,46 @@ public abstract class HObject implements Serializable {
 
         // file name is packed in the full path
         if ((theName == null) && (thePath != null)) {
-            if (thePath.equals(separator)) {
-                theName = separator;
+            if (thePath.equals(SEPARATOR)) {
+                theName = SEPARATOR;
                 thePath = null;
             }
             else {
                 // the path must starts with "/"
-                if (!thePath.startsWith(HObject.separator)) {
-                    thePath = HObject.separator + thePath;
+                if (!thePath.startsWith(HObject.SEPARATOR)) {
+                    thePath = HObject.SEPARATOR + thePath;
                 }
 
                 // get rid of the last "/"
-                if (thePath.endsWith(HObject.separator)) {
+                if (thePath.endsWith(HObject.SEPARATOR)) {
                     thePath = thePath.substring(0, thePath.length() - 1);
                 }
 
                 // separate the name and the path
-                theName = thePath.substring(thePath.lastIndexOf(separator) + 1);
-                thePath = thePath.substring(0, thePath.lastIndexOf(separator));
+                theName = thePath.substring(thePath.lastIndexOf(SEPARATOR) + 1);
+                thePath = thePath.substring(0, thePath.lastIndexOf(SEPARATOR));
             }
         }
-        else if ((theName != null) && (thePath == null) && (theName.indexOf(separator) >= 0)) {
-            if (theName.equals(separator)) {
-                theName = separator;
+        else if ((theName != null) && (thePath == null) && (theName.indexOf(SEPARATOR) >= 0)) {
+            if (theName.equals(SEPARATOR)) {
+                theName = SEPARATOR;
                 thePath = null;
             }
             else {
                 // the full name must starts with "/"
-                if (!theName.startsWith(separator)) {
-                    theName = separator + theName;
+                if (!theName.startsWith(SEPARATOR)) {
+                    theName = SEPARATOR + theName;
                 }
 
                 // the fullname must not end with "/"
                 int n = theName.length();
-                if (theName.endsWith(separator)) {
+                if (theName.endsWith(SEPARATOR)) {
                     theName = theName.substring(0, n - 1);
                 }
 
-                int idx = theName.lastIndexOf(separator);
+                int idx = theName.lastIndexOf(SEPARATOR);
                 if (idx < 0) {
-                    thePath = separator;
+                    thePath = SEPARATOR;
                 }
                 else {
                     thePath = theName.substring(0, idx);
@@ -239,8 +239,8 @@ public abstract class HObject implements Serializable {
         // the path must start and end with "/"
         if (thePath != null) {
             thePath = thePath.replaceAll("//", "/");
-            if (!thePath.endsWith(separator)) {
-                thePath += separator;
+            if (!thePath.endsWith(SEPARATOR)) {
+                thePath += SEPARATOR;
             }
         }
 
@@ -353,21 +353,20 @@ public abstract class HObject implements Serializable {
      */
     public void setName(String newName) throws Exception {
         if (newName != null) {
-            if (newName.equals(HObject.separator)) {
+            if (newName.equals(HObject.SEPARATOR)) {
                 throw new IllegalArgumentException("The new name cannot be the root");
             }
 
-            if (newName.startsWith(HObject.separator)) {
+            if (newName.startsWith(HObject.SEPARATOR)) {
                 newName = newName.substring(1);
             }
 
-            if (newName.endsWith(HObject.separator)) {
+            if (newName.endsWith(HObject.SEPARATOR)) {
                 newName = newName.substring(0, newName.length() - 2);
             }
 
-            if (newName.contains(HObject.separator)) {
-                throw new IllegalArgumentException("The new name contains the separator character: "
-                        + HObject.separator);
+            if (newName.contains(HObject.SEPARATOR)) {
+                throw new IllegalArgumentException("The new name contains the SEPARATOR character: " + HObject.SEPARATOR);
             }
         }
 
@@ -441,22 +440,43 @@ public abstract class HObject implements Serializable {
     }
 
     /**
-     * Checks if the OID of the object is the same as the given object
-     * identifier within the same file.
+     * Returns the file that contains the object.
+     *
+     * @return The file that contains the object.
+     */
+    public final FileFormat getFileFormat() {
+        return fileFormat;
+    }
+
+    /**
+     * Returns a cloned copy of the object identifier.
      * <p>
-     * HDF4 and HDF5 data objects are identified by their unique OIDs. A data
-     * object in a file may have multiple logical names , which are represented
-     * in a graph structure as separate objects.
+     * The object OID cannot be modified once it is created. getOID() clones the object OID to ensure
+     * the object OID cannot be modified outside of this class.
+     *
+     * @return the cloned copy of the object OID.
+     */
+    public final long[] getOID() {
+        if (oid == null) {
+            return null;
+        }
+
+        return oid.clone();
+    }
+
+    /**
+     * Checks if the OID of the object is the same as the given object identifier within the same file.
      * <p>
-     * The HObject.equalsOID(long[] theID) can be used to check if two data
-     * objects with different names are pointed to the same object within the
-     * same file.
+     * HDF4 and HDF5 data objects are identified by their unique OIDs. A data object in a file may have
+     * multiple logical names , which are represented in a graph structure as separate objects.
+     * <p>
+     * The HObject.equalsOID(long[] theID) can be used to check if two data objects with different names
+     * are pointed to the same object within the same file.
      *
      * @param theID
      *            The list object identifiers.
      *
-     * @return true if the ID of the object equals the given OID; otherwise,
-     *         returns false.
+     * @return true if the ID of the object equals the given OID; otherwise, returns false.
      */
     public final boolean equalsOID(long[] theID) {
         if ((theID == null) || (oid == null)) {
@@ -481,45 +501,6 @@ public abstract class HObject implements Serializable {
     }
 
     /**
-     * Returns the file that contains the object.
-     *
-     * @return The file that contains the object.
-     */
-    public final FileFormat getFileFormat() {
-        return fileFormat;
-    }
-
-    /**
-     * Returns a cloned copy of the object identifier.
-     * <p>
-     * The object OID cannot be modified once it is created. getOID() clones the
-     * object OID to ensure the object OID cannot be modified outside of this
-     * class.
-     *
-     * @return the cloned copy of the object OID.
-     */
-    public final long[] getOID() {
-        if (oid == null) {
-            return null;
-        }
-
-        return oid.clone();
-    }
-
-    /**
-     * Returns whether this HObject is equal to the specified HObject
-     * by comparing their OIDs.
-     *
-     * @param obj
-     *            The object
-     *
-     * @return true if the object is equal by OID
-     */
-    public boolean equals(HObject obj) {
-        return this.equalsOID(obj.getOID());
-    }
-
-    /**
      * Returns the name of the object.
      * <p>
      * This method overwrites the toString() method in the Java Object class
@@ -540,5 +521,37 @@ public abstract class HObject implements Serializable {
         if (name != null) return name;
 
         return super.toString();
+    }
+
+    /**
+     * Returns whether this HObject is equal to the specified HObject by comparing their OIDs.
+     *
+     * @param obj
+     *            The object
+     *
+     * @return true if the object is equal by OID
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+
+        // checking if both the object references are
+        // referring to the same object.
+        if (this == obj)
+            return true;
+        if (obj instanceof HObject) {
+            // comparing the state of OID with
+            // the state of 'this' OID.
+            return this.equalsOID(((HObject) obj).getOID());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+
+        // We are returning the OID as a hashcode value.
+        return (int) oid[0];
     }
 }

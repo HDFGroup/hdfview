@@ -163,19 +163,19 @@ public class NewDatatypeDialog extends Dialog {
                 Group g = (Group) obj;
                 groupList.add(g);
                 if (g.isRoot()) {
-                    parentChoice.add(HObject.separator);
+                    parentChoice.add(HObject.SEPARATOR);
                 }
                 else {
-                    parentChoice.add(g.getPath() + g.getName() + HObject.separator);
+                    parentChoice.add(g.getPath() + g.getName() + HObject.SEPARATOR);
                 }
             }
         }
 
         if (parentGroup.isRoot()) {
-            parentChoice.select(parentChoice.indexOf(HObject.separator));
+            parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
+            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.SEPARATOR));
         }
 
 
@@ -389,7 +389,7 @@ public class NewDatatypeDialog extends Dialog {
         Group pgroup = null;
         boolean isVLen = false;
         boolean isVlenStr = false;
-        int tclass = -1, tsize = -1, torder = -1, tsign = -1;
+        int tclass = Datatype.CLASS_NO_CLASS, tsize = Datatype.NATIVE, torder = Datatype.NATIVE, tsign = Datatype.NATIVE;
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
             shell.getDisplay().beep();
@@ -397,7 +397,7 @@ public class NewDatatypeDialog extends Dialog {
             return null;
         }
 
-        if (name.indexOf(HObject.separator) >= 0) {
+        if (name.indexOf(HObject.SEPARATOR) >= 0) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Create", "Datatype name cannot contain path.");
             return null;
@@ -505,12 +505,12 @@ public class NewDatatypeDialog extends Dialog {
 
         HObject obj = null;
         try {
-            String fullPath = HObject.separator;
+            String fullPath = HObject.SEPARATOR;
             if (pgroup.isRoot()) {
                 fullPath += name;
             }
             else {
-                fullPath = pgroup.getPath() + HObject.separator + pgroup.getName() + HObject.separator + name;
+                fullPath = pgroup.getPath() + HObject.SEPARATOR + pgroup.getName() + HObject.SEPARATOR + name;
             }
             Datatype basedatatype = null;
             if (isVLen) {

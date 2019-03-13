@@ -14,11 +14,14 @@ public class H5ObjectEx_T_VLString {
         H5File file = null;
         String[] str_data = { "Parting", "is such", "sweet", "sorrow." };
         long[] dims = { str_data.length };
-        final H5Datatype typeVLStr = new H5Datatype(Datatype.CLASS_STRING, -1, -1, -1);
+        H5Datatype typeVLStr = null;
 
         // Create a new file using default properties.
         try {
             file = new H5File(FILENAME, FileFormat.CREATE);
+
+            // Create the base datatype.
+            typeVLStr = new H5Datatype(Datatype.CLASS_STRING, -1, Datatype.NATIVE, Datatype.NATIVE);
 
             // Create the dataset and write the string data to it.
             file.createScalarDS(DATASETNAME, null, typeVLStr, dims, null, null, 0, str_data);

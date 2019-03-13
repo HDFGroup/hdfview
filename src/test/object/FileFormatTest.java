@@ -27,7 +27,7 @@ import hdf.object.h5.H5File;
  *
  */
 public class FileFormatTest {
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormatTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormatTest.class);
     private static final H5File H5FILE = new H5File();
 
     private FileFormat testFile = null;

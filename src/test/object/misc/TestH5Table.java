@@ -47,8 +47,8 @@ public class TestH5Table {
 
         final String[] COMPOUND_MEMBER_NAMES = {"int32", "float32"};
         final H5Datatype[] COMPOUND_MEMBER_DATATYPES = {
-            new H5Datatype(Datatype.CLASS_INTEGER, 4, -1, -1),
-            new H5Datatype(Datatype.CLASS_FLOAT, 4, -1, -1)};
+            new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE),
+            new H5Datatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE)};
 
         final long DIM1 = dim1;
         final long DIM2 = dim2;

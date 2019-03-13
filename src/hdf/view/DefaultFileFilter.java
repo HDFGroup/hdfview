@@ -38,7 +38,7 @@ public class DefaultFileFilter {
      * @see #addExtension
      */
     public DefaultFileFilter() {
-        this.filters = new Hashtable<String, DefaultFileFilter>();
+        this.filters = new Hashtable<>();
     }
 
     /**
@@ -145,7 +145,7 @@ public class DefaultFileFilter {
      */
     public void addExtension(String extension) {
         if (filters == null) {
-            filters = new Hashtable<String, DefaultFileFilter>(5);
+            filters = new Hashtable<>(5);
         }
 
         String ext = null;
@@ -179,7 +179,7 @@ public class DefaultFileFilter {
                     fullDescription += "." + extensions.nextElement();
                     while (extensions.hasMoreElements()) {
                         fullDescription += ", "
-                                + extensions.nextElement();
+                                + "." + extensions.nextElement();
                     }
                 }
                 fullDescription += ")";

@@ -51,14 +51,14 @@ package hdf.object;
 public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     private static final long serialVersionUID = -4880399929644095662L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDS.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDS.class);
 
     /**
      * A single character to separate the names of nested compound fields. An
      * extended ASCII character, 0x95, is used to avoid common characters in
      * compound names.
      */
-    public static final String separator = "\u0095";
+    public static final String SEPARATOR = "\u0095";
 
     /**
      * The number of members of the compound dataset.
@@ -95,7 +95,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      * The i-th element of the Object[] is an integer array (int[]) that
      * contains the dimension sizes of the i-th member.
      */
-    protected Object[] memberDims;
+    protected transient Object[] memberDims;
 
     /**
      * The datatypes of compound members.
@@ -215,6 +215,29 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     @Override
     public final String[] getMemberNames() {
         return memberNames;
+    }
+
+    /**
+     * Returns an array of the names of the selected members of the compound dataset.
+     *
+     * @return an array of the names of the selected members of the compound dataset.
+     */
+    public final String[] getSelectedMemberNames() {
+        if (isMemberSelected == null) {
+            log.debug("getSelectedMemberNames(): isMemberSelected array is null");
+            log.trace("getSelectedMemberNames(): finish");
+            return memberNames;
+        }
+
+        int idx = 0;
+        String[] names = new String[getSelectedMemberCount()];
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            if (isMemberSelected[i]) {
+                names[idx++] = memberNames[i];
+            }
+        }
+
+        return names;
     }
 
     /**

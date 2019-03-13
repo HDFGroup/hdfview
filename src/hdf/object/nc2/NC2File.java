@@ -35,22 +35,9 @@ import ucar.nc2.Variable;
  */
 public class NC2File extends FileFormat {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 6941235662108358451L;
 
-    //    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2File.class);
-
-    /**
-     * file identifier for the open file.
-     */
-    private int fid;
-
-    /**
-     * the file access flag.
-     */
-    private int flag;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2File.class);
 
     /**
      * The root object of the file hierarchy.
@@ -82,8 +69,7 @@ public class NC2File extends FileFormat {
             ncFile = new NetcdfFile(fullFileName);
         }
         catch (Exception ex) {
-            //            if(!pathname.isEmpty())
-            //                log.debug("constuctor {}:", fullFileName, ex);
+            ncFile = null;
         }
     }
 
@@ -112,7 +98,7 @@ public class NC2File extends FileFormat {
      */
     @Override
     public boolean isThisType(String filename) {
-        boolean is_netcdf = false;
+        boolean isNetcdf = false;
         RandomAccessFile raf = null;
 
         try {
@@ -123,12 +109,7 @@ public class NC2File extends FileFormat {
         }
 
         if (raf == null) {
-            try {
-                raf.close();
-            }
-            catch (Exception ex) {
-                //                log.debug("raf close:", ex);
-            }
+            log.trace("raf null - exit");
             return false;
         }
 
@@ -141,13 +122,11 @@ public class NC2File extends FileFormat {
         }
 
         if (header != null) {
-            if (
-                    // netCDF
-                    ((header[0] == 67) && (header[1] == 68) && (header[2] == 70) && (header[3] < 4))) {
-                is_netcdf = true;
+            if (((header[0] == 67) && (header[1] == 68) && (header[2] == 70) && (header[3] < 4))) {
+                isNetcdf = true;
             }
             else {
-                is_netcdf = false;
+                isNetcdf = false;
             }
         }
 
@@ -155,10 +134,10 @@ public class NC2File extends FileFormat {
             raf.close();
         }
         catch (Exception ex) {
-            //            log.debug("raf close:", ex);
+            log.trace("raf close:", ex);
         }
 
-        return is_netcdf;
+        return isNetcdf;
     }
 
     /**
@@ -233,22 +212,20 @@ public class NC2File extends FileFormat {
     // implementing FileFormat
     @Override
     public Group createGroup(String name, Group pgroup) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation - create group.");
     }
 
     // implementing FileFormat
     @Override
     public Datatype createDatatype(int tclass, int tsize, int torder, int tsign)
             throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation - create datatype.");
     }
 
     @Override
     public Datatype createDatatype(int tclass, int tsize, int torder,
             int tsign, String name) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation - create datatype with name.");
     }
 
     // implementing FileFormat
@@ -256,8 +233,7 @@ public class NC2File extends FileFormat {
     public Dataset createScalarDS(String name, Group pgroup, Datatype type,
             long[] dims, long[] maxdims, long[] chunks, int gzip, Object fillValue,
             Object data) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation create dataset.");
     }
 
     // implementing FileFormat
@@ -265,14 +241,12 @@ public class NC2File extends FileFormat {
     public Dataset createImage(String name, Group pgroup, Datatype type,
             long[] dims, long[] maxdims, long[] chunks, int gzip, int ncomp,
             int intelace, Object data) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation create image.");
     }
 
     // implementing FileFormat
     @Override
     public void delete(HObject obj) throws Exception {
-        // not supported
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
@@ -280,8 +254,7 @@ public class NC2File extends FileFormat {
     @Override
     public HObject copy(HObject srcObj, Group dstGroup, String dstName)
             throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation - copy.");
     }
 
     /**
@@ -296,30 +269,26 @@ public class NC2File extends FileFormat {
 
     private void copyDataset(Dataset srcDataset, NC2Group pgroup)
             throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation - copy dataset.");
     }
 
     private void copyGroup(NC2Group srcGroup, NC2Group pgroup)
             throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation - copy group.");
     }
 
     /**
      * Copy attributes of the source object to the destination object.
      */
     public void copyAttributes(HObject src, HObject dst) {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation copy attributes with HObject.");
     }
 
     /**
      * Copy attributes of the source object to the destination object.
      */
-    public void copyAttributes(int src_id, int dst_id) {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+    public void copyAttributes(int srcID, int dstID) {
+        throw new UnsupportedOperationException("Unsupported operation - copy attributes.");
     }
 
     /**
@@ -340,7 +309,7 @@ public class NC2File extends FileFormat {
     public void writeAttribute(HObject obj, hdf.object.Attribute attr,
             boolean attrExisted) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation.");
+        throw new UnsupportedOperationException("Unsupported operation - write attribute.");
     }
 
     /** converts a ucar.nc2.Attribute into an hdf.object.Attribute */
@@ -354,7 +323,13 @@ public class NC2File extends FileFormat {
 
         String attrName = netcdfAttr.getName();
         long[] attrDims = { netcdfAttr.getLength() };
-        Datatype attrType = new NC2Datatype(netcdfAttr.getDataType());
+        Datatype attrType = null;
+        try {
+            attrType = new NC2Datatype(netcdfAttr.getDataType());
+        }
+        catch (Exception ex) {
+            attrType = null;
+        }
         ncsaAttr = new hdf.object.Attribute(null, attrName, attrType, attrDims);
         ncsaAttr.setData(netcdfAttr.getValues());
 
@@ -366,9 +341,7 @@ public class NC2File extends FileFormat {
      */
     @Override
     public String getLibversion() {
-        String ver = "NetCDF Java (version 2.4)";
-
-        return ver;
+        return "NetCDF Java (version 2.4)";
     }
 
     // implementing FileFormat

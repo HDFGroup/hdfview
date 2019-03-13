@@ -20,9 +20,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Vector;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -40,7 +41,7 @@ import hdf.view.TreeView.TreeViewFactory;
 public class ViewProperties extends PreferenceStore {
     private static final long   serialVersionUID     = -6411465283887959066L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ViewProperties.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ViewProperties.class);
 
     /** the version of the HDFViewer */
     public static final String  VERSION              = HDFVersions.HDFVIEW_VERSION;
@@ -92,7 +93,6 @@ public class ViewProperties extends PreferenceStore {
     public static final String DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultScalarDSTableView";
     public static final String DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.TableView.DefaultScalarAttributeTableView";
     public static final String DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultCompoundDSTableView";
-    public static final String DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.TableView.DefaultCompoundAttributeTableView";
 
     /** Default MetaDataView class names */
     public static final String DEFAULT_GROUP_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultGroupMetaDataView";
@@ -128,87 +128,87 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /** the root directory of the HDFView */
-    private static String           rootDir                = System.getProperty("user.dir");
+    private static String            rootDir = System.getProperty("user.dir");
 
     /** user's guide */
-    private static String           usersGuide             = rootDir + "/UsersGuide/index.html";
+    private static String            usersGuide = "/UsersGuide/index.html";
 
     /** the font size */
-    private static int              fontSize               = 12;
+    private static int               fontSize               = 12;
 
     /** the font type */
-    private static String           fontType               = "Serif";
+    private static String            fontType               = "Serif";
 
     /** the full path of H4toH5 converter */
-    private static String           h4toh5                 = "";
+    private static String            h4toh5                 = "";
 
     /** data delimiter */
-    private static String           delimiter              = DELIMITER_TAB;
+    private static String            delimiter              = DELIMITER_TAB;
 
     /** image origin */
-    private static String           origin                 = ORIGIN_UL;
+    private static String            origin                 = ORIGIN_UL;
 
     /** default index type */
-    private static String           indexType              = "H5_INDEX_NAME";
+    private static String            indexType              = "H5_INDEX_NAME";
 
     /** default index order */
-    private static String           indexOrder             = "H5_ITER_INC";
+    private static String            indexOrder             = "H5_ITER_INC";
 
     /** a list of most recent files */
-    private static Vector<String>   recentFiles;
+    private static ArrayList<String> recentFiles = new ArrayList<>(MAX_RECENT_FILES + 5);
 
     /** default starting file directory */
-    private static String           workDir                = "user.home";
+    private static String            workDir = "user.home";
 
     /** default HDF file extensions */
-    private static String           fileExt                = "hdf, h4, hdf4, h5, hdf5, he2, he5";
+    private static String            fileExt                = "hdf, h4, hdf4, h5, hdf5, he2, he5";
 
-    private static ClassLoader      extClassLoader         = null;
+    private static ClassLoader       extClassLoader         = null;
 
     /** a list of srb accounts */
-    private static Vector<String[]> srbAccountList = new Vector<>(5);
+    private static ArrayList<String[]> srbAccountList = new ArrayList<>(5);
 
     /**
      * flag to indicate if auto contrast is used in image processing. Do not use
      * autocontrast by default (2.6 change).
      */
-    private static boolean          isAutoContrast         = false;
+    private static boolean           isAutoContrast         = false;
 
-    private static boolean          showImageValues        = false;
+    private static boolean           showImageValues        = false;
 
-    private static boolean          showRegRefValues       = false;
+    private static boolean           showRegRefValues       = false;
 
     /**
      * flag to indicate if default open file mode is read only. By default, use read
      * only to prevent accidental modifications to the file.
      */
-    private static boolean          isReadOnly             = true;
+    private static boolean           isReadOnly             = true;
 
-    private static String EarlyLib = "Latest";
+    private static String            EarlyLib = "Latest";
 
-    private static String LateLib = "Latest";
+    private static String            LateLib = "Latest";
 
     /** a list of palette files */
-    private static Vector<String>   paletteList            = new Vector<>(5);
+    private static ArrayList<String> paletteList = new ArrayList<>(5);
 
     /** flag to indicate if enum data is converted to strings */
-    private static boolean          convertEnum            = true;
+    private static boolean           convertEnum            = true;
 
     /** flag to indicate if data is 1-based index */
-    private static boolean          isIndexBase1           = false;
+    private static boolean           isIndexBase1           = false;
 
     /**
      * Current Java applications such as HDFView cannot handle files with a large
      * number of objects such as 1,000,000 objects. max_members defines the maximum
      * number of objects that will be loaded into memory.
      */
-    private static int              max_members            = Integer.MAX_VALUE;   // load all by default
+    private static int               maxMembers            = Integer.MAX_VALUE;   // load all by default
     /**
      * Current Java applications such as HDFView cannot handle files with a large
      * number of objects such 1,000,000 objects. start_members defines the
      * starting index of objects that will be loaded into memory.
      */
-    private static int              start_members          = 0;
+    private static int               startMembers          = 0;
 
     private static Image        hdfIcon, h4Icon, h4IconR, h5Icon, h5IconR, largeHdfIcon, blankIcon, helpIcon, fileopenIcon,
     filesaveIcon, filenewIcon, filecloseIcon, foldercloseIcon, folderopenIcon, foldercloseIconA,
@@ -217,25 +217,25 @@ public class ViewProperties extends PreferenceStore {
     cutIcon, pasteIcon, previousIcon, nextIcon, firstIcon, lastIcon, animationIcon, datatypeIcon,
     datatypeIconA, linkIcon, iconAPPS, iconURL, iconVIDEO, iconXLS, iconPDF, iconAUDIO, questionIcon;
 
-    private static String           propertyFile;
+    private static String            propertyFile;
 
     /** a list of treeview modules */
-    private static Vector<String>   moduleListTreeView     = new Vector<>(5);
+    private static ArrayList<String> moduleListTreeView = new ArrayList<>(5);
 
     /** a list of metaview modules */
-    private static Vector<String>   moduleListMetaDataView = new Vector<>(5);
+    private static ArrayList<String> moduleListMetaDataView = new ArrayList<>(5);
 
     /** a list of tableview modules */
-    private static Vector<String>   moduleListTableView    = new Vector<>(5);
+    private static ArrayList<String> moduleListTableView = new ArrayList<>(5);
 
     /** a list of imageview modules */
-    private static Vector<String>   moduleListImageView    = new Vector<>(5);
+    private static ArrayList<String> moduleListImageView = new ArrayList<>(5);
 
     /** a list of paletteview modules */
-    private static Vector<String>   moduleListPaletteView  = new Vector<>(5);
+    private static ArrayList<String> moduleListPaletteView = new ArrayList<>(5);
 
     /** a list of helpview modules */
-    private static Vector<String>   moduleListHelpView     = new Vector<>(5);
+    private static ArrayList<String> moduleListHelpView = new ArrayList<>(5);
 
     /**
      * Creates a property list with given root directory of the HDFView.
@@ -245,15 +245,48 @@ public class ViewProperties extends PreferenceStore {
      */
     public ViewProperties(String viewRoot) {
         super();
-        // find the property file
-        String userHome, userDir, propertyFileName, h5v;
 
         // look for the property file in the user's home directory
-        propertyFileName = USER_PROPERTY_FILE;
-        userHome = System.getProperty("user.home") + File.separator + propertyFileName;
-        userDir = System.getProperty("user.dir") + File.separator + propertyFileName;
-        h5v = workDir + File.separator + propertyFileName;
+        String propertyFileName = USER_PROPERTY_FILE;
+        String userHome = System.getProperty("user.home") + File.separator + propertyFileName;
+        String userDir = System.getProperty("user.dir") + File.separator + propertyFileName;
+        String h5v = workDir + File.separator + propertyFileName;
 
+        setFilename(createPropertyFile(userHome, userDir, h5v));
+
+        setRootDir(viewRoot);
+        log.trace("rootDir is {}", rootDir);
+        String workPath = System.getProperty("hdfview.workdir");
+        log.trace("hdfview.workdir={}", workPath);
+        if (workPath != null) {
+            setWorkDir(workPath);
+        }
+        setUsersGuide(rootDir + usersGuide);
+
+        setDefault("users.guide", System.getProperty("user.dir") + "/UsersGuide/index.html");
+        setDefault("image.contrast", false);
+        setDefault("image.showvalues", false);
+        setDefault("file.mode", "r");
+        setDefault("lib.lowversion", "Earliest");
+        setDefault("lib.highversion", "Latest");
+        setDefault("enum.conversion", false);
+        setDefault("regref.showvalues", false);
+        setDefault("index.base1", false);
+        setDefault("image.origin", ORIGIN_UL);
+        setDefault("h5file.indexType", "H5_INDEX_NAME");
+        setDefault("h5file.indexOrder", "H5_ITER_INC");
+        setDefault("h4toh5.converter", "");
+        setDefault("work.dir", "user.home");
+        setDefault("file.extension", "hdf, h4, hdf4, h5, hdf5, he2, he5");
+        setDefault("font.size", 12);
+        setDefault("font.type", "Serif");
+        setDefault("max.members", Integer.MAX_VALUE);
+        setDefault("recent.file", "");
+        setDefault("palette.file", "");
+        setDefault("data.delimiter", DELIMITER_TAB);
+    }
+
+    public static String createPropertyFile(String userHome, String userDir, String h5v) {
         if ((new File(userHome)).exists()) {
             propertyFile = userHome;
             log.trace("userHome propertyFile is {}", propertyFile);
@@ -280,40 +313,8 @@ public class ViewProperties extends PreferenceStore {
                 }
             }
         }
-        setFilename(propertyFile);
         log.trace("propertyFile is {}", propertyFile);
-
-        rootDir = viewRoot;
-        log.trace("rootDir is {}", rootDir);
-        String workPath = System.getProperty("hdfview.workdir");
-        log.trace("hdfview.workdir={}", workPath);
-        if (workPath != null) {
-            workDir = workPath;
-        }
-
-        recentFiles = new Vector<>(MAX_RECENT_FILES + 5);
-
-        setDefault("users.guide", System.getProperty("user.dir") + "/UsersGuide/index.html");
-        setDefault("image.contrast", false);
-        setDefault("image.showvalues", false);
-        setDefault("file.mode", "r");
-        setDefault("lib.lowversion", "Earliest");
-        setDefault("lib.highversion", "Latest");
-        setDefault("enum.conversion", false);
-        setDefault("regref.showvalues", false);
-        setDefault("index.base1", false);
-        setDefault("image.origin", ORIGIN_UL);
-        setDefault("h5file.indexType", "H5_INDEX_NAME");
-        setDefault("h5file.indexOrder", "H5_ITER_INC");
-        setDefault("h4toh5.converter", "");
-        setDefault("work.dir", "user.home");
-        setDefault("file.extension", "hdf, h4, hdf4, h5, hdf5, he2, he5");
-        setDefault("font.size", 12);
-        setDefault("font.type", "Serif");
-        setDefault("max.members", Integer.MAX_VALUE);
-        setDefault("recent.file", "");
-        setDefault("palette.file", "");
-        setDefault("data.delimiter", DELIMITER_TAB);
+        return propertyFile;
     }
 
     /**
@@ -355,16 +356,15 @@ public class ViewProperties extends PreferenceStore {
             return extClassLoader;
         }
 
-        Vector<String> jarList = new Vector<>(50);
-        Vector<String> classList = new Vector<>(50);
+        ArrayList<String> jarList = new ArrayList<>(50);
+        ArrayList<String> classList = new ArrayList<>(50);
         for (int i = 0; i < jars.length; i++) {
             log.trace("loadExtClass: load jar[{}]", i);
             if (jars[i].endsWith(".jar")) {
                 jarList.add(jars[i]);
                 // add class names to the list of classes
                 File tmpFile = new File(extdir, jars[i]);
-                try {
-                    JarFile jarFile = new JarFile(tmpFile, false, JarFile.OPEN_READ);
+                try (JarFile jarFile = new JarFile(tmpFile, false, JarFile.OPEN_READ)) {
                     Enumeration<?> emu = jarFile.entries();
                     while (emu.hasMoreElements()) {
                         JarEntry jarEntry = (JarEntry) emu.nextElement();
@@ -376,14 +376,12 @@ public class ViewProperties extends PreferenceStore {
                             classList.add(entryName.substring(0, idx));
                         }
                     }
-
-                    jarFile.close();
                 }
                 catch (Exception ex) {
                     log.debug("loadExtClass: load jar[{}] failed", i, ex);
                 }
-            } // if (jars[i].endsWith(".jar")) {
-        } // for (int i=0; i<jars.length; i++) {
+            } // (jars[i].endsWith(".jar"))
+        } // (int i=0; i<jars.length; i++)
 
         int n = jarList.size();
         if (n <= 0) {
@@ -402,7 +400,6 @@ public class ViewProperties extends PreferenceStore {
             }
         }
 
-        // try { extClassLoader = new URLClassLoader(urls); }
         try {
             extClassLoader = URLClassLoader.newInstance(urls);
         }
@@ -462,7 +459,7 @@ public class ViewProperties extends PreferenceStore {
             catch (Exception ex) {
                 log.debug("loadExtClass: load classList[{}] of {} failed", i, theName, ex);
             }
-        } // for (int i=0; i<n; i++)
+        } //  (int i=0; i<n; i++)
         log.trace("loadExtClass: finished");
 
         return extClassLoader;
@@ -1127,7 +1124,7 @@ public class ViewProperties extends PreferenceStore {
         log.trace("load user properties: add default modules");
         String[] moduleKeys = { "module.treeview", "module.metadataview", "module.tableview",
                 "module.imageview", "module.paletteview" };
-        Vector[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTableView,
+        ArrayList[] moduleList = { moduleListTreeView, moduleListMetaDataView, moduleListTableView,
                 moduleListImageView, moduleListPaletteView };
         String[] moduleNames = { DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT,
                 DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT };
@@ -1136,7 +1133,7 @@ public class ViewProperties extends PreferenceStore {
         log.trace("load user properties: modules");
         for (int i = 0; i < moduleNames.length; i++) {
             if (!moduleList[i].contains(moduleNames[i]))
-                moduleList[i].addElement(moduleNames[i]);
+                moduleList[i].add(moduleNames[i]);
             log.trace("load: add default moduleList[{}] is {}", i, moduleNames[i]);
         }
         log.trace("load Ext Class modules");
@@ -1145,9 +1142,11 @@ public class ViewProperties extends PreferenceStore {
         // set default selection of data views
         log.trace("load user properties: set default selection of data views");
         for (int i = 0; i < moduleNames.length; i++) {
-            Vector<String> theList = moduleList[i];
+            ArrayList<String> theList = moduleList[i];
             propVal = getString(moduleKeys[i]);
-            log.trace("load: default theList is {}", Arrays.toString(theList.toArray()));
+            if (log.isTraceEnabled()) {
+                log.trace("load: default theList is {}", Arrays.toString(theList.toArray()));
+            }
 
             if ((propVal != null) && (propVal.length() > 0)) {
                 // set default to the module specified in property file
@@ -1167,14 +1166,16 @@ public class ViewProperties extends PreferenceStore {
                 }
                 log.trace("load user properties: default module[{}]={}", i, moduleNames[i]);
             }
-            log.trace("load: final theList is {}", Arrays.toString(theList.toArray()));
+            if (log.isTraceEnabled()) {
+                log.trace("load: final theList is {}", Arrays.toString(theList.toArray()));
+            }
         }
 
         // add fileformat modules
         log.trace("load user properties: fileformat modules");
-        String[] local_enum = this.preferenceNames();
+        String[] localEnum = this.preferenceNames();
         String fExt = null;
-        for (String theKey : local_enum) {
+        for (String theKey : localEnum) {
             log.trace("load: add prop {}", theKey);
             if (theKey.startsWith("module.fileformat")) {
                 fExt = theKey.substring(18);
@@ -1200,7 +1201,7 @@ public class ViewProperties extends PreferenceStore {
                         FileFormat.addFileFormat(fExt, (FileFormat) theObject);
                     }
                 }
-                catch (Throwable err) {
+                catch (Exception err) {
                     log.debug("load: load file format failed", err);
                 }
             }
@@ -1208,65 +1209,65 @@ public class ViewProperties extends PreferenceStore {
 
         propVal = getString("users.guide");
         if (!isDefault("users.guide"))
-            usersGuide = propVal;
+            setUsersGuide(propVal);
 
         propVal = getString("image.contrast");
         if (!isDefault("image.contrast"))
-            isAutoContrast = ("auto".equalsIgnoreCase(propVal));
+            setAutoContrast("auto".equalsIgnoreCase(propVal));
 
-        showImageValues = getBoolean("image.showvalues");
+        setShowImageValue(getBoolean("image.showvalues"));
 
         propVal = getString("file.mode");
         if (!isDefault("file.mode"))
-            isReadOnly = ("r".equalsIgnoreCase(propVal));
+            setReadOnly("r".equalsIgnoreCase(propVal));
 
-        EarlyLib = getString("lib.lowversion");
+        setEarlyLib(getString("lib.lowversion"));
 
-        LateLib = getString("lib.highversion");
+        setLateLib(getString("lib.highversion"));
 
-        convertEnum = getBoolean("enum.conversion");
+        setConvertEnum(getBoolean("enum.conversion"));
 
-        showRegRefValues = getBoolean("regref.showvalues");
+        setShowRegRefValue(getBoolean("regref.showvalues"));
 
-        isIndexBase1 = getBoolean("index.base1");
+        setIndexBase1(getBoolean("index.base1"));
 
         propVal = getString("data.delimiter");
         if (!isDefault("data.delimiter"))
-            delimiter = propVal;
+            setDataDelimiter(propVal);
 
         propVal = getString("image.origin");
         if (!isDefault("image.origin"))
-            origin = propVal;
+            setImageOrigin(propVal);
 
         propVal = getString("h5file.indexType");
         if (!isDefault("h5file.indexType"))
-            indexType = propVal;
+            setIndexType(propVal);
 
         propVal = getString("h5file.indexOrder");
         if (!isDefault("h5file.indexOrder"))
-            indexOrder = propVal;
+            setIndexOrder(propVal);
 
         propVal = getString("h4toh5.converter");
         if (!isDefault("h4toh5.converter"))
-            h4toh5 = propVal;
+            setH4toH5(propVal);
 
         propVal = getString("work.dir");
         if (!isDefault("work.dir"))
-            workDir = propVal;
+            setWorkDir(propVal);
 
         propVal = getString("file.extension");
         if (!isDefault("file.extension")) {
-            fileExt = propVal;
+            setFileExtension(propVal);
             FileFormat.addFileExtension(fileExt);
         }
 
-        fontSize = getInt("font.size");
+        setFontSize(getInt("font.size"));
 
         propVal = getString("font.type");
         if (!isDefault("font.type"))
-            fontType = propVal.trim();
+            setFontType(propVal.trim());
 
-        max_members = getInt("max.members");
+        setMaxMembers(getInt("max.members"));
 
         // load the most recent file list from the property file
         log.trace("load user properties: most recent file list");
@@ -1275,55 +1276,48 @@ public class ViewProperties extends PreferenceStore {
             theFile = getString("recent.file" + i);
             if ((theFile != null) && !recentFiles.contains(theFile)) {
                 if (theFile.startsWith("http://") || theFile.startsWith("ftp://") || (new File(theFile)).exists()) {
-                    recentFiles.addElement(theFile);
+                    recentFiles.add(theFile);
                 }
             }
-            // else {
-            // this.remove("recent.file" + i);
-            // }
         }
 
         // load the most recent palette file list from the property file
         log.trace("load user properties: most recent palette file list");
-        theFile = null;
         for (int i = 0; i < MAX_RECENT_FILES; i++) {
             theFile = getString("palette.file" + i);
             if (theFile != null) theFile = theFile.trim();
 
             if ((theFile != null && theFile.length() > 0) && !paletteList.contains(theFile)) {
                 if ((new File(theFile)).exists()) {
-                    paletteList.addElement(theFile);
+                    paletteList.add(theFile);
                 }
             }
-            // else {
-            // this.remove("palette.file" + i);
-            // }
         }
 
         // load srb account
         // log.trace("load user properties: srb account");
         // propVal = null;
         // String srbaccount[] = new String[7];
-        // for (int i = 0; i < MAX_RECENT_FILES; i++) {
-        // if (null == (srbaccount[0] = getString("srbaccount" + i + ".host")))
+        //  (int i = 0; i < MAX_RECENT_FILES; i++) {
+        //  (null == (srbaccount[0] = getString("srbaccount" + i + ".host")))
         // continue;
         //
-        // if (null == (srbaccount[1] = getString("srbaccount" + i + ".port")))
+        //  (null == (srbaccount[1] = getString("srbaccount" + i + ".port")))
         // continue;
         //
-        // if (null == (srbaccount[2] = getString("srbaccount" + i + ".user")))
+        //  (null == (srbaccount[2] = getString("srbaccount" + i + ".user")))
         // continue;
         //
-        // if (null == (srbaccount[3] = getString("srbaccount" + i + ".password")))
+        //  (null == (srbaccount[3] = getString("srbaccount" + i + ".password")))
         // continue;
         //
-        // if (null == (srbaccount[4] = getString("srbaccount" + i + ".home")))
+        //  (null == (srbaccount[4] = getString("srbaccount" + i + ".home")))
         // continue;
         //
-        // if (null == (srbaccount[5] = getString("srbaccount" + i + ".domain")))
+        //  (null == (srbaccount[5] = getString("srbaccount" + i + ".domain")))
         // continue;
         //
-        // if (null == (srbaccount[6] = getString("srbaccount" + i + ".resource")))
+        //  (null == (srbaccount[6] = getString("srbaccount" + i + ".resource")))
         // continue;
         //
         // srbAccountList.add(srbaccount);
@@ -1372,7 +1366,7 @@ public class ViewProperties extends PreferenceStore {
 
         if (fontType != null) setValue("font.type", fontType);
 
-        setValue("max.members", max_members);
+        setValue("max.members", maxMembers);
 
         if (isAutoContrast)
             setValue("image.contrast", "auto");
@@ -1402,7 +1396,7 @@ public class ViewProperties extends PreferenceStore {
         int minSize = Math.min(size, MAX_RECENT_FILES);
         log.trace("save user properties: most recent files size={}", size);
         for (int i = 0; i < minSize; i++) {
-            theFile = recentFiles.elementAt(i);
+            theFile = recentFiles.get(i);
             if ((theFile != null) && (theFile.length() > 0)) setValue("recent.file" + i, theFile);
         }
 
@@ -1411,7 +1405,7 @@ public class ViewProperties extends PreferenceStore {
         size = paletteList.size();
         minSize = Math.min(size, MAX_RECENT_FILES);
         for (int i = 0; i < minSize; i++) {
-            theFile = paletteList.elementAt(i);
+            theFile = paletteList.get(i);
             if ((theFile != null) && (theFile.length() > 0)) setValue("palette.file" + i, theFile);
         }
 
@@ -1420,9 +1414,9 @@ public class ViewProperties extends PreferenceStore {
         // String srbaccount[] = null;
         // size = srbAccountList.size();
         // minSize = Math.min(size, MAX_RECENT_FILES);
-        // for (int i = 0; i < minSize; i++) {
+        //  (int i = 0; i < minSize; i++) {
         // srbaccount = srbAccountList.get(i);
-        // if ((srbaccount[0] != null) && (srbaccount[1] != null) && (srbaccount[2] !=
+        //  ((srbaccount[0] != null) && (srbaccount[1] != null) && (srbaccount[2] !=
         // null)
         // && (srbaccount[3] != null) && (srbaccount[4] != null) && (srbaccount[5] !=
         // null)
@@ -1439,23 +1433,23 @@ public class ViewProperties extends PreferenceStore {
 
         // save default modules
         log.trace("save user properties: default modules");
-        String moduleName = moduleListTreeView.elementAt(0);
+        String moduleName = moduleListTreeView.get(0);
         if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.treeview", moduleName);
         log.trace("save user properties: module.treeview={}", moduleName);
 
-        moduleName = moduleListMetaDataView.elementAt(0);
+        moduleName = moduleListMetaDataView.get(0);
         if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.metadataview", moduleName);
         log.trace("save user properties: module.metadataview={}", moduleName);
 
-        moduleName = moduleListTableView.elementAt(0);
+        moduleName = moduleListTableView.get(0);
         if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.tableview", moduleName);
         log.trace("save user properties: module.tableview={}", moduleName);
 
-        moduleName = moduleListImageView.elementAt(0);
+        moduleName = moduleListImageView.get(0);
         if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.imageview", moduleName);
         log.trace("save user properties: module.imageview={}", moduleName);
 
-        moduleName = moduleListPaletteView.elementAt(0);
+        moduleName = moduleListPaletteView.get(0);
         if ((moduleName != null) && (moduleName.length() > 0)) setValue("module.paletteview", moduleName);
         log.trace("save user properties: module.paletteview={}", moduleName);
 
@@ -1568,46 +1562,46 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /** @return the list of most recent files */
-    public static Vector<String> getMRF() {
+    public static List<String> getMRF() {
         return recentFiles;
     }
 
     /** @return the list of palette files */
-    public static Vector<String> getPaletteList() {
+    public static List<String> getPaletteList() {
         return paletteList;
     }
 
-    public static Vector<String[]> getSrbAccount() {
+    public static List<String[]> getSrbAccount() {
         return srbAccountList;
     }
 
     /** @return a list of treeview modules */
-    public static Vector<String> getTreeViewList() {
+    public static List<String> getTreeViewList() {
         return moduleListTreeView;
     }
 
     /** @return a list of metadataview modules */
-    public static Vector<String> getMetaDataViewList() {
+    public static List<String> getMetaDataViewList() {
         return moduleListMetaDataView;
     }
 
     /** @return a list of tableview modules */
-    public static Vector<String> getTableViewList() {
+    public static List<String> getTableViewList() {
         return moduleListTableView;
     }
 
     /** @return a list of imageview modules */
-    public static Vector<String> getImageViewList() {
+    public static List<String> getImageViewList() {
         return moduleListImageView;
     }
 
     /** @return a list of paletteview modules */
-    public static Vector<String> getPaletteViewList() {
+    public static List<String> getPaletteViewList() {
         return moduleListPaletteView;
     }
 
     /** @return a list of helpview modules */
-    public static Vector<String> getHelpViewList() {
+    public static List<String> getHelpViewList() {
         return moduleListHelpView;
     }
 
@@ -1630,6 +1624,17 @@ public class ViewProperties extends PreferenceStore {
      */
     public static void setH4toH5(String tool) {
         h4toh5 = tool;
+    }
+
+    /**
+     * set the path of the default root directory
+     *
+     * @param rDir
+     *            the default root directory
+     */
+    public static void setRootDir(String rDir) {
+        log.trace("ViewProperties:setRootDir rDir={}", rDir);
+        rootDir = rDir;
     }
 
     /** set the path of the default work directory
@@ -1696,7 +1701,7 @@ public class ViewProperties extends PreferenceStore {
      *            the maximum number of objects to load into memory
      */
     public static void setMaxMembers(int n) {
-        max_members = n;
+        maxMembers = n;
     }
 
     /**
@@ -1712,7 +1717,7 @@ public class ViewProperties extends PreferenceStore {
             idx = 0;
         }
 
-        start_members = idx;
+        startMembers = idx;
     }
 
     /**
@@ -1723,10 +1728,10 @@ public class ViewProperties extends PreferenceStore {
      * @return the maximum members
      */
     public static int getMaxMembers() {
-        if (max_members < 0)
+        if (maxMembers < 0)
             return Integer.MAX_VALUE; // load the whole file
 
-        return max_members;
+        return maxMembers;
     }
 
     /**
@@ -1737,7 +1742,7 @@ public class ViewProperties extends PreferenceStore {
      * @return the start members
      */
     public static int getStartMembers() {
-        return start_members;
+        return startMembers;
     }
 
     /**
@@ -1895,7 +1900,7 @@ public class ViewProperties extends PreferenceStore {
      * @param recentFilesList
      *               The list of most recently accessed files.
      */
-    public static void setRecentFiles(Vector<String> recentFilesList) {
+    public static void setRecentFiles(ArrayList<String> recentFilesList) {
         recentFiles = recentFilesList;
     }
 }

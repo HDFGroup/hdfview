@@ -67,7 +67,7 @@ import hdf.view.ViewProperties;
  */
 public class NewCompoundDatasetDialog extends Dialog {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewCompoundDatasetDialog.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewCompoundDatasetDialog.class);
 
     private Shell                 shell;
 
@@ -196,10 +196,10 @@ public class NewCompoundDatasetDialog extends Dialog {
                 Group g = (Group) obj;
                 groupList.add(g);
                 if (g.isRoot()) {
-                    parentChoice.add(HObject.separator);
+                    parentChoice.add(HObject.SEPARATOR);
                 }
                 else {
-                    parentChoice.add(g.getPath() + g.getName() + HObject.separator);
+                    parentChoice.add(g.getPath() + g.getName() + HObject.SEPARATOR);
                 }
             }
             else if (obj instanceof CompoundDS) {
@@ -208,10 +208,10 @@ public class NewCompoundDatasetDialog extends Dialog {
         }
 
         if (parentGroup.isRoot()) {
-            parentChoice.select(parentChoice.indexOf(HObject.separator));
+            parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.separator));
+            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.SEPARATOR));
         }
 
         label = new Label(fieldComposite, SWT.LEFT);
@@ -268,8 +268,8 @@ public class NewCompoundDatasetDialog extends Dialog {
                 String compression = dset.getCompression();
                 if (compression != null) {
                     int clevel = -1;
-                    int comp_pos = Dataset.compression_gzip_txt.length();
-                    int idx = compression.indexOf(Dataset.compression_gzip_txt);
+                    int comp_pos = Dataset.COMPRESSION_GZIP_TXT.length();
+                    int idx = compression.indexOf(Dataset.COMPRESSION_GZIP_TXT);
                     if (idx >= 0) {
                         try {
                             clevel = Integer.parseInt(compression.substring(idx + comp_pos, idx + comp_pos +1));
@@ -374,7 +374,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                     else {
                         ((Text) editors[i][2].getEditor()).setText(String.valueOf(mOrders[i]));
                     }
-                } // for (int i=0; i<numberOfMembers; i++)
+                } //  (int i=0; i<numberOfMembers; i++)
             }
         });
 
@@ -422,7 +422,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 maxSizeField.setText(maxSizeStr);
 
                 String currentStr = currentSizeField.getText();
-                int idx = currentStr.lastIndexOf("x");
+                int idx = currentStr.lastIndexOf('x');
                 String chunkStr = "1";
 
                 if (rank <= 1) {
@@ -496,7 +496,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 chunkSizeField.setEnabled(true);
 
                 String currentStr = currentSizeField.getText();
-                int idx = currentStr.lastIndexOf("x");
+                int idx = currentStr.lastIndexOf('x');
                 String chunkStr = "1";
 
                 int rank = rankChoice.getSelectionIndex() + 1;
@@ -542,7 +542,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 if (isCompressed) {
                     if (!checkChunked.getSelection()) {
                         String currentStr = currentSizeField.getText();
-                        int idx = currentStr.lastIndexOf("x");
+                        int idx = currentStr.lastIndexOf('x');
                         String chunkStr = "1";
 
                         int rank = rankChoice.getSelectionIndex() + 1;
@@ -857,7 +857,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 throw new IllegalArgumentException("Invalid data type.");
             }
             mDatatypes[i] = type;
-        } // for (int i=0; i<n; i++)
+        } //  (int i=0; i<n; i++)
 
         rank = rankChoice.getSelectionIndex() + 1;
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
@@ -952,7 +952,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 }
 
                 chunks[i] = l;
-            } // for (int i=0; i<rank; i++)
+            } //  (int i=0; i<rank; i++)
 
             long tchunksize = 1, tdimsize = 1;
             for (int i = 0; i < rank; i++) {
@@ -976,7 +976,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 }
             }
 
-        } // if (checkChunked.getSelection())
+        } //  (checkChunked.getSelection())
 
         int gzip = 0;
         if (checkCompression.getSelection()) {
