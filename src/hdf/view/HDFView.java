@@ -219,8 +219,14 @@ public class HDFView implements DataViewManager {
 
         ViewProperties.loadIcons();
 
-        currentDir = ViewProperties.getWorkDir();
-        if (currentDir == null) currentDir = System.getProperty("user.home");
+        String workDir = System.getProperty("hdfview.workdir");
+        if (workDir != null)
+            currentDir = workDir;
+        else
+            currentDir = ViewProperties.getWorkDir();
+
+        if (currentDir == null)
+            currentDir = System.getProperty("user.home");
 
         log.info("Current directory is {}", currentDir);
 
@@ -824,9 +830,9 @@ public class HDFView implements DataViewManager {
                 // Open the dialog
                 userOptionDialog.open();
 
-                //TODO: why overwrite currentDir always?
-                //if (userOptionDialog.isWorkDirChanged())
-                currentDir = ViewProperties.getWorkDir();
+                // TODO: this functionality is currently broken because isWorkDirChanged() is not exposed correctly.
+                // if (userOptionDialog.isWorkDirChanged())
+                //     currentDir = ViewProperties.getWorkDir();
 
                 //if (userOptionDialog.isFontChanged()) {
                 Font font = null;
@@ -1892,7 +1898,8 @@ public class HDFView implements DataViewManager {
         String tmpDir = System.getProperty("java.io.tmpdir");
 
         File tmpFile = new File(tmpDir);
-        if (!tmpFile.canWrite()) tmpDir = System.getProperty("user.home");
+        if (!tmpFile.canWrite())
+            tmpDir = System.getProperty("user.home");
 
         localFile = tmpDir + File.separator + localFile;
 
@@ -2451,9 +2458,9 @@ public class HDFView implements DataViewManager {
     public static void main(String[] args) {
         if (display == null || display.isDisposed()) display = new Display();
 
-        String rootDir = System.getProperty("hdfview.workdir");
+        String rootDir = System.getProperty("hdfview.root");
         log.trace("main: rootDir = {} ", rootDir);
-        if(rootDir == null)
+        if (rootDir == null)
             rootDir = System.getProperty("user.dir");
 
         File tmpFile = null;

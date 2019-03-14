@@ -424,6 +424,7 @@
             <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
             <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />
+            <sysproperty key="hdfview.propfile" path="${basedir}/${jar.dir}/.hdfview99" />
             <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
             <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
         </java>
@@ -650,6 +651,7 @@
     <macrodef name="run-junit">
         <attribute name="rootdir" default="${basedir}/${testclasses.dir}" />
         <attribute name="workdir" default="${basedir}/${testclasses.dir}/uitest" />
+        <attribute name="propfile" default="${user.home}/.hdfview${app.version}" />
         <attribute name="includes" default="**/*Test*" />
         <attribute name="excludes" default="**/*All* **/*$*" />
         <attribute name="if" default="" />
@@ -673,6 +675,7 @@
                 <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
                 <sysproperty key="hdfview.root" path="@{rootdir}" />
                 <sysproperty key="hdfview.workdir" path="@{workdir}" />
+                <sysproperty key="hdfview.propfile" path="@{propfile}" />
                 <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
 
                 <formatter type="xml" />
@@ -691,6 +694,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="**/uitest/${test}*"
             excludes="**/uitest/*$*"
         />
@@ -699,6 +703,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/${test}.class"
             excludes="**/*All* **/*$*"
             if="h4path"
@@ -706,6 +711,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/BugFixTests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/BugFixTests/${test}.class"
             excludes="**/*All* **/*$*"
             if="h4path"
@@ -713,6 +719,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/FeatureTests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/FeatureTests/${test}.class"
             excludes="**/*All* **/*$*"
             if="h4path"
@@ -722,18 +729,21 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF5UITests/${test}.class"
             excludes="**/*All* **/*$*"
         />
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/BugFixTests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF5UITests/BugFixTests/${test}.class"
             excludes="**/*All* **/*$*"
         />
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/FeatureTests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF5UITests/FeatureTests/${test}.class"
             excludes="**/*All* **/*$*"
         />
@@ -749,6 +759,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/*Test*.class"
             excludes="**/*AbstractWindowTest* **/*CLGeometry **/*All* **/*$*"
         />
@@ -762,6 +773,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/*Test*.class"
             excludes="**/*All* **/*$*"
         />
@@ -770,6 +782,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/BugFixTests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/BugFixTests/*Test*.class"
             excludes="**/*All* **/*$*"
         />
@@ -778,6 +791,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/FeatureTests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/FeatureTests/*Test*.class"
             excludes="**/*All* **/*$*"
         />
@@ -790,6 +804,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF5UITests/*Test*.class"
             excludes="**/*All* **/*$*"
         />
@@ -798,6 +813,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/BugFixTests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF5UITests/BugFixTests/*Test*.class"
             excludes="**/*All* **/*$*"
         />
@@ -806,6 +822,7 @@
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/FeatureTests"
+            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF5UITests/FeatureTests/*Test*.class"
             excludes="**/*All* **/*$*"
         />
