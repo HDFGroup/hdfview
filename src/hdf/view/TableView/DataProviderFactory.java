@@ -562,8 +562,31 @@ public class DataProviderFactory {
                      * among the nested compound's members.
                      */
                     theValue = base.getDataValue(colValue, fieldIdx - relCmpdStartIndexMap.get(fieldIdx), rowIdx);
-                else if (base instanceof ArrayDataProvider)
-                    theValue = base.getDataValue(colValue, columnIndex, rowIdx);
+                else if (base instanceof ArrayDataProvider) {
+                    /*
+                     * TODO: quick temporary fix for specific compound of array of compound files.
+                     * Transforms the given column index into a relative index from the starting
+                     * index of the array of compound field.
+                     */
+                    int arrCompoundStartIdx = columnIndex;
+                    HDFDataProvider theProvider;
+                    while (arrCompoundStartIdx >= 0) {
+                        try {
+                            theProvider = baseTypeProviders[baseProviderIndexMap.get(arrCompoundStartIdx - 1)];
+                            if (theProvider != base)
+                                break;
+
+                            arrCompoundStartIdx--;
+                        }
+                        catch (Exception ex) {
+                            break;
+                        }
+                    }
+
+                    int adjustedColIndex = columnIndex - arrCompoundStartIdx;
+
+                    theValue = base.getDataValue(colValue, adjustedColIndex, rowIdx);
+                }
                 else
                     theValue = base.getDataValue(colValue, rowIdx);
             }
