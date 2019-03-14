@@ -1011,20 +1011,20 @@
 
         <symlink action="record" linkfilename="dir.hdf.links">
             <fileset dir="${hdf.lib.dir}">
-                <include name="libhdf.so" />
-                <include name="libhdf_java.so" />
-                <include name="libmfhdf.so" />
-                <include name="libjpeg.so" />
-                <include name="libszip.so" />
-                <include name="libz.so" />
+                <include name="libhdf.so*" />
+                <include name="libhdf_java.so*" />
+                <include name="libmfhdf.so*" />
+                <include name="libjpeg.so*" />
+                <include name="libszip.so*" />
+                <include name="libz.so*" />
             </fileset>
         </symlink>
         <symlink action="record" linkfilename="dir.hdf5.links">
             <fileset dir="${hdf5.lib.dir}">
-                <include name="libhdf5.so" />
-                <include name="libhdf5_java.so" />
-                <include name="libszip.so" />
-                <include name="libz.so" />
+                <include name="libhdf5.so*" />
+                <include name="libhdf5_java.so*" />
+                <include name="libszip.so*" />
+                <include name="libz.so*" />
             </fileset>
         </symlink>
 
@@ -1084,6 +1084,9 @@
         <symlink action="recreate">
             <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf5.links" />
         </symlink>
+
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf.links"/>
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf5.links"/>
 
         <!-- Bundle jre -->
         <copy todir="${release.dir}/jre">
