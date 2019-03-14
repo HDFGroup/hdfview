@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.Position;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot;
@@ -54,6 +55,8 @@ import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 import hdf.HDFVersions;
 import hdf.view.HDFView;
@@ -80,6 +83,8 @@ public abstract class AbstractWindowTest {
 
     protected static Rectangle monitorBounds;
 
+    @Rule public TestName testName = new TestName();
+
     protected static enum FILE_MODE {
         READ_ONLY, READ_WRITE
     }
@@ -104,6 +109,19 @@ public abstract class AbstractWindowTest {
                 shell.close();
             }
         });
+    }
+
+    @After
+    public void checkOpenFiles() {
+        if (open_files > 0) {
+            String failMsg = "Test " + testName.getMethodName() + " still had " + open_files + " files open!";
+
+            open_files = 0;
+
+            fail(failMsg);
+        }
+
+        open_files = 0;
     }
 
     @BeforeClass
@@ -512,17 +530,21 @@ public abstract class AbstractWindowTest {
             }
 
             /*
-             * Utility function wrapper around testTableLocation() for testing an entire
+             * Utility function wrapper around testTableLocations() for testing an entire
              * table.
              */
             public void testAllTableLocations(String[][] expectedValRegexArray) {
+                testTableLocations(0, 0, expectedValRegexArray);
+            }
+
+            public void testTableLocations(int rowOffset, int colOffset, String[][] expectedValRegexArray) {
                 int arrLen = Array.getLength(expectedValRegexArray);
                 for (int i = 0; i < arrLen; i++) {
                     String[] nestedArray = (String[]) Array.get(expectedValRegexArray, i);
                     int nestedLen = Array.getLength(nestedArray);
 
                     for (int j = 0; j < nestedLen; j++)
-                        testTableLocation(i, j, (String) Array.get(nestedArray, j));
+                        testTableLocation(rowOffset + i, colOffset + j, (String) Array.get(nestedArray, j));
                 }
             }
 
@@ -604,11 +626,37 @@ public abstract class AbstractWindowTest {
         return new SWTBotNatTable(theShell.bot().widget(widgetOfType(NatTable.class)));
     }
 
-    protected void closeShell(SWTBotShell theShell) {
-        if (theShell == null) return;
+    protected final void closeShell(SWTBotShell theShell) {
+        if (theShell == null || !theShell.isOpen()) return;
 
-        theShell.bot().menu("Close").click();
-        bot.waitUntil(Conditions.shellCloses(theShell));
+        SWTBotMenu closeButton = null;
+        try {
+            closeButton = theShell.bot().menu("Close");
+        }
+        catch (WidgetNotFoundException ex) {
+            closeButton = null;
+        }
+
+        if (closeButton != null) {
+            closeButton.click();
+            bot.waitUntil(Conditions.shellCloses(theShell));
+        }
+    }
+
+    /*
+     * Only useful when testing certain Menu items which open files in a different
+     * manner than the openFile() method.
+     */
+    protected final void refreshOpenFileCount() {
+        open_files = bot.tree().getAllItems().length;
+    }
+
+    /*
+     * Only useful when testing certain Menu items which close files in a different
+     * manner than the closeFile() method.
+     */
+    protected final void resetOpenFileCount() {
+        open_files = 0;
     }
 
     protected static String constructWrongValueMessage(String methodName, String message, String expected, String actual) {

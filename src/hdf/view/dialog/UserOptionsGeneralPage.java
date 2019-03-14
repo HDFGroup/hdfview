@@ -54,6 +54,8 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     private boolean isUserGuideChanged;
     private boolean isWorkDirChanged;
 
+    private String workDir;
+
     private static String fontname;
 
     public UserOptionsGeneralPage() {
@@ -94,7 +96,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         if (workField != null) {
             String workPath = workField.getText();
             if (checkCurrentUserDir.getSelection())
-                workPath = "user.home";
+                workPath = System.getProperty("user.home");
 
             if ((workPath != null) && (workPath.length() > 0)) {
                 workPath = workPath.trim();

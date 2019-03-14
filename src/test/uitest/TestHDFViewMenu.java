@@ -154,10 +154,10 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     @Test
     public void verifyButtonOpen() {
         String filename = "testopenbutton.hdf";
-        File hdf_file = createFile(filename);
+        File hdfFile = createFile(filename);
 
         try {
-            closeFile(hdf_file, false);
+            closeFile(hdfFile, false);
 
             openFile(filename, FILE_MODE.READ_ONLY);
         }
@@ -171,7 +171,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
         finally {
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdfFile, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -182,23 +182,22 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     @Test
     public void verifyButtonClose() {
         String filename = "closebutton.hdf";
-        File hdf_file = createFile(filename);
+        File hdfFile = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("verifyButtonClose()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
-            assertTrue("verifyButtonClose() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
+            checkFileTree(filetree, "verifyButtonClose()", 1, filename);
 
             items[0].click();
 
             bot.toolbarButtonWithTooltip("Close").click();
 
-            assertTrue("verifyButtonClose() file '" + hdf_file + "' not deleted", hdf_file.delete());
-            assertFalse("verifyButtonClose() file '" + hdf_file + "' wasn't gone", hdf_file.exists());
+            resetOpenFileCount();
+
+            assertTrue("verifyButtonClose() file '" + hdfFile + "' not deleted", hdfFile.delete());
+            assertFalse("verifyButtonClose() file '" + hdfFile + "' wasn't gone", hdfFile.exists());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -210,8 +209,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
         finally {
             try {
-                if(hdf_file.exists())
-                    closeFile(hdf_file, true);
+                if (hdfFile.exists())
+                    closeFile(hdfFile, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -431,23 +430,23 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     @Test
     public void verifyMenuClose() {
         String filename = "closefile.hdf";
-        File hdf_file = createFile(filename);
+        File hdfFile = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
+
+            checkFileTree(filetree, "verifyMenuClose()", 1, filename);
             SWTBotTreeItem[] items = filetree.getAllItems();
-            assertTrue(constructWrongValueMessage("verifyMenuClose()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
-            assertTrue("verifyMenuClose() filetree is missing file '" + filename + "'",
-                    items[0].getText().compareTo(filename) == 0);
 
             items[0].click();
 
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Close");
             fileMenuItem.click();
 
-            assertTrue("verifyMenuClose() file '" + hdf_file + "' not deleted", hdf_file.delete());
-            assertFalse("verifyMenuClose() file '" + hdf_file + "' not gone", hdf_file.exists());
+            resetOpenFileCount();
+
+            assertTrue("verifyMenuClose() file '" + hdfFile + "' not deleted", hdfFile.delete());
+            assertFalse("verifyMenuClose() file '" + hdfFile + "' not gone", hdfFile.exists());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -459,8 +458,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
         finally {
             try {
-                if(hdf_file.exists())
-                    closeFile(hdf_file, true);
+                if (hdfFile.exists())
+                    closeFile(hdfFile, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -472,8 +471,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     public void verifyMenuCloseAll() {
         String filename = "closeallfiles.hdf";
         String filename2 = "closeallfiles.h5";
-        File hdf4_file = createFile(filename);
-        File hdf5_file = createFile(filename2);
+        File hdf4File = createFile(filename);
+        File hdf5File = createFile(filename2);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -486,11 +485,13 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             SWTBotMenu fileMenuItem = bot.menu("File").menu("Close All");
             fileMenuItem.click();
 
-            assertTrue("verifyMenuCloseAll() HDF file '" + hdf4_file + "' not deleted", hdf4_file.delete());
-            assertFalse("verifyMenuCloseAll() HDF file '" + hdf4_file + "' not gone", hdf4_file.exists());
+            resetOpenFileCount();
 
-            assertTrue("verifyMenuCloseAll() HDF5 file '" + hdf5_file + "' not deleted", hdf5_file.delete());
-            assertFalse("verifyMenuCloseAll() HDF5 file '" + hdf5_file + "' not gone", hdf5_file.exists());
+            assertTrue("verifyMenuCloseAll() HDF file '" + hdf4File + "' not deleted", hdf4File.delete());
+            assertFalse("verifyMenuCloseAll() HDF file '" + hdf4File + "' not gone", hdf4File.exists());
+
+            assertTrue("verifyMenuCloseAll() HDF5 file '" + hdf5File + "' not deleted", hdf5File.delete());
+            assertFalse("verifyMenuCloseAll() HDF5 file '" + hdf5File + "' not gone", hdf5File.exists());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -502,10 +503,16 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
         finally {
             try {
-                if(hdf4_file.exists())
-                    closeFile(hdf4_file, true);
-                if(hdf5_file.exists())
-                    closeFile(hdf5_file, true);
+                if (hdf4File.exists())
+                    closeFile(hdf4File, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            try {
+                if (hdf5File.exists())
+                    closeFile(hdf5File, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -577,10 +584,10 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         String save_to_filename = "testsaveasfile2.h5";
         String groupname = "grouptestname";
 
-        File hdf_file = createFile(filename);
-        File hdf_save_file = new File(workDir, save_to_filename);
-        if (hdf_save_file.exists())
-            hdf_save_file.delete();
+        File hdfFile = createFile(filename);
+        File hdfSaveFile = new File(workDir, save_to_filename);
+        if (hdfSaveFile.exists())
+            hdfSaveFile.delete();
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -623,7 +630,9 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
 
-            closeFile(hdf_file, true);
+            refreshOpenFileCount();
+
+            closeFile(hdfSaveFile, false);
 
             openFile(save_to_filename, FILE_MODE.READ_ONLY);
 
@@ -640,9 +649,15 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
         finally {
             try {
-                if(hdf_file.exists())
-                    closeFile(hdf_file, true);
-                closeFile(hdf_save_file, true);
+                closeFile(hdfFile, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            try {
+                if (hdfSaveFile.exists())
+                    closeFile(hdfSaveFile, true);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -653,10 +668,10 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     @Test
     public void verifyMenuWindowCloseAll() {
         String filename = "hdf5_test.h5";
-        File hdf_file = null;
+        File hdfFile = null;
 
         try {
-            hdf_file = openFile(filename, FILE_MODE.READ_ONLY);
+            hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
 
             SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
@@ -725,7 +740,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
         }
         finally {
             try {
-                closeFile(hdf_file, false);
+                closeFile(hdfFile, false);
             }
             catch (Exception ex) {
                 ex.printStackTrace();

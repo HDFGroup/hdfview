@@ -184,7 +184,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             { "\\(21, 22, 23\\)", "\\(27, 28, 29\\)", "\\(33, 34, 35\\)" },
             { "\\(40, 41, 42, 43\\)", "\\(48, 49, 50, 51\\)", "\\(56, 57, 58, 59\\)" } };
 
-    public void openTAttr2GroupTest(SWTBotTree filetree, String testname, String datasetName, String[][] testExpectedData, String datasetName2, String[][] test2DExpectedData, String datasetName3,
+    private void openTAttr2GroupTest(SWTBotTree filetree, String testname, String datasetName, String[][] testExpectedData, String datasetName2, String[][] test2DExpectedData, String datasetName3,
             String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData)
     {
         SWTBotShell tableShell = null;
@@ -236,14 +236,11 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if (tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
         }
     }
 
-    public void openTAttr2GroupCompoundTest(SWTBotTree filetree, String testname, String datasetName, String[][] testExpectedData, String datasetName2, String[][] test2DExpectedData, String datasetName3,
+    private void openTAttr2GroupCompoundTest(SWTBotTree filetree, String testname, String datasetName, String[][] testExpectedData, String datasetName2, String[][] test2DExpectedData, String datasetName3,
             String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData)
     {
         SWTBotShell tableShell = null;
@@ -299,10 +296,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if (tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
         }
     }
 
@@ -319,7 +313,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/array", arrayExpectedData, "/g2/array2D", array2DExpectedData, "/g2/array3D", array3DPage1ExpectedData, array3DPage2ExpectedData);
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/bitfield", bitfieldExpectedData, "/g2/bitfield2D", bitfield2DExpectedData, "/g2/bitfield3D", bitfield3DPage1ExpectedData, bitfield3DPage2ExpectedData);
             openTAttr2GroupCompoundTest(filetree, "datasetTAttr2GroupTest()", "/g2/compound", compoundExpectedData, "/g2/compound2D", compound2DExpectedData, "/g2/compound3D", compound3DPage1ExpectedData, compound3DPage2ExpectedData);
-            openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/enum", enumExpectedData, "/g2/enum2D", enum2DExpectedData, "/g2/enum3D", enum3DPage1ExpectedData, enum3DPage2ExpectedData);
+            // TODO: unable to enable 'convert enum' option from SWTBot
+            // openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/enum", enumExpectedData, "/g2/enum2D", enum2DExpectedData, "/g2/enum3D", enum3DPage1ExpectedData, enum3DPage2ExpectedData);
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/float", floatExpectedData, "/g2/float2D", float2DExpectedData, "/g2/float3D", float3DPage1ExpectedData, float3DPage2ExpectedData);
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/integer", integerExpectedData, "/g2/integer2D", integer2DExpectedData, "/g2/integer3D", integer3DPage1ExpectedData, integer3DPage2ExpectedData);
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/opaque", opaqueExpectedData, "/g2/opaque2D", opaque2DExpectedData, "/g2/opaque3D", opaque3DPage1ExpectedData, opaque3DPage2ExpectedData);
@@ -345,7 +340,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         }
     }
 
-    public void openTAttr2AttributeTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] testExpectedData, String attrName2, String[][] test2DExpectedData, String attrName3,
+    private void openTAttr2AttributeTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] testExpectedData, String attrName2, String[][] test2DExpectedData, String attrName3,
             String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData)
     {
         SWTBotShell tableShell = null;
@@ -398,14 +393,11 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if (tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
         }
     }
 
-    public void openTAttr2AttributeCompoundTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] testExpectedData, String attrName2, String[][] test2DExpectedData, String attrName3,
+    private void openTAttr2AttributeCompoundTest(SWTBotTable attrTable, int rowIndex, String testname, String attrName, String[][] testExpectedData, String attrName2, String[][] test2DExpectedData, String attrName3,
             String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData)
     {
         SWTBotShell tableShell = null;
@@ -461,10 +453,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if (tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(tableShell);
         }
     }
 
@@ -520,9 +509,10 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             openTAttr2AttributeTest(attrTable, 0, "openTAttr2Attribute()", "array", arrayExpectedData,  "array2D", array2DExpectedData,  "array3D", array3DPage1ExpectedData, array3DPage2ExpectedData);
             openTAttr2AttributeTest(attrTable, 3, "openTAttr2Attribute()", "bitfield", bitfieldExpectedData,  "bitfield2D", bitfield2DExpectedData,  "bitfield3D", bitfield3DPage1ExpectedData, bitfield3DPage2ExpectedData);
-            //TODO: attribute compound tables are broken
+            // TODO: attribute compound tables are broken
             //openTAttr2AttributeCompoundTest(attrTable, 6, "openTAttr2Attribute()", "compound", compoundExpectedData,  "compound2D", compound2DExpectedData,  "compound3D", compound3DPage1ExpectedData, compound3DPage2ExpectedData);
-            openTAttr2AttributeTest(attrTable, 9, "openTAttr2Attribute()", "enum", enumExpectedData,  "enum2D", enum2DExpectedData,  "enum3D", enum3DPage1ExpectedData, enum3DPage2ExpectedData);
+            // TODO: unable to enable 'convert enum' option from SWTBot
+            // openTAttr2AttributeTest(attrTable, 9, "openTAttr2Attribute()", "enum", enumExpectedData,  "enum2D", enum2DExpectedData,  "enum3D", enum3DPage1ExpectedData, enum3DPage2ExpectedData);
             openTAttr2AttributeTest(attrTable, 12, "openTAttr2Attribute()", "float", floatExpectedData,  "float2D", float2DExpectedData,  "float3D", float3DPage1ExpectedData, float3DPage2ExpectedData);
             openTAttr2AttributeTest(attrTable, 15, "openTAttr2Attribute()", "integer", integerExpectedData,  "integer2D", integer2DExpectedData,  "integer3D", integer3DPage1ExpectedData, integer3DPage2ExpectedData);
             openTAttr2AttributeTest(attrTable, 18, "openTAttr2Attribute()", "opaque", opaqueExpectedData,  "opaque2D", opaque2DExpectedData,  "opaque3D", opaque3DPage1ExpectedData, opaque3DPage2ExpectedData);
@@ -617,15 +607,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(table2Shell != null && table2Shell.isOpen()) {
-                table2Shell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(table2Shell));
-            }
-
-            if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableShell));
-            }
+            closeShell(table2Shell);
+            closeShell(tableShell);
 
             try {
                 closeFile(hdf_file, false);

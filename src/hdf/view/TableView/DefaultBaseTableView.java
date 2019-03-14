@@ -976,11 +976,13 @@ public abstract class DefaultBaseTableView implements TableView {
 
                 File chosenFile = new File(filename);
                 if (!chosenFile.exists()) {
-                    Tools.showError(theShell, "Import", "Import Data from Text File " + filename + " does not exist.");
+                    Tools.showError(theShell, "Import Data From Text File", "Data import error: " + filename + " does not exist.");
                     return;
                 }
 
-                if (!Tools.showConfirm(theShell, "Import Data", "Do you want to paste selected data?")) return;
+                if (!Tools.showConfirm(theShell, "Import Data From Text File", "Do you want to paste selected data?"))
+                    return;
+
                 importTextData(chosenFile.getAbsolutePath());
             }
         });
@@ -1770,11 +1772,12 @@ public abstract class DefaultBaseTableView implements TableView {
 
         File chosenFile = new File(filename);
         if (!chosenFile.exists()) {
-            Tools.showError(shell, "Import", "Import Data from Binary File " + chosenFile.getName() + " does not exist.");
+            Tools.showError(shell, "Import Data from Binary File", "Data import error: " + chosenFile.getName() + " does not exist.");
             return;
         }
 
-        if (!Tools.showConfirm(shell, "Import Data", "Do you want to paste selected data?")) return;
+        if (!Tools.showConfirm(shell, "Import Data from Binary File", "Do you want to paste selected data?"))
+            return;
 
         ByteOrder bo = ByteOrder.nativeOrder();
         if (binaryOrder == 1)
