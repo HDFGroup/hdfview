@@ -128,10 +128,10 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /** the root directory of the HDFView */
-    private static String            rootDir = System.getProperty("user.dir");
+    private static String            rootDir                = System.getProperty("user.dir");
 
     /** user's guide */
-    private static String            usersGuide = "/UsersGuide/index.html";
+    private static String            usersGuide             = "/UsersGuide/index.html";
 
     /** the font size */
     private static int               fontSize               = 12;
@@ -155,10 +155,10 @@ public class ViewProperties extends PreferenceStore {
     private static String            indexOrder             = "H5_ITER_INC";
 
     /** a list of most recent files */
-    private static ArrayList<String> recentFiles = new ArrayList<>(MAX_RECENT_FILES + 5);
+    private static ArrayList<String> recentFiles            = new ArrayList<>(MAX_RECENT_FILES + 5);
 
     /** default starting file directory */
-    private static String            workDir = "user.home";
+    private static String            workDir                = System.getProperty("user.home");
 
     /** default HDF file extensions */
     private static String            fileExt                = "hdf, h4, hdf4, h5, hdf5, he2, he5";
@@ -166,7 +166,7 @@ public class ViewProperties extends PreferenceStore {
     private static ClassLoader       extClassLoader         = null;
 
     /** a list of srb accounts */
-    private static ArrayList<String[]> srbAccountList = new ArrayList<>(5);
+    private static ArrayList<String[]> srbAccountList       = new ArrayList<>(5);
 
     /**
      * flag to indicate if auto contrast is used in image processing. Do not use
@@ -184,12 +184,12 @@ public class ViewProperties extends PreferenceStore {
      */
     private static boolean           isReadOnly             = true;
 
-    private static String            EarlyLib = "Latest";
+    private static String            EarlyLib               = "Latest";
 
-    private static String            LateLib = "Latest";
+    private static String            LateLib                = "Latest";
 
     /** a list of palette files */
-    private static ArrayList<String> paletteList = new ArrayList<>(5);
+    private static ArrayList<String> paletteList            = new ArrayList<>(5);
 
     /** flag to indicate if enum data is converted to strings */
     private static boolean           convertEnum            = true;
@@ -248,19 +248,14 @@ public class ViewProperties extends PreferenceStore {
 
         // look for the property file in the user's home directory
         String propertyFileName = USER_PROPERTY_FILE;
-        String userHome = System.getProperty("user.home") + File.separator + propertyFileName;
-        String userDir = System.getProperty("user.dir") + File.separator + propertyFileName;
-        String h5v = workDir + File.separator + propertyFileName;
+        String userHomeFile = System.getProperty("user.home") + File.separator + propertyFileName;
+        String userDirFile = System.getProperty("user.dir") + File.separator + propertyFileName;
 
-        setFilename(createPropertyFile(userHome, userDir, h5v));
+        setFilename(createPropertyFile(userHomeFile, userDirFile));
 
         setRootDir(viewRoot);
         log.trace("rootDir is {}", rootDir);
-        String workPath = System.getProperty("hdfview.workdir");
-        log.trace("hdfview.workdir={}", workPath);
-        if (workPath != null) {
-            setWorkDir(workPath);
-        }
+
         setUsersGuide(rootDir + usersGuide);
 
         setDefault("users.guide", System.getProperty("user.dir") + "/UsersGuide/index.html");
@@ -276,7 +271,7 @@ public class ViewProperties extends PreferenceStore {
         setDefault("h5file.indexType", "H5_INDEX_NAME");
         setDefault("h5file.indexOrder", "H5_ITER_INC");
         setDefault("h4toh5.converter", "");
-        setDefault("work.dir", "user.home");
+        setDefault("work.dir", System.getProperty("user.home"));
         setDefault("file.extension", "hdf, h4, hdf4, h5, hdf5, he2, he5");
         setDefault("font.size", 12);
         setDefault("font.type", "Serif");
@@ -286,33 +281,50 @@ public class ViewProperties extends PreferenceStore {
         setDefault("data.delimiter", DELIMITER_TAB);
     }
 
-    public static String createPropertyFile(String userHome, String userDir, String h5v) {
-        if ((new File(userHome)).exists()) {
-            propertyFile = userHome;
-            log.trace("userHome propertyFile is {}", propertyFile);
+    public static String createPropertyFile(String userHomeFile, String userDirFile) {
+        String propFile = System.getProperty("hdfview.propfile");
+
+        if ((propFile != null) && ((new File(propFile)).exists())) {
+            propertyFile = propFile;
         }
-        else if ((new File(userDir)).exists()) {
-            propertyFile = userDir;
-            log.trace("userDir propertyFile is {}", propertyFile);
+        else if ((new File(userHomeFile)).exists()) {
+            propertyFile = userHomeFile;
+        }
+        else if ((new File(userDirFile)).exists()) {
+            propertyFile = userDirFile;
         }
         else {
-            propertyFile = h5v;
-            File pFile = new File(h5v);
-            try {
-                pFile.createNewFile();
-            }
-            catch (Exception ex) {
-                // Last resort: create new property file at user home directory
-                propertyFile = userHome;
+            File pFile = null;
+
+            // If the user specified a property file, but it didn't exist,
+            // try to create a new one where specified.
+            if (propFile != null) {
+                pFile = new File(propFile);
+
                 try {
-                    pFile = new File(userHome);
                     pFile.createNewFile();
+                    propertyFile = propFile;
                 }
-                catch (Exception ex2) {
+                catch (Exception ex) {
+                    log.debug("createPropertyFile(): unable to create property file {}", propFile);
+                    pFile = null;
+                }
+            }
+
+            if (pFile == null) {
+                // Create new property file at user home directory
+                pFile = new File(userHomeFile);
+                try {
+                    pFile.createNewFile();
+                    propertyFile = userHomeFile;
+                }
+                catch (Exception ex) {
+                    log.debug("createPropertyFile(): unable to create property file in home directory");
                     propertyFile = null;
                 }
             }
         }
+
         log.trace("propertyFile is {}", propertyFile);
         return propertyFile;
     }
@@ -463,11 +475,6 @@ public class ViewProperties extends PreferenceStore {
         log.trace("loadExtClass: finished");
 
         return extClassLoader;
-    }
-
-    /** @return the root directory where the HDFView is installed. */
-    public static String getViewRoot() {
-        return rootDir;
     }
 
     public static Image getFoldercloseIcon() {
@@ -1470,6 +1477,11 @@ public class ViewProperties extends PreferenceStore {
     /** @return the name of the user property file */
     public static String getPropertyFile() {
         return propertyFile;
+    }
+
+    /** @return the root directory where the HDFView is installed. */
+    public static String getViewRoot() {
+        return rootDir;
     }
 
     /** @return the default work directory, where the open file starts. */

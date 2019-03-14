@@ -72,7 +72,13 @@ Limitations / Known Problems
 
     * Object/region references can't be opened by a double-click or by
       right-clicking and choosing "Show As Table/Image" when inside a compound
-      datatype.  
+      datatype.
+
+    * If a file is opened in read-only mode, right-clicking on a dataset in
+      in the tree view and choosing any of the options under the
+      "Export Dataset" menu item will fail with a message of
+      'Unable to export dataset: Unable to open file'. The current workaround
+      is to re-open the file in read/write mode.
 
     * The 'Recent Files' button does not work on Mac due to a cross-platform
       issue with SWT.

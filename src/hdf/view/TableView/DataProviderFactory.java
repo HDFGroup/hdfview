@@ -14,6 +14,7 @@
 package hdf.view.TableView;
 
 import java.lang.reflect.Array;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -130,6 +131,8 @@ public class DataProviderFactory {
 
         protected Object           theValue;
 
+        protected final Class      originalFormatClass;
+
         protected boolean          isValueChanged;
 
         protected final boolean    isContainerType;
@@ -146,6 +149,8 @@ public class DataProviderFactory {
             log.trace("constructor: start");
 
             this.dataBuf = dataBuf;
+
+            this.originalFormatClass = dataFormatReference.getOriginalClass();
 
             char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dataBuf);
             if (runtimeTypeClass == ' ') {
@@ -379,14 +384,13 @@ public class DataProviderFactory {
                     break;
                 case 'J':
                     long lvalue = 0;
-                    /*
-                     * TODO:
-                     */
-                    /* if (dname == 'J') {
+                    String cname = this.originalFormatClass.getName();
+                    char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+                    if (dname == 'J') {
                         BigInteger big = new BigInteger((String) newValue);
                         lvalue = big.longValue();
                     }
-                    else */
+                    else
                         lvalue = Long.parseLong((String) newValue);
                     Array.setLong(bufObject, bufIndex, lvalue);
                     break;

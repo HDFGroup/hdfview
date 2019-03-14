@@ -1,15 +1,15 @@
 package test.uitest;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withRegex;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 
-import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
-import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
-import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
@@ -17,7 +17,10 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.hamcrest.Matcher;
 import org.junit.Test;
+
+import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestTreeViewExport extends AbstractWindowTest {
     private String filename = "testds.h5";
@@ -25,7 +28,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
     private File createImportHDF5Dataset(String datasetname) {
         String datasetdimsize = "8 x 64";
-        File hdf_file = createFile(filename);
+        File hdfFile = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -67,6 +70,9 @@ public class TestTreeViewExport extends AbstractWindowTest {
             datasetShell.bot().text(0).setText(datasetname);
             datasetShell.bot().text(2).setText(datasetdimsize);
 
+            // Create 64-bit dataset
+            datasetShell.bot().comboBox(2).setSelection("64");
+
             val = datasetShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("createImportHDF5Dataset()", "wrong dataset name", datasetname, val),
                     val.equals(datasetname));
@@ -96,55 +102,65 @@ public class TestTreeViewExport extends AbstractWindowTest {
             fail(ae.getMessage());
         }
 
-        return hdf_file;
+        return hdfFile;
     }
 
-    private void importHDF5Dataset(File hdf_file, String importfilename) {
+    private void importHDF5Dataset(File hdfFile, String datasetName, String importfilename, String[][] expectedData) {
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
 
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
+            checkFileTree(filetree, "importHDF5Dataset()", 3, hdfFile.getName());
 
-            assertTrue(constructWrongValueMessage("importHDF5Dataset()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==3);
+            SWTBotShell tableShell = openTreeviewObject(filetree, hdfFile.getName(),
+                    "/" + groupname + "/" + datasetName);
+            final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "importHDF5Dataset()");
 
-            SWTBotShell tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
+            dataTable.click(1, 1);
             tableShell.bot().menu("Import/Export Data").menu("Import Data from").menu("Text File").click();
 
-            SWTBotShell shell = bot.shell("Enter a file name");
-            shell.activate();
+            SWTBotShell importShell = bot.shell("Enter a file name");
+            importShell.activate();
 
-            SWTBotText text = shell.bot().text();
+            SWTBotText text = importShell.bot().text();
             text.setText(importfilename);
 
             String val = text.getText();
             assertTrue("importHDF5Dataset() wrong file name: expected '" + importfilename + "' but was '" + val + "'",
                     val.equals(importfilename));
 
-            shell.bot().button("   &OK   ").click();
-            shell.bot().waitUntil(Conditions.shellCloses(shell));
+            importShell.bot().button("   &OK   ").click();
+            importShell.bot().waitUntil(Conditions.shellCloses(importShell));
 
-            shellMatcher = WithRegex.withRegex(".*Import.*");
+            Matcher<Shell> classMatcher = widgetOfType(Shell.class);
+            Matcher<Shell> regexMatcher = withRegex(".*Import.*");
+            Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
-            shell = bot.shells()[2];
-            shell.activate();
+            final SWTBotShell botShell = new SWTBotShell(bot.widget(shellMatcher));
 
-            shell.bot().button("OK").click();
-            shell.bot().waitUntil(Conditions.shellCloses(shell));
+            botShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(botShell.getText()));
+
+            botShell.bot().button("OK").click();
+            botShell.bot().waitUntil(Conditions.shellCloses(botShell));
+
+            retriever.testAllTableLocations(expectedData);
+
+            tableShell.bot().menu("Table").menu("Close").click();
+
+            regexMatcher = withRegex("Changes Detected");
+            shellMatcher = allOf(classMatcher, regexMatcher);
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            final SWTBotShell saveShell = new SWTBotShell(bot.widget(shellMatcher));
+
+            saveShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(saveShell.getText()));
+
+            saveShell.bot().button("Cancel").click();
+            bot.waitUntil(Conditions.shellCloses(saveShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -161,43 +177,47 @@ public class TestTreeViewExport extends AbstractWindowTest {
         String fname = "tintsize.h5";
         String groupsetname = "DS64BITS";
         SWTBotShell exportShell = null;
-        File hdf_file = openFile(fname, FILE_MODE.READ_ONLY);
+        File hdfFile = openFile(fname, FILE_MODE.READ_WRITE);
         File export_file = null;
 
         try {
-            new File(workDir, groupsetname+".txt").delete();
+            new File(workDir, groupsetname + ".txt").delete();
         }
-        catch (Exception ex) {}
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         try {
             SWTBotTree filetree = bot.tree();
+
+            checkFileTree(filetree, "saveHDF5DatasetText()", 10, fname);
+
             SWTBotTreeItem[] items = filetree.getAllItems();
-
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
-
-            assertTrue(constructWrongValueMessage("saveHDF5DatasetText()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==10);
-            assertTrue("saveHDF5DatasetText() filetree is missing file '" + fname + "'", items[0].getText().compareTo(fname) == 0);
-            assertTrue("saveHDF5DatasetText() filetree is missing group '" + groupsetname + "'", items[0].getNode(0).getText().compareTo("DS08BITS")==0);
 
             items[0].getNode(3).click();
             items[0].getNode(3).contextMenu("Export Dataset").menu("Export Data to Text File").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("Save Dataset Data To Text File.*");
+
+            Matcher<Shell> classMatcher = widgetOfType(Shell.class);
+            Matcher<Shell> regexMatcher = withRegex("Save Dataset Data To Text File.*");
+            Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
-            exportShell = bot.shells()[1];
+            exportShell = new SWTBotShell(bot.widget(shellMatcher));
+
+            exportShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(exportShell.getText()));
+
             SWTBotText text = exportShell.bot().text();
-            text.setText(groupsetname+".txt");
+            text.setText(groupsetname + ".txt");
 
             String val = text.getText();
-            assertTrue("saveHDF5DatasetText() wrong file name: expected '" + groupsetname+".txt" + "' but was '" + val + "'",
-                    val.equals(groupsetname+".txt"));
+            assertTrue("saveHDF5DatasetText() wrong file name: expected '" + groupsetname + ".txt" + "' but was '" + val + "'",
+                    val.equals(groupsetname + ".txt"));
 
             exportShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(exportShell));
 
-            export_file = new File(workDir, groupsetname+".txt");
+            export_file = new File(workDir, groupsetname + ".txt");
             assertTrue("File-export text file created", export_file.exists());
         }
         catch (Exception ex) {
@@ -209,15 +229,14 @@ public class TestTreeViewExport extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(exportShell != null && exportShell.isOpen()) {
-                exportShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(exportShell));
-            }
+            closeShell(exportShell);
 
             try {
-                closeFile(hdf_file, false);
+                closeFile(hdfFile, false);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -226,13 +245,15 @@ public class TestTreeViewExport extends AbstractWindowTest {
         String fname = "tintsize.h5";
         String groupsetname = "DU64BITS";
         SWTBotShell exportShell = null;
-        File hdf_file = openFile(fname, FILE_MODE.READ_ONLY);
+        File hdfFile = openFile(fname, FILE_MODE.READ_WRITE);
         File export_file = null;
 
         try {
-            new File(workDir, groupsetname+".bin").delete();
+            new File(workDir, groupsetname + ".bin").delete();
         }
-        catch (Exception ex) {}
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -248,16 +269,23 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
             items[0].getNode(3).click();
             items[0].getNode(3).contextMenu("Export Dataset").menu("Export Data as Little Endian").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("Save Current Data To Binary File.*");
+
+            Matcher<Shell> classMatcher = widgetOfType(Shell.class);
+            Matcher<Shell> regexMatcher = withRegex("Save Current Data To Binary File.*");
+            Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
-            exportShell = bot.shells()[1];
+            exportShell = new SWTBotShell(bot.widget(shellMatcher));
+
+            exportShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(exportShell.getText()));
+
             SWTBotText text = exportShell.bot().text();
-            text.setText(groupsetname+".bin");
+            text.setText(groupsetname + ".bin");
 
             String val = text.getText();
-            assertTrue("saveHDF5DatasetText() wrong file name: expected '" + groupsetname+".bin" + "' but was '" + val + "'",
-                    val.equals(groupsetname+".bin"));
+            assertTrue("saveHDF5DatasetText() wrong file name: expected '" + groupsetname + ".bin" + "' but was '" + val + "'",
+                    val.equals(groupsetname + ".bin"));
 
             exportShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(exportShell));
@@ -274,22 +302,54 @@ public class TestTreeViewExport extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(exportShell != null && exportShell.isOpen()) {
-                exportShell.bot().menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(exportShell));
-            }
+            closeShell(exportShell);
 
             try {
-                closeFile(hdf_file, false);
+                closeFile(hdfFile, false);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     @Test
     public void importHDF5DatasetWithTab() {
-        String datasetname = "testdatasetab";
-        SWTBotShell tableShell = null;
+        String[][] expectedData =
+            { { "-1", "-2", "-4", "-8", "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768",
+                "-65536", "-131072", "-262144", "-524288", "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648",
+                "-4294967296", "-8589934592", "-17179869184", "-34359738368", "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328",
+                "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808" },
+              { "-2", "-4", "-8", "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536",
+                "-131072", "-262144", "-524288", "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296",
+                "-8589934592", "-17179869184", "-34359738368", "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656",
+                "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0" },
+              { "-4", "-8", "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072",
+                "-262144", "-524288", "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592",
+                "-17179869184", "-34359738368", "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312",
+                "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0" },
+              { "-8", "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144",
+                "-524288", "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184",
+                "-34359738368", "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624",
+                "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0" },
+              { "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144", "-524288",
+                "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184", "-34359738368",
+                "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248",
+                "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0", "0" },
+              { "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144", "-524288", "-1048576",
+                "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184", "-34359738368", "-68719476736",
+                "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496",
+                "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0", "0", "0" },
+              { "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144", "-524288", "-1048576", "-2097152",
+                "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184", "-34359738368", "-68719476736", "-137438953472",
+                "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992",
+                "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0", "0", "0", "0" },
+              { "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144", "-524288", "-1048576", "-2097152", "-4194304",
+                "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184", "-34359738368", "-68719476736", "-137438953472", "-274877906944",
+                "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984",
+                "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0", "0", "0", "0" } };
+        String datasetName = "testdatasetab";
+        File hdfFile = null;
 
         try {
             // switch to ViewProperties.DELIMITER_TAB
@@ -310,42 +370,13 @@ public class TestTreeViewExport extends AbstractWindowTest {
             fail(ex.getMessage());
         }
 
-        File hdf_file = createImportHDF5Dataset(datasetname);
-        importHDF5Dataset(hdf_file, "DS64BITS.ttxt");
-
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
 
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
+            hdfFile = createImportHDF5Dataset(datasetName);
+            importHDF5Dataset(hdfFile, datasetName, "DS64BITS.ttxt", expectedData);
 
-            assertTrue(constructWrongValueMessage("importHDF5DatasetWithTab()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==3);
-            assertTrue("importHDF5DatasetWithTab() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
-            assertTrue("importHDF5DatasetWithTab() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname)==0);
-            assertTrue("importHDF5DatasetWithTab() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname)==0);
-
-            items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            String val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("importHDF5DatasetWithTab()", "wrong data", "-1", val),
-                    val.equals("-1"));
-
-            table.click(8, 1);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("importHDF5DatasetWithTab()", "wrong data", "-128", val),
-                    val.equals("-128"));
+            checkFileTree(filetree, "importHDF5DatasetWithTab()", 3, filename);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -356,28 +387,52 @@ public class TestTreeViewExport extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            tableShell.bot().menu("Table").menu("Close").click();
-
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*Changes Detected");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            SWTBotShell saveShell = bot.shells()[2];
-            saveShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(saveShell.getText()));
-            saveShell.bot().button("Cancel").click();
-            bot.waitUntil(Conditions.shellCloses(saveShell));
-
             try {
-                closeFile(hdf_file, true);
+                closeFile(hdfFile, true);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     @Test
     public void importHDF5DatasetWithComma() {
-        String datasetname = "testdatasetcomma";
-        SWTBotShell tableShell = null;
+        String[][] expectedData =
+            { { "-1", "-2", "-4", "-8", "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768",
+                "-65536", "-131072", "-262144", "-524288", "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648",
+                "-4294967296", "-8589934592", "-17179869184", "-34359738368", "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328",
+                "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808" },
+              { "-2", "-4", "-8", "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536",
+                "-131072", "-262144", "-524288", "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296",
+                "-8589934592", "-17179869184", "-34359738368", "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656",
+                "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0" },
+              { "-4", "-8", "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072",
+                "-262144", "-524288", "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592",
+                "-17179869184", "-34359738368", "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312",
+                "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0" },
+              { "-8", "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144",
+                "-524288", "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184",
+                "-34359738368", "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624",
+                "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0" },
+              { "-16", "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144", "-524288",
+                "-1048576", "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184", "-34359738368",
+                "-68719476736", "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248",
+                "-4503599627370496", "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0", "0" },
+              { "-32", "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144", "-524288", "-1048576",
+                "-2097152", "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184", "-34359738368", "-68719476736",
+                "-137438953472", "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496",
+                "-9007199254740992", "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0", "0", "0" },
+              { "-64", "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144", "-524288", "-1048576", "-2097152",
+                "-4194304", "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184", "-34359738368", "-68719476736", "-137438953472",
+                "-274877906944", "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992",
+                "-18014398509481984", "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0", "0", "0", "0" },
+              { "-128", "-256", "-512", "-1024", "-2048", "-4096", "-8192", "-16384", "-32768", "-65536", "-131072", "-262144", "-524288", "-1048576", "-2097152", "-4194304",
+                "-8388608", "-16777216", "-33554432", "-67108864", "-134217728", "-268435456", "-536870912", "-1073741824", "-2147483648", "-4294967296", "-8589934592", "-17179869184", "-34359738368", "-68719476736", "-137438953472", "-274877906944",
+                "-549755813888", "-1099511627776", "-2199023255552", "-4398046511104", "-8796093022208", "-17592186044416", "-35184372088832", "-70368744177664", "-140737488355328", "-281474976710656", "-562949953421312", "-1125899906842624", "-2251799813685248", "-4503599627370496", "-9007199254740992", "-18014398509481984",
+                "-36028797018963968", "-72057594037927936", "-144115188075855872", "-288230376151711744", "-576460752303423488", "-1152921504606846976", "-2305843009213693952", "-4611686018427387904", "-9223372036854775808", "0", "0", "0", "0", "0", "0" } };
+        String datasetName = "testdatasetcomma";
+        File hdfFile = null;
 
         try {
             //switch to ViewProperties.DELIMITER_COMMA
@@ -398,41 +453,13 @@ public class TestTreeViewExport extends AbstractWindowTest {
             fail(ex.getMessage());
         }
 
-        File hdf_file = createImportHDF5Dataset(datasetname);
-        importHDF5Dataset(hdf_file, "DS64BITS.xtxt");
         try {
             SWTBotTree filetree = bot.tree();
-            SWTBotTreeItem[] items = filetree.getAllItems();
 
-            items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
+            hdfFile = createImportHDF5Dataset(datasetName);
+            importHDF5Dataset(hdfFile, datasetName, "DS64BITS.xtxt", expectedData);
 
-            assertTrue(constructWrongValueMessage("importHDF5DatasetWithTab()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==3);
-            assertTrue("importHDF5DatasetWithTab() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
-            assertTrue("importHDF5DatasetWithTab() filetree is missing group '" + groupname + "'", items[0].getNode(0).getText().compareTo(groupname)==0);
-            assertTrue("importHDF5DatasetWithTab() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname)==0);
-
-            items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Open").click();
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            tableShell = bot.shells()[1];
-            tableShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
-
-            final SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
-
-            table.click(1, 1);
-            String val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("importHDF5DatasetWithComma()", "wrong data", "-1", val),
-                    val.equals("-1"));
-
-            table.click(8, 1);
-            val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("importHDF5DatasetWithComma()", "wrong data", "-128", val),
-                    val.equals("-128"));
+            checkFileTree(filetree, "importHDF5DatasetWithComma()", 3, filename);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -443,21 +470,12 @@ public class TestTreeViewExport extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            tableShell.bot().menu("Table").menu("Close").click();
-
-            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex("Changes Detected");
-            bot.waitUntil(Conditions.waitForShell(shellMatcher));
-
-            SWTBotShell saveShell = bot.shells()[2];
-            saveShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(saveShell.getText()));
-            saveShell.bot().button("Cancel").click();
-            bot.waitUntil(Conditions.shellCloses(saveShell));
-
             try {
-                closeFile(hdf_file, false);
+                closeFile(hdfFile, true);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

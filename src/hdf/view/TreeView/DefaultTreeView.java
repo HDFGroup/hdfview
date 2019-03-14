@@ -206,6 +206,10 @@ public class DefaultTreeView implements TreeView {
 
     private String                        currentSearchPhrase = null;
 
+    /** Used to open a File using a temporary indexing type and order */
+    private int                           tempIdxType = -1;
+    private int                           tempIdxOrder = -1;
+
     private enum OBJECT_TYPE {GROUP, DATASET, IMAGE, TABLE, DATATYPE, LINK};
 
     public DefaultTreeView(Composite parent, DataViewManager theView) {
@@ -841,8 +845,6 @@ public class DefaultTreeView implements TreeView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                selectedFile.setIndexType(selectedFile.getIndexType(ViewProperties.getIndexType()));
-                selectedFile.setIndexOrder(selectedFile.getIndexOrder(ViewProperties.getIndexOrder()));
                 try {
                     reopenFile(selectedFile, -1);
                 }
@@ -2248,13 +2250,12 @@ public class DefaultTreeView implements TreeView {
 
         try {
             selectedObject.getFileFormat().exportDataset(filename, dataset.getFile(), dataset.getFullName(), binaryOrder);
+            viewer.showStatus("Data saved to: " + filename);
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Save", ex.getMessage());
+            Tools.showError(shell, "Save", "Unable to export dataset: " + ex.getMessage());
         }
-
-        viewer.showStatus("Data saved to: " + filename);
     }
 
     /** enable/disable GUI components */
@@ -2370,8 +2371,23 @@ public class DefaultTreeView implements TreeView {
         if (fileFormat == null) throw new java.io.IOException("Unsupported fileformat - " + filename);
 
         if (fileFormat.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-            fileFormat.setIndexType(fileFormat.getIndexType(ViewProperties.getIndexType()));
-            fileFormat.setIndexOrder(fileFormat.getIndexOrder(ViewProperties.getIndexOrder()));
+            if (tempIdxType >= 0) {
+                fileFormat.setIndexType(tempIdxType);
+
+                // Reset the temporary index type
+                tempIdxType = -1;
+            }
+            else
+                fileFormat.setIndexType(fileFormat.getIndexType(ViewProperties.getIndexType()));
+
+            if (tempIdxOrder >= 0) {
+                fileFormat.setIndexOrder(tempIdxOrder);
+
+                // Reset the temporary index order
+                tempIdxOrder = -1;
+            }
+            else
+                fileFormat.setIndexOrder(fileFormat.getIndexOrder(ViewProperties.getIndexOrder()));
         }
 
         return initFile(fileFormat);
@@ -2433,6 +2449,10 @@ public class DefaultTreeView implements TreeView {
     @Override
     public FileFormat reopenFile(FileFormat fileFormat, int newFileAccessMode) throws Exception {
         String fileFormatName = fileFormat.getAbsolutePath();
+
+        // Make sure to reload the file using the file's current indexing options
+        tempIdxType = fileFormat.getIndexType(null);
+        tempIdxOrder = fileFormat.getIndexOrder(null);
 
         closeFile(fileFormat);
         ((HDFView) viewer).showMetaData(null);
@@ -2922,18 +2942,16 @@ public class DefaultTreeView implements TreeView {
 
         private void setIndexOptions() {
             if (checkIndexByName.getSelection())
-                selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_NAME"));
+                indexType = selectedFile.getIndexType("H5_INDEX_NAME");
             else
-                selectedFile.setIndexType(selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
-            indexType = selectedFile.getIndexType(null);
+                indexType = selectedFile.getIndexType("H5_INDEX_CRT_ORDER");
 
             if (checkIndexIncrements.getSelection())
-                selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_INC"));
+                indexOrder = selectedFile.getIndexOrder("H5_ITER_INC");
             else if (checkIndexNative.getSelection())
-                selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_NATIVE"));
+                indexOrder = selectedFile.getIndexOrder("H5_ITER_NATIVE");
             else
-                selectedFile.setIndexOrder(selectedFile.getIndexOrder("H5_ITER_DEC"));
-            indexOrder = selectedFile.getIndexOrder(null);
+                indexOrder = selectedFile.getIndexOrder("H5_ITER_DEC");
 
             reloadFile = true;
         }

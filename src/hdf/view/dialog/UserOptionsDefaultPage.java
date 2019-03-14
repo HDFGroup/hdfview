@@ -14,7 +14,6 @@
 
 package hdf.view.dialog;
 
-import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Font;
@@ -38,8 +37,6 @@ public abstract class UserOptionsDefaultPage extends PreferencePage {
     protected Font                  curFont;
 
     protected String                rootDir = null;
-
-    protected String                workDir = null;
 
     /**
      * <code>UserOptionsDefaultPage</code> default constructor.
@@ -69,6 +66,7 @@ public abstract class UserOptionsDefaultPage extends PreferencePage {
         super(title, image);
     }
 
+    @Override
     public void createControl(Composite parent)
     {
         super.createControl(parent);

@@ -531,6 +531,16 @@ public abstract class HObject implements Serializable {
      *
      * @return true if the object is equal by OID
      */
+    public boolean equals(HObject obj) {
+        // Cast down to Object to avoid infinite recursion
+        if (this.equals((Object) obj))
+            return true;
+
+        // comparing the state of OID with
+        // the state of 'this' OID.
+        return this.equalsOID(obj.getOID());
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null)
@@ -540,17 +550,12 @@ public abstract class HObject implements Serializable {
         // referring to the same object.
         if (this == obj)
             return true;
-        if (obj instanceof HObject) {
-            // comparing the state of OID with
-            // the state of 'this' OID.
-            return this.equalsOID(((HObject) obj).getOID());
-        }
+
         return false;
     }
 
     @Override
     public int hashCode() {
-
         // We are returning the OID as a hashcode value.
         return (int) oid[0];
     }
