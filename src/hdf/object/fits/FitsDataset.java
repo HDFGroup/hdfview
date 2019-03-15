@@ -342,6 +342,9 @@ public class FitsDataset extends ScalarDS
      * @param data the array of data values.
      *
      * @return the new dataset if successful. Otherwise returns null.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public static FitsDataset create(
             String name,

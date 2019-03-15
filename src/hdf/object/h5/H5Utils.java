@@ -27,6 +27,14 @@ public final class H5Utils {
      *
      * @param did
      *            IN dataset ID
+     * @param dsetDims
+     *            IN dimensions
+     * @param startDims
+     *            IN start dimensions
+     * @param selectedStride
+     *            IN selected stride values
+     * @param selectedDims
+     *            IN selected dimensions
      * @param spaceIDs
      *            IN/OUT memory and file space IDs -- spaceIDs[0]=mspace, spaceIDs[1]=fspace
      *
