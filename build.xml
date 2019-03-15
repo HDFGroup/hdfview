@@ -424,7 +424,6 @@
             <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
             <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />
-            <sysproperty key="hdfview.propfile" path="${basedir}/${jar.dir}/.hdfview99" />
             <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
             <env key="${platform.hdf.path}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
         </java>
