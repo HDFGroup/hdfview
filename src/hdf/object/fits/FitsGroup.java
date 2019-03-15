@@ -130,7 +130,11 @@ public class FitsGroup extends Group
      * @param file the file which the group is added to.
      * @param name the name of the group to create.
      * @param pgroup the parent group of the new group.
+     *
      * @return the new group if successful. Otherwise returns null.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public static FitsGroup create(String name, Group pgroup)
         throws Exception {

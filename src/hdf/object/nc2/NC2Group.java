@@ -107,10 +107,11 @@ public class NC2Group extends Group {
      * Creates a new attribute and attached to this dataset if attribute does
      * not exist. Otherwise, just update the value of the attribute.
      *
-     * <p>
-     *
      * @param info
      *            the atribute to attach
+     *
+* @throws Exception
+     *            if there is an error
      */
     public void writeMetadata(Object info) throws Exception {
         // not supported
@@ -120,10 +121,12 @@ public class NC2Group extends Group {
 
     /**
      * Deletes an attribute from this dataset.
-     * <p>
      *
      * @param info
      *            the attribute to delete.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public void removeMetadata(Object info) throws Exception {
         // not supported
@@ -162,7 +165,11 @@ public class NC2Group extends Group {
      *            the name of the group to create.
      * @param pgroup
      *            the parent group of the new group.
+     *
      * @return the new group if successful. Otherwise returns null.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public static NC2Group create(String name, Group pgroup) throws Exception {
         // not supported

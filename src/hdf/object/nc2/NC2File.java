@@ -264,7 +264,11 @@ public class NC2File extends FileFormat {
      *            the dataset to be copied.
      * @param pgroup
      *            teh group where the dataset is copied to.
+     *
      * @return the treeNode containing the new copy of the dataset.
+     *
+* @throws Exception
+     *            if there is an error
      */
 
     private void copyDataset(Dataset srcDataset, NC2Group pgroup)
@@ -303,7 +307,11 @@ public class NC2File extends FileFormat {
      *            the atribute to attach.
      * @param attrExisted
      *            The indicator if the given attribute exists.
+     *
      * @return true if successful and false otherwise.
+     *
+* @throws Exception
+     *            if there is an error
      */
     @Override
     public void writeAttribute(HObject obj, hdf.object.Attribute attr,

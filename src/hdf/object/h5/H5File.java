@@ -1058,7 +1058,7 @@ public class H5File extends FileFormat {
      * @param highStr
      *            The latest version of the library.
      *
-     * @throws HDF5Exception
+     * @throws Exception
      *             If there is an error at the HDF5 library level.
      */
     @Override
@@ -1112,7 +1112,7 @@ public class H5File extends FileFormat {
      * @param highStr
      *            The latest version of the library.
      *
-     * @throws HDF5Exception
+     * @throws Exception
      *             If there is an error at the HDF5 library level.
      */
     @Override
@@ -1181,7 +1181,7 @@ public class H5File extends FileFormat {
      *
      * @return libver The earliest and latest version of the library.
      *
-     * @throws HDF5Exception
+     * @throws Exception
      *             If there is an error at the HDF5 library level.
      */
     @Override
@@ -3065,7 +3065,7 @@ public class H5File extends FileFormat {
      * @param newAttrName
      *            The new name of the attribute.
      *
-     * @throws HDF5Exception
+     * @throws Exception
      *             If there is an error at the HDF5 library level.
      */
     @Override
