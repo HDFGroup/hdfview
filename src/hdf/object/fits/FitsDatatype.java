@@ -49,6 +49,9 @@ public class FitsDatatype extends Datatype
      * @param tsize the size of the datatype in bytes.
      * @param torder the order of the datatype.
      * @param tsign the sign of the datatype.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public FitsDatatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         super(tclass, tsize, torder, tsign);
@@ -59,6 +62,9 @@ public class FitsDatatype extends Datatype
      * Create a Datatype with a given fits native datatype.
      *
      * @param theType the fits native datatype.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public FitsDatatype(long theType) throws Exception {
         super(-1);

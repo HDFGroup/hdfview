@@ -194,6 +194,9 @@ public class H5Datatype extends Datatype {
      *            ORDER_NONE and NATIVE.
      * @param tsign
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         this(tclass, tsize, torder, tsign, null);
@@ -227,6 +230,9 @@ public class H5Datatype extends Datatype {
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      * @param tbase
      *            the base datatype of the new datatype
+     *
+* @throws Exception
+     *            if there is an error
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
         this(tclass, tsize, torder, tsign, tbase, null);
@@ -265,6 +271,9 @@ public class H5Datatype extends Datatype {
      *            the base datatype of the new datatype
      * @param pbase
      *            the parent datatype of the new datatype
+     *
+* @throws Exception
+     *            if there is an error
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
         super(tclass, tsize, torder, tsign, tbase, pbase);
@@ -287,6 +296,9 @@ public class H5Datatype extends Datatype {
      *
      * @param nativeID
      *            the native datatype identifier.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public H5Datatype(long nativeID) throws Exception {
         this(nativeID, null);
@@ -310,6 +322,9 @@ public class H5Datatype extends Datatype {
      *            the native datatype identifier.
      * @param pbase
      *            the parent datatype of the new datatype
+     *
+* @throws Exception
+     *            if there is an error
      */
     public H5Datatype(long nativeID, Datatype pbase) throws Exception {
         super(nativeID, pbase);
@@ -1392,6 +1407,8 @@ public class H5Datatype extends Datatype {
      *
      * returns a 32-bit integer array of size 100.
      *
+     * @param dtype
+     *            the type.
      * @param nPoints
      *            the total number of data points of the array.
      *

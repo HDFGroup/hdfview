@@ -59,6 +59,9 @@ public class H4Datatype extends Datatype {
      *            ORDER_NONE and NATIVE.
      * @param tsign
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public H4Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         super(tclass, tsize, torder, tsign);
@@ -84,6 +87,9 @@ public class H4Datatype extends Datatype {
      *
      * @param nativeID
      *            the native datatype identifier.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public H4Datatype(long nativeID) throws Exception {
         super(nativeID);
