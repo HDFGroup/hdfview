@@ -855,7 +855,8 @@
             destdir="${javadoc.dir}"
             windowtitle="${ant.project.name} ${app.version}"
             noqualifier="java.*:javax.*:com.sun.*"
-            linksource="true">
+            linksource="true"
+            failonerror="false">
 
             <fileset dir="${src.dir}/hdf">
                 <include name="object/**.java" />
@@ -983,15 +984,15 @@
         <replace file="${release.dir}/hdfview.bat" token="@SLF4J@" value="${runscript.slf4j}" />
 
         <!-- Copy the documentation -->
-        <copy todir="${release.dir}/doc/javadocs">
+        <copy todir="${release.dir}/doc/javadocs" failonerror="false">
             <fileset dir="${javadoc.dir}" />
         </copy>
         <copy todir="${release.dir}/doc">
             <fileset dir="${docs.dir}" />
         </copy>
-        <!--
-    <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
--->
+
+        <!-- Change to unzip task -->
+        <!-- <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" /> -->
 
         <!-- Copy the samples -->
         <copy todir="${release.dir}/samples">
@@ -1063,7 +1064,7 @@
             <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
         </copy>
 
-        <copy file="${hdf.lib.dir}/dir.hdf.links" tofile="${release.dir}/lib/dir.hdf.links">
+        <copy file="${hdf.lib.dir}/dir.hdf.links" tofile="${release.dir}/lib/dir.hdf.links" failonerror="false">
           <filterchain>
             <tokenfilter>
               <replaceregex pattern="${hdf.lib.dir}" replace="${basedir}/${release.dir}/lib" flags="gi"/>
@@ -1077,14 +1078,14 @@
             </tokenfilter>
           </filterchain>
         </copy>
-        <symlink action="recreate">
+        <symlink action="recreate" failonerror="false">
             <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf.links" />
         </symlink>
         <symlink action="recreate">
             <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf5.links" />
         </symlink>
 
-        <delete file="${basedir}/${release.dir}/lib/dir.hdf.links"/>
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf.links" failonerror="false"/>
         <delete file="${basedir}/${release.dir}/lib/dir.hdf5.links"/>
 
         <!-- Bundle jre -->
@@ -1106,15 +1107,14 @@
         <replace file="${release.dir}/hdfview.sh" token="@SLF4J@" value="${runscript.slf4j}" />
 
         <!-- Copy the documentation -->
-        <copy todir="${release.dir}/share/doc/javadocs">
+        <copy todir="${release.dir}/share/doc/javadocs" failonerror="false">
             <fileset dir="${javadoc.dir}" />
         </copy>
         <copy todir="${release.dir}/share/doc">
             <fileset dir="${docs.dir}" />
         </copy>
-        <!--
-      <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" />
--->
+
+        <!-- <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/share/doc" compression="gzip" /> -->
 
         <!-- Copy the samples -->
         <copy todir="${release.dir}/share/samples">
@@ -1143,15 +1143,14 @@
         </copy>
 
         <!-- Copy the documentation -->
-        <copy todir="${release.dir}/doc/javadocs">
+        <copy todir="${release.dir}/doc/javadocs" failonerror="false">
             <fileset dir="${javadoc.dir}" />
         </copy>
         <copy todir="${release.dir}/doc">
             <fileset dir="${docs.dir}" />
         </copy>
-        <!--
-    <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" />
--->
+
+        <!-- <untar src="${userguide.dir}/UsersGuide.tar.gz" dest="${release.dir}/doc" compression="gzip" /> -->
 
         <!-- Copy the samples -->
         <copy todir="${release.dir}/samples">

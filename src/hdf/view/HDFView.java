@@ -158,8 +158,8 @@ public class HDFView implements DataViewManager {
     private static final String        HDF4_VERSION = HDFVersions.HDF4_VERSION;
     private static final String        HDF5_VERSION = HDFVersions.HDF5_VERSION;
     private static final String        HDFVIEW_VERSION = HDFVersions.HDFVIEW_VERSION;
-    private static final String        HDFVIEW_USERSGUIDE_URL = "https://support.hdfgroup.org/products/java/hdfview/index.html";
-    private static final String        JAVA_COMPILER = "jdk 1.7";
+    private static final String        HDFVIEW_USERSGUIDE_URL = "https://portal.hdfgroup.org/display/HDFVIEW/HDFView+3.x+User%27s+Guide";
+    private static final String        JAVA_COMPILER = "jdk 1.11";
     private static final String        JAVA_VER_INFO = "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
 
     private static final String        ABOUT_HDFVIEW = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
