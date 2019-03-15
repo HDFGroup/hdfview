@@ -270,6 +270,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            ORDER_NONE and NATIVE.
      * @param tsign
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
+     *
+     * @throws Exception
+     *            if there is an error
      */
     public Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         this(tclass, tsize, torder, tsign, null);
@@ -304,6 +307,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      * @param tbase
      *            the base datatype of the new datatype
+     *
+* @throws Exception
+     *            if there is an error
      */
     public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
         this(tclass, tsize, torder, tsign, tbase, null);
@@ -338,6 +344,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the base datatype of the new datatype
      * @param pbase
      *            the parent datatype of the new datatype
+     *
+* @throws Exception
+     *            if there is an error
      */
     public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
         if ((tsize == 0) || (tsize < 0 && tsize != NATIVE))
@@ -381,6 +390,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @see #fromNative(long tid)
      * @param tid
      *            the native datatype identifier.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public Datatype(long tid) throws Exception {
         this(tid, null);
@@ -403,6 +415,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the native datatype identifier.
      * @param pbase
      *            the parent datatype of the new datatype
+     *
+* @throws Exception
+     *            if there is an error
      */
     public Datatype(long tid, Datatype pbase) throws Exception {
         this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE, null, pbase);

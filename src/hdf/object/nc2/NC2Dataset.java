@@ -317,8 +317,12 @@ public class NC2Dataset extends ScalarDS {
      *            the level of the gzip compression.
      * @param data
      *            the array of data values.
+     *
      * @return the new dataset if successful. Otherwise returns null.
-     */
+      *
+* @throws Exception
+     *            if there is an error
+    */
     public static NC2Dataset create(String name, Group pgroup, Datatype type,
             long[] dims, long[] maxdims, long[] chunks, int gzip, Object data)
             throws Exception {

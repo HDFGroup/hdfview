@@ -52,6 +52,9 @@ public class NC2Datatype extends Datatype {
      *            the order of the datatype.
      * @param tsign
      *            the sign of the datatype.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public NC2Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         super(tclass, tsize, torder, tsign);
@@ -63,6 +66,9 @@ public class NC2Datatype extends Datatype {
      *
      * @param theType
      *            the netcdf native datatype.
+     *
+* @throws Exception
+     *            if there is an error
      */
     public NC2Datatype(DataType theType) throws Exception {
         super(-1);

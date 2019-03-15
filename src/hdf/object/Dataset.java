@@ -832,7 +832,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @deprecated Not for public use in the future. <br>
      *             Using {@link #convertFromUnsignedC(Object, Object)}
      *
-     * @param data_in  the object data
+     * @param dataIN  the object data
      *
      * @return the converted object
      */
@@ -853,7 +853,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * <p>
      * Unsigned C integers are upgrade to Java integers according to the
      * following table:
-     * <TABLE CELLSPACING=0 BORDER=1 CELLPADDING=5 WIDTH=400>
+     *  <table border=1>
      * <caption><b>Mapping Unsigned C Integers to Java Integers</b></caption>
      * <TR>
      * <TD><B>Unsigned C Integer</B></TD>
@@ -986,7 +986,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @deprecated Not for public use in the future. <br>
      *             Using {@link #convertToUnsignedC(Object, Object)}
      *
-     * @param data_in
+     * @param dataIN
      *            the input 1D array of the unsigned C-type integers.
      *
      * @return the upgraded 1D array of Java integers.
