@@ -131,7 +131,7 @@ public class ViewProperties extends PreferenceStore {
     private static String            rootDir                = System.getProperty("user.dir");
 
     /** user's guide */
-    private static String            usersGuide             = "/UsersGuide/index.html";
+    private static String            usersGuide             = "/share/doc/UsersGuide/index.html";
 
     /** the font size */
     private static int               fontSize               = 12;
