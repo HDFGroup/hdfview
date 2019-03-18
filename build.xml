@@ -947,8 +947,8 @@
         <mkdir dir="${release.dir}/jre" />
         <mkdir dir="${release.dir}/lib" />
         <mkdir dir="${release.dir}/lib/extra" />
-        <mkdir dir="${release.dir}/doc" />
         <mkdir dir="${release.dir}/samples" />
+        <mkdir dir="${release.dir}/doc" />
 
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}/lib">
@@ -956,10 +956,31 @@
             <fileset dir="${jar.dir}" includes="hdfobject.jar" />
             <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
             <fileset dir="${lib.dir}/extra" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
-            <fileset dir="${hdf.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
-            <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dll" excludes="*.lib slf4j*.jar" />
-            <!-- Copy the hdf5 dll from the bin folder -->
-            <fileset dir="${hdf5.lib.dir}/../bin" includes="hdf5.dll" />
+            <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
+            <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
+
+            <fileset dir="${hdf.lib.dir}">
+                <include name="*.jar" />
+
+                <!-- hdf_java.dll statically includes the hdf lib and others -->
+                <include name="hdf_java.dll" />
+
+                <exclude name="slf4j*.jar" />
+                <exclude name="*.lib" />
+            </fileset>
+            <fileset dir="${hdf5.lib.dir}">
+                <include name="*.jar" />
+                <include name="hdf5_java.dll" />
+                <exclude name="slf4j*.jar" />
+                <exclude name="*.lib" />
+            </fileset>
+
+            <!-- Copy the hdf5 dll and related dlls from the bin folder -->
+            <fileset dir="${hdf5.lib.dir}/../bin">
+                <include name="hdf5.dll"/>
+                <include name="szip.dll" />
+                <include name="zlib.dll" />
+            </fileset>
         </copy>
         <copy todir="${release.dir}/lib/extra">
             <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
@@ -1125,21 +1146,43 @@
     <target name="deployMac" depends="objectjar,jar,javadoc" if="isMac">
         <mkdir dir="${release.dir}" />
         <mkdir dir="${release.dir}/lib" />
-        <mkdir dir="${release.dir}/doc" />
+        <mkdir dir="${release.dir}/lib/extra" />
         <mkdir dir="${release.dir}/samples" />
+        <mkdir dir="${release.dir}/doc" />
 
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}/lib">
             <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
             <fileset dir="${jar.dir}" includes="hdfobject.jar" />
             <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-            <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
             <fileset dir="${lib.dir}/extra" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
-            <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
-            <fileset dir="${hdf.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
-            <fileset dir="${hdf5.lib.dir}" includes="*.jar *.dylib" excludes="*.a slf4j*.jar" />
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
+
+            <fileset dir="${hdf.lib.dir}">
+                <include name="*.jar" />
+                <include name="libhdf.dylib" />
+                <include name="libhdf_java.dylib" />
+                <include name="libmfhdf.dylib" />
+                <include name="libjpeg.dylib" />
+                <include name="libszip.dylib" />
+                <include name="libz.dylib" />
+                <exclude name="slf4j*.jar" />
+                <exclude name="*.a" />
+            </fileset>
+            <fileset dir="${hdf5.lib.dir}">
+                <include name="*.jar" />
+                <include name="libhdf5.dylib" />
+                <include name="libhdf5_java.dylib" />
+                <include name="libszip.dylib" />
+                <include name="libz.dylib" />
+                <exclude name="slf4j*.jar" />
+                <exclude name="*.a" />
+            </fileset>
+        </copy>
+        <copy todir="${release.dir}/lib/extra">
+            <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
+            <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
         </copy>
 
         <!-- Copy the documentation -->
@@ -1429,7 +1472,7 @@
         <!-- Use appbundler to create .app -->
         <bundleapp outputdirectory="${dist.dir}" name="${ant.project.name}" displayname="${ant.project.name}-${app.version}" executableName="${ant.project.name}" identifier="org.hdfgroup.${ant.project.name}-${app.version}" shortversion="${app.version}" icon="${lib.dir}/macosx/${ant.project.name}.icns" signature="????" copyright="Copyright © 2006-2019 by The HDF Group. All rights reserved." applicationCategory="public.app-category.developer-tools" mainclassname="${main-class}">
 
-            <runtime dir="/Library/Java/JavaVirtualMachines/jdk${java.version}.jdk/Contents/Home" />
+            <runtime dir="${java.home}" />
             <classpath dir="${release.dir}" includes="**/lib/*.jar" />
             <librarypath dir="${release.dir}/lib" includes="*.dylib" />
             <arch name="x86_64" />
@@ -1449,13 +1492,13 @@
             <option value="-XstartOnFirstThread"/>
         </bundleapp>
 
-        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk/Contents/MacOS/libjli.dylib" />
-        <copy file="/Library/Java/JavaVirtualMachines/jdk${java.version}.jdk/Contents/Home/jre/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk/Contents/MacOS" />
+        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk/Contents/MacOS/libjli.dylib" />
+        <copy file="${java.home}/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk/Contents/MacOS" />
 
         <!-- Sign the app -->
         <exec executable="chmod">
             <arg value="a+w" />
-            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
+            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
         </exec>
 
         <apply executable="codesign">
@@ -1464,7 +1507,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
+            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
         </apply>
 
         <exec executable="codesign" dir="${dist.dir}">
@@ -1472,7 +1515,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <arg value="${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
+            <arg value="${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
         </exec>
 
         <apply executable="codesign">
