@@ -1429,7 +1429,7 @@
         <!-- Use appbundler to create .app -->
         <bundleapp outputdirectory="${dist.dir}" name="${ant.project.name}" displayname="${ant.project.name}-${app.version}" executableName="${ant.project.name}" identifier="org.hdfgroup.${ant.project.name}-${app.version}" shortversion="${app.version}" icon="${lib.dir}/macosx/${ant.project.name}.icns" signature="????" copyright="Copyright © 2006-2019 by The HDF Group. All rights reserved." applicationCategory="public.app-category.developer-tools" mainclassname="${main-class}">
 
-            <runtime dir="/Library/Java/JavaVirtualMachines/jdk${java.version}.jdk/Contents/Home" />
+            <runtime dir="${java.home}" />
             <classpath dir="${release.dir}" includes="**/lib/*.jar" />
             <librarypath dir="${release.dir}/lib" includes="*.dylib" />
             <arch name="x86_64" />
@@ -1449,13 +1449,13 @@
             <option value="-XstartOnFirstThread"/>
         </bundleapp>
 
-        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk/Contents/MacOS/libjli.dylib" />
-        <copy file="/Library/Java/JavaVirtualMachines/jdk${java.version}.jdk/Contents/Home/jre/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk/Contents/MacOS" />
+        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk/Contents/MacOS/libjli.dylib" />
+        <copy file="${java.home}/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk/Contents/MacOS" />
 
         <!-- Sign the app -->
         <exec executable="chmod">
             <arg value="a+w" />
-            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
+            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
         </exec>
 
         <apply executable="codesign">
@@ -1464,7 +1464,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
+            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
         </apply>
 
         <exec executable="codesign" dir="${dist.dir}">
@@ -1472,7 +1472,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <arg value="${ant.project.name}.app/Contents/PlugIns/jdk${java.version}.jdk" />
+            <arg value="${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
         </exec>
 
         <apply executable="codesign">
