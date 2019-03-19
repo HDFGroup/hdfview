@@ -1208,6 +1208,28 @@
         <mkdir dir="${release.dir}/samples" />
         <mkdir dir="${release.dir}/doc" />
 
+        <symlink action="record" linkfilename="dir.hdf.links">
+            <fileset dir="${hdf.lib.dir}">
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.*dylib" />
+
+                <include name="libhdf.*dylib" />
+                <include name="libhdf_java.*dylib" />
+                <include name="libmfhdf.*dylib" />
+                <include name="libjpeg.*dylib" />
+                <include name="libszip.*dylib" />
+                <include name="libz.*dylib" />
+            </fileset>
+        </symlink>
+        <symlink action="record" linkfilename="dir.hdf5.links">
+            <fileset dir="${hdf5.lib.dir}">
+                <include name="libhdf5.*dylib" />
+                <include name="libhdf5_java.*dylib" />
+                <include name="libszip.*dylib" />
+                <include name="libz.*dylib" />
+            </fileset>
+        </symlink>
+
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}/lib">
             <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
@@ -1217,27 +1239,27 @@
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
 
-            <fileset dir="${hdf.lib.dir}">
+            <fileset dir="${hdf.lib.dir}" followsymlinks="false">
                 <include name="*.jar" />
 
                 <!-- HDF4 bug in lib naming -->
-                <include name="libdf.dylib" />
+                <include name="libdf.*.dylib" />
 
-                <include name="libhdf.dylib" />
-                <include name="libhdf_java.dylib" />
-                <include name="libmfhdf.dylib" />
-                <include name="libjpeg.dylib" />
-                <include name="libszip.dylib" />
-                <include name="libz.dylib" />
+                <include name="libhdf.*.dylib" />
+                <include name="libhdf_java.*.dylib" />
+                <include name="libmfhdf.*.dylib" />
+                <include name="libjpeg.*.dylib" />
+                <include name="libszip.*.dylib" />
+                <include name="libz.*.dylib" />
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.a" />
             </fileset>
-            <fileset dir="${hdf5.lib.dir}">
+            <fileset dir="${hdf5.lib.dir}" followsymlinks="false">
                 <include name="*.jar" />
-                <include name="libhdf5.dylib" />
-                <include name="libhdf5_java.dylib" />
-                <include name="libszip.dylib" />
-                <include name="libz.dylib" />
+                <include name="libhdf5.*.dylib" />
+                <include name="libhdf5_java.*.dylib" />
+                <include name="libszip.*.dylib" />
+                <include name="libz.*.dylib" />
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.a" />
             </fileset>
@@ -1246,6 +1268,30 @@
             <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
             <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
         </copy>
+
+        <copy file="${hdf.lib.dir}/dir.hdf.links" tofile="${release.dir}/lib/dir.hdf.links" failonerror="false">
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="${hdf.lib.dir}/?" replace="" flags="gi"/>
+            </tokenfilter>
+          </filterchain>
+        </copy>
+        <copy file="${hdf5.lib.dir}/dir.hdf5.links" tofile="${release.dir}/lib/dir.hdf5.links">
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="${hdf5.lib.dir}/?" replace="" flags="gi"/>
+            </tokenfilter>
+          </filterchain>
+        </copy>
+        <symlink action="recreate" failonerror="false">
+            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf.links" />
+        </symlink>
+        <symlink action="recreate">
+            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf5.links" />
+        </symlink>
+
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf.links" failonerror="false"/>
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf5.links"/>
 
         <!-- Bundle jre -->
         <echo>Bundling JRE with jdeps and jlink...</echo>
@@ -1587,7 +1633,7 @@
         <!-- Use appbundler to create .app -->
         <bundleapp outputdirectory="${dist.dir}" name="${ant.project.name}" displayname="${ant.project.name}-${app.version}" executableName="${ant.project.name}" identifier="org.hdfgroup.${ant.project.name}-${app.version}" shortversion="${app.version}" icon="${lib.dir}/macosx/${ant.project.name}.icns" signature="????" copyright="Copyright © 2006-2019 by The HDF Group. All rights reserved." applicationCategory="public.app-category.developer-tools" mainclassname="${main-class}">
 
-            <runtime dir="${java.home}" />
+            <runtime dir="${install.mac.jre}/Contents/Home" />
             <classpath dir="${release.dir}" includes="**/lib/*.jar" />
             <librarypath dir="${release.dir}/lib" includes="*.dylib" />
             <arch name="x86_64" />
@@ -1607,13 +1653,13 @@
             <option value="-XstartOnFirstThread"/>
         </bundleapp>
 
-        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk/Contents/MacOS/libjli.dylib" />
-        <copy file="${java.home}/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk/Contents/MacOS" />
+        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}/Contents/MacOS/libjli.dylib" />
+        <copy file="${java.home}/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}/Contents/MacOS" />
 
         <!-- Sign the app -->
         <exec executable="chmod">
             <arg value="a+w" />
-            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
+            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}" />
         </exec>
 
         <apply executable="codesign">
@@ -1622,7 +1668,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
+            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}" />
         </apply>
 
         <exec executable="codesign" dir="${dist.dir}">
@@ -1630,7 +1676,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <arg value="${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
+            <arg value="${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}" />
         </exec>
 
         <apply executable="codesign">
@@ -1672,7 +1718,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <arg value="${ant.project.name}.app/Contents/Pkginfo" />
+            <arg value="${ant.project.name}.app/Contents/PkgInfo" />
         </exec>
 
         <exec executable="codesign" dir="${dist.dir}">
