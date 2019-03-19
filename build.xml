@@ -1703,7 +1703,7 @@
         <mkdir dir="${dist.dir}" />
 
         <!-- <exec executable="${env.JPACKAGE_DIR}/jpackage"> -->
-        <exec executable="/home/darius/Downloads/jdk-13/bin/jpackage">
+        <exec executable="${env.JPACKAGE_DIR}/jpackage">
             <arg value="create-installer" />
             <arg value="-i" />
             <arg value="${basedir}/${release.dir}" />
