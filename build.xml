@@ -1653,13 +1653,13 @@
             <option value="-XstartOnFirstThread"/>
         </bundleapp>
 
-        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/*jdk*/Contents/MacOS/libjli.dylib" />
-        <copy file="${java.home}/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/*jdk*/Contents/MacOS" />
+        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}/Contents/MacOS/libjli.dylib" />
+        <copy file="${java.home}/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}/Contents/MacOS" />
 
         <!-- Sign the app -->
         <exec executable="chmod">
             <arg value="a+w" />
-            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/*jdk*" />
+            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}" />
         </exec>
 
         <apply executable="codesign">
@@ -1668,7 +1668,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/*jdk*" />
+            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}" />
         </apply>
 
         <exec executable="codesign" dir="${dist.dir}">
@@ -1676,7 +1676,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <arg value="${ant.project.name}.app/Contents/PlugIns/*jdk*" />
+            <arg value="${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}" />
         </exec>
 
         <apply executable="codesign">
