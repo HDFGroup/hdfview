@@ -255,6 +255,7 @@
         <delete file="${build.dir}/allfiles.wixobj" />
         <delete file="${build.dir}/allfiles.wxs" />
         <delete file="${build.dir}/build.wixobj" />
+        <delete file="${build.dir}/jdeps.info" />
         <delete file="${build.dir}/${ant.project.name}-${app.version}.msi" />
     </target>
 
@@ -891,6 +892,54 @@
         </tar>
     </target>
 
+    <macrodef name="jlink" description="Generate a stand-alone JRE for the application">
+        <attribute name="java.bindir" default="${java.home}/bin" description="The directory in which Java executables can be found" />
+        <sequential>
+            <!-- Generate list of needed Java modules by using `jdeps` on all JAR files in the release directory -->
+            <apply executable="@{java.bindir}/jdeps" output="${build.dir}/jdeps.pre" append="true" >
+                <arg value="--list-deps" />
+                <fileset dir="${release.dir}/lib" includes="**/*.jar" />
+            </apply>
+
+            <!-- Remove any duplicate entries added -->
+            <copy file="${build.dir}/jdeps.pre" tofile="${build.dir}/jdeps.info">
+                <filterchain>
+                    <sortfilter />
+                    <uniqfilter />
+                    <tokenfilter>
+                        <trim />
+                    </tokenfilter>
+                </filterchain>
+            </copy>
+            <delete file="${build.dir}/jdeps.pre" failonerror="false" />
+
+            <!-- Convert generated list of modules into comma-separated string to pass to jlink -->
+            <loadfile property="jdeps.modlist" srcfile="${build.dir}/jdeps.info">
+                <filterchain>
+                    <tokenfilter>
+                        <replaceregex pattern="$" replace="," />
+                    </tokenfilter>
+                    <striplinebreaks />
+                    <tokenfilter>
+                        <replaceregex pattern=",$" replace="" />
+                    </tokenfilter>
+                </filterchain>
+            </loadfile>
+
+            <echo>List of generated module dependencies: ${jdeps.modlist}</echo>
+
+            <!-- Use generated list of Java modules to create custom JRE -->
+            <exec executable="@{java.bindir}/jlink">
+                <arg value="--no-header-files" />
+                <arg value="--no-man-pages" />
+                <arg value="--output" />
+                <arg value="${basedir}/${release.dir}/jre" />
+                <arg value="--add-modules" />
+                <arg value="${jdeps.modlist}" />
+            </exec>
+        </sequential>
+    </macrodef>
+
     <target name="createREADME" description="Creates the project README.txt file">
         <copy file="${packagefiles.dir}/README.txt.in" tofile="${dist.dir}/README.txt" />
         <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
@@ -944,7 +993,6 @@
 
     <target name="deployWindows" depends="objectjar,jar,javadoc" if="isWindows">
         <mkdir dir="${release.dir}" />
-        <mkdir dir="${release.dir}/jre" />
         <mkdir dir="${release.dir}/lib" />
         <mkdir dir="${release.dir}/lib/extra" />
         <mkdir dir="${release.dir}/samples" />
@@ -1023,7 +1071,6 @@
 
     <target name="deployUnix" depends="objectjar,jar,javadoc" if="isUnix">
         <mkdir dir="${release.dir}" />
-        <mkdir dir="${release.dir}/jre" />
         <mkdir dir="${release.dir}/lib" />
         <mkdir dir="${release.dir}/lib/extra" />
         <mkdir dir="${release.dir}/share" />
@@ -1032,6 +1079,9 @@
 
         <symlink action="record" linkfilename="dir.hdf.links">
             <fileset dir="${hdf.lib.dir}">
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.so*" />
+
                 <include name="libhdf.so*" />
                 <include name="libhdf_java.so*" />
                 <include name="libmfhdf.so*" />
@@ -1060,6 +1110,10 @@
 
             <fileset dir="${hdf.lib.dir}" followsymlinks="false">
                 <include name="*.jar" />
+
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.so*" />
+
                 <include name="libhdf.so*" />
                 <include name="libhdf_java.so*" />
                 <include name="libmfhdf.so*" />
@@ -1088,14 +1142,14 @@
         <copy file="${hdf.lib.dir}/dir.hdf.links" tofile="${release.dir}/lib/dir.hdf.links" failonerror="false">
           <filterchain>
             <tokenfilter>
-              <replaceregex pattern="${hdf.lib.dir}" replace="${basedir}/${release.dir}/lib" flags="gi"/>
+              <replaceregex pattern="${hdf.lib.dir}" replace="${basedir}/${release.dir}/lib/" flags="gi"/>
             </tokenfilter>
           </filterchain>
         </copy>
         <copy file="${hdf5.lib.dir}/dir.hdf5.links" tofile="${release.dir}/lib/dir.hdf5.links">
           <filterchain>
             <tokenfilter>
-              <replaceregex pattern="${hdf5.lib.dir}" replace="${basedir}/${release.dir}/lib" flags="gi"/>
+              <replaceregex pattern="${hdf5.lib.dir}" replace="${basedir}/${release.dir}/lib/" flags="gi"/>
             </tokenfilter>
           </filterchain>
         </copy>
@@ -1110,18 +1164,11 @@
         <delete file="${basedir}/${release.dir}/lib/dir.hdf5.links"/>
 
         <!-- Bundle jre -->
-        <copy todir="${release.dir}/jre">
-            <fileset dir="${java.home}" />
-        </copy>
-        <chmod perm="ugo+rx">
-            <fileset dir="${release.dir}/jre" includes="**/**" />
-        </chmod>
+        <echo>Bundling JRE with jdeps and jlink...</echo>
+        <jlink java.bindir="${java.home}/bin" />
 
         <!-- Create the .sh run script -->
         <copy file="${packagefiles.dir}/hdfview.sh.in" tofile="${release.dir}/hdfview.sh" />
-        <chmod perm="ugo+rx">
-            <fileset dir="${release.dir}" includes="hdfview.sh" />
-        </chmod>
 
         <!-- Set the correct classpath for the run script -->
         <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar" />
@@ -1141,6 +1188,17 @@
         <copy todir="${release.dir}/share/samples">
             <fileset dir="${samples.dir}" />
         </copy>
+
+        <chmod perm="u+rw">
+            <fileset dir="${release.dir}/share/">
+                <include name="**/*" />
+            </fileset>
+        </chmod>
+        <chmod perm="go+r">
+            <fileset dir="${release.dir}/share/">
+                <include name="**/*" />
+            </fileset>
+        </chmod>
     </target>
 
     <target name="deployMac" depends="objectjar,jar,javadoc" if="isMac">
@@ -1149,6 +1207,28 @@
         <mkdir dir="${release.dir}/lib/extra" />
         <mkdir dir="${release.dir}/samples" />
         <mkdir dir="${release.dir}/doc" />
+
+        <symlink action="record" linkfilename="dir.hdf.links">
+            <fileset dir="${hdf.lib.dir}">
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.*dylib" />
+
+                <include name="libhdf.*dylib" />
+                <include name="libhdf_java.*dylib" />
+                <include name="libmfhdf.*dylib" />
+                <include name="libjpeg.*dylib" />
+                <include name="libszip.*dylib" />
+                <include name="libz.*dylib" />
+            </fileset>
+        </symlink>
+        <symlink action="record" linkfilename="dir.hdf5.links">
+            <fileset dir="${hdf5.lib.dir}">
+                <include name="libhdf5.*dylib" />
+                <include name="libhdf5_java.*dylib" />
+                <include name="libszip.*dylib" />
+                <include name="libz.*dylib" />
+            </fileset>
+        </symlink>
 
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}/lib">
@@ -1159,23 +1239,27 @@
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
 
-            <fileset dir="${hdf.lib.dir}">
+            <fileset dir="${hdf.lib.dir}" followsymlinks="false">
                 <include name="*.jar" />
-                <include name="libhdf.dylib" />
-                <include name="libhdf_java.dylib" />
-                <include name="libmfhdf.dylib" />
-                <include name="libjpeg.dylib" />
-                <include name="libszip.dylib" />
-                <include name="libz.dylib" />
+
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.*.dylib" />
+
+                <include name="libhdf.*.dylib" />
+                <include name="libhdf_java.*.dylib" />
+                <include name="libmfhdf.*.dylib" />
+                <include name="libjpeg.*.dylib" />
+                <include name="libszip.*.dylib" />
+                <include name="libz.*.dylib" />
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.a" />
             </fileset>
-            <fileset dir="${hdf5.lib.dir}">
+            <fileset dir="${hdf5.lib.dir}" followsymlinks="false">
                 <include name="*.jar" />
-                <include name="libhdf5.dylib" />
-                <include name="libhdf5_java.dylib" />
-                <include name="libszip.dylib" />
-                <include name="libz.dylib" />
+                <include name="libhdf5.*.dylib" />
+                <include name="libhdf5_java.*.dylib" />
+                <include name="libszip.*.dylib" />
+                <include name="libz.*.dylib" />
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.a" />
             </fileset>
@@ -1184,6 +1268,34 @@
             <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
             <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
         </copy>
+
+        <copy file="${hdf.lib.dir}/dir.hdf.links" tofile="${release.dir}/lib/dir.hdf.links" failonerror="false">
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="${hdf.lib.dir}/?" replace="" flags="gi"/>
+            </tokenfilter>
+          </filterchain>
+        </copy>
+        <copy file="${hdf5.lib.dir}/dir.hdf5.links" tofile="${release.dir}/lib/dir.hdf5.links">
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="${hdf5.lib.dir}/?" replace="" flags="gi"/>
+            </tokenfilter>
+          </filterchain>
+        </copy>
+        <symlink action="recreate" failonerror="false">
+            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf.links" />
+        </symlink>
+        <symlink action="recreate">
+            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf5.links" />
+        </symlink>
+
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf.links" failonerror="false"/>
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf5.links"/>
+
+        <!-- Bundle jre -->
+        <echo>Bundling JRE with jdeps and jlink...</echo>
+        <jlink java.bindir="${java.home}/bin" />
 
         <!-- Copy the documentation -->
         <copy todir="${release.dir}/doc/javadocs" failonerror="false">
@@ -1232,10 +1344,12 @@
 
         <!-- Compress everything into one tar.gz file -->
         <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" compression="gzip">
-            <tarfileset dir="${dist.dir}" filemode="777">
+            <tarfileset dir="${dist.dir}" filemode="755">
                 <exclude name="temp.tar.gz" />
             </tarfileset>
         </tar>
+        <chmod perm="ugo+rx" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
+        <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
     </target>
 
     <target name="packageMac" depends="createInstaller, clean-package" if="isMac">
@@ -1290,6 +1404,51 @@
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <!-- verify gatekeeper -->
+        <exec executable="spctl" dir="${dist.dir}" failonerror="true">
+            <arg value="-vvvv" />
+            <arg value="--assess" />
+            <arg value="--type" />
+            <arg value="install" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <!-- Compress everything into one tar.gz file -->
+        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${uname.version}.tar.gz" compression="gzip">
+            <tarfileset dir="${dist.dir}" filemode="755">
+                <include name="COPYING.txt" />
+                <include name="README.txt" />
+                <include name="${ant.project.name}-${app.version}.dmg" />
+            </tarfileset>
+        </tar>
+    </target>
+
+    <target name="packageMacJPackage" depends="createMacInstallerJPackage, clean-package" if="isMac">
+        <mkdir dir="${dist.dir}" />
+
+        <!-- Copy over license file -->
+        <copy tofile="${dist.dir}/COPYING.txt">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+        <!-- Create README.txt and add appropriate version information -->
+        <antcall target="createMacREADME" />
+
+        <!-- Add Applications folder link -->
+        <exec executable="ln">
+            <arg value="-s" />
+            <arg value="/Applications" />
+            <arg value="${dist.dir}/Applications" />
         </exec>
 
         <!-- verify gatekeeper -->
@@ -1448,13 +1607,15 @@
         </chmod>
 
         <tar destfile="${dist.dir}/temp.tar.gz" compression="gzip">
-            <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}">
-                <exclude name="*.sh" />
-            </tarfileset>
-            <tarfileset dir="${release.dir}/jre" prefix="${ant.project.name}/${app.version}/jre" filemode="777">
+            <tarfileset dir="${release.dir}/lib" prefix="${ant.project.name}/${app.version}/lib" filemode="755" />
+
+            <tarfileset dir="${release.dir}/share" prefix="${ant.project.name}/${app.version}/share" filemode="666" />
+
+            <tarfileset dir="${release.dir}/jre" prefix="${ant.project.name}/${app.version}/jre" filemode="755">
                 <include name="**" />
             </tarfileset>
-            <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}" filemode="777">
+
+            <tarfileset dir="${release.dir}" prefix="${ant.project.name}/${app.version}" filemode="755">
                 <include name="*.sh" />
             </tarfileset>
         </tar>
@@ -1472,7 +1633,7 @@
         <!-- Use appbundler to create .app -->
         <bundleapp outputdirectory="${dist.dir}" name="${ant.project.name}" displayname="${ant.project.name}-${app.version}" executableName="${ant.project.name}" identifier="org.hdfgroup.${ant.project.name}-${app.version}" shortversion="${app.version}" icon="${lib.dir}/macosx/${ant.project.name}.icns" signature="????" copyright="Copyright © 2006-2019 by The HDF Group. All rights reserved." applicationCategory="public.app-category.developer-tools" mainclassname="${main-class}">
 
-            <runtime dir="${java.home}" />
+            <runtime dir="${install.mac.jre}/Contents/Home" />
             <classpath dir="${release.dir}" includes="**/lib/*.jar" />
             <librarypath dir="${release.dir}/lib" includes="*.dylib" />
             <arch name="x86_64" />
@@ -1492,13 +1653,13 @@
             <option value="-XstartOnFirstThread"/>
         </bundleapp>
 
-        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk/Contents/MacOS/libjli.dylib" />
-        <copy file="${java.home}/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk/Contents/MacOS" />
+        <delete file="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}/Contents/MacOS/libjli.dylib" />
+        <copy file="${java.home}/lib/jli/libjli.dylib" todir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}/Contents/MacOS" />
 
         <!-- Sign the app -->
         <exec executable="chmod">
             <arg value="a+w" />
-            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
+            <arg value="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}" />
         </exec>
 
         <apply executable="codesign">
@@ -1507,7 +1668,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
+            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}" />
         </apply>
 
         <exec executable="codesign" dir="${dist.dir}">
@@ -1515,7 +1676,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <arg value="${ant.project.name}.app/Contents/PlugIns/openjdk-${java.version}.jdk" />
+            <arg value="${ant.project.name}.app/Contents/PlugIns/${jre.dir.name}" />
         </exec>
 
         <apply executable="codesign">
@@ -1557,7 +1718,7 @@
             <arg value="-f" />
             <arg value="-s" />
             <arg value="${env.SIGNER}" />
-            <arg value="${ant.project.name}.app/Contents/Pkginfo" />
+            <arg value="${ant.project.name}.app/Contents/PkgInfo" />
         </exec>
 
         <exec executable="codesign" dir="${dist.dir}">
@@ -1581,6 +1742,60 @@
             <arg value="--type" />
             <arg value="execute" />
             <arg value="${ant.project.name}.app" />
+        </exec>
+    </target>
+
+    <target name="createMacInstallerJPackage" depends="clean-package, deploy" if="isMac">
+        <mkdir dir="${dist.dir}" />
+
+        <!-- <exec executable="${env.JPACKAGE_DIR}/jpackage"> -->
+        <exec executable="${env.JPACKAGE_DIR}/jpackage">
+            <arg value="create-installer" />
+            <arg value="-i" />
+            <arg value="${basedir}/${release.dir}" />
+            <arg value="-o" />
+            <arg value="${dist.dir}"/>
+            <arg value="-n" />
+            <arg value="${ant.project.name}-${app.version}" />
+            <arg value="--main-class" />
+            <arg value="hdf.view.HDFView" />
+            <arg value="--main-jar" />
+            <arg value="lib/HDFView.jar" />
+            <arg value="--app-version" />
+            <arg value="${app.version}" />
+            <arg value="--runtime-image" />
+            <arg value="${release.dir}/jre" />
+            <arg value="--copyright" />
+            <arg value="" />
+            <arg value="--description" />
+            <arg value="" />
+            <arg value="--vendor" />
+            <arg value="" />
+            <arg value="--icon" />
+            <arg value="${basedir}/lib/macosx/HDFView.icns" />
+            <!--
+            <arg value="-jvm-args=" />
+            <arg value="-Xmx1024M" />
+            <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" />
+            <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" />
+            -->
+            <arg value="--install-dir" />
+            <arg value="/Applications/HDF_Group/${ant.project.name}" />
+            <arg value="--installer-type" />
+            <arg value="dmg" />
+            <arg value="--license-file" />
+            <arg value="${basedir}/COPYING" />
+            <arg value="--mac-bundle-identifier" />
+            <arg value="" />
+            <arg value="--mac-bundle-name" />
+            <arg value="${ant.project.name} ${app.version}" />
+            <arg value="--mac-bundle-signing-prefix" />
+            <arg value="" />
+            <arg value="--mac-sign" />
+            <arg value="--mac-signing-keychain" />
+            <arg value="" />
+            <arg value="--mac-signing-key-user-name" />
+            <arg value="" />
         </exec>
     </target>
 
