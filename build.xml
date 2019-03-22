@@ -1256,8 +1256,8 @@
                 <include name="libmfhdf.*.dylib" />
                 <include name="libjpeg.*.dylib" />
                 <!-- Do not copy, use hdf5 version
-                <include name="libszip.*dylib" />
-                <include name="libz.*dylib" />
+                <include name="libszip.*.dylib" />
+                <include name="libz.*.dylib" />
                  -->
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.a" />
