@@ -1086,8 +1086,10 @@
                 <include name="libhdf_java.so*" />
                 <include name="libmfhdf.so*" />
                 <include name="libjpeg.so*" />
+                <!-- Do not copy, use hdf5 version
                 <include name="libszip.so*" />
                 <include name="libz.so*" />
+                 -->
             </fileset>
         </symlink>
         <symlink action="record" linkfilename="dir.hdf5.links">
@@ -1118,8 +1120,10 @@
                 <include name="libhdf_java.so*" />
                 <include name="libmfhdf.so*" />
                 <include name="libjpeg.so*" />
+                <!-- Do not copy, use hdf5 version
                 <include name="libszip.so*" />
                 <include name="libz.so*" />
+                 -->
                 <exclude name="slf4j*.jar" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="false">
@@ -1217,8 +1221,10 @@
                 <include name="libhdf_java.*dylib" />
                 <include name="libmfhdf.*dylib" />
                 <include name="libjpeg.*dylib" />
+                <!-- Do not copy, use hdf5 version
                 <include name="libszip.*dylib" />
                 <include name="libz.*dylib" />
+                 -->
             </fileset>
         </symlink>
         <symlink action="record" linkfilename="dir.hdf5.links">
@@ -1249,8 +1255,10 @@
                 <include name="libhdf_java.*.dylib" />
                 <include name="libmfhdf.*.dylib" />
                 <include name="libjpeg.*.dylib" />
-                <include name="libszip.*.dylib" />
-                <include name="libz.*.dylib" />
+                <!-- Do not copy, use hdf5 version
+                <include name="libszip.*dylib" />
+                <include name="libz.*dylib" />
+                 -->
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.a" />
             </fileset>
