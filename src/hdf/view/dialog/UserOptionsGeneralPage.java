@@ -380,7 +380,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
             public void widgetSelected(SelectionEvent e) {
                 final FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(rootDir);
-                fChooser.setFilterExtensions(new String[] {"*.*"});
+                fChooser.setFilterExtensions(new String[] {"*"});
                 fChooser.setFilterNames(new String[] {"All Files"});
                 fChooser.setFilterIndex(0);
 

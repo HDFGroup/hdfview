@@ -965,7 +965,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     fChooser.setFilterPath(currentDir);
 
                     DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
-                    fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+                    fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
                     fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
                     fChooser.setFilterIndex(1);
 
@@ -1361,7 +1361,7 @@ public abstract class DefaultBaseTableView implements TableView {
             fChooser.setFilterPath(currentDir);
 
             DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
-            fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+            fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
             fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
             fChooser.setFilterIndex(1);
             fChooser.setText("Save Current Data To Text File --- " + ((HObject) dataObject).getName());
@@ -1445,7 +1445,7 @@ public abstract class DefaultBaseTableView implements TableView {
     // fChooser.setFilterPath(dataset.getFileFormat().getParent());
     //
     // DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
-    // fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+    // fChooser.setFilterExtensions(new String[] {"*", filter.getExtensions()});
     // fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
     // fChooser.setFilterIndex(1);
     //
@@ -1560,7 +1560,7 @@ public abstract class DefaultBaseTableView implements TableView {
             fChooser.setFilterPath(currentDir);
 
             DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
-            fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+            fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
             fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
             fChooser.setFilterIndex(1);
             fChooser.setText("Save Current Data To Binary File --- " + ((HObject) dataObject).getName());
@@ -1761,7 +1761,7 @@ public abstract class DefaultBaseTableView implements TableView {
             fChooser.setFilterPath(currentDir);
 
             DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
-            fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+            fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
             fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
             fChooser.setFilterIndex(1);
 

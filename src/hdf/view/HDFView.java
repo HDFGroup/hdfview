@@ -1767,7 +1767,7 @@ public class HDFView implements DataViewManager {
                 fChooser.setFilterPath(currentDir);
 
                 DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
-                fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+                fChooser.setFilterExtensions(new String[] {"*", filter.getExtensions()});
                 fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
                 fChooser.setFilterIndex(1);
 
