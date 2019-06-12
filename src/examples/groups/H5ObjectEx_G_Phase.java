@@ -1,8 +1,6 @@
 /************************************************************
   This example shows how to set the conditions for
   conversion between compact and dense (indexed) groups.
-
-  This file is intended for use with HDF5 Library version 1.8
  ************************************************************/
 package examples.groups;
 
@@ -32,7 +30,7 @@ public class H5ObjectEx_G_Phase {
         H5G_STORAGE_TYPE_COMPACT(1),
         H5G_STORAGE_TYPE_DENSE(2);
 
-        private static final Map<Integer, H5G_storage> lookup = new HashMap<Integer, H5G_storage>();
+        private static final Map<Integer, H5G_storage> lookup = new HashMap<>();
 
         static {
             for (H5G_storage s : EnumSet.allOf(H5G_storage.class))

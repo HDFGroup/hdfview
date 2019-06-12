@@ -1,23 +1,17 @@
 /************************************************************
-
   This example shows how to read and write bitfield
   datatypes to a dataset.  The program first writes bit
   fields to a dataset with a dataspace of DIM0xDIM1, then
   closes the file.  Next, it reopens the file, reads back
   the data, and outputs it to the screen.
-
-  This file is intended for use with HDF5 Library verion 1.6
-
  ************************************************************/
 
 package examples.datatypes;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
-import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
