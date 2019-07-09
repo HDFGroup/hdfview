@@ -1,14 +1,10 @@
 /************************************************************
-
   This example shows how to commit a named datatype to a
   file, and read back that datatype.  The program first
   defines a compound datatype, commits it to a file, then
   closes the file.  Next, it reopens the file, opens the
   datatype, and outputs the names of its fields to the
   screen.
-
-  This file is intended for use with HDF5 Library verion 1.6
-
  ************************************************************/
 
 package examples.datatypes;

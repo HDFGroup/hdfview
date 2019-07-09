@@ -1,8 +1,6 @@
 /************************************************************
 This example shows how to create intermediate groups with
 a single call to H5Gcreate.
-
-This file is intended for use with HDF5 Library version 1.8
  ************************************************************/
 package examples.groups;
 
@@ -78,7 +76,7 @@ public class H5ObjectEx_G_Intermediate {
         }
     }
     private class H5O_iter_data implements H5O_iterate_t {
-        public ArrayList<idata> iterdata = new ArrayList<idata>();
+        public ArrayList<idata> iterdata = new ArrayList<>();
     }
 
 

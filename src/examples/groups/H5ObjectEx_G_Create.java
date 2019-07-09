@@ -1,9 +1,5 @@
 /************************************************************
-
   This example shows how to create, open, and close a group.
-
-  This file is intended for use with HDF5 Library verion 1.6
-
  ************************************************************/
 
 package examples.groups;

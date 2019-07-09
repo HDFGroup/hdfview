@@ -1,13 +1,9 @@
 /************************************************************
-
   This example shows how to read and write floating point
   datatypes to an attribute.  The program first writes
   floating point numbers to an attribute with a dataspace of
   DIM0xDIM1, then closes the file.  Next, it reopens the
   file, reads back the data, and outputs it to the screen.
-
-  This file is intended for use with HDF5 Library verion 1.6
-
  ************************************************************/
 
 package examples.datatypes;

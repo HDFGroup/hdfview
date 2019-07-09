@@ -1,10 +1,6 @@
 /************************************************************
-
   This example shows how to iterate over group members using
   H5Gget_obj_info_all.
-
-  This file is intended for use with HDF5 Library verion 1.6
-
  ************************************************************/
 package examples.groups;
 
@@ -31,7 +27,7 @@ public class H5ObjectEx_G_Iterate {
         H5O_TYPE_DATASET(1), // Object is a dataset
         H5O_TYPE_NAMED_DATATYPE(2), // Object is a named data type
         H5O_TYPE_NTYPES(3); // Number of different object types
-        private static final Map<Integer, H5O_type> lookup = new HashMap<Integer, H5O_type>();
+        private static final Map<Integer, H5O_type> lookup = new HashMap<>();
 
         static {
             for (H5O_type s : EnumSet.allOf(H5O_type.class))
