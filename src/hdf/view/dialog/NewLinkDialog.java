@@ -634,7 +634,7 @@ public class NewLinkDialog extends Dialog {
         fchooser.setFilterPath(currentDir);
 
         DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
-        fchooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+        fchooser.setFilterExtensions(new String[] {"*", filter.getExtensions()});
         fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
         fchooser.setFilterIndex(1);
 

@@ -2210,7 +2210,7 @@ public class DefaultTreeView implements TreeView {
                 filter = DefaultFileFilter.getFileFilterBinary();
             }
 
-            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            fChooser.setFilterExtensions(new String[] {"*", filter.getExtensions()});
             fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
             fChooser.setFilterIndex(1);
 

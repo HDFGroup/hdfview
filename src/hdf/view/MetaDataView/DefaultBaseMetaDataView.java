@@ -1397,7 +1397,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     fChooser.setFileName(fout);
 
                     DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
-                    fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+                    fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
                     fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
                     fChooser.setFilterIndex(1);
 
