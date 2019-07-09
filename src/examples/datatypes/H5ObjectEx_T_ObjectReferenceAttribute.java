@@ -1,5 +1,4 @@
 /************************************************************
-
   This example shows how to read and write object references
   to an attribute.  The program first creates objects in the
   file and writes references to those objects to an
@@ -39,7 +38,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
         H5O_TYPE_GROUP(HDF5Constants.H5O_TYPE_GROUP), /* Object is a group */
         H5O_TYPE_DATASET(HDF5Constants.H5O_TYPE_DATASET), /* Object is a dataset */
         H5O_TYPE_NAMED_DATATYPE(HDF5Constants.H5O_TYPE_NAMED_DATATYPE); /* Object is a named data type */
-        private static final Map<Integer, H5O_TYPE_obj> lookup = new HashMap<Integer, H5O_TYPE_obj>();
+        private static final Map<Integer, H5O_TYPE_obj> lookup = new HashMap<>();
 
         static {
             for (H5O_TYPE_obj s : EnumSet.allOf(H5O_TYPE_obj.class))

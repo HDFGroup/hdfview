@@ -4,9 +4,7 @@ using H5Ovisit and H5Lvisit.  The program prints all of
 the objects in the file specified in FILE, then prints all
 of the links in that file.  The default file used by this
 example implements the structure described in the User's
-Guide, chapter 4, figure 26.
-
-This file is intended for use with HDF5 Library version 1.8
+Guide.
  ************************************************************/
 package examples.groups;
 
@@ -84,7 +82,7 @@ public class H5ObjectEx_G_Visit {
     }
 
     private class H5L_iter_data implements H5L_iterate_t {
-        public ArrayList<idata> iterdata = new ArrayList<idata>();
+        public ArrayList<idata> iterdata = new ArrayList<>();
     }
 
     private class H5L_iter_callback implements H5L_iterate_cb {
@@ -111,7 +109,7 @@ public class H5ObjectEx_G_Visit {
     }
 
     private class H5O_iter_data implements H5O_iterate_t {
-        public ArrayList<idata> iterdata = new ArrayList<idata>();
+        public ArrayList<idata> iterdata = new ArrayList<>();
     }
 
 
