@@ -49,17 +49,31 @@
         </filterchain>
     </loadfile>
 
-    <pathconvert property="hdfjava.filelist">
-        <map from="${hdf.lib.dir}${file.separator}" to="" />
-        <fileset dir="${hdf.lib.dir}">
-            <include name="jarhdf*.jar" />
-        </fileset>
-        <map from="${hdf5.lib.dir}${file.separator}" to="" />
-        <fileset dir="${hdf5.lib.dir}">
-            <include name="jarhdf5*.jar" />
-        </fileset>
-        <mapper type="glob" from="*.jar" to="*" />
-    </pathconvert>
+    <target name="loadHDFHDF5Version" if="h4path">
+        <pathconvert property="hdfjava.filelist">
+            <map from="${hdf.lib.dir}${file.separator}" to="" />
+            <fileset dir="${hdf.lib.dir}">
+                <include name="jarhdf*.jar" />
+            </fileset>
+            <map from="${hdf5.lib.dir}${file.separator}" to="" />
+            <fileset dir="${hdf5.lib.dir}">
+                <include name="jarhdf5*.jar" />
+            </fileset>
+            <mapper type="glob" from="*.jar" to="*" />
+        </pathconvert>
+    </target>
+
+    <target name="loadHDF5Version" unless="h4path">
+        <pathconvert property="hdfjava.filelist">
+            <map from="${hdf5.lib.dir}${file.separator}" to="" />
+            <fileset dir="${hdf5.lib.dir}">
+                <include name="jarhdf5*.jar" />
+            </fileset>
+            <mapper type="glob" from="*.jar" to="*" />
+        </pathconvert>
+    </target>
+
+    <target name="loadVersionProperties" depends="loadHDFHDF5Version, loadHDF5Version">
     <loadresource property="hdfjava.version">
         <string value="${hdfjava.filelist}" />
         <filterchain>
@@ -68,6 +82,7 @@
             </tokenfilter>
         </filterchain>
     </loadresource>
+    </target>
 
     <condition property="isWindows">
         <os family="windows" />
@@ -159,8 +174,8 @@
     <property name="sonar.host.url" value="http://localhost:9000" />
 
     <!-- Define the SonarQube project properties -->
-    <property name="sonar.projectKey" value="HDFView3" />
-    <property name="sonar.projectName" value="HDFView3" />
+    <property name="sonar.projectKey" value="org.sonarqube:sonarqube-scanner-ant" />
+    <property name="sonar.projectName" value="HDFView-development" />
     <property name="sonar.projectVersion" value="1.0" />
     <property name="sonar.sources" value="${src.dir}/hdf" />
     <property name="sonar.java.binaries" value="${classes.dir}" />
