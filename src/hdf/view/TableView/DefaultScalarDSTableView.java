@@ -908,7 +908,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         boolean isPointSelection = (reg.indexOf('-') <= 0);
 
         // find the object location
-        String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf(' '));
+        String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf("REGION_TYPE")-1);
         log.trace("showRegRefData(): isPointSelection={} oidStr={}", isPointSelection,
                 oidStr);
 
