@@ -1,4 +1,4 @@
-@HDFJAVA_PACKAGE_NAME@ @HDFVIEW_PACKAGE_VERSION_STRING@ with hdf4-java:hdf5-java versions @HDFJAVA_PACKAGE_VERSION_STRING@
+@HDFJAVA_PACKAGE_NAME@ @HDFVIEW_PACKAGE_VERSION_STRING@
 ------------------------------------------------------------------------------
 
 This directory contains the binary (release) distribution of
