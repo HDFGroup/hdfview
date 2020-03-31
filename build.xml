@@ -165,7 +165,6 @@
     <property name="lib.dir" value="lib" />
     <property name="packagefiles.dir" value="package_files" />
     <property name="dist.dir" value="${build.dir}/dist" />
-    <property name="java.bin" value="/bin/jre/bin" />
     <property name="release.dir" value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}" />
     <property name="includeantruntime" value="false" />
     <property name="jre.version" value="${ant.java.version}" />
@@ -905,7 +904,6 @@
 
             <fileset dir="${src.dir}/hdf">
                 <include name="object/**.java" />
-                <!--   -->
                 <include name="${h4.object.path.files}" />
                 <include name="${h5.object.path.files}" />
                 <include name="view/**.java" />
@@ -917,7 +915,7 @@
             </doctitle>
 
             <bottom>
-                <![CDATA[Copyright © 2018. All Rights Reserved.]]>
+                <![CDATA[Copyright © 2020. All Rights Reserved.]]>
             </bottom>
 
             <group title="object packages" packages="hdf.object.*" />
@@ -926,7 +924,9 @@
                 <path refid="project-classpath" />
                 <path refid="application" />
             </classpath>
+            <!--
             <link href="http://java.sun.com/javase/7/docs/api/" />
+               -->
         </javadoc>
     </target>
 
@@ -942,7 +942,8 @@
         <sequential>
             <!-- Generate list of needed Java modules by using `jdeps` on all JAR files in the release directory -->
             <apply executable="@{java.bindir}/jdeps" output="${build.dir}/jdeps.pre" append="true" >
-                <arg value="-s" />
+                <arg value="--print-module-deps" />
+                <arg value="--ignore-missing-deps" />
                 <fileset dir="${release.dir}/lib" includes="**/*.jar" />
             </apply>
 
@@ -979,6 +980,8 @@
                 <arg value="--no-man-pages" />
                 <arg value="--output" />
                 <arg value="${basedir}/${release.dir}/jre" />
+                <arg value="--module-path" />
+                <arg value="${build.dir}" />
                 <arg value="--add-modules" />
                 <arg value="${jdeps.modlist}" />
             </exec>
