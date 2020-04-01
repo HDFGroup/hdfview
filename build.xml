@@ -323,7 +323,7 @@
         <mkdir dir="${classes.dir}" />
         <mkdir dir="${classes.dir}/hdf" />
 
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="${hdf.view.path} ${all.object.path} ${examples.test.path} **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="${hdf.view.path} ${fits.object.path} ${nc2.object.path} ${h5.object.path} ${examples.test.path} **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
 
         <copy todir="${classes.dir}">
             <fileset dir="${src.dir}" excludes="${hdf.view.path} ${fits.object.path} ${nc2.object.path} ${h5.object.path} **/*.in **/*.java ${examples.test.path}" />
@@ -937,7 +937,7 @@
         </tar>
     </target>
 
-    <macrodef name="jlink" description="Generate a stand-alone JRE for the application">
+    <macrodef name="jdepslink" description="Generate a stand-alone JRE for the application">
         <attribute name="java.bindir" default="${java.home}/bin" description="The directory in which Java executables can be found" />
         <sequential>
             <!-- Generate list of needed Java modules by using `jdeps` on all JAR files in the release directory -->
@@ -1128,30 +1128,6 @@
         <mkdir dir="${release.dir}/share/samples" />
         <mkdir dir="${release.dir}/share/doc" />
 
-        <symlink action="record" linkfilename="dir.hdf.links">
-            <fileset dir="${hdf.lib.dir}">
-                <!-- HDF4 bug in lib naming -->
-                <include name="libdf.so*" />
-
-                <include name="libhdf.so*" />
-                <include name="libhdf_java.so*" />
-                <include name="libmfhdf.so*" />
-                <include name="libjpeg.so*" />
-                <!-- Do not copy, use hdf5 version
-                <include name="libszip.so*" />
-                <include name="libz.so*" />
-                 -->
-            </fileset>
-        </symlink>
-        <symlink action="record" linkfilename="dir.hdf5.links">
-            <fileset dir="${hdf5.lib.dir}">
-                <include name="libhdf5.so*" />
-                <include name="libhdf5_java.so*" />
-                <include name="libszip.so*" />
-                <include name="libz.so*" />
-            </fileset>
-        </symlink>
-
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}/lib">
             <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
@@ -1161,29 +1137,27 @@
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
 
-            <fileset dir="${hdf.lib.dir}" followsymlinks="false">
+            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
+                <include name="libhdf_java.so" />
                 <include name="*.jar" />
-
-                <!-- HDF4 bug in lib naming -->
-                <include name="libdf.so*" />
-
-                <include name="libhdf.so*" />
-                <include name="libhdf_java.so*" />
-                <include name="libmfhdf.so*" />
-                <include name="libjpeg.so*" />
-                <!-- Do not copy, use hdf5 version
-                <include name="libszip.so*" />
-                <include name="libz.so*" />
-                 -->
                 <exclude name="slf4j*.jar" />
             </fileset>
-            <fileset dir="${hdf5.lib.dir}" followsymlinks="false">
+            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
+                <filename regex="[0-9]"/>
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.so.*" />
+                <include name="libhdf.so.*" />
+                <include name="libmfhdf.so.*" />
+                <include name="libz.so.*" />
+            </fileset>
+            <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
+                <include name="libhdf5_java.so" />
                 <include name="*.jar" />
-                <include name="libhdf5.so*" />
-                <include name="libhdf5_java.so*" />
-                <include name="libszip.so*" />
-                <include name="libz.so*" />
                 <exclude name="slf4j*.jar" />
+            </fileset>
+            <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
+                <include name="libhdf5.so.*" />
+                <filename regex="[0-9][0-9][0-9]"/>
             </fileset>
         </copy>
         <chmod perm="ugo+rx">
@@ -1194,33 +1168,9 @@
             <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
         </copy>
 
-        <copy file="${hdf.lib.dir}/dir.hdf.links" tofile="${release.dir}/lib/dir.hdf.links" failonerror="false">
-          <filterchain>
-            <tokenfilter>
-              <replaceregex pattern="${hdf.lib.dir}" replace="${basedir}/${release.dir}/lib/" flags="gi"/>
-            </tokenfilter>
-          </filterchain>
-        </copy>
-        <copy file="${hdf5.lib.dir}/dir.hdf5.links" tofile="${release.dir}/lib/dir.hdf5.links">
-          <filterchain>
-            <tokenfilter>
-              <replaceregex pattern="${hdf5.lib.dir}" replace="${basedir}/${release.dir}/lib/" flags="gi"/>
-            </tokenfilter>
-          </filterchain>
-        </copy>
-        <symlink action="recreate" failonerror="false">
-            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf.links" />
-        </symlink>
-        <symlink action="recreate">
-            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf5.links" />
-        </symlink>
-
-        <delete file="${basedir}/${release.dir}/lib/dir.hdf.links" failonerror="false"/>
-        <delete file="${basedir}/${release.dir}/lib/dir.hdf5.links"/>
-
         <!-- Bundle jre -->
         <echo>Bundling JRE with jdeps and jlink...</echo>
-        <jlink java.bindir="${java.home}/bin" />
+        <jdepslink java.bindir="${java.home}/bin" />
 
         <!-- Create the .sh run script -->
         <copy file="${packagefiles.dir}/hdfview.sh.in" tofile="${release.dir}/hdfview.sh" />
@@ -1228,6 +1178,7 @@
         <!-- Set the correct classpath for the run script -->
         <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar" />
         <replace file="${release.dir}/hdfview.sh" token="@SLF4J@" value="${runscript.slf4j}" />
+        <chmod file="${release.dir}/hdfview.sh" perm="ugo+rx"/>
 
         <!-- Copy the documentation -->
         <copy todir="${release.dir}/share/doc/javadocs" failonerror="false">
@@ -1263,30 +1214,6 @@
         <mkdir dir="${release.dir}/samples" />
         <mkdir dir="${release.dir}/doc" />
 
-        <symlink action="record" linkfilename="dir.hdf.links">
-            <fileset dir="${hdf.lib.dir}">
-                <!-- HDF4 bug in lib naming -->
-                <include name="libdf.*dylib" />
-
-                <include name="libhdf.*dylib" />
-                <include name="libhdf_java.*dylib" />
-                <include name="libmfhdf.*dylib" />
-                <include name="libjpeg.*dylib" />
-                <!-- Do not copy, use hdf5 version
-                <include name="libszip.*dylib" />
-                <include name="libz.*dylib" />
-                 -->
-            </fileset>
-        </symlink>
-        <symlink action="record" linkfilename="dir.hdf5.links">
-            <fileset dir="${hdf5.lib.dir}">
-                <include name="libhdf5.*dylib" />
-                <include name="libhdf5_java.*dylib" />
-                <include name="libszip.*dylib" />
-                <include name="libz.*dylib" />
-            </fileset>
-        </symlink>
-
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}/lib">
             <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
@@ -1296,30 +1223,28 @@
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
 
-            <fileset dir="${hdf.lib.dir}" followsymlinks="false">
+            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
+                <include name="libhdf_java.dylib" />
                 <include name="*.jar" />
-
+                <exclude name="slf4j*.jar" />
+            </fileset>
+            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
+                <filename regex="[0-9]"/>
                 <!-- HDF4 bug in lib naming -->
                 <include name="libdf.*.dylib" />
-
                 <include name="libhdf.*.dylib" />
-                <include name="libhdf_java.*.dylib" />
                 <include name="libmfhdf.*.dylib" />
-                <include name="libjpeg.*.dylib" />
-                <!-- Do not copy, use hdf5 version
-                <include name="libszip.*.dylib" />
                 <include name="libz.*.dylib" />
-                 -->
-                <exclude name="slf4j*.jar" />
                 <exclude name="*.a" />
             </fileset>
-            <fileset dir="${hdf5.lib.dir}" followsymlinks="false">
+            <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
+                <include name="libhdf5_java.dylib" />
                 <include name="*.jar" />
-                <include name="libhdf5.*.dylib" />
-                <include name="libhdf5_java.*.dylib" />
-                <include name="libszip.*.dylib" />
-                <include name="libz.*.dylib" />
                 <exclude name="slf4j*.jar" />
+            </fileset>
+            <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
+                <filename regex="[0-9][0-9][0-9]"/>
+                <include name="libhdf5.*.dylib" />
                 <exclude name="*.a" />
             </fileset>
         </copy>
@@ -1328,33 +1253,9 @@
             <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
         </copy>
 
-        <copy file="${hdf.lib.dir}/dir.hdf.links" tofile="${release.dir}/lib/dir.hdf.links" failonerror="false">
-          <filterchain>
-            <tokenfilter>
-              <replaceregex pattern="${hdf.lib.dir}/?" replace="" flags="gi"/>
-            </tokenfilter>
-          </filterchain>
-        </copy>
-        <copy file="${hdf5.lib.dir}/dir.hdf5.links" tofile="${release.dir}/lib/dir.hdf5.links">
-          <filterchain>
-            <tokenfilter>
-              <replaceregex pattern="${hdf5.lib.dir}/?" replace="" flags="gi"/>
-            </tokenfilter>
-          </filterchain>
-        </copy>
-        <symlink action="recreate" failonerror="false">
-            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf.links" />
-        </symlink>
-        <symlink action="recreate">
-            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf5.links" />
-        </symlink>
-
-        <delete file="${basedir}/${release.dir}/lib/dir.hdf.links" failonerror="false"/>
-        <delete file="${basedir}/${release.dir}/lib/dir.hdf5.links"/>
-
         <!-- Bundle jre -->
         <echo>Bundling JRE with jdeps and jlink...</echo>
-        <jlink java.bindir="${java.home}/bin" />
+        <jdepslink java.bindir="${java.home}/bin" />
 
         <!-- Copy the documentation -->
         <copy todir="${release.dir}/doc/javadocs" failonerror="false">
