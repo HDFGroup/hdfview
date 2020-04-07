@@ -1223,7 +1223,7 @@
                 <exclude name="slf4j*.jar" />
             </fileset>
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <filename regex="lib[zmfhdf]*\.[0-9]\.dylib"/>
+                <filename regex="lib[zmfhdf]*(\.[0-9])(\.dylib)$"/>
                 <exclude name="*.a" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
@@ -1232,7 +1232,7 @@
                 <exclude name="slf4j*.jar" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
-                <filename regex="libhdf5\.[0-9][0-9][0-9]\.dylib"/>
+                <filename regex="libhdf5(\.[0-9][0-9][0-9])(\.dylib)$"/>
                 <exclude name="*.a" />
             </fileset>
         </copy>
