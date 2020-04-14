@@ -96,7 +96,7 @@ public class H5Group extends Group {
     public H5Group(FileFormat theFile, String name, String path, Group parent, long[] oid) {
         super(theFile, name, path, parent, oid);
         nMembersInFile = -1;
-        obj_info = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
+        obj_info = new H5O_info_t(-1L, null, 0, 0, -1L, 0L, 0L, 0L, 0L);
 
         if ((oid == null) && (theFile != null)) {
             // retrieve the object ID

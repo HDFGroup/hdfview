@@ -30,6 +30,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
+import hdf.hdf5lib.structs.H5O_token_t;
 import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -2429,7 +2430,7 @@ public class H5File extends FileFormat {
         // two seconds
         int[] objTypes = new int[nelems];
         long[] fNos = new long[nelems];
-        long[] objRefs = new long[nelems];
+        H5O_token_t[] objRefs = new H5O_token_t[nelems];
         String[] objNames = new String[nelems];
 
         try {

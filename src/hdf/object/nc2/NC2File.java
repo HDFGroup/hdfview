@@ -15,16 +15,21 @@
 package hdf.object.nc2;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Vector;
 
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
+import ucar.nc2.iosp.netcdf3.N3header;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  * This class provides file level APIs. File access APIs include retrieving the
@@ -34,18 +39,24 @@ import ucar.nc2.Variable;
  * @author Peter X. Cao
  */
 public class NC2File extends FileFormat {
-
     private static final long serialVersionUID = 6941235662108358451L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2File.class);
+    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(NC2File.class);
 
     /**
-     * The root object of the file hierarchy.
+     * The root object of this file.
      */
-    private HObject rootObject;
+    private HObject                         rootObject;
+
+    /**
+     * The list of unique (tag, ref) pairs. It is used to avoid duplicate
+     * objects in memory.
+     */
+    @SuppressWarnings("rawtypes")
+    private List                            objList;
 
     /** the netcdf file */
-    private NetcdfFile ncFile;
+    private NetcdfFile                      ncFile;
 
     private static boolean isFileOpen;
 
@@ -57,30 +68,40 @@ public class NC2File extends FileFormat {
     }
 
     /**
-     * Constructs an NC2File object of given file name with read-only access.
+     * Creates an NC2File object of given file name with read-only access.
+     *
+     * @param fileName
+     *            A valid file name, with a relative or absolute path.
      */
-    public NC2File(String pathname) {
-        super(pathname);
+    public NC2File(String fileName) {
+        super(fileName);
 
-        isReadOnly = true;
         isFileOpen = false;
+        isReadOnly = true;
+        objList = new Vector();
+        ncFile = null;
+
         this.fid = -1;
-        try {
-            ncFile = new NetcdfFile(fullFileName);
-        }
-        catch (Exception ex) {
-            ncFile = null;
+
+        if ((fileName != null) && (fileName.length() > 0)) {
+            try {
+                log.trace("NetcdfFile:{}", fullFileName);
+                ncFile = NetcdfFile.open(fullFileName);
+                this.fid = 1;
+            }
+            catch (Exception ex) {
+                log.trace("NC2File:{}", fileName, ex);
+            }
         }
     }
 
     /**
-     * Checks if the given file format is a NetCDF file.
-     * <p>
+     * Checks if the given file format is a NetCDF3 file.
      *
      * @param fileformat
      *            the fileformat to be checked.
-     * @return true if the given file is an NetCDF file; otherwise returns
-     *         false.
+     *
+     * @return true if the given file is a NetCDF3 file; otherwise returns false.
      */
     @Override
     public boolean isThisType(FileFormat fileformat) {
@@ -88,46 +109,36 @@ public class NC2File extends FileFormat {
     }
 
     /**
-     * Checks if a given file is a NetCDF file.
-     * <p>
+     * Checks if the given file is a NetCDF file.
      *
      * @param filename
      *            the file to be checked.
-     * @return true if the given file is an NetCDF file; otherwise returns
-     *         false.
+     *
+     * @return true if the given file is a NetCDF file; otherwise returns false.
      */
     @Override
     public boolean isThisType(String filename) {
         boolean isNetcdf = false;
-        RandomAccessFile raf = null;
+        ucar.unidata.io.RandomAccessFile raf = null;
 
         try {
-            raf = new RandomAccessFile(filename, "r");
+            raf = new ucar.unidata.io.RandomAccessFile(filename, "r");
         }
         catch (Exception ex) {
+            log.trace("raf null - exit", ex);
             raf = null;
         }
 
         if (raf == null) {
-            log.trace("raf null - exit");
             return false;
         }
 
-        byte[] header = new byte[4];
         try {
-            raf.read(header);
+            isNetcdf = N3header.isValidFile(raf);
         }
-        catch (Exception ex) {
-            header = null;
-        }
-
-        if (header != null) {
-            if (((header[0] == 67) && (header[1] == 68) && (header[2] == 70) && (header[3] < 4))) {
-                isNetcdf = true;
-            }
-            else {
-                isNetcdf = false;
-            }
+        catch (IOException e) {
+            log.trace("raf isValidFile - failure", e);
+            return false;
         }
 
         try {
@@ -137,12 +148,12 @@ public class NC2File extends FileFormat {
             log.trace("raf close:", ex);
         }
 
+        log.trace("{} - isNetcdf:{}", filename, isNetcdf);
         return isNetcdf;
     }
 
     /**
-     * Creates an NC2File instance with specified file name and READ access.
-     * <p>
+     * Creates a NC2File instance with specified file name and READ access.
      * Regardless of specified access, the NC2File implementation uses READ.
      *
      * @see hdf.object.FileFormat#createInstance(java.lang.String, int)
@@ -156,6 +167,8 @@ public class NC2File extends FileFormat {
     // Implementing FileFormat
     @Override
     public long open() throws Exception {
+        log.trace("open(): start isFileOpen={}", isFileOpen);
+
         if (!isFileOpen) {
             isFileOpen = true;
             rootObject = loadTree();
@@ -165,6 +178,7 @@ public class NC2File extends FileFormat {
     }
 
     private HObject loadTree() {
+        log.trace("loadTree(): start");
 
         long[] oid = { 0 };
         NC2Group rootGroup = new NC2Group(
@@ -178,6 +192,7 @@ public class NC2File extends FileFormat {
             return rootGroup;
         }
 
+        log.trace("loadTree(): iterate members");
         Iterator it = ncFile.getVariables().iterator();
         Variable ncDataset = null;
         NC2Dataset d = null;
@@ -194,9 +209,14 @@ public class NC2File extends FileFormat {
     // Implementing FileFormat
     @Override
     public void close() throws IOException {
+        log.trace("close(): start");
+
         if (ncFile != null) {
             ncFile.close();
         }
+
+        fid = -1;
+        objList = null;
     }
 
     // Implementing FileFormat
@@ -209,16 +229,20 @@ public class NC2File extends FileFormat {
         return ncFile;
     }
 
-    // implementing FileFormat
     @Override
     public Group createGroup(String name, Group pgroup) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation - create group.");
     }
 
-    // implementing FileFormat
     @Override
     public Datatype createDatatype(int tclass, int tsize, int torder, int tsign)
             throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation - create datatype.");
+    }
+
+    @Override
+    public Datatype createDatatype(int tclass, int tsize, int torder,
+            int tsign, Datatype tbase) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation - create datatype.");
     }
 
@@ -228,7 +252,13 @@ public class NC2File extends FileFormat {
         throw new UnsupportedOperationException("Unsupported operation - create datatype with name.");
     }
 
-    // implementing FileFormat
+    @Override
+    public Datatype createDatatype(int tclass, int tsize, int torder,
+            int tsign, Datatype tbase, String name) throws Exception {
+        throw new UnsupportedOperationException(
+                "netcdf3 does not support named datatype.");
+    }
+
     @Override
     public Dataset createScalarDS(String name, Group pgroup, Datatype type,
             long[] dims, long[] maxdims, long[] chunks, int gzip, Object fillValue,
@@ -236,7 +266,6 @@ public class NC2File extends FileFormat {
         throw new UnsupportedOperationException("Unsupported operation create dataset.");
     }
 
-    // implementing FileFormat
     @Override
     public Dataset createImage(String name, Group pgroup, Datatype type,
             long[] dims, long[] maxdims, long[] chunks, int gzip, int ncomp,
@@ -244,41 +273,31 @@ public class NC2File extends FileFormat {
         throw new UnsupportedOperationException("Unsupported operation create image.");
     }
 
-    // implementing FileFormat
     @Override
     public void delete(HObject obj) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
-    // implementing FileFormat
     @Override
     public HObject copy(HObject srcObj, Group dstGroup, String dstName)
             throws Exception {
         throw new UnsupportedOperationException("Unsupported operation - copy.");
     }
 
-    /**
-     * copy a dataset into another group.
-     *
-     * @param srcDataset
-     *            the dataset to be copied.
-     * @param pgroup
-     *            teh group where the dataset is copied to.
-     *
-     * @return the treeNode containing the new copy of the dataset.
-     *
-* @throws Exception
-     *            if there is an error
-     */
+    @Override
+    public void writeAttribute(HObject obj, hdf.object.Attribute attr,
+            boolean attrExisted) throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation - write attribute.");
+    }
+
+    private HObject copyGroup(NC2Group srcGroup, NC2Group pgroup)
+            throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation - copy group.");
+    }
 
     private void copyDataset(Dataset srcDataset, NC2Group pgroup)
             throws Exception {
         throw new UnsupportedOperationException("Unsupported operation - copy dataset.");
-    }
-
-    private void copyGroup(NC2Group srcGroup, NC2Group pgroup)
-            throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation - copy group.");
     }
 
     /**
@@ -295,42 +314,18 @@ public class NC2File extends FileFormat {
         throw new UnsupportedOperationException("Unsupported operation - copy attributes.");
     }
 
-    /**
-     * Creates a new attribute and attached to the object if attribute does not
-     * exist. Otherwise, just update the value of the attribute.
-     *
-     * <p>
-     *
-     * @param obj
-     *            the object which the attribute is to be attached to.
-     * @param attr
-     *            the atribute to attach.
-     * @param attrExisted
-     *            The indicator if the given attribute exists.
-     *
-     * @return true if successful and false otherwise.
-     *
-* @throws Exception
-     *            if there is an error
-     */
-    @Override
-    public void writeAttribute(HObject obj, hdf.object.Attribute attr,
-            boolean attrExisted) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("Unsupported operation - write attribute.");
-    }
-
     /** converts a ucar.nc2.Attribute into an hdf.object.Attribute */
-    public static hdf.object.Attribute convertAttribute(
-            ucar.nc2.Attribute netcdfAttr) {
+    public static hdf.object.Attribute convertAttribute(HObject parent, ucar.nc2.Attribute netcdfAttr) {
         hdf.object.Attribute ncsaAttr = null;
 
+        log.trace("convertAttribute(): start");
         if (netcdfAttr == null) {
             return null;
         }
 
-        String attrName = netcdfAttr.getName();
+        String attrName = netcdfAttr.getShortName();
         long[] attrDims = { netcdfAttr.getLength() };
+        log.trace("convertAttribute(): attrName={} len={}", attrName, netcdfAttr.getLength());
         Datatype attrType = null;
         try {
             attrType = new NC2Datatype(netcdfAttr.getDataType());
@@ -338,10 +333,74 @@ public class NC2File extends FileFormat {
         catch (Exception ex) {
             attrType = null;
         }
-        ncsaAttr = new hdf.object.Attribute(null, attrName, attrType, attrDims);
-        ncsaAttr.setData(netcdfAttr.getValues());
+        ncsaAttr = new hdf.object.Attribute(parent, attrName, attrType, attrDims);
+        Object[] attrValues = { netcdfAttr.getValue(0) };
+        ncsaAttr.setData(attrValues);
 
+        log.trace("convertAttribute(): finish data={}", netcdfAttr.getValue(0));
         return ncsaAttr;
+    }
+
+    /**
+     * Retrieves the file structure from disk and returns the root object.
+     * <p>
+     * First gets the top level objects or objects that do not belong to any
+     * groups. If a top level object is a group, call the depth_first() to
+     * retrieve the sub-tree of that group, recursively.
+     */
+    private void loadIntoMemory() {
+        log.trace("loadIntoMemory(): start");
+
+        if (fid < 0) {
+            log.debug("loadIntoMemory(): Invalid File Id");
+            log.trace("loadIntoMemory(): finish");
+            return;
+        }
+
+        log.trace("loadIntoMemory(): finish");
+    }
+
+    /**
+     * Retrieves the tree structure of the file by depth-first order. The
+     * current implementation only retrieves groups and datasets.
+     *
+     * @param parentObject
+     *            the parent object.
+     */
+    private void depth_first(HObject parentObj) {
+        log.trace("depth_first(pobj = {})", parentObj);
+
+        if (parentObj == null) {
+            log.debug("depth_first(): Parent object is null");
+            log.trace("depth_first(): finish");
+            return;
+        }
+
+        log.trace("depth_first(): finish");
+    } // private depth_first()
+
+    /**
+     * Returns a list of all the members of this NetCDF3 in a
+     * breadth-first ordering that are rooted at the specified
+     * object.
+     */
+    private static List<HObject> getMembersBreadthFirst(HObject obj) {
+        List<HObject> allMembers = new ArrayList<>();
+        Queue<HObject> queue = new LinkedList<>();
+        HObject currentObject = obj;
+
+        queue.add(currentObject);
+
+        while(!queue.isEmpty()) {
+            currentObject = queue.remove();
+            allMembers.add(currentObject);
+
+            if(currentObject instanceof Group) {
+                queue.addAll(((Group) currentObject).getMemberList());
+            }
+        }
+
+        return allMembers;
     }
 
     /**
@@ -349,7 +408,7 @@ public class NC2File extends FileFormat {
      */
     @Override
     public String getLibversion() {
-        return "NetCDF Java (version 2.4)";
+        return "NetCDF Java (version 4.3)";
     }
 
     // implementing FileFormat

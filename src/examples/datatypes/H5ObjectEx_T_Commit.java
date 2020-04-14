@@ -41,7 +41,7 @@ public class H5ObjectEx_T_Commit {
         H5T_ARRAY(HDF5Constants.H5T_ARRAY), // Array types
         H5T_NCLASSES(11); // this must be last
 
-        private static final Map<Integer, H5T_class> lookup = new HashMap<>();
+        private static final Map<Integer, H5T_class> lookup = new HashMap<Integer, H5T_class>();
 
         static {
             for (H5T_class s : EnumSet.allOf(H5T_class.class))
