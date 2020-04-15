@@ -19,46 +19,15 @@
         </filterchain>
     </loadfile>
 
-    <!-- Optional hdf4 -->
-    <property name="hdf4.settings.version" value="${hdf.lib.dir}/libhdf4.settings" />
     <condition property="h4path" value="${hdf.lib.dir}">
-        <available file="${hdf4.settings.version}" />
+        <available file="${hdf.lib.dir}/libhdf4.settings" />
     </condition>
 
-    <property name="h4.object.path" value="hdf/object/h4/**"/>
-    <condition property="h4.object.path.files" value="${h4.object.path}.java">
-        <isset property="h4path"/>
-    </condition>
-
-    <!-- Required hdf5 -->
-    <property name="hdf5.settings.version" value="${hdf5.lib.dir}/libhdf5.settings" />
-    <condition property="h5path" value="${hdf5.lib.dir}">
-        <available file="${hdf5.settings.version}" />
-    </condition>
-
-    <property name="h5.object.path" value="hdf/object/h5/**"/>
-    <condition property="h5.object.path.files" value="${h5.object.path}.java">
-        <isset property="h5path"/>
-    </condition>
-
-    <!-- Other types -->
-    <property name="fits.object.path" value="hdf/object/fits/**"/>
-    <property name="nc2.object.path" value="hdf/object/nc2/**"/>
-
-    <property name="all.object.path" value="${fits.object.path} ${nc2.object.path} ${h4.object.path} ${h5.object.path}"/>
-
-    <property name="hdf.view.path" value="hdf/view/**"/>
-
-    <property name="examples.path" value="examples/**"/>
-    <property name="test.path" value="test/**"/>
-    <property name="examples.test.path" value="${examples.path} ${test.path}"/>
-
-    <!-- Old style java version -->
     <condition property="version1.8">
       <equals arg1="1.8" arg2="${ant.java.version}"/>
     </condition>
 
-    <loadfile property="hdf4.version" srcFile="${hdf4.settings.version}" failonerror="false">
+    <loadfile property="hdf4.version" srcFile="${hdf.lib.dir}/libhdf4.settings" failonerror="false">
         <filterchain>
             <tokenfilter>
                 <linetokenizer />
@@ -71,7 +40,7 @@
         </filterchain>
     </loadfile>
 
-    <loadfile property="hdf5.version" srcFile="${hdf5.settings.version}">
+    <loadfile property="hdf5.version" srcFile="${hdf5.lib.dir}/libhdf5.settings">
         <filterchain>
             <tokenfilter>
                 <linetokenizer />
@@ -84,7 +53,6 @@
         </filterchain>
     </loadfile>
 
-    <!-- platform type -->
     <condition property="isWindows">
         <os family="windows" />
     </condition>
@@ -165,6 +133,7 @@
     <property name="lib.dir" value="lib" />
     <property name="packagefiles.dir" value="package_files" />
     <property name="dist.dir" value="${build.dir}/dist" />
+    <property name="java.bin" value="/bin/jre/bin" />
     <property name="release.dir" value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}" />
     <property name="includeantruntime" value="false" />
     <property name="jre.version" value="${ant.java.version}" />
@@ -193,10 +162,8 @@
         <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
         <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
     </path>
-    <path id="jni4-classpath">
+    <path id="jni-classpath">
         <fileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
-    </path>
-    <path id="jni5-classpath">
         <fileset dir="${hdf5.lib.dir}" includes="jarhdf5*.jar" />
     </path>
     <path id="slf4j-classpath">
@@ -214,30 +181,25 @@
     <path id="swtbot-classpath">
         <fileset dir="${lib.dir}/ext/swt/swtbot" includes="*swtbot*.jar *log4j*.jar" excludes="*sources.jar" />
     </path>
-    <path id="ui-test4-sources">
+    <path id="ui-test-sources">
         <fileset dir="${src.dir}/" includes="**/uitest/*Test*.java" excludes="**/uitest/*CLGeometry.java **/uitest/*All*.java" />
         <fileset dir="${src.dir}/" includes="**/uitest/HDF4UITests/*Test*.java" excludes="**/*All*.java" />
         <fileset dir="${src.dir}/" includes="**/uitest/HDF4UITests/BugFixTests/*Test*.java" excludes="**/*All*.java" />
         <fileset dir="${src.dir}/" includes="**/uitest/HDF4UITests/FeatureTests/*Test*.java" excludes="**/*All*.java" />
-    </path>
-    <path id="ui-test5-sources">
-        <fileset dir="${src.dir}/" includes="**/uitest/*Test*.java" excludes="**/uitest/*CLGeometry.java **/uitest/*All*.java" />
         <fileset dir="${src.dir}/" includes="**/uitest/HDF5UITests/*Test*.java" excludes="**/*All*.java" />
         <fileset dir="${src.dir}/" includes="**/uitest/HDF5UITests/BugFixTests/*Test*.java" excludes="**/*All*.java" />
         <fileset dir="${src.dir}/" includes="**/uitest/HDF5UITests/FeatureTests/*Test*.java" excludes="**/*All*.java" />
     </path>
     <path id="project-classpath">
         <path refid="obj-classpath" />
-        <path refid="jni4-classpath" />
-        <path refid="jni5-classpath" />
+        <path refid="jni-classpath" />
         <path refid="swt-classpath" />
         <path refid="slf4j-classpath" />
         <path refid="log-classpath" />
     </path>
     <path id="jar-classpath">
         <path refid="obj-classpath" />
-        <path refid="jni4-classpath" />
-        <path refid="jni5-classpath" />
+        <path refid="jni-classpath" />
         <path refid="swt-classpath" />
         <path refid="slf4j-classpath" />
         <path refid="nop-classpath" />
@@ -290,10 +252,10 @@
         <mkdir dir="${classes.dir}" />
         <mkdir dir="${classes.dir}/hdf" />
 
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="${all.object.path} ${examples.test.path} **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
 
         <copy todir="${classes.dir}">
-            <fileset dir="${src.dir}" excludes="${all.object.path} **/*.in **/*.java ${examples.test.path}" />
+            <fileset dir="${src.dir}" excludes="hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
         </copy>
     </target>
 
@@ -312,10 +274,10 @@
         <!-- Generate Versions file -->
         <javac srcdir="${build.dir}" destdir="${classes.dir}" includes="HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
 
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="${hdf.view.path} ${all.object.path} ${examples.test.path} **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
 
         <copy todir="${classes.dir}">
-            <fileset dir="${src.dir}" excludes="${hdf.view.path} ${all.object.path} **/*.in **/*.java ${examples.test.path}" />
+            <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
         </copy>
     </target>
 
@@ -323,10 +285,10 @@
         <mkdir dir="${classes.dir}" />
         <mkdir dir="${classes.dir}/hdf" />
 
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="${hdf.view.path} ${fits.object.path} ${nc2.object.path} ${h5.object.path} ${examples.test.path} **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
 
         <copy todir="${classes.dir}">
-            <fileset dir="${src.dir}" excludes="${hdf.view.path} ${fits.object.path} ${nc2.object.path} ${h5.object.path} **/*.in **/*.java ${examples.test.path}" />
+            <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h5/** **/*.in **/*.java examples/** test/**" />
         </copy>
     </target>
 
@@ -334,10 +296,10 @@
         <mkdir dir="${classes.dir}" />
         <mkdir dir="${classes.dir}/hdf" />
 
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="${hdf.view.path} ${h4.object.path} ${h5.object.path} ${examples.test.path} **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="hdf/view/** hdf/object/h4/** hdf/object/h5/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
 
         <copy todir="${classes.dir}">
-            <fileset dir="${src.dir}" excludes="${hdf.view.path} ${h4.object.path} ${h5.object.path}  **/*.in **/*.java ${examples.test.path}" />
+            <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/h4/** hdf/object/h5/**  **/*.in **/*.java examples/** test/**" />
         </copy>
     </target>
 
@@ -345,10 +307,10 @@
         <mkdir dir="${classes.dir}" />
         <mkdir dir="${classes.dir}/hdf" />
 
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="${hdf.view.path} ${fits.object.path} ${nc2.object.path} ${h4.object.path} ${examples.test.path} **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="project-classpath" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** examples/** test/** **/*.in **/*.gif **/*.png **/*.icns **/*.html **/*.properties hdf/HDFVersions.java" includeantruntime="false" debug="${build.debug}" />
 
         <copy todir="${classes.dir}">
-            <fileset dir="${src.dir}" excludes="${hdf.view.path} ${fits.object.path} ${nc2.object.path} ${h4.object.path} **/*.in **/*.java ${examples.test.path}" />
+            <fileset dir="${src.dir}" excludes="hdf/view/** hdf/object/fits/** hdf/object/nc2/** hdf/object/h4/** **/*.in **/*.java examples/** test/**" />
         </copy>
     </target>
 
@@ -364,7 +326,7 @@
             </mapper>
         </pathconvert>
 
-        <jar destfile="${jar.dir}/hdfobject.jar" basedir="${classes.dir}" excludes="${hdf.view.path} ${examples.test.path} *.log *.h5 *.data">
+        <jar destfile="${jar.dir}/hdfobject.jar" basedir="${classes.dir}" excludes="hdf/view/** examples/** test/** *.log *.h5 *.data">
             <zipgroupfileset dir="lib" includes="jarhdf*.jar" />
             <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api${version.slf4j}.jar" />
 
@@ -402,7 +364,7 @@
             </mapper>
         </pathconvert>
 
-        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}" excludes="${examples.test.path} *.log *.h5 *.data">
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}" excludes="examples/** test/** *.log *.h5 *.data">
             <zipgroupfileset dir="${hdf.lib.dir}" includes="jarhdf*.jar" />
             <zipgroupfileset dir="${hdf5.lib.dir}" includes="jarhdf*.jar" />
             <zipgroupfileset dir="${lib.dir}" includes="fits.jar netcdf.jar slf4j-api${version.slf4j}.jar" />
@@ -477,7 +439,7 @@
             </classpath>
         </javac>
         <copy todir="${exclasses.dir}">
-            <fileset dir="${examples.dir}" excludes=" **/*.in **/*.java hdf/** ${test.path}" />
+            <fileset dir="${examples.dir}" excludes=" **/*.in **/*.java hdf/** test/**" />
         </copy>
     </target>
     <path id="example-classes" location="${exclasses.dir}" />
@@ -513,10 +475,6 @@
         </delete>
     </target>
 
-    <!-- =================================================================
-          TESTS
-          ================================================================= -->
-
     <target name="compile-test" depends="compile">
         <mkdir dir="${testclasses.dir}" />
 
@@ -533,7 +491,7 @@
         </javac>
 
         <copy todir="${testclasses.dir}">
-            <fileset dir="${test.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
+            <fileset dir="${test.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** examples/**" />
         </copy>
         <mkdir dir="${testclasses.dir}/lib/ext" />
     </target>
@@ -653,23 +611,9 @@
         <sonar:sonar />
     </target>
 
-    <target name="ensure-test4-name" unless="test">
+    <target name="ensure-test-name" unless="test">
         <!-- Capture the path as a delimited property using the refid attribute -->
-        <pathconvert pathsep="${line.separator}" property="filesetref" refid="ui-test4-sources">
-            <!-- the path stripped -->
-            <mapper>
-                <flattenmapper />
-            </mapper>
-        </pathconvert>
-
-        <!-- Emit the property to the ant console -->
-        <echo message="Where TestName is the the base name of: ${filesetref}" />
-        <fail message="You must run this target with -Dtest=TestName" />
-    </target>
-
-    <target name="ensure-test5-name" unless="test">
-        <!-- Capture the path as a delimited property using the refid attribute -->
-        <pathconvert pathsep="${line.separator}" property="fileset5ref" refid="ui-test5-sources">
+        <pathconvert pathsep="${line.separator}" property="filesetref" refid="ui-test-sources">
             <!-- the path stripped -->
             <mapper>
                 <flattenmapper />
@@ -726,7 +670,7 @@
         </sequential>
     </macrodef>
 
-    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test5-name, ensure-test5-name, jacoco">
+    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test-name, jacoco">
         <mkdir dir="${report.dir}" />
 
         <run-junit
@@ -884,11 +828,6 @@
         </junitreport>
     </target>
 
-    <!-- =================================================================
-          JAVADOC
-          ================================================================= -->
-
-
     <target name="javadoc" depends="jar">
         <javadoc
             packagenames="hdf.*"
@@ -904,8 +843,8 @@
 
             <fileset dir="${src.dir}/hdf">
                 <include name="object/**.java" />
-                <include name="${h4.object.path.files}" />
-                <include name="${h5.object.path.files}" />
+                <include name="object/h4/**.java" />
+                <include name="object/h5/**.java" />
                 <include name="view/**.java" />
                 <exclude name="Versions.*" />
             </fileset>
@@ -915,7 +854,7 @@
             </doctitle>
 
             <bottom>
-                <![CDATA[Copyright © 2020. All Rights Reserved.]]>
+                <![CDATA[Copyright © 2018. All Rights Reserved.]]>
             </bottom>
 
             <group title="object packages" packages="hdf.object.*" />
@@ -924,9 +863,7 @@
                 <path refid="project-classpath" />
                 <path refid="application" />
             </classpath>
-            <!--
             <link href="http://java.sun.com/javase/7/docs/api/" />
-               -->
         </javadoc>
     </target>
 
@@ -937,13 +874,12 @@
         </tar>
     </target>
 
-    <macrodef name="jdepslink" description="Generate a stand-alone JRE for the application">
+    <macrodef name="jlink" description="Generate a stand-alone JRE for the application">
         <attribute name="java.bindir" default="${java.home}/bin" description="The directory in which Java executables can be found" />
         <sequential>
             <!-- Generate list of needed Java modules by using `jdeps` on all JAR files in the release directory -->
             <apply executable="@{java.bindir}/jdeps" output="${build.dir}/jdeps.pre" append="true" >
-                <arg value="--print-module-deps" />
-                <arg value="--ignore-missing-deps" />
+                <arg value="--list-deps" />
                 <fileset dir="${release.dir}/lib" includes="**/*.jar" />
             </apply>
 
@@ -980,8 +916,6 @@
                 <arg value="--no-man-pages" />
                 <arg value="--output" />
                 <arg value="${basedir}/${release.dir}/jre" />
-                <arg value="--module-path" />
-                <arg value="${build.dir}" />
                 <arg value="--add-modules" />
                 <arg value="${jdeps.modlist}" />
             </exec>
@@ -1035,10 +969,6 @@
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.dmg" />
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="" />
     </target>
-
-    <!-- =================================================================
-          DEPLOY
-          ================================================================= -->
 
     <target name="deploy" depends="deployWindows, deployUnix, deployMac" description="Creates the release directory containing the fully-prepared application binaries, libraries, etc. ready to be packaged up for distribution" />
 
@@ -1128,6 +1058,30 @@
         <mkdir dir="${release.dir}/share/samples" />
         <mkdir dir="${release.dir}/share/doc" />
 
+        <symlink action="record" linkfilename="dir.hdf.links">
+            <fileset dir="${hdf.lib.dir}">
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.so*" />
+
+                <include name="libhdf.so*" />
+                <include name="libhdf_java.so*" />
+                <include name="libmfhdf.so*" />
+                <include name="libjpeg.so*" />
+                <!-- Do not copy, use hdf5 version
+                <include name="libszip.so*" />
+                <include name="libz.so*" />
+                 -->
+            </fileset>
+        </symlink>
+        <symlink action="record" linkfilename="dir.hdf5.links">
+            <fileset dir="${hdf5.lib.dir}">
+                <include name="libhdf5.so*" />
+                <include name="libhdf5_java.so*" />
+                <include name="libszip.so*" />
+                <include name="libz.so*" />
+            </fileset>
+        </symlink>
+
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}/lib">
             <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
@@ -1137,21 +1091,29 @@
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
 
-            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <include name="libhdf_java.so" />
+            <fileset dir="${hdf.lib.dir}" followsymlinks="false">
                 <include name="*.jar" />
+
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.so*" />
+
+                <include name="libhdf.so*" />
+                <include name="libhdf_java.so*" />
+                <include name="libmfhdf.so*" />
+                <include name="libjpeg.so*" />
+                <!-- Do not copy, use hdf5 version
+                <include name="libszip.so*" />
+                <include name="libz.so*" />
+                 -->
                 <exclude name="slf4j*.jar" />
             </fileset>
-            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <filename regex="lib[zmfhdf]*\.so(\.[0-9])$"/>
-            </fileset>
-            <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
-                <include name="libhdf5_java.so" />
+            <fileset dir="${hdf5.lib.dir}" followsymlinks="false">
                 <include name="*.jar" />
+                <include name="libhdf5.so*" />
+                <include name="libhdf5_java.so*" />
+                <include name="libszip.so*" />
+                <include name="libz.so*" />
                 <exclude name="slf4j*.jar" />
-            </fileset>
-            <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
-                <filename regex="libhdf5\.so(\.[0-9][0-9][0-9])$"/>
             </fileset>
         </copy>
         <chmod perm="ugo+rx">
@@ -1162,9 +1124,33 @@
             <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
         </copy>
 
+        <copy file="${hdf.lib.dir}/dir.hdf.links" tofile="${release.dir}/lib/dir.hdf.links" failonerror="false">
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="${hdf.lib.dir}" replace="${basedir}/${release.dir}/lib/" flags="gi"/>
+            </tokenfilter>
+          </filterchain>
+        </copy>
+        <copy file="${hdf5.lib.dir}/dir.hdf5.links" tofile="${release.dir}/lib/dir.hdf5.links">
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="${hdf5.lib.dir}" replace="${basedir}/${release.dir}/lib/" flags="gi"/>
+            </tokenfilter>
+          </filterchain>
+        </copy>
+        <symlink action="recreate" failonerror="false">
+            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf.links" />
+        </symlink>
+        <symlink action="recreate">
+            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf5.links" />
+        </symlink>
+
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf.links" failonerror="false"/>
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf5.links"/>
+
         <!-- Bundle jre -->
         <echo>Bundling JRE with jdeps and jlink...</echo>
-        <jdepslink java.bindir="${java.home}/bin" />
+        <jlink java.bindir="${java.home}/bin" />
 
         <!-- Create the .sh run script -->
         <copy file="${packagefiles.dir}/hdfview.sh.in" tofile="${release.dir}/hdfview.sh" />
@@ -1172,7 +1158,6 @@
         <!-- Set the correct classpath for the run script -->
         <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar" />
         <replace file="${release.dir}/hdfview.sh" token="@SLF4J@" value="${runscript.slf4j}" />
-        <chmod file="${release.dir}/hdfview.sh" perm="ugo+rx"/>
 
         <!-- Copy the documentation -->
         <copy todir="${release.dir}/share/doc/javadocs" failonerror="false">
@@ -1208,6 +1193,30 @@
         <mkdir dir="${release.dir}/samples" />
         <mkdir dir="${release.dir}/doc" />
 
+        <symlink action="record" linkfilename="dir.hdf.links">
+            <fileset dir="${hdf.lib.dir}">
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.*dylib" />
+
+                <include name="libhdf.*dylib" />
+                <include name="libhdf_java.*dylib" />
+                <include name="libmfhdf.*dylib" />
+                <include name="libjpeg.*dylib" />
+                <!-- Do not copy, use hdf5 version
+                <include name="libszip.*dylib" />
+                <include name="libz.*dylib" />
+                 -->
+            </fileset>
+        </symlink>
+        <symlink action="record" linkfilename="dir.hdf5.links">
+            <fileset dir="${hdf5.lib.dir}">
+                <include name="libhdf5.*dylib" />
+                <include name="libhdf5_java.*dylib" />
+                <include name="libszip.*dylib" />
+                <include name="libz.*dylib" />
+            </fileset>
+        </symlink>
+
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}/lib">
             <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
@@ -1217,22 +1226,30 @@
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
 
-            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <include name="libhdf_java.dylib" />
+            <fileset dir="${hdf.lib.dir}" followsymlinks="false">
                 <include name="*.jar" />
+
+                <!-- HDF4 bug in lib naming -->
+                <include name="libdf.*.dylib" />
+
+                <include name="libhdf.*.dylib" />
+                <include name="libhdf_java.*.dylib" />
+                <include name="libmfhdf.*.dylib" />
+                <include name="libjpeg.*.dylib" />
+                <!-- Do not copy, use hdf5 version
+                <include name="libszip.*.dylib" />
+                <include name="libz.*.dylib" />
+                 -->
                 <exclude name="slf4j*.jar" />
-            </fileset>
-            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <filename regex="lib[zmfhdf]*(\.[0-9])(\.dylib)$"/>
                 <exclude name="*.a" />
             </fileset>
-            <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
-                <include name="libhdf5_java.dylib" />
+            <fileset dir="${hdf5.lib.dir}" followsymlinks="false">
                 <include name="*.jar" />
+                <include name="libhdf5.*.dylib" />
+                <include name="libhdf5_java.*.dylib" />
+                <include name="libszip.*.dylib" />
+                <include name="libz.*.dylib" />
                 <exclude name="slf4j*.jar" />
-            </fileset>
-            <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
-                <filename regex="libhdf5(\.[0-9][0-9][0-9])(\.dylib)$"/>
                 <exclude name="*.a" />
             </fileset>
         </copy>
@@ -1241,9 +1258,33 @@
             <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
         </copy>
 
+        <copy file="${hdf.lib.dir}/dir.hdf.links" tofile="${release.dir}/lib/dir.hdf.links" failonerror="false">
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="${hdf.lib.dir}/?" replace="" flags="gi"/>
+            </tokenfilter>
+          </filterchain>
+        </copy>
+        <copy file="${hdf5.lib.dir}/dir.hdf5.links" tofile="${release.dir}/lib/dir.hdf5.links">
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="${hdf5.lib.dir}/?" replace="" flags="gi"/>
+            </tokenfilter>
+          </filterchain>
+        </copy>
+        <symlink action="recreate" failonerror="false">
+            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf.links" />
+        </symlink>
+        <symlink action="recreate">
+            <fileset dir="${basedir}/${release.dir}/lib" includes="dir.hdf5.links" />
+        </symlink>
+
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf.links" failonerror="false"/>
+        <delete file="${basedir}/${release.dir}/lib/dir.hdf5.links"/>
+
         <!-- Bundle jre -->
         <echo>Bundling JRE with jdeps and jlink...</echo>
-        <jdepslink java.bindir="${java.home}/bin" />
+        <jlink java.bindir="${java.home}/bin" />
 
         <!-- Copy the documentation -->
         <copy todir="${release.dir}/doc/javadocs" failonerror="false">
@@ -1260,10 +1301,6 @@
             <fileset dir="${samples.dir}" />
         </copy>
     </target>
-
-    <!-- =================================================================
-          PACKAGE
-          ================================================================= -->
 
     <target name="package" depends="packageWindows, packageUnix, packageMac" description="Packages up the release directory, the license file and the README file into a distributable form" />
 
@@ -1458,10 +1495,6 @@
         </tar>
     </target>
 
-    <!-- =================================================================
-          INSTALLER
-          ================================================================= -->
-
     <target name="createInstaller" depends="clean-package, createWindowsInstaller, createUnixInstaller, createMacInstaller" description="Creates a binary installer to install the application on the machine" />
 
     <target name="createWindowsInstaller" depends="clean-package, deploy" if="isWindows">
@@ -1587,7 +1620,7 @@
         <taskdef name="bundleapp" classpath="lib/appbundler-1.0ea.jar" classname="com.oracle.appbundler.AppBundlerTask" />
 
         <!-- Use appbundler to create .app -->
-        <bundleapp outputdirectory="${dist.dir}" name="${ant.project.name}" displayname="${ant.project.name}-${app.version}" executableName="${ant.project.name}" identifier="org.hdfgroup.${ant.project.name}-${app.version}" shortversion="${app.version}" icon="${lib.dir}/macosx/${ant.project.name}.icns" signature="????" copyright="Copyright © 2006-2020 by The HDF Group. All rights reserved." applicationCategory="public.app-category.developer-tools" mainclassname="${main-class}">
+        <bundleapp outputdirectory="${dist.dir}" name="${ant.project.name}" displayname="${ant.project.name}-${app.version}" executableName="${ant.project.name}" identifier="org.hdfgroup.${ant.project.name}-${app.version}" shortversion="${app.version}" icon="${lib.dir}/macosx/${ant.project.name}.icns" signature="????" copyright="Copyright © 2006-2019 by The HDF Group. All rights reserved." applicationCategory="public.app-category.developer-tools" mainclassname="${main-class}">
 
             <runtime dir="${install.mac.jre}/Contents/Home" />
             <classpath dir="${release.dir}" includes="**/lib/*.jar" />

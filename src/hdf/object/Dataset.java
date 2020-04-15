@@ -42,7 +42,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
 
     /**
-     * The memory buffer that holds the raw data array of the dataset.
+     * The memory buffer that holds the raw data of the dataset.
      */
     protected transient Object          data;
 
@@ -589,7 +589,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final Object getData() throws Exception, OutOfMemoryError {
-        log.trace("getData: start");
         if (!isDataLoaded) {
             log.trace("getData: read");
             data = read(); // load the data
@@ -603,7 +602,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             log.trace("getData: read {}", nPoints);
         }
 
-        log.trace("getData: finish");
         return data;
     }
 
@@ -614,14 +612,13 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * of the dataset object. Dataset operations such as write/read
      * will fail if the buffer type or size is changed.
      *
-     * @param d  the object data -must be an array of Objects
+     * @param d  the object data
      */
     @Override
     public final void setData(Object d) {
         if (!(this instanceof Attribute))
             throw new UnsupportedOperationException("setData: unsupported for non-Attribute objects");
 
-        log.trace("setData");
         data = d;
     }
 
@@ -982,7 +979,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             log.debug("convertFromUnsignedC(): Java does not support unsigned long");
         }
 
-        log.trace("convertFromUnsignedC(): finish");
         return dataOUT;
     }
 
@@ -1097,7 +1093,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             log.debug("convertToUnsignedC(): Java does not support unsigned long");
         }
 
-        log.trace("convertToUnsignedC(): finish");
         return dataOUT;
     }
 

@@ -1,0 +1,881 @@
+[main] TRACE hdf.view.HDFView - main: rootDir = /home/byrn/git/hdfview_adb/build/jar 
+[main] DEBUG hdf.view.HDFView - Root is /home/byrn/git/hdfview_adb/build/jar
+[main] TRACE hdf.view.ViewProperties - propertyFile is /home/byrn/.hdfview99.99.99
+[main] TRACE hdf.view.ViewProperties - ViewProperties:setRootDir rDir=/home/byrn/git/hdfview_adb/build/jar
+[main] TRACE hdf.view.ViewProperties - rootDir is /home/byrn/git/hdfview_adb/build/jar
+[main] TRACE hdf.view.ViewProperties - load user properties: begin
+[main] TRACE hdf.view.ViewProperties - load user properties: add default modules
+[main] TRACE hdf.view.ViewProperties - load user properties: modules
+[main] TRACE hdf.view.ViewProperties - load: add default moduleList[0] is Default
+[main] TRACE hdf.view.ViewProperties - load: add default moduleList[1] is Default
+[main] TRACE hdf.view.ViewProperties - load: add default moduleList[2] is Default
+[main] TRACE hdf.view.ViewProperties - load: add default moduleList[3] is Default
+[main] TRACE hdf.view.ViewProperties - load: add default moduleList[4] is Default
+[main] TRACE hdf.view.ViewProperties - load Ext Class modules
+[main] TRACE hdf.view.ViewProperties - loadExtClass: start
+[main] TRACE hdf.view.ViewProperties - loadExtClass: default classloader is sun.misc.Launcher$AppClassLoader@63947c6b
+[main] DEBUG hdf.view.ViewProperties - loadExtClass: rootPath is /home/byrn/git/hdfview_adb/build/jar
+[main] TRACE hdf.view.ViewProperties - loadExtClass: dirname is /home/byrn/git/hdfview_adb/build/jar/lib/ext/ with 0 jars
+[main] TRACE hdf.view.ViewProperties - load user properties: set default selection of data views
+[main] TRACE hdf.view.ViewProperties - load: default theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load user properties: module[0]=Default
+[main] TRACE hdf.view.ViewProperties - load: final theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load: default theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load user properties: module[1]=Default
+[main] TRACE hdf.view.ViewProperties - load: final theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load: default theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load user properties: module[2]=Default
+[main] TRACE hdf.view.ViewProperties - load: final theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load: default theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load user properties: module[3]=Default
+[main] TRACE hdf.view.ViewProperties - load: final theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load: default theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load user properties: module[4]=Default
+[main] TRACE hdf.view.ViewProperties - load: final theList is [Default]
+[main] TRACE hdf.view.ViewProperties - load user properties: fileformat modules
+[main] TRACE hdf.view.ViewProperties - load: add prop regref.showvalues
+[main] TRACE hdf.view.ViewProperties - load: add prop image.origin
+[main] TRACE hdf.view.ViewProperties - load: add prop max.members
+[main] TRACE hdf.view.ViewProperties - load: add prop image.showvalues
+[main] TRACE hdf.view.ViewProperties - load: add prop enum.conversion
+[main] TRACE hdf.view.ViewProperties - load: add prop lib.lowversion
+[main] TRACE hdf.view.ViewProperties - load: add prop h5file.indexOrder
+[main] TRACE hdf.view.ViewProperties - load: add prop lib.highversion
+[main] TRACE hdf.view.ViewProperties - load: add prop module.fileformat.HDF5
+[main] TRACE hdf.object.FileFormat - fullFileName= isReadOnly=false
+[main] TRACE hdf.object.h4.H4File - File:  isReadOnly=false accessType=2
+[main] DEBUG hdf.object.h4.H4File - show all is off
+[main] DEBUG hdf.object.FileFormat - FILE_TYPE_HDF4 file format added
+[main] TRACE hdf.object.FileFormat - fullFileName= isReadOnly=false
+[main] INFO hdf.hdf5lib.H5 - HDF5 library: hdf5_java
+[main] DEBUG hdf.hdf5lib.H5 -  resolved to: libhdf5_java.so; 
+[main] INFO hdf.hdf5lib.H5 -  successfully loaded from java.library.path
+[main] DEBUG hdf.object.FileFormat - FILE_TYPE_HDF5 file format added
+[main] TRACE hdf.object.FileFormat - fullFileName= isReadOnly=false
+[main] DEBUG hdf.object.FileFormat - NetCDF file format added
+[main] TRACE hdf.object.FileFormat - fullFileName= isReadOnly=false
+[main] DEBUG hdf.object.FileFormat - Fits file format added
+[main] TRACE hdf.object.FileFormat - fullFileName= isReadOnly=false
+[main] TRACE hdf.view.ViewProperties - load: add prop module.fileformat.NetCDF
+[main] TRACE hdf.object.FileFormat - fullFileName= isReadOnly=false
+[main] TRACE hdf.view.ViewProperties - load: add prop module.fileformat.HDF4
+[main] TRACE hdf.object.FileFormat - fullFileName= isReadOnly=false
+[main] TRACE hdf.object.h4.H4File - File:  isReadOnly=false accessType=2
+[main] DEBUG hdf.object.h4.H4File - show all is off
+[main] TRACE hdf.view.ViewProperties - load: add prop file.extension
+[main] TRACE hdf.view.ViewProperties - load: add prop module.treeview
+[main] TRACE hdf.view.ViewProperties - load: add prop module.metadataview
+[main] TRACE hdf.view.ViewProperties - load: add prop index.base1
+[main] TRACE hdf.view.ViewProperties - load: add prop palette.file
+[main] TRACE hdf.view.ViewProperties - load: add prop h4toh5.converter
+[main] TRACE hdf.view.ViewProperties - load: add prop module.imageview
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file14
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file13
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file12
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file11
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file10
+[main] TRACE hdf.view.ViewProperties - load: add prop image.contrast
+[main] TRACE hdf.view.ViewProperties - load: add prop file.mode
+[main] TRACE hdf.view.ViewProperties - load: add prop font.type
+[main] TRACE hdf.view.ViewProperties - load: add prop module.paletteview
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file
+[main] TRACE hdf.view.ViewProperties - load: add prop module.tableview
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file9
+[main] TRACE hdf.view.ViewProperties - load: add prop font.size
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file8
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file7
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file6
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file5
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file4
+[main] TRACE hdf.view.ViewProperties - load: add prop h5file.indexType
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file3
+[main] TRACE hdf.view.ViewProperties - load: add prop users.guide
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file2
+[main] TRACE hdf.view.ViewProperties - load: add prop module.fileformat.FITS
+[main] TRACE hdf.object.FileFormat - fullFileName= isReadOnly=false
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file1
+[main] TRACE hdf.view.ViewProperties - load: add prop recent.file0
+[main] TRACE hdf.view.ViewProperties - load: add prop data.delimiter
+[main] TRACE hdf.view.ViewProperties - load: add prop work.dir
+[main] TRACE hdf.view.ViewProperties - ViewProperties:setWorkDir wDir=/home/byrn/git/hdfview_adb/build/classes/test/uitest
+[main] TRACE hdf.view.ViewProperties - load user properties: most recent file list
+[main] TRACE hdf.view.ViewProperties - load user properties: most recent palette file list
+[main] TRACE hdf.view.ViewProperties - load: finish
+[main] TRACE hdf.view.ViewProperties - loadIcons: start
+[main] TRACE hdf.view.ViewProperties - loadIcons: finish
+[main] INFO hdf.view.HDFView - Current directory is /home/byrn/git/hdfview_adb/build/jar
+[main] DEBUG hdf.view.HDFView - Constructor exit
+[main] DEBUG hdf.view.HDFView - openMainWindow enter
+[main] INFO hdf.view.HDFView - Menubar created
+[main] INFO hdf.view.HDFView - Toolbar created
+[main] INFO hdf.view.HDFView - URL Toolbar created
+[main] TRACE hdf.view.HDFView - createContentArea(): load TreeView
+[main] TRACE hdf.view.DataView.DataViewFactoryProducer - getFactory(): start
+[main] TRACE hdf.view.DataView.DataViewFactoryProducer - getFactory(): returning default TreeView factory instance
+[main] TRACE hdf.view.DataView.DataViewFactoryProducer - getFactory(): finish
+[main] TRACE hdf.view.TreeView.DefaultTreeViewFactory - getTreeView(): start
+[main] TRACE hdf.view.TreeView.DefaultTreeViewFactory - getTreeView(): Class.forName(hdf.view.TreeView.DefaultTreeView)
+[main] TRACE hdf.view.Tools - newInstance(Class = class hdf.view.TreeView.DefaultTreeView): start
+[main] TRACE hdf.view.Tools - newInstance(Class = class hdf.view.TreeView.DefaultTreeView): finish
+[main] TRACE hdf.view.TreeView.DefaultTreeViewFactory - getTreeView(): returning TreeView instance hdf.view.TreeView.DefaultTreeView@ff5b51f
+[main] TRACE hdf.view.TreeView.DefaultTreeViewFactory - getTreeView(): finish
+[main] INFO hdf.view.HDFView - Content Area created
+[main] INFO hdf.view.HDFView - Main Window created
+[main] DEBUG hdf.view.HDFView - openMainWindow exit
+[main] DEBUG hdf.view.HDFView - runMainWindow enter
+[main] TRACE hdf.view.HDFView - openLocalFile /home/byrn/HDF_Projects/hdf5pl/dev/JPEG/example/test.jpg.h5,-1
+[main] TRACE hdf.view.TreeView.DefaultTreeView - openFile: /home/byrn/HDF_Projects/hdf5pl/dev/JPEG/example/test.jpg.h5,2
+[main] TRACE hdf.view.TreeView.DefaultTreeView - openFile: /home/byrn/HDF_Projects/hdf5pl/dev/JPEG/example/test.jpg.h5 FILE_TYPE_HDF5
+[main] TRACE hdf.object.h5.H5File - createInstance() for /home/byrn/HDF_Projects/hdf5pl/dev/JPEG/example/test.jpg.h5
+[main] TRACE hdf.object.FileFormat - fullFileName=/home/byrn/HDF_Projects/hdf5pl/dev/JPEG/example/test.jpg.h5 isReadOnly=false
+[main] TRACE hdf.view.TreeView.DefaultTreeView - initFile[/home/byrn/HDF_Projects/hdf5pl/dev/JPEG/example/test.jpg.h5] - start
+[main] TRACE hdf.object.h5.H5File - open()
+[main] TRACE hdf.object.h5.H5File - open(): loadFull=true
+[main] TRACE hdf.object.h5.H5File - open(loadFullHierarchy = true, plist = 0): start
+[main] TRACE hdf.object.h5.H5File - open(): open file
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Fopen add 72057594037927936
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 1
+[main] TRACE hdf.object.h5.H5File - open(loadFullHeirarchy): load the hierarchy
+[main] TRACE hdf.object.h5.H5File - loadIntoMemory(): start
+[main] TRACE hdf.object.HObject - name=/ path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.h5.H5File - loadIntoMemory(): depth_first on root
+[main] TRACE hdf.object.h5.H5File - depth_first(test.jpg.h5): start
+[main] TRACE hdf.object.h5.H5Group - open(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Gopen add 144115188075855872
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5Group - open(): finish
+[main] TRACE hdf.hdf5lib.H5 - H5Gget_obj_info_full: oname_len=1
+[main] TRACE hdf.hdf5lib.H5 - H5Gget_obj_info_full: oname=test.jpg
+[main] TRACE hdf.object.h5.H5File - depth_first(test.jpg.h5): obj_name=test.jpg, obj_type=1
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dopen add 360287970189639680
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dget_type add 216172782113784122
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784122
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dclose remove 360287970189639680
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.HObject - name=test.jpg path=/
+[main] TRACE hdf.object.HObject - fullName=/test.jpg
+[main] TRACE hdf.object.h5.H5Group - open(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Gopen add 144115188075855875
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.object.h5.H5Group - open(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Gclose remove 144115188075855875
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Gclose remove 144115188075855872
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 1
+[main] TRACE hdf.object.h5.H5File - depth_first(test.jpg.h5): finish
+[main] TRACE hdf.object.h5.H5File - loadIntoMemory(): finish
+[main] TRACE hdf.object.h5.H5File - open(loadFullHeirarchy = true, plist = 0): finish
+[main] TRACE hdf.view.TreeView.DefaultTreeView - populateTree(): start
+[main] TRACE hdf.object.h5.H5Group - open(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Gopen add 144115188075855876
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5Group - open(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Gclose remove 144115188075855876
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 1
+[main] TRACE hdf.object.h5.H5Group - hasAttribute(): nAttributes=0
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dopen add 360287970189639681
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): did=360287970189639681
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dget_type add 216172782113784124
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.object.HObject - name=null path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.Datatype - datatypeClass=-1 datatypeSize=-1 datatypeOrder=-1 datatypeSign=-1 baseType=null
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): start: tid=216172782113784124
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=0, tsize=1, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=0, tsize=1, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): isUchar=true, nativePrecision=8, nativeOffset=0, nativePadLSB=0, nativePadMSB=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): integer type
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): datatypeClass=0 baseType=null datatypeSize=1
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - hasAttribute(): dataclass type: isText=false,isVLEN=false,isEnum=false
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784124
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): start: name=CLASS
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen_by_name add 432345564227567616
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784125
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784126
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784125
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.object.HObject - name=null path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.Datatype - datatypeClass=-1 datatypeSize=-1 datatypeOrder=-1 datatypeSign=-1 baseType=null
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): start: tid=216172782113784126
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=6, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=6, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): isUchar=false, nativePrecision=48, nativeOffset=0, nativePadLSB=0, nativePadMSB=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:var str type=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:nativeStrPad=0, nativeStrCSET=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): datatypeClass=3 baseType=null datatypeSize=6
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): datatypeClass=3 datatypeSize=6 baseType=null
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tcopy add 216172782113784127
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): isVlenStr=false nativeStrPad=0 nativeStrCSET=0
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784128
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784127
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784128
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_space add 288230376151711746
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): adims=null
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): lsize=1
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): start: nPoints=1
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): tclass=3 : tsize=6
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): class H5T_STRING || H5T_REFERENCE
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): read attribute id 216172782113784126 of size=1
+[main] TRACE hdf.hdf5lib.H5 - H5Aread: cname=[B is1D=true dname=B
+[main] TRACE hdf.hdf5lib.H5 - H5Aread_dname_B
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784126
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Sclose remove 288230376151711746
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567616
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - hasAttribute(): isImageDisplay dataset: true with value = [73, 77, 65, 71, 69, 0]
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): start: name=IMAGE_MINMAXRANGE
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen_by_name add 432345564227567617
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784129
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784130
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784129
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.object.HObject - name=null path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.Datatype - datatypeClass=-1 datatypeSize=-1 datatypeOrder=-1 datatypeSign=-1 baseType=null
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): start: tid=216172782113784130
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=0, tsize=1, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=0, tsize=1, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): isUchar=true, nativePrecision=8, nativeOffset=0, nativePadLSB=0, nativePadMSB=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): integer type
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): datatypeClass=0 baseType=null datatypeSize=1
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_space add 288230376151711747
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): adims=[2]
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): lsize=2
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): start: nPoints=2
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): tclass=0 : tsize=1
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): class H5T_INTEGER
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): read attribute id 216172782113784130 of size=2
+[main] TRACE hdf.hdf5lib.H5 - H5Aread: cname=[B is1D=true dname=B
+[main] TRACE hdf.hdf5lib.H5 - H5Aread_dname_B
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): id 216172782113784130 is unsigned
+[main] TRACE hdf.object.Dataset - convertFromUnsignedC(): start
+[main] TRACE hdf.object.Dataset - convertFromUnsignedC(): cname=[B dname=B size=2
+[main] DEBUG hdf.object.Dataset - convertFromUnsignedC(): Java convert byte to short
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784130
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Sclose remove 288230376151711747
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567617
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - checkCFconvention(): start
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): start: name=_FillValue
+[main] TRACE hdf.object.h5.H5ScalarDS - getAttrValue(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - checkCFconvention(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dclose remove 360287970189639681
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 1
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - hasAttribute(): nAttributes=5
+[main] TRACE hdf.object.h5.H5ScalarDS - getDatatype(): start
+[main] TRACE hdf.object.h5.H5ScalarDS - init(): start
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dopen add 360287970189639682
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): did=360287970189639682
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dget_create_plist add 720575940379279379
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.object.h5.H5ScalarDS - init(): pid=720575940379279379 nfiles=0 isExternal=false isVirtual=false
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Pclose remove 720575940379279379
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - getPaletteRefs(): start
+[main] TRACE hdf.object.h5.H5ScalarDS - getPaletteRefs(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dget_space add 288230376151711748
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dget_type add 216172782113784132
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.object.h5.H5ScalarDS - init(): tid=216172782113784132 sid=288230376151711748 rank=3
+[main] TRACE hdf.object.HObject - name=null path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.Datatype - datatypeClass=-1 datatypeSize=-1 datatypeOrder=-1 datatypeSign=-1 baseType=null
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): start: tid=216172782113784132
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=0, tsize=1, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=0, tsize=1, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): isUchar=true, nativePrecision=8, nativeOffset=0, nativePadLSB=0, nativePadMSB=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): integer type
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): datatypeClass=0 baseType=null datatypeSize=1
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - init(): tid=216172782113784132 is tclass=0 has isText=false : isVLEN=false : isEnum=false : isUnsigned=true : isRegRef=false
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784133
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.h5.H5ScalarDS - init(): isNativeDatatype=true
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dget_create_plist add 720575940379279380
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Pclose remove 720575940379279380
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.h5.H5ScalarDS - init(): rank=3, dims=[149, 227, 3], maxDims=[149, 227, 3]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784133
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784132
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Sclose remove 288230376151711748
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen_by_name add 432345564227567618
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784134
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784134
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567618
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen_by_name add 432345564227567619
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784135
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784135
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567619
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - init(): close dataset
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dclose remove 360287970189639682
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 1
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - resetSelection(): start
+[main] TRACE hdf.object.h5.H5ScalarDS - resetSelection(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - init(): rank=3, startDims=[0, 0, 0], selectedDims=[149, 227, 3]
+[main] TRACE hdf.object.h5.H5ScalarDS - init(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - getDatatype(): finish
+[main] TRACE hdf.view.TreeView.DefaultTreeView - populateTree(): finish
+[main] TRACE hdf.view.TreeView.DefaultTreeView - initFile[/home/byrn/HDF_Projects/hdf5pl/dev/JPEG/example/test.jpg.h5] - fileList items=1
+[main] TRACE hdf.view.TreeView.DefaultTreeView - initFile - finish
+[main] TRACE hdf.view.HDFView - showMetaData(): start
+[main] TRACE hdf.view.DataView.DataViewFactoryProducer - getFactory(): start
+[main] TRACE hdf.view.DataView.DataViewFactoryProducer - getFactory(): returning default MetaDataView factory instance
+[main] TRACE hdf.view.DataView.DataViewFactoryProducer - getFactory(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultMetaDataViewFactory - getMetaDataView(): start
+[main] TRACE hdf.view.MetaDataView.DefaultMetaDataViewFactory - getMetaDataView(): Class.forName(hdf.view.MetaDataView.DefaultDatasetMetaDataView)
+[main] TRACE hdf.view.Tools - newInstance(Class = class hdf.view.MetaDataView.DefaultDatasetMetaDataView): start
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - start
+[main] TRACE hdf.object.h5.H5ScalarDS - getMetadata(): start
+[main] TRACE hdf.object.h5.H5File - getLinkTargetName(): start
+[main] TRACE hdf.object.h5.H5File - getLinkTargetName(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): start: obj=test.jpg idx_type=0 order=0
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dopen add 360287970189639683
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): did=360287970189639683
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): get obj_info
+[main] TRACE hdf.object.h5.H5File - getAttribute(): num_attrs=5
+[main] TRACE hdf.object.h5.H5File - getAttribute(): attribute[0]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen_by_idx add 432345564227567620
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_space add 288230376151711749
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[0] aid=432345564227567620 sid=288230376151711749
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[0] isScalar=true
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[0] is CLASS
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784137
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784138
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[0] tid=216172782113784138 native tmptid=216172782113784137 from aid=432345564227567620
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784137
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.HObject - name=null path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.Datatype - datatypeClass=-1 datatypeSize=-1 datatypeOrder=-1 datatypeSign=-1 baseType=null
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): start: tid=216172782113784138
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=6, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=6, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): isUchar=false, nativePrecision=48, nativeOffset=0, nativePadLSB=0, nativePadMSB=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:var str type=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:nativeStrPad=0, nativeStrCSET=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): datatypeClass=3 baseType=null datatypeSize=6
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): datatypeClass=3 datatypeSize=6 baseType=null
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tcopy add 216172782113784139
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): isVlenStr=false nativeStrPad=0 nativeStrCSET=0
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784140
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 7
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784139
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784140
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[0] Datatype=String, length = 6, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[0] has size=1 isCompound=false is_variable_str=false isVLEN=false
+[main] TRACE hdf.object.HObject - name=CLASS path=/test.jpg/
+[main] TRACE hdf.object.HObject - fullName=/test.jpg/CLASS
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - attrName=CLASS, attrType=String, length = 6, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII, attrValue=null, rank=1, isUnsigned=false, isScalar=true
+[main] TRACE hdf.object.Attribute - resetSelection(): start
+[main] TRACE hdf.object.Attribute - resetSelection(): finish
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): start: nPoints=1
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): tclass=3 : tsize=6
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): class H5T_STRING || H5T_REFERENCE
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[0] H5Aread
+[main] TRACE hdf.hdf5lib.H5 - H5Aread: cname=[B is1D=true dname=B
+[main] TRACE hdf.hdf5lib.H5 - H5Aread_dname_B
+[main] TRACE hdf.object.h5.H5File - getAttribute(): isText: converting byte array to string array
+[main] TRACE hdf.object.Dataset - byteToString(): start
+[main] TRACE hdf.object.Dataset - byteToString(): n=1 from length of 6
+[main] TRACE hdf.object.Dataset - byteToString(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[0] data: [IMAGE]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784138
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Sclose remove 288230376151711749
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567620
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5File - getAttribute(): attribute[1]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen_by_idx add 432345564227567621
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_space add 288230376151711750
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[1] aid=432345564227567621 sid=288230376151711750
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[1] isScalar=false
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[1] rank=1, dims=[2]
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[1] is IMAGE_MINMAXRANGE
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784141
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784142
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[1] tid=216172782113784142 native tmptid=216172782113784141 from aid=432345564227567621
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784141
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.HObject - name=null path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.Datatype - datatypeClass=-1 datatypeSize=-1 datatypeOrder=-1 datatypeSign=-1 baseType=null
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): start: tid=216172782113784142
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=0, tsize=1, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=0, tsize=1, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): isUchar=true, nativePrecision=8, nativeOffset=0, nativePadLSB=0, nativePadMSB=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): integer type
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): datatypeClass=0 baseType=null datatypeSize=1
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[1] Datatype=8-bit unsigned integer
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[1] has size=2 isCompound=false is_variable_str=false isVLEN=false
+[main] TRACE hdf.object.HObject - name=IMAGE_MINMAXRANGE path=/test.jpg/
+[main] TRACE hdf.object.HObject - fullName=/test.jpg/IMAGE_MINMAXRANGE
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - attrName=IMAGE_MINMAXRANGE, attrType=8-bit unsigned integer, attrValue=null, rank=1, isUnsigned=true, isScalar=false
+[main] TRACE hdf.object.Attribute - resetSelection(): start
+[main] TRACE hdf.object.Attribute - resetSelection(): finish
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): start: nPoints=2
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): tclass=0 : tsize=1
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): class H5T_INTEGER
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[1] H5Aread
+[main] TRACE hdf.hdf5lib.H5 - H5Aread: cname=[B is1D=true dname=B
+[main] TRACE hdf.hdf5lib.H5 - H5Aread_dname_B
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[1] data: [0, -1]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784142
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Sclose remove 288230376151711750
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567621
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5File - getAttribute(): attribute[2]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen_by_idx add 432345564227567622
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_space add 288230376151711751
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[2] aid=432345564227567622 sid=288230376151711751
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[2] isScalar=true
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[2] is IMAGE_SUBCLASS
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784143
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784144
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[2] tid=216172782113784144 native tmptid=216172782113784143 from aid=432345564227567622
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784143
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.HObject - name=null path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.Datatype - datatypeClass=-1 datatypeSize=-1 datatypeOrder=-1 datatypeSign=-1 baseType=null
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): start: tid=216172782113784144
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=16, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=16, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): isUchar=false, nativePrecision=128, nativeOffset=0, nativePadLSB=0, nativePadMSB=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:var str type=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:nativeStrPad=0, nativeStrCSET=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): datatypeClass=3 baseType=null datatypeSize=16
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): datatypeClass=3 datatypeSize=16 baseType=null
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tcopy add 216172782113784145
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): isVlenStr=false nativeStrPad=0 nativeStrCSET=0
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784146
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 7
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784145
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784146
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[2] Datatype=String, length = 16, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[2] has size=1 isCompound=false is_variable_str=false isVLEN=false
+[main] TRACE hdf.object.HObject - name=IMAGE_SUBCLASS path=/test.jpg/
+[main] TRACE hdf.object.HObject - fullName=/test.jpg/IMAGE_SUBCLASS
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - attrName=IMAGE_SUBCLASS, attrType=String, length = 16, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII, attrValue=null, rank=1, isUnsigned=false, isScalar=true
+[main] TRACE hdf.object.Attribute - resetSelection(): start
+[main] TRACE hdf.object.Attribute - resetSelection(): finish
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): start: nPoints=1
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): tclass=3 : tsize=16
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): class H5T_STRING || H5T_REFERENCE
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[2] H5Aread
+[main] TRACE hdf.hdf5lib.H5 - H5Aread: cname=[B is1D=true dname=B
+[main] TRACE hdf.hdf5lib.H5 - H5Aread_dname_B
+[main] TRACE hdf.object.h5.H5File - getAttribute(): isText: converting byte array to string array
+[main] TRACE hdf.object.Dataset - byteToString(): start
+[main] TRACE hdf.object.Dataset - byteToString(): n=1 from length of 16
+[main] TRACE hdf.object.Dataset - byteToString(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[2] data: [IMAGE_TRUECOLOR]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784144
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Sclose remove 288230376151711751
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567622
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5File - getAttribute(): attribute[3]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen_by_idx add 432345564227567623
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_space add 288230376151711752
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[3] aid=432345564227567623 sid=288230376151711752
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[3] isScalar=true
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[3] is IMAGE_VERSION
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784147
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784148
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[3] tid=216172782113784148 native tmptid=216172782113784147 from aid=432345564227567623
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784147
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.HObject - name=null path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.Datatype - datatypeClass=-1 datatypeSize=-1 datatypeOrder=-1 datatypeSign=-1 baseType=null
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): start: tid=216172782113784148
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=4, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=4, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): isUchar=false, nativePrecision=32, nativeOffset=0, nativePadLSB=0, nativePadMSB=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:var str type=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:nativeStrPad=0, nativeStrCSET=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): datatypeClass=3 baseType=null datatypeSize=4
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): datatypeClass=3 datatypeSize=4 baseType=null
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tcopy add 216172782113784149
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): isVlenStr=false nativeStrPad=0 nativeStrCSET=0
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784150
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 7
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784149
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784150
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[3] Datatype=String, length = 4, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[3] has size=1 isCompound=false is_variable_str=false isVLEN=false
+[main] TRACE hdf.object.HObject - name=IMAGE_VERSION path=/test.jpg/
+[main] TRACE hdf.object.HObject - fullName=/test.jpg/IMAGE_VERSION
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - attrName=IMAGE_VERSION, attrType=String, length = 4, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII, attrValue=null, rank=1, isUnsigned=false, isScalar=true
+[main] TRACE hdf.object.Attribute - resetSelection(): start
+[main] TRACE hdf.object.Attribute - resetSelection(): finish
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): start: nPoints=1
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): tclass=3 : tsize=4
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): class H5T_STRING || H5T_REFERENCE
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[3] H5Aread
+[main] TRACE hdf.hdf5lib.H5 - H5Aread: cname=[B is1D=true dname=B
+[main] TRACE hdf.hdf5lib.H5 - H5Aread_dname_B
+[main] TRACE hdf.object.h5.H5File - getAttribute(): isText: converting byte array to string array
+[main] TRACE hdf.object.Dataset - byteToString(): start
+[main] TRACE hdf.object.Dataset - byteToString(): n=1 from length of 4
+[main] TRACE hdf.object.Dataset - byteToString(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[3] data: [1.2]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784148
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Sclose remove 288230376151711752
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567623
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5File - getAttribute(): attribute[4]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen_by_idx add 432345564227567624
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_space add 288230376151711753
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[4] aid=432345564227567624 sid=288230376151711753
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[4] isScalar=true
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[4] is INTERLACE_MODE
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784151
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784152
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[4] tid=216172782113784152 native tmptid=216172782113784151 from aid=432345564227567624
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784151
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.HObject - name=null path=null
+[main] TRACE hdf.object.HObject - fullName=/
+[main] TRACE hdf.object.Datatype - datatypeClass=-1 datatypeSize=-1 datatypeOrder=-1 datatypeSign=-1 baseType=null
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): start: tid=216172782113784152
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=16, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): tclass=3, tsize=16, torder=-1, isVLEN=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): isUchar=false, nativePrecision=128, nativeOffset=0, nativePadLSB=0, nativePadMSB=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:var str type=false
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): H5T_STRING:nativeStrPad=0, nativeStrCSET=0
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): datatypeClass=3 baseType=null datatypeSize=16
+[main] TRACE hdf.object.h5.H5Datatype - fromNative(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): start
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): datatypeClass=3 datatypeSize=16 baseType=null
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tcopy add 216172782113784153
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.object.h5.H5Datatype - createNative(): isVlenStr=false nativeStrPad=0 nativeStrCSET=0
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tget_native_type add 216172782113784154
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 7
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784153
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 6
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784154
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 5
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[4] Datatype=String, length = 16, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[4] has size=1 isCompound=false is_variable_str=false isVLEN=false
+[main] TRACE hdf.object.HObject - name=INTERLACE_MODE path=/test.jpg/
+[main] TRACE hdf.object.HObject - fullName=/test.jpg/INTERLACE_MODE
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - attrName=INTERLACE_MODE, attrType=String, length = 16, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII, attrValue=null, rank=1, isUnsigned=false, isScalar=true
+[main] TRACE hdf.object.Attribute - resetSelection(): start
+[main] TRACE hdf.object.Attribute - resetSelection(): finish
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): start: nPoints=1
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): tclass=3 : tsize=16
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): class H5T_STRING || H5T_REFERENCE
+[main] TRACE hdf.object.h5.H5Datatype - allocateArray(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[4] H5Aread
+[main] TRACE hdf.hdf5lib.H5 - H5Aread: cname=[B is1D=true dname=B
+[main] TRACE hdf.hdf5lib.H5 - H5Aread_dname_B
+[main] TRACE hdf.object.h5.H5File - getAttribute(): isText: converting byte array to string array
+[main] TRACE hdf.object.Dataset - byteToString(): start
+[main] TRACE hdf.object.Dataset - byteToString(): n=1 from length of 16
+[main] TRACE hdf.object.Dataset - byteToString(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): Attribute[4] data: [INTERLACE_PIXEL]
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784152
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 4
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Sclose remove 288230376151711753
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567624
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dclose remove 360287970189639683
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 1
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): finish
+[main] TRACE hdf.object.h5.H5File - getAttribute(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - getMetadata(): attributeList loaded
+[main] TRACE hdf.object.h5.H5ScalarDS - getMetadata(): open dataset
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dopen add 360287970189639684
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): did=360287970189639684
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - getMetadata(): dataset opened
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dget_create_plist add 720575940379279383
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.object.h5.H5ScalarDS - getMetadata(): 0 filters in pipeline
+[main] TRACE hdf.object.h5.H5ScalarDS - getMetadata(): filter compression=NONE
+[main] TRACE hdf.object.h5.H5ScalarDS - getMetadata(): filter information=NONE
+[main] TRACE hdf.object.h5.H5ScalarDS - getMetadata(): storage=SIZE: 101469, allocation time: Late
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Pclose remove 720575940379279384
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Pclose remove 720575940379279383
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dclose remove 360287970189639684
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 1
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - getMetadata(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - dataObject=test.jpg isH4=false isH5=true numAttributes=5
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createAttributeInfoPane(): start
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dopen add 360287970189639685
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): did=360287970189639685
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dget_create_plist add 720575940379279386
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createAttributeInfoPane(): creationOrder=0
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Pclose remove 720575940379279386
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dclose remove 360287970189639685
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 1
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createAttributeInfoPane(): numAttributes=5
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createAttributeInfoPane(): attr[0] is CLASS of type String, length = 6, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - toString(): start
+[main] TRACE hdf.object.Attribute - toString: is_enum=false is_unsigned=false Array.getLength=1
+[main] TRACE hdf.object.Attribute - toString: not enum or unsigned
+[main] TRACE hdf.object.Attribute - toString: finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createAttributeInfoPane(): attr[1] is IMAGE_MINMAXRANGE of type 8-bit unsigned integer
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - toString(): start
+[main] TRACE hdf.object.Attribute - toString: is_enum=false is_unsigned=true Array.getLength=2
+[main] TRACE hdf.object.Attribute - toString: is_unsigned with cname=[B dname=B
+[main] TRACE hdf.object.Attribute - toString: finish
+[main] TRACE hdf.object.Attribute - init(): start
+[main] TRACE hdf.object.Attribute - open(): start
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dopen add 360287970189639686
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): did=360287970189639686
+[main] TRACE hdf.object.h5.H5ScalarDS - open(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aopen add 432345564227567625
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.object.Attribute - open(): aid=432345564227567625
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Dclose remove 360287970189639686
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.h5.H5ScalarDS - close(): finish
+[main] TRACE hdf.object.Attribute - open(): finish
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aget_type add 216172782113784158
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 3
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Tclose remove 216172782113784158
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 2
+[main] TRACE hdf.object.Attribute - close(): start
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Aclose remove 432345564227567625
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 1
+[main] TRACE hdf.object.Attribute - close(): finish
+[main] TRACE hdf.object.Attribute - resetSelection(): start
+[main] TRACE hdf.object.Attribute - resetSelection(): finish
+[main] TRACE hdf.object.Attribute - init(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createAttributeInfoPane(): attr[2] is IMAGE_SUBCLASS of type String, length = 16, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - toString(): start
+[main] TRACE hdf.object.Attribute - toString: is_enum=false is_unsigned=false Array.getLength=1
+[main] TRACE hdf.object.Attribute - toString: not enum or unsigned
+[main] TRACE hdf.object.Attribute - toString: finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createAttributeInfoPane(): attr[3] is IMAGE_VERSION of type String, length = 4, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - toString(): start
+[main] TRACE hdf.object.Attribute - toString: is_enum=false is_unsigned=false Array.getLength=1
+[main] TRACE hdf.object.Attribute - toString: not enum or unsigned
+[main] TRACE hdf.object.Attribute - toString: finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createAttributeInfoPane(): attr[4] is INTERLACE_MODE of type String, length = 16, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.object.Attribute - toString(): start
+[main] TRACE hdf.object.Attribute - toString: is_enum=false is_unsigned=false Array.getLength=1
+[main] TRACE hdf.object.Attribute - toString: not enum or unsigned
+[main] TRACE hdf.object.Attribute - toString: finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createAttributeInfoPane(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createGeneralObjectInfoPane(): start
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - createGeneralObjectInfoPane(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultDatasetMetaDataView - addObjectSpecificContent(): start
+[main] TRACE hdf.view.MetaDataView.DefaultLinkMetaDataView - addObjectSpecificContent(): start
+[main] TRACE hdf.view.MetaDataView.DefaultLinkMetaDataView - addObjectSpecificContent(): finish
+[main] TRACE hdf.object.h5.H5ScalarDS - getDatatype(): start
+[main] TRACE hdf.object.h5.H5ScalarDS - getDatatype(): finish
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): start
+[main] TRACE hdf.object.h5.H5Datatype - getDescription(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultDatasetMetaDataView - addObjectSpecificContent(): finish
+[main] TRACE hdf.view.MetaDataView.DefaultBaseMetaDataView - finish
+[main] TRACE hdf.view.Tools - newInstance(Class = class hdf.view.MetaDataView.DefaultDatasetMetaDataView): finish
+[main] TRACE hdf.view.MetaDataView.DefaultMetaDataViewFactory - getMetaDataView(): returning MetaDataView instance hdf.view.MetaDataView.DefaultDatasetMetaDataView@551aa95a
+[main] TRACE hdf.view.MetaDataView.DefaultMetaDataViewFactory - getMetaDataView(): finish
+[main] TRACE hdf.view.HDFView - showMetaData(): finish
+[main] TRACE hdf.view.ViewProperties - save user properties: begin
+[main] TRACE hdf.view.ViewProperties - save user properties: update data saving options
+[main] TRACE hdf.view.ViewProperties - save user properties: lib.lowversion=Earliest
+[main] TRACE hdf.view.ViewProperties - save user properties: lib.highversion=Latest
+[main] TRACE hdf.view.ViewProperties - save user properties: most recent files
+[main] TRACE hdf.view.ViewProperties - save user properties: most recent files size=4
+[main] TRACE hdf.view.ViewProperties - save user properties: most recent palette files
+[main] TRACE hdf.view.ViewProperties - save user properties: default modules
+[main] TRACE hdf.view.ViewProperties - save user properties: module.treeview=Default
+[main] TRACE hdf.view.ViewProperties - save user properties: module.metadataview=Default
+[main] TRACE hdf.view.ViewProperties - save user properties: module.tableview=Default
+[main] TRACE hdf.view.ViewProperties - save user properties: module.imageview=Default
+[main] TRACE hdf.view.ViewProperties - save user properties: module.paletteview=Default
+[main] TRACE hdf.view.ViewProperties - save user properties: supported fileformat
+[main] TRACE hdf.view.ViewProperties - save user properties: end
+[main] TRACE hdf.view.TreeView.DefaultTreeView - dispose(/home/byrn/HDF_Projects/hdf5pl/dev/JPEG/example/test.jpg.h5):
+[main] TRACE hdf.object.h5.H5File - close(): start
+[main] TRACE hdf.object.h5.H5File - close(): clear Group test.jpg.h5
+[main] TRACE hdf.object.h5.H5File - close(): clear Dataset test.jpg
+[main] TRACE hdf.object.h5.H5File - close(): open objects=1
+[main] TRACE hdf.object.h5.H5File - close(): object[0] id=72057594037927936
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: H5Fclose remove 72057594037927936
+[main] TRACE hdf.hdf5lib.H5 - OPEN_IDS: 0
+[main] TRACE hdf.object.h5.H5File - close(): finish
+[main] DEBUG hdf.view.HDFView - runMainWindow exit

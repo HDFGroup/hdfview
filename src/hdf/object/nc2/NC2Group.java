@@ -22,8 +22,8 @@ import hdf.object.Group;
 import ucar.nc2.NetcdfFile;
 
 /**
- * An NC2Group represents NC2 group, inheriting from Group. Every NC2 object
- * has at least one name. An NC2 group is used to store a set of the names
+ * An H5Group represents HDF5 group, inheriting from Group. Every HDF5 object
+ * has at least one name. An HDF5 group is used to store a set of the names
  * together in one place, i.e. a group. The general structure of a group is
  * similar to that of the UNIX file system in that the group may contain
  * references to other groups or data objects just as the UNIX directory may
@@ -35,32 +35,17 @@ import ucar.nc2.NetcdfFile;
 public class NC2Group extends Group {
     private static final long serialVersionUID = -1261533010442193447L;
 
-    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(NC2Group.class);
-
-    /**
-     * The corresponding netcdf Group for this group.
-     */
-    protected ucar.nc2.Group netCDFGroup;
-
-    public ucar.nc2.Group getNetCDFGroup() {
-        return netCDFGroup;
-    }
-
-    public void setNetCDFGroup(ucar.nc2.Group netCDFGroup) {
-        this.netCDFGroup = netCDFGroup;
-    }
-
     /**
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
      */
     private List attributeList;
 
-    /** The default object ID for NC2 objects */
+    /** The default object ID for HDF5 objects */
     private static final long[] DEFAULT_OID = { 0 };
 
     /**
-     * Constructs an NC2 group with specific name, path, and parent.
+     * Constructs an HDF5 group with specific name, path, and parent.
      *
      * @param fileFormat
      *            the file which containing the group.
@@ -73,13 +58,10 @@ public class NC2Group extends Group {
      * @param oid
      *            the unique identifier of this data object.
      */
-    public NC2Group(FileFormat fileFormat, String name, String path, Group parent, long[] theID) {
-        super(fileFormat, name, path, parent, ((theID == null) ? DEFAULT_OID : theID));
-        ucar.nc2.Group parentGroup = null;
-        if (parent != null)
-            parentGroup = ((NC2Group)parent).getNetCDFGroup();
-        netCDFGroup = new ucar.nc2.Group(((NC2File)fileFormat).getNetcdfFile(), parentGroup, name);
-        log.trace("NC2Group:{}", name);
+    public NC2Group(FileFormat fileFormat, String name, String path,
+            Group parent, long[] theID) {
+        super(fileFormat, name, path, parent, ((theID == null) ? DEFAULT_OID
+                : theID));
     }
 
     /*
@@ -93,17 +75,15 @@ public class NC2Group extends Group {
 
     // Implementing DataFormat
     public List getMetadata() throws Exception {
-        log.trace("getMetadata(): start");
         if (!isRoot()) {
             return null;
         }
 
         if (attributeList != null) {
-            log.trace("getMetadata(): attributeList exists -finish");
             return attributeList;
         }
 
-        NC2File theFile = (NC2File)getFileFormat();
+        NC2File theFile = (NC2File) getFileFormat();
         NetcdfFile ncFile = theFile.getNetcdfFile();
 
         List netcdfAttributeList = ncFile.getGlobalAttributes();
@@ -112,17 +92,14 @@ public class NC2Group extends Group {
         }
 
         int n = netcdfAttributeList.size();
-        log.trace("Attribute size:{}", n);
         attributeList = new Vector(n);
 
         ucar.nc2.Attribute netcdfAttr = null;
         for (int i = 0; i < n; i++) {
             netcdfAttr = (ucar.nc2.Attribute) netcdfAttributeList.get(i);
-            log.trace("getMetadata(): Attribute[{}]:{}", i, netcdfAttr.toString());
-            attributeList.add(NC2File.convertAttribute(this, netcdfAttr));
+            attributeList.add(NC2File.convertAttribute(netcdfAttr));
         }
 
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -166,14 +143,17 @@ public class NC2Group extends Group {
     // Implementing DataFormat
     @Override
     public long open() {
-        // nothing to open
-        return -1;
+        // not supported
+        throw new UnsupportedOperationException(
+                "Unsupported operation for NetCDF.");
     }
 
     /** close group access */
     @Override
     public void close(long gid) {
-        // nothing to close
+        // not supported
+        throw new UnsupportedOperationException(
+                "Unsupported operation for NetCDF.");
     }
 
     /**

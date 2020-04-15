@@ -198,8 +198,7 @@ public class H4Datatype extends Datatype {
      * @throws OutOfMemoryError
      *             if the array cannot be allocated
      */
-    public static final Object allocateArray(long datatype, int datasize)
-            throws OutOfMemoryError {
+    public static final Object allocateArray(long datatype, int datasize) throws OutOfMemoryError {
         log.trace("allocateArray(): start");
 
         if (datasize <= 0) {

@@ -143,9 +143,6 @@ public class HDFView implements DataViewManager {
     /* A list of help view implementations. */
     private static List<?>             helpViews;
 
-    /* The list of GUI components related to NetCDF3 */
-    private final List<MenuItem>       n3GUIs = new ArrayList<>();
-
     /* The list of GUI components related to HDF4 */
     private final List<MenuItem>       h4GUIs = new ArrayList<>();
 
@@ -167,7 +164,7 @@ public class HDFView implements DataViewManager {
 
     private static final String        ABOUT_HDFVIEW = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
             + "For " + System.getProperty("os.name") + "\n\n"
-            + "Copyright " + '\u00a9' + " 2006-2020 The HDF Group.\n"
+            + "Copyright " + '\u00a9' + " 2006-2019 The HDF Group.\n"
             + "All rights reserved.";
 
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
@@ -331,9 +328,6 @@ public class HDFView implements DataViewManager {
 
             log.info("CurrentDir is {}", currentDir);
         }
-
-        if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3) == null)
-            setEnabled(n3GUIs, false);
 
         if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4) == null)
             setEnabled(h4GUIs, false);

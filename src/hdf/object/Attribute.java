@@ -305,7 +305,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
         if (parentObject == null) {
             log.debug("open(): attribute's parent object is null");
-            log.trace("open(): exit");
+            log.trace("open(): finish");
             return -1;
         }
 
@@ -316,20 +316,14 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
             pObjID = parentObject.open();
             if (pObjID >= 0) {
                 if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-                    log.trace("open(): FILE_TYPE_HDF5");
                     if (H5.H5Aexists(pObjID, getName()))
                         aid = H5.H5Aopen(pObjID, getName(), HDF5Constants.H5P_DEFAULT);
                 }
                 else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
-                    log.trace("open(): FILE_TYPE_HDF4");
+
                     /*
-                     * TODO: Get type of HDF4 object this is attached to and retrieve attribute info.
-                     */
-                }
-                else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
-                    log.trace("open(): FILE_TYPE_NC3");
-                    /*
-                     * TODO: Get type of netcdf3 object this is attached to and retrieve attribute info.
+                     * TODO: Get type of HDF4 object this is attached to and retrieve attribute
+                     * info.
                      */
                 }
             }
@@ -359,26 +353,11 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         log.trace("close(): start");
 
         if (aid >= 0) {
-            if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-                log.trace("close(): FILE_TYPE_HDF5");
-                try {
-                    H5.H5Aclose(aid);
-                }
-                catch (HDF5Exception ex) {
-                    log.debug("close(): H5Aclose({}) failure: ", aid, ex);
-                }
+            try {
+                H5.H5Aclose(aid);
             }
-            else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
-                log.trace("close(): FILE_TYPE_HDF4");
-                /*
-                 * TODO: Get type of HDF4 object this is attached to and close attribute.
-                 */
-            }
-            else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
-                log.trace("close(): FILE_TYPE_NC3");
-                /*
-                 * TODO: Get type of netcdf3 object this is attached to and close attribute.
-                 */
+            catch (HDF5Exception ex) {
+                log.debug("close(): H5Aclose({}) failure: ", aid, ex);
             }
         }
 
@@ -396,147 +375,130 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
             return;
         }
 
-        if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-            long aid = -1;
-            long tid = -1;
-            int tclass = -1;
-            flatNameList = new Vector<>();
-            flatTypeList = new Vector<>();
-            long[] memberTIDs = null;
+        long aid = -1;
+        long tid = -1;
+        int tclass = -1;
+        flatNameList = new Vector<>();
+        flatTypeList = new Vector<>();
+        long[] memberTIDs = null;
 
-            log.trace("init(): FILE_TYPE_HDF5");
-            aid = open();
-            if (aid >= 0) {
-                try {
-                    tid = H5.H5Aget_type(aid);
-                    tclass = H5.H5Tget_class(tid);
+        aid = open();
+        if (aid >= 0) {
+            try {
+                tid = H5.H5Aget_type(aid);
+                tclass = H5.H5Tget_class(tid);
 
-                    long tmptid = 0;
+                long tmptid = 0;
 
-                    // Handle ARRAY and VLEN types by getting the base type
-                    if (tclass == HDF5Constants.H5T_ARRAY || tclass == HDF5Constants.H5T_VLEN) {
+                // Handle ARRAY and VLEN types by getting the base type
+                if (tclass == HDF5Constants.H5T_ARRAY || tclass == HDF5Constants.H5T_VLEN) {
+                    try {
+                        tmptid = tid;
+                        tid = H5.H5Tget_super(tmptid);
+                        log.trace("init(): H5T_ARRAY or H5T_VLEN class old={}, new={}", tmptid, tid);
+                    }
+                    catch (Exception ex) {
+                        log.debug("init(): H5T_ARRAY or H5T_VLEN H5Tget_super({}) failure: ", tmptid, ex);
+                        tid = -1;
+                    }
+                    finally {
                         try {
-                            tmptid = tid;
-                            tid = H5.H5Tget_super(tmptid);
-                            log.trace("init(): H5T_ARRAY or H5T_VLEN class old={}, new={}", tmptid, tid);
+                            H5.H5Tclose(tmptid);
+                        }
+                        catch (HDF5Exception ex) {
+                            log.debug("init(): H5Tclose({}) failure: ", tmptid, ex);
+                        }
+                    }
+                }
+
+                if (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND) {
+                    // initialize member information
+                    H5Datatype.extractCompoundInfo((H5Datatype) getDatatype(), "", flatNameList, flatTypeList);
+                    numberOfMembers = flatNameList.size();
+                    log.trace("init(): numberOfMembers={}", numberOfMembers);
+
+                    memberNames = new String[numberOfMembers];
+                    memberTIDs = new long[numberOfMembers];
+                    memberTypes = new Datatype[numberOfMembers];
+                    memberOrders = new int[numberOfMembers];
+                    isMemberSelected = new boolean[numberOfMembers];
+                    memberDims = new Object[numberOfMembers];
+
+                    for (int i = 0; i < numberOfMembers; i++) {
+                        isMemberSelected[i] = true;
+                        memberTIDs[i] = flatTypeList.get(i).createNative();
+
+                        try {
+                            memberTypes[i] = flatTypeList.get(i);
                         }
                         catch (Exception ex) {
-                            log.debug("init(): H5T_ARRAY or H5T_VLEN H5Tget_super({}) failure: ", tmptid, ex);
-                            tid = -1;
+                            log.debug("init(): failed to create datatype for member[{}]: ", i, ex);
+                            memberTypes[i] = null;
                         }
-                        finally {
+
+                        memberNames[i] = flatNameList.get(i);
+                        memberOrders[i] = 1;
+                        memberDims[i] = null;
+                        log.trace("init()[{}]: memberNames[{}]={}, memberTIDs[{}]={}, memberTypes[{}]={}", i, i,
+                                memberNames[i], i, memberTIDs[i], i, memberTypes[i]);
+
+                        try {
+                            tclass = H5.H5Tget_class(memberTIDs[i]);
+                        }
+                        catch (HDF5Exception ex) {
+                            log.debug("init(): H5Tget_class({}) failure: ", memberTIDs[i], ex);
+                        }
+
+                        if (tclass == HDF5Constants.H5T_ARRAY) {
+                            int n = H5.H5Tget_array_ndims(memberTIDs[i]);
+                            long mdim[] = new long[n];
+                            H5.H5Tget_array_dims(memberTIDs[i], mdim);
+                            int idim[] = new int[n];
+                            for (int j = 0; j < n; j++)
+                                idim[j] = (int) mdim[j];
+                            memberDims[i] = idim;
+                            tmptid = H5.H5Tget_super(memberTIDs[i]);
+                            memberOrders[i] = (int) (H5.H5Tget_size(memberTIDs[i]) / H5.H5Tget_size(tmptid));
                             try {
                                 H5.H5Tclose(tmptid);
                             }
                             catch (HDF5Exception ex) {
-                                log.debug("init(): H5Tclose({}) failure: ", tmptid, ex);
+                                log.debug("init(): memberTIDs[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
                             }
                         }
-                    }
-
-                    if (H5.H5Tget_class(tid) == HDF5Constants.H5T_COMPOUND) {
-                        // initialize member information
-                        H5Datatype.extractCompoundInfo((H5Datatype) getDatatype(), "", flatNameList, flatTypeList);
-                        numberOfMembers = flatNameList.size();
-                        log.trace("init(): numberOfMembers={}", numberOfMembers);
-
-                        memberNames = new String[numberOfMembers];
-                        memberTIDs = new long[numberOfMembers];
-                        memberTypes = new Datatype[numberOfMembers];
-                        memberOrders = new int[numberOfMembers];
-                        isMemberSelected = new boolean[numberOfMembers];
-                        memberDims = new Object[numberOfMembers];
-
-                        for (int i = 0; i < numberOfMembers; i++) {
-                            isMemberSelected[i] = true;
-                            memberTIDs[i] = flatTypeList.get(i).createNative();
-
-                            try {
-                                memberTypes[i] = flatTypeList.get(i);
-                            }
-                            catch (Exception ex) {
-                                log.debug("init(): failed to create datatype for member[{}]: ", i, ex);
-                                memberTypes[i] = null;
-                            }
-
-                            memberNames[i] = flatNameList.get(i);
-                            memberOrders[i] = 1;
-                            memberDims[i] = null;
-                            log.trace("init()[{}]: memberNames[{}]={}, memberTIDs[{}]={}, memberTypes[{}]={}", i, i,
-                                    memberNames[i], i, memberTIDs[i], i, memberTypes[i]);
-
-                            try {
-                                tclass = H5.H5Tget_class(memberTIDs[i]);
-                            }
-                            catch (HDF5Exception ex) {
-                                log.debug("init(): H5Tget_class({}) failure: ", memberTIDs[i], ex);
-                            }
-
-                            if (tclass == HDF5Constants.H5T_ARRAY) {
-                                int n = H5.H5Tget_array_ndims(memberTIDs[i]);
-                                long mdim[] = new long[n];
-                                H5.H5Tget_array_dims(memberTIDs[i], mdim);
-                                int idim[] = new int[n];
-                                for (int j = 0; j < n; j++)
-                                    idim[j] = (int) mdim[j];
-                                memberDims[i] = idim;
-                                tmptid = H5.H5Tget_super(memberTIDs[i]);
-                                memberOrders[i] = (int) (H5.H5Tget_size(memberTIDs[i]) / H5.H5Tget_size(tmptid));
-                                try {
-                                    H5.H5Tclose(tmptid);
-                                }
-                                catch (HDF5Exception ex) {
-                                    log.debug("init(): memberTIDs[{}] H5Tclose(tmptid {}) failure: ", i, tmptid, ex);
-                                }
-                            }
-                        } // (int i=0; i<numberOfMembers; i++)
-                    }
-
-                    inited = true;
-                }
-                catch (HDF5Exception ex) {
-                    numberOfMembers = 0;
-                    memberNames = null;
-                    memberTypes = null;
-                    memberOrders = null;
-                    log.debug("init(): ", ex);
-                }
-                finally {
-                    try {
-                        H5.H5Tclose(tid);
-                    }
-                    catch (HDF5Exception ex2) {
-                        log.debug("init(): H5Tclose({}) failure: ", tid, ex2);
-                    }
-
-                    if (memberTIDs != null) {
-                        for (int i = 0; i < memberTIDs.length; i++) {
-                            try {
-                                H5.H5Tclose(memberTIDs[i]);
-                            }
-                            catch (Exception ex) {
-                                log.debug("init(): H5Tclose(memberTIDs[{}] {}) failure: ", i, memberTIDs[i], ex);
-                            }
-                        }
-                    }
+                    } // (int i=0; i<numberOfMembers; i++)
                 }
 
-                close(aid);
+                inited = true;
             }
-        }
-        else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
-            log.trace("init(): FILE_TYPE_HDF4");
-            /*
-             * TODO: Get type of HDF4 object this is attached to and close attribute.
-             */
-            inited = true;
-        }
-        else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
-            log.trace("init(): FILE_TYPE_NC3");
-            /*
-             * TODO: Get type of netcdf3 object this is attached to and close attribute.
-             */
-            inited = true;
+            catch (HDF5Exception ex) {
+                numberOfMembers = 0;
+                memberNames = null;
+                memberTypes = null;
+                memberOrders = null;
+                log.debug("init(): ", ex);
+            }
+            finally {
+                try {
+                    H5.H5Tclose(tid);
+                }
+                catch (HDF5Exception ex2) {
+                    log.debug("init(): H5Tclose({}) failure: ", tid, ex2);
+                }
+
+                if (memberTIDs != null) {
+                    for (int i = 0; i < memberTIDs.length; i++) {
+                        try {
+                            H5.H5Tclose(memberTIDs[i]);
+                        }
+                        catch (Exception ex) {
+                            log.debug("init(): H5Tclose(memberTIDs[{}] {}) failure: ", i, memberTIDs[i], ex);
+                        }
+                    }
+                }
+            }
+
+            close(aid);
         }
 
         resetSelection();
@@ -727,7 +689,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
     @Override
     public Object read() throws Exception, OutOfMemoryError {
-        log.trace("read(): start");
         if (!inited) init();
 
         /*
@@ -740,7 +701,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
             data = valueList;
         }
 
-        log.trace("read(): finish");
         return data;
     }
 
