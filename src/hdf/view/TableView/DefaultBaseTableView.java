@@ -1027,7 +1027,7 @@ public abstract class DefaultBaseTableView implements TableView {
         dataValue = null;
         try {
             dataValue = dataObject.getData();
-            log.trace("loadData(): dataValue = {}", dataValue);
+            // DEBUG ONLY log.trace("loadData(): dataValue = {}", dataValue);
         }
         catch (Exception ex) {
             dataValue = null;
