@@ -161,7 +161,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         if (dataValue == null) {
             log.debug("loadData(): data value is null");
-            log.trace("loadData(): finish");
+            log.trace("loadData(): exit");
             throw new RuntimeException("data value is null");
         }
 

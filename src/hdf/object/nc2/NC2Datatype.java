@@ -28,6 +28,9 @@ import ucar.ma2.DataType;
  */
 public class NC2Datatype extends Datatype {
     private static final long serialVersionUID = 5399364372073889764L;
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2Datatype.class);
+
     DataType nativeType = null;
 
     /**
@@ -35,23 +38,25 @@ public class NC2Datatype extends Datatype {
      * following list a few example of how to create a Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * NC2Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);</li>
+     * NC2Datatype type = new NC2Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);</li>
      * <li>to create 16-bit signed integer with big endian<br>
-     * NC2Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);</li>
+     * NC2Datatype type = new NC2Datatype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);</li>
      * <li>to create native float<br>
-     * NC2Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);</li>
+     * NC2Datatype type = new NC2Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);</li>
      * <li>to create 64-bit double<br>
-     * NC2Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);</li>
+     * NC2Datatype type = new NC2Datatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);</li>
      * </ol>
      *
      * @param tclass
-     *            the class of the datatype.
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
-     *            the size of the datatype in bytes.
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value.
      * @param torder
-     *            the order of the datatype.
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
      * @param tsign
-     *            the sign of the datatype.
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      *
 * @throws Exception
      *            if there is an error
@@ -62,7 +67,7 @@ public class NC2Datatype extends Datatype {
     }
 
     /**
-     * Create a Datatype with a given Netcdf native datatype.
+     * Constructs a NC2Datatype with a given NetCDF3 native datatype identifier.
      *
      * @param theType
      *            the netcdf native datatype.
@@ -72,6 +77,7 @@ public class NC2Datatype extends Datatype {
      */
     public NC2Datatype(DataType theType) throws Exception {
         super(-1);
+        log.trace("NC2Datatype: start nc2 type = {}", theType);
         nativeType = theType;
         fromNative(0);
         datatypeDescription = getDescription();
@@ -87,64 +93,32 @@ public class NC2Datatype extends Datatype {
         return false;
     }
 
-    /**
-     * Allocate an one-dimensional array of byte, short, int, long, float,
-     * double, or String to store data retrieved from an Netcdf file based on
-     * the given Netcdf datatype and dimension sizes.
+    /*
+     * (non-Javadoc)
      *
-     * @param dtype
-     *            the netdcdf datatype.
-     * @param size
-     *            the total size of the array.
-     * @return the array object if successful and null otherwise.
+     * @see hdf.object.Datatype#fromNative(long)
      */
-    public static Object allocateArray(DataType dtype, int size)
-            throws OutOfMemoryError {
-        Object data = null;
-
-        if ((size <= 0) || (dtype == null)) {
-            return null;
-        }
-
-        if (dtype.equals(DataType.BYTE)) {
-            data = new byte[size];
-        }
-        else if (dtype.equals(DataType.SHORT)) {
-            data = new short[size];
-        }
-        else if (dtype.equals(DataType.INT)) {
-            data = new int[size];
-        }
-        else if (dtype.equals(DataType.LONG)) {
-            data = new long[size];
-        }
-        else if (dtype.equals(DataType.FLOAT)) {
-            data = new float[size];
-        }
-        else if (dtype.equals(DataType.DOUBLE)) {
-            data = new double[size];
-        }
-        else if (dtype.equals(DataType.STRING)) {
-            data = new String[size];
-        }
-
-        return data;
-    }
-
     /**
-     * Translate Netcdf datatype identifier into NC2Datatype.
+     * Translate NetCDF3 datatype identifier into NC2Datatype.
      *
      * @param nativeID
      *            the netcdf native datatype.
      */
     @Override
-    public void fromNative(long tid) {
+    public void fromNative(long tid)
+    {
+        log.trace("fromNative(): start");
+
         if (nativeType == null) {
             return;
         }
 
         datatypeOrder = NATIVE;
-        if (nativeType.equals(DataType.BYTE)) {
+        if (nativeType.equals(DataType.CHAR)) {
+            datatypeClass = CLASS_CHAR;
+            datatypeSize = 1;
+        }
+        else if (nativeType.equals(DataType.BYTE)) {
             datatypeClass = CLASS_INTEGER;
             datatypeSize = 1;
         }
@@ -170,39 +144,123 @@ public class NC2Datatype extends Datatype {
         }
         else if (nativeType.equals(DataType.STRING)) {
             datatypeClass = CLASS_STRING;
-            datatypeSize = 80; // default length. need to figure out the actual
-            // length
+            datatypeSize = 80; // default length. need to figure out the actual length
         }
+        else if (nativeType.equals(DataType.OPAQUE)) {
+            datatypeClass = CLASS_OPAQUE;
+            datatypeSize = 1;
+        }
+
+        log.trace("Datatype class={} size={}", datatypeClass, datatypeSize);
+        log.trace("fromNative(): finish");
     }
 
-    // implementing Datatype
+    /**
+     * Allocate an one-dimensional array of byte, short, int, long, float,
+     * double, or String to store data retrieved from an NetCDF3 file based on
+     * the given NetCDF3 datatype and dimension sizes.
+     *
+     * @param dtype
+     *            the NetCDF3 datatype.
+     * @param datasize
+     *            the size of the data array
+     *
+     * @return an array of 'datasize' numbers of datatype.
+     *
+     * @throws OutOfMemoryError
+     *             if the array cannot be allocated
+     */
+    public static final Object allocateArray(DataType dtype, int datasize)
+            throws OutOfMemoryError {
+        log.trace("allocateArray(): start");
+
+        if ((datasize <= 0) || (dtype == null)) {
+            log.debug("datasize <= 0");
+            log.trace("allocateArray(): finish");
+            return null;
+        }
+
+        Object data = null;
+
+        if (dtype.equals(DataType.BYTE)) {
+            data = new byte[datasize];
+        }
+        else if (dtype.equals(DataType.SHORT)) {
+            data = new short[datasize];
+        }
+        else if (dtype.equals(DataType.INT)) {
+            data = new int[datasize];
+        }
+        else if (dtype.equals(DataType.LONG)) {
+            data = new long[datasize];
+        }
+        else if (dtype.equals(DataType.FLOAT)) {
+            data = new float[datasize];
+        }
+        else if (dtype.equals(DataType.DOUBLE)) {
+            data = new double[datasize];
+        }
+        else if (dtype.equals(DataType.STRING)) {
+            data = new String[datasize];
+        }
+
+        log.trace("allocateArray(): finish");
+        return data;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.Datatype#getDatatypeDescription()
+     */
     @Override
     public String getDescription() {
-        if (datatypeDescription != null)
-            return datatypeDescription;
+        log.trace("getDescription(): start");
 
-        if (nativeType == null) {
-            return "Unknown data type.";
+        if (datatypeDescription != null) {
+            log.trace("getDescription(): finish");
+            return datatypeDescription;
         }
 
-        return nativeType.toString();
+        String description = null;
+
+        if (nativeType == null) {
+            description = "Unknown data type.";
+        }
+
+        description = nativeType.toString();
+
+        log.trace("getDescription(): finish");
+        return description;
     }
 
-    // implementing Datatype
-    @Override
-    public boolean isText() {
-        return false;
-    }
-
-    // implementing Datatype
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.Datatype#isUnsigned()
+     */
     @Override
     public boolean isUnsigned() {
-        return false;
+        if (nativeType.isNumeric())
+            return false;
+        else
+            return false;
     }
 
-    // implementing Datatype
     @Override
-    public long createNative() {
+    public boolean isText() {
+        return (nativeType == DataType.CHAR);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.Datatype#createNative()
+     */
+    @Override
+    public long createNative()
+    {
+        log.trace("createNative(): start");
+
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = DataType.BYTE;
@@ -228,7 +286,11 @@ public class NC2Datatype extends Datatype {
         else if (datatypeClass == CLASS_STRING) {
             nativeType = DataType.STRING;
         }
+        else {
+            log.debug("createNative(): unknown datatype class {}", datatypeClass);
+        }
 
+        log.trace("createNative(): finish");
         return -1;
     }
 
@@ -239,13 +301,12 @@ public class NC2Datatype extends Datatype {
      */
     @Override
     public void close(long id) {
-        ;
+        // No implementation
     }
 
-    //Implementing DataFormat
+    // Implementing DataFormat
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
-
 }

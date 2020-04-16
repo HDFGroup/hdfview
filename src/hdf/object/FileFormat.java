@@ -135,6 +135,9 @@ public abstract class FileFormat extends File {
     /** Key for HDF5 file format. */
     public static final String                   FILE_TYPE_HDF5     = "HDF5";
 
+    /** Key for NetCDF file format. */
+    public static final String                   FILE_TYPE_NC3      = "NetCDF3";
+
     /**
      * A separator that separates file name and object name.
      *
@@ -234,18 +237,18 @@ public abstract class FileFormat extends File {
         }
 
         // add NetCDF to default modules
-        if (FileFormat.getFileFormat("NetCDF") == null) {
+        if (FileFormat.getFileFormat(FILE_TYPE_NC3) == null) {
             try {
                 @SuppressWarnings("rawtypes")
                 Class fileclass = Class.forName("hdf.object.nc2.NC2File");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
-                    FileFormat.addFileFormat("NetCDF", fileformat);
-                    log.debug("NetCDF file format added");
+                    FileFormat.addFileFormat(FILE_TYPE_NC3, fileformat);
+                    log.debug("NetCDF3 file format added");
                 }
             }
             catch (Exception err) {
-                log.debug("NetCDF instance failure: ", err);
+                log.debug("NetCDF3 instance failure: ", err);
             }
         }
 
@@ -639,6 +642,7 @@ public abstract class FileFormat extends File {
      * call will return <code>true</code>.
      *
      * <pre>
+     * FileFormat ncF = FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3);
      * FileFormat h4F = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
      * FileFormat h5F = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
      * boolean isH4 = h4F.isThisType(&quot;test.h5&quot;); // false
