@@ -527,14 +527,14 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             log.trace("init(): FILE_TYPE_HDF4");
             /*
-             * TODO: Get type of HDF4 object this is attached to and close attribute.
+             * TODO: If HDF4 attribute object needs to init dependent objects.
              */
             inited = true;
         }
         else if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
             log.trace("init(): FILE_TYPE_NC3");
             /*
-             * TODO: Get type of netcdf3 object this is attached to and close attribute.
+             * TODO: If netcdf3 attribute object needs to init dependent objects.
              */
             inited = true;
         }
