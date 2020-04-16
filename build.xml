@@ -726,7 +726,7 @@
         </sequential>
     </macrodef>
 
-    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test5-name, ensure-test5-name, jacoco">
+    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test5-name, ensure-test4-name, jacoco">
         <mkdir dir="${report.dir}" />
 
         <run-junit
