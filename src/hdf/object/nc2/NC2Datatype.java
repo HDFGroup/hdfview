@@ -67,7 +67,7 @@ public class NC2Datatype extends Datatype {
     }
 
     /**
-     * Constructs a NC2Datatype with a given NetCDF3 native datatype identifier.
+     * Constructs a NC2Datatype with a given NetCDF3 native datatype object.
      *
      * @param theType
      *            the netcdf native datatype.
@@ -99,10 +99,10 @@ public class NC2Datatype extends Datatype {
      * @see hdf.object.Datatype#fromNative(long)
      */
     /**
-     * Translate NetCDF3 datatype identifier into NC2Datatype.
+     * Translate NetCDF3 datatype object into NC2Datatype.
      *
      * @param nativeID
-     *            the netcdf native datatype.
+     *            UNUSED.
      */
     @Override
     public void fromNative(long tid)
@@ -161,7 +161,7 @@ public class NC2Datatype extends Datatype {
      * the given NetCDF3 datatype and dimension sizes.
      *
      * @param dtype
-     *            the NetCDF3 datatype.
+     *            the NetCDF3 datatype object.
      * @param datasize
      *            the size of the data array
      *

@@ -83,14 +83,14 @@ public class NC2File extends FileFormat {
 
         this.fid = -1;
 
-        if ((fileName != null) && (fileName.length() > 0)) {
+        if ((fullFileName != null) && (fullFileName.length() > 0)) {
             try {
                 log.trace("NetcdfFile:{}", fullFileName);
                 ncFile = NetcdfFile.open(fullFileName);
                 this.fid = 1;
             }
             catch (Exception ex) {
-                log.trace("NC2File:{}", fileName, ex);
+                log.trace("NC2File:{}", fullFileName, ex);
             }
         }
     }
@@ -215,6 +215,7 @@ public class NC2File extends FileFormat {
             ncFile.close();
         }
 
+        isFileOpen = false;
         fid = -1;
         objList = null;
     }
