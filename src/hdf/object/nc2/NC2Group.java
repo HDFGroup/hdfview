@@ -166,14 +166,17 @@ public class NC2Group extends Group {
     // Implementing DataFormat
     @Override
     public long open() {
-        // nothing to open
-        return -1;
+        // not supported
+        throw new UnsupportedOperationException(
+                "Unsupported operation for NetCDF.");
     }
 
     /** close group access */
     @Override
     public void close(long gid) {
-        // nothing to close
+        // not supported
+        throw new UnsupportedOperationException(
+                "Unsupported operation for NetCDF.");
     }
 
     /**
