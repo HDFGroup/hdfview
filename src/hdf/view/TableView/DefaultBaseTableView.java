@@ -345,6 +345,12 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         dataObject = (DataFormat) hObject;
+        if (((HObject) dataObject).getFileFormat() == null) {
+            log.debug("DataFormat object cannot access FileFormat");
+            log.trace("exit");
+            shell.dispose();
+            return;
+        }
 
         isReadOnly = ((HObject) dataObject).getFileFormat().isReadOnly();
 
@@ -1001,7 +1007,7 @@ public abstract class DefaultBaseTableView implements TableView {
             catch (Exception ex) {
                 dataValue = null;
                 log.debug("loadData(): ", ex);
-                log.trace("loadData(): finish");
+                log.trace("loadData(): exit");
                 throw ex;
             }
         }
@@ -1021,11 +1027,12 @@ public abstract class DefaultBaseTableView implements TableView {
         dataValue = null;
         try {
             dataValue = dataObject.getData();
+            log.trace("loadData(): dataValue = {}", dataValue);
         }
         catch (Exception ex) {
             dataValue = null;
             log.debug("loadData(): ", ex);
-            log.trace("loadData(): finish");
+            log.trace("loadData(): exit");
             throw ex;
         }
 

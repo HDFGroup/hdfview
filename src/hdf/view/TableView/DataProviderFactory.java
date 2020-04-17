@@ -172,6 +172,7 @@ public class DataProviderFactory {
                 rowCount = (int) dataFormatReference.getSelectedDims()[0];
                 colCount = 1;
             }
+            log.trace("constructor: rowCount={} colCount={}", rowCount, colCount);
 
             theValue = null;
             isValueChanged = false;
@@ -1160,7 +1161,7 @@ public class DataProviderFactory {
 
             typeSize = dtype.getDatatypeSize();
 
-            log.trace("constructor: finish");
+            log.trace("constructor: finish typeSize={}", typeSize);
         }
 
         @Override

@@ -26,6 +26,7 @@ import java.util.Vector;
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
+
 import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -87,14 +88,14 @@ public class H4File extends FileFormat {
     private boolean                         showAll = false;
 
     /**
-     * Creates an H4File with read only access.
+     * Creates an H4File with read write access.
      */
     public H4File() {
         this("", WRITE);
     }
 
     /**
-     * Creates an H4File with read only access.
+     * Creates an H4File with read write access.
      *
      * @param pathname
      *        The file path string.
@@ -135,6 +136,7 @@ public class H4File extends FileFormat {
     @SuppressWarnings("rawtypes")
     public H4File(String fileName, int access) {
         super(fileName);
+
         isReadOnly = (access == READ);
         objList = new Vector();
 
@@ -456,7 +458,7 @@ public class H4File extends FileFormat {
      */
     @Override
     public void delete(HObject obj) throws Exception {
-        throw (new UnsupportedOperationException("Cannot delete HDF4 object."));
+        throw new UnsupportedOperationException("Cannot delete HDF4 object.");
     }
 
     /**
@@ -1512,7 +1514,7 @@ public class H4File extends FileFormat {
                             }
                             Attribute newAttr = new Attribute(getRootObject(), annName + " #" + i, attrType, attrDims);
                             attrList.add(newAttr);
-                            newAttr.setData(str[0]);
+                            newAttr.setData(str);
                         }
                     }
 

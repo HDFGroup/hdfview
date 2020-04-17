@@ -88,7 +88,7 @@ public class FitsDataset extends ScalarDS
     public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
             throws Exception {
         // not supported
-        throw new UnsupportedOperationException("copy operation unsupported for NetCDF.");
+        throw new UnsupportedOperationException("copy operation unsupported for FITS.");
     }
 
     /*
@@ -98,7 +98,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public byte[] readBytes() throws Exception {
         // not supported
-        throw new UnsupportedOperationException("readBytes operation unsupported for NetCDF.");
+        throw new UnsupportedOperationException("readBytes operation unsupported for FITS.");
     }
 
     /*
@@ -138,7 +138,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public void write(Object buf) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("write operation unsupported for NetCDF.");
+        throw new UnsupportedOperationException("write operation unsupported for FITS.");
     }
 
     /*
@@ -194,7 +194,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public void writeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("writeMetadata operation unsupported for NetCDF.");
+        throw new UnsupportedOperationException("writeMetadata operation unsupported for FITS.");
     }
 
     /*
@@ -204,7 +204,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public void removeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("removeMetadata operation unsupported for NetCDF.");
+        throw new UnsupportedOperationException("removeMetadata operation unsupported for FITS.");
     }
 
     /*
@@ -214,7 +214,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public void updateMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("updateMetadata operation unsupported for NetCDF.");
+        throw new UnsupportedOperationException("updateMetadata operation unsupported for FITS.");
     }
 
     /*
@@ -356,7 +356,7 @@ public class FitsDataset extends ScalarDS
             int gzip,
             Object data) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     /*
@@ -394,7 +394,7 @@ public class FitsDataset extends ScalarDS
     @Override
     public void setName (String newName) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     private int get1DLength(Object data) throws Exception {

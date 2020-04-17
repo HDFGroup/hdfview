@@ -136,19 +136,19 @@ public class H4SDS extends ScalarDS
     /**
      * Creates an H4SDS object with specific name and path.
      *
-     * @param theFile the HDF file.
-     * @param name the name of this H4SDS.
-     * @param path the full path of this H4SDS.
-     * @param oid the unique identifier of this data object.
+     * @param theFile
+     *            the HDF file.
+     * @param name
+     *            the name of this H4SDS.
+     * @param path
+     *            the full path of this H4SDS.
+     * @param oid
+     *            the unique identifier of this data object.
      */
     @SuppressWarnings("deprecation")
-    public H4SDS(
-        FileFormat theFile,
-        String name,
-        String path,
-        long[] oid)
+    public H4SDS(FileFormat theFile, String name, String path, long[] oid)
     {
-        super (theFile, name, path, oid);
+        super(theFile, name, path, oid);
         unsignedConverted = false;
         sdid = ((H4File)getFileFormat()).getSDAccessID();
     }

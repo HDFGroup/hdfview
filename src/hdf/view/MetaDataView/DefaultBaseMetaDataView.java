@@ -116,7 +116,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     private int                           numAttributes;
 
-    protected boolean                     isH5, isH4;
+    protected boolean                     isH5, isH4, isN3;
 
     private static final String[]         attrTableColNames = { "Name", "Type", "Array Size", "Value[50](...)" };
 
@@ -134,6 +134,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         isH5 = dataObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
         isH4 = dataObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
+        isN3 = dataObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3));
 
         try {
             curFont = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);

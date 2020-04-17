@@ -178,6 +178,8 @@ public class DefaultTreeView implements TreeView {
     private Image h4IconR = ViewProperties.getH4IconR();
     private Image h5Icon = ViewProperties.getH5Icon();
     private Image h5IconR = ViewProperties.getH5IconR();
+    private Image nc3Icon = ViewProperties.getNC3Icon();
+    private Image nc3IconR = ViewProperties.getNC3IconR();
     private Image imageIcon = ViewProperties.getImageIcon();
     private Image imageIconA = ViewProperties.getImageIconA();
     private Image textIcon = ViewProperties.getTextIcon();
@@ -698,6 +700,8 @@ public class DefaultTreeView implements TreeView {
                 String filetype = FileFormat.FILE_TYPE_HDF4;
                 if (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
                     filetype = FileFormat.FILE_TYPE_HDF5;
+                else if (selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3)))
+                    filetype = FileFormat.FILE_TYPE_NC3;
 
                 String currentDir = selectedObject.getFileFormat().getParent();
 
@@ -715,7 +719,12 @@ public class DefaultTreeView implements TreeView {
                 if (filetype.equals(FileFormat.FILE_TYPE_HDF4)) {
                     fChooser.setFileName(Tools.checkNewFile(currentDir, ".hdf").getName());
                     filter = DefaultFileFilter.getFileFilterHDF4();
-                } else {
+                }
+                else if (filetype.equals(FileFormat.FILE_TYPE_NC3)) {
+                    fChooser.setFileName(Tools.checkNewFile(currentDir, ".nc").getName());
+                    filter = DefaultFileFilter.getFileFilterNetCDF3();
+                }
+                else {
                     fChooser.setFileName(Tools.checkNewFile(currentDir, ".h5").getName());
                     filter = DefaultFileFilter.getFileFilterHDF5();
                 }
@@ -1328,6 +1337,7 @@ public class DefaultTreeView implements TreeView {
         FileFormat dstFile = getSelectedFile();
         FileFormat h5file = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         FileFormat h4file = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
+        FileFormat ncfile = FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3);
 
         if (srcFile == null) {
             shell.getDisplay().beep();
@@ -1347,6 +1357,11 @@ public class DefaultTreeView implements TreeView {
         else if (srcFile.isThisType(h5file) && dstFile.isThisType(h4file)) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Copy", "Unsupported operation: cannot copy HDF5 object to HDF4 file");
+            return;
+        }
+        else if (srcFile.isThisType(ncfile) && dstFile.isThisType(ncfile)) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Copy", "Unsupported operation: cannot copy NetCDF3 objects");
             return;
         }
 
@@ -1478,10 +1493,17 @@ public class DefaultTreeView implements TreeView {
         }
 
         boolean isH4 = selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
+        boolean isN3 = selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3));
 
         if (isH4) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Rename", "Cannot rename HDF4 object.");
+            return;
+        }
+
+        if (isN3) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Rename", "Cannot rename NetCDF3 object.");
             return;
         }
 
@@ -1512,6 +1534,11 @@ public class DefaultTreeView implements TreeView {
         if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Remove object", "Unsupported operation: cannot delete HDF4 object.");
+            return;
+        }
+        if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Remove object", "Unsupported operation: cannot delete NetCDF3 object.");
             return;
         }
 
@@ -1589,15 +1616,19 @@ public class DefaultTreeView implements TreeView {
         if (theFile == null) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Open File", "Error opening file");
-            log.debug("Error populating tree, File root object was null.");
+            log.debug("Error populating tree, File object was null.");
             log.trace("populateTree(): exit");
             return null;
         }
         else if ((theFile.getFID() < 0) || (theFile.getRootObject() == null)) {
+            if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
+                log.trace("populateTree(): FileID={} Null Root={}", theFile.getFID(), (theFile.getRootObject() == null));
+            }
             //TODO: Update FitsFile and NC2File to have a fid other than -1
             // so this check isn't needed
-            if ((theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) ||
-                    theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))) {
+            if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) ||
+                    //theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3)) ||
+                    theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Open File", "Error opening file " + theFile.getName());
                 log.debug("Error populating tree for {}, File ID was wrong or File root object was null.", theFile.getFilePath());
@@ -1620,8 +1651,10 @@ public class DefaultTreeView implements TreeView {
 
                     // Tell SWT how many members this group has so they can
                     // be populated when the group is expanded
-                    if (obj instanceof Group)
+                    if (obj instanceof Group) {
                         newItem.setItemCount(((Group) obj).getMemberList().size());
+                        log.debug("populateTree(): group members size {}:", ((Group) obj).getMemberList().size());
+                    }
                 }
             }
         }
@@ -1733,7 +1766,13 @@ public class DefaultTreeView implements TreeView {
             if(((Group) obj).isRoot()) {
                 FileFormat theFile = obj.getFileFormat();
 
-                if(theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
+                if(theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
+                    if(theFile.isReadOnly())
+                        return nc3IconR;
+                    else
+                        return nc3Icon;
+                }
+                else if(theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                     if(theFile.isReadOnly())
                         return h4IconR;
                     else
@@ -2347,6 +2386,24 @@ public class DefaultTreeView implements TreeView {
                 catch (UnsatisfiedLinkError e) {
                     log.debug("openFile({}): HDF5 library link error:", filename, e);
                     viewer.showError("Unable to open file '" + filename + "': HDF5 library linking error");
+                }
+                catch (Exception err) {
+                    log.debug("openFile: Error retrieving the file structure of {}:", filename, err);
+                }
+                continue;
+            }
+            else if (theKey.equals(FileFormat.FILE_TYPE_NC3)) {
+                log.trace("openFile: {} FILE_TYPE_NC3", filename);
+                try {
+                    FileFormat nc3format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3);
+                    if ((nc3format != null) && nc3format.isThisType(filename)) {
+                        fileFormat = nc3format.createInstance(filename, accessID);
+                        break;
+                    }
+                }
+                catch (UnsatisfiedLinkError e) {
+                    log.debug("openFile({}): NetCDF3 library link error:", filename, e);
+                    viewer.showError("Unable to open file '" + filename + "': NetCDF3 library linking error");
                 }
                 catch (Exception err) {
                     log.debug("openFile: Error retrieving the file structure of {}:", filename, err);

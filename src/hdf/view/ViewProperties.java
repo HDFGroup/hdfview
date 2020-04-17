@@ -210,11 +210,11 @@ public class ViewProperties extends PreferenceStore {
      */
     private static int               startMembers          = 0;
 
-    private static Image        hdfIcon, h4Icon, h4IconR, h5Icon, h5IconR, largeHdfIcon, blankIcon, helpIcon, fileopenIcon,
-    filesaveIcon, filenewIcon, filecloseIcon, foldercloseIcon, folderopenIcon, foldercloseIconA,
-    folderopenIconA, datasetIcon, imageIcon, tableIcon, textIcon, datasetIconA, imageIconA, tableIconA,
-    textIconA, zoominIcon, zoomoutIcon, paletteIcon, chartIcon, brightIcon, autocontrastIcon, copyIcon,
-    cutIcon, pasteIcon, previousIcon, nextIcon, firstIcon, lastIcon, animationIcon, datatypeIcon,
+    private static Image        hdfIcon, h4Icon, h4IconR, h5Icon, h5IconR, ncIcon, ncIconR,
+    largeHdfIcon, blankIcon, helpIcon, fileopenIcon, filesaveIcon, filenewIcon, filecloseIcon, foldercloseIcon,
+    folderopenIcon, foldercloseIconA, folderopenIconA, datasetIcon, imageIcon, tableIcon, textIcon, datasetIconA,
+    imageIconA, tableIconA, textIconA, zoominIcon, zoomoutIcon, paletteIcon, chartIcon, brightIcon, autocontrastIcon,
+    copyIcon, cutIcon, pasteIcon, previousIcon, nextIcon, firstIcon, lastIcon, animationIcon, datatypeIcon,
     datatypeIconA, linkIcon, iconAPPS, iconURL, iconVIDEO, iconXLS, iconPDF, iconAUDIO, questionIcon;
 
     private static String            propertyFile;
@@ -513,6 +513,14 @@ public class ViewProperties extends PreferenceStore {
         return h5IconR;
     }
 
+    public static Image getNC3Icon() {
+        return ncIcon;
+    }
+
+    public static Image getNC3IconR() {
+        return ncIconR;
+    }
+
     public static Image getDatasetIcon() {
         return datasetIcon;
     }
@@ -718,6 +726,24 @@ public class ViewProperties extends PreferenceStore {
         catch (Exception ex) {
             h5IconR = null;
             log.trace("h5IconR: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdfnc.gif");
+            ncIcon = new Image(null, s);
+        }
+        catch (Exception ex) {
+            ncIcon = null;
+            log.trace("ncIcon: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdfncR.gif");
+            ncIconR = new Image(null, s);
+        }
+        catch (Exception ex) {
+            ncIconR = null;
+            log.trace("ncIconR: null");
         }
 
         try {

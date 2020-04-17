@@ -89,7 +89,7 @@ public class FitsGroup extends Group
      */
     public void writeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     /**
@@ -99,7 +99,7 @@ public class FitsGroup extends Group
      */
     public void removeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     /*
@@ -108,21 +108,21 @@ public class FitsGroup extends Group
      */
     public void updateMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     // Implementing DataFormat
     @Override
     public long open() {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     /** close group access */
     @Override
     public void close(long gid) {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     /**
@@ -139,7 +139,7 @@ public class FitsGroup extends Group
     public static FitsGroup create(String name, Group pgroup)
         throws Exception {
         // not supported
-        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     //Implementing DataFormat
