@@ -460,7 +460,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 objTypeStr = "HDF5 Named Datatype";
             }
             else {
-                log.trace("createGeneralObjectInfoPane(): unknown HDF5 dataObject");
+                log.debug("createGeneralObjectInfoPane(): unknown HDF5 dataObject");
             }
         }
         else if (isH4) {
@@ -480,7 +480,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 objTypeStr = "HDF4 Vdata";
             }
             else {
-                log.trace("createGeneralObjectInfoPane(): unknown HDF4 dataObject");
+                log.debug("createGeneralObjectInfoPane(): unknown HDF4 dataObject");
             }
         }
         else if (isN3) {
@@ -491,7 +491,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 objTypeStr = "netCDF3 Dataset";
             }
             else {
-                log.trace("createGeneralObjectInfoPane(): unknown netCDF3 dataObject");
+                log.debug("createGeneralObjectInfoPane(): unknown netCDF3 dataObject");
             }
         }
         else {
@@ -505,7 +505,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 objTypeStr = "Dataset";
             }
             else {
-                log.trace("createGeneralObjectInfoPane(): unknown dataObject");
+                log.debug("createGeneralObjectInfoPane(): unknown dataObject");
             }
         }
 
