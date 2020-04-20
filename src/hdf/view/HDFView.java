@@ -143,6 +143,9 @@ public class HDFView implements DataViewManager {
     /* A list of help view implementations. */
     private static List<?>             helpViews;
 
+    /* The list of GUI components related to NetCDF3 */
+    private final List<MenuItem>       n3GUIs = new ArrayList<>();
+
     /* The list of GUI components related to HDF4 */
     private final List<MenuItem>       h4GUIs = new ArrayList<>();
 
