@@ -653,10 +653,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     }
                 });
             }
-
-            if (isN3) {
-                log.trace("createGeneralObjectInfoPane(): get netCDF3 dimensions");
-            }
         }
 
         /* Add a dummy label to take up some vertical space between sections */
