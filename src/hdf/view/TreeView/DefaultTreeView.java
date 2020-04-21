@@ -1493,14 +1493,13 @@ public class DefaultTreeView implements TreeView {
         }
 
         boolean isH4 = selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
-        boolean isN3 = selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3));
-
         if (isH4) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Rename", "Cannot rename HDF4 object.");
             return;
         }
 
+        boolean isN3 = selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3));
         if (isN3) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Rename", "Cannot rename NetCDF3 object.");
@@ -2280,10 +2279,16 @@ public class DefaultTreeView implements TreeView {
         }
 
         boolean isH4 = selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
-
         if (isH4) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Save", "Cannot export HDF4 object.");
+            return;
+        }
+
+        boolean isN3 = selectedObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3));
+        if (isN3) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Save", "Cannot export netCDF3 object.");
             return;
         }
 

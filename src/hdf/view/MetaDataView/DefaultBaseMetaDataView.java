@@ -153,7 +153,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             log.debug("Error retrieving metadata of object '" + dataObject.getName() + "':", ex);
         }
 
-        log.trace("dataObject={} isH4={} isH5={} numAttributes={}", dataObject, isH4, isH5, numAttributes);
+        log.trace("dataObject={} isN3={} isH4={} isH5={} numAttributes={}", dataObject, isN3, isH4, isH5, numAttributes);
 
         contentTabFolder = new TabFolder(parent, SWT.NONE);
         contentTabFolder.addSelectionListener(new SelectionAdapter() {
@@ -459,6 +459,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             else if (dataObject instanceof Datatype) {
                 objTypeStr = "HDF5 Named Datatype";
             }
+            else {
+                log.debug("createGeneralObjectInfoPane(): unknown HDF5 dataObject");
+            }
         }
         else if (isH4) {
             if (dataObject instanceof Group) {
@@ -476,6 +479,20 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             else if (dataObject instanceof CompoundDS) {
                 objTypeStr = "HDF4 Vdata";
             }
+            else {
+                log.debug("createGeneralObjectInfoPane(): unknown HDF4 dataObject");
+            }
+        }
+        else if (isN3) {
+            if (dataObject instanceof Group) {
+                objTypeStr = "netCDF3 Group";
+            }
+            else if (dataObject instanceof ScalarDS) {
+                objTypeStr = "netCDF3 Dataset";
+            }
+            else {
+                log.debug("createGeneralObjectInfoPane(): unknown netCDF3 dataObject");
+            }
         }
         else {
             if (dataObject instanceof Group) {
@@ -486,6 +503,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             else if (dataObject instanceof CompoundDS) {
                 objTypeStr = "Dataset";
+            }
+            else {
+                log.debug("createGeneralObjectInfoPane(): unknown dataObject");
             }
         }
 
@@ -594,6 +614,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             else if (isH4) {
                 objTypeStr = "HDF4,  " + fileInfo;
+            }
+            else if (isN3) {
+                objTypeStr = "netCDF3,  " + fileInfo;
             }
             else {
                 objTypeStr = fileInfo;
