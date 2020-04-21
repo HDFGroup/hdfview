@@ -219,7 +219,7 @@ public class NC2Group extends Group {
 
     // overload to get different lists
     @SuppressWarnings("rawtypes")
-    public List getMetadata(int... attrPropList) throws HDF5Exception {
+    public List getMetadata(int... attrPropList) throws Exception {
         log.trace("getMetadata(...): start");
         int hdfType = 0;
         int attrType = 0;
