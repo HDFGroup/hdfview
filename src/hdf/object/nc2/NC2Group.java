@@ -14,6 +14,7 @@
 
 package hdf.object.nc2;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -56,6 +57,14 @@ public class NC2Group extends Group {
      */
     private List attributeList;
 
+    /**
+     * The list of netcdf typedefs, dimensions and attributes of this data object. Members of the list are
+     * instance of ucar.nc2.*.
+     */
+    private List netcdfTypedefList;
+    private List netcdfDimensionList;
+    private List netcdfAttributeList;
+
     /** The default object ID for NC2 objects */
     private static final long[] DEFAULT_OID = { 0 };
 
@@ -91,12 +100,14 @@ public class NC2Group extends Group {
         return false;
     }
 
+    public boolean hasDimension() {
+        return false;
+    }
+
     // Implementing DataFormat
+    @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {
         log.trace("getMetadata(): start");
-        if (!isRoot()) {
-            return null;
-        }
 
         if (attributeList != null) {
             log.trace("getMetadata(): attributeList exists -finish");
@@ -105,23 +116,33 @@ public class NC2Group extends Group {
 
         NC2File theFile = (NC2File)getFileFormat();
         NetcdfFile ncFile = theFile.getNetcdfFile();
+        if (!isRoot() && (netCDFGroup !=null)) {
+            netcdfDimensionList = netCDFGroup.getDimensions();
 
-        List netcdfAttributeList = ncFile.getGlobalAttributes();
+            netcdfTypedefList = netCDFGroup.getEnumTypedefs();
+
+            netcdfAttributeList = netCDFGroup.getAttributes();
+        }
+        else {
+            netcdfDimensionList = ncFile.getDimensions();
+
+            netcdfAttributeList = ncFile.getGlobalAttributes();
+        }
         if (netcdfAttributeList == null) {
-            return null;
+            attributeList = null;
         }
+        else {
+            int n = netcdfAttributeList.size();
+            log.trace("Attribute size:{}", n);
+            attributeList = new Vector(n);
 
-        int n = netcdfAttributeList.size();
-        log.trace("Attribute size:{}", n);
-        attributeList = new Vector(n);
-
-        ucar.nc2.Attribute netcdfAttr = null;
-        for (int i = 0; i < n; i++) {
-            netcdfAttr = (ucar.nc2.Attribute) netcdfAttributeList.get(i);
-            log.trace("getMetadata(): Attribute[{}]:{}", i, netcdfAttr.toString());
-            attributeList.add(NC2File.convertAttribute(this, netcdfAttr));
+            ucar.nc2.Attribute netcdfAttr = null;
+            for (int i = 0; i < n; i++) {
+                netcdfAttr = (ucar.nc2.Attribute) netcdfAttributeList.get(i);
+                log.trace("getMetadata(): Attribute[{}]:{}", i, netcdfAttr.toString());
+                attributeList.add(NC2File.convertAttribute(this, netcdfAttr));
+            }
         }
-
         log.trace("getMetadata(): finish");
         return attributeList;
     }
@@ -200,9 +221,92 @@ public class NC2Group extends Group {
                 "Unsupported operation for NetCDF.");
     }
 
-    //Implementing DataFormat
-    public List getMetadata(int... attrPropList) throws Exception {
-        throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
+    // overload to get different lists
+    @SuppressWarnings("rawtypes")
+    public List getMetadata(int... attrPropList) throws HDF5Exception {
+        log.trace("getMetadata(...): start");
+        int hdfType = 0;
+        int attrType = 0;
+        int dimType = 0;
+        int enumType = 0;
+        List returnList = null;
+
+        // use 0 to skip or 1 select in attrPropList to get the list
+        // hdf attributes first netcdf attributes second, dimensions third, enumTypes fourth
+        log.trace("getMetadata(...): attrPropList={}", attrPropList.length);
+        if (attrPropList.length > 0) {
+            hdfType = attrPropList[0];
+        }
+        if (attrPropList.length > 1) {
+            attrType = attrPropList[1];
+        }
+        if (attrPropList.length > 2) {
+            dimType = attrPropList[2];
+        }
+        if (attrPropList.length > 3) {
+            enumType = attrPropList[3];
+        }
+        if ((hdfType != 0) && (attributeList != null)) {
+            log.trace("getMetadata(): get attributeList");
+
+            returnList = attributeList;
+        }
+        else if ((attrType != 0) && (netcdfAttributeList != null)) {
+            log.trace("getMetadata(): get netcdfAttributeList");
+
+            returnList = netcdfAttributeList;
+        }
+        else if ((dimType != 0) && (netcdfDimensionList != null)) {
+            log.trace("getMetadata(): get netcdfDimensionList");
+
+            returnList = netcdfDimensionList;
+        }
+        else if ((enumType != 0) && (netcdfTypedefList != null)) {
+            log.trace("getMetadata(): get netcdfTypedefList");
+
+            returnList = netcdfTypedefList;
+        }
+
+        log.trace("getMetadata(...): finish");
+        return returnList;
+    }
+
+    public String netcdfAttributeString(int index) {
+        ucar.nc2.Attribute netcdfAttr = (ucar.nc2.Attribute) netcdfAttributeList.get(index);
+        log.trace("netcdfAttributeString(): netcdfAttribute[{}]:{}", index, netcdfAttr.toString());
+        String returnStr = netcdfAttr.toString();
+        return returnStr;
+    }
+
+    public String netcdfDimensionString(int index) {
+        ucar.nc2.Dimension netcdfDim = (ucar.nc2.Dimension) netcdfDimensionList.get(index);
+        log.trace("netcdfDimensionString(): netcdfDimension[{}]:{}", index, netcdfDim.toString());
+        StringBuilder objDimensionStr = new StringBuilder(netcdfDim.getShortName());
+        if (netcdfDim.isShared())
+            objDimensionStr.append("[SHARED]");
+        if (netcdfDim.isUnlimited())
+            objDimensionStr.append(" = UNLIMITED");
+          else if (netcdfDim.isVariableLength())
+              objDimensionStr.append(" = UNKNOWN");
+          else
+              objDimensionStr.append(" = " + netcdfDim.getLength());
+        return objDimensionStr.toString();
+    }
+
+    public String netcdfTypedefString(int index) {
+        ucar.nc2.EnumTypedef netcdfType = (ucar.nc2.EnumTypedef) netcdfTypedefList.get(index);
+        log.trace("netcdfEnumTypedefString(): netcdfTypedef[{}]:{}", index, netcdfType.toString());
+        StringBuilder objEnumTypedefStr = new StringBuilder(netcdfType.getShortName() + " {");
+        int count = 0;
+        List<Object> keyset = Arrays.asList(netcdfType.getMap().keySet().toArray());
+        for (Object key : keyset) {
+          String s = netcdfType.getMap().get(key);
+          if (0 < count++)
+              objEnumTypedefStr.append(", ");
+          objEnumTypedefStr.append("'" + s + "' = " + key);
+        }
+        objEnumTypedefStr.append(" }");
+        return objEnumTypedefStr.toString();
     }
 
 }
