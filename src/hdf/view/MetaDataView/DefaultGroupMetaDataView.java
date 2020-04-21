@@ -109,17 +109,22 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
         if (isN3) {
             StringBuilder objDimensionStr = new StringBuilder("No Dimensions");
             int[] listDimSelector = { 0, 0, 1};
-            List ncDimensions = ((NC2Group)g).getMetadata(listDimSelector);
-            if (ncDimensions != null) {
-                int listCnt = ncDimensions.size();
-                log.trace("createGeneralObjectInfoPane(): ncDimensions={}", listCnt);
-                if (listCnt > 0)
-                    objDimensionStr.setLength(0);
-                for (int i = 0; i < listCnt; i++) {
-                    objDimensionStr.append(((NC2Group)g).netcdfDimensionString(i));
-                    if (i < listCnt - 1)
-                        objDimensionStr.append("\n");
+            try {
+                List ncDimensions = ((NC2Group)g).getMetadata(listDimSelector);
+                if (ncDimensions != null) {
+                    int listCnt = ncDimensions.size();
+                    log.trace("createGeneralObjectInfoPane(): ncDimensions={}", listCnt);
+                    if (listCnt > 0)
+                        objDimensionStr.setLength(0);
+                    for (int i = 0; i < listCnt; i++) {
+                        objDimensionStr.append(((NC2Group)g).netcdfDimensionString(i));
+                        if (i < listCnt - 1)
+                            objDimensionStr.append("\n");
+                    }
                 }
+            }
+            catch (Exception e) {
+                log.debug("Error retrieving dimensions of object '" + dataObject.getName() + "':", e);
             }
 
             /* Dimensions section */
@@ -141,17 +146,22 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
 
             StringBuilder objEnumTypedefStr = new StringBuilder("No Enums");
             int[] listEnumSelector = { 0, 0, 0, 1};
-            List ncEnums = ((NC2Group)g).getMetadata(listEnumSelector);
-            if (ncEnums != null) {
-                int listCnt = ncEnums.size();
-                log.trace("createGeneralObjectInfoPane(): ncEnums={}", listCnt);
-                if (listCnt > 0)
-                    objEnumTypedefStr.setLength(0);
-                for (int i = 0; i < listCnt; i++) {
-                    objEnumTypedefStr.append(((NC2Group)g).netcdfTypedefString(i));
-                    if (i < listCnt - 1)
-                        objEnumTypedefStr.append("\n");
+            try {
+                List ncEnums = ((NC2Group)g).getMetadata(listEnumSelector);
+                if (ncEnums != null) {
+                    int listCnt = ncEnums.size();
+                    log.trace("createGeneralObjectInfoPane(): ncEnums={}", listCnt);
+                    if (listCnt > 0)
+                        objEnumTypedefStr.setLength(0);
+                    for (int i = 0; i < listCnt; i++) {
+                        objEnumTypedefStr.append(((NC2Group)g).netcdfTypedefString(i));
+                        if (i < listCnt - 1)
+                            objEnumTypedefStr.append("\n");
+                    }
                 }
+            }
+            catch (Exception e) {
+                log.debug("Error retrieving enums of object '" + dataObject.getName() + "':", e);
             }
 
             /* Dimensions section */
