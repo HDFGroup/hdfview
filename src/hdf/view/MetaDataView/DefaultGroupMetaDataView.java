@@ -17,6 +17,7 @@ package hdf.view.MetaDataView;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -33,6 +34,7 @@ import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5Link;
+import hdf.object.nc2.NC2Group;
 import hdf.view.ViewProperties;
 import hdf.view.DataView.DataViewManager;
 
@@ -104,7 +106,81 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
             text.setText(objCreationStr.toString());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         }
+        if (isN3) {
+            StringBuilder objDimensionStr = new StringBuilder("No Dimensions");
+            int[] listDimSelector = { 0, 0, 1};
+            try {
+                List ncDimensions = ((NC2Group)g).getMetadata(listDimSelector);
+                if (ncDimensions != null) {
+                    int listCnt = ncDimensions.size();
+                    log.trace("createGeneralObjectInfoPane(): ncDimensions={}", listCnt);
+                    if (listCnt > 0)
+                        objDimensionStr.setLength(0);
+                    for (int i = 0; i < listCnt; i++) {
+                        objDimensionStr.append(((NC2Group)g).netcdfDimensionString(i));
+                        if (i < listCnt - 1)
+                            objDimensionStr.append("\n");
+                    }
+                }
+            }
+            catch (Exception e) {
+                log.debug("Error retrieving dimensions of object '" + dataObject.getName() + "':", e);
+            }
 
+            /* Dimensions section */
+            label = new Label(generalObjectInfoPane, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Dimensions: ");
+
+            ScrolledComposite dimensionScroller = new ScrolledComposite(generalObjectInfoPane, SWT.V_SCROLL | SWT.BORDER);
+            dimensionScroller.setExpandHorizontal(true);
+            dimensionScroller.setExpandVertical(true);
+            dimensionScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
+
+            Text text = new Text(dimensionScroller, SWT.MULTI | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(curFont);
+            text.setText(objDimensionStr.toString());
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            dimensionScroller.setContent(text);
+
+            StringBuilder objEnumTypedefStr = new StringBuilder("No Enums");
+            int[] listEnumSelector = { 0, 0, 0, 1};
+            try {
+                List ncEnums = ((NC2Group)g).getMetadata(listEnumSelector);
+                if (ncEnums != null) {
+                    int listCnt = ncEnums.size();
+                    log.trace("createGeneralObjectInfoPane(): ncEnums={}", listCnt);
+                    if (listCnt > 0)
+                        objEnumTypedefStr.setLength(0);
+                    for (int i = 0; i < listCnt; i++) {
+                        objEnumTypedefStr.append(((NC2Group)g).netcdfTypedefString(i));
+                        if (i < listCnt - 1)
+                            objEnumTypedefStr.append("\n");
+                    }
+                }
+            }
+            catch (Exception e) {
+                log.debug("Error retrieving enums of object '" + dataObject.getName() + "':", e);
+            }
+
+            /* Dimensions section */
+            label = new Label(generalObjectInfoPane, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Enums: ");
+
+            ScrolledComposite enumScroller = new ScrolledComposite(generalObjectInfoPane, SWT.V_SCROLL | SWT.BORDER);
+            enumScroller.setExpandHorizontal(true);
+            enumScroller.setExpandVertical(true);
+            enumScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
+
+            text = new Text(enumScroller, SWT.MULTI | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(curFont);
+            text.setText(objEnumTypedefStr.toString());
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            enumScroller.setContent(text);
+        }
         org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
         groupInfoGroup.setFont(curFont);
         groupInfoGroup.setText("Group Members");

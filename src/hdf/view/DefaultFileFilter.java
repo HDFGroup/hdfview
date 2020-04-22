@@ -240,6 +240,15 @@ public class DefaultFileFilter {
         return filter;
     }
 
+    /** @return a file filter for NetCDF3 file. */
+    public static DefaultFileFilter getFileFilterNetCDF3() {
+        DefaultFileFilter filter = new DefaultFileFilter();
+        filter.addExtension("nc");
+        filter.setDescription("NetCDF3 files");
+
+        return filter;
+    }
+
     /** @return a file filter for HDF4 file. */
     public static DefaultFileFilter getFileFilterHDF4() {
         DefaultFileFilter filter = new DefaultFileFilter();

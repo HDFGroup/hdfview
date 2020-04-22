@@ -40,11 +40,20 @@ import ucar.nc2.Variable;
 public class NC2Dataset extends ScalarDS {
     private static final long serialVersionUID = -6031051694304457461L;
 
+    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(NC2Dataset.class);
+
+    /** tag for netCDF datasets.
+     *  HDF4 library supports netCDF version 2.3.2. It only supports SDS APIs.
+     */
+    // magic number for netCDF: "C(67) D(68) F(70) '\001'"
+    public static final int                 DFTAG_NDG_NETCDF = 67687001;
+
     /**
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
      */
-    private List attributeList;
+    @SuppressWarnings("rawtypes")
+    private List                            attributeList;
 
     private Variable nativeDataset;
 
@@ -56,7 +65,7 @@ public class NC2Dataset extends ScalarDS {
      * @param ncDataset
      *            the netcdf variable.
      * @param oid
-     *            the unique identifier for this dataset.
+     *            the unique identifier of this data object.
      */
     public NC2Dataset(FileFormat fileFormat, Variable ncDataset, long[] oid) {
         super(fileFormat, ncDataset.getName(), HObject.SEPARATOR, oid);
@@ -66,7 +75,6 @@ public class NC2Dataset extends ScalarDS {
 
     /*
      * (non-Javadoc)
-     *
      * @see hdf.object.DataFormat#hasAttribute()
      */
     @Override
@@ -95,6 +103,7 @@ public class NC2Dataset extends ScalarDS {
     @Override
     public Object read() throws Exception {
         Object theData = null;
+        log.trace("read(): start");
 
         if (nativeDataset == null) {
             return null;
@@ -106,6 +115,7 @@ public class NC2Dataset extends ScalarDS {
         for (int i = 0; i < rank; i++) {
             origin[i] = (int) startDims[i];
             shape[i] = (int) selectedDims[i];
+            log.trace("read(): origin-shape [{}]={}-{}", i, origin[i], shape[i]);
         }
 
         ucar.ma2.Array ncArray = null;
@@ -141,6 +151,7 @@ public class NC2Dataset extends ScalarDS {
             theData = oneD;
         }
 
+        log.trace("read(): finish");
         return theData;
     }
 
@@ -155,6 +166,7 @@ public class NC2Dataset extends ScalarDS {
     // Implementing DataFormat
     @Override
     public List getMetadata() throws Exception {
+        log.trace("getMetadata(): start");
         if (attributeList != null) {
             return attributeList;
         }
@@ -173,9 +185,11 @@ public class NC2Dataset extends ScalarDS {
         ucar.nc2.Attribute ncAttr = null;
         for (int i = 0; i < n; i++) {
             ncAttr = (ucar.nc2.Attribute) ncAttrList.get(i);
-            attributeList.add(NC2File.convertAttribute(ncAttr));
+            log.trace("getMetadata(): Attribute[{}]:{}", i, ncAttr.toString());
+            attributeList.add(NC2File.convertAttribute(this, ncAttr));
         }
 
+        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -218,6 +232,7 @@ public class NC2Dataset extends ScalarDS {
      */
     @Override
     public void init() {
+        log.trace("init(): start");
         if (nativeDataset == null) {
             return;
         }
@@ -230,6 +245,7 @@ public class NC2Dataset extends ScalarDS {
         boolean isChar = nativeDataset.getDataType().equals(DataType.CHAR);
 
         rank = nativeDataset.getRank();
+        log.trace("init(): rank:{}", rank);
 
         if (rank == 0) {
             // a scalar data point
@@ -274,6 +290,7 @@ public class NC2Dataset extends ScalarDS {
         }
 
         inited = true;
+        log.trace("init(): finish");
     }
 
     // Implementing ScalarDS
@@ -343,6 +360,7 @@ public class NC2Dataset extends ScalarDS {
     // implementing ScalarDS
     @Override
     public Datatype getDatatype() {
+        log.trace("getDatatype(): start");
         if (datatype == null) {
             try {
                 datatype = new NC2Datatype(nativeDataset.getDataType());
@@ -352,6 +370,7 @@ public class NC2Dataset extends ScalarDS {
             }
         }
 
+        log.trace("getDatatype(): finish");
         return datatype;
     }
 
