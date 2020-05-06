@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <installer-gui-script minSpecVersion="1">
-    <pkg-ref id="org.hdfgroup.HDFView-3.99"/>
-    <product id="org.hdfgroup.HDFView-3.99" version="3.99"/>
-    <title>HDFView-3.99</title>
+    <pkg-ref id="org.hdfgroup.HDFView-3.1.1"/>
+    <product id="org.hdfgroup.HDFView-3.1.1" version="3.1.1"/>
+    <title>HDFView-3.1.1</title>
     <options customize="never" require-scripts="false" hostArchitectures="x86_64"/>
     <choices-outline>
         <line choice="default">
-            <line choice="org.hdfgroup.HDFView-3.99"/>
+            <line choice="org.hdfgroup.HDFView-3.1.1"/>
         </line>
     </choices-outline>
-    <choice id="default" title="HDFView-3.99" versStr="3.99"/>
-    <choice id="org.hdfgroup.HDFView-3.99" title="HDFView-3.99" visible="false">
-        <pkg-ref id="org.hdfgroup.HDFView-3.99"/>
+    <choice id="default" title="HDFView-3.1.1" versStr="3.1.1"/>
+    <choice id="org.hdfgroup.HDFView-3.1.1" title="HDFView-3.1.1" visible="false">
+        <pkg-ref id="org.hdfgroup.HDFView-3.1.1"/>
     </choice>
-    <pkg-ref id="org.hdfgroup.HDFView-3.99" version="3.99.99" onConclusion="none">org.hdfgroup.HDFView-3.99.pkg</pkg-ref>
+    <pkg-ref id="org.hdfgroup.HDFView-3.1.1" version="3.1.1" onConclusion="none">org.hdfgroup.HDFView-3.1.1.pkg</pkg-ref>
 </installer-gui-script>
