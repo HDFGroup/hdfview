@@ -211,6 +211,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     @Deprecated
     public Dataset(FileFormat theFile, String dsName, String dsPath, long[] oid) {
         super(theFile, dsName, dsPath, oid);
+        log.trace("Dataset: start {}", dsName);
 
         datatype = null;
         rank = -1;
@@ -231,6 +232,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         selectedIndex[0] = 0;
         selectedIndex[1] = 1;
         selectedIndex[2] = 2;
+        log.trace("Dataset: finish");
     }
 
     /**
@@ -463,9 +465,11 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final void write() throws Exception {
+        log.trace("write: start");
         if (data != null) {
             write(data);
         }
+        log.trace("write: finish");
     }
 
     /**

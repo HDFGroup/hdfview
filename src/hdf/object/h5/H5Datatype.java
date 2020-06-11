@@ -384,6 +384,7 @@ public class H5Datatype extends Datatype {
      */
     @Override
     public boolean hasAttribute() {
+        log.trace("hasAttribute(): nAttributes={}", nAttributes);
         objInfo.num_attrs = nAttributes;
 
         if (objInfo.num_attrs < 0) {
@@ -393,6 +394,7 @@ public class H5Datatype extends Datatype {
                 fromNative(tid);
                 objInfo = H5.H5Oget_info(tid);
                 isNamed = true;
+                log.trace("hasAttribute(): isNamed={}", isNamed);
             }
             catch (Exception ex) {
                 objInfo.num_attrs = 0;
@@ -402,7 +404,7 @@ public class H5Datatype extends Datatype {
             }
         }
 
-        log.trace("hasAttribute(): nAttributes={}", objInfo.num_attrs);
+        log.trace("hasAttribute(): objInfo.num_attrs={}", objInfo.num_attrs);
 
         return (objInfo.num_attrs > 0);
     }
@@ -597,6 +599,9 @@ public class H5Datatype extends Datatype {
                 isVariableStr = H5.H5Tis_variable_str(tid);
                 isVLEN = false;
                 log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, isVLEN);
+                if (H5.H5Tcommitted(tid))
+                    isNamed = true;
+                log.trace("fromNative(): isNamed={}", isNamed);
             }
             catch (Exception ex) {
                 log.debug("fromNative(): failure: ", ex);
@@ -942,6 +947,7 @@ public class H5Datatype extends Datatype {
         long tmptid = -1;
 
         if (isNamed) {
+            log.trace("createNative(): isNamed");
             try {
                 tid = H5.H5Topen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
             }
@@ -1571,10 +1577,10 @@ public class H5Datatype extends Datatype {
      */
     @Override
     public String getDescription() {
-        log.trace("getDescription(): start");
+        log.trace("getDescription(): start - isNamed={}", isNamed);
 
         if (datatypeDescription != null) {
-            log.trace("getDescription(): finish");
+            log.trace("getDescription(): exit");
             return datatypeDescription;
         }
 
@@ -1583,21 +1589,25 @@ public class H5Datatype extends Datatype {
 
         switch (datatypeClass) {
             case CLASS_CHAR:
+                log.trace("getDescription(): Char");
                 description.append("8-bit ").append(isUnsigned() ? "unsigned " : "").append("integer");
                 break;
             case CLASS_INTEGER:
+                log.trace("getDescription(): Int");
                 if (datatypeSize == NATIVE)
                     description.append("native ").append(isUnsigned() ? "unsigned " : "").append("integer");
                 else
                     description.append(String.valueOf(datatypeSize * 8)).append("-bit ").append(isUnsigned() ? "unsigned " : "").append("integer");
                 break;
             case CLASS_FLOAT:
+                log.trace("getDescription(): Float");
                 if (datatypeSize == NATIVE)
                     description.append("native floating-point");
                 else
                     description.append(String.valueOf(datatypeSize * 8)).append("-bit floating-point");
                 break;
             case CLASS_STRING:
+                log.trace("getDescription(): String");
                 description.append("String, length = ").append(isVarStr() ? "variable" : datatypeSize);
 
                 try {
@@ -1642,12 +1652,14 @@ public class H5Datatype extends Datatype {
                 }
                 break;
             case CLASS_BITFIELD:
+                log.trace("getDescription(): Bit");
                 if (datatypeSize == NATIVE)
                     description.append("native bitfield");
                 else
                     description.append(String.valueOf(datatypeSize * 8)).append("-bit bitfield");
                 break;
             case CLASS_OPAQUE:
+                log.trace("getDescription(): Opaque");
                 if (datatypeSize == NATIVE)
                     description.append("native Opaque");
                 else
@@ -1659,6 +1671,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_COMPOUND:
+                log.trace("getDescription(): Compound");
                 description.append("Compound");
 
                 if ((compoundMemberTypes != null) && !compoundMemberTypes.isEmpty()) {
@@ -1686,6 +1699,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_REFERENCE:
+                log.trace("getDescription(): Ref");
                 description.append("Reference");
 
                 try {
@@ -1713,6 +1727,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_ENUM:
+                log.trace("getDescription(): Enum");
                 if (datatypeSize == NATIVE)
                     description.append("native enum");
                 else
@@ -1724,6 +1739,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_VLEN:
+                log.trace("getDescription(): Var Len");
                 description.append("Variable-length");
 
                 if (baseType != null) {
@@ -1732,6 +1748,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_ARRAY:
+                log.trace("getDescription(): Array");
                 description.append("Array");
 
                 if (arrayDims != null) {
@@ -1753,6 +1770,13 @@ public class H5Datatype extends Datatype {
                 description.append("Unknown");
                 break;
         }
+        if (isNamed)
+            if (baseType != null) {
+                description.append("->").append(baseType.getFullName());
+            }
+            else {
+                description.append("->COMMITTED");
+            }
 
         log.trace("getDescription(): finish");
         return description.toString();

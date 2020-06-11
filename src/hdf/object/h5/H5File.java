@@ -1529,7 +1529,7 @@ public class H5File extends FileFormat {
             H5Datatype t = (H5Datatype) createDatatype(tclass, tsize, torder, tsign, tbase);
             if ((tid = t.createNative()) < 0) {
                 log.debug("createDatatype(): createNative() failure");
-                log.trace("createDatatype(): finish");
+                log.trace("createDatatype(): exit");
                 throw new Exception("createNative() failed");
             }
 

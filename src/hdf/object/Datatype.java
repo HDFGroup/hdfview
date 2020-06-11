@@ -661,7 +661,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         log.trace("getDescription(): start");
 
         if (datatypeDescription != null) {
-            log.trace("getDescription(): finish");
+            log.trace("getDescription(): exit");
             return datatypeDescription;
         }
 

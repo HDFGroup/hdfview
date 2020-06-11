@@ -410,6 +410,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             public void widgetSelected(SelectionEvent e) {
                 if (checkScientificNotation.getSelection()) {
                     if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                    if (checkEnum != null) checkEnum.setSelection(false);
                     if (checkHex != null) checkHex.setSelection(false);
                     if (checkBin != null) checkBin.setSelection(false);
 
@@ -444,6 +445,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             public void widgetSelected(SelectionEvent e) {
                 if (checkCustomNotation.getSelection()) {
                     if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
+                    if (checkEnum != null) checkEnum.setSelection(false);
                     if (checkHex != null) checkHex.setSelection(false);
                     if (checkBin != null) checkBin.setSelection(false);
 
@@ -514,6 +516,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     if (showAsHex) {
                         if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
                         if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                        if (checkEnum != null) checkEnum.setSelection(false);
                         if (checkBin != null) checkBin.setSelection(false);
 
                         showAsBin = false;
@@ -545,8 +548,42 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     if (showAsBin) {
                         if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
                         if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                        if (checkEnum != null) checkEnum.setSelection(false);
                         if (checkHex != null) checkHex.setSelection(false);
 
+                        showAsHex = false;
+                        numberFormat = normalFormat;
+                    }
+
+                    updateDataConversionSettings();
+
+                    dataTable.doCommand(new VisualRefreshCommand());
+
+                    PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                    if (lastSelectedCell != null) {
+                        /*
+                         * Send down a cell selection event for the current cell to update the cell
+                         * value labels
+                         */
+                        dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                                lastSelectedCell.rowPosition, false, false));
+                    }
+                }
+            });
+
+            checkEnum = new MenuItem(dataDisplayMenu, SWT.CHECK);
+            checkEnum.setText("Show Enum Values");
+            checkEnum.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    isEnumConverted = checkEnum.getSelection();
+                    if (isEnumConverted) {
+                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
+                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                        if (checkHex != null) checkHex.setSelection(false);
+                        if (checkBin != null) checkBin.setSelection(false);
+
+                        showAsBin = false;
                         showAsHex = false;
                         numberFormat = normalFormat;
                     }

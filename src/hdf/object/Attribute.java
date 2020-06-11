@@ -265,6 +265,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         super((parentObj == null) ? null : parentObj.getFileFormat(), attrName,
                 (parentObj == null) ? null : parentObj.getFullName(), null);
 
+        log.trace("Attribute: start {}", parentObj);
         this.parentObject = parentObj;
 
         datatype = attrType;
@@ -292,6 +293,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                 attrName, getDatatype().getDescription(), data, rank, getDatatype().isUnsigned(), isScalar);
 
         resetSelection();
+        log.trace("Attribute: finish");
     }
 
     /*
@@ -392,7 +394,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         if (inited) {
             resetSelection();
             log.trace("init(): Attribute already inited");
-            log.trace("init(): finish");
+            log.trace("init(): exit");
             return;
         }
 
@@ -755,7 +757,7 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
         if (parentObject == null) {
             log.debug("write(): parent object is null; nowhere to write attribute to");
-            log.debug("write(): finish");
+            log.debug("write(): exit");
             return;
         }
 

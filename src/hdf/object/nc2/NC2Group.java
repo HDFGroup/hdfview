@@ -100,6 +100,10 @@ public class NC2Group extends Group {
         return false;
     }
 
+    public boolean hasDimension() {
+        return false;
+    }
+
     // Implementing DataFormat
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {

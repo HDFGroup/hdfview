@@ -216,12 +216,12 @@ public abstract class DefaultBaseTableView implements TableView {
     /**
      * Global variables for GUI components
      */
-
     protected MenuItem                      checkFixedDataLength = null;
     protected MenuItem                      checkCustomNotation = null;
     protected MenuItem                      checkScientificNotation = null;
     protected MenuItem                      checkHex = null;
     protected MenuItem                      checkBin = null;
+    protected MenuItem                      checkEnum = null;
 
     // Labeled Group to display the index base
     protected org.eclipse.swt.widgets.Group indexBaseGroup;
@@ -510,6 +510,21 @@ public abstract class DefaultBaseTableView implements TableView {
             checkCustomNotation.setSelection(false);
             checkBin.setSelection(false);
             showAsBin = false;
+            numberFormat = normalFormat;
+        }
+
+        /*
+         * Set the default selection on the "Show Enum", etc. MenuItems.
+         * This step must be done after the menu bar has actually been created.
+         */
+        if (dataObject.getDatatype().isEnum()) {
+            checkEnum.setSelection(true);
+            checkScientificNotation.setSelection(false);
+            checkCustomNotation.setSelection(false);
+            checkBin.setSelection(false);
+            checkHex.setSelection(false);
+            showAsBin = false;
+            showAsHex = false;
             numberFormat = normalFormat;
         }
 
