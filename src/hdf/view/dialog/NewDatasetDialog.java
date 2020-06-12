@@ -80,8 +80,6 @@ public class NewDatasetDialog extends NewDataDialog {
     /** A list of current groups */
     private List<Group>       groupList;
 
-    private HObject           newObject;
-
     private final DataView    dataView;
 
     /**
@@ -98,7 +96,6 @@ public class NewDatasetDialog extends NewDataDialog {
     public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, pGroup, objs);
 
-        newObject = null;
         dataView = null;
     }
 
@@ -118,7 +115,6 @@ public class NewDatasetDialog extends NewDataDialog {
     public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs, DataView observer) {
         super(parent, pGroup, objs);
 
-        newObject = null;
         dataView = observer;
     }
 
@@ -1044,15 +1040,5 @@ public class NewDatasetDialog extends NewDataDialog {
                 log.debug("Open New Dataset Help failure: ", ex);
             }
         }
-    }
-
-    /** @return the new dataset created. */
-    public HObject getObject() {
-        return newObject;
-    }
-
-    /** @return the parent group of the new dataset. */
-    public Group getParentGroup() {
-        return (Group) parentObj;
     }
 }

@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import hdf.object.Datatype;
-import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.view.Tools;
@@ -53,17 +52,13 @@ import hdf.view.ViewProperties;
  */
 public class NewDatatypeDialog extends NewDataDialog {
 
-    private Combo             parentChoice, classChoice, sizeChoice, endianChoice;
+    private Combo             parentChoice;
 
     /** TextField for entering the name of the object */
-    protected Text    nameField;
+    protected Text            nameField;
 
     /** a list of current groups */
     private List<Group>       groupList;
-
-    private HObject           newObject;
-
-    private FileFormat        fileFormat;
 
     /**
      * Constructs a NewDatatypeDialog with specified list of possible parent
@@ -78,8 +73,6 @@ public class NewDatatypeDialog extends NewDataDialog {
      */
     public NewDatatypeDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, pGroup, objs);
-
-        newObject = null;
     }
 
     public void open() {
@@ -214,8 +207,6 @@ public class NewDatatypeDialog extends NewDataDialog {
     public Datatype createDatatype() {
         String name = null;
         Group pgroup = null;
-        boolean isVLen = false;
-        boolean isVlenStr = false;
 
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
@@ -256,15 +247,5 @@ public class NewDatatypeDialog extends NewDataDialog {
         }
 
         return datatype;
-    }
-
-    /** @return the new dataset created. */
-    public HObject getObject() {
-        return newObject;
-    }
-
-    /** @return the parent group of the new dataset. */
-    public Group getParentGroup() {
-        return (Group) parentObj;
     }
 }

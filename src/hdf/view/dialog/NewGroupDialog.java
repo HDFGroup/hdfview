@@ -17,8 +17,6 @@ package hdf.view.dialog;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -26,7 +24,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -34,13 +31,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.view.Tools;
@@ -52,11 +47,7 @@ import hdf.view.ViewProperties;
  * @author Jordan T. Henderson
  * @version 2.4 12/30/2015
  */
-public class NewGroupDialog extends Dialog {
-
-    private Shell       shell;
-
-    private Font        curFont;
+public class NewGroupDialog extends NewDataDialog {
 
     /* Used to restore original size after click "less" button */
     private Point       originalSize;
@@ -83,16 +74,9 @@ public class NewGroupDialog extends Dialog {
     private Composite   buttonComposite;
 
     private List<Group> groupList;
-    private List<?>     objList;
-
-    private HObject     newObject;
-    private Group       parentGroup;
-
-    private FileFormat  fileFormat;
 
     private int         creationOrder;
 
-    private boolean     isH5;
     private boolean     moreOptionsEnabled;
 
     /**
@@ -106,27 +90,9 @@ public class NewGroupDialog extends Dialog {
      *            the list of all objects.
      */
     public NewGroupDialog(Shell parent, Group pGroup, List<?> objs) {
-        super(parent, SWT.APPLICATION_MODAL);
-
-        try {
-            curFont = new Font(
-                    Display.getCurrent(),
-                    ViewProperties.getFontType(),
-                    ViewProperties.getFontSize(),
-                    SWT.NORMAL);
-        }
-        catch (Exception ex) {
-            curFont = null;
-        }
-
-        newObject = null;
-        parentGroup = pGroup;
-        objList = objs;
+        super(parent, pGroup, objs);
 
         moreOptionsEnabled = false;
-
-        fileFormat = pGroup.getFileFormat();
-        isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
     }
 
     public void open() {
@@ -164,7 +130,7 @@ public class NewGroupDialog extends Dialog {
         parentChoice.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                parentGroup = groupList.get(parentChoice.getSelectionIndex());
+                parentObj = groupList.get(parentChoice.getSelectionIndex());
             }
         });
 
@@ -185,12 +151,12 @@ public class NewGroupDialog extends Dialog {
             }
         }
 
-        if (parentGroup.isRoot()) {
+        if (((Group) parentObj).isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() +
-                    parentGroup.getName() + HObject.SEPARATOR));
+            parentChoice.select(parentChoice.indexOf(parentObj.getPath() +
+                    parentObj.getName() + HObject.SEPARATOR));
         }
 
         // Only add "More" button if file is H5 type
@@ -552,15 +518,5 @@ public class NewGroupDialog extends Dialog {
         Point shellSize = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-    }
-
-    /** @return the new group created. */
-    public HObject getObject() {
-        return newObject;
-    }
-
-    /** @return the parent group of the new group. */
-    public Group getParentGroup() {
-        return parentGroup;
     }
 }

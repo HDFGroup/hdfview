@@ -87,8 +87,6 @@ public class NewCompoundDatasetDialog extends NewDataDialog {
     private Vector<Group>         groupList;
     private Vector<CompoundDS>    compoundDSList;
 
-    private HObject               newObject;
-
     private int                   numberOfMembers;
 
     private Table                 table;
@@ -115,7 +113,6 @@ public class NewCompoundDatasetDialog extends NewDataDialog {
     public NewCompoundDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
         super(parent, pGroup, objs);
 
-        newObject = null;
         numberOfMembers = 2;
 
         groupList = new Vector<>(objs.size());
@@ -1087,15 +1084,5 @@ public class NewCompoundDatasetDialog extends NewDataDialog {
         });
 
         return editor;
-    }
-
-    /** @return the new dataset created. */
-    public HObject getObject() {
-        return newObject;
-    }
-
-    /** @return the parent group of the new dataset. */
-    public Group getParentGroup() {
-        return (Group) parentObj;
     }
 }

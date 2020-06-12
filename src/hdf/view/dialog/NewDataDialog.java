@@ -1,6 +1,23 @@
+/*****************************************************************************
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of the HDF Java Products distribution.                  *
+ * The full copyright notice, including terms governing use, modification,   *
+ * and redistribution, is contained in the files COPYING and Copyright.html. *
+ * COPYING can be found at the root of the source code distribution tree.    *
+ * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
+ ****************************************************************************/
+
 package hdf.view.dialog;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -19,6 +36,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.h5.H5Datatype;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
@@ -36,19 +54,35 @@ public class NewDataDialog extends Dialog {
     /** the object which the this object is attached */
     protected HObject parentObj;
 
+    /** the object referenced */
+    protected HObject refObject;
+
+    /** the object created */
+    protected HObject newObject;
+
     /** TextField for entering the length of the data array or string. */
     protected Text    lengthField;
 
     /** The Choice of the datatypes */
+    protected Combo   namedChoice;
     protected Combo   classChoice;
     protected Combo   sizeChoice;
     protected Combo   endianChoice;
 
     /** The Choice of the object list */
-    protected Combo   objChoice;
+    protected Button  useCommittedType;
     protected Button  checkUnsigned;
     protected List<?> objList;
+    protected List<Datatype> namedList;
     protected Label   arrayLengthLabel;
+
+    /** The attributes of the datatype */
+    public int tclass = Datatype.CLASS_NO_CLASS;
+    public int tsize = Datatype.NATIVE;
+    public int torder = Datatype.NATIVE;
+    public int tsign = Datatype.NATIVE;
+    public boolean isVLen = false;
+    public boolean isVlenStr = false;
 
     protected FileFormat fileFormat;
 
@@ -68,6 +102,7 @@ public class NewDataDialog extends Dialog {
             curFont = null;
         }
 
+        newObject = null;
         parentObj = pGroup;
         objList = objs;
 
@@ -77,6 +112,8 @@ public class NewDataDialog extends Dialog {
 
     /** @return the new dataset created. */
     public void createDatatypeWidget() {
+        Label label;
+
         // Create Datatype region
         org.eclipse.swt.widgets.Group datatypeGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
         datatypeGroup.setFont(curFont);
@@ -84,7 +121,44 @@ public class NewDataDialog extends Dialog {
         datatypeGroup.setLayout(new GridLayout(4, true));
         datatypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        Label label = new Label(datatypeGroup, SWT.LEFT);
+        useCommittedType = new Button(datatypeGroup, SWT.CHECK);
+        useCommittedType.setFont(curFont);
+        useCommittedType.setText("Use Committed Datatype");
+        useCommittedType.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
+        useCommittedType.setEnabled(isH5);
+
+        if(isH5) {
+            label = new Label(datatypeGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Committed Datatype: ");
+
+            namedChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+            namedChoice.setFont(curFont);
+            namedChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+            namedChoice.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    refObject = namedList.get(namedChoice.getSelectionIndex());
+                }
+            });
+
+            namedList = new Vector<>(objList.size());
+            Object obj = null;
+            Iterator<?> iterator = objList.iterator();
+            while (iterator.hasNext()) {
+                obj = iterator.next();
+                if (obj instanceof Datatype) {
+                    H5Datatype ndt = (H5Datatype) obj;
+                    namedList.add(ndt);
+                    namedChoice.add(((Datatype)obj).getFullName());
+                }
+            }
+
+            if (refObject != null)
+                namedChoice.select(namedChoice.indexOf(((Datatype)refObject).getFullName()));
+        }
+
+        label = new Label(datatypeGroup, SWT.LEFT);
         label.setFont(curFont);
         label.setText("Datatype Class");
 
@@ -99,6 +173,7 @@ public class NewDataDialog extends Dialog {
         checkUnsigned = new Button(datatypeGroup, SWT.CHECK);
         checkUnsigned.setFont(curFont);
         checkUnsigned.setText("Unsigned");
+        checkUnsigned.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
 
         classChoice = new Combo(datatypeGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
         classChoice.setFont(curFont);
@@ -195,7 +270,8 @@ public class NewDataDialog extends Dialog {
 
         if(isH5) {
             sizeChoice.add("NATIVE");
-        } else {
+        }
+        else {
             sizeChoice.add("DEFAULT");
         }
 
@@ -213,7 +289,8 @@ public class NewDataDialog extends Dialog {
             endianChoice.add("NATIVE");
             endianChoice.add("LITTLE ENDIAN");
             endianChoice.add("BIG ENDIAN");
-        } else {
+        }
+        else {
             endianChoice.add("DEFAULT");
         }
 
@@ -226,148 +303,199 @@ public class NewDataDialog extends Dialog {
         classChoice.select(0);
         sizeChoice.select(0);
         endianChoice.select(0);
+
+        if (useCommittedType.getSelection()) {
+            classChoice.setEnabled(false);
+            sizeChoice.setEnabled(false);
+            endianChoice.setEnabled(false);
+            checkUnsigned.setEnabled(false);
+        }
+        else {
+            refObject = null;
+            classChoice.setEnabled(true);
+            sizeChoice.setEnabled(true);
+            endianChoice.setEnabled(isH5);
+            checkUnsigned.setEnabled(true);
+        }
     }
 
     public Datatype createDatatype(String name) {
-        Group pgroup = null;
-        boolean isVLen = false;
-        boolean isVlenStr = false;
-        int rank = -1;
-        int gzip = -1;
-        int tclass = Datatype.CLASS_NO_CLASS;
-        int tsize = Datatype.NATIVE;
-        int torder = Datatype.NATIVE;
-        int tsign = Datatype.NATIVE;
+        Datatype datatype = null;
+
+        tclass = Datatype.CLASS_NO_CLASS;
+        tsize = Datatype.NATIVE;
+        torder = Datatype.NATIVE;
+        tsign = Datatype.NATIVE;
+        isVLen = false;
+        isVlenStr = false;
 
         log.trace("start");
-       // set datatype class
-        int idx = classChoice.getSelectionIndex();
-        if (idx == 0) {
-            tclass = Datatype.CLASS_INTEGER;
-            if (checkUnsigned.getSelection()) {
-                tsign = Datatype.SIGN_NONE;
-            }
-        }
-        else if (idx == 1) {
-            tclass = Datatype.CLASS_FLOAT;
-        }
-        else if (idx == 2) {
-            tclass = Datatype.CLASS_CHAR;
-            if (checkUnsigned.getSelection()) {
-                tsign = Datatype.SIGN_NONE;
-            }
-        }
-        else if (idx == 3) {
-            tclass = Datatype.CLASS_STRING;
-        }
-        else if (idx == 4) {
-            tclass = Datatype.CLASS_REFERENCE;
-        }
-        else if (idx == 5) {
-            tclass = Datatype.CLASS_ENUM;
-        }
-        else if (idx == 6) {
-            isVLen = true;
-            tclass = Datatype.CLASS_INTEGER;
-            if (checkUnsigned.getSelection()) {
-                tsign = Datatype.SIGN_NONE;
-            }
-        }
-        else if (idx == 7) {
-            isVLen = true;
-            tclass = Datatype.CLASS_FLOAT;
-        }
-        else if (idx == 8) {
-            tclass = Datatype.CLASS_STRING;
-            isVlenStr = true;
-            tsize = -1;
-        }
 
-        // set datatype size/order
-        idx = sizeChoice.getSelectionIndex();
-        if (tclass == Datatype.CLASS_STRING) {
-            log.trace("CLASS_STRING start");
-            if (!isVlenStr) {
-                int stringLength = 0;
-                try {
-                    stringLength = Integer.parseInt(lengthField.getText());
+        if (useCommittedType.getSelection()) {
+            datatype = (Datatype)refObject;
+        }
+        else {
+           // set datatype class
+            int idx = classChoice.getSelectionIndex();
+            if (idx == 0) {
+                tclass = Datatype.CLASS_INTEGER;
+                if (checkUnsigned.getSelection()) {
+                    tsign = Datatype.SIGN_NONE;
                 }
-                catch (NumberFormatException ex) {
-                    stringLength = -1;
+            }
+            else if (idx == 1) {
+                tclass = Datatype.CLASS_FLOAT;
+            }
+            else if (idx == 2) {
+                tclass = Datatype.CLASS_CHAR;
+                if (checkUnsigned.getSelection()) {
+                    tsign = Datatype.SIGN_NONE;
                 }
+            }
+            else if (idx == 3) {
+                tclass = Datatype.CLASS_STRING;
+            }
+            else if (idx == 4) {
+                tclass = Datatype.CLASS_REFERENCE;
+            }
+            else if (idx == 5) {
+                tclass = Datatype.CLASS_ENUM;
+            }
+            else if (idx == 6) {
+                isVLen = true;
+                tclass = Datatype.CLASS_INTEGER;
+                if (checkUnsigned.getSelection()) {
+                    tsign = Datatype.SIGN_NONE;
+                }
+            }
+            else if (idx == 7) {
+                isVLen = true;
+                tclass = Datatype.CLASS_FLOAT;
+            }
+            else if (idx == 8) {
+                tclass = Datatype.CLASS_STRING;
+                isVlenStr = true;
+                tsize = -1;
+            }
 
-                if (stringLength <= 0) {
+            // set datatype size/order
+            idx = sizeChoice.getSelectionIndex();
+            if (tclass == Datatype.CLASS_STRING) {
+                log.trace("CLASS_STRING start");
+                if (!isVlenStr) {
+                    int stringLength = 0;
+                    try {
+                        stringLength = Integer.parseInt(lengthField.getText());
+                    }
+                    catch (NumberFormatException ex) {
+                        stringLength = -1;
+                    }
+
+                    if (stringLength <= 0) {
+                        shell.getDisplay().beep();
+                        Tools.showError(shell, "Create", "Invalid string length: " + lengthField.getText());
+                        return null;
+                    }
+                    tsize = stringLength;
+                }
+            }
+            else if (tclass == Datatype.CLASS_ENUM) {
+                log.trace("CLASS_ENUM start");
+                String enumStr = lengthField.getText();
+                if ((enumStr == null) || (enumStr.length() < 1) || enumStr.endsWith("...")) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Create", "Invalid string length: " + lengthField.getText());
+                    Tools.showError(shell, "Create", "Invalid member values: " + lengthField.getText());
                     return null;
                 }
-                tsize = stringLength;
             }
-        }
-        else if (tclass == Datatype.CLASS_ENUM) {
-            log.trace("CLASS_ENUM start");
-            String enumStr = lengthField.getText();
-            if ((enumStr == null) || (enumStr.length() < 1) || enumStr.endsWith("...")) {
+            else if (tclass == Datatype.CLASS_REFERENCE) {
+                tsize = 1;
+                torder = Datatype.NATIVE;
+            }
+            else if (idx == 0) {
+                tsize = Datatype.NATIVE;
+            }
+            else if (tclass == Datatype.CLASS_FLOAT) {
+                tsize = idx * 4;
+            }
+            else if (tclass == Datatype.CLASS_INTEGER) {
+                switch(idx) {
+                    case 0:
+                        tsize = 1;
+                        break;
+                    case 1:
+                        tsize = 2;
+                        break;
+                    case 2:
+                        tsize = 4;
+                        break;
+                    case 3:
+                        tsize = 8;
+                        break;
+                    default:
+                        break;
+                }
+                log.trace("CLASS_INTEGER: tsize={}", tsize);
+            }
+            else if (tclass == Datatype.CLASS_FLOAT) {
+                tsize = (idx + 1) * 4;
+                log.trace("CLASS_FLOAT: tsize={}", tsize);
+            }
+            else {
+                tsize = 1 << (idx - 1);
+            }
+
+            if ((tsize == 8) && !isH5 && (tclass == Datatype.CLASS_INTEGER)) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Create", "Invalid member values: " + lengthField.getText());
+                Tools.showError(shell, "Create", "HDF4 does not support 64-bit integer.");
+                return null;
+            }
+
+            // set order
+            idx = endianChoice.getSelectionIndex();
+            if (idx == 0) {
+                torder = Datatype.NATIVE;
+            }
+            else if (idx == 1) {
+                torder = Datatype.ORDER_LE;
+            }
+            else {
+                torder = Datatype.ORDER_BE;
+            }
+
+            Datatype basedatatype = null;
+            try {
+                if (isVLen) {
+                    log.trace("create VLen base type");
+                    basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
+                    tclass = Datatype.CLASS_VLEN;
+                }
+                if (name != null)
+                    datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype, name);
+                else
+                    datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
+                if (tclass == Datatype.CLASS_ENUM) {
+                    log.trace("setEnumMembers");
+                    datatype.setEnumMembers(lengthField.getText());
+                }
+            }
+            catch (Exception ex) {
+                shell.getDisplay().beep();
+                Tools.showError(shell, "Create", ex.getMessage());
                 return null;
             }
         }
-        else if (tclass == Datatype.CLASS_REFERENCE) {
-            tsize = 1;
-        }
-        else if (idx == 0) {
-            tsize = Datatype.NATIVE;
-        }
-        else if (tclass == Datatype.CLASS_FLOAT) {
-            tsize = idx * 4;
-        }
-        else {
-            tsize = 1 << (idx - 1);
-        }
-
-        if ((tsize == 8) && !isH5 && (tclass == Datatype.CLASS_INTEGER)) {
-            shell.getDisplay().beep();
-            Tools.showError(shell, "Create", "HDF4 does not support 64-bit integer.");
-            return null;
-        }
-
-        // set order
-        idx = endianChoice.getSelectionIndex();
-        if (idx == 0) {
-            torder = Datatype.NATIVE;
-        }
-        else if (idx == 1) {
-            torder = Datatype.ORDER_LE;
-        }
-        else {
-            torder = Datatype.ORDER_BE;
-        }
-
-        Datatype basedatatype = null;
-        Datatype datatype = null;
-        try {
-            if (isVLen) {
-                log.trace("create VLen base type");
-                basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
-                tclass = Datatype.CLASS_VLEN;
-            }
-            if (name != null)
-                datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype, name);
-            else
-                datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
-            if (tclass == Datatype.CLASS_ENUM) {
-                log.trace("setEnumMembers");
-                datatype.setEnumMembers(lengthField.getText());
-            }
-        }
-        catch (Exception ex) {
-            shell.getDisplay().beep();
-            Tools.showError(shell, "Create", ex.getMessage());
-            return null;
-        }
-
         log.trace("finish");
         return datatype;
+    }
+
+    /** @return the new object created. */
+    public HObject getObject() {
+        return newObject;
+    }
+
+    /** @return the parent group of the new dataset. */
+    public Group getParentGroup() {
+        return (Group) parentObj;
     }
 }
