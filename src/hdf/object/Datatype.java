@@ -531,15 +531,18 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            the (key, value) pairs of enum members
      */
     public final void setEnumMembers(String enumStr) {
-        log.trace("setEnumMembers: is_enum enum_members={}", enumStr);
-        enumMembers = new HashMap<>();
-        String[] entries = enumStr.split(",");
-        for (String entry : entries) {
-            String[] keyValue = entry.split("=");
-            enumMembers.put(keyValue[0].trim(), keyValue[1].trim());
-            if (log.isTraceEnabled())
-                log.trace("setEnumMembers: is_enum value={} name={}", keyValue[0].trim(), keyValue[1].trim());
+        log.trace("setEnumMembers: start enum_members={}", enumStr);
+        if (enumStr != null) {
+            enumMembers = new HashMap<>();
+            String[] entries = enumStr.split(",");
+            for (String entry : entries) {
+                String[] keyValue = entry.split("=");
+                enumMembers.put(keyValue[0].trim(), keyValue[1].trim());
+                if (log.isTraceEnabled())
+                    log.trace("setEnumMembers: value={} name={}", keyValue[0].trim(), keyValue[1].trim());
+            }
         }
+        log.trace("setEnumMembers: finish enum size={}", enumMembers.size());
     }
 
     /**
@@ -548,12 +551,15 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return enumStr Map&lt;String,String%gt; pairs of enum members
      */
     public final Map<String, String> getEnumMembers() {
+        log.trace("getEnumMembers: start");
         if (enumMembers == null) {
+            log.trace("getEnumMembers: null");
             enumMembers = new HashMap<>();
             enumMembers.put("1", "0");
             enumMembers.put("2", "1");
         }
 
+        log.trace("getEnumMembers: finish");
         return enumMembers;
     }
 
@@ -570,7 +576,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     @SuppressWarnings("rawtypes")
     public final String getEnumMembersAsString() {
+        log.trace("getEnumMembersAsString: start");
         if (enumMembers == null) {
+            log.trace("getEnumMembersAsString: null");
             enumMembers = new HashMap<>();
             enumMembers.put("1", "0");
             enumMembers.put("2", "1");
@@ -579,6 +587,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         StringBuilder enumStr = new StringBuilder();
         Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
         int i = enumMembers.size();
+        log.trace("getEnumMembersAsString: enum size={}", i);
         while (entries.hasNext()) {
             Entry thisEntry = entries.next();
             enumStr.append((String) thisEntry.getKey())
@@ -589,6 +598,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             if (i > 0)
                 enumStr.append(", ");
         }
+        log.trace("getEnumMembersAsString: finish {}", enumStr);
         return enumStr.toString();
     }
 

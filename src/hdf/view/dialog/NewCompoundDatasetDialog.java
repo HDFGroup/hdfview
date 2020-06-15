@@ -810,15 +810,12 @@ public class NewCompoundDatasetDialog extends NewDataDialog {
                 type = fileFormat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[10].equals(typeName)) { // enum
-                type = fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
                 if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "Create", "Invalid member values: " + orderStr);
                     return null;
                 }
-                else {
-                    type.setEnumMembers(orderStr);
-                }
+                type = fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE, orderStr);
             }
             else if (DATATYPE_NAMES[11].equals(typeName)) {
                 type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.SIGN_NONE);

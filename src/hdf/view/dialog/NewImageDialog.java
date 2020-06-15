@@ -354,10 +354,8 @@ public class NewImageDialog extends NewDataDialog {
         }
 
         try {
-            Datatype datatype = fileFormat.createDatatype(tclass, tsize,
-                    torder, tsign);
-            dataset = fileFormat.createImage(name, pgroup, datatype, dims,
-                    dims, null, -1, ncomp, interlace, null);
+            Datatype datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
+            dataset = fileFormat.createImage(name, pgroup, datatype, dims, dims, null, -1, ncomp, interlace, null);
             dataset.init();
         }
         catch (Exception ex) {

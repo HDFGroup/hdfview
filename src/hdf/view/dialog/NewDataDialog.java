@@ -37,6 +37,7 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5Datatype;
+import hdf.object.h5.H5File;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
@@ -141,6 +142,11 @@ public class NewDataDialog extends Dialog {
                     refObject = namedList.get(namedChoice.getSelectionIndex());
                 }
             });
+
+            //Dummy label
+            label = new Label(datatypeGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("");
 
             namedList = new Vector<>(objList.size());
             Object obj = null;
@@ -407,6 +413,7 @@ public class NewDataDialog extends Dialog {
                     Tools.showError(shell, "Create", "Invalid member values: " + lengthField.getText());
                     return null;
                 }
+                log.trace("CLASS_ENUM enumStr={}", enumStr);
             }
             else if (tclass == Datatype.CLASS_REFERENCE) {
                 tsize = 1;
@@ -470,13 +477,16 @@ public class NewDataDialog extends Dialog {
                     basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
                     tclass = Datatype.CLASS_VLEN;
                 }
-                if (name != null)
-                    datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype, name);
-                else
-                    datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
+                String enumMap = null;
                 if (tclass == Datatype.CLASS_ENUM) {
-                    log.trace("setEnumMembers");
-                    datatype.setEnumMembers(lengthField.getText());
+                    log.trace("CLASS_ENUM {}",lengthField.getText());
+                    enumMap = lengthField.getText();
+                }
+                if (isH5) {
+                    datatype = ((H5File)fileFormat).createDatatype(tclass, tsize, torder, tsign, enumMap, basedatatype, name);
+                }
+                else {
+                    datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
                 }
             }
             catch (Exception ex) {

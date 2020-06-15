@@ -703,14 +703,67 @@ public class DataValidatorFactory {
 
     private static class EnumDataValidator extends HDFDataValidator {
 
-        EnumDataValidator(final Datatype dtype) {
+        private final HDFDataValidator baseValidator;
+        //private final Datatype datasetDatatype;
+
+        EnumDataValidator(final Datatype dtype) throws Exception {
             super(dtype);
 
             log = org.slf4j.LoggerFactory.getLogger(EnumDataValidator.class);
 
             log.trace("constructor: start");
 
+            if (!dtype.isEnum()) {
+                log.debug("datatype is not an enum type");
+                log.trace("constructor: finish");
+                throw new Exception("EnumDataValidator: datatype is not an array type");
+            }
+
+            Datatype baseType = dtype.getDatatypeBase();
+            if (baseType == null) {
+                log.debug("base datatype is null");
+                log.trace("constructor: finish");
+                throw new Exception("EnumDataValidator: base datatype is null");
+            }
+            if (!baseType.isInteger()) {
+                log.debug("base datatype is not an integer type");
+                log.trace("constructor: finish");
+                throw new Exception("EnumDataValidator: datatype is not an integer type");
+            }
+
+            log.trace("EnumDataValidator: base Datatype is {}", dtype.getDescription());
+
+            try {
+                baseValidator = getDataValidator(baseType);
+            }
+            catch (Exception ex) {
+                log.debug("couldn't get DataValidator for base datatype: ", ex);
+                log.trace("constructor: finish");
+                throw new Exception("EnumDataValidator: couldn't get DataValidator for base datatype: " + ex.getMessage());
+            }
+
+            //this.datasetDatatype = dtype;
+
             log.trace("constructor: finish");
+        }
+
+        @Override
+        public boolean validate(int colIndex, int rowIndex, Object newValue) {
+            log.trace("validate({}, {}, {}): start", rowIndex, colIndex, newValue);
+
+            try {
+                super.checkValidValue(newValue);
+
+                baseValidator.validate(colIndex, rowIndex, newValue);
+            }
+            catch (Exception ex) {
+                super.throwValidationFailedException(rowIndex, colIndex, newValue, ex.toString());
+            }
+            finally {
+                log.trace("validate({}, {}, {}): finish", rowIndex, colIndex, newValue);
+            }
+
+            return true;
         }
 
     }

@@ -138,7 +138,6 @@ public class NewAttributeDialog extends NewDataDialog {
             label.setFont(curFont);
             label.setText("");
         }
-        objChoice.setEnabled(false);
 
         createDatatypeWidget();
 
@@ -178,7 +177,7 @@ public class NewAttributeDialog extends NewDataDialog {
 
         objChoice = new Combo(content, SWT.DROP_DOWN | SWT.READ_ONLY);
         objChoice.setFont(curFont);
-        objChoice.setEnabled(false);
+        objChoice.setEnabled(true);
         objChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         objChoice.addSelectionListener(new SelectionAdapter() {
             @Override

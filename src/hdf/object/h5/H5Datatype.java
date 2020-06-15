@@ -1102,6 +1102,7 @@ public class H5Datatype extends Datatype {
 
                 break;
             case CLASS_ENUM:
+                log.trace("createNative(): CLASS_ENUM");
                 try {
                     if (baseType != null) {
                         if ((tmptid = baseType.createNative()) < 0) {
@@ -1323,31 +1324,13 @@ public class H5Datatype extends Datatype {
         } // (tclass)
 
         // set up enum members
-        if (datatypeClass == CLASS_ENUM) {
+        if ((datatypeClass == CLASS_ENUM) && (enumMembers != null)) {
+            log.trace("createNative(): set up enum members");
             try {
                 String memstr;
                 String memname;
                 byte[] memval = null;
-                if (datatypeSize == 1) {
-                    memval = HDFNativeData.byteToByte(new Byte((byte) 0));
-                }
-                else if (datatypeSize == 2) {
-                    memval = HDFNativeData.shortToByte(new Short((short) 0));
-                }
-                else if (datatypeSize == 4) {
-                    memval = HDFNativeData.intToByte(new Integer(0));
-                }
-                else if (datatypeSize == 8) {
-                    memval = HDFNativeData.longToByte(new Long(0));
-                }
 
-                // using "0" and "1" as default
-                if (enumMembers == null) {
-                    enumMembers = new HashMap<>();
-                    enumMembers.put("1", "0");
-                    enumMembers.put("2", "1");
-                    log.trace("createNative(): default string");
-                }
                 Iterator entries = enumMembers.entrySet().iterator();
                 while (entries.hasNext()) {
                     Entry thisEntry = (Entry) entries.next();
@@ -1355,17 +1338,17 @@ public class H5Datatype extends Datatype {
                     memname = (String) thisEntry.getValue();
 
                     if (datatypeSize == 1) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT8");
+                        log.trace("createNative(): CLASS_ENUM is H5T_NATIVE_INT8");
                         Byte tval = Byte.parseByte(memstr);
                         memval = HDFNativeData.byteToByte(tval);
                     }
                     else if (datatypeSize == 2) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT16");
+                        log.trace("createNative(): CLASS_ENUM is H5T_NATIVE_INT16");
                         Short tval = Short.parseShort(memstr);
                         memval = HDFNativeData.shortToByte(tval);
                     }
                     else if (datatypeSize == 4) {
-                        log.trace("createNative(): CLASS_INT-ENUM is H5T_NATIVE_INT32");
+                        log.trace("createNative(): CLASS_ENUM is H5T_NATIVE_INT32");
                         Integer tval = Integer.parseInt(memstr);
                         memval = HDFNativeData.intToByte(tval);
                     }

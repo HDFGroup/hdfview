@@ -1515,8 +1515,7 @@ public class H5File extends FileFormat {
      *
      * @see hdf.object.FileFormat#createDatatype(int, int, int, int, Datatype, java.lang.String)
      */
-    @Override
-    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name)
+    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, String enumMap, Datatype tbase, String name)
             throws Exception {
         log.trace("createDatatype(): start: name={} class={} size={} order={} sign={}", name, tclass, tsize, torder, tsign);
         if (tbase != null)
@@ -1526,23 +1525,30 @@ public class H5File extends FileFormat {
         H5Datatype dtype = null;
 
         try {
-            H5Datatype t = (H5Datatype) createDatatype(tclass, tsize, torder, tsign, tbase);
+            H5Datatype t = (H5Datatype)createDatatype(tclass, tsize, torder, tsign, tbase);
+            if (tclass == Datatype.CLASS_ENUM)
+                t.setEnumMembers(enumMap);
             if ((tid = t.createNative()) < 0) {
                 log.debug("createDatatype(): createNative() failure");
                 log.trace("createDatatype(): exit");
                 throw new Exception("createNative() failed");
             }
 
-            H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+            if (name != null ) {
+                H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                        HDF5Constants.H5P_DEFAULT);
 
-            byte[] ref_buf = H5.H5Rcreate(fid, name, HDF5Constants.H5R_OBJECT, -1);
-            long l = HDFNativeData.byteToLong(ref_buf, 0);
+                byte[] ref_buf = H5.H5Rcreate(fid, name, HDF5Constants.H5R_OBJECT, -1);
+                long l = HDFNativeData.byteToLong(ref_buf, 0);
 
-            long[] oid = new long[1];
-            oid[0] = l; // save the object ID
+                long[] oid = new long[1];
+                oid[0] = l; // save the object ID
 
-            dtype = new H5Datatype(this, null, name);
+                dtype = new H5Datatype(this, null, name);
+            }
+            else {
+                dtype = t;
+            }
         }
         finally {
             H5.H5Tclose(tid);
