@@ -50,7 +50,7 @@ import hdf.view.ViewProperties;
  * @author Jordan T. Henderson
  * @version 2.4 1/1/2016
  */
-public class NewDatatypeDialog extends NewDataDialog {
+public class NewDatatypeDialog extends NewDataObjectDialog {
 
     private Combo             parentChoice;
 

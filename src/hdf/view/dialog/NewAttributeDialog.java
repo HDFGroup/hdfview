@@ -56,7 +56,7 @@ import hdf.view.ViewProperties;
  * @author Jordan T. Henderson
  * @version 2.4 1/7/2016
  */
-public class NewAttributeDialog extends NewDataDialog {
+public class NewAttributeDialog extends NewDataObjectDialog {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
 

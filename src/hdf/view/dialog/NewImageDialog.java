@@ -51,7 +51,7 @@ import hdf.view.ViewProperties;
  * @author Jordan T. Henderson
  * @version 2.4 1/1/2016
  */
-public class NewImageDialog extends NewDataDialog {
+public class NewImageDialog extends NewDataObjectDialog {
 
     private Text        nameField, widthField, heightField;
 

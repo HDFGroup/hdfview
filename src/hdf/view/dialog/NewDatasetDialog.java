@@ -60,7 +60,7 @@ import hdf.view.TableView.TableView;
  * @author Jordan T. Henderson
  * @version 2.4 12/31/2015
  */
-public class NewDatasetDialog extends NewDataDialog {
+public class NewDatasetDialog extends NewDataObjectDialog {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDatasetDialog.class);
 

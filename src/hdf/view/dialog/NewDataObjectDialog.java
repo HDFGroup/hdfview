@@ -44,9 +44,9 @@ import hdf.view.ViewProperties;
 /**
  * NewDataDialog is an intermediate class for creating data types.
  */
-public class NewDataDialog extends Dialog {
+public class NewDataObjectDialog extends Dialog {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDataDialog.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDataObjectDialog.class);
 
     protected Shell   shell;
 
@@ -89,7 +89,7 @@ public class NewDataDialog extends Dialog {
 
     protected boolean isH5;
 
-    public NewDataDialog(Shell parent, HObject pGroup, List<?> objs) {
+    public NewDataObjectDialog(Shell parent, HObject pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
 
         try {

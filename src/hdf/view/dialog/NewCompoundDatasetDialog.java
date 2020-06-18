@@ -62,7 +62,7 @@ import hdf.view.ViewProperties;
  * @author Jordan T. Henderson
  * @version 2.4 1/7/2015
  */
-public class NewCompoundDatasetDialog extends NewDataDialog {
+public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewCompoundDatasetDialog.class);
 

@@ -47,7 +47,7 @@ import hdf.view.ViewProperties;
  * @author Jordan T. Henderson
  * @version 2.4 12/30/2015
  */
-public class NewGroupDialog extends NewDataDialog {
+public class NewGroupDialog extends NewDataObjectDialog {
 
     /* Used to restore original size after click "less" button */
     private Point       originalSize;

@@ -30,6 +30,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -37,6 +38,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -58,9 +60,13 @@ import hdf.view.ViewProperties;
  * @author Jordan T. Henderson
  * @version 2.4 1/1/2016
  */
-public class NewLinkDialog extends NewDataDialog {
+public class NewLinkDialog extends Dialog {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewLinkDialog.class);
+
+    private Shell         shell;
+
+    private Font          curFont;
 
     private Text          nameField;
 
@@ -79,6 +85,14 @@ public class NewLinkDialog extends NewDataDialog {
     /** a list of current groups */
     private List<Group>   groupList;
 
+    /** a list of current objects */
+    private List<?>       objList;
+
+    private HObject       newObject;
+    private Group         parentGroup;
+
+    private FileFormat    fileFormat;
+
     private final List<?> fileList;
 
     /**
@@ -94,8 +108,24 @@ public class NewLinkDialog extends NewDataDialog {
      *            the list of all files open in the TreeView
      */
     public NewLinkDialog(Shell parent, Group pGroup, List<?> objs, List<FileFormat> files) {
-        super(parent, pGroup, objs);
+        super(parent, SWT.APPLICATION_MODAL);
 
+        try {
+            curFont = new Font(
+                    Display.getCurrent(),
+                    ViewProperties.getFontType(),
+                    ViewProperties.getFontSize(),
+                    SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
+
+        newObject = null;
+        parentGroup = pGroup;
+        objList = objs;
+
+        fileFormat = pGroup.getFileFormat();
         currentDir = ViewProperties.getWorkDir();
         fileList = files;
     }
@@ -133,7 +163,7 @@ public class NewLinkDialog extends NewDataDialog {
         parentChoice.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                parentObj = groupList.get(parentChoice.getSelectionIndex());
+                parentGroup = groupList.get(parentChoice.getSelectionIndex());
             }
         });
 
@@ -351,11 +381,11 @@ public class NewLinkDialog extends NewDataDialog {
         targetObject.remove(idx_root);
         objList.remove(idx_root);
 
-        if (((Group) parentObj).isRoot()) {
+        if (parentGroup.isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentObj.getPath() + parentObj.getName()
+            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName()
                     + HObject.SEPARATOR));
         }
 
@@ -767,5 +797,15 @@ public class NewLinkDialog extends NewDataDialog {
         catch (Exception ex) {
             log.debug("FileFormat close:", ex);
         }
+    }
+
+    /** @return the new dataset created. */
+    public HObject getObject() {
+        return newObject;
+    }
+
+    /** @return the parent group of the new dataset. */
+    public Group getParentGroup() {
+        return parentGroup;
     }
 }
