@@ -704,7 +704,6 @@ public class DataValidatorFactory {
     private static class EnumDataValidator extends HDFDataValidator {
 
         private final HDFDataValidator baseValidator;
-        //private final Datatype datasetDatatype;
 
         EnumDataValidator(final Datatype dtype) throws Exception {
             super(dtype);
@@ -716,7 +715,7 @@ public class DataValidatorFactory {
             if (!dtype.isEnum()) {
                 log.debug("datatype is not an enum type");
                 log.trace("constructor: finish");
-                throw new Exception("EnumDataValidator: datatype is not an array type");
+                throw new Exception("EnumDataValidator: datatype is not an enum type");
             }
 
             Datatype baseType = dtype.getDatatypeBase();
@@ -741,8 +740,6 @@ public class DataValidatorFactory {
                 log.trace("constructor: finish");
                 throw new Exception("EnumDataValidator: couldn't get DataValidator for base datatype: " + ex.getMessage());
             }
-
-            //this.datasetDatatype = dtype;
 
             log.trace("constructor: finish");
         }

@@ -330,8 +330,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         log.trace("Index base = {} - Is data transposed = {} - Is display type char = {}",
-                indexBase, isDataTransposed,
-                isDisplayTypeChar);
+                indexBase, isDataTransposed, isDisplayTypeChar);
 
         if (hObject == null) hObject = viewer.getTreeView().getCurrentObject();
 
@@ -388,8 +387,7 @@ public abstract class DefaultBaseTableView implements TableView {
         for (int i = 0; i < dims.length; i++)
             tsize *= dims[i];
 
-        log.trace("Data object Size={} Height={} Width={}", tsize, dataObject.getHeight(),
-                dataObject.getWidth());
+        log.trace("Data object Size={} Height={} Width={}", tsize, dataObject.getHeight(), dataObject.getWidth());
 
         if (dataObject.getHeight() <= 0 || dataObject.getWidth() <= 0 || tsize <= 0) {
             log.debug("data object has dimension of size 0");
@@ -504,6 +502,7 @@ public abstract class DefaultBaseTableView implements TableView {
          * This step must be done after the menu bar has actually been created.
          */
         if (dataObject.getDatatype().isBitField() || dataObject.getDatatype().isOpaque()) {
+            log.trace("Show Hexadecimal/Show Binary");
             showAsHex = true;
             checkHex.setSelection(true);
             checkScientificNotation.setSelection(false);
@@ -518,7 +517,8 @@ public abstract class DefaultBaseTableView implements TableView {
          * This step must be done after the menu bar has actually been created.
          */
         if (dataObject.getDatatype().isEnum()) {
-            checkEnum.setSelection(true);
+            log.trace("Show Enum");
+            checkEnum.setSelection(isEnumConverted);
             checkScientificNotation.setSelection(false);
             checkCustomNotation.setSelection(false);
             checkBin.setSelection(false);
