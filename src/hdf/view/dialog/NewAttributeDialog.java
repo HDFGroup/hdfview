@@ -332,7 +332,7 @@ public class NewAttributeDialog extends NewDataObjectDialog {
         log.trace("Count of Values is {}", count);
 
         // set datatype class
-        Datatype datatype = super.createDatatype(null);
+        Datatype datatype = super.createNewDatatype(null);
         if (isVLen) {
             log.trace("Attribute isVLen={} and tsize={}", isVLen, tsize);
             String[] strArray = { strValue };

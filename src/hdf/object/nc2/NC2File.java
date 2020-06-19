@@ -248,16 +248,15 @@ public class NC2File extends FileFormat {
     }
 
     @Override
-    public Datatype createDatatype(int tclass, int tsize, int torder,
+    public Datatype createNamedDatatype(int tclass, int tsize, int torder,
             int tsign, String name) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation - create datatype with name.");
     }
 
     @Override
-    public Datatype createDatatype(int tclass, int tsize, int torder,
+    public Datatype createNamedDatatype(int tclass, int tsize, int torder,
             int tsign, Datatype tbase, String name) throws Exception {
-        throw new UnsupportedOperationException(
-                "netcdf3 does not support named datatype.");
+        throw new UnsupportedOperationException("netcdf3 does not support named datatype.");
     }
 
     @Override

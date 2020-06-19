@@ -158,7 +158,7 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                newObject = createDatatype();
+                newObject = createNewDatatype();
 
                 if (newObject != null) {
                     shell.dispose();
@@ -204,7 +204,7 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
                 display.sleep();
     }
 
-    public Datatype createDatatype() {
+    public Datatype createNewDatatype() {
         String name = null;
         Group pgroup = null;
 
@@ -238,7 +238,7 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
             else {
                 fullPath = pgroup.getPath() + HObject.SEPARATOR + pgroup.getName() + HObject.SEPARATOR + name;
             }
-            datatype = super.createDatatype(fullPath);
+            datatype = super.createNewDatatype(fullPath);
         }
         catch (Exception ex) {
             shell.getDisplay().beep();

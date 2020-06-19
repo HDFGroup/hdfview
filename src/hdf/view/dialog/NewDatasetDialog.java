@@ -752,7 +752,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
 
         HObject obj = null;
         try {
-            Datatype datatype = createDatatype(null);
+            Datatype datatype = createNewDatatype(null);
 
             String fillValue = null;
 

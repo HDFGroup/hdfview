@@ -389,7 +389,7 @@ public abstract class FileFormat extends File {
 
     /**
      * Returns an Enumeration of keys for all supported formats.
-     * <p>
+     *
      * This method returns an Enumeration containing the unique keys (Strings)
      * for the all File Formats in the list of supported File Formats.
      *
@@ -695,8 +695,7 @@ public abstract class FileFormat extends File {
      * @throws NullPointerException
      *             If the <code>filename</code> argument is <code>null</code>.
      * @throws UnsupportedOperationException
-     *             If the implementing class does not support the file creation
-     *             operation.
+     *             If the implementing class does not support the file creation operation.
      * @throws Exception
      *             If the file cannot be created or if the creation flag has an
      *             unexpected value. The exceptions thrown vary depending on the
@@ -969,7 +968,7 @@ public abstract class FileFormat extends File {
 
     /**
      * Closes file associated with this instance.
-     * <p>
+     *
      * This method closes the file associated with this FileFormat instance, as
      * well as all objects associated with the file.
      *
@@ -999,8 +998,7 @@ public abstract class FileFormat extends File {
      * named datatypes, or empty groups.
      *
      * @return The root object of the file, or <code>null</code> if there is no
-     *         associated file or if the associated file has not yet been
-     *         opened.
+     *         associated file or if the associated file has not yet been opened.
      * @see #open()
      */
     public abstract HObject getRootObject();
@@ -1074,12 +1072,12 @@ public abstract class FileFormat extends File {
 
     /**
      * Creates a named datatype in a file.
-     * <p>
+     *
      * The following code creates a named datatype in a file.
      *
      * <pre>
      * H5File file = (H5File) h5file.createInstance(&quot;test_hdf5.h5&quot;, FileFormat.WRITE);
-     * H5Datatype dtype = file.createDatatype(
+     * H5Datatype dtype = file.createNamedDatatype(
      *                             Datatype.CLASS_INTEGER,
      *                             4,
      *                             Datatype.NATIVE,
@@ -1099,10 +1097,9 @@ public abstract class FileFormat extends File {
      *            name of the datatype to create, e.g. "Native Integer".
      * @return The new datatype if successful; otherwise returns null.
      * @throws Exception
-     *             The exceptions thrown vary depending on the implementing
-     *             class.
+     *             The exceptions thrown vary depending on the implementing class.
      */
-    public abstract Datatype createDatatype(int tclass, int tsize, int torder, int tsign, String name) throws Exception;
+    public abstract Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, String name) throws Exception;
 
     /**
      * Creates a named datatype in a file.
@@ -1111,7 +1108,7 @@ public abstract class FileFormat extends File {
      *
      * <pre>
      * H5File file = (H5File) h5file.createInstance(&quot;test_hdf5.h5&quot;, FileFormat.WRITE);
-     * H5Datatype dtype = file.createDatatype(
+     * H5Datatype dtype = file.createNamedDatatype(
      *                             Datatype.CLASS_INTEGER,
      *                             4,
      *                             Datatype.NATIVE,
@@ -1134,13 +1131,12 @@ public abstract class FileFormat extends File {
      *            name of the datatype to create, e.g. "Native Integer".
      * @return The new datatype if successful; otherwise returns null.
      * @throws Exception
-     *             The exceptions thrown vary depending on the implementing
-     *             class.
+     *             The exceptions thrown vary depending on the implementing class.
      */
-    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name) throws Exception
+    public Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name) throws Exception
     {
         // Derived classes must override this function to use base type option
-        return createDatatype(tclass, tsize, torder, tsign, name);
+        return createNamedDatatype(tclass, tsize, torder, tsign, name);
     }
 
     // REVIEW DOCS for createDatatype(). Check and document exceptions.
@@ -1275,10 +1271,12 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public abstract Dataset createScalarDS(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
-            long[] chunks, int gzip, Object fillValue, Object data) throws Exception;
+    public abstract Dataset createScalarDS(String name, Group pgroup, Datatype type,
+            long[] dims, long[] maxdims, long[] chunks,
+            int gzip, Object fillValue, Object data) throws Exception;
 
-    public Dataset createScalarDS(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims, long[] chunks,
+    public Dataset createScalarDS(String name, Group pgroup, Datatype type,
+            long[] dims, long[] maxdims, long[] chunks,
             int gzip, Object data) throws Exception {
         return createScalarDS(name, pgroup, type, dims, maxdims, chunks, gzip, null, data);
     }
@@ -1344,8 +1342,9 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing
      *             class.
      */
-    public Dataset createCompoundDS(String name, Group pgroup, long[] dims, long[] maxdims, long[] chunks, int gzip,
-            String[] memberNames, Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception
+    public Dataset createCompoundDS(String name, Group pgroup,
+            long[] dims, long[] maxdims, long[] chunks,
+            int gzip, String[] memberNames, Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception
     // REVIEW DOCS for createCompoundDS(). Check and document exceptions.
     {
         // If the implementing subclass doesn't have this method then that
@@ -1406,9 +1405,9 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing
      *             class.
      */
-    public abstract Dataset createImage(
-            String name, Group pgroup, Datatype type, long[] dims, long[] maxdims, long[] chunks, int gzip, int ncomp,
-            int interlace, Object data) throws Exception;
+    public abstract Dataset createImage(String name, Group pgroup, Datatype type,
+            long[] dims, long[] maxdims, long[] chunks,
+            int gzip, int ncomp, int interlace, Object data) throws Exception;
 
     // REVIEW DOCS for createImage(). Check and document exceptions.
 
@@ -1456,8 +1455,7 @@ public abstract class FileFormat extends File {
      *         returns null.
      *
      * @throws Exception
-     *             The exceptions thrown vary depending on the implementing
-     *             class.
+     *             The exceptions thrown vary depending on the implementing class.
      */
     public HObject createLink(Group parentGroup, String name, HObject currentObj, int type) throws Exception {
         return createLink(parentGroup, name, currentObj);
@@ -1481,8 +1479,7 @@ public abstract class FileFormat extends File {
      *         otherwise returns null.
      *
      * @throws Exception
-     *             The exceptions thrown vary depending on the implementing
-     *             class.
+     *             The exceptions thrown vary depending on the implementing class.
      */
     public HObject createLink(Group parentGroup, String name, String currentObj, int type) throws Exception {
         return createLink(parentGroup, name, currentObj);
@@ -1549,8 +1546,7 @@ public abstract class FileFormat extends File {
      * @param obj
      *            The object to delete.
      * @throws Exception
-     *             The exceptions thrown vary depending on the implementing
-     *             class.
+     *             The exceptions thrown vary depending on the implementing class.
      */
     public abstract void delete(HObject obj) throws Exception;
 
@@ -1659,8 +1655,8 @@ public abstract class FileFormat extends File {
      * @throws Exception if the dataset cannot be created
      */
     @Deprecated
-    public final Dataset createCompoundDS(String name, Group pgroup, long[] dims, String[] memberNames,
-            Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception {
+    public final Dataset createCompoundDS(String name, Group pgroup, long[] dims,
+            String[] memberNames, Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception {
         return createCompoundDS(name, pgroup, dims, null, null, -1, memberNames, memberDatatypes, memberSizes, data);
     }
 
@@ -1668,8 +1664,7 @@ public abstract class FileFormat extends File {
      * @deprecated As of 2.4, replaced by {@link #copy(HObject, Group, String)}
      *             <p>
      *             To mimic the behavior originally provided by this method,
-     *             call the replacement method with <code>null</code> as the 3rd
-     *             parameter.
+     *             call the replacement method with <code>null</code> as the 3rd parameter.
      *
      * @param srcObj
      *             The object to be copied
@@ -1688,12 +1683,10 @@ public abstract class FileFormat extends File {
     /**
      * @deprecated As of 2.4, replaced by {@link #get(String)}
      *             <p>
-     *             This static method, which as been deprecated, causes two
-     *             problems:
+     *             This static method, which as been deprecated, causes two problems:
      *             <ul>
      *             <li>It can be very expensive if it is called many times or in
-     *             a loop because each call to the method creates an instance of
-     *             a file.
+     *             a loop because each call to the method creates an instance of a file.
      *             <li>Since the method does not return the instance of the
      *             file, the file cannot be closed directly and may be left open
      *             (memory leak). The only way to close the file is through the
@@ -1734,8 +1727,7 @@ public abstract class FileFormat extends File {
     /**
      * @deprecated As of 2.4, replaced by {@link #get(String)}
      *             <p>
-     *             This static method, which as been deprecated, causes two
-     *             problems:
+     *             This static method, which as been deprecated, causes two problems:
      *             <ul>
      *             <li>It can be very expensive if it is called many times or in
      *             a loop because each call to the method creates an instance of
@@ -1915,8 +1907,7 @@ public abstract class FileFormat extends File {
      *            lcpl, gcpl and gapl, where
      *            <ul>
      *            <li>lcpl : Property list for link creation <li>gcpl : Property
-     *            list for group creation <li>gapl : Property list for group
-     *            access
+     *            list for group creation <li>gapl : Property list for group access
      *            </ul>
      *
      * @return The new group if successful; otherwise returns null.
@@ -1936,8 +1927,7 @@ public abstract class FileFormat extends File {
      *            The order in which the objects in a group should be created.
      *            It can be Tracked or Indexed.
      * @param maxcompact
-     *            The maximum number of links to store in the group in a compact
-     *            format.
+     *            The maximum number of links to store in the group in a compact format.
      * @param mindense
      *            The minimum number of links to store in the indexed
      *            format.Groups which are in indexed format and in which the
@@ -1965,8 +1955,8 @@ public abstract class FileFormat extends File {
      * @param currentObj
      *            The existing object the new link will reference.
      *
-     * @return The object pointed to by the new link if successful; otherwise
-     *         returns null.
+     * @return The object pointed to by the new link if successful;
+     *         otherwise returns null.
      *
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.

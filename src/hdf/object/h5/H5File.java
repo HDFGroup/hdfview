@@ -577,7 +577,7 @@ public class H5File extends FileFormat {
 
                                 if (attr.getDatatype().isText() && value instanceof byte[]) {
                                     log.trace("getAttribute(): isText: converting byte array to string array");
-                                    value = attr.byteToString((byte[]) value, (int) attr.getDatatype().getDatatypeSize());
+                                    value = Attribute.byteToString((byte[]) value, (int) attr.getDatatype().getDatatypeSize());
                                 }
                                 else if (((H5Datatype)attr.getDatatype()).isRefObj()) {
                                     log.trace("getAttribute(): Attribute[{}] isREF: converting byte array to long array", i);
@@ -1503,40 +1503,71 @@ public class H5File extends FileFormat {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.FileFormat#createDatatype(int, int, int, int, java.lang.String)
+     * @see hdf.object.FileFormat#createNamedDatatype(int, int, int, int, java.lang.String)
      */
     @Override
-    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, String name) throws Exception {
-        return createDatatype(tclass, tsize, torder, tsign, null, name);
+    public Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, String name) throws Exception {
+        return createNamedDatatype(tclass, tsize, torder, tsign, null, name);
     }
 
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.FileFormat#createDatatype(int, int, int, int, Datatype, java.lang.String)
+     * @see hdf.object.FileFormat#createNamedDatatype(int, int, int, int, java.lang.String)
      */
-    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, String enumMap, Datatype tbase, String name)
-            throws Exception {
-        log.trace("createDatatype(): start: name={} class={} size={} order={} sign={}", name, tclass, tsize, torder, tsign);
-        if (tbase != null)
-            log.trace("createDatatype(): baseType is {}", tbase.getDescription());
+    @Override
+    public Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name) throws Exception {
+        Datatype t = createDatatype(tclass, tsize, torder, tsign, tbase);
+        return createNamedDatatype(t, null, name);
+    }
+
+
+    /**
+     * Creates a named datatype in a file.
+     * <p>
+     * The following code creates a named datatype in a file.
+     *
+     * <pre>
+     * H5File file = (H5File) h5file.createInstance(&quot;test_hdf5.h5&quot;, FileFormat.WRITE);
+     * Datatype dtype = file.createDatatype(
+     *                             Datatype.CLASS_INTEGER,
+     *                             4,
+     *                             Datatype.NATIVE,
+     *                             Datatype.NATIVE,
+     *                             basetype);
+     * H5Datatype h5dtype = file.createNamedDatatype(
+     *                             dtype,
+     *                             null,
+     *                             &quot;Native Integer&quot;);
+     * </pre>
+     *
+     * @param tnative
+     *            native datatype previously created
+     * @param enumMap
+     *            if type enum, the mapping.
+     * @param name
+     *            name of the datatype to create, e.g. "Native Integer".
+     * @return The new datatype if successful; otherwise returns null.
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
+    public Datatype createNamedDatatype(Datatype tnative, String enumMap, String name) throws Exception {
+        log.trace("createNamedDatatype(): start: enumMap={} name={}", enumMap, name);
 
         long tid = -1;
         H5Datatype dtype = null;
 
         try {
-            H5Datatype t = (H5Datatype)createDatatype(tclass, tsize, torder, tsign, tbase);
-            if (tclass == Datatype.CLASS_ENUM)
-                t.setEnumMembers(enumMap);
-            if ((tid = t.createNative()) < 0) {
+            if (enumMap != null)
+                tnative.setEnumMembers(enumMap);
+            if ((tid = tnative.createNative()) < 0) {
                 log.debug("createDatatype(): createNative() failure");
                 log.trace("createDatatype(): exit");
                 throw new Exception("createNative() failed");
             }
 
             if (name != null ) {
-                H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
                 byte[] ref_buf = H5.H5Rcreate(fid, name, HDF5Constants.H5R_OBJECT, -1);
                 long l = HDFNativeData.byteToLong(ref_buf, 0);
@@ -1547,7 +1578,7 @@ public class H5File extends FileFormat {
                 dtype = new H5Datatype(this, null, name);
             }
             else {
-                dtype = t;
+                dtype = (H5Datatype) tnative;
             }
         }
         finally {

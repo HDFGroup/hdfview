@@ -197,6 +197,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 CompoundDS dset = null;
                 String name = templateChoice.getItem(templateChoice.getSelectionIndex());
 
+                log.trace("templateChoice start name={}", name);
                 for (CompoundDS ds : compoundDSList)
                     if (ds.getName().equals(name))
                         dset = ds;
@@ -259,6 +260,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 for (int i = 0; i < numberOfMembers; i++) {
                     ((Text) editors[i][0].getEditor()).setText(mNames[i]);
 
+                    log.trace("mNames[{}] = {}", i, mNames[i]);
                     int typeIdx = -1;
                     int tclass = mTypes[i].getDatatypeClass();
                     long tsize = mTypes[i].getDatatypeSize();
@@ -327,6 +329,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                     if (typeIdx < 0) {
                         continue;
                     }
+                    log.trace("typeIdx={}", typeIdx);
 
                     CCombo typeCombo = ((CCombo) editors[i][1].getEditor());
                     typeCombo.select(typeIdx);
@@ -345,6 +348,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                         ((Text) editors[i][2].getEditor()).setText(String.valueOf(mOrders[i]));
                     }
                 } //  (int i=0; i<numberOfMembers; i++)
+                log.trace("templateChoice finish");
             }
         });
 
@@ -611,6 +615,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
         String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
 
+        log.trace("create table columns");
         TableColumn column = new TableColumn(table, SWT.NONE);
         column.setText(colNames[0]);
 
@@ -738,6 +743,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         long dims[], maxdims[], chunks[];
         int rank;
 
+        log.trace("createCompoundDS start");
         maxdims = chunks = null;
         String dname = nameField.getText();
         if ((dname == null) || (dname.length() <= 0)) {
@@ -764,6 +770,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 throw new IllegalArgumentException("Member name is empty");
             }
             mNames[i] = name;
+            log.trace("createCompoundDS member[{}] name = {}", i, mNames[i]);
 
             int order = 1;
             String orderStr = (String) table.getItem(i).getData("MemberSize");
@@ -778,6 +785,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
             mOrders[i] = order;
 
             String typeName = (String) table.getItem(i).getData("MemberType");
+            log.trace("createCompoundDS type[{}] name = {}", i, typeName);
             Datatype type = null;
             if (DATATYPE_NAMES[0].equals(typeName)) {
                 type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
@@ -810,12 +818,15 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 type = fileFormat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[10].equals(typeName)) { // enum
+                type = fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
                 if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "Create", "Invalid member values: " + orderStr);
                     return null;
                 }
-                type = fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE, orderStr);
+                else {
+                    type.setEnumMembers(orderStr);
+                }
             }
             else if (DATATYPE_NAMES[11].equals(typeName)) {
                 type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.SIGN_NONE);
@@ -827,6 +838,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         } //  (int i=0; i<n; i++)
 
         rank = rankChoice.getSelectionIndex() + 1;
+        log.trace("createCompoundDS rank={}", rank);
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
@@ -951,14 +963,12 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         }
 
         if (checkChunked.getSelection()) {
-            obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, chunks, gzip, mNames, mDatatypes, mOrders,
-                    null);
+            obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, chunks, gzip, mNames, mDatatypes, mOrders, null);
         }
         else {
-            obj = fileFormat
-                    .createCompoundDS(dname, pgroup, dims, maxdims, null, -1, mNames, mDatatypes, mOrders, null);
+            obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, null, -1, mNames, mDatatypes, mOrders, null);
         }
-
+        log.trace("createCompoundDS finish");
         return obj;
     }
 

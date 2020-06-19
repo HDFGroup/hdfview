@@ -82,6 +82,8 @@ public class NewDataObjectDialog extends Dialog {
     public int tsize = Datatype.NATIVE;
     public int torder = Datatype.NATIVE;
     public int tsign = Datatype.NATIVE;
+    public boolean isEnum = false;
+    public String strEnumMap = null;
     public boolean isVLen = false;
     public boolean isVlenStr = false;
 
@@ -325,13 +327,15 @@ public class NewDataObjectDialog extends Dialog {
         }
     }
 
-    public Datatype createDatatype(String name) {
+    public Datatype createNewDatatype(String name) {
         Datatype datatype = null;
 
         tclass = Datatype.CLASS_NO_CLASS;
         tsize = Datatype.NATIVE;
         torder = Datatype.NATIVE;
         tsign = Datatype.NATIVE;
+        isEnum = false;
+        strEnumMap = null;
         isVLen = false;
         isVlenStr = false;
 
@@ -365,7 +369,8 @@ public class NewDataObjectDialog extends Dialog {
                 tclass = Datatype.CLASS_REFERENCE;
             }
             else if (idx == 5) {
-                tclass = Datatype.CLASS_ENUM;
+                isEnum = true;
+                tclass = Datatype.CLASS_INTEGER;
             }
             else if (idx == 6) {
                 isVLen = true;
@@ -404,16 +409,6 @@ public class NewDataObjectDialog extends Dialog {
                     }
                     tsize = stringLength;
                 }
-            }
-            else if (tclass == Datatype.CLASS_ENUM) {
-                log.trace("CLASS_ENUM start");
-                String enumStr = lengthField.getText();
-                if ((enumStr == null) || (enumStr.length() < 1) || enumStr.endsWith("...")) {
-                    shell.getDisplay().beep();
-                    Tools.showError(shell, "Create", "Invalid member values: " + lengthField.getText());
-                    return null;
-                }
-                log.trace("CLASS_ENUM enumStr={}", enumStr);
             }
             else if (tclass == Datatype.CLASS_REFERENCE) {
                 tsize = 1;
@@ -477,16 +472,24 @@ public class NewDataObjectDialog extends Dialog {
                     basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
                     tclass = Datatype.CLASS_VLEN;
                 }
-                String enumMap = null;
-                if (tclass == Datatype.CLASS_ENUM) {
-                    log.trace("CLASS_ENUM {}",lengthField.getText());
-                    enumMap = lengthField.getText();
-                }
-                if (isH5) {
-                    datatype = ((H5File)fileFormat).createDatatype(tclass, tsize, torder, tsign, enumMap, basedatatype, name);
+                if (isEnum && isH5) {
+                    log.trace("create Enum base type");
+                    basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
+
+                    strEnumMap = lengthField.getText();
+                    if ((strEnumMap == null) || (strEnumMap.length() < 1) || strEnumMap.endsWith("...")) {
+                        shell.getDisplay().beep();
+                        Tools.showError(shell, "Create", "Invalid member values: " + lengthField.getText());
+                        return null;
+                    }
+                    log.trace("CLASS_ENUM enumStr={}", strEnumMap);
+
+                    tclass = Datatype.CLASS_ENUM;
+                    Datatype t = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
+                    return ((H5File)fileFormat).createNamedDatatype(t, strEnumMap, name);
                 }
                 else {
-                    datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
+                    datatype = fileFormat.createNamedDatatype(tclass, tsize, torder, tsign, basedatatype, name);
                 }
             }
             catch (Exception ex) {
