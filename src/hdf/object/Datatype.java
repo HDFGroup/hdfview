@@ -555,8 +555,6 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         if (enumMembers == null) {
             log.trace("getEnumMembers: null");
             enumMembers = new HashMap<>();
-            enumMembers.put("1", "0");
-            enumMembers.put("2", "1");
         }
 
         log.trace("getEnumMembers: finish");
@@ -577,13 +575,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     @SuppressWarnings("rawtypes")
     public final String getEnumMembersAsString() {
         log.trace("getEnumMembersAsString: start");
-        if (enumMembers == null) {
-            log.trace("getEnumMembersAsString: null");
-            enumMembers = new HashMap<>();
-            enumMembers.put("1", "0");
-            enumMembers.put("2", "1");
-        }
-
+        getEnumMembers();
         StringBuilder enumStr = new StringBuilder();
         Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
         int i = enumMembers.size();

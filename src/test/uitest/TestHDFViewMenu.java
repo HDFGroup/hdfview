@@ -835,7 +835,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("About HDFView"));
 
-                    //("HDF Viewer, Version " + VERSION + "\\sFor.*\\s\\sCopyright.*2006-2018 The HDF Group.\\sAll rights reserved.");
+                    //("HDF Viewer, Version " + VERSION + "\\sFor.*\\s\\sCopyright.*2006-2020 The HDF Group.\\sAll rights reserved.");
             botshell.bot().button("   &OK   ").click();
         }
         catch (Exception ex) {

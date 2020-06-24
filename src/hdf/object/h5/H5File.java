@@ -1500,27 +1500,6 @@ public class H5File extends FileFormat {
         return obj;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hdf.object.FileFormat#createNamedDatatype(int, int, int, int, java.lang.String)
-     */
-    @Override
-    public Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, String name) throws Exception {
-        return createNamedDatatype(tclass, tsize, torder, tsign, null, name);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see hdf.object.FileFormat#createNamedDatatype(int, int, int, int, java.lang.String)
-     */
-    @Override
-    public Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name) throws Exception {
-        Datatype t = createDatatype(tclass, tsize, torder, tsign, tbase);
-        return createNamedDatatype(t, null, name);
-    }
-
 
     /**
      * Creates a named datatype in a file.
@@ -1551,22 +1530,20 @@ public class H5File extends FileFormat {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public Datatype createNamedDatatype(Datatype tnative, String enumMap, String name) throws Exception {
-        log.trace("createNamedDatatype(): start: enumMap={} name={}", enumMap, name);
+    public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception {
+        log.trace("createNamedDatatype(): start: name={}", name);
 
-        long tid = -1;
         H5Datatype dtype = null;
 
-        try {
-            if (enumMap != null)
-                tnative.setEnumMembers(enumMap);
-            if ((tid = tnative.createNative()) < 0) {
-                log.debug("createDatatype(): createNative() failure");
-                log.trace("createDatatype(): exit");
-                throw new Exception("createNative() failed");
-            }
+        if (name != null ) {
+            long tid = -1;
+            try {
+                if ((tid = tnative.createNative()) < 0) {
+                    log.debug("createDatatype(): createNative() failure");
+                    log.trace("createDatatype(): exit");
+                    throw new Exception("createNative() failed");
+                }
 
-            if (name != null ) {
                 H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
                 byte[] ref_buf = H5.H5Rcreate(fid, name, HDF5Constants.H5R_OBJECT, -1);
@@ -1577,12 +1554,12 @@ public class H5File extends FileFormat {
 
                 dtype = new H5Datatype(this, null, name);
             }
-            else {
-                dtype = (H5Datatype) tnative;
+            finally {
+                H5.H5Tclose(tid);
             }
         }
-        finally {
-            H5.H5Tclose(tid);
+        else {
+            dtype = (H5Datatype) tnative;
         }
 
         log.trace("createDatatype(): finish");

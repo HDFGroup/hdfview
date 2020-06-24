@@ -37,7 +37,6 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5Datatype;
-import hdf.object.h5.H5File;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
@@ -370,7 +369,7 @@ public class NewDataObjectDialog extends Dialog {
             }
             else if (idx == 5) {
                 isEnum = true;
-                tclass = Datatype.CLASS_INTEGER;
+                tclass = Datatype.CLASS_ENUM;
             }
             else if (idx == 6) {
                 isVLen = true;
@@ -420,24 +419,24 @@ public class NewDataObjectDialog extends Dialog {
             else if (tclass == Datatype.CLASS_FLOAT) {
                 tsize = idx * 4;
             }
-            else if (tclass == Datatype.CLASS_INTEGER) {
+            else if (tclass == Datatype.CLASS_INTEGER || tclass == Datatype.CLASS_ENUM) {
                 switch(idx) {
-                    case 0:
+                    case 1:
                         tsize = 1;
                         break;
-                    case 1:
+                    case 2:
                         tsize = 2;
                         break;
-                    case 2:
+                    case 3:
                         tsize = 4;
                         break;
-                    case 3:
+                    case 4:
                         tsize = 8;
                         break;
                     default:
                         break;
                 }
-                log.trace("CLASS_INTEGER: tsize={}", tsize);
+                log.trace("CLASS_INTEGER or CLASS_ENUM: tsize={}", tsize);
             }
             else if (tclass == Datatype.CLASS_FLOAT) {
                 tsize = (idx + 1) * 4;
@@ -465,16 +464,17 @@ public class NewDataObjectDialog extends Dialog {
                 torder = Datatype.ORDER_BE;
             }
 
-            Datatype basedatatype = null;
+            Datatype thedatatype = null;
             try {
+                Datatype basedatatype = null;
                 if (isVLen) {
                     log.trace("create VLen base type");
                     basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
                     tclass = Datatype.CLASS_VLEN;
+                    thedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
                 }
-                if (isEnum && isH5) {
+                else if (isEnum && isH5) {
                     log.trace("create Enum base type");
-                    basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
 
                     strEnumMap = lengthField.getText();
                     if ((strEnumMap == null) || (strEnumMap.length() < 1) || strEnumMap.endsWith("...")) {
@@ -484,13 +484,12 @@ public class NewDataObjectDialog extends Dialog {
                     }
                     log.trace("CLASS_ENUM enumStr={}", strEnumMap);
 
-                    tclass = Datatype.CLASS_ENUM;
-                    Datatype t = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
-                    return ((H5File)fileFormat).createNamedDatatype(t, strEnumMap, name);
+                    thedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
+                    thedatatype.setEnumMembers(strEnumMap);
                 }
-                else {
-                    datatype = fileFormat.createNamedDatatype(tclass, tsize, torder, tsign, basedatatype, name);
-                }
+                else
+                    thedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
+                datatype = fileFormat.createNamedDatatype(thedatatype, name);
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();

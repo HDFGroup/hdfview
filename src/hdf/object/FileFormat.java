@@ -1072,71 +1072,27 @@ public abstract class FileFormat extends File {
 
     /**
      * Creates a named datatype in a file.
-     *
-     * The following code creates a named datatype in a file.
-     *
-     * <pre>
-     * H5File file = (H5File) h5file.createInstance(&quot;test_hdf5.h5&quot;, FileFormat.WRITE);
-     * H5Datatype dtype = file.createNamedDatatype(
-     *                             Datatype.CLASS_INTEGER,
-     *                             4,
-     *                             Datatype.NATIVE,
-     *                             Datatype.NATIVE,
-     *                             &quot;Native Integer&quot;);
-     * </pre>
-     *
-     * @param tclass
-     *            class of datatype, e.g. Datatype.CLASS_INTEGER
-     * @param tsize
-     *            size of the datatype in bytes, e.g. 4 for 32-bit integer.
-     * @param torder
-     *            order of the byte endianing, e.g. Datatype.ORDER_LE.
-     * @param tsign
-     *            signed or unsigned of an integer, e.g. Datatype.SIGN_NONE.
-     * @param name
-     *            name of the datatype to create, e.g. "Native Integer".
-     * @return The new datatype if successful; otherwise returns null.
-     * @throws Exception
-     *             The exceptions thrown vary depending on the implementing class.
-     */
-    public abstract Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, String name) throws Exception;
-
-    /**
-     * Creates a named datatype in a file.
      * <p>
      * The following code creates a named datatype in a file.
      *
      * <pre>
      * H5File file = (H5File) h5file.createInstance(&quot;test_hdf5.h5&quot;, FileFormat.WRITE);
      * H5Datatype dtype = file.createNamedDatatype(
-     *                             Datatype.CLASS_INTEGER,
-     *                             4,
-     *                             Datatype.NATIVE,
-     *                             Datatype.NATIVE,
-     *                             basetype,
+     *                             nativetype,
      *                             &quot;Native Integer&quot;);
      * </pre>
-     *
-     * @param tclass
-     *            class of datatype, e.g. Datatype.CLASS_INTEGER
-     * @param tsize
-     *            size of the datatype in bytes, e.g. 4 for 32-bit integer.
-     * @param torder
-     *            order of the byte endianing, e.g. Datatype.ORDER_LE.
-     * @param tsign
-     *            signed or unsigned of an integer, e.g. Datatype.SIGN_NONE.
-     * @param tbase
-     *            the base datatype of the new datatype
+     * @param tnative
+     *            the native datatype of the new datatype
      * @param name
      *            name of the datatype to create, e.g. "Native Integer".
      * @return The new datatype if successful; otherwise returns null.
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name) throws Exception
+    public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception
     {
-        // Derived classes must override this function to use base type option
-        return createNamedDatatype(tclass, tsize, torder, tsign, name);
+        // Derived classes must override this function
+        return createNamedDatatype(tnative, name);
     }
 
     // REVIEW DOCS for createDatatype(). Check and document exceptions.
