@@ -423,7 +423,6 @@ public class NewDataObjectDialog extends Dialog {
                 // Note that idx == 0 is set to either
                 //       "NATIVE" if isH5 is true
                 //       "DEFAULT" otherwise
-                }
                 switch(idx) {
                     case 1:
                         tsize = 1;
