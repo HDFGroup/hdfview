@@ -344,7 +344,7 @@ public class NewDataObjectDialog extends Dialog {
             datatype = (Datatype)refObject;
         }
         else {
-           // set datatype class
+           // idx is set to datatype class
             int idx = classChoice.getSelectionIndex();
             if (idx == 0) {
                 tclass = Datatype.CLASS_INTEGER;
@@ -388,7 +388,7 @@ public class NewDataObjectDialog extends Dialog {
                 tsize = -1;
             }
 
-            // set datatype size/order
+            // idx is set to datatype size
             idx = sizeChoice.getSelectionIndex();
             if (tclass == Datatype.CLASS_STRING) {
                 log.trace("CLASS_STRING start");
@@ -420,6 +420,10 @@ public class NewDataObjectDialog extends Dialog {
                 tsize = idx * 4;
             }
             else if (tclass == Datatype.CLASS_INTEGER || tclass == Datatype.CLASS_ENUM) {
+                // Note that idx == 0 is set to either
+                //       "NATIVE" if isH5 is true
+                //       "DEFAULT" otherwise
+                }
                 switch(idx) {
                     case 1:
                         tsize = 1;

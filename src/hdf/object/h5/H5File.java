@@ -1522,8 +1522,6 @@ public class H5File extends FileFormat {
      *
      * @param tnative
      *            native datatype previously created
-     * @param enumMap
-     *            if type enum, the mapping.
      * @param name
      *            name of the datatype to create, e.g. "Native Integer".
      * @return The new datatype if successful; otherwise returns null.
@@ -1537,6 +1535,7 @@ public class H5File extends FileFormat {
 
         if (name != null ) {
             long tid = -1;
+            tnative.setName(name);
             try {
                 if ((tid = tnative.createNative()) < 0) {
                     log.debug("createDatatype(): createNative() failure");
@@ -1552,7 +1551,7 @@ public class H5File extends FileFormat {
                 long[] oid = new long[1];
                 oid[0] = l; // save the object ID
 
-                dtype = new H5Datatype(this, null, name);
+                dtype = new H5Datatype(this, name, null, oid);
             }
             finally {
                 H5.H5Tclose(tid);

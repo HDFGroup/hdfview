@@ -575,20 +575,21 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     @SuppressWarnings("rawtypes")
     public final String getEnumMembersAsString() {
         log.trace("getEnumMembersAsString: start");
-        getEnumMembers();
         StringBuilder enumStr = new StringBuilder();
-        Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
-        int i = enumMembers.size();
-        log.trace("getEnumMembersAsString: enum size={}", i);
-        while (entries.hasNext()) {
-            Entry thisEntry = entries.next();
-            enumStr.append((String) thisEntry.getKey())
-                   .append("=")
-                   .append((String) thisEntry.getValue());
+        if (getEnumMembers() != null) {
+            Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
+            int i = enumMembers.size();
+            log.trace("getEnumMembersAsString: enum size={}", i);
+            while (entries.hasNext()) {
+                Entry thisEntry = entries.next();
+                enumStr.append((String) thisEntry.getKey())
+                       .append("=")
+                       .append((String) thisEntry.getValue());
 
-            i--;
-            if (i > 0)
-                enumStr.append(", ");
+                i--;
+                if (i > 0)
+                    enumStr.append(", ");
+            }
         }
         log.trace("getEnumMembersAsString: finish {}", enumStr);
         return enumStr.toString();

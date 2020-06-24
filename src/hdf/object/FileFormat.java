@@ -1091,8 +1091,9 @@ public abstract class FileFormat extends File {
      */
     public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception
     {
-        // Derived classes must override this function
-        return createNamedDatatype(tnative, name);
+        // If the implementing subclass doesn't have this method then that
+        // format doesn't support Named Datatypes and we throw an exception.
+        throw new UnsupportedOperationException("Datatype FileFormat.createNamedDatatype(...) is not implemented.");
     }
 
     // REVIEW DOCS for createDatatype(). Check and document exceptions.

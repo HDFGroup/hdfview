@@ -946,15 +946,23 @@ public class H5Datatype extends Datatype {
         long tid = -1;
         long tmptid = -1;
 
-        if (isNamed) {
+        log.debug("createNative(): path={} name={}", getPath(), getName());
+        String the_path = null;
+        if (getPath() != null)
+            the_path = getPath();
+        if (getName() != null)
+            the_path += getName();
+        if (isNamed && the_path != null) {
             log.trace("createNative(): isNamed");
             try {
-                tid = H5.H5Topen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
+                tid = H5.H5Topen(getFID(), the_path, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
                 log.debug("createNative(): name {} H5Topen failure: ", getPath() + getName(), ex);
             }
         }
+        else
+            log.debug("createNative(): isNamed but named path={}", the_path);
 
         if (tid >= 0) {
             log.trace("createNative(): tid >= 0");
@@ -962,8 +970,7 @@ public class H5Datatype extends Datatype {
             return tid;
         }
 
-        log.trace("createNative(): datatypeClass={} datatypeSize={} baseType={}", datatypeClass, datatypeSize,
-                baseType);
+        log.trace("createNative(): datatypeClass={} datatypeSize={} baseType={}", datatypeClass, datatypeSize, baseType);
 
         switch (datatypeClass) {
             case CLASS_ARRAY:
