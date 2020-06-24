@@ -901,8 +901,10 @@ public class H5ScalarDS extends ScalarDS {
                  */
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
                         selectedStride, selectedDims, spaceIDs);
+                log.trace("scalarDatasetCommonIO(): totalSelectedSpacePoints={}", totalSelectedSpacePoints);
 
                 if (ioType == IO_TYPE.READ) {
+                    log.trace("scalarDatasetCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}", dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(), dsDatatype.isRefObj());
                     if ((originalBuf == null) || dsDatatype.isEnum() || dsDatatype.isText() || dsDatatype.isRefObj()
                             || ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
                         try {
@@ -916,6 +918,7 @@ public class H5ScalarDS extends ScalarDS {
                     }
                     else {
                         // reuse the buffer if the size is the same
+                        log.trace("scalarDatasetCommonIO():read ioType reuse the buffer if the size is the same");
                         theData = originalBuf;
                     }
 
@@ -925,6 +928,7 @@ public class H5ScalarDS extends ScalarDS {
                          */
                         long tid = -1;
                         try {
+                            log.trace("scalarDatasetCommonIO():read ioType create native");
                             tid = dsDatatype.createNative();
 
                             if (dsDatatype.isVLEN() || (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isVLEN())) {

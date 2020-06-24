@@ -311,19 +311,11 @@ public class NewDataObjectDialog extends Dialog {
         sizeChoice.select(0);
         endianChoice.select(0);
 
-        if (useCommittedType.getSelection()) {
-            classChoice.setEnabled(false);
-            sizeChoice.setEnabled(false);
-            endianChoice.setEnabled(false);
-            checkUnsigned.setEnabled(false);
-        }
-        else {
-            refObject = null;
-            classChoice.setEnabled(true);
-            sizeChoice.setEnabled(true);
-            endianChoice.setEnabled(isH5);
-            checkUnsigned.setEnabled(true);
-        }
+        refObject = null;
+        classChoice.setEnabled(true);
+        sizeChoice.setEnabled(true);
+        endianChoice.setEnabled(isH5);
+        checkUnsigned.setEnabled(true);
     }
 
     public Datatype createNewDatatype(String name) {

@@ -1535,13 +1535,20 @@ public class H5File extends FileFormat {
 
         if (name != null ) {
             long tid = -1;
-            tnative.setName(name);
+            log.trace("createNamedDatatype(): name={}", name);
+            try {
+                tnative.setName(name);
+            }
+            catch (Exception ex) {
+                log.debug("createNamedDatatype():setName(): {} failure: ", name);
+            }
             try {
                 if ((tid = tnative.createNative()) < 0) {
-                    log.debug("createDatatype(): createNative() failure");
-                    log.trace("createDatatype(): exit");
+                    log.debug("createNamedDatatype(): createNative() failure");
+                    log.trace("createNamedDatatype(): exit");
                     throw new Exception("createNative() failed");
                 }
+                log.trace("createNamedDatatype(): createNative gets id={}", tid);
 
                 H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
@@ -1561,7 +1568,7 @@ public class H5File extends FileFormat {
             dtype = (H5Datatype) tnative;
         }
 
-        log.trace("createDatatype(): finish");
+        log.trace("createNamedDatatype(): finish");
         return dtype;
     }
 
@@ -2574,6 +2581,7 @@ public class H5File extends FileFormat {
             }
             else if (obj_type == HDF5Constants.H5O_TYPE_NAMED_DATATYPE) {
                 Datatype t = new H5Datatype(this, obj_name, fullPath, oid); // deprecated!
+                log.trace("depth_first({}): H5O_TYPE_NAMED_DATATYPE name={}", parentObject, t.getDatatypeBase().getFullName());
 
                 pgroup.addToMemberList(t);
             }

@@ -181,12 +181,8 @@ public class NC2File extends FileFormat {
         log.trace("loadTree(): start");
 
         long[] oid = { 0 };
-        NC2Group rootGroup = new NC2Group(
-                this,
-                "/",
-                null, // root object does not have a parent path
-                null, // root object does not have a parent node
-                oid);
+        // root object does not have a parent path or a parent node
+        NC2Group rootGroup = new NC2Group(this, "/", null, null, oid);
 
         if (ncFile == null) {
             return rootGroup;
@@ -248,14 +244,7 @@ public class NC2File extends FileFormat {
     }
 
     @Override
-    public Datatype createNamedDatatype(int tclass, int tsize, int torder,
-            int tsign, String name) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation - create datatype with name.");
-    }
-
-    @Override
-    public Datatype createNamedDatatype(int tclass, int tsize, int torder,
-            int tsign, Datatype tbase, String name) throws Exception {
+    public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception {
         throw new UnsupportedOperationException("netcdf3 does not support named datatype.");
     }
 
@@ -413,8 +402,7 @@ public class NC2File extends FileFormat {
 
     // implementing FileFormat
     @Override
-    public HObject get(String path) throws Exception
-    {
+    public HObject get(String path) throws Exception {
         throw new UnsupportedOperationException("get() is not supported");
     }
 }

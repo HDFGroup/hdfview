@@ -352,6 +352,7 @@ public abstract class HObject implements Serializable {
      * @throws Exception if name is root or contains separator
      */
     public void setName(String newName) throws Exception {
+        log.trace("setName(): name={}", newName);
         if (newName != null) {
             if (newName.equals(HObject.SEPARATOR)) {
                 throw new IllegalArgumentException("The new name cannot be the root");

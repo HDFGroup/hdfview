@@ -156,6 +156,7 @@ public class H5Datatype extends Datatype {
         long tid = -1;
         if (theFile != null) {
             try {
+                log.trace("constructor H5Topen() with {}", this.getFullName());
                 tid = H5.H5Topen(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
                 fromNative(tid);
             }
@@ -390,11 +391,13 @@ public class H5Datatype extends Datatype {
         if (objInfo.num_attrs < 0) {
             long tid = -1;
             try {
+                log.trace("hasAttribute(): path={} name={}", getPath(), getName());
                 tid = H5.H5Topen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
                 fromNative(tid);
                 objInfo = H5.H5Oget_info(tid);
-                isNamed = true;
-                log.trace("hasAttribute(): isNamed={}", isNamed);
+                if (objInfo.num_attrs > 0)
+                    isNamed = true;
+                log.trace("hasAttribute(): datatype with attribute are named");
             }
             catch (Exception ex) {
                 objInfo.num_attrs = 0;
@@ -599,8 +602,10 @@ public class H5Datatype extends Datatype {
                 isVariableStr = H5.H5Tis_variable_str(tid);
                 isVLEN = false;
                 log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, isVLEN);
-                if (H5.H5Tcommitted(tid))
+                if (H5.H5Tcommitted(tid)) {
                     isNamed = true;
+                    log.trace("fromNative(): path={} name={}", this.getPath(), this.getName());
+                }
                 log.trace("fromNative(): isNamed={}", isNamed);
             }
             catch (Exception ex) {
@@ -611,7 +616,7 @@ public class H5Datatype extends Datatype {
             try {
                 isUchar = H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_UCHAR);
                 isChar = (H5.H5Tequal(tid, HDF5Constants.H5T_NATIVE_CHAR) || isUchar);
-                log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, isVLEN);
+                log.trace("fromNative(): tclass={}, tsize={}, torder={}, isUchar={}, isChar={}", nativeClass, tsize, torder, isUchar, isChar);
             }
             catch (Exception ex) {
                 log.debug("fromNative(): native char type failure: ", ex);
@@ -1934,13 +1939,24 @@ public class H5Datatype extends Datatype {
 
     @Override
     public void setName(String newName) throws Exception {
-        H5File.renameObject(this, newName);
+        log.trace("setName(): start");
+        try {
+            H5File.renameObject(this, newName);
+        }
+        catch (Exception ex) {
+            log.debug("setName(): ", ex);
+        }
         super.setName(newName);
+        log.trace("setName(): finish");
     }
 
     @Override
     public boolean isText() {
         return (datatypeClass == Datatype.CLASS_STRING);
+    }
+
+    public boolean isNamed() {
+        return isNamed;
     }
 
     public boolean isRefObj() {

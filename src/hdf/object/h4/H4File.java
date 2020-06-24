@@ -223,8 +223,7 @@ public class H4File extends FileFormat {
      * instance associated with the file.
      *
      * @throws HDFException
-     *             If the file cannot be created or if createFlag has unexpected
-     *             value.
+     *             If the file cannot be created or if createFlag has unexpected value.
      *
      * @see hdf.object.FileFormat#createFile(java.lang.String, int)
      * @see #H4File(String, int)
@@ -312,11 +311,10 @@ public class H4File extends FileFormat {
         }
 
         // Only check for NetCDF if the file exists, else isNetCDF() throws an exception
-        if (exists()) isNetCDF = isNetCDF(fullFileName);
-        if (isNetCDF) {
+        if (exists())
+            isNetCDF = isNetCDF(fullFileName);
+        if (isNetCDF)
             isReadOnly = true; // read only for netCDF
-        }
-
         log.trace("open(): isNetCDF={}", isNetCDF);
 
         // only support SDS APIs for netCDF
@@ -334,7 +332,8 @@ public class H4File extends FileFormat {
         try {
             sdid = HDFLibrary.SDstart(fullFileName, flag & ~HDFConstants.DFACC_CREATE);
 
-            if (sdid < 0) log.debug("open(): SDstart failed!");
+            if (sdid < 0)
+                log.debug("open(): SDstart failed!");
         }
         catch (HDFException ex) {
             log.debug("open(): SDstart failure: ", ex);
@@ -417,12 +416,7 @@ public class H4File extends FileFormat {
     }
 
     @Override
-    public Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, String name) throws Exception {
-        throw new UnsupportedOperationException("HDF4 does not support named datatype.");
-    }
-
-    @Override
-    public Datatype createNamedDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name) throws Exception {
+    public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception {
         throw new UnsupportedOperationException("HDF4 does not support named datatype.");
     }
 
@@ -540,7 +534,8 @@ public class H4File extends FileFormat {
         Object attrValue;
         try {
             attrValue = attr.getData();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             attrValue = null;
             log.trace("writeAttribute(): getData() failure:", ex);
         }
@@ -749,10 +744,8 @@ public class H4File extends FileFormat {
          * appropriately, as it currently assumes the root path to be null.
          */
         long[] oid = { 0, 0 };
-        rootObject = new H4Group(this, "/",
-                null, // root object does not have a parent path
-                null, // root object does not have a parent object
-                oid);
+        // root object does not have a parent path or a parent object
+        rootObject = new H4Group(this, "/", null, null, oid);
 
         int i0 = Math.max(0, getStartMembers());
         int i1 = getMaxMembers();
