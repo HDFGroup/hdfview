@@ -183,6 +183,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     protected Datatype baseType;
 
     /**
+     * Determines whether this datatype is a named datatype
+     */
+    protected boolean isNamed = false;
+
+    /**
      * The dimensions of the ARRAY element of an ARRAY datatype.
      */
     protected long[] arrayDims;
@@ -796,6 +801,15 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     public boolean isFloat() {
         return (datatypeClass == Datatype.CLASS_FLOAT);
+    }
+
+    /**
+     * Checks if this datatype is a named type.
+     *
+     * @return true if the datatype is named; false otherwise
+     */
+    public boolean isNamed() {
+        return isNamed;
     }
 
     /**

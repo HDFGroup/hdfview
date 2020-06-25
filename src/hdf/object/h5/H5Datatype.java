@@ -54,9 +54,6 @@ public class H5Datatype extends Datatype {
      */
     private List<Attribute> attributeList;
 
-    /** Flag to indicate if this datatype is a named datatype */
-    private boolean isNamed = false;
-
     private boolean isRefObj = false;
 
     private boolean isRegRef = false;
@@ -604,9 +601,15 @@ public class H5Datatype extends Datatype {
                 log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize, torder, isVLEN);
                 if (H5.H5Tcommitted(tid)) {
                     isNamed = true;
+                    try {
+                        setName(H5.H5Iget_name(tid));
+                    }
+                    catch (Exception nex) {
+                        log.debug("fromNative(): setName failure: {}", nex.getMessage());
+                    }
                     log.trace("fromNative(): path={} name={}", this.getPath(), this.getName());
                 }
-                log.trace("fromNative(): isNamed={}", isNamed);
+                log.trace("fromNative(): isNamed={}", isNamed());
             }
             catch (Exception ex) {
                 log.debug("fromNative(): failure: ", ex);
@@ -957,7 +960,7 @@ public class H5Datatype extends Datatype {
             the_path = getPath();
         if (getName() != null)
             the_path += getName();
-        if (isNamed && the_path != null) {
+        if (isNamed() && the_path != null) {
             log.trace("createNative(): isNamed");
             try {
                 tid = H5.H5Topen(getFID(), the_path, HDF5Constants.H5P_DEFAULT);
@@ -1572,7 +1575,7 @@ public class H5Datatype extends Datatype {
      */
     @Override
     public String getDescription() {
-        log.trace("getDescription(): start - isNamed={}", isNamed);
+        log.trace("getDescription(): start - isNamed={}", isNamed());
 
         if (datatypeDescription != null) {
             log.trace("getDescription(): exit");
@@ -1765,7 +1768,7 @@ public class H5Datatype extends Datatype {
                 description.append("Unknown");
                 break;
         }
-        if (isNamed)
+        if (isNamed())
             description.append("->").append(getFullName());
 
         log.trace("getDescription(): finish");
@@ -1942,10 +1945,6 @@ public class H5Datatype extends Datatype {
     @Override
     public boolean isText() {
         return (datatypeClass == Datatype.CLASS_STRING);
-    }
-
-    public boolean isNamed() {
-        return isNamed;
     }
 
     public boolean isRefObj() {
