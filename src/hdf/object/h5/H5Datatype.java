@@ -1766,12 +1766,7 @@ public class H5Datatype extends Datatype {
                 break;
         }
         if (isNamed)
-            if (baseType != null) {
-                description.append("->").append(baseType.getFullName());
-            }
-            else {
-                description.append("->COMMITTED");
-            }
+            description.append("->").append(getFullName());
 
         log.trace("getDescription(): finish");
         return description.toString();
@@ -1939,13 +1934,7 @@ public class H5Datatype extends Datatype {
 
     @Override
     public void setName(String newName) throws Exception {
-        log.trace("setName(): start");
-        try {
-            H5File.renameObject(this, newName);
-        }
-        catch (Exception ex) {
-            log.debug("setName(): ", ex);
-        }
+        H5File.renameObject(this, newName);
         super.setName(newName);
         log.trace("setName(): finish");
     }

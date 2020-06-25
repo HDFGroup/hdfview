@@ -1540,7 +1540,7 @@ public class H5File extends FileFormat {
                 tnative.setName(name);
             }
             catch (Exception ex) {
-                log.debug("createNamedDatatype():setName(): {} failure: ", name);
+                log.debug("createNamedDatatype():setName(): {} failure: ", name, ex);
             }
             try {
                 if ((tid = tnative.createNative()) < 0) {
@@ -3107,23 +3107,26 @@ public class H5File extends FileFormat {
      *            If there is a failure.
      */
     public static void renameObject(HObject obj, String newName) throws Exception {
-        String currentFullPath = obj.getPath() + obj.getName();
+        String currentFullPath = obj.getFullName();
         String newFullPath = obj.getPath() + newName;
 
-        currentFullPath = currentFullPath.replaceAll("//", "/");
-        newFullPath = newFullPath.replaceAll("//", "/");
+        log.trace("renameObject(): currentFullPath={}", currentFullPath);
+        if (currentFullPath != null) {
+            currentFullPath = currentFullPath.replaceAll("//", "/");
+            newFullPath = newFullPath.replaceAll("//", "/");
 
-        if (currentFullPath.equals("/")) {
-            throw new HDF5Exception("Can't rename the root group.");
+            if (currentFullPath.equals("/") && obj instanceof Group) {
+                throw new HDF5Exception("Can't rename the root group.");
+            }
+
+            if (currentFullPath.equals(newFullPath)) {
+                throw new HDF5Exception("The new name is the same as the current name.");
+            }
+
+            if (obj.getName() != null)
+                // Call the library to move things in the file if object exists
+                H5.H5Lmove(obj.getFID(), currentFullPath, obj.getFID(), newFullPath, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
-
-        if (currentFullPath.equals(newFullPath)) {
-            throw new HDF5Exception("The new name is the same as the current name.");
-        }
-
-        // Call the library to move things in the file
-        H5.H5Lmove(obj.getFID(), currentFullPath, obj.getFID(), newFullPath, HDF5Constants.H5P_DEFAULT,
-                HDF5Constants.H5P_DEFAULT);
     }
 
     public static int getIndexTypeValue(String strtype) {
