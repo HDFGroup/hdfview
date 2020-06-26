@@ -3107,8 +3107,23 @@ public class H5File extends FileFormat {
      *            If there is a failure.
      */
     public static void renameObject(HObject obj, String newName) throws Exception {
+        renameObject(obj, obj.getPath(), newName);
+    }
+
+    /**
+     * Rename the given object
+     *
+     * @param obj
+     *            the object to be renamed.
+     * @param newName
+     *            the new name of the object.
+     *
+     * @throws Exception
+     *            If there is a failure.
+     */
+    public static void renameObject(HObject obj, String newPath, String newName) throws Exception {
         String currentFullPath = obj.getFullName();
-        String newFullPath = obj.getPath() + newName;
+        String newFullPath = obj.createFullname(newPath, newName);
 
         log.trace("renameObject(): currentFullPath={}", currentFullPath);
         if (currentFullPath != null) {

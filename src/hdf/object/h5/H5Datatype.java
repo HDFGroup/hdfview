@@ -602,7 +602,7 @@ public class H5Datatype extends Datatype {
                 if (H5.H5Tcommitted(tid)) {
                     isNamed = true;
                     try {
-                        setName(H5.H5Iget_name(tid));
+                        setFullname(getPath(), H5.H5Iget_name(tid));
                     }
                     catch (Exception nex) {
                         log.debug("fromNative(): setName failure: {}", nex.getMessage());
@@ -954,19 +954,15 @@ public class H5Datatype extends Datatype {
         long tid = -1;
         long tmptid = -1;
 
-        log.debug("createNative(): path={} name={}", getPath(), getName());
-        String the_path = null;
-        if (getPath() != null)
-            the_path = getPath();
-        if (getName() != null)
-            the_path += getName();
+        log.debug("createNative(): path+name={}", getFullName());
+        String the_path = getName();
         if (isNamed() && the_path != null) {
-            log.trace("createNative(): isNamed");
+            log.trace("createNative(): isNamed {}", the_path);
             try {
                 tid = H5.H5Topen(getFID(), the_path, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
-                log.debug("createNative(): name {} H5Topen failure: ", getPath() + getName(), ex);
+                log.debug("createNative(): name {} H5Topen failure: ", the_path, ex);
             }
         }
         else
@@ -1940,6 +1936,11 @@ public class H5Datatype extends Datatype {
         H5File.renameObject(this, newName);
         super.setName(newName);
         log.trace("setName(): finish");
+    }
+    @Override
+    public void setFullname(String newPath, String newName) throws Exception {
+        H5File.renameObject(this, newPath, newName);
+        super.setFullname(newPath, newName);
     }
 
     @Override

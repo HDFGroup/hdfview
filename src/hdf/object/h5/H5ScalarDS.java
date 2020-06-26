@@ -308,8 +308,8 @@ public class H5ScalarDS extends ScalarDS {
                 try {
                     datatype = new H5Datatype(tid);
 
-                    log.trace("init(): tid={} is tclass={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
-                            tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isVLEN(),
+                    log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
+                            tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isNamed(), datatype.isVLEN(),
                             datatype.isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
                 }
                 catch (Exception ex) {
