@@ -306,7 +306,7 @@ public class H5ScalarDS extends ScalarDS {
                 log.trace("init(): tid={} sid={} rank={}", tid, sid, rank);
 
                 try {
-                    datatype = new H5Datatype(tid);
+                    datatype = new H5Datatype(getFileFormat(), tid);
 
                     log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
                             tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isNamed(), datatype.isVLEN(),
@@ -463,29 +463,15 @@ public class H5ScalarDS extends ScalarDS {
         if (objInfo.num_attrs < 0) {
             long did = open();
             if (did >= 0) {
-                long tid = -1;
                 objInfo.num_attrs = 0;
 
                 try {
                     objInfo = H5.H5Oget_info(did);
                     nAttributes = (int) objInfo.num_attrs;
-
-                    tid = H5.H5Dget_type(did);
-                    H5Datatype dsDatatype = new H5Datatype(tid);
-
-                    log.trace("hasAttribute(): dataclass type: isText={},isVLEN={},isEnum={}", dsDatatype.isText(), dsDatatype.isVLEN(), dsDatatype.isEnum());
                 }
                 catch (Exception ex) {
                     objInfo.num_attrs = 0;
                     log.debug("hasAttribute(): get object info: ", ex);
-                }
-                finally {
-                    try {
-                        H5.H5Tclose(tid);
-                    }
-                    catch (HDF5Exception ex) {
-                        log.debug("hasAttribute(): H5Tclose(tid {}) failure: ", tid, ex);
-                    }
                 }
 
                 if(nAttributes > 0) {
@@ -580,7 +566,7 @@ public class H5ScalarDS extends ScalarDS {
                             log.debug("getDatatype(): toNative: ", ex);
                         }
                     }
-                    datatype = new H5Datatype(tid);
+                    datatype = new H5Datatype(getFileFormat(), tid);
                 }
                 catch (Exception ex) {
                     log.debug("getDatatype(): get datatype failure: ", ex);
@@ -1865,7 +1851,7 @@ public class H5ScalarDS extends ScalarDS {
                 catch (Exception ex) {
                     log.debug("getAttrValue(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                 }
-                H5Datatype dsDatatype = new H5Datatype(atid);
+                H5Datatype dsDatatype = new H5Datatype(getFileFormat(), atid);
 
                 asid = H5.H5Aget_space(aid);
                 long adims[] = null;

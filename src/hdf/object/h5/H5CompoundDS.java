@@ -377,7 +377,7 @@ public class H5CompoundDS extends CompoundDS {
                 selectedDims = new long[rank];
 
                 try {
-                    datatype = new H5Datatype(tid);
+                    datatype = new H5Datatype(getFileFormat(), tid);
 
                     log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}", tid,
                             datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
@@ -516,13 +516,11 @@ public class H5CompoundDS extends CompoundDS {
             long did = -1;
             long tid = -1;
 
-            log.trace("getDatatype(): datatype == null");
-
             did = open();
             if (did >= 0) {
                 try {
                     tid = H5.H5Dget_type(did);
-                    datatype = new H5Datatype(tid);
+                    datatype = new H5Datatype(getFileFormat(), tid);
                 }
                 catch (Exception ex) {
                     log.debug("getDatatype(): ", ex);

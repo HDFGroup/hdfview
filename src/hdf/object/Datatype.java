@@ -265,6 +265,41 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
+     * @param theFile
+     *            the HDF file.
+     * @param tclass
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
+     * @param tsize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value.
+     * @param torder
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
+     * @param tsign
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
+     *
+     * @throws Exception
+     *            if there is an error
+     */
+    public Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign) throws Exception {
+        this(theFile, tclass, tsize, torder, tsign, null);
+    }
+
+    /**
+     * Constructs a Datatype with specified class, size, byte order and sign.
+     * <p>
+     * The following is a list of a few examples of Datatype.
+     * <ol>
+     * <li>to create unsigned native integer<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
+     * <li>to create 16-bit signed integer with big endian<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
+     * <li>to create native float<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+     * <li>to create 64-bit double<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
+     * </ol>
+     *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
@@ -280,7 +315,46 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *            if there is an error
      */
     public Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
-        this(tclass, tsize, torder, tsign, null);
+        this(null, tclass, tsize, torder, tsign, null);
+    }
+
+    /**
+     * Constructs a Datatype with specified class, size, byte order and sign.
+     * <p>
+     * The following is a list of a few examples of Datatype.
+     * <ol>
+     * <li>to create unsigned native integer<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
+     * <li>to create 16-bit signed integer with big endian<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
+     * <li>to create native float<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+     * <li>to create 64-bit double<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
+     * </ol>
+     *
+     * @param theFile
+     *            the HDF file.
+     * @param tclass
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
+     *            etc.
+     * @param tsize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer,
+     *            the size is 4.
+     *            Valid values are NATIVE or a positive value.
+     * @param torder
+     *            the byte order of the datatype. Valid values are ORDER_LE,
+     *            ORDER_BE, ORDER_VAX, ORDER_NONE and NATIVE.
+     * @param tsign
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
+     * @param tbase
+     *            the base datatype of the new datatype
+     *
+     * @throws Exception
+     *            if there is an error
+     */
+    public Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
+        this(theFile, tclass, tsize, torder, tsign, tbase, null);
     }
 
     /**
@@ -313,11 +387,74 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param tbase
      *            the base datatype of the new datatype
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
-        this(tclass, tsize, torder, tsign, tbase, null);
+        this(null, tclass, tsize, torder, tsign, tbase, null);
+    }
+
+    /**
+     * Constructs a Datatype with specified class, size, byte order and sign.
+     * <p>
+     * The following is a list of a few examples of Datatype.
+     * <ol>
+     * <li>to create unsigned native integer<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
+     * <li>to create 16-bit signed integer with big endian<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
+     * <li>to create native float<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+     * <li>to create 64-bit double<br>
+     * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
+     * </ol>
+     *
+     * @param theFile
+     *            the HDF file.
+     * @param tclass
+     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
+     * @param tsize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
+     *            Valid values are NATIVE or a positive value.
+     * @param torder
+     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
+     *            ORDER_NONE and NATIVE.
+     * @param tsign
+     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
+     * @param tbase
+     *            the base datatype of the new datatype
+     * @param pbase
+     *            the parent datatype of the new datatype
+     *
+     * @throws Exception
+     *            if there is an error
+     */
+    public Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
+        super(theFile, null, null, null);
+        if ((tsize == 0) || (tsize < 0 && tsize != NATIVE))
+            throw new Exception("invalid datatype size - " + tsize);
+        if ((torder != ORDER_LE) && (torder != ORDER_BE) && (torder != ORDER_VAX)
+                && (torder != ORDER_NONE) && (torder != NATIVE))
+            throw new Exception("invalid datatype order - " + torder);
+        if ((tsign != SIGN_NONE) && (tsign != SIGN_2) && (tsign != NATIVE))
+            throw new Exception("invalid datatype sign - " + tsign);
+
+        datatypeClass = tclass;
+        datatypeSize = tsize;
+        datatypeOrder = torder;
+        datatypeSign = tsign;
+        enumMembers = null;
+        baseType = tbase;
+        arrayDims = null;
+        isVariableStr = (datatypeClass == Datatype.CLASS_STRING) && (tsize < 0);
+        isVLEN = (datatypeClass == Datatype.CLASS_VLEN) || isVariableStr;
+
+        compoundMemberNames = new ArrayList<>();
+        compoundMemberTypes = new ArrayList<>();
+        compoundMemberOffsets = new ArrayList<>();
+
+        log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}",
+                datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
     }
 
     /**
@@ -350,34 +487,36 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param pbase
      *            the parent datatype of the new datatype
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
-        if ((tsize == 0) || (tsize < 0 && tsize != NATIVE))
-            throw new Exception("invalid datatype size - " + tsize);
-        if ((torder != ORDER_LE) && (torder != ORDER_BE) && (torder != ORDER_VAX)
-                && (torder != ORDER_NONE) && (torder != NATIVE))
-            throw new Exception("invalid datatype order - " + torder);
-        if ((tsign != SIGN_NONE) && (tsign != SIGN_2) && (tsign != NATIVE))
-            throw new Exception("invalid datatype sign - " + tsign);
+        this(null, tclass, tsize, torder, tsign, tbase, pbase);
+    }
 
-        datatypeClass = tclass;
-        datatypeSize = tsize;
-        datatypeOrder = torder;
-        datatypeSign = tsign;
-        enumMembers = null;
-        baseType = tbase;
-        arrayDims = null;
-        isVariableStr = (datatypeClass == Datatype.CLASS_STRING) && (tsize < 0);
-        isVLEN = (datatypeClass == Datatype.CLASS_VLEN) || isVariableStr;
-
-        compoundMemberNames = new ArrayList<>();
-        compoundMemberTypes = new ArrayList<>();
-        compoundMemberOffsets = new ArrayList<>();
-
-        log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}",
-                datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
+    /**
+     * Constructs a Datatype with a given native datatype identifier.
+     * <p>
+     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
+     *
+     * <pre>
+     * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
+     * Datatype dtype = new Datatype(tid);
+     * </pre>
+     *
+     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     *
+     * @see #fromNative(long tid)
+     * @param theFile
+     *            the HDF file.
+     * @param tid
+     *            the native datatype identifier.
+     *
+     * @throws Exception
+     *            if there is an error
+     */
+    public Datatype(FileFormat theFile, long tid) throws Exception {
+        this(theFile, tid, null);
     }
 
     /**
@@ -396,11 +535,38 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param tid
      *            the native datatype identifier.
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public Datatype(long tid) throws Exception {
-        this(tid, null);
+        this(null, tid, null);
+    }
+
+    /**
+     * Constructs a Datatype with a given native datatype identifier.
+     * <p>
+     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
+     *
+     * <pre>
+     * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
+     * Datatype dtype = new Datatype(tid);
+     * </pre>
+     *
+     * will construct a datatype equivalent to new Datatype(CLASS_INTEGER, 4, NATIVE, SIGN_NONE);
+     *
+     * @see #fromNative(long tid)
+     * @param theFile
+     *            the HDF file.
+     * @param tid
+     *            the native datatype identifier.
+     * @param pbase
+     *            the parent datatype of the new datatype
+     *
+     * @throws Exception
+     *            if there is an error
+     */
+    public Datatype(FileFormat theFile, long tid, Datatype pbase) throws Exception {
+        this(theFile, CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE, null, pbase);
     }
 
     /**
@@ -421,11 +587,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @param pbase
      *            the parent datatype of the new datatype
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public Datatype(long tid, Datatype pbase) throws Exception {
-        this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE, null, pbase);
+        this(null, tid, pbase);
     }
 
     /**
@@ -556,13 +722,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return enumStr Map&lt;String,String%gt; pairs of enum members
      */
     public final Map<String, String> getEnumMembers() {
-        log.trace("getEnumMembers: start");
         if (enumMembers == null) {
             log.trace("getEnumMembers: null");
             enumMembers = new HashMap<>();
         }
 
-        log.trace("getEnumMembers: finish");
         return enumMembers;
     }
 
@@ -579,7 +743,6 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     @SuppressWarnings("rawtypes")
     public final String getEnumMembersAsString() {
-        log.trace("getEnumMembersAsString: start");
         StringBuilder enumStr = new StringBuilder();
         if (getEnumMembers() != null) {
             Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
@@ -666,10 +829,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return a short text description of this datatype
      */
     public String getDescription() {
-        log.trace("getDescription(): start");
 
         if (datatypeDescription != null) {
-            log.trace("getDescription(): exit");
             return datatypeDescription;
         }
 
@@ -745,7 +906,6 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
             description.append(" of " + baseType.getDescription());
         }
 
-        log.trace("getDescription(): finish");
         return description.toString();
     }
 
