@@ -138,22 +138,21 @@ public class H5Datatype extends Datatype {
         super(theFile, name, path, oid);
         objInfo = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
 
-        if ((oid == null) && (theFile != null)) {
-            // retrieve the object ID
-            try {
-                byte[] refBuf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
-                this.oid = new long[1];
-                this.oid[0] = HDFNativeData.byteToLong(refBuf, 0);
-            }
-            catch (Exception ex) {
-                log.debug("constructor ID {} for {} failed H5Rcreate", theFile.getFID(), this.getFullName());
-            }
-        }
-
-        long tid = -1;
         if (theFile != null) {
+            if (oid == null) {
+                // retrieve the object ID
+                try {
+                    byte[] refBuf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
+                    this.oid = new long[1];
+                    this.oid[0] = HDFNativeData.byteToLong(refBuf, 0);
+                }
+                catch (Exception ex) {
+                    log.debug("constructor ID {} for {} failed H5Rcreate", theFile.getFID(), this.getFullName());
+                }
+            }
+
+            long tid = -1;
             try {
-                log.trace("constructor H5Topen() with {}", this.getFullName());
                 tid = H5.H5Topen(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
                 fromNative(tid);
             }
@@ -164,42 +163,6 @@ public class H5Datatype extends Datatype {
                 close(tid);
             }
         }
-    }
-
-    /**
-     * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
-     * The following is a list of a few examples of H5Datatype.
-     * <ol>
-     * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
-     * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
-     * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
-     * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
-     * </ol>
-     *
-     * @param theFile
-     *            the file that contains the datatype.
-     * @param tclass
-     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
-     * @param tsize
-     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
-     *            Valid values are NATIVE or a positive value. For string datatypes, -1 is also
-     *            a valid value (to create a variable-length string).
-     * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
-     *            ORDER_NONE and NATIVE.
-     * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
-     *
-     * @throws Exception
-     *            if there is an error
-     */
-    public H5Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign) throws Exception {
-        this(theFile, tclass, tsize, torder, tsign, null);
     }
 
     /**
@@ -233,45 +196,7 @@ public class H5Datatype extends Datatype {
      *            if there is an error
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
-        this(null, tclass, tsize, torder, tsign, null);
-    }
-
-    /**
-     * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
-     * The following is a list of a few examples of H5Datatype.
-     * <ol>
-     * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
-     * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
-     * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
-     * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
-     * </ol>
-     *
-     * @param theFile
-     *            the file that contains the datatype.
-     * @param tclass
-     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
-     * @param tsize
-     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the size is 4.
-     *            Valid values are NATIVE or a positive value. For string datatypes, -1 is also
-     *            a valid value (to create a variable-length string).
-     * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE, ORDER_BE, ORDER_VAX,
-     *            ORDER_NONE and NATIVE.
-     * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
-     * @param tbase
-     *            the base datatype of the new datatype
-     *
-     * @throws Exception
-     *            if there is an error
-     */
-    public H5Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
-        this(theFile, tclass, tsize, torder, tsign, tbase, null);
+        this(tclass, tsize, torder, tsign, null);
     }
 
     /**
@@ -307,7 +232,7 @@ public class H5Datatype extends Datatype {
      *            if there is an error
      */
     public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
-        this(null, tclass, tsize, torder, tsign, tbase, null);
+        this(tclass, tsize, torder, tsign, tbase, null);
     }
 
     /**
@@ -325,8 +250,6 @@ public class H5Datatype extends Datatype {
      * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
      * </ol>
      *
-     * @param theFile
-     *            the file that contains the datatype.
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
      * @param tsize
@@ -348,50 +271,9 @@ public class H5Datatype extends Datatype {
      * @throws Exception
      *            if there is an error
      */
-    public H5Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
-        super(theFile, tclass, tsize, torder, tsign, tbase, pbase);
-        datatypeDescription = getDescription();
-    }
-
-    /**
-     * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
-     * The following is a list of a few examples of H5Datatype.
-     * <ol>
-     * <li>to create unsigned native integer<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
-     * <li>to create 16-bit signed integer with big endian<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
-     * <li>to create native float<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
-     * <li>to create 64-bit double<br>
-     * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
-     * </ol>
-     *
-     * @param tclass
-     *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and
-     *            etc.
-     * @param tsize
-     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the
-     *            size is 4. Valid values are NATIVE or a positive value. For string
-     *            datatypes, -1 is also a valid value (to create a variable-length
-     *            string).
-     * @param torder
-     *            the byte order of the datatype. Valid values are ORDER_LE,
-     *            ORDER_BE, ORDER_VAX, ORDER_NONE and NATIVE.
-     * @param tsign
-     *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and
-     *            NATIVE.
-     * @param tbase
-     *            the base datatype of the new datatype
-     * @param pbase
-     *            the parent datatype of the new datatype
-     *
-     * @throws Exception
-     *            if there is an error
-     */
     public H5Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
-        super(null, tclass, tsize, torder, tsign, tbase, pbase);
+        super(tclass, tsize, torder, tsign, tbase, pbase);
+        datatypeDescription = getDescription();
     }
 
     /**
@@ -434,30 +316,6 @@ public class H5Datatype extends Datatype {
      *
      * @see #fromNative(long nativeID)
      *
-     * @param nativeID
-     *            the native datatype identifier.
-     *
-     * @throws Exception
-     *            if there is an error
-     */
-    public H5Datatype(long nativeID) throws Exception {
-        this(null, nativeID, null);
-    }
-
-    /**
-     * Constructs a Datatype with a given native datatype identifier.
-     * <p>
-     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
-     *
-     * <pre>
-     * int tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
-     * Datatype dtype = new Datatype(tid);
-     * </pre>
-     *
-     * will construct a datatype equivalent to new Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
-     *
-     * @see #fromNative(long nativeID)
-     *
      * @param theFile
      *            the file that contains the datatype.
      * @param nativeID
@@ -475,32 +333,6 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * Constructs a Datatype with a given native datatype identifier.
-     * <p>
-     * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
-     *
-     * <pre>
-     * int tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_UNINT32);
-     * Datatype dtype = new Datatype(tid);
-     * </pre>
-     *
-     * will construct a datatype equivalent to new Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
-     *
-     * @see #fromNative(long nativeID)
-     *
-     * @param nativeID
-     *            the native datatype identifier.
-     * @param pbase
-     *            the parent datatype of the new datatype
-     *
-     * @throws Exception
-     *            if there is an error
-     */
-    public H5Datatype(long nativeID, Datatype pbase) throws Exception {
-        super(null, nativeID, pbase);
-    }
-
-    /**
      * Opens access to a named datatype.
      * <p>
      * It calls H5.H5Topen(loc, name).
@@ -511,17 +343,17 @@ public class H5Datatype extends Datatype {
      */
     @Override
     public long open() {
-        log.trace("open(): start");
         long tid = -1;
 
-        try {
-            tid = H5.H5Topen(fileFormat.getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
-        }
-        catch (HDF5Exception ex) {
-            tid = -1;
+        if (fileFormat != null) {
+            try {
+                tid = H5.H5Topen(getFID(), getFullName(), HDF5Constants.H5P_DEFAULT);
+            }
+            catch (HDF5Exception ex) {
+                tid = -1;
+            }
         }
 
-        log.trace("open(): finish");
         return tid;
     }
 
@@ -555,16 +387,14 @@ public class H5Datatype extends Datatype {
         log.trace("hasAttribute(): nAttributes={}", nAttributes);
         objInfo.num_attrs = nAttributes;
 
-        if (objInfo.num_attrs < 0) {
+        if ((objInfo.num_attrs < 0) && (fileFormat != null)) {
             long tid = -1;
             try {
-                log.trace("hasAttribute(): path={} name={}", getPath(), getName());
-                tid = H5.H5Topen(fileFormat.getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
+                tid = H5.H5Topen(getFID(), getFullName(), HDF5Constants.H5P_DEFAULT);
                 fromNative(tid);
                 objInfo = H5.H5Oget_info(tid);
                 if (objInfo.num_attrs > 0)
                     isNamed = true;
-                log.trace("hasAttribute(): datatype with attribute are named");
             }
             catch (Exception ex) {
                 objInfo.num_attrs = 0;
@@ -604,7 +434,6 @@ public class H5Datatype extends Datatype {
 
         if (inValues == null) {
             log.debug("convertEnumValueToName() failure: in values null ");
-            log.trace("convertEnumValueToName(): exit");
             return null;
         }
 
@@ -622,13 +451,11 @@ public class H5Datatype extends Datatype {
         if (inSize <= 0) {
             log.debug("convertEnumValueToName() failure: inSize length invalid");
             log.debug("convertEnumValueToName(): inValues={} inSize={}", inValues, inSize);
-            log.trace("convertEnumValueToName(): exit");
             return null;
         }
 
         if (enumMembers == null || enumMembers.size() <= 0) {
             log.debug("convertEnumValueToName(): no members");
-            log.trace("convertEnumValueToName(): exit");
             return null;
         }
 
@@ -653,7 +480,6 @@ public class H5Datatype extends Datatype {
             }
         }
 
-        log.trace("convertEnumValueToName(): finish");
         return outNames;
     }
 
@@ -673,24 +499,20 @@ public class H5Datatype extends Datatype {
      *
      */
     public Object[] convertEnumNameToValue(String[] in) throws HDF5Exception {
-        log.trace("convertEnumNameToValue() start");
         int size = 0;
 
         if (in == null) {
             log.debug("convertEnumNameToValue() failure: in values null");
-            log.trace("convertEnumNameToValue(): exit");
             return null;
         }
 
         if ((size = Array.getLength(in)) <= 0) {
             log.debug("convertEnumNameToValue() failure: in size not valid");
-            log.trace("convertEnumNameToValue(): exit");
             return null;
         }
 
         if (enumMembers == null || enumMembers.size() <= 0) {
             log.debug("convertEnumNameToValue(): no members");
-            log.trace("convertEnumNameToValue(): exit");
             return null;
         }
 
@@ -742,7 +564,6 @@ public class H5Datatype extends Datatype {
             }
         }
 
-        log.trace("convertEnumNameToValue(): finish");
         return out;
     }
 
@@ -859,7 +680,6 @@ public class H5Datatype extends Datatype {
                 finally {
                     close(tmptid);
                 }
-                log.trace("fromNative(): array type finish");
             }
             else if (nativeClass == HDF5Constants.H5T_COMPOUND) {
                 datatypeClass = CLASS_COMPOUND;
@@ -896,7 +716,6 @@ public class H5Datatype extends Datatype {
                 catch (HDF5LibraryException ex) {
                     log.debug("fromNative(): compound type failure: ", ex);
                 }
-                log.trace("fromNative(): compound type finish");
             }
             else if (nativeClass == HDF5Constants.H5T_INTEGER) {
                 datatypeClass = CLASS_INTEGER;
@@ -992,7 +811,7 @@ public class H5Datatype extends Datatype {
                     basetid = H5.H5Tget_native_type(tmptid);
                     log.trace("fromNative(): enum type basetid={}", basetid);
                     if (basetid >= 0) {
-                        baseType = new H5Datatype(tmptid, this);
+                        baseType = new H5Datatype(this.fileFormat, tmptid, this);
                         datatypeSign = baseType.getDatatypeSign();
                     }
                 }
@@ -1079,7 +898,6 @@ public class H5Datatype extends Datatype {
             datatypeSize = (isVLEN && !isVariableStr) ? HDF5Constants.H5T_VL_T : tsize;
         }
         log.trace("fromNative(): datatypeClass={} baseType={} datatypeSize={}", datatypeClass, baseType, datatypeSize);
-        log.trace("fromNative(): finish");
     }
 
     /**
@@ -1119,15 +937,11 @@ public class H5Datatype extends Datatype {
     @SuppressWarnings("rawtypes")
     @Override
     public long createNative() {
-        log.trace("createNative(): start");
-
         long tid = -1;
         long tmptid = -1;
 
-        log.debug("createNative(): path+name={}", getFullName());
-        String the_path = getName();
-        if (isNamed() && the_path != null) {
-            log.trace("createNative(): isNamed {}", the_path);
+        String the_path = getFullName();
+        if (isNamed() && (the_path != null) && (fileFormat != null)) {
             try {
                 tid = H5.H5Topen(getFID(), the_path, HDF5Constants.H5P_DEFAULT);
             }
@@ -1139,8 +953,6 @@ public class H5Datatype extends Datatype {
             log.debug("createNative(): isNamed but named path={}", the_path);
 
         if (tid >= 0) {
-            log.trace("createNative(): tid >= 0");
-            log.trace("createNative(): finish");
             return tid;
         }
 
@@ -1597,7 +1409,6 @@ public class H5Datatype extends Datatype {
 
         if (nPoints < 0) {
             log.debug("allocateArray(): nPoints < 0");
-            log.trace("allocateArray(): finish");
             return null;
         }
 
@@ -1703,8 +1514,6 @@ public class H5Datatype extends Datatype {
             data = null;
         }
 
-        log.trace("allocateArray(): finish");
-
         return data;
     }
 
@@ -1744,7 +1553,6 @@ public class H5Datatype extends Datatype {
         log.trace("getDescription(): start - isNamed={}", isNamed());
 
         if (datatypeDescription != null) {
-            log.trace("getDescription(): exit");
             return datatypeDescription;
         }
 
@@ -1937,7 +1745,6 @@ public class H5Datatype extends Datatype {
         if (isNamed())
             description.append("->").append(getFullName());
 
-        log.trace("getDescription(): finish");
         return description.toString();
     }
 
@@ -2000,7 +1807,6 @@ public class H5Datatype extends Datatype {
      * @see hdf.object.DataFormat#getMetadata(int...)
      */
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
-        log.trace("getMetadata(): start");
         // load attributes first
         if (attributeList == null) {
             int indxType = fileFormat.getIndexType(null);
@@ -2028,7 +1834,6 @@ public class H5Datatype extends Datatype {
             log.debug("getMetadata(): H5File.linkTargetObjName failure: ", ex);
         }
 
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -2039,12 +1844,10 @@ public class H5Datatype extends Datatype {
      */
     @Override
     public void writeMetadata(Object info) throws Exception {
-        log.trace("writeMetadata(): start");
 
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an Attribute");
-            log.trace("writeMetadata(): finish");
             return;
         }
 
@@ -2065,7 +1868,6 @@ public class H5Datatype extends Datatype {
             attributeList.add(attr);
             nAttributes = attributeList.size();
         }
-        log.trace("writeMetadata(): finish");
     }
 
     /*
@@ -2075,12 +1877,9 @@ public class H5Datatype extends Datatype {
      */
     @Override
     public void removeMetadata(Object info) throws HDF5Exception {
-        log.trace("removeMetadata(): start");
-
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("removeMetadata(): Object not an attribute");
-            log.trace("removeMetadata(): finish");
             return;
         }
 
@@ -2098,14 +1897,12 @@ public class H5Datatype extends Datatype {
         finally {
             close(tid);
         }
-        log.trace("removeMetadata(): finish");
     }
 
     @Override
     public void setName(String newName) throws Exception {
         H5File.renameObject(this, newName);
         super.setName(newName);
-        log.trace("setName(): finish");
     }
     @Override
     public void setFullname(String newPath, String newName) throws Exception {
@@ -2172,13 +1969,11 @@ public class H5Datatype extends Datatype {
 
             if (compoundMemberNames == null) {
                 log.debug("extractCompoundInfo(): compoundMemberNames is null");
-                log.trace("extractCompoundInfo(): exit");
                 return;
             }
 
             if (compoundMemberNames.isEmpty()) {
                 log.debug("extractCompoundInfo(): compound datatype has no members");
-                log.trace("extractCompoundInfo(): exit");
                 return;
             }
 
@@ -2222,8 +2017,6 @@ public class H5Datatype extends Datatype {
                 }
             }
         }
-
-        log.trace("extractCompoundInfo(): finish");
     }
 
     /**
@@ -2328,8 +2121,6 @@ public class H5Datatype extends Datatype {
         finally {
             close(tmpTID1);
         }
-
-        log.trace("createCompoundFieldType(): finish");
 
         return topTID;
     }
