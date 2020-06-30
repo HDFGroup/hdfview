@@ -1095,7 +1095,6 @@ public final class Tools {
                 }
             } // (int i=0; i<m; i++)
         }
-        log.trace("newInstance(Class = {}): finish", cls);
 
         return instance;
     }

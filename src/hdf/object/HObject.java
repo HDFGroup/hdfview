@@ -276,23 +276,23 @@ public abstract class HObject implements Serializable {
      * @throws Exception if name is root or contains separator
      */
     public void setName(String newName) throws Exception {
-        log.trace("setName(): name={}", newName);
-        if (newName != null) {
-            if (newName.equals(HObject.SEPARATOR)) {
-                throw new IllegalArgumentException("The new name cannot be the root");
-            }
+        if (newName == null)
+            throw new IllegalArgumentException("The new name is NULL");
 
-            if (newName.startsWith(HObject.SEPARATOR)) {
-                newName = newName.substring(1);
-            }
+        if (newName.equals(HObject.SEPARATOR)) {
+            throw new IllegalArgumentException("The new name cannot be the root");
+        }
 
-            if (newName.endsWith(HObject.SEPARATOR)) {
-                newName = newName.substring(0, newName.length() - 2);
-            }
+        if (newName.startsWith(HObject.SEPARATOR)) {
+            newName = newName.substring(1);
+        }
 
-            if (newName.contains(HObject.SEPARATOR)) {
-                throw new IllegalArgumentException("The new name contains the SEPARATOR character: " + HObject.SEPARATOR);
-            }
+        if (newName.endsWith(HObject.SEPARATOR)) {
+            newName = newName.substring(0, newName.length() - 2);
+        }
+
+        if (newName.contains(HObject.SEPARATOR)) {
+            throw new IllegalArgumentException("The new name contains the SEPARATOR character: " + HObject.SEPARATOR);
         }
 
         name = newName;
@@ -381,8 +381,6 @@ public abstract class HObject implements Serializable {
         this.name = theName;
         this.path = thePath;
 
-        log.trace("name={} path={}", this.name, this.path);
-
         this.fullName = createFullname(thePath, theName);
     }
 
@@ -407,7 +405,6 @@ public abstract class HObject implements Serializable {
             }
         }
 
-        log.trace("fullName={}", theFullName);
         return theFullName;
     }
 

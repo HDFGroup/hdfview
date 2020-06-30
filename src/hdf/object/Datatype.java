@@ -591,6 +591,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                     log.trace("setEnumMembers: value={} name={}", keyValue[0].trim(), keyValue[1].trim());
             }
         }
+        datatypeDescription = null; //reset description
         log.trace("setEnumMembers: finish enum size={}", enumMembers.size());
     }
 

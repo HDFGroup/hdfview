@@ -1746,11 +1746,8 @@ public abstract class FileFormat extends File {
      * @return the object that has the given OID; otherwise returns null
      */
     public static final HObject findObject(FileFormat file, long[] oid) {
-        log.trace("findObject(): start");
-
         if ((file == null) || (oid == null)) {
             log.debug("findObject(): file is null or oid is null");
-            log.trace("findObject(): finish");
             return null;
         }
 
@@ -1759,7 +1756,6 @@ public abstract class FileFormat extends File {
         HObject theRoot = file.getRootObject();
         if (theRoot == null) {
             log.debug("findObject(): rootObject is null");
-            log.trace("findObject(): finish");
             return null;
         }
 
@@ -1787,7 +1783,6 @@ public abstract class FileFormat extends File {
 
         if ((file == null) || (path == null)) {
             log.debug("findObject(): file is null or path is null");
-            log.trace("findObject(): finish");
             return null;
         }
 
@@ -1799,12 +1794,10 @@ public abstract class FileFormat extends File {
 
         if (theRoot == null) {
             log.debug("findObject(): rootObject is null");
-            log.trace("findObject(): finish");
             return null;
         }
         else if (path.equals("/")) {
             log.debug("findObject() path is rootObject");
-            log.trace("findObject(): finish");
             return theRoot;
         }
 
@@ -1822,7 +1815,6 @@ public abstract class FileFormat extends File {
             }
         }
 
-        log.trace("findObject(): finish");
         return theObj;
     }
 

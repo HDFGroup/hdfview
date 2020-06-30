@@ -48,8 +48,6 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
 
     @Override
     protected void addObjectSpecificContent() {
-        log.trace("addObjectSpecificContent(): start");
-
         super.addObjectSpecificContent();
 
         Group g = (Group) dataObject;
@@ -249,8 +247,6 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
         for (int i = 0; i < columnNames.length; i++) {
             memberTable.getColumn(i).pack();
         }
-
-        log.trace("addObjectSpecificContent(): finish");
     }
 
 }

@@ -43,8 +43,6 @@ public class DefaultMetaDataViewFactory extends MetaDataViewFactory {
         Object[] initargs = { parentObj, viewer, theObj };
         MetaDataView theView = null;
 
-        log.trace("getMetaDataView(): start");
-
         if (theObj instanceof Group)
             dataViewName = ViewProperties.DEFAULT_GROUP_METADATAVIEW_NAME;
         else if (theObj instanceof Dataset)
@@ -79,8 +77,6 @@ public class DefaultMetaDataViewFactory extends MetaDataViewFactory {
             log.debug("getMetaDataView(): Error instantiating class:", ex);
             theView = null;
         }
-
-        log.trace("getMetaDataView(): finish");
 
         return theView;
     }

@@ -232,7 +232,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         selectedIndex[0] = 0;
         selectedIndex[1] = 1;
         selectedIndex[2] = 2;
-        log.trace("Dataset: finish");
     }
 
     /**
@@ -465,11 +464,9 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final void write() throws Exception {
-        log.trace("write: start");
         if (data != null) {
             write(data);
         }
-        log.trace("write: finish");
     }
 
     /**
@@ -593,9 +590,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final Object getData() throws Exception, OutOfMemoryError {
-        log.trace("getData: start");
         if (!isDataLoaded) {
-            log.trace("getData: read");
             data = read(); // load the data
             originalBuf = data;
             isDataLoaded = true;
@@ -607,7 +602,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             log.trace("getData: read {}", nPoints);
         }
 
-        log.trace("getData: finish");
         return data;
     }
 
@@ -625,7 +619,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         if (!(this instanceof Attribute))
             throw new UnsupportedOperationException("setData: unsupported for non-Attribute objects");
 
-        log.trace("setData");
         data = d;
     }
 
@@ -902,18 +895,14 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @SuppressWarnings("rawtypes")
     public static Object convertFromUnsignedC(Object dataIN, Object dataOUT) {
-        log.trace("convertFromUnsignedC(): start");
-
         if (dataIN == null) {
             log.debug("convertFromUnsignedC(): data_in is null");
-            log.trace("convertFromUnsignedC(): finish");
             return null;
         }
 
         Class dataClass = dataIN.getClass();
         if (!dataClass.isArray()) {
             log.debug("convertFromUnsignedC(): data_in not an array");
-            log.trace("convertFromUnsignedC(): finish");
             return null;
         }
 
@@ -986,7 +975,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             log.debug("convertFromUnsignedC(): Java does not support unsigned long");
         }
 
-        log.trace("convertFromUnsignedC(): finish");
         return dataOUT;
     }
 
@@ -1023,18 +1011,14 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @SuppressWarnings("rawtypes")
     public static Object convertToUnsignedC(Object dataIN, Object dataOUT) {
-        log.trace("convertToUnsignedC(): start");
-
         if (dataIN == null) {
             log.debug("convertToUnsignedC(): data_in is null");
-            log.trace("convertToUnsignedC(): finish");
             return null;
         }
 
         Class dataClass = dataIN.getClass();
         if (!dataClass.isArray()) {
             log.debug("convertToUnsignedC(): data_in not an array");
-            log.trace("convertToUnsignedC(): finish");
             return null;
         }
 
@@ -1101,7 +1085,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             log.debug("convertToUnsignedC(): Java does not support unsigned long");
         }
 
-        log.trace("convertToUnsignedC(): finish");
         return dataOUT;
     }
 
@@ -1134,11 +1117,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the array of Java String.
      */
     public static final String[] byteToString(byte[] bytes, int length) {
-        log.trace("byteToString(): start");
-
         if (bytes == null) {
             log.debug("byteToString(): input is null");
-            log.trace("byteToString(): finish");
             return null;
         }
 
@@ -1162,7 +1142,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             strArray[i] = (end <= 0) ? "" : str.substring(0, end);
         }
 
-        log.trace("byteToString(): finish");
         return strArray;
     }
 
@@ -1184,11 +1163,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the array of bytes.
      */
     public static final byte[] stringToByte(String[] strings, int length) {
-        log.trace("stringToByte(): start");
-
         if (strings == null) {
             log.debug("stringToByte(): input is null");
-            log.trace("stringToByte(): finish");
             return null;
         }
 
@@ -1210,8 +1186,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             strBuff.setLength(length);
             System.arraycopy(strBuff.toString().getBytes(), 0, bytes, length * i, length);
         }
-
-        log.trace("stringToByte(): finish");
 
         return bytes;
     }

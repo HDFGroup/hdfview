@@ -1987,7 +1987,8 @@ public class H5FileTest {
         assertTrue(fid > 0);
 
         try {
-            d1 = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.SIGN_NONE, "NATIVE_INT");
+            Datatype dnative = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.SIGN_NONE);
+            d1 = file.createNamedDatatype(dnative, "NATIVE_INT");
             // create Datatype.
         }
         catch (final Exception ex) {
@@ -2069,7 +2070,8 @@ public class H5FileTest {
         assertNotNull(g1);
 
         try {
-            t1 = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.SIGN_NONE, "NATIVE_INT");
+            Datatype dnative = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.SIGN_NONE);
+            t1 = file.createNamedDatatype(dnative, "NATIVE_INT");
         }
         catch (final Exception ex) {
             fail("file.createDatatype() failed. " + ex);

@@ -407,9 +407,12 @@ public class TestH5MemoryLeak
             ATTRIBUTE_INT_ARRAY.write();
         }
 
-        file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_INT);
-        file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_FLOAT);
-        file.createDatatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_STR);
+        Datatype dnative = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        file.createNamedDatatype(dnative, NAME_DATATYPE_INT);
+        dnative = file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        file.createNamedDatatype(dnative, NAME_DATATYPE_FLOAT);
+        dnative = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
+        file.createNamedDatatype(dnative, NAME_DATATYPE_STR);
 
         long nObjs = 0;
         try { nObjs = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL); }

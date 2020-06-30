@@ -593,7 +593,7 @@ public class H5Datatype extends Datatype {
                 if (H5.H5Tcommitted(tid)) {
                     isNamed = true;
                     try {
-                        setFullname(getPath(), H5.H5Iget_name(tid));
+                        setFullname(null, H5.H5Iget_name(tid));
                     }
                     catch (Exception nex) {
                         log.debug("fromNative(): setName failure: {}", nex.getMessage());
@@ -1901,6 +1901,9 @@ public class H5Datatype extends Datatype {
 
     @Override
     public void setName(String newName) throws Exception {
+        if (newName == null)
+            throw new IllegalArgumentException("The new name is NULL");
+
         H5File.renameObject(this, newName);
         super.setName(newName);
     }

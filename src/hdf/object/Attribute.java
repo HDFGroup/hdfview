@@ -293,7 +293,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                 attrName, getDatatype().getDescription(), data, rank, getDatatype().isUnsigned(), isScalar);
 
         resetSelection();
-        log.trace("Attribute: finish");
     }
 
     /*
@@ -303,11 +302,8 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     @Override
     public long open() {
-        log.trace("open(): start");
-
         if (parentObject == null) {
             log.debug("open(): attribute's parent object is null");
-            log.trace("open(): exit");
             return -1;
         }
 
@@ -346,8 +342,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
             parentObject.close(pObjID);
         }
 
-        log.trace("open(): finish");
-
         return aid;
     }
 
@@ -358,8 +352,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     @Override
     public void close(long aid) {
-        log.trace("close(): start");
-
         if (aid >= 0) {
             if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
                 log.trace("close(): FILE_TYPE_HDF5");
@@ -383,18 +375,13 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                  */
             }
         }
-
-        log.trace("close(): finish");
     }
 
     @Override
     public void init() {
-        log.trace("init(): start");
-
         if (inited) {
             resetSelection();
             log.trace("init(): Attribute already inited");
-            log.trace("init(): exit");
             return;
         }
 
@@ -542,8 +529,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
         }
 
         resetSelection();
-
-        log.trace("init(): finish");
     }
 
     /**
@@ -576,20 +561,14 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     @Override
     public Object convertFromUnsignedC() {
-        log.trace("convertFromUnsignedC(): start");
-
         // Keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
         if ((data != null) && getDatatype().isUnsigned() && !unsignedConverted) {
-            log.trace("convertFromUnsignedC(): convert");
-
             originalBuf = data;
             convertedBuf = convertFromUnsignedC(originalBuf, convertedBuf);
             data = convertedBuf;
             unsignedConverted = true;
         }
-
-        log.trace("convertFromUnsignedC(): finish");
 
         return data;
     }
@@ -606,19 +585,13 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     @Override
     public Object convertToUnsignedC() {
-        log.trace("convertToUnsignedC(): start");
-
         // Keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
         if ((data != null) && getDatatype().isUnsigned()) {
-            log.trace("convertToUnsignedC(): convert");
-
             convertedBuf = data;
             originalBuf = convertToUnsignedC(convertedBuf, originalBuf);
             data = originalBuf;
         }
-
-        log.trace("convertToUnsignedC(): finish");
 
         return data;
     }
@@ -638,8 +611,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
     }
 
     private void resetSelection() {
-        log.trace("resetSelection(): start");
-
         for (int i = 0; i < rank; i++) {
             startDims[i] = 0;
             selectedDims[i] = 1;
@@ -682,8 +653,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
             selectedDims[selectedIndex[1]] = dims[selectedIndex[1]];
             selectedDims[selectedIndex[2]] = dims[selectedIndex[2]];
         }
-
-        log.trace("resetSelection(): finish");
     }
 
     /**
@@ -729,7 +698,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
     @Override
     public Object read() throws Exception, OutOfMemoryError {
-        log.trace("read(): start");
         if (!inited) init();
 
         /*
@@ -742,14 +710,11 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
             data = valueList;
         }
 
-        log.trace("read(): finish");
         return data;
     }
 
     @Override
     public void write(Object buf) throws Exception {
-        log.trace("write(): start");
-
         if (!buf.equals(data))
             setData(buf);
 
@@ -757,13 +722,10 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
 
         if (parentObject == null) {
             log.debug("write(): parent object is null; nowhere to write attribute to");
-            log.debug("write(): exit");
             return;
         }
 
         ((MetaDataContainer) getParentObject()).writeMetadata(this);
-
-        log.trace("write(): finish");
     }
 
     /**
@@ -826,7 +788,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
     public final String[] getSelectedMemberNames() {
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberNames(): isMemberSelected array is null");
-            log.trace("getSelectedMemberNames(): finish");
             return memberNames;
         }
 
@@ -938,11 +899,8 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     @Override
     public int[] getSelectedMemberOrders() {
-        log.trace("getSelectedMemberOrders(): start");
-
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberOrders(): isMemberSelected array is null");
-            log.trace("getSelectedMemberOrders(): finish");
             return memberOrders;
         }
 
@@ -953,8 +911,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                 orders[idx++] = memberOrders[i];
             }
         }
-
-        log.trace("getSelectedMemberOrders(): finish");
 
         return orders;
     }
@@ -1012,11 +968,8 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      */
     @Override
     public Datatype[] getSelectedMemberTypes() {
-        log.trace("getSelectedMemberTypes(): start");
-
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberTypes(): isMemberSelected array is null");
-            log.trace("getSelectedMemberTypes(): finish");
             return memberTypes;
         }
 
@@ -1027,8 +980,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
                 types[idx++] = memberTypes[i];
             }
         }
-
-        log.trace("getSelectedMemberTypes(): finish");
 
         return types;
     }
@@ -1156,11 +1107,8 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
      * @return the string representation of the data values.
      */
     public String toString(String delimiter, int maxItems) {
-        log.trace("toString(): start");
-
         if (data == null) {
             log.debug("toString(): value is null");
-            log.trace("toString(): finish");
             return null;
         }
 
@@ -1418,7 +1366,6 @@ public class Attribute extends Dataset implements DataFormat, CompoundDataFormat
             }
         }
 
-        log.trace("toString: finish");
         return sb.toString();
     }
 

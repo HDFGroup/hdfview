@@ -212,7 +212,7 @@ public class HObjectTest {
     @Test
     public void testSetName() {
         log.debug("testSetName");
-        final String newName = "tmpName";
+        final String newName = "/tmpName";
 
         // test set name to null
         H5.H5error_off();

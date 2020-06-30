@@ -560,7 +560,6 @@ public class DefaultTreeView implements TreeView {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 isDefaultDisplay = true;
-                log.trace("createPopupMenu(): Open");
 
                 try {
                     loadDataThread = new LoadDataThread();
@@ -1307,8 +1306,6 @@ public class DefaultTreeView implements TreeView {
 
     /** Paste selected objects */
     private void pasteObject() {
-        log.trace("pasteObject(): start");
-
         if (moveFlag) {
             HObject theObj = null;
             for (int i = 0; i < currentSelectionsForMove.length; i++) {
@@ -1414,8 +1411,6 @@ public class DefaultTreeView implements TreeView {
             currentSelectionsForMove = null;
             objectsToCopy = null;
         }
-
-        log.trace("pasteObject(): finish");
     }
 
     /** Paste selected objects */
@@ -1424,7 +1419,6 @@ public class DefaultTreeView implements TreeView {
 
         FileFormat srcFile = ((HObject) objList[0].getData()).getFileFormat();
         Group pgroup = (Group) pobj.getData();
-        log.trace("pasteObject(...): start");
 
         HObject theObj = null;
         for (int i = 0; i < objList.length; i++) {
@@ -1469,8 +1463,6 @@ public class DefaultTreeView implements TreeView {
                 Tools.showError(shell, "Paste", ex.getMessage());
             }
         } // (int i = 0; i < objList.length; i++)
-
-        log.trace("pasteObject(...): finish");
     }
 
     /**
@@ -1610,13 +1602,10 @@ public class DefaultTreeView implements TreeView {
      * to the file object.
      */
     private TreeItem populateTree(FileFormat theFile) {
-        log.trace("populateTree(): start");
-
         if (theFile == null) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Open File", "Error opening file");
             log.debug("Error populating tree, File object was null.");
-            log.trace("populateTree(): exit");
             return null;
         }
         else if ((theFile.getFID() < 0) || (theFile.getRootObject() == null)) {
@@ -1631,7 +1620,6 @@ public class DefaultTreeView implements TreeView {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Open File", "Error opening file " + theFile.getName());
                 log.debug("Error populating tree for {}, File ID was wrong or File root object was null.", theFile.getFilePath());
-                log.trace("populateTree(): exit");
                 return null;
             }
         }
@@ -1662,11 +1650,9 @@ public class DefaultTreeView implements TreeView {
             if (rootItem != null) rootItem.dispose();
             shell.getDisplay().beep();
             Tools.showError(shell, "Open File", "Error opening file " + theFile.getName() + "\n\n" + ex.getMessage());
-            log.trace("populateTree(): finish");
             return null;
         }
 
-        log.trace("populateTree(): finish");
         return rootItem;
     }
 
@@ -1871,8 +1857,6 @@ public class DefaultTreeView implements TreeView {
     private ArrayList<TreeItem> getItemsBreadthFirst(TreeItem item) {
         if (item == null) return null;
 
-        log.trace("getItemsBreadthFirst(): start");
-
         ArrayList<TreeItem> allItems = new ArrayList<>();
         Queue<TreeItem> currentChildren = new LinkedList<>();
         TreeItem currentItem = item;
@@ -1893,7 +1877,6 @@ public class DefaultTreeView implements TreeView {
             currentChildren.addAll(Arrays.asList(currentItem.getItems()));
         }
 
-        log.trace("getItemsBreadthFirst(): finish");
         return allItems;
     }
 
@@ -1907,8 +1890,6 @@ public class DefaultTreeView implements TreeView {
     private final List<Object> breadthFirstUserObjects(TreeItem item) {
         if (item == null) return null;
 
-        log.trace("breadthFirstUserObjects(): start");
-
         ArrayList<Object> list = new ArrayList<>();
         list.add(item.getData()); // Add this item to the list first
 
@@ -1920,7 +1901,6 @@ public class DefaultTreeView implements TreeView {
             list.add(theItem.getData());
         }
 
-        log.trace("breadthFirstUserObjects(): finish");
         return list;
     }
 
@@ -2248,7 +2228,7 @@ public class DefaultTreeView implements TreeView {
                 filter = DefaultFileFilter.getFileFilterBinary();
             }
 
-            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            fChooser.setFilterExtensions(new String[] {"*", filter.getExtensions()});
             fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
             fChooser.setFilterIndex(1);
 
@@ -2503,8 +2483,6 @@ public class DefaultTreeView implements TreeView {
             shell.setCursor(null);
         }
 
-        log.trace("initFile - finish");
-
         return fileFormat;
     }
 
@@ -2739,9 +2717,6 @@ public class DefaultTreeView implements TreeView {
         BitSet bitmask = null;
         String dataViewName = null;
 
-        log.trace("showDataContent(): inited");
-        log.trace("isDefaultDisplay? {}", isDefaultDisplay);
-
         if (isDefaultDisplay) { /* Displaying a data object using the default display options */
             DataView existingView = viewer.getDataView((HObject) d);
 
@@ -2761,7 +2736,6 @@ public class DefaultTreeView implements TreeView {
                                 shells[i].forceActive();
 
                                 log.trace("showDataContent(): found existing DataView for data object {}", dataObject.getName());
-                                log.trace("showDataContent(): finish");
 
                                 return view;
                             }
@@ -2868,8 +2842,6 @@ public class DefaultTreeView implements TreeView {
 
         if (!shell.isDisposed()) shell.setCursor(null);
 
-        log.trace("showDataContent({}): finish", dataObject.getName());
-
         return theView;
     }
 
@@ -2920,8 +2892,6 @@ public class DefaultTreeView implements TreeView {
             viewer.showError("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
             return null;
         }
-
-        log.trace("showMetaData({}): finish", dataObject.getName());
 
         return theView;
     }

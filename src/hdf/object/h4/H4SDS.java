@@ -234,7 +234,6 @@ public class H4SDS extends ScalarDS
 
         if (pgroup == null) {
             log.debug("copy(): Parent group is null");
-            log.trace("copy(): exit");
             return null;
         }
 
@@ -253,7 +252,6 @@ public class H4SDS extends ScalarDS
         srcdid = open();
         if (srcdid < 0) {
             log.debug("copy(): Invalid source SDID");
-            log.trace("copy(): finish");
             return null;
         }
 
@@ -285,7 +283,6 @@ public class H4SDS extends ScalarDS
                 dname, tid, theRank, count);
         if (dstdid < 0) {
             log.debug("copy(): Invalid dest SDID");
-            log.trace("copy(): finish");
             return null;
         }
 
@@ -325,7 +322,6 @@ public class H4SDS extends ScalarDS
             log.debug("copy(): SDendaccess failure: ", ex);
         }
 
-        log.trace("copy(): finish");
         return dataset;
     }
 
@@ -333,8 +329,6 @@ public class H4SDS extends ScalarDS
     @Override
     public byte[] readBytes() throws HDFException
     {
-        log.trace("readBytes(): start");
-
         byte[] theData = null;
 
         if (!isInited())
@@ -343,7 +337,6 @@ public class H4SDS extends ScalarDS
         long id = open();
         if (id < 0) {
             log.debug("readBytes(): Invalid SDID");
-            log.trace("readBytes(): finish");
             return null;
         }
 
@@ -376,7 +369,6 @@ public class H4SDS extends ScalarDS
             close(id);
         }
 
-        log.trace("readBytes(): finish");
         return theData;
     }
 
@@ -384,8 +376,6 @@ public class H4SDS extends ScalarDS
     @Override
     public Object read() throws HDFException, OutOfMemoryError
     {
-        log.trace("read(): start");
-
         Object theData = null;
 
         if (!isInited())
@@ -394,7 +384,6 @@ public class H4SDS extends ScalarDS
         long id = open();
         if (id < 0) {
             log.debug("read(): Invalid SDID");
-            log.trace("read(): finish");
             return null;
         }
 
@@ -451,7 +440,6 @@ public class H4SDS extends ScalarDS
             isDefaultImageOrder = true;
 
         log.trace("read(): isDefaultImageOrder={}", isDefaultImageOrder);
-        log.trace("read(): finish");
         return theData;
     }
 
@@ -460,18 +448,14 @@ public class H4SDS extends ScalarDS
     @Override
     public void write(Object buf) throws HDFException
     {
-        log.trace("write(): start");
-
         if (buf == null) {
             log.debug("write(): Object is null");
-            log.trace("write(): exit");
             return;
         }
 
         long id = open();
         if (id < 0) {
             log.debug("write(): Invalid SDID");
-            log.trace("write(): exit");
             return;
         }
 
@@ -507,8 +491,6 @@ public class H4SDS extends ScalarDS
             tmpData = null;
             close(id);
         }
-
-        log.trace("write(): finish");
     }
 
     // Implementing DataFormat
@@ -516,11 +498,8 @@ public class H4SDS extends ScalarDS
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
-        log.trace("getMetadata(): start");
-
         if (attributeList != null) {
             log.trace("getMetdata(): attributeList != null");
-            log.trace("getMetadata(): finish");
             return attributeList;
         }
 
@@ -606,7 +585,6 @@ public class H4SDS extends ScalarDS
             close(id);
         }
 
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -615,12 +593,9 @@ public class H4SDS extends ScalarDS
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
-        log.trace("writeMetadata(): start");
-
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an Attribute");
-            log.trace("writeMetadata(): finish");
             return;
         }
 
@@ -637,8 +612,6 @@ public class H4SDS extends ScalarDS
         catch (Exception ex) {
             log.trace("writeMetadata(): failure: ", ex);
         }
-
-        log.trace("writeMetadata(): finish");
     }
 
     // To do: implementing DataFormat
@@ -657,8 +630,6 @@ public class H4SDS extends ScalarDS
     @Override
     public long open()
     {
-        log.trace("open(): start");
-
         long id=-1;
 
         try {
@@ -680,7 +651,6 @@ public class H4SDS extends ScalarDS
             id = -1;
         }
 
-        log.trace("open(): finish");
         return id;
     }
 
@@ -699,11 +669,8 @@ public class H4SDS extends ScalarDS
     @Override
     public void init()
     {
-        log.trace("init(): start");
-
         if (inited) {
             log.trace("init(): Already initialized");
-            log.trace("init(): finish");
             return; // already called. Initialize only once
         }
 
@@ -868,8 +835,6 @@ public class H4SDS extends ScalarDS
                 selectedDims[1] = dims[1];
             }
         }
-
-        log.trace("init(): finish");
     }
 
     // Implementing ScalarDS
@@ -907,14 +872,11 @@ public class H4SDS extends ScalarDS
         Object fillValue,
         Object data) throws Exception
     {
-        log.trace("create(): start");
-
         H4SDS dataset = null;
         if ((pgroup == null) ||
             (name == null)||
             (dims == null)) {
             log.trace("create(): Parent group, name or dims is null");
-            log.trace("create(): exit");
             return null;
         }
 
@@ -922,7 +884,6 @@ public class H4SDS extends ScalarDS
 
         if (file == null) {
             log.trace("create(): Parent group FileFormat is null");
-            log.trace("create(): exit");
             return null;
         }
 
@@ -958,7 +919,6 @@ public class H4SDS extends ScalarDS
         // unlimited cannot be used with chunking or compression for HDF 4.2.6 or earlier.
         if (idims[0] == 0 && (ichunks != null || gzip>0)) {
             log.debug("create(): Unlimited cannot be used with chunking or compression");
-            log.trace("create(): finish");
             throw new HDFException("Unlimited cannot be used with chunking or compression");
         }
 
@@ -996,14 +956,12 @@ public class H4SDS extends ScalarDS
             }
             catch (Exception ex) {
                 log.debug("create(): failure: ", ex);
-                log.trace("create(): finish");
                 throw (ex);
             }
         }
 
         if (sdsid < 0) {
             log.debug("create(): Dataset creation failed");
-            log.trace("create(): finish");
             throw (new HDFException("Unable to create the new dataset."));
         }
 
@@ -1032,7 +990,6 @@ public class H4SDS extends ScalarDS
             catch (Exception err) {
                 log.debug("create(): SDsetchunk failure: ", err);
                 err.printStackTrace();
-                log.trace("create(): finish");
                 throw new HDFException("SDsetchunk failed.");
             }
         }
@@ -1051,7 +1008,6 @@ public class H4SDS extends ScalarDS
                     HDFLibrary.SDendaccess(sdsid);
                 }
                 log.debug("create(): Invalid Parent Group ID");
-                log.trace("create(): finish");
                 throw (new HDFException("Unable to open the parent group."));
             }
 
@@ -1076,7 +1032,6 @@ public class H4SDS extends ScalarDS
             pgroup.addToMemberList(dataset);
         }
 
-        log.trace("create(): finish");
         return dataset;
     }
 
@@ -1136,7 +1091,6 @@ public class H4SDS extends ScalarDS
 
                 if (attrBuff == null) {
                     log.debug("copyAttribute(): attrBuff[{}] is null", i);
-                    log.trace("copyAttribute(): continue");
                     continue;
                 }
 
@@ -1147,8 +1101,6 @@ public class H4SDS extends ScalarDS
         catch (Exception ex) {
             log.debug("copyAttribute(): failure: ", ex);
         }
-
-        log.trace("copyAttribute(): finish");
     }
 
     //Implementing DataFormat

@@ -1218,8 +1218,6 @@ public class HDFView implements DataViewManager {
         content.setWeights(new int[] { 9, 1 });
         contentArea.setWeights(new int[] { 1, 3 });
 
-        log.trace("createContentArea(): load TreeView");
-
         DataViewFactory treeViewFactory = null;
         try {
             treeViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TREEVIEW);
@@ -1343,8 +1341,6 @@ public class HDFView implements DataViewManager {
 
         if (obj == null) return;
 
-        log.trace("showMetaData(): start");
-
         DataViewFactory metaDataViewFactory = null;
         try {
             metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
@@ -1375,8 +1371,6 @@ public class HDFView implements DataViewManager {
             this.showError("Unable to find suitable MetaDataView class");
             return;
         }
-
-        log.trace("showMetaData(): finish");
     }
 
     public void closeFile(FileFormat theFile) {

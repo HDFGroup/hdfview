@@ -82,7 +82,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     @Override
     public boolean performOk() {
         getPreferenceStore();
-        log.trace("performOk: save General options");
 
         if (UGField != null) {
             String UGPath = UGField.getText();
@@ -177,7 +176,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
                 ViewProperties.setIndexBase1(true);
         }
 
-        log.trace("performOk: save General options finished");
         return true;
     }
 
@@ -198,7 +196,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      */
     protected void load() {
         getPreferenceStore();
-        log.trace("performOk: load General options");
 
         try {
             curFont = new Font(
@@ -299,7 +296,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         startMemberField.setText(String.valueOf(ViewProperties.getStartMembers()));
 
         maxMemberField.setText(String.valueOf(ViewProperties.getMaxMembers()));
-        log.trace("performOk: load General options finished");
     }
 
     /**

@@ -141,7 +141,6 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public long open() {
-        log.trace("open(): start");
         long did = -1;
 
         try {
@@ -153,7 +152,6 @@ public class H5ScalarDS extends ScalarDS {
             did = -1;
         }
 
-        log.trace("open(): finish");
         return did;
     }
 
@@ -164,8 +162,6 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public void close(long did) {
-        log.trace("close(): start");
-
         if (did >= 0) {
             try {
                 H5.H5Fflush(did, HDF5Constants.H5F_SCOPE_LOCAL);
@@ -180,8 +176,6 @@ public class H5ScalarDS extends ScalarDS {
                 log.debug("close(): H5Dclose(did {}) failure: ", did, ex);
             }
         }
-
-        log.trace("close(): finish");
     }
 
     /**
@@ -232,12 +226,10 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public void init() {
-        log.trace("init(): start");
 
         if (inited) {
             resetSelection();
             log.trace("init(): Dataset already intialized");
-            log.trace("init(): exit");
             return; // already called. Initialize only once
         }
 
@@ -268,7 +260,6 @@ public class H5ScalarDS extends ScalarDS {
                                         log.trace("init(): virtualNameList[{}]={}", next, fname);
                                     }
                                     catch (Exception err) {
-                                        log.trace("init(): vds[{}] continue", next);
                                         continue;
                                     }
                                 }
@@ -436,7 +427,6 @@ public class H5ScalarDS extends ScalarDS {
                 }
             }
 
-            log.trace("init(): close dataset");
             close(did);
 
             startDims = new long[rank];
@@ -448,7 +438,6 @@ public class H5ScalarDS extends ScalarDS {
             log.debug("init(): failed to open dataset");
         }
         log.trace("init(): rank={}, startDims={}, selectedDims={}", rank, startDims, selectedDims);
-        log.trace("init(): finish");
     }
 
     /*
@@ -532,16 +521,12 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public Datatype getDatatype() {
-        log.trace("getDatatype(): start");
-
         if (!inited)
             init();
 
         if (datatype == null) {
             long did = -1;
             long tid = -1;
-
-            log.trace("getDatatype(): datatype == null");
 
             did = open();
             if (did >= 0) {
@@ -598,7 +583,6 @@ public class H5ScalarDS extends ScalarDS {
             log.trace("getDatatype(): External dataset: user.dir={}", pdir);
         }
 
-        log.trace("getDatatype(): finish");
         return datatype;
     }
 
@@ -623,8 +607,6 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public byte[] readBytes() throws HDF5Exception {
-        log.trace("readBytes(): start");
-
         byte[] theData = null;
 
         if (!isInited())
@@ -689,7 +671,6 @@ public class H5ScalarDS extends ScalarDS {
             }
         }
 
-        log.trace("readBytes(): finish");
         return theData;
     }
 
@@ -791,8 +772,6 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public Object read() throws Exception {
-        log.trace("read(): start");
-
         Object readData = null;
 
         if (!isInited())
@@ -805,8 +784,6 @@ public class H5ScalarDS extends ScalarDS {
             log.debug("read(): failed to read scalar dataset: ", ex);
             throw new Exception("Failed to read scalar dataset: " + ex.getMessage(), ex);
         }
-
-        log.trace("read(): finish");
 
         return readData;
     }
@@ -822,8 +799,6 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public void write(Object buf) throws Exception {
-        log.trace("write(): start");
-
         if (this.getFileFormat().isReadOnly())
             throw new Exception("cannot write to scalar dataset in file opened as read-only");
 
@@ -837,13 +812,9 @@ public class H5ScalarDS extends ScalarDS {
             log.debug("write(): failed to write to scalar dataset: ", ex);
             throw new Exception("Failed to write to scalar dataset: " + ex.getMessage(), ex);
         }
-
-        log.trace("write(): finish");
     }
 
     private Object scalarDatasetCommonIO(IO_TYPE ioType, Object writeBuf) throws Exception {
-        log.trace("scalarDatasetCommonIO(): start");
-
         H5Datatype dsDatatype = (H5Datatype) getDatatype();
         Object theData = null;
 
@@ -853,7 +824,6 @@ public class H5ScalarDS extends ScalarDS {
         if (ioType == IO_TYPE.WRITE) {
             if (writeBuf == null) {
                 log.debug("scalarDatasetCommonIO(): writeBuf is null");
-                log.trace("scalarDatasetCommonIO(): exit");
                 throw new Exception("write buffer is null");
             }
 
@@ -863,18 +833,14 @@ public class H5ScalarDS extends ScalarDS {
              */
             if (dsDatatype.isVLEN() && !dsDatatype.isText()) {
                 log.debug("scalarDatasetCommonIO(): Cannot write non-string variable-length data");
-                log.trace("scalarDatasetCommonIO(): exit");
                 throw new HDF5Exception("Writing non-string variable-length data is not supported");
             }
 
             if (dsDatatype.isRegRef()) {
                 log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
-                log.trace("scalarDatasetCommonIO(): exit");
                 throw new HDF5Exception("Writing region reference data is not supported");
             }
         }
-
-        log.trace("scalarDatasetCommonIO(): open dataset");
 
         long did = open();
         if (did >= 0) {
@@ -898,7 +864,6 @@ public class H5ScalarDS extends ScalarDS {
                         }
                         catch (OutOfMemoryError err) {
                             log.debug("scalarDatasetCommonIO(): Out of memory");
-                            log.trace("scalarDatasetCommonIO(): exit");
                             throw new HDF5Exception("Out Of Memory");
                         }
                     }
@@ -935,12 +900,10 @@ public class H5ScalarDS extends ScalarDS {
                         }
                         catch (HDF5DataFiltersException exfltr) {
                             log.debug("scalarDatasetCommonIO(): read failure: ", exfltr);
-                            log.trace("scalarDatasetCommonIO(): exit");
                             throw new Exception("Filter not available exception: " + exfltr.getMessage(), exfltr);
                         }
                         catch (Exception ex) {
                             log.debug("scalarDatasetCommonIO(): read failure: ", ex);
-                            log.trace("scalarDatasetCommonIO(): exit");
                             throw new Exception(ex.getMessage(), ex);
                         }
                         finally {
@@ -991,7 +954,6 @@ public class H5ScalarDS extends ScalarDS {
                     }
                     catch (Exception ex) {
                         log.debug("scalarDatasetCommonIO(): data conversion failure: ", ex);
-                        log.trace("scalarDatasetCommonIO(): exit");
                         throw new Exception("data conversion failure: " + ex.getMessage());
                     }
 
@@ -1019,7 +981,6 @@ public class H5ScalarDS extends ScalarDS {
                     }
                     catch (Exception ex) {
                         log.debug("scalarDatasetCommonIO(): write failure: ", ex);
-                        log.trace("scalarDatasetCommonIO(): exit");
                         throw new Exception(ex.getMessage());
                     }
                     finally {
@@ -1052,8 +1013,6 @@ public class H5ScalarDS extends ScalarDS {
         else
             log.debug("scalarDatasetCommonIO(): failed to open dataset");
 
-        log.trace("scalarDatasetCommonIO(): finish");
-
         return theData;
     }
 
@@ -1073,11 +1032,8 @@ public class H5ScalarDS extends ScalarDS {
      * @see hdf.object.DataFormat#getMetadata(int...)
      */
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
-        log.trace("getMetadata(): start");
-
         if (!isInited()) {
             init();
-            log.trace("getMetadata(): inited");
         }
 
         try {
@@ -1089,7 +1045,6 @@ public class H5ScalarDS extends ScalarDS {
 
         if (attributeList != null) {
             log.trace("getMetadata(): attributeList != null");
-            log.trace("getMetadata(): finish");
             return attributeList;
         }
 
@@ -1108,12 +1063,9 @@ public class H5ScalarDS extends ScalarDS {
         }
 
         attributeList = H5File.getAttribute(this, indxType, order);
-        log.trace("getMetadata(): attributeList loaded");
 
-        log.trace("getMetadata(): open dataset");
         did = open();
         if (did >= 0) {
-            log.trace("getMetadata(): dataset opened");
             try {
                 // get the compression and chunk information
                 pcid = H5.H5Dget_create_plist(did);
@@ -1209,7 +1161,6 @@ public class H5ScalarDS extends ScalarDS {
                                 }
                                 catch (Exception err) {
                                     log.debug("getMetadata(): vds space[{}] error: ", next, err);
-                                    log.trace("getMetadata(): vds[{}] continue", next);
                                     storageLayout.append("ERROR");
                                 }
                             }
@@ -1260,7 +1211,6 @@ public class H5ScalarDS extends ScalarDS {
                         }
                         catch (Exception err) {
                             log.debug("getMetadata(): filter[{}] error: ", i, err);
-                            log.trace("getMetadata(): filter[{}] continue", i);
                             filters.append("ERROR");
                             continue;
                         }
@@ -1364,7 +1314,6 @@ public class H5ScalarDS extends ScalarDS {
             }
         }
 
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -1375,11 +1324,9 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public void writeMetadata(Object info) throws Exception {
-        log.trace("writeMetadata(): start");
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an Attribute");
-            log.trace("writeMetadata(): finish");
             return;
         }
 
@@ -1400,7 +1347,6 @@ public class H5ScalarDS extends ScalarDS {
             attributeList.add(attr);
             nAttributes = attributeList.size();
         }
-        log.trace("writeMetadata(): finish");
     }
 
     /*
@@ -1410,11 +1356,9 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public void removeMetadata(Object info) throws HDF5Exception {
-        log.trace("removeMetadata(): start");
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("removeMetadata(): Object not an Attribute");
-            log.trace("removeMetadata(): finish");
             return;
         }
 
@@ -1432,7 +1376,6 @@ public class H5ScalarDS extends ScalarDS {
                 close(did);
             }
         }
-        log.trace("removeMetadata(): finish");
     }
 
     /*
@@ -1442,16 +1385,13 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public void updateMetadata(Object info) throws HDF5Exception {
-        log.trace("updateMetadata(): start");
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("updateMetadata(): Object not an Attribute");
-            log.trace("updateMetadata(): finish");
             return;
         }
 
         nAttributes = -1;
-        log.trace("updateMetadata(): finish");
     }
 
     /*
@@ -1461,6 +1401,9 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public void setName(String newName) throws Exception {
+        if (newName == null)
+            throw new IllegalArgumentException("The new name is NULL");
+
         H5File.renameObject(this, newName);
         super.setName(newName);
     }
@@ -1469,8 +1412,6 @@ public class H5ScalarDS extends ScalarDS {
      * Resets selection of dataspace
      */
     private void resetSelection() {
-        log.trace("resetSelection(): start");
-
         for (int i = 0; i < rank; i++) {
             startDims[i] = 0;
             selectedDims[i] = 1;
@@ -1548,8 +1489,6 @@ public class H5ScalarDS extends ScalarDS {
             isDefaultImageOrder = false;
         else
             isDefaultImageOrder = true;
-
-        log.trace("resetSelection(): finish");
     }
 
     public static Dataset create(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
@@ -1610,8 +1549,6 @@ public class H5ScalarDS extends ScalarDS {
      */
     public static Dataset create(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
             long[] chunks, int gzip, Object fillValue, Object data) throws Exception {
-        log.trace("create(): start");
-
         H5ScalarDS dataset = null;
         String fullPath = null;
         long did = -1;
@@ -1621,14 +1558,12 @@ public class H5ScalarDS extends ScalarDS {
 
         if ((pgroup == null) || (name == null) || (dims == null) || ((gzip > 0) && (chunks == null))) {
             log.debug("create(): one or more parameters are null");
-            log.trace("create(): exit");
             return null;
         }
 
         H5File file = (H5File) pgroup.getFileFormat();
         if (file == null) {
             log.debug("create(): parent group FileFormat is null");
-            log.trace("create(): exit");
             return null;
         }
 
@@ -1749,8 +1684,6 @@ public class H5ScalarDS extends ScalarDS {
             }
         }
 
-        log.trace("create(): dataset created");
-
         if (dataset != null) {
             pgroup.addToMemberList(dataset);
             if (data != null) {
@@ -1762,14 +1695,12 @@ public class H5ScalarDS extends ScalarDS {
                 dataset.write(data);
             }
         }
-        log.trace("create(): finish");
+
         return dataset;
     }
 
     // check _FillValue, valid_min, valid_max, and valid_range
     private void checkCFconvention(long oid) throws Exception {
-        log.trace("checkCFconvention(): start");
-
         Object avalue = getAttrValue(oid, "_FillValue");
 
         if (avalue != null) {
@@ -1818,7 +1749,6 @@ public class H5ScalarDS extends ScalarDS {
                 }
             }
         } // (imageDataRange==null || imageDataRange[1]<=imageDataRange[0])
-        log.trace("checkCFconvention(): finish");
     }
 
     private Object getAttrValue(long oid, String aname) {
@@ -1917,7 +1847,6 @@ public class H5ScalarDS extends ScalarDS {
             }
         } // (aid > 0)
 
-        log.trace("getAttrValue(): finish");
         return avalue;
     }
 
@@ -1965,11 +1894,9 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
-        log.trace("copy(): start");
         // must give a location to copy
         if (pgroup == null) {
             log.debug("copy(): Parent group is null");
-            log.trace("copy(): finish");
             return null;
         }
 
@@ -2088,7 +2015,6 @@ public class H5ScalarDS extends ScalarDS {
         if (dataset != null)
             ((ScalarDS) dataset).setIsImage(isImage);
 
-        log.trace("copy(): finish");
         return dataset;
     }
 
@@ -2113,8 +2039,6 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public String getPaletteName(int idx) {
-        log.trace("getPaletteName(): start");
-
         byte[] refs = getPaletteRefs();
         long did = -1;
         long palID = -1;
@@ -2122,7 +2046,6 @@ public class H5ScalarDS extends ScalarDS {
 
         if (refs == null) {
             log.debug("getPaletteName(): refs is null");
-            log.trace("getPaletteName(): exit");
             return null;
         }
 
@@ -2133,7 +2056,6 @@ public class H5ScalarDS extends ScalarDS {
         }
         catch (Exception err) {
             log.debug("getPaletteName(): arraycopy failure: ", err);
-            log.trace("getPaletteName(): finish");
             return null;
         }
 
@@ -2152,7 +2074,6 @@ public class H5ScalarDS extends ScalarDS {
             }
         }
 
-        log.trace("getPaletteName(): finish");
         return paletteName;
     }
 
@@ -2163,8 +2084,6 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public byte[][] readPalette(int idx) {
-        log.trace("readPalette(): start");
-
         byte[][] thePalette = null;
         byte[] refs = getPaletteRefs();
         long did = -1;
@@ -2173,7 +2092,6 @@ public class H5ScalarDS extends ScalarDS {
 
         if (refs == null) {
             log.debug("readPalette(): refs is null");
-            log.trace("readPalette(): finish");
             return null;
         }
 
@@ -2185,7 +2103,6 @@ public class H5ScalarDS extends ScalarDS {
         }
         catch (Exception err) {
             log.debug("readPalette(): arraycopy failure: ", err);
-            log.trace("readPalette(): failure");
             return null;
         }
 
@@ -2227,18 +2144,14 @@ public class H5ScalarDS extends ScalarDS {
             }
         }
 
-        log.trace("readPalette(): finish");
         return thePalette;
     }
 
     private static byte[] parseFillValue(Datatype type, Object fillValue) throws Exception {
-        log.trace("parseFillValue(): start");
-
         byte[] data = null;
 
         if (type == null || fillValue == null) {
             log.debug("parseFillValue(): datatype or fill value is null");
-            log.trace("parseFillValue(): exit");
             return null;
         }
 
@@ -2261,7 +2174,6 @@ public class H5ScalarDS extends ScalarDS {
             }
             catch (NumberFormatException ex) {
                 log.debug("parseFillValue(): parse error: ", ex);
-                log.trace("parseFillValue(): finish");
                 return null;
             }
         }
@@ -2313,7 +2225,6 @@ public class H5ScalarDS extends ScalarDS {
             data = null;
         }
 
-        log.trace("parseFillValue(): finish");
         return data;
     }
 
@@ -2335,8 +2246,6 @@ public class H5ScalarDS extends ScalarDS {
      * length is 8*numberOfPalettes.
      */
     private byte[] getPaletteRefs(long did) {
-        log.trace("getPaletteRefs(): start");
-
         long aid = -1;
         long sid = -1;
         long atype = -1;
@@ -2392,7 +2301,6 @@ public class H5ScalarDS extends ScalarDS {
             }
         }
 
-        log.trace("getPaletteRefs(): finish");
         return refbuf;
     }
 

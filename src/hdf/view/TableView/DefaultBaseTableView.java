@@ -29,6 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -57,7 +58,6 @@ import org.eclipse.nebula.widgets.nattable.edit.action.KeyEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.action.MouseEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditConfiguration;
 import org.eclipse.nebula.widgets.nattable.edit.config.DialogErrorHandling;
-import org.eclipse.nebula.widgets.nattable.edit.editor.TextCellEditor;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
@@ -80,7 +80,7 @@ import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
-import org.eclipse.nebula.widgets.nattable.ui.matcher.BodyCellEditorMouseEventMatcher;
+import org.eclipse.nebula.widgets.nattable.ui.matcher.CellEditorMouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.LetterOrDigitKeyEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuAction;
@@ -258,8 +258,6 @@ public abstract class DefaultBaseTableView implements TableView {
      */
     @SuppressWarnings("rawtypes")
     public DefaultBaseTableView(DataViewManager theView, HashMap dataPropertiesMap) {
-        log.trace("start");
-
         shell = new Shell(display, SWT.SHELL_TRIM);
 
         shell.setData(this);
@@ -337,7 +335,6 @@ public abstract class DefaultBaseTableView implements TableView {
         /* Only edit objects which actually contain editable data */
         if ((hObject == null) || !(hObject instanceof DataFormat)) {
             log.debug("data object is null or not an instanceof DataFormat");
-            log.trace("exit");
             dataObject = null;
             shell.dispose();
             return;
@@ -346,7 +343,6 @@ public abstract class DefaultBaseTableView implements TableView {
         dataObject = (DataFormat) hObject;
         if (((HObject) dataObject).getFileFormat() == null) {
             log.debug("DataFormat object cannot access FileFormat");
-            log.trace("exit");
             shell.dispose();
             return;
         }
@@ -376,7 +372,6 @@ public abstract class DefaultBaseTableView implements TableView {
 
         if (dims == null) {
             log.debug("data object has null dimensions");
-            log.trace("exit");
             viewer.showError("Error: Data object '" + ((HObject) dataObject).getName() + "' has null dimensions.");
             shell.dispose();
             Tools.showError(display.getActiveShell(), "Error", "Could not open data object '" + ((HObject) dataObject).getName()
@@ -391,7 +386,6 @@ public abstract class DefaultBaseTableView implements TableView {
 
         if (dataObject.getHeight() <= 0 || dataObject.getWidth() <= 0 || tsize <= 0) {
             log.debug("data object has dimension of size 0");
-            log.trace("exit");
             viewer.showError("Error: Data object '" + ((HObject) dataObject).getName() + "' has dimension of size 0.");
             shell.dispose();
             Tools.showError(display.getActiveShell(), "Error", "Could not open data object '" + ((HObject) dataObject).getName()
@@ -425,8 +419,6 @@ public abstract class DefaultBaseTableView implements TableView {
         log.trace("Data object isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
 
         // Setup subset information
-        log.trace("Setup subset information");
-
         int rank = dataObject.getRank();
         int[] selectedIndex = dataObject.getSelectedIndex();
         long[] count = dataObject.getSelectedDims();
@@ -487,7 +479,6 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         catch (Exception ex) {
             log.debug("loadData(): data not loaded: ", ex);
-            log.trace("exit");
             viewer.showError("Error: unable to load table data");
             shell.dispose();
             Tools.showError(display.getActiveShell(), "Open", "An error occurred while loading data for the table:\n\n" + ex.getMessage());
@@ -502,7 +493,6 @@ public abstract class DefaultBaseTableView implements TableView {
          * This step must be done after the menu bar has actually been created.
          */
         if (dataObject.getDatatype().isBitField() || dataObject.getDatatype().isOpaque()) {
-            log.trace("Show Hexadecimal/Show Binary");
             showAsHex = true;
             checkHex.setSelection(true);
             checkScientificNotation.setSelection(false);
@@ -517,7 +507,6 @@ public abstract class DefaultBaseTableView implements TableView {
          * This step must be done after the menu bar has actually been created.
          */
         if (dataObject.getDatatype().isEnum()) {
-            log.trace("Show Enum");
             checkEnum.setSelection(isEnumConverted);
             checkScientificNotation.setSelection(false);
             checkCustomNotation.setSelection(false);
@@ -529,11 +518,11 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         /* Create the actual NatTable */
+        log.debug("table creation", ((HObject) dataObject).getName());
         try {
             dataTable = createTable(content, dataObject);
             if (dataTable == null) {
                 log.debug("table creation for object {} failed", ((HObject) dataObject).getName());
-                log.trace("exit");
                 viewer.showError("Creating table for object '" + ((HObject) dataObject).getName() + "' failed.");
                 shell.dispose();
                 Tools.showError(display.getActiveShell(), "Open", "Failed to create Table object");
@@ -542,7 +531,6 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         catch (UnsupportedOperationException ex) {
             log.debug("Subclass does not implement createTable()");
-            log.trace("exit");
             shell.dispose();
             return;
         }
@@ -615,8 +603,6 @@ public abstract class DefaultBaseTableView implements TableView {
         int width = 700 + (ViewProperties.getFontSize() - 12) * 15;
         int height = 500 + (ViewProperties.getFontSize() - 12) * 10;
         shell.setSize(width, height);
-
-        log.trace("finish");
     }
 
     /**
@@ -1012,17 +998,13 @@ public abstract class DefaultBaseTableView implements TableView {
     }
 
     protected void loadData(DataFormat dataObject) throws Exception {
-        log.trace("loadData(): start");
-
         if (!dataObject.isInited()) {
             try {
                 dataObject.init();
-                log.trace("loadData(): data object inited");
             }
             catch (Exception ex) {
                 dataValue = null;
                 log.debug("loadData(): ", ex);
-                log.trace("loadData(): exit");
                 throw ex;
             }
         }
@@ -1042,16 +1024,12 @@ public abstract class DefaultBaseTableView implements TableView {
         dataValue = null;
         try {
             dataValue = dataObject.getData();
-            // DEBUG ONLY log.trace("loadData(): dataValue = {}", dataValue);
         }
         catch (Exception ex) {
             dataValue = null;
             log.debug("loadData(): ", ex);
-            log.trace("loadData(): exit");
             throw ex;
         }
-
-        log.trace("loadData(): finish");
     }
 
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
@@ -1076,29 +1054,23 @@ public abstract class DefaultBaseTableView implements TableView {
      */
     @Override
     public void updateValueInFile() {
-        log.trace("updateValueInFile(): start");
 
         if (isReadOnly || !dataProvider.getIsValueChanged() || showAsBin || showAsHex) {
             log.debug("updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
-            log.trace("updateValueInFile(): exit");
             return;
         }
 
         try {
-            log.trace("updateValueInFile(): write");
             dataObject.write();
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Update", ex.getMessage());
             log.debug("updateValueInFile(): ", ex);
-            log.trace("updateValueInFile(): exit");
             return;
         }
 
         dataProvider.setIsValueChanged(false);
-
-        log.trace("updateValueInFile(): finish");
     }
 
     @Override
@@ -1827,11 +1799,9 @@ public abstract class DefaultBaseTableView implements TableView {
      * Convert selected data based on predefined math functions.
      */
     private void mathConversion() throws Exception {
-        log.trace("mathConversion(): start");
 
         if (isReadOnly) {
             log.debug("mathConversion(): can't convert read-only data");
-            log.trace("mathConversion(): exit");
             return;
         }
 
@@ -1840,7 +1810,6 @@ public abstract class DefaultBaseTableView implements TableView {
             shell.getDisplay().beep();
             Tools.showError(shell, "Convert", "Please select one column at a time for math conversion" + "for compound dataset.");
             log.debug("mathConversion(): more than one column selected for CompoundDS");
-            log.trace("mathConversion(): exit");
             return;
         }
 
@@ -1849,7 +1818,6 @@ public abstract class DefaultBaseTableView implements TableView {
             shell.getDisplay().beep();
             Tools.showError(shell, "Convert", "No data is selected.");
             log.debug("mathConversion(): no data selected");
-            log.trace("mathConversion(): exit");
             return;
         }
 
@@ -1901,8 +1869,6 @@ public abstract class DefaultBaseTableView implements TableView {
             System.gc();
 
             dataProvider.setIsValueChanged(true);
-
-            log.trace("mathConversion(): finish");
         }
     }
 
@@ -2268,11 +2234,9 @@ public abstract class DefaultBaseTableView implements TableView {
                 this.addConfiguration(new AbstractUiBindingConfiguration() {
                     @Override
                     public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
+                        uiBindingRegistry.registerFirstKeyBinding(new LetterOrDigitKeyEventMatcher(), new KeyEditAction());
                         uiBindingRegistry.registerFirstDoubleClickBinding(
-                                new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
-
-                        uiBindingRegistry.registerFirstKeyBinding(new LetterOrDigitKeyEventMatcher(),
-                                new KeyEditAction());
+                                new CellEditorMouseEventMatcher(), new MouseEditAction());
                     }
                 });
             }

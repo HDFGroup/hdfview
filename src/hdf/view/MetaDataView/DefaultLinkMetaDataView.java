@@ -42,8 +42,6 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
 
     @Override
     protected void addObjectSpecificContent() {
-        log.trace("addObjectSpecificContent(): start");
-
         /* For HDF5 links, add a box to allow changing of the link target */
         if (dataObject.getLinkTargetObjName() != null) {
             org.eclipse.swt.widgets.Group linkTargetGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
@@ -93,8 +91,6 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
                 }
             });
         }
-
-        log.trace("addObjectSpecificContent(): finish");
     }
 
     private void changeLinkTarget(String linkTargetName) {

@@ -48,8 +48,6 @@ public class DefaultTableViewFactory extends TableViewFactory {
         TableView theView = null;
         HObject dataObject = null;
 
-        log.trace("getTableView(): start");
-
         /* Retrieve the data object to be displayed */
         if (dataPropertiesMap != null)
             dataObject = (HObject) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.OBJECT);
@@ -59,7 +57,6 @@ public class DefaultTableViewFactory extends TableViewFactory {
 
         if (dataObject == null) {
             log.debug("getTableView(): data object is null");
-            log.trace("getTableView(): finish");
             return null;
         }
 
@@ -132,7 +129,6 @@ public class DefaultTableViewFactory extends TableViewFactory {
             if (dCopy != null) {
                 try {
                     ((DataFormat) dCopy).init();
-                    log.trace("getTableView(): d_copy inited");
 
                     int rank = ((DataFormat) dataObject).getRank();
                     System.arraycopy(((DataFormat) dataObject).getDims(), 0, ((DataFormat) dCopy).getDims(), 0, rank);
@@ -158,8 +154,6 @@ public class DefaultTableViewFactory extends TableViewFactory {
             log.debug("getTableView(): Error instantiating class:", ex);
             theView = null;
         }
-
-        log.trace("getTableView(): finish");
 
         return theView;
     }

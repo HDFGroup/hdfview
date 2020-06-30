@@ -113,11 +113,8 @@ public class H4Group extends Group
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
-        log.trace("getMetadata(): start");
-
         if (attributeList != null) {
             log.trace("getMetadata(): attributeList != null");
-            log.trace("getMetadata(): finish");
             return attributeList;
         }
         else {
@@ -130,7 +127,6 @@ public class H4Group extends Group
             log.trace("getMetadata(): open: id={}", vgid);
             if (vgid < 0) {
                 log.debug("getMetadata(): Invalid VG ID");
-                log.trace("getMetadata(): finish");
                 return attributeList;
             }
 
@@ -197,7 +193,6 @@ public class H4Group extends Group
             }
         }
 
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -206,12 +201,9 @@ public class H4Group extends Group
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
-        log.trace("writeMetadata(): start");
-
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an Attribute");
-            log.trace("writeMetadata(): finish");
             return;
         }
 
@@ -228,8 +220,6 @@ public class H4Group extends Group
         catch (Exception ex) {
             log.debug("writeMetadata(): failure: ", ex);
         }
-
-        log.trace("writeMetadata(): finish");
     }
 
 
@@ -253,7 +243,6 @@ public class H4Group extends Group
 
         if (oid[1] <= 0) {
             log.debug("open(): oid[1] <= 0");
-            log.trace("open(): finish");
             return -1; // Library methods cannot be called on HDF4 dummy group with ref 0
         }
 
@@ -283,7 +272,6 @@ public class H4Group extends Group
             }
         }
 
-        log.trace("open(): finish");
         return vgid;
     }
 
@@ -322,7 +310,6 @@ public class H4Group extends Group
         if ((pgroup == null) ||
             (name == null)) {
             log.debug("create(): one or more parameters are null");
-            log.trace("create(): finish");
             return null;
         }
 
@@ -330,7 +317,6 @@ public class H4Group extends Group
 
         if (file == null) {
             log.debug("create(): Parent group FileFormat is null");
-            log.trace("create(): finish");
             return null;
         }
 
@@ -341,14 +327,12 @@ public class H4Group extends Group
         long fileid = file.open();
         if (fileid < 0) {
             log.debug("create(): Invalid File ID");
-            log.trace("create(): finish");
             return null;
         }
 
         long gid = HDFLibrary.Vattach(fileid, -1, "w");
         if (gid < 0) {
             log.debug("create(): Invalid Group ID");
-            log.trace("create(): finish");
             return null;
         }
 
@@ -361,7 +345,6 @@ public class H4Group extends Group
             long pid = pgroup.open();
             if (pid < 0) {
                 log.debug("create(): Invalid Parent Group ID");
-                log.trace("create(): finish");
                 throw (new HDFException("Unable to open the parent group."));
             }
 
@@ -384,7 +367,6 @@ public class H4Group extends Group
             pgroup.addToMemberList(group);
         }
 
-        log.trace("create(): finish");
         return group;
     }
 

@@ -107,10 +107,7 @@ public class NC2Group extends Group {
     // Implementing DataFormat
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {
-        log.trace("getMetadata(): start");
-
         if (attributeList != null) {
-            log.trace("getMetadata(): attributeList exists -finish");
             return attributeList;
         }
 
@@ -143,7 +140,6 @@ public class NC2Group extends Group {
                 attributeList.add(NC2File.convertAttribute(this, netcdfAttr));
             }
         }
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -159,8 +155,7 @@ public class NC2Group extends Group {
      */
     public void writeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     /**
@@ -174,8 +169,7 @@ public class NC2Group extends Group {
      */
     public void removeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // implementing DataFormat
@@ -188,16 +182,14 @@ public class NC2Group extends Group {
     @Override
     public long open() {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     /** close group access */
     @Override
     public void close(long gid) {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     /**
@@ -217,14 +209,12 @@ public class NC2Group extends Group {
      */
     public static NC2Group create(String name, Group pgroup) throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // overload to get different lists
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
-        log.trace("getMetadata(...): start");
         int hdfType = 0;
         int attrType = 0;
         int dimType = 0;
@@ -247,27 +237,18 @@ public class NC2Group extends Group {
             enumType = attrPropList[3];
         }
         if ((hdfType != 0) && (attributeList != null)) {
-            log.trace("getMetadata(): get attributeList");
-
             returnList = attributeList;
         }
         else if ((attrType != 0) && (netcdfAttributeList != null)) {
-            log.trace("getMetadata(): get netcdfAttributeList");
-
             returnList = netcdfAttributeList;
         }
         else if ((dimType != 0) && (netcdfDimensionList != null)) {
-            log.trace("getMetadata(): get netcdfDimensionList");
-
             returnList = netcdfDimensionList;
         }
         else if ((enumType != 0) && (netcdfTypedefList != null)) {
-            log.trace("getMetadata(): get netcdfTypedefList");
-
             returnList = netcdfTypedefList;
         }
 
-        log.trace("getMetadata(...): finish");
         return returnList;
     }
 

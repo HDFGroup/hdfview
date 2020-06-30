@@ -348,7 +348,6 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                         ((Text) editors[i][2].getEditor()).setText(String.valueOf(mOrders[i]));
                     }
                 } //  (int i=0; i<numberOfMembers; i++)
-                log.trace("templateChoice finish");
             }
         });
 
@@ -615,7 +614,6 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
         String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
 
-        log.trace("create table columns");
         TableColumn column = new TableColumn(table, SWT.NONE);
         column.setText(colNames[0]);
 
@@ -743,7 +741,6 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         long dims[], maxdims[], chunks[];
         int rank;
 
-        log.trace("createCompoundDS start");
         maxdims = chunks = null;
         String dname = nameField.getText();
         if ((dname == null) || (dname.length() <= 0)) {
@@ -968,7 +965,6 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         else {
             obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, null, -1, mNames, mDatatypes, mOrders, null);
         }
-        log.trace("createCompoundDS finish");
         return obj;
     }
 

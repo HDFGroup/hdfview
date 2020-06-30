@@ -1426,7 +1426,7 @@ public class DebugHDF {
                 long tid = H5.H5Dget_type(did);
 
                 long nativeDatatype = H5.H5Tget_native_type(tid);
-                H5Datatype datatype = new H5Datatype(tid);
+                H5Datatype datatype = new H5Datatype(ds.getFileFormat(), tid);
 
                 long msid = H5.H5Screate_simple(ds.getRank(), selectionCount, null);
                 long fsid = H5.H5Dget_space(did);
@@ -2400,17 +2400,17 @@ public class DebugHDF {
     private static void testGetObjID() throws Exception
     {
         final HashMap typeMap = new HashMap();
-        typeMap.put(new Integer(HDF5Constants.H5T_INTEGER), "integer");
-        typeMap.put(new Integer(HDF5Constants.H5T_FLOAT), "float");
-        typeMap.put(new Integer(HDF5Constants.H5T_TIME), "time");
-        typeMap.put(new Integer(HDF5Constants.H5T_STRING), "string");
-        typeMap.put(new Integer(HDF5Constants.H5T_BITFIELD), "bitfield");
-        typeMap.put(new Integer(HDF5Constants.H5T_OPAQUE), "opaque");
-        typeMap.put(new Integer(HDF5Constants.H5T_COMPOUND), "compound");
-        typeMap.put(new Integer(HDF5Constants.H5T_REFERENCE), "reference");
-        typeMap.put(new Integer(HDF5Constants.H5T_ENUM), "enum");
-        typeMap.put(new Integer(HDF5Constants.H5T_VLEN), "vlen");
-        typeMap.put(new Integer(HDF5Constants.H5T_ARRAY), "array");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_INTEGER), "integer");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_FLOAT), "float");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_TIME), "time");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_STRING), "string");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_BITFIELD), "bitfield");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_OPAQUE), "opaque");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_COMPOUND), "compound");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_REFERENCE), "reference");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_ENUM), "enum");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_VLEN), "vlen");
+        typeMap.put(Integer.valueOf(HDF5Constants.H5T_ARRAY), "array");
 
 
         // get number of open objects
@@ -2425,7 +2425,7 @@ public class DebugHDF {
         // for each open object, look up the type in the hash map and print out
         for (int i = 0; i < numDatatypes; i++) {
             final int typeClass = H5.H5Tget_class(objIds[i]);
-            System.out.println(typeMap.get( new Integer(typeClass)));
+            System.out.println(typeMap.get(Integer.valueOf(typeClass)));
             // above line prints integer, float, etc. in addition to compound,
         }
     }
@@ -2845,7 +2845,7 @@ public class DebugHDF {
         // set the data values
         final float[] dataFl = new float[size];
         for (int i=0; i<size; i++){
-            dataFl[i] =  new Float((value.elementAt(i)).toString()).floatValue();
+            dataFl[i] = Float.valueOf((value.elementAt(i)).toString()).floatValue();
         }
 
         if(flag == true ) {
@@ -2881,7 +2881,7 @@ public class DebugHDF {
         final float[] dataRead = (float[])dataset.read();
         // print out the data values
         for(int i=0; i<dataRead.length; i++){
-            v.add(new Float(dataRead[i]));
+            v.add(Float.valueOf(dataRead[i]));
             System.out.println(v);
         }
         return v;

@@ -290,8 +290,6 @@ public class NewAttributeDialog extends NewDataObjectDialog {
 
     @SuppressWarnings("unchecked")
     private boolean createAttribute() {
-        log.trace("createAttribute start");
-
         Object value = null;
         String strValue = valueField.getText();
 
@@ -561,7 +559,6 @@ public class NewAttributeDialog extends NewDataObjectDialog {
 
         long[] dims = { arraySize };
         Attribute attr = new Attribute(parentObj, attrName, datatype, dims);
-        log.trace("assign data to value");
         attr.setData(value);
 
         try {
@@ -588,7 +585,6 @@ public class NewAttributeDialog extends NewDataObjectDialog {
 
         newObject = attr;
 
-        log.trace("createAttribute finish");
         return true;
     }
 

@@ -37,8 +37,6 @@ public class DefaultTreeViewFactory extends TreeViewFactory {
         Object[] initargs = { parent, viewer };
         TreeView theView = null;
 
-        log.trace("getTreeView(): start");
-
         dataViewName = ViewProperties.DEFAULT_TREEVIEW_NAME;
 
         Class<?> theClass = null;
@@ -64,8 +62,6 @@ public class DefaultTreeViewFactory extends TreeViewFactory {
             log.debug("getTreeView(): Error instantiating class:", ex);
             theView = null;
         }
-
-        log.trace("getTreeView(): finish");
 
         return theView;
     }

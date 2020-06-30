@@ -330,8 +330,6 @@ public class NewDataObjectDialog extends Dialog {
         isVLen = false;
         isVlenStr = false;
 
-        log.trace("start");
-
         if (useCommittedType.getSelection()) {
             datatype = (Datatype)refObject;
         }
@@ -383,7 +381,6 @@ public class NewDataObjectDialog extends Dialog {
             // idx is set to datatype size
             idx = sizeChoice.getSelectionIndex();
             if (tclass == Datatype.CLASS_STRING) {
-                log.trace("CLASS_STRING start");
                 if (!isVlenStr) {
                     int stringLength = 0;
                     try {
@@ -463,14 +460,11 @@ public class NewDataObjectDialog extends Dialog {
             try {
                 Datatype basedatatype = null;
                 if (isVLen) {
-                    log.trace("create VLen base type");
                     basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
                     tclass = Datatype.CLASS_VLEN;
                     thedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
                 }
                 else if (isEnum && isH5) {
-                    log.trace("create Enum base type");
-
                     strEnumMap = lengthField.getText();
                     if ((strEnumMap == null) || (strEnumMap.length() < 1) || strEnumMap.endsWith("...")) {
                         shell.getDisplay().beep();
@@ -492,7 +486,6 @@ public class NewDataObjectDialog extends Dialog {
                 return null;
             }
         }
-        log.trace("finish");
         return datatype;
     }
 

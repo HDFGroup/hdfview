@@ -38,8 +38,6 @@ public class DefaultPaletteViewFactory extends PaletteViewFactory {
         Object[] initargs;
         PaletteView theView = null;
 
-        log.trace("getPaletteView(): start");
-
         dataViewName = ViewProperties.DEFAULT_PALETTEVIEW_NAME;
 
         Class<?> theClass = null;
@@ -67,8 +65,6 @@ public class DefaultPaletteViewFactory extends PaletteViewFactory {
             log.debug("getPaletteView(): Error instantiating class:", ex);
             theView = null;
         }
-
-        log.trace("getPaletteView(): finish");
 
         return theView;
     }

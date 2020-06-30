@@ -399,7 +399,7 @@ public class H5DatatypeTest {
 
         H5Datatype type = null;
         try {
-            type = new H5Datatype(-1);
+            type = new H5Datatype(null, -1);
         }
         catch (Exception ex) {
             ;
@@ -443,7 +443,7 @@ public class H5DatatypeTest {
         int orders[] = { Datatype.ORDER_LE, Datatype.ORDER_LE, Datatype.ORDER_BE };
         for (int i = 0; i < tids.length; i++) {
             try {
-                type = new H5Datatype(tids[i]);
+                type = new H5Datatype(null, tids[i]);
             }
             catch (Exception ex) {
                 fail("new H5Datatype failed. " + ex);
