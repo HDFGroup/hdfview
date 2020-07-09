@@ -393,8 +393,6 @@ public class H5Datatype extends Datatype {
                 tid = H5.H5Topen(getFID(), getFullName(), HDF5Constants.H5P_DEFAULT);
                 fromNative(tid);
                 objInfo = H5.H5Oget_info(tid);
-                if (objInfo.num_attrs > 0)
-                    isNamed = true;
             }
             catch (Exception ex) {
                 objInfo.num_attrs = 0;
@@ -402,6 +400,7 @@ public class H5Datatype extends Datatype {
             finally {
                 close(tid);
             }
+            nAttributes = (int) objInfo.num_attrs;
         }
 
         log.trace("hasAttribute(): objInfo.num_attrs={}", objInfo.num_attrs);
@@ -941,7 +940,8 @@ public class H5Datatype extends Datatype {
         long tmptid = -1;
 
         String the_path = getFullName();
-        if (isNamed() && (the_path != null) && (fileFormat != null)) {
+        // isNamed == true should have non-null fileFormat
+        if (isNamed()) {
             try {
                 tid = H5.H5Topen(getFID(), the_path, HDF5Constants.H5P_DEFAULT);
             }
