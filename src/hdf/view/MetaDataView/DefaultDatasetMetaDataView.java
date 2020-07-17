@@ -48,7 +48,6 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
 
     @Override
     protected void addObjectSpecificContent() {
-        log.trace("addObjectSpecificContent(): start");
 
         super.addObjectSpecificContent();
 
@@ -59,7 +58,6 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         Dataset d = (Dataset) dataObject;
         if (!d.isInited()) {
             d.init();
-            log.trace("addObjectSpecificContent(): dataset inited");
         }
 
         org.eclipse.swt.widgets.Group datasetInfoGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
@@ -362,8 +360,6 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             // Prevent conflict from equal vertical grabbing
             datasetLayoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
         }
-
-        log.trace("addObjectSpecificContent(): finish");
     }
 
 }

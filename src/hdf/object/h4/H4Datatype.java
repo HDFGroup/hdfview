@@ -92,7 +92,7 @@ public class H4Datatype extends Datatype {
      *            if there is an error
      */
     public H4Datatype(long nativeID) throws Exception {
-        super(nativeID);
+        super(null, nativeID);
 
         fromNative(nativeID);
         datatypeDescription = getDescription();
@@ -116,8 +116,6 @@ public class H4Datatype extends Datatype {
     @Override
     public void fromNative(long tid)
     {
-        log.trace("fromNative(): start");
-
         datatypeOrder = NATIVE;
         datatypeSign = NATIVE;
 
@@ -181,7 +179,6 @@ public class H4Datatype extends Datatype {
         }
 
         log.trace("Datatype class={} size={}", datatypeClass, datatypeSize);
-        log.trace("fromNative(): finish");
     }
 
     /**
@@ -200,11 +197,8 @@ public class H4Datatype extends Datatype {
      */
     public static final Object allocateArray(long datatype, int datasize)
             throws OutOfMemoryError {
-        log.trace("allocateArray(): start");
-
         if (datasize <= 0) {
             log.debug("datasize <= 0");
-            log.trace("allocateArray(): finish");
             return null;
         }
 
@@ -247,7 +241,6 @@ public class H4Datatype extends Datatype {
                 break;
         }
 
-        log.trace("allocateArray(): finish");
         return data;
     }
 
@@ -258,10 +251,8 @@ public class H4Datatype extends Datatype {
      */
     @Override
     public String getDescription() {
-        log.trace("getDescription(): start");
 
         if (datatypeDescription != null) {
-            log.trace("getDescription(): finish");
             return datatypeDescription;
         }
 
@@ -282,7 +273,6 @@ public class H4Datatype extends Datatype {
                 break;
         }
 
-        log.trace("getDescription(): finish");
         return description;
     }
 
@@ -305,8 +295,6 @@ public class H4Datatype extends Datatype {
      * @return True is the datatype is an unsigned integer; otherwise returns false.
      */
     public static final boolean isUnsigned(long datatype) {
-        log.trace("isUnsigned(): start");
-
         boolean unsigned = false;
 
         switch((int) datatype) {
@@ -323,7 +311,6 @@ public class H4Datatype extends Datatype {
                 break;
         }
 
-        log.trace("isUnsigned(): finish");
         return unsigned;
     }
 
@@ -339,8 +326,6 @@ public class H4Datatype extends Datatype {
     @Override
     public long createNative()
     {
-        log.trace("createNative(): start");
-
         long tid = -1;
         int tclass = getDatatypeClass();
         int tsize = (int) getDatatypeSize();
@@ -407,7 +392,6 @@ public class H4Datatype extends Datatype {
                 log.debug("createNative(): unknown datatype class {}", tclass);
         }
 
-        log.trace("createNative(): finish");
         return tid;
     }
 

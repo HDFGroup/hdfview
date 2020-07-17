@@ -34,8 +34,6 @@ public class DefaultDatatypeMetaDataView extends DefaultLinkMetaDataView impleme
 
     @Override
     protected void addObjectSpecificContent() {
-        log.trace("addObjectSpecificContent(): start");
-
         super.addObjectSpecificContent();
 
         org.eclipse.swt.widgets.Group datatypeInfoGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
@@ -48,8 +46,6 @@ public class DefaultDatatypeMetaDataView extends DefaultLinkMetaDataView impleme
         infoArea.setFont(curFont);
         infoArea.setText(((Datatype) dataObject).getDescription());
         infoArea.setEditable(false);
-
-        log.trace("addObjectSpecificContent(): finish");
     }
 
 }

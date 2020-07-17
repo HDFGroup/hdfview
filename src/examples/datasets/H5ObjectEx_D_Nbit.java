@@ -41,7 +41,7 @@ public class H5ObjectEx_D_Nbit {
         H5Z_FILTER_FLETCHER32(HDF5Constants.H5Z_FILTER_FLETCHER32), H5Z_FILTER_SZIP(HDF5Constants.H5Z_FILTER_SZIP),
         H5Z_FILTER_NBIT(HDF5Constants.H5Z_FILTER_NBIT), H5Z_FILTER_SCALEOFFSET(HDF5Constants.H5Z_FILTER_SCALEOFFSET),
         H5Z_FILTER_RESERVED(HDF5Constants.H5Z_FILTER_RESERVED), H5Z_FILTER_MAX(HDF5Constants.H5Z_FILTER_MAX);
-        private static final Map<Integer, H5Z_filter> lookup = new HashMap<Integer, H5Z_filter>();
+        private static final Map<Integer, H5Z_filter> lookup = new HashMap<>();
 
         static {
             for (H5Z_filter s : EnumSet.allOf(H5Z_filter.class))
@@ -101,8 +101,7 @@ public class H5ObjectEx_D_Nbit {
         long[] dims = { DIM_X, DIM_Y };
         long[] chunk_dims = { CHUNK_X, CHUNK_Y };
         int[][] dset_data = new int[DIM_X][DIM_Y];
-        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER,
-                DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
+        final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
 
         // Initialize data.
         for (int indx = 0; indx < DIM_X; indx++)

@@ -197,10 +197,7 @@ public class H5Group extends Group {
      */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws HDF5Exception {
-        log.trace("getMetadata(): start");
         if (attributeList == null) {
-            log.trace("getMetadata(): get attributeList");
-
             int indxType = fileFormat.getIndexType(null);
             int order = fileFormat.getIndexOrder(null);
 
@@ -225,7 +222,6 @@ public class H5Group extends Group {
             log.debug("getMetadata(): getLinkTargetName failure: ", ex);
         }
 
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -237,11 +233,9 @@ public class H5Group extends Group {
     @Override
     @SuppressWarnings("unchecked")
     public void writeMetadata(Object info) throws Exception {
-        log.trace("writeMetadata(): start");
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an Attribute");
-            log.trace("writeMetadata(): finish");
             return;
         }
 
@@ -261,7 +255,6 @@ public class H5Group extends Group {
             attributeList.add(attr);
             nAttributes = attributeList.size();
         }
-        log.trace("writeMetadata(): finish");
     }
 
     /*
@@ -272,11 +265,9 @@ public class H5Group extends Group {
     @Override
     @SuppressWarnings("rawtypes")
     public void removeMetadata(Object info) throws HDF5Exception {
-        log.trace("removeMetadata(): start");
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("removeMetadata(): Object not an Attribute");
-            log.trace("removeMetadata(): finish");
             return;
         }
 
@@ -297,8 +288,6 @@ public class H5Group extends Group {
         else {
             log.debug("removeMetadata(): failed to open group");
         }
-
-        log.trace("removeMetadata(): finish");
     }
 
     /*
@@ -308,16 +297,13 @@ public class H5Group extends Group {
      */
     @Override
     public void updateMetadata(Object info) throws HDF5Exception {
-        log.trace("updateMetadata(): start");
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("updateMetadata(): Object not an Attribute");
-            log.trace("updateMetadata(): finish");
             return;
         }
 
         nAttributes = -1;
-        log.trace("updateMetadata(): finish");
     }
 
     /*
@@ -327,7 +313,6 @@ public class H5Group extends Group {
      */
     @Override
     public long open() {
-        log.trace("open(): start");
         long gid = -1;
 
         try {
@@ -343,7 +328,6 @@ public class H5Group extends Group {
             gid = -1;
         }
 
-        log.trace("open(): finish");
         return gid;
     }
 
@@ -393,7 +377,6 @@ public class H5Group extends Group {
      * @throws Exception if there is a failure.
      */
     public static H5Group create(String name, Group pgroup, long... gplist) throws Exception {
-        log.trace("create(): start");
         H5Group group = null;
         String fullPath = null;
         long lcpl = HDF5Constants.H5P_DEFAULT;
@@ -410,7 +393,6 @@ public class H5Group extends Group {
 
         if ((name == null) || (pgroup == null)) {
             log.debug("create(): one or more parameters are null");
-            log.trace("create(): finish");
             System.err.println("(name == null) || (pgroup == null)");
             return null;
         }
@@ -419,7 +401,6 @@ public class H5Group extends Group {
 
         if (file == null) {
             log.debug("create(): Parent Group FileFormat is null");
-            log.trace("create(): finish");
             System.err.println("Could not get file that contains object");
             return null;
         }
@@ -466,7 +447,6 @@ public class H5Group extends Group {
             }
         }
 
-        log.trace("create(): finish");
         return group;
     }
 
@@ -477,6 +457,9 @@ public class H5Group extends Group {
      */
     @Override
     public void setName(String newName) throws Exception {
+        if (newName == null)
+            throw new IllegalArgumentException("The new name is NULL");
+
         H5File.renameObject(this, newName);
         super.setName(newName);
     }

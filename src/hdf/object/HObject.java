@@ -186,88 +186,12 @@ public abstract class HObject implements Serializable {
             this.filename = null;
         }
 
-        // file name is packed in the full path
-        if ((theName == null) && (thePath != null)) {
-            if (thePath.equals(SEPARATOR)) {
-                theName = SEPARATOR;
-                thePath = null;
-            }
-            else {
-                // the path must starts with "/"
-                if (!thePath.startsWith(HObject.SEPARATOR)) {
-                    thePath = HObject.SEPARATOR + thePath;
-                }
-
-                // get rid of the last "/"
-                if (thePath.endsWith(HObject.SEPARATOR)) {
-                    thePath = thePath.substring(0, thePath.length() - 1);
-                }
-
-                // separate the name and the path
-                theName = thePath.substring(thePath.lastIndexOf(SEPARATOR) + 1);
-                thePath = thePath.substring(0, thePath.lastIndexOf(SEPARATOR));
-            }
+        try {
+            setFullname(thePath, theName);
         }
-        else if ((theName != null) && (thePath == null) && (theName.indexOf(SEPARATOR) >= 0)) {
-            if (theName.equals(SEPARATOR)) {
-                theName = SEPARATOR;
-                thePath = null;
-            }
-            else {
-                // the full name must starts with "/"
-                if (!theName.startsWith(SEPARATOR)) {
-                    theName = SEPARATOR + theName;
-                }
-
-                // the fullname must not end with "/"
-                int n = theName.length();
-                if (theName.endsWith(SEPARATOR)) {
-                    theName = theName.substring(0, n - 1);
-                }
-
-                int idx = theName.lastIndexOf(SEPARATOR);
-                if (idx < 0) {
-                    thePath = SEPARATOR;
-                }
-                else {
-                    thePath = theName.substring(0, idx);
-                    theName = theName.substring(idx + 1);
-                }
-            }
+        catch (Exception e) {
+            log.debug("setFullname failed", e.getMessage());
         }
-
-        // the path must start and end with "/"
-        if (thePath != null) {
-            thePath = thePath.replaceAll("//", "/");
-            if (!thePath.endsWith(SEPARATOR)) {
-                thePath += SEPARATOR;
-            }
-        }
-
-        this.name = theName;
-        this.path = thePath;
-
-        log.trace("name={} path={}", this.name, this.path);
-
-        if (thePath != null) {
-            this.fullName = thePath + theName;
-        }
-        else {
-            if (theName == null) {
-                this.fullName = "/";
-            }
-            else if (theName.startsWith("/")) {
-                this.fullName = theName;
-            }
-            else {
-                if (this instanceof Attribute)
-                    this.fullName = theName;
-                else
-                    this.fullName = "/" + theName;
-            }
-        }
-
-        log.trace("fullName={}", this.fullName);
     }
 
     /**
@@ -352,22 +276,23 @@ public abstract class HObject implements Serializable {
      * @throws Exception if name is root or contains separator
      */
     public void setName(String newName) throws Exception {
-        if (newName != null) {
-            if (newName.equals(HObject.SEPARATOR)) {
-                throw new IllegalArgumentException("The new name cannot be the root");
-            }
+        if (newName == null)
+            throw new IllegalArgumentException("The new name is NULL");
 
-            if (newName.startsWith(HObject.SEPARATOR)) {
-                newName = newName.substring(1);
-            }
+        if (newName.equals(HObject.SEPARATOR)) {
+            throw new IllegalArgumentException("The new name cannot be the root");
+        }
 
-            if (newName.endsWith(HObject.SEPARATOR)) {
-                newName = newName.substring(0, newName.length() - 2);
-            }
+        if (newName.startsWith(HObject.SEPARATOR)) {
+            newName = newName.substring(1);
+        }
 
-            if (newName.contains(HObject.SEPARATOR)) {
-                throw new IllegalArgumentException("The new name contains the SEPARATOR character: " + HObject.SEPARATOR);
-            }
+        if (newName.endsWith(HObject.SEPARATOR)) {
+            newName = newName.substring(0, newName.length() - 2);
+        }
+
+        if (newName.contains(HObject.SEPARATOR)) {
+            throw new IllegalArgumentException("The new name contains the SEPARATOR character: " + HObject.SEPARATOR);
         }
 
         name = newName;
@@ -392,6 +317,95 @@ public abstract class HObject implements Serializable {
         }
 
         path = newPath;
+    }
+
+    public void setFullname(String thePath, String theName) throws Exception {
+        // file name is packed in the full path
+        if ((theName == null) && (thePath != null)) {
+            if (thePath.equals(SEPARATOR)) {
+                theName = SEPARATOR;
+                thePath = null;
+            }
+            else {
+                // the path must starts with "/"
+                if (!thePath.startsWith(HObject.SEPARATOR)) {
+                    thePath = HObject.SEPARATOR + thePath;
+                }
+
+                // get rid of the last "/"
+                if (thePath.endsWith(HObject.SEPARATOR)) {
+                    thePath = thePath.substring(0, thePath.length() - 1);
+                }
+
+                // separate the name and the path
+                theName = thePath.substring(thePath.lastIndexOf(SEPARATOR) + 1);
+                thePath = thePath.substring(0, thePath.lastIndexOf(SEPARATOR));
+            }
+        }
+        else if ((theName != null) && (thePath == null) && (theName.indexOf(SEPARATOR) >= 0)) {
+            if (theName.equals(SEPARATOR)) {
+                theName = SEPARATOR;
+                thePath = null;
+            }
+            else {
+                // the full name must starts with "/"
+                if (!theName.startsWith(SEPARATOR)) {
+                    theName = SEPARATOR + theName;
+                }
+
+                // the fullname must not end with "/"
+                int n = theName.length();
+                if (theName.endsWith(SEPARATOR)) {
+                    theName = theName.substring(0, n - 1);
+                }
+
+                int idx = theName.lastIndexOf(SEPARATOR);
+                if (idx < 0) {
+                    thePath = SEPARATOR;
+                }
+                else {
+                    thePath = theName.substring(0, idx);
+                    theName = theName.substring(idx + 1);
+                }
+            }
+        }
+
+        // the path must start and end with "/"
+        if (thePath != null) {
+            thePath = thePath.replaceAll("//", "/");
+            if (!thePath.endsWith(SEPARATOR)) {
+                thePath += SEPARATOR;
+            }
+        }
+
+        this.name = theName;
+        this.path = thePath;
+
+        this.fullName = createFullname(thePath, theName);
+    }
+
+    public String createFullname(String thePath, String theName) {
+        String theFullName;
+
+        if (thePath != null) {
+            theFullName = thePath + theName;
+        }
+        else {
+            if (theName == null) {
+                theFullName = "/";
+            }
+            else if (theName.startsWith("/")) {
+                theFullName = theName;
+            }
+            else {
+                if (this instanceof Attribute)
+                    theFullName = theName;
+                else
+                    theFullName = "/" + theName;
+            }
+        }
+
+        return theFullName;
     }
 
     /**

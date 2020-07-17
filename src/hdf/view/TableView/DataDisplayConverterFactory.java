@@ -41,7 +41,6 @@ import hdf.view.Tools;
  *
  */
 public class DataDisplayConverterFactory {
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataDisplayConverterFactory.class);
 
     /*
@@ -53,11 +52,8 @@ public class DataDisplayConverterFactory {
     private static DataFormat dataFormatReference = null;
 
     public static HDFDisplayConverter getDataDisplayConverter(final DataFormat dataObject) throws Exception {
-        log.trace("getDataDisplayConverter(DataFormat): start");
-
         if (dataObject == null) {
             log.debug("getDataDisplayConverter(DataFormat): data object is null");
-            log.trace("getDataDisplayConverter(DataFormat): finish");
             return null;
         }
 
@@ -65,14 +61,10 @@ public class DataDisplayConverterFactory {
 
         HDFDisplayConverter converter = getDataDisplayConverter(dataObject.getDatatype());
 
-        log.trace("getDataDisplayConverter(DataFormat): finish");
-
         return converter;
     }
 
     private static final HDFDisplayConverter getDataDisplayConverter(final Datatype dtype) throws Exception {
-        log.trace("getDataDisplayConverter(Datatype): start");
-
         HDFDisplayConverter converter = null;
 
         try {
@@ -109,17 +101,12 @@ public class DataDisplayConverterFactory {
             converter = new HDFDisplayConverter(dtype);
         }
 
-        log.trace("getDataDisplayConverter(Datatype): finish");
-
         return converter;
     }
 
     public static class HDFDisplayConverter extends DisplayConverter {
-
         protected org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDisplayConverter.class);
-
         protected NumberFormat     numberFormat = null;
-
         protected boolean          showAsHex = false;
         protected boolean          showAsBin = false;
         protected boolean          isEnumConverted = false;
@@ -134,12 +121,8 @@ public class DataDisplayConverterFactory {
         protected int              cellColIdx;
 
         HDFDisplayConverter(final Datatype dtype) {
-            log.trace("constructor: start");
-
             cellRowIdx = -1;
             cellColIdx = -1;
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -147,17 +130,13 @@ public class DataDisplayConverterFactory {
             log.trace("canonicalToDisplayValue({}): start", value);
 
             if (value instanceof String) {
-                log.trace("canonicalToDisplayValue({}): exit", value);
                 return value;
             }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
-                log.trace("canonicalToDisplayValue({}): exit", value);
                 return DataFactoryUtils.nullStr;
             }
-
-            log.trace("canonicalToDisplayValue({}): finish", value);
 
             return value;
         }
@@ -165,8 +144,6 @@ public class DataDisplayConverterFactory {
         @Override
         public Object displayToCanonicalValue(Object value) {
             log.trace("displayToCanonicalValue({}): start", value);
-            log.trace("displayToCanonicalValue({}): finish", value);
-
             return value;
         }
 
@@ -189,22 +166,16 @@ public class DataDisplayConverterFactory {
     }
 
     private static class CompoundDataDisplayConverter extends HDFDisplayConverter {
-
         private final HashMap<Integer, Integer> baseConverterIndexMap;
         private final HashMap<Integer, Integer> relCmpdStartIndexMap;
-
         private final HDFDisplayConverter[]     memberTypeConverters;
-
         private final StringBuilder             buffer;
-
         private final int                       nTotFields;
 
         CompoundDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
 
             log = org.slf4j.LoggerFactory.getLogger(CompoundDataDisplayConverter.class);
-
-            log.trace("constructor: start");
 
             if (!dtype.isCompound()) {
                 log.debug("datatype is not a compound type");
@@ -250,21 +221,17 @@ public class DataDisplayConverterFactory {
 
             if (baseConverterIndexMap.size() == 0) {
                 log.debug("base DataDisplayConverter index mapping is invalid - size 0");
-                log.trace("constructor: finish");
                 throw new Exception("CompoundDataDisplayConverter: invalid DataDisplayConverter mapping of size 0 built");
             }
 
             if (relCmpdStartIndexMap.size() == 0) {
                 log.debug("compound field start index mapping is invalid - size 0");
-                log.trace("constructor: finish");
                 throw new Exception("CompoundDataDisplayConverter: invalid compound field start index mapping of size 0 built");
             }
 
             nTotFields = baseConverterIndexMap.size();
 
             buffer = new StringBuilder();
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -279,13 +246,11 @@ public class DataDisplayConverterFactory {
             log.trace("canonicalToDisplayValue({}): start", value);
 
             if (value instanceof String) {
-                log.trace("canonicalToDisplayValue({}): finish", value);
                 return value;
             }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
-                log.trace("canonicalToDisplayValue({}): finish", value);
                 return DataFactoryUtils.nullStr;
             }
 
@@ -329,8 +294,6 @@ public class DataDisplayConverterFactory {
                 buffer.append(DataFactoryUtils.errStr);
             }
 
-            log.trace("canonicalToDisplayValue({}): finish", buffer);
-
             return buffer;
         }
 
@@ -373,9 +336,7 @@ public class DataDisplayConverterFactory {
     }
 
     private static class ArrayDataDisplayConverter extends HDFDisplayConverter {
-
         private final HDFDisplayConverter baseTypeConverter;
-
         private final StringBuilder       buffer;
 
         ArrayDataDisplayConverter(final Datatype dtype) throws Exception {
@@ -383,17 +344,15 @@ public class DataDisplayConverterFactory {
 
             log = org.slf4j.LoggerFactory.getLogger(ArrayDataDisplayConverter.class);
 
-            log.trace("constructor: start");
-
             if (!dtype.isArray()) {
-                log.debug("datatype is not an array type");
+                log.debug("exit: datatype is not an array type");
                 throw new Exception("ArrayDataDisplayConverter: datatype is not an array type");
             }
 
             Datatype baseType = dtype.getDatatypeBase();
 
             if (baseType == null) {
-                log.debug("base datatype is null");
+                log.debug("exit: base datatype is null");
                 throw new Exception("ArrayDataDisplayConverter: base datatype is null");
             }
 
@@ -409,13 +368,11 @@ public class DataDisplayConverterFactory {
                 baseTypeConverter.setConvertEnum(this.isEnumConverted);
             }
             catch (Exception ex) {
-                log.debug("couldn't get DataDisplayConverter for base datatype: ", ex);
+                log.debug("exit: couldn't get DataDisplayConverter for base datatype: ", ex);
                 throw new Exception("ArrayDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: " + ex.getMessage());
             }
 
             buffer = new StringBuilder();
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -430,13 +387,11 @@ public class DataDisplayConverterFactory {
             log.trace("canonicalToDisplayValue({}): start", value);
 
             if (value instanceof String) {
-                log.trace("canonicalToDisplayValue({}): finish", value);
                 return value;
             }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
-                log.trace("canonicalToDisplayValue({}): finish", value);
                 return DataFactoryUtils.nullStr;
             }
 
@@ -478,8 +433,6 @@ public class DataDisplayConverterFactory {
                 buffer.append(DataFactoryUtils.errStr);
             }
 
-            log.trace("canonicalToDisplayValue({}): finish", buffer);
-
             return buffer;
         }
 
@@ -514,7 +467,6 @@ public class DataDisplayConverterFactory {
     }
 
     private static class VlenDataDisplayConverter extends HDFDisplayConverter {
-
         private final HDFDisplayConverter baseTypeConverter;
 
         VlenDataDisplayConverter(final Datatype dtype) throws Exception {
@@ -522,10 +474,8 @@ public class DataDisplayConverterFactory {
 
             log = org.slf4j.LoggerFactory.getLogger(VlenDataDisplayConverter.class);
 
-            log.trace("constructor: start");
-
             if (!dtype.isVLEN() || dtype.isVarStr()) {
-                log.debug("datatype is not a variable-length type or is a variable-length string type (use StringDataDisplayConverter)");
+                log.debug("exit: datatype is not a variable-length type or is a variable-length string type (use StringDataDisplayConverter)");
                 throw new Exception("VlenDataDisplayConverter: datatype is not a variable-length type or is a variable-length string type (use StringDataDisplayConverter)");
             }
 
@@ -551,8 +501,6 @@ public class DataDisplayConverterFactory {
                 log.debug("couldn't get DataDisplayConverter for base datatype: ", ex);
                 throw new Exception("VlenDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: " + ex.getMessage());
             }
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -586,39 +534,29 @@ public class DataDisplayConverterFactory {
     }
 
     private static class StringDataDisplayConverter extends HDFDisplayConverter {
-
         StringDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
 
             log = org.slf4j.LoggerFactory.getLogger(StringDataDisplayConverter.class);
 
-            log.trace("constructor: start");
-
             if (!dtype.isString() && !dtype.isVarStr()) {
                 log.debug("datatype is not a string type");
                 throw new Exception("StringDataDisplayConverter: datatype is not a string type");
             }
-
-            log.trace("constructor: finish");
         }
 
     }
 
     private static class CharDataDisplayConverter extends HDFDisplayConverter {
-
         CharDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
 
             log = org.slf4j.LoggerFactory.getLogger(CharDataDisplayConverter.class);
 
-            log.trace("constructor: start");
-
             if (!dtype.isChar()) {
                 log.debug("datatype is not a character type");
                 throw new Exception("CharDataDisplayConverter: datatype is not a character type");
             }
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -629,19 +567,14 @@ public class DataDisplayConverterFactory {
     }
 
     private static class NumericalDataDisplayConverter extends HDFDisplayConverter {
-
         private final StringBuilder buffer;
-
         private final long          typeSize;
-
         private final boolean       isUINT64;
 
         NumericalDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
 
             log = org.slf4j.LoggerFactory.getLogger(NumericalDataDisplayConverter.class);
-
-            log.trace("constructor: start");
 
             if (!dtype.isInteger() && !dtype.isFloat()) {
                 log.debug("datatype is not an integer or floating-point type");
@@ -652,8 +585,6 @@ public class DataDisplayConverterFactory {
 
             typeSize = dtype.getDatatypeSize();
             isUINT64 = dtype.isUnsigned() && (typeSize == 8);
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -661,13 +592,11 @@ public class DataDisplayConverterFactory {
             log.trace("canonicalToDisplayValue({}): start", value);
 
             if (value instanceof String) {
-                log.trace("canonicalToDisplayValue({}): finish", value);
                 return value;
             }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
-                log.trace("canonicalToDisplayValue({}): finish", value);
                 return DataFactoryUtils.nullStr;
             }
 
@@ -703,25 +632,19 @@ public class DataDisplayConverterFactory {
                 buffer.append(DataFactoryUtils.errStr);
             }
 
-            log.trace("canonicalToDisplayValue({}): finish", buffer);
-
             return buffer;
         }
 
     }
 
     private static class EnumDataDisplayConverter extends HDFDisplayConverter {
-
         private final StringBuilder buffer;
-
         private final H5Datatype    enumType;
 
         EnumDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
 
             log = org.slf4j.LoggerFactory.getLogger(EnumDataDisplayConverter.class);
-
-            log.trace("constructor: start");
 
             if (!dtype.isEnum()) {
                 log.debug("datatype is not an enum type");
@@ -731,8 +654,6 @@ public class DataDisplayConverterFactory {
             buffer = new StringBuilder();
 
             enumType = (H5Datatype) dtype;
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -740,13 +661,11 @@ public class DataDisplayConverterFactory {
             log.trace("canonicalToDisplayValue({}): start", value);
 
             if (value instanceof String) {
-                log.trace("canonicalToDisplayValue({}): exit", value);
                 return value;
             }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
-                log.trace("canonicalToDisplayValue({}): exit", value);
                 return DataFactoryUtils.nullStr;
             }
 
@@ -778,25 +697,19 @@ public class DataDisplayConverterFactory {
                 buffer.append(DataFactoryUtils.errStr);
             }
 
-            log.trace("canonicalToDisplayValue({}): finish", buffer);
-
             return buffer;
         }
 
     }
 
     private static class BitfieldDataDisplayConverter extends HDFDisplayConverter {
-
         private final StringBuilder buffer;
-
         private final boolean       isOpaque;
 
         BitfieldDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
 
             log = org.slf4j.LoggerFactory.getLogger(BitfieldDataDisplayConverter.class);
-
-            log.trace("constructor: start");
 
             if (!dtype.isBitField() && !dtype.isOpaque()) {
                 log.debug("datatype is not a bitfield or opaque type");
@@ -806,8 +719,6 @@ public class DataDisplayConverterFactory {
             buffer = new StringBuilder();
 
             isOpaque = dtype.isOpaque();
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -815,13 +726,11 @@ public class DataDisplayConverterFactory {
             log.trace("canonicalToDisplayValue({}): start", value);
 
             if (value instanceof String) {
-                log.trace("canonicalToDisplayValue({}): exit", value);
                 return value;
             }
 
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
-                log.trace("canonicalToDisplayValue({}): exit", value);
                 return DataFactoryUtils.nullStr;
             }
 
@@ -842,30 +751,22 @@ public class DataDisplayConverterFactory {
                 buffer.append(DataFactoryUtils.errStr);
             }
 
-            log.trace("canonicalToDisplayValue({}): finish", buffer);
-
             return buffer;
         }
 
     }
 
     private static class RefDataDisplayConverter extends HDFDisplayConverter {
-
         RefDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
 
             log = org.slf4j.LoggerFactory.getLogger(RefDataDisplayConverter.class);
 
-            log.trace("constructor: start");
-
             if (!dtype.isRef()) {
                 log.debug("datatype is not a reference type");
                 throw new Exception("RefDataDisplayConverter: datatype is not a reference type");
             }
-
-            log.trace("constructor: finish");
         }
-
     }
 
 }

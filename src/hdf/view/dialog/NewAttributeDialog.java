@@ -29,7 +29,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -45,7 +44,6 @@ import org.eclipse.swt.widgets.Text;
 
 import hdf.object.Attribute;
 import hdf.object.Datatype;
-import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
@@ -58,21 +56,12 @@ import hdf.view.ViewProperties;
  * @author Jordan T. Henderson
  * @version 2.4 1/7/2016
  */
-public class NewAttributeDialog extends Dialog {
+public class NewAttributeDialog extends NewDataObjectDialog {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
 
-    private Shell             shell;
-
-    private Font              curFont;
-
     /** the default length of a string attribute */
     public static final int   DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;
-
-    /** the object which the attribute to be attached to */
-    private HObject           hObject;
-
-    private Attribute         newAttribute;
 
     /** TextField for entering the name of the dataset */
     private Text              nameField;
@@ -80,27 +69,12 @@ public class NewAttributeDialog extends Dialog {
     /** TextField for entering the attribute value. */
     private Text              valueField;
 
-    /** TextField for entering the length of the data array or string. */
-    private Text              lengthField;
-
-    /** The Choice of the datatypes */
-    private Combo             classChoice;
-    private Combo             sizeChoice;
-
     /** The Choice of the object list */
     private Combo             objChoice;
 
-    private Button            checkUnsigned;
-
     private Button            h4GrAttrRadioButton;
 
-    private FileFormat        fileFormat;
-
-    private List<HObject>     objList;
-
     private Label             arrayLengthLabel;
-
-    private final boolean     isH5;
 
     /**
      * Constructs a NewAttributeDialog with specified object (dataset, group, or
@@ -114,24 +88,7 @@ public class NewAttributeDialog extends Dialog {
      *            the specified objects.
      */
     public NewAttributeDialog(Shell parent, HObject obj, List<HObject> objs) {
-        super(parent, SWT.APPLICATION_MODAL);
-
-        try {
-            curFont = new Font(
-                    Display.getCurrent(),
-                    ViewProperties.getFontType(),
-                    ViewProperties.getFontSize(),
-                    SWT.NORMAL);
-        }
-        catch (Exception ex) {
-            curFont = null;
-        }
-
-        hObject = obj;
-        newAttribute = null;
-        objList = objs;
-        isH5 = obj.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-        fileFormat = obj.getFileFormat();
+        super(parent, obj, objs);
     }
 
     public void open() {
@@ -163,24 +120,16 @@ public class NewAttributeDialog extends Dialog {
         Composite optionsComposite = new Composite(content, SWT.NONE);
         optionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         optionsComposite.setLayout(new GridLayout(
-                (!isH5 && (hObject instanceof Group) && ((Group) hObject).isRoot()) ? 5 : 3,
+                (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot()) ? 5 : 3,
                         false)
                 );
-
-        label = new Label(optionsComposite, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Datatype class");
-
-        label = new Label(optionsComposite, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Size (bits) ");
 
         // Dummy label
         label = new Label(optionsComposite, SWT.LEFT);
         label.setFont(curFont);
         label.setText("");
 
-        if (!isH5 && (hObject instanceof Group) && ((Group) hObject).isRoot()) {
+        if (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot()) {
             label = new Label(optionsComposite, SWT.LEFT);
             label.setFont(curFont);
             label.setText("");
@@ -190,103 +139,9 @@ public class NewAttributeDialog extends Dialog {
             label.setText("");
         }
 
-        classChoice = new Combo(optionsComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
-        classChoice.setFont(curFont);
-        classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        classChoice.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                int idx = classChoice.getSelectionIndex();
-                sizeChoice.select(0);
-                objChoice.setEnabled(false);
-                lengthField.setEnabled(true);
+        createDatatypeWidget();
 
-                if ((idx == 0) || (idx == 5)) {
-                    sizeChoice.setEnabled(true);
-                    checkUnsigned.setEnabled(true);
-                    arrayLengthLabel.setText("Array Size: ");
-
-                    if (sizeChoice.getItemCount() == 2) {
-                        sizeChoice.remove("32");
-                        sizeChoice.remove("64");
-                        sizeChoice.add("8");
-                        sizeChoice.add("16");
-                        sizeChoice.add("32");
-                        sizeChoice.add("64");
-                    }
-                }
-                else if ((idx == 1) || (idx == 6)) {
-                    sizeChoice.setEnabled(true);
-                    checkUnsigned.setEnabled(false);
-                    arrayLengthLabel.setText("Array Size: ");
-
-                    if (sizeChoice.getItemCount() == 4) {
-                        sizeChoice.remove("16");
-                        sizeChoice.remove("8");
-                    }
-                }
-                else if (idx == 2) {
-                    sizeChoice.setEnabled(false);
-                    checkUnsigned.setEnabled(true);
-                    arrayLengthLabel.setText("Array Size: ");
-                }
-                else if (idx == 3) {
-                    sizeChoice.setEnabled(false);
-                    checkUnsigned.setEnabled(false);
-                    arrayLengthLabel.setText("String Length: ");
-                }
-                else if (idx == 4) {
-                    sizeChoice.setEnabled(false);
-                    checkUnsigned.setEnabled(false);
-                    lengthField.setText("1");
-                    lengthField.setEnabled(false);
-                    arrayLengthLabel.setText("Array Size: ");
-                    objChoice.setEnabled(true);
-                    valueField.setText("");
-                }
-                else if (idx == 7) {
-                    sizeChoice.setEnabled(false);
-                    checkUnsigned.setEnabled(false);
-                    lengthField.setEnabled(false);
-                }
-            }
-        });
-
-        classChoice.add("INTEGER");
-        classChoice.add("FLOAT");
-        classChoice.add("CHAR");
-
-        if (isH5) {
-            classChoice.add("STRING");
-            classChoice.add("REFERENCE");
-            classChoice.add("VLEN_INTEGER");
-            classChoice.add("VLEN_FLOAT");
-            classChoice.add("VLEN_STRING");
-        }
-
-        sizeChoice = new Combo(optionsComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
-        sizeChoice.setFont(curFont);
-        sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        sizeChoice.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                if (classChoice.getSelectionIndex() == 0) {
-                    checkUnsigned.setEnabled(true);
-                }
-            }
-        });
-
-        sizeChoice.add("8");
-        sizeChoice.add("16");
-        sizeChoice.add("32");
-        sizeChoice.add("64");
-
-        checkUnsigned = new Button(optionsComposite, SWT.CHECK);
-        checkUnsigned.setFont(curFont);
-        checkUnsigned.setText("Unsigned");
-        checkUnsigned.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
-
-        if (!isH5 && (hObject instanceof Group) && ((Group) hObject).isRoot()) {
+        if (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot()) {
             Button h4SdAttrRadioButton = new Button(optionsComposite, SWT.RADIO);
             h4SdAttrRadioButton.setFont(curFont);
             h4SdAttrRadioButton.setText("SD");
@@ -322,7 +177,7 @@ public class NewAttributeDialog extends Dialog {
 
         objChoice = new Combo(content, SWT.DROP_DOWN | SWT.READ_ONLY);
         objChoice.setFont(curFont);
-        objChoice.setEnabled(false);
+        objChoice.setEnabled(true);
         objChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         objChoice.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -352,10 +207,10 @@ public class NewAttributeDialog extends Dialog {
             }
         });
 
-        Iterator<HObject> it = objList.iterator();
+        Iterator<?> it = objList.iterator();
         HObject hobj;
         while (it.hasNext()) {
-            hobj = it.next();
+            hobj = (HObject) it.next();
 
             if (hobj instanceof Group) {
                 if (((Group) hobj).isRoot()) continue;
@@ -393,7 +248,7 @@ public class NewAttributeDialog extends Dialog {
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                newAttribute = null;
+                newObject = null;
                 shell.dispose();
             }
         });
@@ -408,10 +263,6 @@ public class NewAttributeDialog extends Dialog {
                 new HelpDialog(shell).open();
             }
         });
-
-        classChoice.select(0);
-        sizeChoice.select(0);
-        objChoice.select(0);
 
         shell.pack();
 
@@ -439,14 +290,6 @@ public class NewAttributeDialog extends Dialog {
 
     @SuppressWarnings("unchecked")
     private boolean createAttribute() {
-        int tclass = Datatype.CLASS_NO_CLASS;
-        int tsize = Datatype.NATIVE;
-        int torder = Datatype.NATIVE;
-        int tsign = Datatype.NATIVE;
-        boolean isVLen = false;
-        boolean isVlenStr = false;
-        log.trace("createAttribute start");
-
         Object value = null;
         String strValue = valueField.getText();
 
@@ -487,105 +330,18 @@ public class NewAttributeDialog extends Dialog {
         log.trace("Count of Values is {}", count);
 
         // set datatype class
-        int idx = classChoice.getSelectionIndex();
-        if (idx == 0) {
-            tclass = Datatype.CLASS_INTEGER;
-            if (checkUnsigned.getSelection()) {
-                tsign = Datatype.SIGN_NONE;
-            }
-            torder = Datatype.NATIVE;
-        }
-        else if (idx == 1) {
-            tclass = Datatype.CLASS_FLOAT;
-            torder = Datatype.NATIVE;
-        }
-        else if (idx == 2) {
-            tclass = Datatype.CLASS_CHAR;
-            if (checkUnsigned.getSelection()) {
-                tsign = Datatype.SIGN_NONE;
-            }
-            torder = Datatype.NATIVE;
-        }
-        else if (idx == 3) {
-            tclass = Datatype.CLASS_STRING;
-        }
-        else if (idx == 4) {
-            tclass = Datatype.CLASS_REFERENCE;
-        }
-        else if (idx == 5) {
-            isVLen = true;
-            tclass = Datatype.CLASS_INTEGER;
-            if (checkUnsigned.getSelection()) {
-                tsign = Datatype.SIGN_NONE;
-            }
-            torder = Datatype.NATIVE;
-
-            Tools.showWarning(shell, "Create", "Multi-dimensional Variable Length Integer Attributes will be created without data.");
-        }
-        else if (idx == 6) {
-            isVLen = true;
-            tclass = Datatype.CLASS_FLOAT;
-            torder = Datatype.NATIVE;
-
-            Tools.showWarning(shell, "Create", "Multi-dimensional Variable Length Float Attributes will be created without data.");
-        }
-        else if (idx == 7) {
-            tclass = Datatype.CLASS_STRING;
-            isVlenStr = true;
-            tsize = -1;
-        }
-        log.trace("Attribute: isVLen={} and tclass={} and torder={} and tsign={}", isVLen, tclass, torder, tsign);
-
-        // set datatype size/order
-        idx = sizeChoice.getSelectionIndex();
+        Datatype datatype = super.createNewDatatype(null);
         if (isVLen) {
-            tsize = -1;
             log.trace("Attribute isVLen={} and tsize={}", isVLen, tsize);
             String[] strArray = { strValue };
             value = strArray;
-            if (tclass == Datatype.CLASS_INTEGER) {
-                switch(idx) {
-                    case 0:
-                        tsize = 1;
-                        break;
-                    case 1:
-                        tsize = 2;
-                        break;
-                    case 2:
-                        tsize = 4;
-                        break;
-                    case 3:
-                        tsize = 8;
-                        break;
-                    default:
-                        break;
-                }
-                log.trace("Attribute VL-CLASS_INTEGER: tsize={}", tsize);
-            }
-            else if (tclass == Datatype.CLASS_FLOAT) {
-                tsize = (idx + 1) * 4;
-                log.trace("Attribute VL-CLASS_FLOAT: tsize={}", tsize);
-            }
         }
         else {
             if (tclass == Datatype.CLASS_STRING) {
-                int stringLength = 0;
                 if (!isVlenStr) {
-                    try {
-                        stringLength = Integer.parseInt(lengthField.getText());
+                    if (strValue.length() > tsize) {
+                        strValue = strValue.substring(0, tsize);
                     }
-                    catch (NumberFormatException ex) {
-                        stringLength = -1;
-                    }
-
-                    if (stringLength <= 0) {
-                        stringLength = DEFAULT_STRING_ATTRIBUTE_LENGTH;
-                    }
-                    if (strValue.length() > stringLength) {
-                        strValue = strValue.substring(0, stringLength);
-                    }
-
-                    tsize = stringLength;
                 }
 
                 String[] strArray = { strValue };
@@ -595,12 +351,11 @@ public class NewAttributeDialog extends Dialog {
                     arraySize = 1; // support string type
                 }
                 else {
-                    arraySize = stringLength; // array of characters
+                    arraySize = tsize; // array of characters
                 }
                 log.trace("Attribute CLASS_STRING: isVLen={} and tsize={} and arraySize={}", isVLen, tsize, arraySize);
             }
             else if (tclass == Datatype.CLASS_REFERENCE) {
-                tsize = 1;
                 arraySize = st.countTokens();
                 long[] ref = new long[arraySize];
                 for (int j = 0; j < arraySize; j++) {
@@ -615,43 +370,9 @@ public class NewAttributeDialog extends Dialog {
                 }
 
                 value = ref;
-                torder = Datatype.NATIVE;
                 log.trace("Attribute CLASS_REFERENCE: tsize={} and arraySize={}", tsize, arraySize);
             }
             else if (tclass == Datatype.CLASS_INTEGER) {
-                switch(idx) {
-                    case 0:
-                        tsize = 1;
-                        break;
-                    case 1:
-                        tsize = 2;
-                        break;
-                    case 2:
-                        tsize = 4;
-                        break;
-                    case 3:
-                        tsize = 8;
-                        break;
-                    default:
-                        break;
-                }
-                log.trace("Attribute CLASS_INTEGER: tsize={}", tsize);
-            }
-            else if (tclass == Datatype.CLASS_FLOAT) {
-                tsize = (idx + 1) * 4;
-                log.trace("Attribute CLASS_FLOAT: tsize={}", tsize);
-            }
-            else {
-                tsize = 1 << (idx);
-                log.trace("Attribute other: tsize={}", tsize);
-            }
-
-            if ((tsize == 8) && !isH5 && (tclass == Datatype.CLASS_INTEGER)) {
-                Tools.showError(shell, "Create", "HDF4 does not support 64-bit integer.");
-                return false;
-            }
-
-            if (tclass == Datatype.CLASS_INTEGER) {
                 if (tsign == Datatype.SIGN_NONE) {
                     if (tsize == 1) {
                         byte[] b = new byte[arraySize];
@@ -836,35 +557,19 @@ public class NewAttributeDialog extends Dialog {
             }
         }
 
-        Datatype datatype = null;
-        try {
-            Datatype basedatatype = null;
-            if (isVLen) {
-                basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
-                tclass = Datatype.CLASS_VLEN;
-                log.trace("Attribute CLASS_VLEN");
-            }
-            datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
-        }
-        catch (Exception ex) {
-            Tools.showError(shell, "Create", ex.getMessage());
-            log.debug("createAttribute(): ", ex);
-            return false;
-        }
-
         long[] dims = { arraySize };
-        Attribute attr = new Attribute(hObject, attrName, datatype, dims);
+        Attribute attr = new Attribute(parentObj, attrName, datatype, dims);
         attr.setData(value);
 
         try {
-            if (!isH5 && (hObject instanceof Group) && ((Group) hObject).isRoot() && h4GrAttrRadioButton.getSelection()) {
+            parentObj.getFileFormat().writeAttribute(parentObj, attr, false);
+            if (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot() && h4GrAttrRadioButton.getSelection()) {
                 // don't find a good way to write HDF4 global
                 // attribute. Use the isExisted to separate the
                 // global attribute is GR or SD
-                hObject.getFileFormat().writeAttribute(hObject, attr, false);
 
-                if (((MetaDataContainer) hObject).getMetadata() == null) {
-                    ((MetaDataContainer) hObject).getMetadata().add(attr);
+                if (((MetaDataContainer) parentObj).getMetadata() == null) {
+                    ((MetaDataContainer) parentObj).getMetadata().add(attr);
                 }
             }
             else {
@@ -878,9 +583,8 @@ public class NewAttributeDialog extends Dialog {
             return false;
         }
 
-        newAttribute = attr;
+        newObject = attr;
 
-        log.trace("createAttribute finish");
         return true;
     }
 
@@ -1021,6 +725,6 @@ public class NewAttributeDialog extends Dialog {
 
     /** @return the new attribute created. */
     public Attribute getAttribute() {
-        return newAttribute;
+        return (Attribute)newObject;
     }
 }

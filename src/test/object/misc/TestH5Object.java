@@ -424,7 +424,8 @@ public class TestH5Object
         {
             message = "Create a named datatype -- "+msgs[i];
             try {
-                file.createDatatype(dtype_cls[i],Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE, dtype_names[i]);
+                Datatype dnative = file.createDatatype(dtype_cls[i],Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+                file.createNamedDatatype(dnative, dtype_names[i]);
             } catch (final Exception ex) { failed(message, ex, file); return 1; }
 
             passed(message);

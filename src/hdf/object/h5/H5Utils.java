@@ -45,8 +45,6 @@ public final class H5Utils {
      */
     public static final long selectHyperslab(long did, long[] dsetDims, long[] startDims, long[] selectedStride,
             long[] selectedDims, long[] spaceIDs) throws HDF5Exception {
-        log.trace("selectHyperslab(): start");
-
         if (dsetDims == null) {
             log.debug("selectHyperslab(): dsetDims is null");
             return -1;
@@ -95,8 +93,6 @@ public final class H5Utils {
             H5.H5Sselect_hyperslab(spaceIDs[1], HDF5Constants.H5S_SELECT_SET, startDims, selectedStride, selectedDims, null);
         }
 
-        log.trace("selectHyperslab(): finish");
-
         return lsize;
     }
 
@@ -108,13 +104,11 @@ public final class H5Utils {
 
         if (totalSelectedSpacePoints == 0) {
             log.debug("getTotalSelectedSpacePoints(): No data to read. Dataset or selected subset is empty.");
-            log.trace("getTotalSelectedSpacePoints(): finish");
             throw new HDF5Exception("No data to read.\nEither the dataset or the selected subset is empty.");
         }
 
         if (totalSelectedSpacePoints < Integer.MIN_VALUE || totalSelectedSpacePoints > Integer.MAX_VALUE) {
             log.debug("getTotalSelectedSpacePoints(): totalSelectedSpacePoints outside valid Java int range; unsafe cast");
-            log.trace("getTotalSelectedSpacePoints(): finish");
             throw new HDF5Exception("Invalid int size");
         }
 

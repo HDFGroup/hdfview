@@ -106,6 +106,9 @@ public class H5Link extends HObject implements MetaDataContainer {
      */
     @Override
     public void setName(String newName) throws Exception {
+        if (newName == null)
+            throw new IllegalArgumentException("The new name is NULL");
+
         H5File.renameObject(this, newName);
         super.setName(newName);
     }

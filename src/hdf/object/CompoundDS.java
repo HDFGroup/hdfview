@@ -225,7 +225,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     public final String[] getSelectedMemberNames() {
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberNames(): isMemberSelected array is null");
-            log.trace("getSelectedMemberNames(): finish");
             return memberNames;
         }
 
@@ -339,11 +338,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      */
     @Override
     public final int[] getSelectedMemberOrders() {
-        log.trace("getSelectedMemberOrders(): start");
-
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberOrders(): isMemberSelected array is null");
-            log.trace("getSelectedMemberOrders(): finish");
             return memberOrders;
         }
 
@@ -354,8 +350,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
                 orders[idx++] = memberOrders[i];
             }
         }
-
-        log.trace("getSelectedMemberOrders(): finish");
 
         return orders;
     }
@@ -411,11 +405,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      */
     @Override
     public final Datatype[] getSelectedMemberTypes() {
-        log.trace("getSelectedMemberTypes(): start");
-
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberTypes(): isMemberSelected array is null");
-            log.trace("getSelectedMemberTypes(): finish");
             return memberTypes;
         }
 
@@ -426,8 +417,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
                 types[idx++] = memberTypes[i];
             }
         }
-
-        log.trace("getSelectedMemberTypes(): finish");
 
         return types;
     }

@@ -42,8 +42,6 @@ public class DataViewFactoryProducer {
         DataViewFactory theFactory = null;
         List<?> moduleList = null;
 
-        log.trace("getFactory(): start");
-
         /*
          * First determine if we are using the default module for the requested DataViewFactory
          * class. If not, we will attempt to load the given DataViewFactory class.
@@ -60,7 +58,6 @@ public class DataViewFactoryProducer {
 
                 if (factoryClassName.equals(ViewProperties.DEFAULT_MODULE_TEXT)) {
                     log.trace("getFactory(): returning default TableView factory instance");
-                    log.trace("getFactory(): finish");
                     return new DefaultTableViewFactory();
                 }
 
@@ -77,7 +74,6 @@ public class DataViewFactoryProducer {
 
                 if (factoryClassName.equals(ViewProperties.DEFAULT_MODULE_TEXT)) {
                     log.trace("getFactory(): returning default ImageView factory instance");
-                    log.trace("getFactory(): finish");
                     return new DefaultImageViewFactory();
                 }
 
@@ -94,7 +90,6 @@ public class DataViewFactoryProducer {
 
                 if (factoryClassName.equals(ViewProperties.DEFAULT_MODULE_TEXT)) {
                     log.trace("getFactory(): returning default PaletteView factory instance");
-                    log.trace("getFactory(): finish");
                     return new DefaultPaletteViewFactory();
                 }
 
@@ -111,7 +106,6 @@ public class DataViewFactoryProducer {
 
                 if (factoryClassName.equals(ViewProperties.DEFAULT_MODULE_TEXT)) {
                     log.trace("getFactory(): returning default MetaDataView factory instance");
-                    log.trace("getFactory(): finish");
                     return new DefaultMetaDataViewFactory();
                 }
 
@@ -128,7 +122,6 @@ public class DataViewFactoryProducer {
 
                 if (factoryClassName.equals(ViewProperties.DEFAULT_MODULE_TEXT)) {
                     log.trace("getFactory(): returning default TreeView factory instance");
-                    log.trace("getFactory(): finish");
                     return new DefaultTreeViewFactory();
                 }
 
@@ -161,23 +154,18 @@ public class DataViewFactoryProducer {
                 switch (viewType) {
                     case TABLE:
                         log.trace("getFactory(): returning default TableView factory instance");
-                        log.trace("getFactory(): finish");
                         return new DefaultTableViewFactory();
                     case IMAGE:
                         log.trace("getFactory(): returning default ImageView factory instance");
-                        log.trace("getFactory(): finish");
                         return new DefaultImageViewFactory();
                     case PALETTE:
                         log.trace("getFactory(): returning default PaletteView factory instance");
-                        log.trace("getFactory(): finish");
                         return new DefaultPaletteViewFactory();
                     case METADATA:
                         log.trace("getFactory(): returning default MetaDataView factory instance");
-                        log.trace("getFactory(): finish");
                         return new DefaultMetaDataViewFactory();
                     case TREEVIEW:
                         log.trace("getFactory(): returning default TreeView factory instance");
-                        log.trace("getFactory(): finish");
                         return new DefaultTreeViewFactory();
                     default:
                         throw new Exception("getFactory(): invalid DataViewType");
@@ -196,8 +184,6 @@ public class DataViewFactoryProducer {
             log.debug("getFactory(): Error instantiating class:", ex);
             theFactory = null;
         }
-
-        log.trace("getFactory(): finish");
 
         return theFactory;
     }

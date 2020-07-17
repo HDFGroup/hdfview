@@ -335,7 +335,6 @@ public class ViewProperties extends PreferenceStore {
      * @return the ClassLoader
      */
     public static ClassLoader loadExtClass() {
-        log.trace("loadExtClass: start");
         if (extClassLoader != null) {
             return extClassLoader;
         }
@@ -472,7 +471,6 @@ public class ViewProperties extends PreferenceStore {
                 log.debug("loadExtClass: load classList[{}] of {} failed", i, theName, ex);
             }
         } //  (int i=0; i<n; i++)
-        log.trace("loadExtClass: finished");
 
         return extClassLoader;
     }
@@ -679,10 +677,7 @@ public class ViewProperties extends PreferenceStore {
 
     public static void loadIcons() {
         InputStream s = null;
-        log.trace("loadIcons: start");
-
         // load icon images
-
         try {
             s = ViewProperties.class.getResourceAsStream("icons/hdf.gif");
             hdfIcon = new Image(null, s);
@@ -1132,7 +1127,6 @@ public class ViewProperties extends PreferenceStore {
             iconVIDEO = null;
             log.trace("iconVIDEO: null");
         }
-        log.trace("loadIcons: finish");
     }
 
     /**
@@ -1145,8 +1139,6 @@ public class ViewProperties extends PreferenceStore {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void load() throws IOException {
         super.load();
-
-        log.trace("load user properties: begin");
 
         if (propertyFile == null)
             return;
@@ -1356,7 +1348,6 @@ public class ViewProperties extends PreferenceStore {
         // srbAccountList.add(srbaccount);
         // srbaccount = new String[7];
         // }
-        log.trace("load: finish");
     }
 
     /**
@@ -1367,12 +1358,10 @@ public class ViewProperties extends PreferenceStore {
      */
     @Override
     public void save() throws IOException {
-        log.trace("save user properties: begin");
         if (propertyFile == null)
             return;
 
         // update data saving options
-        log.trace("save user properties: update data saving options");
         if (delimiter == null)
             setDefault("data.delimiter", DELIMITER_TAB);
         else
@@ -1497,7 +1486,6 @@ public class ViewProperties extends PreferenceStore {
         }
 
         super.save();
-        log.trace("save user properties: end");
     }
 
     /** @return the name of the user property file */

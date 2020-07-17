@@ -49,11 +49,8 @@ public class DataProviderFactory {
     private static DataFormat dataFormatReference = null;
 
     public static HDFDataProvider getDataProvider(final DataFormat dataObject, final Object dataBuf, final boolean dataTransposed) throws Exception {
-        log.trace("getDataProvider(DataFormat): start");
-
         if (dataObject == null) {
             log.debug("getDataProvider(DataFormat): data object is null");
-            log.trace("getDataProvider(DataFormat): finish");
             return null;
         }
 
@@ -61,14 +58,11 @@ public class DataProviderFactory {
 
         HDFDataProvider dataProvider = getDataProvider(dataObject.getDatatype(), dataBuf, dataTransposed);
 
-        log.trace("getDataProvider(DataFormat): finish");
 
         return dataProvider;
     }
 
     private static final HDFDataProvider getDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
-        log.trace("getDataProvider(Datatype): start");
-
         HDFDataProvider dataProvider = null;
 
         try {
@@ -109,8 +103,6 @@ public class DataProviderFactory {
             dataProvider = new HDFDataProvider(dtype, dataBuf, dataTransposed);
         }
 
-        log.trace("getDataProvider(Datatype): finish");
-
         return dataProvider;
     }
 
@@ -146,8 +138,6 @@ public class DataProviderFactory {
         protected final long       rowCount;
 
         HDFDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
-            log.trace("constructor: start");
-
             this.dataBuf = dataBuf;
 
             this.originalFormatClass = dataFormatReference.getOriginalClass();
@@ -155,7 +145,6 @@ public class DataProviderFactory {
             char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(dataBuf);
             if (runtimeTypeClass == ' ') {
                 log.debug("invalid data value runtime type class: runtimeTypeClass={}", runtimeTypeClass);
-                log.trace("finish");
                 throw new IllegalStateException("Invalid data value runtime type class: " + runtimeTypeClass);
             }
 
@@ -180,8 +169,6 @@ public class DataProviderFactory {
             isContainerType = (this instanceof CompoundDataProvider
                             || this instanceof ArrayDataProvider
                             || this instanceof VlenDataProvider);
-
-            log.trace("constructor: finish");
         }
 
         /*
@@ -351,7 +338,6 @@ public class DataProviderFactory {
         private void updateAtomicValue(Object bufObject, Object newValue, int bufIndex) {
             if ((newValue == null) || ((newValue = ((String) newValue).trim()) == null)) {
                 log.debug("updateAtomicValue(): cell value not updated; new value is null");
-                log.trace("updateAtomicValue(): finish");
                 return;
             }
 
@@ -359,7 +345,6 @@ public class DataProviderFactory {
             Object oldVal = this.getDataValue(bufObject, bufIndex);
             if ((oldVal != null) && newValue.equals(oldVal.toString())) {
                 log.debug("updateAtomicValue(): cell value not updated; new value same as old value");
-                log.trace("updateAtomicValue(): finish");
                 return;
             }
 
@@ -466,8 +451,6 @@ public class DataProviderFactory {
 
             log = org.slf4j.LoggerFactory.getLogger(CompoundDataProvider.class);
 
-            log.trace("constructor: start");
-
             CompoundDataFormat compoundFormat = (CompoundDataFormat) dataFormatReference;
             selectedMemberTypes = compoundFormat.getSelectedMemberTypes();
             selectedMemberOrders = compoundFormat.getSelectedMemberOrders();
@@ -501,13 +484,11 @@ public class DataProviderFactory {
 
             if (baseProviderIndexMap.size() == 0) {
                 log.debug("base DataProvider index mapping is invalid - size 0");
-                log.trace("constructor: finish");
                 throw new Exception("CompoundDataProvider: invalid DataProvider mapping of size 0 built");
             }
 
             if (relCmpdStartIndexMap.size() == 0) {
                 log.debug("compound field start index mapping is invalid - size 0");
-                log.trace("constructor: finish");
                 throw new Exception("CompoundDataProvider: invalid compound field start index mapping of size 0 built");
             }
 
@@ -520,8 +501,6 @@ public class DataProviderFactory {
             nRows = (int) compoundFormat.getHeight();
 
             nSubColumns = (int) compoundFormat.getWidth();
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -652,7 +631,6 @@ public class DataProviderFactory {
 
             if ((newValue == null) || ((newValue = ((String) newValue).trim()) == null)) {
                 log.debug("setDataValue({}, {}, {}): cell value not updated; new value is null", rowIndex, columnIndex, newValue);
-                log.trace("setDataValue({}, {}, {}): exit", rowIndex, columnIndex, newValue);
                 return;
             }
 
@@ -660,7 +638,6 @@ public class DataProviderFactory {
             Object oldVal = this.getDataValue(columnIndex, rowIndex);
             if ((oldVal != null) && newValue.equals(oldVal.toString())) {
                 log.debug("setDataValue({}, {}, {}): cell value not updated; new value same as old value", rowIndex, columnIndex, newValue);
-                log.trace("setDataValue({}, {}, {}): exit", rowIndex, columnIndex, newValue);
                 return;
             }
 
@@ -684,7 +661,6 @@ public class DataProviderFactory {
                 Object colValue = ((List<?>) dataBuf).get(providerIndex);
                 if (colValue == null) {
                     log.debug("setDataValue({}, {}, {}): colValue is null", rowIndex, columnIndex, newValue);
-                    log.trace("setDataValue({}, {}, {}): finish", rowIndex, columnIndex, newValue);
                     return;
                 }
 
@@ -729,7 +705,6 @@ public class DataProviderFactory {
                 Object colValue = ((List<?>) bufObject).get(providerIndex);
                 if (colValue == null) {
                     log.debug("setDataValue({}, {}, {}, {}): colValue is null", rowIndex, columnIndex, bufObject, newValue);
-                    log.trace("setDataValue({}, {}, {}, {}): finish", rowIndex, columnIndex, bufObject, newValue);
                     return;
                 }
 
@@ -790,8 +765,6 @@ public class DataProviderFactory {
 
             log = org.slf4j.LoggerFactory.getLogger(ArrayDataProvider.class);
 
-            log.trace("constructor: start");
-
             Datatype baseType = dtype.getDatatypeBase();
 
             baseTypeDataProvider = getDataProvider(baseType, dataBuf, dataTransposed);
@@ -812,8 +785,6 @@ public class DataProviderFactory {
                 nCols = (int) arraySize * ((CompoundDataProvider) baseTypeDataProvider).nCols;
             else
                 nCols = super.getColumnCount();
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -878,8 +849,6 @@ public class DataProviderFactory {
                 log.debug("getDataValue({}, {}, {}): failure: ", obj, rowIndex, columnIndex, ex);
                 theValue = DataFactoryUtils.errStr;
             }
-
-            log.trace("getDataValue({}, {}, {}): finish", obj, rowIndex, columnIndex);
 
             return theValue;
         }
@@ -963,8 +932,6 @@ public class DataProviderFactory {
         }
 
         private void updateArrayElements(Object curBuf, Object newValue, int columnIndex, int bufStartIndex) {
-            log.trace("updateArrayElements(): start");
-
             StringTokenizer st = new StringTokenizer((String) newValue, ",[]");
             if (st.countTokens() < arraySize) {
                 /*
@@ -985,8 +952,6 @@ public class DataProviderFactory {
             else {
                 updateArrayOfAtomicElements(st, curBuf, bufStartIndex);
             }
-
-            log.trace("updateArrayElements(): finish");
         }
 
         private void updateArrayOfCompoundElements(StringTokenizer tokenizer, Object curBuf, int columnIndex, int bufStartIndex) {
@@ -1033,15 +998,11 @@ public class DataProviderFactory {
 
             log = org.slf4j.LoggerFactory.getLogger(VlenDataProvider.class);
 
-            log.trace("constructor: start");
-
             Datatype baseType = dtype.getDatatypeBase();
 
             baseTypeDataProvider = getDataProvider(baseType, dataBuf, dataTransposed);
 
             buffer = new StringBuilder();
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -1157,11 +1118,7 @@ public class DataProviderFactory {
 
             log = org.slf4j.LoggerFactory.getLogger(StringDataProvider.class);
 
-            log.trace("constructor: start");
-
             typeSize = dtype.getDatatypeSize();
-
-            log.trace("constructor: finish typeSize={}", typeSize);
         }
 
         @Override
@@ -1256,9 +1213,6 @@ public class DataProviderFactory {
             super(dtype, dataBuf, dataTransposed);
 
             log = org.slf4j.LoggerFactory.getLogger(CharDataProvider.class);
-
-            log.trace("constructor: start");
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -1290,12 +1244,8 @@ public class DataProviderFactory {
 
             log = org.slf4j.LoggerFactory.getLogger(NumericalDataProvider.class);
 
-            log.trace("constructor: start");
-
             typeSize = dtype.getDatatypeSize();
             isUINT64 = dtype.isUnsigned() && (typeSize == 8);
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -1346,9 +1296,6 @@ public class DataProviderFactory {
             super(dtype, dataBuf, dataTransposed);
 
             log = org.slf4j.LoggerFactory.getLogger(EnumDataProvider.class);
-
-            log.trace("constructor: start");
-            log.trace("constructor: finish");
         }
 
     }
@@ -1362,11 +1309,7 @@ public class DataProviderFactory {
 
             log = org.slf4j.LoggerFactory.getLogger(BitfieldDataProvider.class);
 
-            log.trace("constructor: start");
-
             typeSize = dtype.getDatatypeSize();
-
-            log.trace("constructor: finish");
         }
 
         @Override
@@ -1425,9 +1368,6 @@ public class DataProviderFactory {
             super(dtype, dataBuf, dataTransposed);
 
             log = org.slf4j.LoggerFactory.getLogger(RefDataProvider.class);
-
-            log.trace("constructor: start");
-            log.trace("constructor: finish");
         }
 
     }
@@ -1455,8 +1395,6 @@ public class DataProviderFactory {
         CompoundAttributeDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
 
-            log.trace("CompoundAttributeDataProvider: start");
-
             CompoundDataFormat dataFormat = (CompoundDataFormat) dataFormatReference;
 
             stringBuffer = new StringBuilder();
@@ -1466,8 +1404,6 @@ public class DataProviderFactory {
             nRows = (int) dataFormat.getHeight();
             nCols = (int) (dataFormat.getWidth() * dataFormat.getSelectedMemberCount());
             nSubColumns = (nFields > 0) ? getColumnCount() / nFields : 0;
-
-            log.trace("CompoundAttributeDataProvider: finish");
         }
 
         @Override

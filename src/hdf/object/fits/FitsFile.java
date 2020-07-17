@@ -164,8 +164,7 @@ public class FitsFile extends FileFormat
      * Creates a FitsFile instance with specified file name and READ access.
      * <p>
      * @param pathname the full path name of the file.
-     * Regardless of specified access, the FitsFile implementation uses
-     * READ.
+     * Regardless of specified access, the FitsFile implementation uses* READ.
      *
      * @see hdf.object.FileFormat@createInstance(java.lang.String, int)
      */
@@ -190,12 +189,8 @@ public class FitsFile extends FileFormat
     private HObject loadTree() {
 
         long[] oid = {0};
-        FitsGroup rootGroup = new FitsGroup(
-            this,
-            "/",
-            null, // root object does not have a parent path
-            null, // root object does not have a parent node
-            oid);
+        // root object does not have a parent path or a parent node
+        FitsGroup rootGroup = new FitsGroup(this, "/", null, null, oid);
 
         if (fitsFile == null) {
             return rootGroup;
@@ -282,54 +277,29 @@ public class FitsFile extends FileFormat
 
     // implementign FileFormat
     @Override
-    public Datatype createDatatype(
-        int tclass,
-        int tsize,
-        int torder,
-        int tsign) throws Exception {
+    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         throw new UnsupportedOperationException("Unsupported createDatatype operation for Fits.");
     }
 
     // implementign FileFormat
     @Override
-    public Datatype createDatatype(
-        int tclass,
-        int tsize,
-        int torder,
-        int tsign,
-        String name) throws Exception
-    {
-        throw new UnsupportedOperationException("Unsupported createDatatype with name operation for Fits.");
+    public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception {
+        throw new UnsupportedOperationException("Fits does not support named datatype.");
     }
 
     // implementign FileFormat
     @Override
-    public Dataset createScalarDS(
-        String name,
-        Group pgroup,
-        Datatype type,
-        long[] dims,
-        long[] maxdims,
-        long[] chunks,
-        int gzip,
-        Object fillValue,
-        Object data) throws Exception {
+    public Dataset createScalarDS(String name, Group pgroup, Datatype type,
+            long[] dims, long[] maxdims, long[] chunks,
+            int gzip, Object fillValue, Object data) throws Exception {
         throw new UnsupportedOperationException("Unsupported createScalarDS operation.");
     }
 
     // implementign FileFormat
     @Override
-    public Dataset createImage(
-        String name,
-        Group pgroup,
-        Datatype type,
-        long[] dims,
-        long[] maxdims,
-        long[] chunks,
-        int gzip,
-        int ncomp,
-        int intelace,
-        Object data) throws Exception {
+    public Dataset createImage(String name, Group pgroup, Datatype type,
+            long[] dims, long[] maxdims, long[] chunks,
+            int gzip, int ncomp, int intelace, Object data) throws Exception {
         throw new UnsupportedOperationException("Unsupported createImage operation.");
     }
 
