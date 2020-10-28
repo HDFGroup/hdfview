@@ -12,20 +12,29 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package test.modules;
+package modules;
 
-import hdf.object.HObject;
-import hdf.view.PaletteView.PaletteView;
+import org.eclipse.swt.widgets.Composite;
 
-public class PaletteViewModule implements PaletteView {
+import hdf.view.DataView.DataViewManager;
+import hdf.view.TreeView.TreeView;
+import hdf.view.TreeView.TreeViewFactory;
 
-    public PaletteViewModule() {
-
-    }
+/*
+ * A simple Factory class which returns a concrete instance of an external
+ * TreeView module.
+ *
+ * This factory class is used to test HDFView's module loading and switching
+ * capabilities.
+ *
+ * @author jhenderson
+ * @version 1.0 7/30/2018
+ */
+public class ModuleTreeViewFactory extends TreeViewFactory {
 
     @Override
-    public HObject getDataObject() {
-        return null;
+    public TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException {
+        return new TreeViewModule();
     }
 
 }

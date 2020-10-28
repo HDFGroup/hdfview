@@ -12,17 +12,17 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package test.modules;
+package modules;
 
 import java.util.HashMap;
 
 import hdf.view.DataView.DataViewManager;
-import hdf.view.ImageView.ImageView;
-import hdf.view.ImageView.ImageViewFactory;
+import hdf.view.TableView.TableView;
+import hdf.view.TableView.TableViewFactory;
 
 /*
  * A simple Factory class which returns a concrete instance of an external
- * ImageView module.
+ * TableView module.
  *
  * This factory class is used to test HDFView's module loading and switching
  * capabilities.
@@ -30,12 +30,12 @@ import hdf.view.ImageView.ImageViewFactory;
  * @author jhenderson
  * @version 1.0 7/30/2018
  */
-public class ModuleImageViewFactory extends ImageViewFactory {
+public class ModuleTableViewFactory extends TableViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public ImageView getImageView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
-        return new ImageViewModule();
+    public TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
+        return new TableViewModule();
     }
 
 }

@@ -12,17 +12,18 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package test.modules;
+package modules;
 
-import java.util.HashMap;
+import org.eclipse.swt.widgets.Shell;
 
 import hdf.view.DataView.DataViewManager;
-import hdf.view.TableView.TableView;
-import hdf.view.TableView.TableViewFactory;
+import hdf.view.ImageView.ImageView;
+import hdf.view.PaletteView.PaletteView;
+import hdf.view.PaletteView.PaletteViewFactory;
 
 /*
  * A simple Factory class which returns a concrete instance of an external
- * TableView module.
+ * PaletteView module.
  *
  * This factory class is used to test HDFView's module loading and switching
  * capabilities.
@@ -30,12 +31,11 @@ import hdf.view.TableView.TableViewFactory;
  * @author jhenderson
  * @version 1.0 7/30/2018
  */
-public class ModuleTableViewFactory extends TableViewFactory {
+public class ModulePaletteViewFactory extends PaletteViewFactory {
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
-        return new TableViewModule();
+    public PaletteView getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
+        return new PaletteViewModule();
     }
 
 }

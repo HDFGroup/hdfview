@@ -12,17 +12,18 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package test.modules;
+package modules;
 
 import org.eclipse.swt.widgets.Composite;
 
+import hdf.object.HObject;
 import hdf.view.DataView.DataViewManager;
-import hdf.view.TreeView.TreeView;
-import hdf.view.TreeView.TreeViewFactory;
+import hdf.view.MetaDataView.MetaDataView;
+import hdf.view.MetaDataView.MetaDataViewFactory;
 
 /*
  * A simple Factory class which returns a concrete instance of an external
- * TreeView module.
+ * MetaDataView module.
  *
  * This factory class is used to test HDFView's module loading and switching
  * capabilities.
@@ -30,11 +31,11 @@ import hdf.view.TreeView.TreeViewFactory;
  * @author jhenderson
  * @version 1.0 7/30/2018
  */
-public class ModuleTreeViewFactory extends TreeViewFactory {
+public class ModuleMetaDataViewFactory extends MetaDataViewFactory {
 
     @Override
-    public TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException {
-        return new TreeViewModule();
+    public MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj) throws ClassNotFoundException {
+        return new MetaDataViewModule();
     }
 
 }

@@ -12,30 +12,20 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package test.modules;
-
-import org.eclipse.swt.widgets.Composite;
+package modules;
 
 import hdf.object.HObject;
-import hdf.view.DataView.DataViewManager;
-import hdf.view.MetaDataView.MetaDataView;
-import hdf.view.MetaDataView.MetaDataViewFactory;
+import hdf.view.PaletteView.PaletteView;
 
-/*
- * A simple Factory class which returns a concrete instance of an external
- * MetaDataView module.
- *
- * This factory class is used to test HDFView's module loading and switching
- * capabilities.
- *
- * @author jhenderson
- * @version 1.0 7/30/2018
- */
-public class ModuleMetaDataViewFactory extends MetaDataViewFactory {
+public class PaletteViewModule implements PaletteView {
+
+    public PaletteViewModule() {
+
+    }
 
     @Override
-    public MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj) throws ClassNotFoundException {
-        return new MetaDataViewModule();
+    public HObject getDataObject() {
+        return null;
     }
 
 }

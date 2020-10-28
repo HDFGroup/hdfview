@@ -12,17 +12,15 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package test.modules;
+package modules;
 
-import java.awt.Image;
-import java.awt.Rectangle;
-
+import hdf.object.Attribute;
 import hdf.object.HObject;
-import hdf.view.ImageView.ImageView;
+import hdf.view.MetaDataView.MetaDataView;
 
-public class ImageViewModule implements ImageView {
+public class MetaDataViewModule implements MetaDataView {
 
-    public ImageViewModule() {
+    public MetaDataViewModule() {
 
     }
 
@@ -32,47 +30,12 @@ public class ImageViewModule implements ImageView {
     }
 
     @Override
-    public Rectangle getSelectedArea() {
+    public Attribute addAttribute(HObject obj) {
         return null;
     }
 
     @Override
-    public boolean isTrueColor() {
-        return false;
-    }
-
-    @Override
-    public boolean isPlaneInterlace() {
-        return false;
-    }
-
-    @Override
-    public Object getSelectedData() {
-        return null;
-    }
-
-    @Override
-    public Image getImage() {
-        return null;
-    }
-
-    @Override
-    public void setImage(Image img) {
-
-    }
-
-    @Override
-    public byte[][] getPalette() {
-        return null;
-    }
-
-    @Override
-    public void setPalette(byte[][] palette) {
-
-    }
-
-    @Override
-    public byte[] getImageByteData() {
+    public Attribute deleteAttribute(HObject obj) {
         return null;
     }
 

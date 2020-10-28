@@ -12,30 +12,45 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package test.modules;
+package modules;
 
-import org.eclipse.swt.widgets.Shell;
+import hdf.object.HObject;
+import hdf.view.TableView.TableView;
 
-import hdf.view.DataView.DataViewManager;
-import hdf.view.ImageView.ImageView;
-import hdf.view.PaletteView.PaletteView;
-import hdf.view.PaletteView.PaletteViewFactory;
+public class TableViewModule implements TableView {
 
-/*
- * A simple Factory class which returns a concrete instance of an external
- * PaletteView module.
- *
- * This factory class is used to test HDFView's module loading and switching
- * capabilities.
- *
- * @author jhenderson
- * @version 1.0 7/30/2018
- */
-public class ModulePaletteViewFactory extends PaletteViewFactory {
+    public TableViewModule() {
+
+    }
 
     @Override
-    public PaletteView getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
-        return new PaletteViewModule();
+    public HObject getDataObject() {
+        return null;
+    }
+
+    @Override
+    public Object getTable() {
+        return null;
+    }
+
+    @Override
+    public Object getSelectedData() {
+        return null;
+    }
+
+    @Override
+    public int getSelectedColumnCount() {
+        return 0;
+    }
+
+    @Override
+    public int getSelectedRowCount() {
+        return 0;
+    }
+
+    @Override
+    public void updateValueInFile() {
+
     }
 
 }
