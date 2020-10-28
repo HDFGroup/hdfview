@@ -1,4 +1,4 @@
-package test.uitest.HDF4UITests;
+package uitest.HDF4UITests;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
