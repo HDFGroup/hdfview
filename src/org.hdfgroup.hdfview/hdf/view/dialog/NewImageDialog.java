@@ -24,7 +24,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -32,7 +31,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -40,7 +38,6 @@ import org.eclipse.swt.widgets.Text;
 
 import hdf.object.Dataset;
 import hdf.object.Datatype;
-import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
@@ -54,11 +51,7 @@ import hdf.view.ViewProperties;
  * @author Jordan T. Henderson
  * @version 2.4 1/1/2016
  */
-public class NewImageDialog extends Dialog {
-
-    private Shell       shell;
-
-    private Font        curFont;
+public class NewImageDialog extends NewDataObjectDialog {
 
     private Text        nameField, widthField, heightField;
 
@@ -69,15 +62,6 @@ public class NewImageDialog extends Dialog {
 
     /** A list of current groups */
     private List<Group> groupList;
-
-    private List<?>     objList;
-
-    private boolean     isH5;
-
-    private HObject     newObject;
-    private Group       parentGroup;
-
-    private FileFormat  fileFormat;
 
     /**
      * Constructs a NewImageDialog with specified list of possible parent groups.
@@ -90,25 +74,7 @@ public class NewImageDialog extends Dialog {
      *            the list of all objects.
      */
     public NewImageDialog(Shell parent, Group pGroup, List<?> objs) {
-        super(parent, SWT.APPLICATION_MODAL);
-
-        try {
-            curFont = new Font(
-                    Display.getCurrent(),
-                    ViewProperties.getFontType(),
-                    ViewProperties.getFontSize(),
-                    SWT.NORMAL);
-        }
-        catch (Exception ex) {
-            curFont = null;
-        }
-
-        newObject = null;
-        parentGroup = pGroup;
-        objList = objs;
-
-        isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
-        fileFormat = pGroup.getFileFormat();
+        super(parent, pGroup, objs);
     }
 
     public void open() {
@@ -145,7 +111,7 @@ public class NewImageDialog extends Dialog {
         parentChoice.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                parentGroup = groupList.get(parentChoice.getSelectionIndex());
+                parentObj = groupList.get(parentChoice.getSelectionIndex());
             }
         });
 
@@ -167,11 +133,11 @@ public class NewImageDialog extends Dialog {
             }
         }
 
-        if (parentGroup.isRoot()) {
+        if (((Group) parentObj).isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName()
+            parentChoice.select(parentChoice.indexOf(parentObj.getPath() + parentObj.getName()
                     + HObject.SEPARATOR));
         }
 
@@ -388,10 +354,8 @@ public class NewImageDialog extends Dialog {
         }
 
         try {
-            Datatype datatype = fileFormat.createDatatype(tclass, tsize,
-                    torder, tsign);
-            dataset = fileFormat.createImage(name, pgroup, datatype, dims,
-                    dims, null, -1, ncomp, interlace, null);
+            Datatype datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
+            dataset = fileFormat.createImage(name, pgroup, datatype, dims, dims, null, -1, ncomp, interlace, null);
             dataset.init();
         }
         catch (Exception ex) {
@@ -401,15 +365,5 @@ public class NewImageDialog extends Dialog {
         }
 
         return dataset;
-    }
-
-    /** @return the new dataset created. */
-    public HObject getObject() {
-        return newObject;
-    }
-
-    /** @return the parent group of the new dataset. */
-    public Group getParentGroup() {
-        return parentGroup;
     }
 }

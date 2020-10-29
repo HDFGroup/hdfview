@@ -62,10 +62,10 @@ import hdf.HDFVersions;
 import hdf.view.HDFView;
 
 public abstract class AbstractWindowTest {
-    protected static String HDF5VERSION = "HDF5 " + HDFVersions.HDF5_VERSION;
-    protected static String HDF4VERSION = "HDF " + HDFVersions.HDF4_VERSION;
+    protected static String HDF5VERSION = "HDF5 " + HDFVersions.getPropertyVersionHDF5();
+    protected static String HDF4VERSION = "HDF " + HDFVersions.getPropertyVersionHDF4();
     // the version of the HDFViewer
-    protected static String VERSION = HDFVersions.HDFVIEW_VERSION;
+    protected static String VERSION = HDFVersions.getPropertyVersionView();
 
     protected static String workDir = System.getProperty("hdfview.workdir");
 

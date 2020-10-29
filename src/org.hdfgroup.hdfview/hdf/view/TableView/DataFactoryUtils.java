@@ -57,7 +57,7 @@ public class DataFactoryUtils {
          * Make sure to make a copy of the compound datatype's member list, as we will
          * make modifications to the list when members aren't selected.
          */
-        List<Datatype> selectedTypes = new ArrayList<Datatype>(compoundType.getCompoundMemberTypes());
+        List<Datatype> selectedTypes = new ArrayList<>(compoundType.getCompoundMemberTypes());
 
         /*
          * Among the datatypes within this compound type, only keep the ones that are
@@ -88,8 +88,8 @@ public class DataFactoryUtils {
     @SuppressWarnings("unchecked")
     public static HashMap<Integer, Integer>[] buildIndexMaps(CompoundDataFormat dataFormat, List<Datatype> localSelectedTypes) throws Exception {
         HashMap<Integer, Integer>[] maps = new HashMap[2];
-        maps[COL_TO_BASE_CLASS_MAP_INDEX] = new HashMap<Integer, Integer>();
-        maps[CMPD_START_IDX_MAP_INDEX] = new HashMap<Integer, Integer>();
+        maps[COL_TO_BASE_CLASS_MAP_INDEX] = new HashMap<>();
+        maps[CMPD_START_IDX_MAP_INDEX] = new HashMap<>();
 
         buildColIdxToProviderMap(maps[COL_TO_BASE_CLASS_MAP_INDEX], dataFormat, localSelectedTypes, new int[] { 0 }, new int[] { 0 }, 0);
         buildRelColIdxToStartIdxMap(maps[CMPD_START_IDX_MAP_INDEX], dataFormat, localSelectedTypes, new int[] { 0 }, new int[] { 0 }, 0);
@@ -126,6 +126,7 @@ public class DataFactoryUtils {
             List<Datatype> localSelectedTypes, int[] curMapIndex, int[] curProviderIndex, int depth) throws Exception {
         for (int i = 0; i < localSelectedTypes.size(); i++) {
             Datatype curType = localSelectedTypes.get(i);
+            log.trace("buildColIdxToStartIdxMap(): curType[{}]={}", i, curType);
             Datatype nestedCompoundType = null;
             int arrSize = 1;
 
@@ -134,6 +135,7 @@ public class DataFactoryUtils {
                 for (int j = 0; j < arrayDims.length; j++) {
                     arrSize *= arrayDims[j];
                 }
+                log.trace("buildColIdxToStartIdxMap(): arrSize={}", arrSize);
 
                 /*
                  * Recursively detect any nested array/vlen of compound types.
@@ -153,6 +155,7 @@ public class DataFactoryUtils {
 
                     base = base.getDatatypeBase();
                 }
+                log.trace("buildColIdxToStartIdxMap(): arrSize after base={}", arrSize);
             }
 
             if (nestedCompoundType != null) {
@@ -226,6 +229,7 @@ public class DataFactoryUtils {
             List<Datatype> localSelectedTypes, int[] curMapIndex, int[] curStartIdx, int depth) throws Exception {
         for (int i = 0; i < localSelectedTypes.size(); i++) {
             Datatype curType = localSelectedTypes.get(i);
+            log.trace("buildRelColIdxToStartIdxMap(): curType[{}]={}", i, curType);
             Datatype nestedCompoundType = null;
             int arrSize = 1;
 
@@ -234,6 +238,7 @@ public class DataFactoryUtils {
                 for (int j = 0; j < arrayDims.length; j++) {
                     arrSize *= arrayDims[j];
                 }
+                log.trace("buildRelColIdxToStartIdxMap(): arrSize={}", arrSize);
 
                 /*
                  * Recursively detect any nested array/vlen of compound types.
@@ -253,6 +258,7 @@ public class DataFactoryUtils {
 
                     base = base.getDatatypeBase();
                 }
+                log.trace("buildRelColIdxToStartIdxMap(): arrSize after base={}", arrSize);
             }
 
             if (nestedCompoundType != null) {

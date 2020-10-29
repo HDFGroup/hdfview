@@ -50,14 +50,9 @@ public class FitsGroup extends Group
      * @param name the name of this group.
      * @param path the full path of this group.
      * @param parent the parent of this group.
-     * @param oid the unique identifier of this data object.
+     * @param theID the unique identifier of this data object.
      */
-    public FitsGroup(
-        FileFormat fileFormat,
-        String name,
-        String path,
-        Group parent,
-        long[] theID) {
+    public FitsGroup(FileFormat fileFormat, String name, String path, Group parent, long[] theID) {
         super (fileFormat, name, path, parent, ((theID == null) ? DEFAULT_OID : theID));
     }
 
@@ -84,7 +79,6 @@ public class FitsGroup extends Group
      * Creates a new attribute and attached to this dataset if attribute does
      * not exist. Otherwise, just update the value of the attribute.
      *
-     * <p>
      * @param info the atribute to attach
      */
     public void writeMetadata(Object info) throws Exception {
@@ -127,13 +121,12 @@ public class FitsGroup extends Group
 
     /**
      * Creates a new group.
-     * @param file the file which the group is added to.
      * @param name the name of the group to create.
      * @param pgroup the parent group of the new group.
      *
      * @return the new group if successful. Otherwise returns null.
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public static FitsGroup create(String name, Group pgroup)

@@ -15,12 +15,12 @@ import test.uitest.AbstractWindowTest;
 public class TestNCTreeView extends AbstractWindowTest {
 
     @Test
-    public void testclwvi_attributes() {
+    public void testRoy_attributes() {
         String[][] expectedData =
             {   { "" },
                 { "" } };
         SWTBotShell tableShell = null;
-        String filename = "clwvi_test.nc";
+        String filename = "Roy.nc";
         String groupname = "/";
         String datasetName = "";
         File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
@@ -28,14 +28,14 @@ public class TestNCTreeView extends AbstractWindowTest {
         try {
             SWTBotTree filetree = bot.tree();
 
-            checkFileTree(filetree, "testclwvi_attributes()", 2, filename);
+            checkFileTree(filetree, "testRoy_attributes()", 2, filename);
 
             // Test metadata
             SWTBotTabItem tabItem = openMetadataTab(filetree, filename, groupname, "General Object Info");
             tabItem.activate();
 
             String val = bot.textWithLabel("Name: ").getText();
-            assertTrue(constructWrongValueMessage("testclwvi_attributes()", "wrong name", groupname, val), val.equals(groupname)); // Test group name
+            assertTrue(constructWrongValueMessage("testRoy_attributes()", "wrong name", groupname, val), val.equals(groupname)); // Test group name
         }
         catch (Exception ex) {
             ex.printStackTrace();

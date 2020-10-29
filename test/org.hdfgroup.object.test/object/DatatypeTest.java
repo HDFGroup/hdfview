@@ -223,6 +223,8 @@ public class DatatypeTest {
                     }
                     for (int l = 0; l < n_sizes; l++) {
                         baseTypes[counter] = new H5Datatype(classes[i], sizes[l], orders[j], signs[k]);
+                        if (classes[i]==Datatype.CLASS_ENUM)
+                            baseTypes[counter].setEnumMembers("1=0, 2=1");
                         assertNotNull(baseTypes[counter]);
                         log.trace("counter={}: (i={}, j={}, k={}, l={}) datatype is (class={}, size={}, order={}, sign={}) with description {}",
                                 counter, i, j, k, l, classes[i], sizes[l], orders[j], signs[k], baseTypes[counter].getDescription());

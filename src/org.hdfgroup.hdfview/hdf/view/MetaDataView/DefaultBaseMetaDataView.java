@@ -124,8 +124,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     private static final int              GENERAL_TAB_INDEX = 1;
 
     public DefaultBaseMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
-        log.trace("start");
-
         this.parent = parentComposite;
         this.viewManager = viewer;
         this.dataObject = theObj;
@@ -204,16 +202,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (lastTabObject != null) {
             contentTabFolder.setSelection((int) lastTabObject);
         }
-
-        log.trace("finish");
     }
 
     protected abstract void addObjectSpecificContent();
 
     private Composite createAttributeInfoPane(Composite parent, final HObject dataObject) {
         if (parent == null || dataObject == null) return null;
-
-        log.trace("createAttributeInfoPane(): start");
 
         org.eclipse.swt.widgets.Group attributeInfoGroup = null;
 
@@ -396,15 +390,11 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         // the window too wide
         attrTable.getColumn(3).setWidth(200);
 
-        log.trace("createAttributeInfoPane(): finish");
-
         return attributeInfoGroup;
     }
 
     private Composite createGeneralObjectInfoPane(Composite parent, final HObject dataObject) {
         if (parent == null || dataObject == null) return null;
-
-        log.trace("createGeneralObjectInfoPane(): start");
 
         FileFormat theFile = dataObject.getFileFormat();
         boolean isRoot = ((dataObject instanceof Group) && ((Group) dataObject).isRoot());
@@ -547,9 +537,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
          * Version bounds set for the file.
          */
         if (isRoot) {
-            log.trace("createGeneralObjectInfoPane(): add extra root group information");
-            log.trace("createGeneralObjectInfoPane(): get file info");
-
             /* Get the file's size */
             long fileSize = 0;
             try {
@@ -660,8 +647,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         label.setText("");
         label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
-        log.trace("createGeneralObjectInfoPane(): finish");
-
         return generalInfoGroup;
     }
 
@@ -766,8 +751,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     public Attribute addAttribute(HObject obj) {
         if (obj == null) return null;
 
-        log.trace("addAttribute(): start");
-
         HObject root = obj.getFileFormat().getRootObject();
         NewAttributeDialog dialog = new NewAttributeDialog(display.getShells()[0], obj,
                 ((Group) root).breadthFirstMemberList());
@@ -776,7 +759,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         Attribute attr = dialog.getAttribute();
         if (attr == null) {
             log.debug("addAttribute(): attr is null");
-            log.trace("addAttribute(): finish");
             return null;
         }
 
@@ -788,8 +770,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (viewManager.getTreeView() instanceof DefaultTreeView)
             ((DefaultTreeView) viewManager.getTreeView()).updateItemIcon(obj);
 
-        log.trace("addAttribute(): finish");
-
         return attr;
     }
 
@@ -797,12 +777,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     public Attribute deleteAttribute(HObject obj) {
         if (obj == null) return null;
 
-        log.trace("deleteAttribute(): start");
-
         int idx = attrTable.getSelectionIndex();
         if (idx < 0) {
             log.debug("deleteAttribute(): no attribute is selected");
-            log.trace("deleteAttribute(): exit");
             Tools.showError(display.getShells()[0], "Delete", "No attribute is selected.");
             return null;
         }
@@ -813,13 +790,11 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             answer = SWT.YES;
         if (answer == SWT.NO) {
             log.trace("deleteAttribute(): attribute deletion cancelled");
-            log.trace("deleteAttribute(): exit");
             return null;
         }
 
         if (attrList == null) {
             log.debug("deleteAttribute(): Attribute list was null; can't delete an attribute from it");
-            log.trace("deleteAttribute(): exit");
             return null;
         }
 
@@ -842,17 +817,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (viewManager.getTreeView() instanceof DefaultTreeView)
             ((DefaultTreeView) viewManager.getTreeView()).updateItemIcon(obj);
 
-        log.trace("deleteAttribute(): finish");
-
         return attr;
     }
 
     private void renameAttribute(Attribute attr, String newName) {
-        log.trace("renameAttribute(): start");
-
         if ((attr == null) || (newName == null) || (newName = newName.trim()) == null || (newName.length() < 1)) {
             log.debug("renameAttribute(): Attribute is null or Attribute's new name is null");
-            log.trace("renameAttribute(): finish");
             return;
         }
 
@@ -884,7 +854,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         if (dataObject instanceof MetaDataContainer) {
             try {
-                log.trace("renameAttribute(): updateMetadata()");
                 ((MetaDataContainer) dataObject).updateMetadata(attr);
             }
             catch (Exception ex) {
@@ -892,8 +861,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 Tools.showError(display.getShells()[0], "Delete", ex.getMessage());
             }
         }
-
-        log.trace("renameAttribute(): finish");
     }
 
     /**
@@ -905,11 +872,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
      *            the string of the new value.
      */
     private void updateAttributeValue(Attribute attr, String newValue) {
-        log.trace("updateAttributeValue(): start");
-
         if ((attr == null) || (newValue == null) || (newValue = newValue.trim()) == null || (newValue.length() < 1)) {
             log.debug("updateAttributeValue(): Attribute is null or Attribute's new value is null");
-            log.trace("updateAttributeValue(): exit");
             return;
         }
 
@@ -919,18 +883,15 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         log.trace("updateAttributeValue(): changing value of attribute '{}'", attrName);
 
         try {
-            log.trace("updateAttributeValue(): attr.getData()");
             data = attr.getData();
         }
         catch (Exception ex) {
             log.debug("updateAttributeValue(): getData() failure:", ex);
-            log.trace("updateAttributeValue(): finish");
             return;
         }
 
         if (data == null) {
             log.debug("updateAttributeValue(): attribute's data was null");
-            log.trace("updateAttributeValue(): finish");
             return;
         }
 
@@ -938,7 +899,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         StringTokenizer st = new StringTokenizer(newValue, ",");
         if (st.countTokens() < arrayLength) {
             log.debug("updateAttributeValue(): More data values needed: {}", newValue);
-            log.trace("updateAttributeValue(): finish");
             Tools.showError(display.getShells()[0], "Update", "More data values needed: " + newValue);
             return;
         }
@@ -968,14 +928,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             catch (NumberFormatException ex) {
                 log.debug("updateAttributeValue(): NumberFormatException: ", ex);
-                log.trace("updateAttributeValue(): finish");
                 Tools.showError(display.getShells()[0], "Update", ex.getMessage());
                 return;
             }
 
             if (isUnsigned && (d < 0)) {
                 log.debug("updateAttributeValue(): Negative value for unsigned integer: {}", theToken);
-                log.trace("updateAttributeValue(): finish");
                 Tools.showError(display.getShells()[0], "Update", "Negative value for unsigned integer: " + theToken);
                 return;
             }
@@ -1081,12 +1039,10 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         }
 
         try {
-            log.trace("updateAttributeValue(): writeAttribute()");
             dataObject.getFileFormat().writeAttribute(dataObject, attr, true);
         }
         catch (Exception ex) {
             log.debug("updateAttributeValue(): writeAttribute failure: ", ex);
-            log.trace("updateAttributeValue(): finish");
             Tools.showError(display.getShells()[0], "Update", ex.getMessage());
             return;
         }
@@ -1102,7 +1058,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         if (dataObject instanceof MetaDataContainer) {
             try {
-                log.trace("updateAttributeValue(): updateMetadata()");
                 ((MetaDataContainer) dataObject).updateMetadata(attr);
             }
             catch (Exception ex) {
@@ -1110,8 +1065,6 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 Tools.showError(display.getShells()[0], "Update", ex.getMessage());
             }
         }
-
-        log.trace("updateAttributeValue(): finish");
     }
 
     private void addAttributeTableItem(Table table, Attribute attr) {
@@ -1421,7 +1374,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     fChooser.setFileName(fout);
 
                     DefaultFileFilter filter = DefaultFileFilter.getFileFilterHDF5();
-                    fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+                    fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
                     fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
                     fChooser.setFilterIndex(1);
 

@@ -87,23 +87,20 @@ public class NC2Dataset extends ScalarDS {
     public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
             throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // implementing Dataset
     @Override
     public byte[] readBytes() throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // Implementing DataFormat
     @Override
     public Object read() throws Exception {
         Object theData = null;
-        log.trace("read(): start");
 
         if (nativeDataset == null) {
             return null;
@@ -151,7 +148,6 @@ public class NC2Dataset extends ScalarDS {
             theData = oneD;
         }
 
-        log.trace("read(): finish");
         return theData;
     }
 
@@ -159,14 +155,12 @@ public class NC2Dataset extends ScalarDS {
     @Override
     public void write(Object buf) throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // Implementing DataFormat
     @Override
     public List getMetadata() throws Exception {
-        log.trace("getMetadata(): start");
         if (attributeList != null) {
             return attributeList;
         }
@@ -189,7 +183,6 @@ public class NC2Dataset extends ScalarDS {
             attributeList.add(NC2File.convertAttribute(this, ncAttr));
         }
 
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -197,16 +190,14 @@ public class NC2Dataset extends ScalarDS {
     @Override
     public void writeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // implementing DataFormat
     @Override
     public void removeMetadata(Object info) throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // implementing DataFormat
@@ -232,7 +223,6 @@ public class NC2Dataset extends ScalarDS {
      */
     @Override
     public void init() {
-        log.trace("init(): start");
         if (nativeDataset == null) {
             return;
         }
@@ -290,7 +280,6 @@ public class NC2Dataset extends ScalarDS {
         }
 
         inited = true;
-        log.trace("init(): finish");
     }
 
     // Implementing ScalarDS
@@ -328,7 +317,7 @@ public class NC2Dataset extends ScalarDS {
      *            the dimension size of the dataset.
      * @param maxdims
      *            the max dimension size of the dataset.
-     * @param chunk
+     * @param chunks
      *            the chunk size of the dataset.
      * @param gzip
      *            the level of the gzip compression.
@@ -336,16 +325,15 @@ public class NC2Dataset extends ScalarDS {
      *            the array of data values.
      *
      * @return the new dataset if successful. Otherwise returns null.
-      *
-* @throws Exception
+     *
+     * @throws Exception
      *            if there is an error
     */
     public static NC2Dataset create(String name, Group pgroup, Datatype type,
             long[] dims, long[] maxdims, long[] chunks, int gzip, Object data)
             throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     /**
@@ -360,7 +348,6 @@ public class NC2Dataset extends ScalarDS {
     // implementing ScalarDS
     @Override
     public Datatype getDatatype() {
-        log.trace("getDatatype(): start");
         if (datatype == null) {
             try {
                 datatype = new NC2Datatype(nativeDataset.getDataType());
@@ -370,7 +357,6 @@ public class NC2Dataset extends ScalarDS {
             }
         }
 
-        log.trace("getDatatype(): finish");
         return datatype;
     }
 
@@ -384,8 +370,7 @@ public class NC2Dataset extends ScalarDS {
     @Override
     public void setName(String newName) throws Exception {
         // not supported
-        throw new UnsupportedOperationException(
-                "Unsupported operation for NetCDF.");
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     //Implementing DataFormat

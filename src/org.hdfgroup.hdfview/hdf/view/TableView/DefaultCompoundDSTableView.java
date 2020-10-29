@@ -90,8 +90,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     public DefaultCompoundDSTableView(DataViewManager theView, HashMap dataPropertiesMap) {
         super(theView, dataPropertiesMap);
 
-        log.trace("DefaultCompoundDSTableView: start");
-
         isDataTransposed = false; // Disable transpose for compound datasets
 
         if (!shell.isDisposed()) {
@@ -99,27 +97,18 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             viewer.addDataView(this);
 
-            log.trace("DefaultCompoundDSTableView: viewer add");
-
             shell.open();
         }
-
-        log.trace("DefaultCompoundDSTableView: finish");
     }
 
     @Override
     protected void loadData(DataFormat dataObject) throws Exception {
-        log.trace("loadData(): start");
-
         super.loadData(dataObject);
 
         if (dataValue == null) {
             log.debug("loadData(): data value is null");
-            log.trace("loadData(): finish");
             throw new RuntimeException("data value is null or not a list");
         }
-
-        log.trace("loadData(): finish");
     }
 
     /**
@@ -134,14 +123,14 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      */
     @Override
     protected NatTable createTable(Composite parent, DataFormat dataObject) {
-        log.trace("createTable(): start");
-
         // Create body layer
         final ColumnGroupModel columnGroupModel = new ColumnGroupModel();
         final ColumnGroupModel secondLevelGroupModel = new ColumnGroupModel();
 
         try {
             dataProvider = DataProviderFactory.getDataProvider(dataObject, dataValue, isDataTransposed);
+
+            log.trace("createTable(): rows={} : cols={}", dataProvider.getRowCount(), dataProvider.getColumnCount());
 
             dataLayer = new DataLayer(dataProvider);
         }
@@ -190,9 +179,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
         natTable.addLayerListener(new CompoundDSCellSelectionListener());
 
-        natTable.configure();
+        // Create popup menu for region or object ref.
+        //if (isRegRef || isObjRef) {
+        //    natTable.addConfiguration(new RefContextMenu(natTable));
+        //}
 
-        log.trace("createTable(): finish");
+        natTable.configure();
 
         return natTable;
     }
@@ -228,30 +220,43 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
         log.trace("getSelectedData(): size={} cName={} nt={}", size, cName, nt);
 
-        if (nt == 'B') {
-            selectedData = new byte[size];
-        }
-        else if (nt == 'S') {
-            selectedData = new short[size];
-        }
-        else if (nt == 'I') {
-            selectedData = new int[size];
-        }
-        else if (nt == 'J') {
-            selectedData = new long[size];
-        }
-        else if (nt == 'F') {
-            selectedData = new float[size];
-        }
-        else if (nt == 'D') {
-            selectedData = new double[size];
+        if (isRegRef) {
+            // reg. ref data are stored in strings
+            selectedData = new String[size];
         }
         else {
+            switch (nt) {
+                case 'B':
+                    selectedData = new byte[size];
+                    break;
+                case 'S':
+                    selectedData = new short[size];
+                    break;
+                case 'I':
+                    selectedData = new int[size];
+                    break;
+                case 'J':
+                    selectedData = new long[size];
+                    break;
+                case 'F':
+                    selectedData = new float[size];
+                    break;
+                case 'D':
+                    selectedData = new double[size];
+                    break;
+                default:
+                    selectedData = null;
+                    break;
+            }
+        }
+
+        if (selectedData == null) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Select", "Unsupported data type.");
             return null;
         }
-        log.trace("getSelectedData(): selectedData={}", selectedData);
+
+        log.trace("getSelectedData(): selectedData is type {}", nt);
 
         System.arraycopy(colData, 0, selectedData, 0, size);
 
@@ -272,7 +277,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     /**
      * Returns an IEditableRule that determines whether cells can be edited.
      *
-     * Cells can be edited as long as the dataset is not opened in read-only mode.
+     * Cells can be edited as long as the dataset is not opened in read-only mode
+     * and the data is not currently displayed in hexadecimal, binary, or character
+     * mode.
      *
      * @param dataObject
      *            The dataset for editing
@@ -283,10 +290,15 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     protected IEditableRule getDataEditingRule(DataFormat dataObject) {
         if (dataObject == null) return null;
 
-        // Only Allow editing of CompoundDS if not in read-only mode
+        // Only Allow editing if not in read-only mode
         return new EditableRule() {
             @Override
             public boolean isEditable(int columnIndex, int rowIndex) {
+                /*
+                 * TODO: Should be able to edit character-displayed types and datasets when
+                 * displayed as hex/binary.
+                 */
+                //return !(isReadOnly || isDisplayTypeChar || showAsBin || showAsHex);
                 return !isReadOnly;
             }
         };
@@ -299,10 +311,10 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
+                log.trace("ScalarDSCellSelectionListener: CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
-
-                log.trace("NATTable CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
 
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
@@ -311,7 +323,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 Object fieldName = columnHeaderDataProvider.getDataValue(dataTable.getColumnIndexByPosition(event.getColumnPosition()), 0);
 
                 String colIndex = "";
-
                 if (dataObject.getWidth() > 1) {
                     int groupSize = ((CompoundDataFormat) dataObject).getSelectedMemberCount();
                     colIndex = "[" + String.valueOf((dataTable.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
@@ -327,8 +338,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 ILayerCell cell = dataTable.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(), ((CellSelectionEvent) e).getRowPosition());
                 cellValueField.setText(dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val).toString());
                 ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
-                log.trace("NATTable CellSelected finish");
             }
         }
     }
@@ -356,7 +365,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             List<Datatype> selectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
             final List<String> datasetMemberNames = Arrays.asList(dataFormat.getSelectedMemberNames());
 
-            columnNames = new ArrayList<String>(dataFormat.getSelectedMemberCount());
+            columnNames = new ArrayList<>(dataFormat.getSelectedMemberCount());
 
             recursiveColumnHeaderSetup(columnNames, dataFormat, cmpdType, datasetMemberNames, selectedTypes);
 
@@ -385,11 +394,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         private void recursiveColumnHeaderSetup(List<String> outColNames, CompoundDataFormat dataFormat,
                 Datatype curDtype, List<String> memberNames, List<Datatype> memberTypes) {
-            log.trace("recursiveColumnHeaderSetup(): start");
 
             if (curDtype.isArray()) {
-                log.trace("recursiveColumnHeaderSetup(): ARRAY type");
-
                 /*
                  * ARRAY of COMPOUND type
                  */
@@ -426,7 +432,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                  * that assumption is not true.
                  */
                 StringBuilder sBuilder = new StringBuilder();
-                ArrayList<String> nestedMemberNames = new ArrayList<String>(arrSize * memberNames.size());
+                ArrayList<String> nestedMemberNames = new ArrayList<>(arrSize * memberNames.size());
                 for (int i = 0; i < arrSize; i++) {
                     for (int j = 0; j < memberNames.size(); j++) {
                         sBuilder.setLength(0);
@@ -453,8 +459,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                  */
             }
             else if (curDtype.isCompound()) {
-                log.trace("recursiveColumnHeaderSetup(): COMPOUND type");
-
                 ListIterator<String> localIt = memberNames.listIterator();
                 while (localIt.hasNext()) {
                     int curIdx = localIt.nextIndex();
@@ -486,7 +490,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                      */
                     if (nestedArrayOfCompound) {
                         List<Datatype> selTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedArrayOfCompoundType);
-                        List<String> selMemberNames = new ArrayList<String>(selTypes.size());
+                        List<String> selMemberNames = new ArrayList<>(selTypes.size());
 
                         int arrCmpdLen = calcArrayOfCompoundLen(selTypes);
                         for (int i = 0; i < arrCmpdLen; i++) {
@@ -504,8 +508,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     }
                 }
             }
-
-            log.trace("recursiveColumnHeaderSetup(): finish");
         }
 
         private int calcArrayOfCompoundLen(List<Datatype> datatypes) {

@@ -297,7 +297,6 @@ public class H4GRImage extends ScalarDS
             log.debug("copy(): GRendaccess failure: ", ex);
         }
 
-        log.trace("copy(): finish");
         return dataset;
     }
 
@@ -333,8 +332,6 @@ public class H4GRImage extends ScalarDS
     @Override
     public byte[] readBytes() throws HDFException
     {
-        log.trace("readBytes(): start");
-
         byte[] theData = null;
 
         if (!isInited()) init();
@@ -371,7 +368,6 @@ public class H4GRImage extends ScalarDS
             close(id);
         }
 
-        log.trace("readBytes(): finish");
         return theData;
     }
 
@@ -379,8 +375,6 @@ public class H4GRImage extends ScalarDS
     @Override
     public Object read() throws HDFException
     {
-        log.trace("read(): start");
-
         Object theData = null;
 
         if (!isInited()) init();
@@ -388,7 +382,6 @@ public class H4GRImage extends ScalarDS
         long id = open();
         if (id < 0) {
             log.debug("read(): Invalid ID");
-            log.trace("read(): finish");
             return null;
         }
 
@@ -430,7 +423,6 @@ public class H4GRImage extends ScalarDS
             isDefaultImageOrder = true;
 
         log.trace("read(): isDefaultImageOrder={}", isDefaultImageOrder);
-        log.trace("read(): finish");
         return theData;
     }
 
@@ -439,8 +431,6 @@ public class H4GRImage extends ScalarDS
     @Override
     public void write(Object buf) throws HDFException
     {
-        log.trace("write(): start");
-
         if (buf == null) {
             log.debug("write(): buf is null - exit");
             return;
@@ -484,8 +474,6 @@ public class H4GRImage extends ScalarDS
             tmpData = null;
             close(id);
         }
-
-        log.trace("write(): finish");
     }
 
     // ***** need to implement from DataFormat *****
@@ -493,8 +481,6 @@ public class H4GRImage extends ScalarDS
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
-        log.trace("getMetadata(): start");
-
         if (attributeList != null) {
             log.trace("getMetadata(): attributeList != null - exit");
             return attributeList;
@@ -571,7 +557,6 @@ public class H4GRImage extends ScalarDS
             close(id);
         }
 
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -580,8 +565,6 @@ public class H4GRImage extends ScalarDS
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
-        log.trace("writeMetadata(): start");
-
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an Attribute - exit");
@@ -601,8 +584,6 @@ public class H4GRImage extends ScalarDS
         catch (Exception ex) {
             log.debug("writeMetadata(): failure: ", ex);
         }
-
-        log.trace("writeMetadata(): finish");
     }
 
     // ***** need to implement from DataFormat *****
@@ -633,7 +614,6 @@ public class H4GRImage extends ScalarDS
             id = -1;
         }
 
-        log.trace("open(): finish");
         return id;
     }
 
@@ -649,11 +629,8 @@ public class H4GRImage extends ScalarDS
     @Override
     public void init()
     {
-        log.trace("init(): start");
-
         if (inited) {
             log.trace("init(): Already initialized");
-            log.trace("init(): finish");
             return; // already called. Initialize only once
         }
 
@@ -755,16 +732,12 @@ public class H4GRImage extends ScalarDS
             selectedDims[i] = idims[i];
             dims[i] = idims[i];
         }
-
-        log.trace("init(): finish");
     }
 
     // ***** need to implement from ScalarDS *****
     @Override
     public byte[][] getPalette()
     {
-        log.trace("getPalette(): start");
-
         if (palette != null) {
             log.trace("getPalette(): palette != null - exit");
             return palette;
@@ -838,7 +811,6 @@ public class H4GRImage extends ScalarDS
 
         close(id);
 
-        log.trace("getPalette(): finish");
         return palette;
     }
 
@@ -1005,7 +977,6 @@ public class H4GRImage extends ScalarDS
             pgroup.addToMemberList(dataset);
         }
 
-        log.trace("create(): finish");
         return dataset;
     }
 
@@ -1018,7 +989,6 @@ public class H4GRImage extends ScalarDS
 
         if (numberOfAttributes <= 0) {
             log.debug("copyAttribute(): numberOfAttributes={}", numberOfAttributes);
-            log.trace("copyAttribute(): finish");
             return;
         }
 

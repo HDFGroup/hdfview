@@ -51,7 +51,7 @@ public class InputDialog extends Dialog {
     private Font            curFont;
 
     public InputDialog(Shell parent) {
-        this(parent, "HDFView " + HDFVersions.HDFVIEW_VERSION, "");
+        this(parent, "HDFView " + HDFVersions.getPropertyVersionView(), "");
     }
 
     public InputDialog(Shell parent, String title, String message) {

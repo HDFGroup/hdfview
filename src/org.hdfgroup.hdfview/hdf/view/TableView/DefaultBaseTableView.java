@@ -29,6 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -57,7 +58,6 @@ import org.eclipse.nebula.widgets.nattable.edit.action.KeyEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.action.MouseEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditConfiguration;
 import org.eclipse.nebula.widgets.nattable.edit.config.DialogErrorHandling;
-import org.eclipse.nebula.widgets.nattable.edit.editor.TextCellEditor;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
@@ -80,7 +80,7 @@ import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
-import org.eclipse.nebula.widgets.nattable.ui.matcher.BodyCellEditorMouseEventMatcher;
+import org.eclipse.nebula.widgets.nattable.ui.matcher.CellEditorMouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.LetterOrDigitKeyEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuAction;
@@ -216,12 +216,12 @@ public abstract class DefaultBaseTableView implements TableView {
     /**
      * Global variables for GUI components
      */
-
     protected MenuItem                      checkFixedDataLength = null;
     protected MenuItem                      checkCustomNotation = null;
     protected MenuItem                      checkScientificNotation = null;
     protected MenuItem                      checkHex = null;
     protected MenuItem                      checkBin = null;
+    protected MenuItem                      checkEnum = null;
 
     // Labeled Group to display the index base
     protected org.eclipse.swt.widgets.Group indexBaseGroup;
@@ -258,8 +258,6 @@ public abstract class DefaultBaseTableView implements TableView {
      */
     @SuppressWarnings("rawtypes")
     public DefaultBaseTableView(DataViewManager theView, HashMap dataPropertiesMap) {
-        log.trace("start");
-
         shell = new Shell(display, SWT.SHELL_TRIM);
 
         shell.setData(this);
@@ -330,15 +328,13 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         log.trace("Index base = {} - Is data transposed = {} - Is display type char = {}",
-                indexBase, isDataTransposed,
-                isDisplayTypeChar);
+                indexBase, isDataTransposed, isDisplayTypeChar);
 
         if (hObject == null) hObject = viewer.getTreeView().getCurrentObject();
 
         /* Only edit objects which actually contain editable data */
         if ((hObject == null) || !(hObject instanceof DataFormat)) {
             log.debug("data object is null or not an instanceof DataFormat");
-            log.trace("exit");
             dataObject = null;
             shell.dispose();
             return;
@@ -347,7 +343,6 @@ public abstract class DefaultBaseTableView implements TableView {
         dataObject = (DataFormat) hObject;
         if (((HObject) dataObject).getFileFormat() == null) {
             log.debug("DataFormat object cannot access FileFormat");
-            log.trace("exit");
             shell.dispose();
             return;
         }
@@ -377,7 +372,6 @@ public abstract class DefaultBaseTableView implements TableView {
 
         if (dims == null) {
             log.debug("data object has null dimensions");
-            log.trace("exit");
             viewer.showError("Error: Data object '" + ((HObject) dataObject).getName() + "' has null dimensions.");
             shell.dispose();
             Tools.showError(display.getActiveShell(), "Error", "Could not open data object '" + ((HObject) dataObject).getName()
@@ -388,12 +382,10 @@ public abstract class DefaultBaseTableView implements TableView {
         for (int i = 0; i < dims.length; i++)
             tsize *= dims[i];
 
-        log.trace("Data object Size={} Height={} Width={}", tsize, dataObject.getHeight(),
-                dataObject.getWidth());
+        log.trace("Data object Size={} Height={} Width={}", tsize, dataObject.getHeight(), dataObject.getWidth());
 
         if (dataObject.getHeight() <= 0 || dataObject.getWidth() <= 0 || tsize <= 0) {
             log.debug("data object has dimension of size 0");
-            log.trace("exit");
             viewer.showError("Error: Data object '" + ((HObject) dataObject).getName() + "' has dimension of size 0.");
             shell.dispose();
             Tools.showError(display.getActiveShell(), "Error", "Could not open data object '" + ((HObject) dataObject).getName()
@@ -427,8 +419,6 @@ public abstract class DefaultBaseTableView implements TableView {
         log.trace("Data object isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
 
         // Setup subset information
-        log.trace("Setup subset information");
-
         int rank = dataObject.getRank();
         int[] selectedIndex = dataObject.getSelectedIndex();
         long[] count = dataObject.getSelectedDims();
@@ -489,7 +479,6 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         catch (Exception ex) {
             log.debug("loadData(): data not loaded: ", ex);
-            log.trace("exit");
             viewer.showError("Error: unable to load table data");
             shell.dispose();
             Tools.showError(display.getActiveShell(), "Open", "An error occurred while loading data for the table:\n\n" + ex.getMessage());
@@ -513,12 +502,27 @@ public abstract class DefaultBaseTableView implements TableView {
             numberFormat = normalFormat;
         }
 
+        /*
+         * Set the default selection on the "Show Enum", etc. MenuItems.
+         * This step must be done after the menu bar has actually been created.
+         */
+        if (dataObject.getDatatype().isEnum()) {
+            checkEnum.setSelection(isEnumConverted);
+            checkScientificNotation.setSelection(false);
+            checkCustomNotation.setSelection(false);
+            checkBin.setSelection(false);
+            checkHex.setSelection(false);
+            showAsBin = false;
+            showAsHex = false;
+            numberFormat = normalFormat;
+        }
+
         /* Create the actual NatTable */
+        log.debug("table creation", ((HObject) dataObject).getName());
         try {
             dataTable = createTable(content, dataObject);
             if (dataTable == null) {
                 log.debug("table creation for object {} failed", ((HObject) dataObject).getName());
-                log.trace("exit");
                 viewer.showError("Creating table for object '" + ((HObject) dataObject).getName() + "' failed.");
                 shell.dispose();
                 Tools.showError(display.getActiveShell(), "Open", "Failed to create Table object");
@@ -527,7 +531,6 @@ public abstract class DefaultBaseTableView implements TableView {
         }
         catch (UnsupportedOperationException ex) {
             log.debug("Subclass does not implement createTable()");
-            log.trace("exit");
             shell.dispose();
             return;
         }
@@ -600,8 +603,6 @@ public abstract class DefaultBaseTableView implements TableView {
         int width = 700 + (ViewProperties.getFontSize() - 12) * 15;
         int height = 500 + (ViewProperties.getFontSize() - 12) * 10;
         shell.setSize(width, height);
-
-        log.trace("finish");
     }
 
     /**
@@ -722,7 +723,7 @@ public abstract class DefaultBaseTableView implements TableView {
         return toolbar;
     }
 
-    /**
+    /*
      * Creates the menubar for the Shell.
      */
     protected Menu createMenuBar(final Shell theShell) {
@@ -971,7 +972,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     fChooser.setFilterPath(currentDir);
 
                     DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
-                    fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+                    fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
                     fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
                     fChooser.setFilterIndex(1);
 
@@ -997,17 +998,13 @@ public abstract class DefaultBaseTableView implements TableView {
     }
 
     protected void loadData(DataFormat dataObject) throws Exception {
-        log.trace("loadData(): start");
-
         if (!dataObject.isInited()) {
             try {
                 dataObject.init();
-                log.trace("loadData(): data object inited");
             }
             catch (Exception ex) {
                 dataValue = null;
                 log.debug("loadData(): ", ex);
-                log.trace("loadData(): exit");
                 throw ex;
             }
         }
@@ -1027,16 +1024,12 @@ public abstract class DefaultBaseTableView implements TableView {
         dataValue = null;
         try {
             dataValue = dataObject.getData();
-            log.trace("loadData(): dataValue = {}", dataValue);
         }
         catch (Exception ex) {
             dataValue = null;
             log.debug("loadData(): ", ex);
-            log.trace("loadData(): exit");
             throw ex;
         }
-
-        log.trace("loadData(): finish");
     }
 
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
@@ -1044,6 +1037,331 @@ public abstract class DefaultBaseTableView implements TableView {
     protected abstract void showObjRefData(long ref);
 
     protected abstract void showRegRefData(String reg);
+
+    /**
+     * Display data pointed to by object references. Data of each object is shown in
+     * a separate spreadsheet.
+     *
+     * @param ref
+     *            the array of strings that contain the object reference
+     *            information.
+     *
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected void NewshowObjRefData(long ref) {
+        long[] oid = { ref };
+        log.trace("showObjRefData(): start: ref={}", ref);
+
+        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oid);
+        if (obj == null || !(obj instanceof ScalarDS)) {
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
+            log.debug("showObjRefData(): obj is null or not a Dataset");
+            return;
+        }
+
+        ScalarDS dset = (ScalarDS) obj;
+        ScalarDS dsetCopy = null;
+
+        // create an instance of the dataset constructor
+        Constructor<? extends ScalarDS> constructor = null;
+        Object[] paramObj = null;
+        Object data = null;
+
+        try {
+            Class[] paramClass = { FileFormat.class, String.class, String.class };
+            constructor = dset.getClass().getConstructor(paramClass);
+            paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
+            dsetCopy = constructor.newInstance(paramObj);
+            data = dsetCopy.getData();
+        }
+        catch (Exception ex) {
+            log.debug("showObjRefData(): couldn't show data: ", ex);
+            Tools.showError(shell, "Select", "Object Reference: " + ex.getMessage());
+            data = null;
+        }
+
+        if (data == null) {
+            return;
+        }
+
+        Class<?> theClass = null;
+        String viewName = null;
+
+        switch (viewType) {
+            case IMAGE:
+                viewName = HDFView.getListOfImageViews().get(0);
+                break;
+            case TABLE:
+                viewName = (String) HDFView.getListOfTableViews().get(0);
+                break;
+            default:
+                viewName = null;
+        }
+
+        try {
+            theClass = Class.forName(viewName);
+        }
+        catch (Exception ex) {
+            try {
+                theClass = ViewProperties.loadExtClass().loadClass(viewName);
+            }
+            catch (Exception ex2) {
+                theClass = null;
+            }
+        }
+
+        // Use default dataview
+        if (theClass == null) {
+            switch (viewType) {
+                case IMAGE:
+                    viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                    break;
+                case TABLE:
+                    viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                    break;
+                default:
+                    viewName = null;
+            }
+
+            try {
+                theClass = Class.forName(viewName);
+            }
+            catch (Exception ex) {
+                log.debug("showObjRefData(): no suitable display class found");
+                Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
+                return;
+            }
+        }
+
+        HashMap map = new HashMap(1);
+        map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy);
+        Object[] args = { viewer, map };
+
+        try {
+            Tools.newInstance(theClass, args);
+        }
+        catch (Exception ex) {
+            log.debug("showObjRefData(): Could not show reference data: ", ex);
+            Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
+        }
+    }
+
+    /**
+     * Display data pointed to by region references. Data of each region is shown in
+     * a separate spreadsheet. The reg. ref. information is stored in strings of the
+     * format below:
+     * <ul>
+     * <li>For point selections: "<code>file_id:obj_id { [point1] [point2] ...) }</code>", where
+     * <code>[point1]</code> is in the form of (location_of_dim0, location_of_dim1, ...). For
+     * example, <code>0:800 { (0,1) (2,11) (1,0) (2,4) }</code></li>
+     * <li>For rectangle selections: "<code>file_id:obj_id { [corner coordinates1] [corner coordinates2] ... }</code>",
+     * where [corner coordinates1] is in the form of
+     * (start_corner)-(oposite_corner).
+     * For example, <code>0:800 { (0,0)-(0,2) (0,11)-(0,13) (2,0)-(2,2) (2,11)-(2,13) }</code></li>
+     * </ul>
+     *
+     * @param reg
+     *            the array of strings that contain the reg. ref information.
+     *
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected void NewshowRegRefData(String reg) {
+        log.trace("showRegRefData(): start: reg={}", reg);
+
+        if (reg == null || (reg.length() <= 0) || (reg.compareTo("NULL") == 0)) {
+            Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
+            log.debug("showRegRefData(): ref is null or invalid");
+            return;
+        }
+
+        boolean isPointSelection = (reg.indexOf('-') <= 0);
+
+        // find the object location
+        String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf("REGION_TYPE")-1);
+        log.trace("showRegRefData(): isPointSelection={} oidStr={}", isPointSelection,
+                oidStr);
+
+        // decode the region selection
+        String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
+        if (regStr == null || regStr.length() <= 0) {
+            Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
+            log.debug("showRegRefData(): no region selection made");
+            return; // no selection
+        }
+
+        // TODO: do we need to do something with what's past the closing bracket
+        // regStr = reg.substring(reg.indexOf('}') + 1);
+
+        StringTokenizer st = new StringTokenizer(regStr);
+        int nSelections = st.countTokens();
+        if (nSelections <= 0) {
+            Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
+            log.debug("showRegRefData(): no region selection made");
+            return; // no selection
+        }
+        log.trace("showRegRefData(): nSelections={}", nSelections);
+
+        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
+        if (obj == null || !(obj instanceof ScalarDS)) {
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
+            log.debug("showRegRefData(): obj is null or not a Dataset");
+            return;
+        }
+
+        ScalarDS dset = (ScalarDS) obj;
+        ScalarDS dsetCopy = null;
+
+        // create an instance of the dataset constructor
+        Constructor<? extends ScalarDS> constructor = null;
+        Object[] paramObj = null;
+        try {
+            Class[] paramClass = { FileFormat.class, String.class, String.class };
+            constructor = dset.getClass().getConstructor(paramClass);
+            paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
+        }
+        catch (Exception ex) {
+            log.debug("showRegRefData(): constructor failure: ", ex);
+            constructor = null;
+        }
+
+        // load each selection into a separate dataset and display it in
+        // a separate spreadsheet
+
+        while (st.hasMoreTokens()) {
+            try {
+                dsetCopy = constructor.newInstance(paramObj);
+            }
+            catch (Exception ex) {
+                log.debug("showRegRefData(): constructor newInstance failure: ", ex);
+                continue;
+            }
+
+            if (dsetCopy == null) {
+                log.debug("showRegRefData(): continue after null dataset copy");
+                continue;
+            }
+
+            try {
+                dsetCopy.init();
+            }
+            catch (Exception ex) {
+                log.debug("showRegRefData(): continue after copied dataset init failure: ",
+                        ex);
+                continue;
+            }
+
+            dsetCopy.getRank();
+            long[] start = dsetCopy.getStartDims();
+            long[] count = dsetCopy.getSelectedDims();
+
+            // set the selected dimension sizes based on the region selection
+            // info.
+            int idx = 0;
+            String sizeStr = null;
+            String token = st.nextToken();
+
+            token = token.replace('(', ' ');
+            token = token.replace(')', ' ');
+            if (isPointSelection) {
+                // point selection
+                StringTokenizer tmp = new StringTokenizer(token, ",");
+                while (tmp.hasMoreTokens()) {
+                    count[idx] = 1;
+                    sizeStr = tmp.nextToken().trim();
+                    start[idx] = Long.valueOf(sizeStr);
+                    idx++;
+                }
+            }
+            else {
+                // rectangle selection
+                String startStr = token.substring(0, token.indexOf('-'));
+                String endStr = token.substring(token.indexOf('-') + 1);
+                StringTokenizer tmp = new StringTokenizer(startStr, ",");
+                while (tmp.hasMoreTokens()) {
+                    sizeStr = tmp.nextToken().trim();
+                    start[idx] = Long.valueOf(sizeStr);
+                    idx++;
+                }
+
+                idx = 0;
+                tmp = new StringTokenizer(endStr, ",");
+                while (tmp.hasMoreTokens()) {
+                    sizeStr = tmp.nextToken().trim();
+                    count[idx] = Long.valueOf(sizeStr) - start[idx] + 1;
+                    idx++;
+                }
+            }
+
+            try {
+                dsetCopy.getData();
+            }
+            catch (Exception ex) {
+                log.debug("showRegRefData(): getData failure: ", ex);
+                Tools.showError(shell, "Select", "Region Reference: " + ex.getMessage());
+            }
+
+            Class<?> theClass = null;
+            String viewName = null;
+
+            switch (viewType) {
+                case IMAGE:
+                    viewName = HDFView.getListOfImageViews().get(0);
+                    break;
+                case TABLE:
+                    viewName = (String) HDFView.getListOfTableViews().get(0);
+                    break;
+                default:
+                    viewName = null;
+            }
+
+            try {
+                theClass = Class.forName(viewName);
+            }
+            catch (Exception ex) {
+                try {
+                    theClass = ViewProperties.loadExtClass().loadClass(viewName);
+                }
+                catch (Exception ex2) {
+                    theClass = null;
+                }
+            }
+
+            // Use default dataview
+            if (theClass == null) {
+                switch (viewType) {
+                    case IMAGE:
+                        viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                        break;
+                    case TABLE:
+                        viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                        break;
+                    default:
+                        viewName = null;
+                }
+
+                try {
+                    theClass = Class.forName(viewName);
+                }
+                catch (Exception ex) {
+                    log.debug("showRegRefData(): no suitable display class found");
+                    Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
+                    return;
+                }
+            }
+
+            HashMap map = new HashMap(1);
+            map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy);
+            Object[] args = { viewer, map };
+
+            try {
+                Tools.newInstance(theClass, args);
+            }
+            catch (Exception ex) {
+                log.debug("showRegRefData(): Could not show reference data: ", ex);
+                Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
+            }
+        } // (st.hasMoreTokens())
+    } // end of showRegRefData(String reg)
 
     protected abstract IEditableRule getDataEditingRule(DataFormat dataObject);
 
@@ -1061,29 +1379,23 @@ public abstract class DefaultBaseTableView implements TableView {
      */
     @Override
     public void updateValueInFile() {
-        log.trace("updateValueInFile(): start");
 
         if (isReadOnly || !dataProvider.getIsValueChanged() || showAsBin || showAsHex) {
             log.debug("updateValueInFile(): file not updated; read-only or unchanged data or displayed as hex or binary");
-            log.trace("updateValueInFile(): exit");
             return;
         }
 
         try {
-            log.trace("updateValueInFile(): write");
             dataObject.write();
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
             Tools.showError(shell, "Update", ex.getMessage());
             log.debug("updateValueInFile(): ", ex);
-            log.trace("updateValueInFile(): exit");
             return;
         }
 
         dataProvider.setIsValueChanged(false);
-
-        log.trace("updateValueInFile(): finish");
     }
 
     @Override
@@ -1368,7 +1680,7 @@ public abstract class DefaultBaseTableView implements TableView {
             fChooser.setFilterPath(currentDir);
 
             DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
-            fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+            fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
             fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
             fChooser.setFilterIndex(1);
             fChooser.setText("Save Current Data To Text File --- " + ((HObject) dataObject).getName());
@@ -1452,7 +1764,7 @@ public abstract class DefaultBaseTableView implements TableView {
     // fChooser.setFilterPath(dataset.getFileFormat().getParent());
     //
     // DefaultFileFilter filter = DefaultFileFilter.getFileFilterText();
-    // fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+    // fChooser.setFilterExtensions(new String[] {"*", filter.getExtensions()});
     // fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
     // fChooser.setFilterIndex(1);
     //
@@ -1567,7 +1879,7 @@ public abstract class DefaultBaseTableView implements TableView {
             fChooser.setFilterPath(currentDir);
 
             DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
-            fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+            fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
             fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
             fChooser.setFilterIndex(1);
             fChooser.setText("Save Current Data To Binary File --- " + ((HObject) dataObject).getName());
@@ -1768,7 +2080,7 @@ public abstract class DefaultBaseTableView implements TableView {
             fChooser.setFilterPath(currentDir);
 
             DefaultFileFilter filter = DefaultFileFilter.getFileFilterBinary();
-            fChooser.setFilterExtensions(new String[] { "*.*", filter.getExtensions() });
+            fChooser.setFilterExtensions(new String[] { "*", filter.getExtensions() });
             fChooser.setFilterNames(new String[] { "All Files", filter.getDescription() });
             fChooser.setFilterIndex(1);
 
@@ -1812,11 +2124,9 @@ public abstract class DefaultBaseTableView implements TableView {
      * Convert selected data based on predefined math functions.
      */
     private void mathConversion() throws Exception {
-        log.trace("mathConversion(): start");
 
         if (isReadOnly) {
             log.debug("mathConversion(): can't convert read-only data");
-            log.trace("mathConversion(): exit");
             return;
         }
 
@@ -1825,7 +2135,6 @@ public abstract class DefaultBaseTableView implements TableView {
             shell.getDisplay().beep();
             Tools.showError(shell, "Convert", "Please select one column at a time for math conversion" + "for compound dataset.");
             log.debug("mathConversion(): more than one column selected for CompoundDS");
-            log.trace("mathConversion(): exit");
             return;
         }
 
@@ -1834,7 +2143,6 @@ public abstract class DefaultBaseTableView implements TableView {
             shell.getDisplay().beep();
             Tools.showError(shell, "Convert", "No data is selected.");
             log.debug("mathConversion(): no data selected");
-            log.trace("mathConversion(): exit");
             return;
         }
 
@@ -1886,8 +2194,6 @@ public abstract class DefaultBaseTableView implements TableView {
             System.gc();
 
             dataProvider.setIsValueChanged(true);
-
-            log.trace("mathConversion(): finish");
         }
     }
 
@@ -2253,11 +2559,9 @@ public abstract class DefaultBaseTableView implements TableView {
                 this.addConfiguration(new AbstractUiBindingConfiguration() {
                     @Override
                     public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
+                        uiBindingRegistry.registerFirstKeyBinding(new LetterOrDigitKeyEventMatcher(), new KeyEditAction());
                         uiBindingRegistry.registerFirstDoubleClickBinding(
-                                new BodyCellEditorMouseEventMatcher(TextCellEditor.class), new MouseEditAction());
-
-                        uiBindingRegistry.registerFirstKeyBinding(new LetterOrDigitKeyEventMatcher(),
-                                new KeyEditAction());
+                                new CellEditorMouseEventMatcher(), new MouseEditAction());
                     }
                 });
             }

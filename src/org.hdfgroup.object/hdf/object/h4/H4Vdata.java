@@ -196,8 +196,6 @@ public class H4Vdata extends CompoundDS
     @Override
     public byte[] readBytes() throws HDFException
     {
-        log.trace("readBytes(): start");
-
         byte[] theData = null;
 
         if (!isInited())
@@ -205,14 +203,12 @@ public class H4Vdata extends CompoundDS
 
         if (numberOfMembers <= 0) {
             log.debug("readBytes(): VData contains no members");
-            log.trace("readBytes(): finish");
             return null; // this Vdata does not have any filed
         }
 
         long id = open();
         if (id < 0) {
             log.debug("readBytes(): Invalid VData ID");
-            log.trace("readBytes(): finish");
             return null;
         }
 
@@ -243,7 +239,6 @@ public class H4Vdata extends CompoundDS
             close(id);
         }
 
-        log.trace("readBytes(): finish");
         return theData;
     }
 
@@ -252,8 +247,6 @@ public class H4Vdata extends CompoundDS
     @Override
     public Object read() throws HDFException
     {
-        log.trace("read(): start");
-
         List list = null;
 
         if (!isInited())
@@ -261,14 +254,12 @@ public class H4Vdata extends CompoundDS
 
         if (numberOfMembers <= 0) {
             log.debug("read(): VData contains no members");
-            log.trace("read(): finish");
             return null; // this Vdata does not have any filed
         }
 
         long id = open();
         if (id < 0) {
             log.debug("read(): Invalid VData ID");
-            log.trace("read(): finish");
             return null;
         }
 
@@ -349,7 +340,6 @@ public class H4Vdata extends CompoundDS
 
         close(id);
 
-        log.trace("read(): finish");
         return list;
     }
 
@@ -434,11 +424,8 @@ public class H4Vdata extends CompoundDS
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
     {
-        log.trace("getMetadata(): start");
-
         if (attributeList != null) {
             log.trace("getMetdata(): attributeList != null");
-            log.trace("getMetadata(): finish");
             return attributeList;
         }
 
@@ -446,7 +433,6 @@ public class H4Vdata extends CompoundDS
 
         if (id < 0) {
             log.debug("getMetadata(): Invalid VData ID");
-            log.trace("getMetadata(): finish");
             return attributeList;
         }
 
@@ -456,7 +442,6 @@ public class H4Vdata extends CompoundDS
 
             if (n <= 0) {
                 log.debug("getMetadata(): VData number of attributes <= 0");
-                log.trace("getMetadata(): finish");
                 return attributeList;
             }
 
@@ -530,7 +515,6 @@ public class H4Vdata extends CompoundDS
 
         // todo: We shall also load attributes of fields
 
-        log.trace("getMetadata(): finish");
         return attributeList;
     }
 
@@ -539,12 +523,9 @@ public class H4Vdata extends CompoundDS
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
     {
-        log.trace("writeMetadata(): start");
-
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an Attribute");
-            log.trace("writeMetadata(): finish");
             return;
         }
 
@@ -561,8 +542,6 @@ public class H4Vdata extends CompoundDS
         catch (Exception ex) {
             log.trace("writeMetadata(): failure: ", ex);
         }
-
-        log.trace("writeMetadata(): finish");
     }
 
     // To do: Implementing DataFormat
@@ -582,8 +561,6 @@ public class H4Vdata extends CompoundDS
     @Override
     public long open()
     {
-        log.trace("open(): start");
-
         // try to open with write permission
         long vsid = -1;
         try {
@@ -605,7 +582,6 @@ public class H4Vdata extends CompoundDS
             }
         }
 
-        log.trace("open(): finish");
         return vsid;
     }
 
@@ -627,18 +603,14 @@ public class H4Vdata extends CompoundDS
     @Override
     public void init()
     {
-        log.trace("init(): start");
-
         if (inited) {
             log.trace("init(): Already initialized");
-            log.trace("init(): finish");
             return; // already called. Initialize only once
         }
 
         long id = open();
         if (id < 0) {
             log.debug("init(): Invalid VData ID");
-            log.trace("init(): finish");
             return;
         }
 
@@ -710,7 +682,6 @@ public class H4Vdata extends CompoundDS
             }
             catch (HDFException ex) {
                 log.debug("init(): member[{}]: ", i, ex);
-                log.trace("init(): continue");
                 continue;
             }
         } //  (int i=0; i<numberOfMembers; i++)
@@ -718,7 +689,6 @@ public class H4Vdata extends CompoundDS
         inited = true;
 
         close(id);
-        log.trace("init(): finish");
     }
 
     /**

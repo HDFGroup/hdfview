@@ -30,7 +30,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -38,7 +37,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -52,26 +50,21 @@ import org.eclipse.swt.widgets.Text;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
-import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
 /**
- * NewTableDataDialog shows a message dialog requesting user input for creating
+ * NewCompoundDatasetDialog shows a message dialog requesting user input for creating
  * a new HDF4/5 compound dataset.
  *
  * @author Jordan T. Henderson
  * @version 2.4 1/7/2015
  */
-public class NewCompoundDatasetDialog extends Dialog {
+public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewCompoundDatasetDialog.class);
-
-    private Shell                 shell;
-
-    private Font                  curFont;
 
     private static final String[] DATATYPE_NAMES   = {
         "byte (8-bit)", // 0
@@ -88,18 +81,11 @@ public class NewCompoundDatasetDialog extends Dialog {
         "unsigned long (64-bit)" // 11
     };
 
-    private FileFormat            fileformat;
-
     private Combo                 parentChoice, nFieldBox, templateChoice;
 
     /** A list of current groups */
     private Vector<Group>         groupList;
     private Vector<CompoundDS>    compoundDSList;
-
-    private HObject               newObject;
-    private Group                 parentGroup;
-
-    private List<?>               objList;
 
     private int                   numberOfMembers;
 
@@ -114,7 +100,7 @@ public class NewCompoundDatasetDialog extends Dialog {
     private Button                checkContiguous, checkChunked;
 
     /**
-     * Constructs a NewTableDataDialog with specified list of possible parent
+     * Constructs a NewDatasetDialog with specified list of possible parent
      * groups.
      *
      * @param parent
@@ -125,28 +111,12 @@ public class NewCompoundDatasetDialog extends Dialog {
      *            the list of all objects.
      */
     public NewCompoundDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
-        super(parent, SWT.APPLICATION_MODAL);
+        super(parent, pGroup, objs);
 
-        try {
-            curFont = new Font(
-                    Display.getCurrent(),
-                    ViewProperties.getFontType(),
-                    ViewProperties.getFontSize(),
-                    SWT.NORMAL);
-        }
-        catch (Exception ex) {
-            curFont = null;
-        }
-
-        newObject = null;
         numberOfMembers = 2;
-        parentGroup = pGroup;
-        objList = objs;
 
         groupList = new Vector<>(objs.size());
         compoundDSList = new Vector<>(objs.size());
-
-        fileformat = pGroup.getFileFormat();
     }
 
     public void open() {
@@ -183,7 +153,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         parentChoice.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                parentGroup = groupList.get(parentChoice.getSelectionIndex());
+                parentObj = groupList.get(parentChoice.getSelectionIndex());
             }
         });
 
@@ -207,11 +177,11 @@ public class NewCompoundDatasetDialog extends Dialog {
             }
         }
 
-        if (parentGroup.isRoot()) {
+        if (((Group) parentObj).isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.SEPARATOR));
+            parentChoice.select(parentChoice.indexOf(parentObj.getPath() + parentObj.getName() + HObject.SEPARATOR));
         }
 
         label = new Label(fieldComposite, SWT.LEFT);
@@ -227,6 +197,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 CompoundDS dset = null;
                 String name = templateChoice.getItem(templateChoice.getSelectionIndex());
 
+                log.trace("templateChoice start name={}", name);
                 for (CompoundDS ds : compoundDSList)
                     if (ds.getName().equals(name))
                         dset = ds;
@@ -289,6 +260,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 for (int i = 0; i < numberOfMembers; i++) {
                     ((Text) editors[i][0].getEditor()).setText(mNames[i]);
 
+                    log.trace("mNames[{}] = {}", i, mNames[i]);
                     int typeIdx = -1;
                     int tclass = mTypes[i].getDatatypeClass();
                     long tsize = mTypes[i].getDatatypeSize();
@@ -357,6 +329,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                     if (typeIdx < 0) {
                         continue;
                     }
+                    log.trace("typeIdx={}", typeIdx);
 
                     CCombo typeCombo = ((CCombo) editors[i][1].getEditor());
                     typeCombo.select(typeIdx);
@@ -794,6 +767,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 throw new IllegalArgumentException("Member name is empty");
             }
             mNames[i] = name;
+            log.trace("createCompoundDS member[{}] name = {}", i, mNames[i]);
 
             int order = 1;
             String orderStr = (String) table.getItem(i).getData("MemberSize");
@@ -808,39 +782,40 @@ public class NewCompoundDatasetDialog extends Dialog {
             mOrders[i] = order;
 
             String typeName = (String) table.getItem(i).getData("MemberType");
+            log.trace("createCompoundDS type[{}] name = {}", i, typeName);
             Datatype type = null;
             if (DATATYPE_NAMES[0].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
+                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[1].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.NATIVE);
+                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[2].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
+                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[3].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
+                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else if (DATATYPE_NAMES[4].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.SIGN_NONE);
+                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else if (DATATYPE_NAMES[5].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
+                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else if (DATATYPE_NAMES[6].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.NATIVE);
+                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[7].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
+                type = fileFormat.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[8].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
+                type = fileFormat.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[9].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE, Datatype.NATIVE);
+                type = fileFormat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[10].equals(typeName)) { // enum
-                type = fileformat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
+                type = fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
                 if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "Create", "Invalid member values: " + orderStr);
@@ -851,7 +826,7 @@ public class NewCompoundDatasetDialog extends Dialog {
                 }
             }
             else if (DATATYPE_NAMES[11].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.SIGN_NONE);
+                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else {
                 throw new IllegalArgumentException("Invalid data type.");
@@ -860,6 +835,7 @@ public class NewCompoundDatasetDialog extends Dialog {
         } //  (int i=0; i<n; i++)
 
         rank = rankChoice.getSelectionIndex() + 1;
+        log.trace("createCompoundDS rank={}", rank);
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
@@ -984,14 +960,11 @@ public class NewCompoundDatasetDialog extends Dialog {
         }
 
         if (checkChunked.getSelection()) {
-            obj = fileformat.createCompoundDS(dname, pgroup, dims, maxdims, chunks, gzip, mNames, mDatatypes, mOrders,
-                    null);
+            obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, chunks, gzip, mNames, mDatatypes, mOrders, null);
         }
         else {
-            obj = fileformat
-                    .createCompoundDS(dname, pgroup, dims, maxdims, null, -1, mNames, mDatatypes, mOrders, null);
+            obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, null, -1, mNames, mDatatypes, mOrders, null);
         }
-
         return obj;
     }
 
@@ -1114,15 +1087,5 @@ public class NewCompoundDatasetDialog extends Dialog {
         });
 
         return editor;
-    }
-
-    /** @return the new dataset created. */
-    public HObject getObject() {
-        return newObject;
-    }
-
-    /** @return the parent group of the new dataset. */
-    public Group getParentGroup() {
-        return parentGroup;
     }
 }

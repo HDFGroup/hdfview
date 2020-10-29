@@ -82,7 +82,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     @Override
     public boolean performOk() {
         getPreferenceStore();
-        log.trace("performOk: save General options");
 
         if (UGField != null) {
             String UGPath = UGField.getText();
@@ -177,7 +176,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
                 ViewProperties.setIndexBase1(true);
         }
 
-        log.trace("performOk: save General options finished");
         return true;
     }
 
@@ -198,7 +196,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      */
     protected void load() {
         getPreferenceStore();
-        log.trace("performOk: load General options");
 
         try {
             curFont = new Font(
@@ -299,7 +296,6 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         startMemberField.setText(String.valueOf(ViewProperties.getStartMembers()));
 
         maxMemberField.setText(String.valueOf(ViewProperties.getMaxMembers()));
-        log.trace("performOk: load General options finished");
     }
 
     /**
@@ -380,7 +376,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
             public void widgetSelected(SelectionEvent e) {
                 final FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(rootDir);
-                fChooser.setFilterExtensions(new String[] {"*.*"});
+                fChooser.setFilterExtensions(new String[] {"*"});
                 fChooser.setFilterNames(new String[] {"All Files"});
                 fChooser.setFilterIndex(0);
 

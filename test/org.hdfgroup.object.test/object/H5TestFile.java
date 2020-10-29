@@ -89,17 +89,17 @@ public class H5TestFile {
      *
      * <pre>
      * /dataset_byte            Dataset {50, 10}
-     *           /dataset_comp            Dataset {50, 10}
-     *           /dataset_enum            Dataset {50, 10}
-     *           /dataset_float           Dataset {50, 10}
-     *           /dataset_int             Dataset {50, 10}
-     *           /dataset_image           Dataset {50, 10}
-     *           /dataset_str             Dataset {50, 10}
-     *           /g0                      Group
-     *           /g0/dataset_int          Dataset {50, 10}
-     *           /g0/g00                  Group
-     *           /g0/g00/dataset_float    Dataset {50, 10}
-     *           /g0_attr                 Group
+     * /dataset_comp            Dataset {50, 10}
+     * /dataset_enum            Dataset {50, 10}
+     * /dataset_float           Dataset {50, 10}
+     * /dataset_int             Dataset {50, 10}
+     * /dataset_image           Dataset {50, 10}
+     * /dataset_str             Dataset {50, 10}
+     * /g0                      Group
+     * /g0/dataset_int          Dataset {50, 10}
+     * /g0/g00                  Group
+     * /g0/g00/dataset_float    Dataset {50, 10}
+     * /g0_attr                 Group
      * </pre>
      *
      * @throws Exception
@@ -121,7 +121,10 @@ public class H5TestFile {
         final H5Datatype typeStr = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
         final H5Datatype typeChar = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.NATIVE);
         final H5Datatype typeEnum = new H5Datatype(Datatype.CLASS_ENUM, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        typeEnum.setEnumMembers("0=1,1=2");
         final H5Datatype typeRef = new H5Datatype(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+
+        log.debug("create compounds");
 
         COMPOUND_MEMBER_DATATYPES[0] = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
         COMPOUND_MEMBER_DATATYPES[1] = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
@@ -147,10 +150,12 @@ public class H5TestFile {
         file = new H5File(fileName, FileFormat.CREATE);
         file.open();
 
+        log.debug("create groups");
         g0 = file.createGroup(NAME_GROUP, null);
         g1 = file.createGroup(NAME_GROUP_ATTR, null);
         g00 = file.createGroup(NAME_GROUP_SUB, null);
 
+        log.debug("create attributes");
         // attributes
         ATTRIBUTE_STR = new Attribute(g1, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(g1, "arrayInt", typeInt, new long[] { 10 },
@@ -159,6 +164,7 @@ public class H5TestFile {
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
+        log.debug("create datasets");
         dsets[0] = file.createScalarDS(NAME_DATASET_INT, null, typeInt, DIMs, null, CHUNKs, 9, DATA_INT);
         dsets[1] = file.createScalarDS(NAME_DATASET_FLOAT, null, typeFloat, DIMs, null, CHUNKs, 9, DATA_FLOAT);
         dsets[2] = file.createScalarDS(NAME_DATASET_CHAR, null, typeChar, DIMs, null, CHUNKs, 9, DATA_BYTE);
@@ -195,28 +201,33 @@ public class H5TestFile {
             }
         }
 
-        Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_INT);
+        log.debug("create committed");
+        Datatype dnative = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        Datatype dtype = file.createNamedDatatype(dnative, NAME_DATATYPE_INT);
         ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
-        dtype = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.SIGN_NONE, NAME_DATATYPE_UINT);
+        dnative = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.SIGN_NONE);
+        dtype = file.createNamedDatatype(dnative, NAME_DATATYPE_UINT);
         ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
-        dtype = file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_FLOAT);
+        dnative = file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
+        dtype = file.createNamedDatatype(dnative, NAME_DATATYPE_FLOAT);
         ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
-        dtype = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE, NAME_DATATYPE_STR);
+        dnative = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
+        dtype = file.createNamedDatatype(dnative, NAME_DATATYPE_STR);
         ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
         ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
@@ -225,19 +236,24 @@ public class H5TestFile {
 
         file.createLink(g0, NAME_HARD_LINK_TO_IMAGE, dsets[7]);
 
+        log.debug("create file close");
         try {
             file.close();
         }
         catch (final Exception ex) {
         }
 
+        log.debug("create file open to write refs");
         // write object refs to the ref dataset
         file.open();
+        log.debug("create file opened");
         final long[] refs = new long[DIM_SIZE];
         //  (int i = 0; i < OBJ_NAMES.length; i++) { --//This gives CORE DUMP when OBJ_NAMES = NAME_DATASET_OBJ_REF,
         // as it enters an infinite loop.
         for (int i = 0; i < OBJ_NAMES.length - 1; i++) {
+            log.debug("get object[{}]={}", i, OBJ_NAMES[i]);
             oid = file.get(OBJ_NAMES[i]).getOID();
+            log.debug("create refs[{}]={}", i, oid);
             refs[i] = oid[0];
         }
         dsets[10].write(refs);
@@ -248,6 +264,7 @@ public class H5TestFile {
         catch (final Exception ex) {
         }
 
+        log.debug("create file finished");
         return file;
     }
 

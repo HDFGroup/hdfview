@@ -67,7 +67,7 @@ public class FitsDatatype extends Datatype
      *            if there is an error
      */
     public FitsDatatype(long theType) throws Exception {
-        super(-1);
+        super(null, -1);
         nativeType = theType;
         fromNative(0);
         datatypeDescription = getDescription();
@@ -133,7 +133,7 @@ public class FitsDatatype extends Datatype
     /**
      * Translate fits datatype identifier into FitsDatatype.
      *
-     * @param nativeID the fits native datatype.
+     * @param dtype the fits native datatype.
      */
     @Override
     public void fromNative(long dtype)

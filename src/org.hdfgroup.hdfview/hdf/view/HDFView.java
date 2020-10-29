@@ -158,11 +158,12 @@ public class HDFView implements DataViewManager {
     /* GUI component: the TreeView */
     private TreeView                   treeView = null;
 
-    private static final String        HDF4_VERSION = HDFVersions.HDF4_VERSION;
-    private static final String        HDF5_VERSION = HDFVersions.HDF5_VERSION;
-    private static final String        HDFVIEW_VERSION = HDFVersions.HDFVIEW_VERSION;
+    private static final String        JAVA_VERSION = HDFVersions.getPropertyVersionJava();
+    private static final String        HDF4_VERSION = HDFVersions.getPropertyVersionHDF4();
+    private static final String        HDF5_VERSION = HDFVersions.getPropertyVersionHDF5();
+    private static final String        HDFVIEW_VERSION = HDFVersions.getPropertyVersionView();
     private static final String        HDFVIEW_USERSGUIDE_URL = "https://portal.hdfgroup.org/display/HDFVIEW/HDFView+3.x+User%27s+Guide";
-    private static final String        JAVA_COMPILER = "jdk 1.11";
+    private static final String        JAVA_COMPILER = "jdk " + JAVA_VERSION;
     private static final String        JAVA_VER_INFO = "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
 
     private static final String        ABOUT_HDFVIEW = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
@@ -273,7 +274,7 @@ public class HDFView implements DataViewManager {
      *            the newly-created HDFView Shell
      */
     public Shell openMainWindow(List<File> flist, int width, int height, int x, int y) {
-        log.debug("openMainWindow enter");
+        log.debug("openMainWindow enter current directory is {}", currentDir);
 
         // Initialize all GUI components
         mainWindow = createMainWindow();
@@ -1218,8 +1219,6 @@ public class HDFView implements DataViewManager {
         content.setWeights(new int[] { 9, 1 });
         contentArea.setWeights(new int[] { 1, 3 });
 
-        log.trace("createContentArea(): load TreeView");
-
         DataViewFactory treeViewFactory = null;
         try {
             treeViewFactory = DataViewFactoryProducer.getFactory(DataViewType.TREEVIEW);
@@ -1343,8 +1342,6 @@ public class HDFView implements DataViewManager {
 
         if (obj == null) return;
 
-        log.trace("showMetaData(): start");
-
         DataViewFactory metaDataViewFactory = null;
         try {
             metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
@@ -1375,8 +1372,6 @@ public class HDFView implements DataViewManager {
             this.showError("Unable to find suitable MetaDataView class");
             return;
         }
-
-        log.trace("showMetaData(): finish");
     }
 
     public void closeFile(FileFormat theFile) {
@@ -1562,7 +1557,6 @@ public class HDFView implements DataViewManager {
      */
     public void setTestState(boolean testing) {
         isTesting = testing;
-        currentDir = rootDir;
     }
 
     public boolean getTestState() {
@@ -1773,7 +1767,7 @@ public class HDFView implements DataViewManager {
                 fChooser.setFilterPath(currentDir);
 
                 DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
-                fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+                fChooser.setFilterExtensions(new String[] {"*", filter.getExtensions()});
                 fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
                 fChooser.setFilterIndex(1);
 

@@ -709,7 +709,7 @@ public class DefaultImageView implements ImageView {
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(ViewProperties.getWorkDir());
 
-                fChooser.setFilterExtensions(new String[] {"*.*"});
+                fChooser.setFilterExtensions(new String[] {"*"});
                 fChooser.setFilterNames(new String[] {"All Files"});
                 fChooser.setFilterIndex(0);
 
@@ -741,7 +741,7 @@ public class DefaultImageView implements ImageView {
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
                 fChooser.setFilterPath(workDir);
 
-                fChooser.setFilterExtensions(new String[] {"*.*", "*.lut"});
+                fChooser.setFilterExtensions(new String[] {"*", "*.lut"});
                 fChooser.setFilterNames(new String[] {"All Files", "Color Lookup Table"});
                 fChooser.setFilterIndex(1);
 
@@ -1821,12 +1821,12 @@ public class DefaultImageView implements ImageView {
         }
 
         if (filter == null) {
-            fChooser.setFilterExtensions(new String[] {"*.*"});
+            fChooser.setFilterExtensions(new String[] {"*"});
             fChooser.setFilterNames(new String[] {"All Files"});
             fChooser.setFilterIndex(0);
         }
         else {
-            fChooser.setFilterExtensions(new String[] {"*.*", filter.getExtensions()});
+            fChooser.setFilterExtensions(new String[] {"*", filter.getExtensions()});
             fChooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
             fChooser.setFilterIndex(1);
         }

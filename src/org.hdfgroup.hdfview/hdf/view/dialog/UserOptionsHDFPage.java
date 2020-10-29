@@ -77,7 +77,6 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     @Override
     public boolean performOk() {
         getPreferenceStore();
-        log.trace("performOk: save HDF options");
 
         if (fileExtField != null) {
             String ext = fileExtField.getText();
@@ -138,7 +137,6 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         if (checkShowRegRefValues != null)
             ViewProperties.setShowRegRefValue(checkShowRegRefValues.getSelection());
 
-        log.trace("performOk: save HDF options finished");
         return true;
     }
 
@@ -147,7 +145,6 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      */
     protected void load() {
         getPreferenceStore();
-        log.trace("performOk: load HDF options");
 
         fileExtField.setText(ViewProperties.getFileExtension());
 
@@ -176,8 +173,6 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         checkIncOrder.setSelection(indexOrder.compareTo("H5_ITER_INC") == 0);
         checkDecOrder.setSelection(indexOrder.compareTo("H5_ITER_DEC") == 0);
         checkNativeOrder.setSelection(indexOrder.compareTo("H5_ITER_NATIVE") == 0);
-
-        log.trace("performOk: load HDF options finished");
     }
 
     /**

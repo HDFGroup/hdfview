@@ -268,6 +268,9 @@ public abstract class Group extends HObject implements MetaDataContainer {
      */
     @Override
     public void setName(String newName) throws Exception {
+        if (newName == null)
+            throw new IllegalArgumentException("The new name is NULL");
+
         super.setName(newName);
 
         if (memberList != null) {

@@ -99,8 +99,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     public DefaultScalarDSTableView(DataViewManager theView, HashMap dataPropertiesMap) {
         super(theView, dataPropertiesMap);
 
-        log.trace("DefaultScalarDSTableView: start");
-
         if (!shell.isDisposed()) {
             shell.setImage(dataObject.getDatatype().isText() ? ViewProperties.getTextIcon() : ViewProperties.getDatasetIcon());
 
@@ -121,18 +119,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             viewer.addDataView(this);
 
-            log.trace("DefaultScalarDSTableView: viewer add");
-
             shell.open();
         }
-
-        log.trace("DefaultScalarDSTableView: finish");
     }
 
     @Override
     protected void loadData(DataFormat dataObject) throws Exception {
-        log.trace("loadData(): start");
-
         super.loadData(dataObject);
 
         try {
@@ -154,14 +146,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
         catch (Exception ex) {
             log.debug("loadData(): ", ex);
-            log.trace("loadData(): exit");
             dataValue = null;
             throw ex;
         }
 
         if (dataValue == null) {
             log.debug("loadData(): data value is null");
-            log.trace("loadData(): exit");
             throw new RuntimeException("data value is null");
         }
 
@@ -195,8 +185,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 dataValue = Dataset.byteToString((byte[]) dataValue, (int) baseType.getDatatypeSize());
             }
         }
-
-        log.trace("loadData(): finish");
     }
 
     /**
@@ -410,6 +398,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             public void widgetSelected(SelectionEvent e) {
                 if (checkScientificNotation.getSelection()) {
                     if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                    if (checkEnum != null) checkEnum.setSelection(false);
                     if (checkHex != null) checkHex.setSelection(false);
                     if (checkBin != null) checkBin.setSelection(false);
 
@@ -444,6 +433,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             public void widgetSelected(SelectionEvent e) {
                 if (checkCustomNotation.getSelection()) {
                     if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
+                    if (checkEnum != null) checkEnum.setSelection(false);
                     if (checkHex != null) checkHex.setSelection(false);
                     if (checkBin != null) checkBin.setSelection(false);
 
@@ -514,6 +504,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     if (showAsHex) {
                         if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
                         if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                        if (checkEnum != null) checkEnum.setSelection(false);
                         if (checkBin != null) checkBin.setSelection(false);
 
                         showAsBin = false;
@@ -545,8 +536,42 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     if (showAsBin) {
                         if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
                         if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                        if (checkEnum != null) checkEnum.setSelection(false);
                         if (checkHex != null) checkHex.setSelection(false);
 
+                        showAsHex = false;
+                        numberFormat = normalFormat;
+                    }
+
+                    updateDataConversionSettings();
+
+                    dataTable.doCommand(new VisualRefreshCommand());
+
+                    PositionCoordinate lastSelectedCell = getSelectionLayer().getLastSelectedCellPosition();
+                    if (lastSelectedCell != null) {
+                        /*
+                         * Send down a cell selection event for the current cell to update the cell
+                         * value labels
+                         */
+                        dataTable.doCommand(new SelectCellCommand(getSelectionLayer(), lastSelectedCell.columnPosition,
+                                lastSelectedCell.rowPosition, false, false));
+                    }
+                }
+            });
+
+            checkEnum = new MenuItem(dataDisplayMenu, SWT.CHECK);
+            checkEnum.setText("Show Enum Values");
+            checkEnum.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    isEnumConverted = checkEnum.getSelection();
+                    if (isEnumConverted) {
+                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
+                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
+                        if (checkHex != null) checkHex.setSelection(false);
+                        if (checkBin != null) checkBin.setSelection(false);
+
+                        showAsBin = false;
                         showAsHex = false;
                         numberFormat = normalFormat;
                     }
@@ -583,8 +608,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     @Override
     protected NatTable createTable(Composite parent, DataFormat dataObject) {
-        log.trace("createTable(): start");
-
         // Create body layer
         try {
             dataProvider = DataProviderFactory.getDataProvider(dataObject, dataValue, isDataTransposed);
@@ -617,12 +640,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         DataLayer baseLayer = new DataLayer(rowHeaderDataProvider, 40, defaultRowHeight);
         RowHeaderLayer rowHeaderLayer = new RowHeader(baseLayer, viewportLayer, selectionLayer);
 
-        // Create the Corner layer
+        // Create the Corner Layer
         ILayer cornerLayer = new CornerLayer(
                 new DataLayer(new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
                 rowHeaderLayer, columnHeaderLayer);
 
-        // Create the Grid layer
+        // Create the Grid Layer
         GridLayer gridLayer = new EditingGridLayer(viewportLayer, columnHeaderLayer, rowHeaderLayer, cornerLayer);
 
         final NatTable natTable = new NatTable(parent, gridLayer, false);
@@ -635,8 +658,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
 
         natTable.configure();
-
-        log.trace("createTable(): finish");
 
         return natTable;
     }
@@ -748,6 +769,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     protected IEditableRule getDataEditingRule(final DataFormat dataObject) {
         if (dataObject == null) return null;
 
+        // Only Allow editing if not in read-only mode
         return new EditableRule() {
             @Override
             public boolean isEditable(int columnIndex, int rowIndex) {
@@ -779,7 +801,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (obj == null || !(obj instanceof ScalarDS)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showObjRefData(): obj is null or not a Scalar Dataset");
-            log.trace("showObjRefData(): exit");
             return;
         }
 
@@ -805,7 +826,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
 
         if (data == null) {
-            log.trace("showObjRefData(): finish");
             return;
         }
 
@@ -837,7 +857,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         // Use default dataview
         if (theClass == null) {
-            log.trace("showObjRefData(): Using default dataview");
             switch (viewType) {
                 case IMAGE:
                     viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
@@ -854,7 +873,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
             catch (Exception ex) {
                 log.debug("showObjRefData(): no suitable display class found");
-                log.trace("showObjRefData(): finish");
                 Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
                 return;
             }
@@ -871,8 +889,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             log.debug("showObjRefData(): Could not show reference data: ", ex);
             Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
         }
-
-        log.trace("showObjRefData(): finish");
     }
 
     /**
@@ -880,13 +896,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * a separate spreadsheet. The reg. ref. information is stored in strings of the
      * format below:
      * <ul>
-     * <li>For point selections: "file_id:obj_id { <point1> <point2> ...) }", where
-     * <point1> is in the form of (location_of_dim0, location_of_dim1, ...). For
-     * example, 0:800 { (0,1) (2,11) (1,0) (2,4) }</li>
-     * <li>For rectangle selections: "file_id:obj_id { <corner coordinates1> <corner
-     * coordinates2> ... }", where <corner coordinates1> is in the form of
-     * (start_corner)-(oposite_corner). For example, 0:800 { (0,0)-(0,2)
-     * (0,11)-(0,13) (2,0)-(2,2) (2,11)-(2,13) }</li>
+     * <li>For point selections: "<code>file_id:obj_id { [point1] [point2] ...) }</code>", where
+     * <code>[point1]</code> is in the form of (location_of_dim0, location_of_dim1, ...). For
+     * example, <code>0:800 { (0,1) (2,11) (1,0) (2,4) }</code></li>
+     * <li>For rectangle selections: "<code>file_id:obj_id { [corner coordinates1] [corner coordinates2] ... }</code>",
+     * where [corner coordinates1] is in the form of
+     * (start_corner)-(oposite_corner). For example, <code>0:800 { (0,0)-(0,2) (0,11)-(0,13) (2,0)-(2,2) (2,11)-(2,13) }</code></li>
      * </ul>
      *
      * @param reg
@@ -901,7 +916,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (reg == null || (reg.length() <= 0) || (reg.compareTo("NULL") == 0)) {
             Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
             log.debug("showRegRefData(): ref is null or invalid");
-            log.trace("showRegRefData(): exit");
             return;
         }
 
@@ -917,7 +931,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (regStr == null || regStr.length() <= 0) {
             Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
             log.debug("showRegRefData(): no region selection made");
-            log.trace("showRegRefData(): exit");
             return; // no selection
         }
 
@@ -929,7 +942,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (nSelections <= 0) {
             Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
             log.debug("showRegRefData(): no region selection made");
-            log.trace("showRegRefData(): exit");
             return; // no selection
         }
         log.trace("showRegRefData(): nSelections={}", nSelections);
@@ -938,7 +950,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (obj == null || !(obj instanceof ScalarDS)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showRegRefData(): obj is null or not a Scalar Dataset");
-            log.debug("showRegRefData(): exit");
             return;
         }
 
@@ -962,7 +973,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         // a separate spreadsheet
 
         while (st.hasMoreTokens()) {
-            log.trace("showRegRefData(): st.hasMoreTokens() begin");
             try {
                 dsetCopy = constructor.newInstance(paramObj);
             }
@@ -980,8 +990,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 dsetCopy.init();
             }
             catch (Exception ex) {
-                log.debug("showRegRefData(): continue after copied dataset init failure: ",
-                        ex);
+                log.debug("showRegRefData(): continue after copied dataset init failure: ", ex);
                 continue;
             }
 
@@ -1026,7 +1035,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     idx++;
                 }
             }
-            log.trace("showRegRefData(): selection inited");
 
             try {
                 dsetCopy.getData();
@@ -1064,7 +1072,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
             // Use default dataview
             if (theClass == null) {
-                log.trace("showRegRefData(): Using default dataview");
                 switch (viewType) {
                     case IMAGE:
                         viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
@@ -1081,7 +1088,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 }
                 catch (Exception ex) {
                     log.debug("showRegRefData(): no suitable display class found");
-                    log.trace("showRegRefData(): finish");
                     Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
                     return;
                 }
@@ -1098,11 +1104,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 log.debug("showRegRefData(): Could not show reference data: ", ex);
                 Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
             }
-
-            log.trace("showRegRefData(): st.hasMoreTokens() end");
         } // (st.hasMoreTokens())
-
-        log.trace("showRegRefData(): finish");
     } // end of showRegRefData(String reg)
 
     /**
@@ -1181,8 +1183,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                                     int idx = 0;
                                     while (st.hasMoreTokens()) {
-                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() begin");
-
                                         int rank = dset.getRank();
                                         long[] start = dset.getStartDims();
                                         long[] count = dset.getSelectedDims();
@@ -1229,7 +1229,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                         tmp[x], count[x]);
                                             }
                                         }
-                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: selection inited");
 
                                         Object dbuf = null;
                                         try {
@@ -1271,7 +1270,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                             }
 
                                             strvalSB.append(charData);
-                                            log.trace("ScalarDSCellSelectionListener:RegRef CellSelected charData");
                                         }
                                         else {
                                             // numerical values
@@ -1371,14 +1369,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                     strvalSB.append(theValue);
                                                 }
                                             }
-                                            log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: byteString");
                                         }
                                         idx++;
                                         dset.clearData();
-                                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() end");
                                     } // (st.hasMoreTokens())
                                     strVal = strvalSB.toString();
-                                    log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: st.hasMoreTokens() end");
                                 }
                             }
                         }
@@ -1406,8 +1401,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 cellValueField.setText(strVal);
                 ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
-                log.trace("ScalarDSCellSelectionListener: CellSelected finish");
             }
         }
     }

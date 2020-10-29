@@ -35,8 +35,8 @@ import nom.tam.fits.HeaderCard;
  * types, such as byte, int, short, long, float, double and string,
  * and operations performed on the scalar dataset
  * <p>
- * The library predefines a modest number of datatypes. For details, read
- * https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/HDF5_Users_Guide/Datatypes/HDF5_Datatypes.htm
+ * The library predefines a modest number of datatypes. For details, read <a
+ * href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/HDF5_Users_Guide/Datatypes/HDF5_Datatypes.htm">
  * The Datatype Interface (H5T)</a>
  * <p>
  * @version 1.1 9/4/2007
@@ -60,14 +60,11 @@ public class FitsDataset extends ScalarDS
      * Constructs an FitsDataset object with specific netcdf variable.
      *
      * @param fileFormat the netcdf file.
-     * @param ncDataset the netcdf variable.
+     * @param hdu the BasicHDU.
+     * @param dName the name for this dataset.
      * @param oid the unique identifier for this dataset.
      */
-    public FitsDataset(
-            FileFormat fileFormat,
-            BasicHDU hdu,
-            String dName,
-            long[] oid) {
+    public FitsDataset(FileFormat fileFormat, BasicHDU hdu, String dName, long[] oid) {
         super(fileFormat, dName, HObject.SEPARATOR, oid);
         unsignedConverted = false;
         nativeDataset = hdu;
@@ -337,13 +334,13 @@ public class FitsDataset extends ScalarDS
      * @param type the datatype of the dataset.
      * @param dims the dimension size of the dataset.
      * @param maxdims the max dimension size of the dataset.
-     * @param chunk the chunk size of the dataset.
+     * @param chunks the chunk size of the dataset.
      * @param gzip the level of the gzip compression.
      * @param data the array of data values.
      *
      * @return the new dataset if successful. Otherwise returns null.
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public static FitsDataset create(

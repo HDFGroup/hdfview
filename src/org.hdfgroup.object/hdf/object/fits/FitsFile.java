@@ -64,6 +64,7 @@ public class FitsFile extends FileFormat
 
     /**
      * Constructs an FitsFile object of given file name with read-only access.
+     * @param pathname the file name.
      */
     public FitsFile(String pathname) {
         super(pathname);
@@ -163,11 +164,9 @@ public class FitsFile extends FileFormat
     /**
      * Creates a FitsFile instance with specified file name and READ access.
      * <p>
-     * @param pathname the full path name of the file.
-     * Regardless of specified access, the FitsFile implementation uses
-     * READ.
-     *
-     * @see hdf.object.FileFormat@createInstance(java.lang.String, int)
+     * @param filename the full path name of the file.
+     * @param access the access properties of the file.
+     * Regardless of specified access, the FitsFile implementation uses* READ.
      */
     @Override
     public FileFormat createInstance(String filename, int access)
@@ -190,12 +189,8 @@ public class FitsFile extends FileFormat
     private HObject loadTree() {
 
         long[] oid = {0};
-        FitsGroup rootGroup = new FitsGroup(
-            this,
-            "/",
-            null, // root object does not have a parent path
-            null, // root object does not have a parent node
-            oid);
+        // root object does not have a parent path or a parent node
+        FitsGroup rootGroup = new FitsGroup(this, "/", null, null, oid);
 
         if (fitsFile == null) {
             return rootGroup;
@@ -282,54 +277,29 @@ public class FitsFile extends FileFormat
 
     // implementign FileFormat
     @Override
-    public Datatype createDatatype(
-        int tclass,
-        int tsize,
-        int torder,
-        int tsign) throws Exception {
+    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         throw new UnsupportedOperationException("Unsupported createDatatype operation for Fits.");
     }
 
     // implementign FileFormat
     @Override
-    public Datatype createDatatype(
-        int tclass,
-        int tsize,
-        int torder,
-        int tsign,
-        String name) throws Exception
-    {
-        throw new UnsupportedOperationException("Unsupported createDatatype with name operation for Fits.");
+    public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception {
+        throw new UnsupportedOperationException("Fits does not support named datatype.");
     }
 
     // implementign FileFormat
     @Override
-    public Dataset createScalarDS(
-        String name,
-        Group pgroup,
-        Datatype type,
-        long[] dims,
-        long[] maxdims,
-        long[] chunks,
-        int gzip,
-        Object fillValue,
-        Object data) throws Exception {
+    public Dataset createScalarDS(String name, Group pgroup, Datatype type,
+            long[] dims, long[] maxdims, long[] chunks,
+            int gzip, Object fillValue, Object data) throws Exception {
         throw new UnsupportedOperationException("Unsupported createScalarDS operation.");
     }
 
     // implementign FileFormat
     @Override
-    public Dataset createImage(
-        String name,
-        Group pgroup,
-        Datatype type,
-        long[] dims,
-        long[] maxdims,
-        long[] chunks,
-        int gzip,
-        int ncomp,
-        int intelace,
-        Object data) throws Exception {
+    public Dataset createImage(String name, Group pgroup, Datatype type,
+            long[] dims, long[] maxdims, long[] chunks,
+            int gzip, int ncomp, int intelace, Object data) throws Exception {
         throw new UnsupportedOperationException("Unsupported createImage operation.");
     }
 
@@ -347,10 +317,9 @@ public class FitsFile extends FileFormat
 
     /** copy a dataset into another group.
      * @param srcDataset the dataset to be copied.
-     * @param pgroup teh group where the dataset is copied to.
+     * @param pgroup the group where the dataset is copied to.
      * @return the treeNode containing the new copy of the dataset.
      */
-
     private void copyDataset(Dataset srcDataset, FitsGroup pgroup) throws Exception {
         throw new UnsupportedOperationException("Unsupported copyDataset operation.");
     }
@@ -359,14 +328,14 @@ public class FitsFile extends FileFormat
         throw new UnsupportedOperationException("Unsupported copyGroup operation.");
     }
 
-    /**
+    /*
      * Copy attributes of the source object to the destination object.
      */
     public void copyAttributes(HObject src, HObject dst) {
         throw new UnsupportedOperationException("Unsupported copyAttributes operation.");
     }
 
-    /**
+    /*
      * Copy attributes of the source object to the destination object.
      */
     public void copyAttributes(long srcID, long dstID) {
@@ -381,11 +350,9 @@ public class FitsFile extends FileFormat
      * @param obj the object which the attribute is to be attached to.
      * @param attr the atribute to attach.
      * @param attrExisted The indicator if the given attribute exists.
-     * @return true if successful and false otherwise.
      */
     @Override
-    public void writeAttribute(HObject obj, hdf.object.Attribute attr,
-        boolean attrExisted) throws Exception {
+    public void writeAttribute(HObject obj, hdf.object.Attribute attr, boolean attrExisted) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 

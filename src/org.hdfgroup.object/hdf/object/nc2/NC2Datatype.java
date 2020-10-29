@@ -58,7 +58,7 @@ public class NC2Datatype extends Datatype {
      * @param tsign
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public NC2Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
@@ -72,11 +72,11 @@ public class NC2Datatype extends Datatype {
      * @param theType
      *            the netcdf native datatype.
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public NC2Datatype(DataType theType) throws Exception {
-        super(-1);
+        super(null, -1);
         log.trace("NC2Datatype: start nc2 type = {}", theType);
         nativeType = theType;
         fromNative(0);
@@ -101,14 +101,12 @@ public class NC2Datatype extends Datatype {
     /**
      * Translate NetCDF3 datatype object into NC2Datatype.
      *
-     * @param nativeID
+     * @param tid the native ID
      *            UNUSED.
      */
     @Override
     public void fromNative(long tid)
     {
-        log.trace("fromNative(): start");
-
         if (nativeType == null) {
             return;
         }
@@ -152,7 +150,6 @@ public class NC2Datatype extends Datatype {
         }
 
         log.trace("Datatype class={} size={}", datatypeClass, datatypeSize);
-        log.trace("fromNative(): finish");
     }
 
     /**
@@ -172,11 +169,8 @@ public class NC2Datatype extends Datatype {
      */
     public static final Object allocateArray(DataType dtype, int datasize)
             throws OutOfMemoryError {
-        log.trace("allocateArray(): start");
-
         if ((datasize <= 0) || (dtype == null)) {
             log.debug("datasize <= 0");
-            log.trace("allocateArray(): finish");
             return null;
         }
 
@@ -204,7 +198,6 @@ public class NC2Datatype extends Datatype {
             data = new String[datasize];
         }
 
-        log.trace("allocateArray(): finish");
         return data;
     }
 
@@ -215,10 +208,7 @@ public class NC2Datatype extends Datatype {
      */
     @Override
     public String getDescription() {
-        log.trace("getDescription(): start");
-
         if (datatypeDescription != null) {
-            log.trace("getDescription(): finish");
             return datatypeDescription;
         }
 
@@ -230,7 +220,6 @@ public class NC2Datatype extends Datatype {
 
         description = nativeType.toString();
 
-        log.trace("getDescription(): finish");
         return description;
     }
 
@@ -259,8 +248,6 @@ public class NC2Datatype extends Datatype {
     @Override
     public long createNative()
     {
-        log.trace("createNative(): start");
-
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = DataType.BYTE;
@@ -290,7 +277,6 @@ public class NC2Datatype extends Datatype {
             log.debug("createNative(): unknown datatype class {}", datatypeClass);
         }
 
-        log.trace("createNative(): finish");
         return -1;
     }
 

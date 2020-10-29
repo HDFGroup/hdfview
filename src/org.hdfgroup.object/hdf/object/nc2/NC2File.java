@@ -178,15 +178,9 @@ public class NC2File extends FileFormat {
     }
 
     private HObject loadTree() {
-        log.trace("loadTree(): start");
-
         long[] oid = { 0 };
-        NC2Group rootGroup = new NC2Group(
-                this,
-                "/",
-                null, // root object does not have a parent path
-                null, // root object does not have a parent node
-                oid);
+        // root object does not have a parent path or a parent node
+        NC2Group rootGroup = new NC2Group(this, "/", null, null, oid);
 
         if (ncFile == null) {
             return rootGroup;
@@ -209,8 +203,6 @@ public class NC2File extends FileFormat {
     // Implementing FileFormat
     @Override
     public void close() throws IOException {
-        log.trace("close(): start");
-
         if (ncFile != null) {
             ncFile.close();
         }
@@ -248,29 +240,21 @@ public class NC2File extends FileFormat {
     }
 
     @Override
-    public Datatype createDatatype(int tclass, int tsize, int torder,
-            int tsign, String name) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation - create datatype with name.");
-    }
-
-    @Override
-    public Datatype createDatatype(int tclass, int tsize, int torder,
-            int tsign, Datatype tbase, String name) throws Exception {
-        throw new UnsupportedOperationException(
-                "netcdf3 does not support named datatype.");
+    public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception {
+        throw new UnsupportedOperationException("netcdf3 does not support named datatype.");
     }
 
     @Override
     public Dataset createScalarDS(String name, Group pgroup, Datatype type,
-            long[] dims, long[] maxdims, long[] chunks, int gzip, Object fillValue,
-            Object data) throws Exception {
+            long[] dims, long[] maxdims, long[] chunks,
+            int gzip, Object fillValue, Object data) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation create dataset.");
     }
 
     @Override
     public Dataset createImage(String name, Group pgroup, Datatype type,
-            long[] dims, long[] maxdims, long[] chunks, int gzip, int ncomp,
-            int intelace, Object data) throws Exception {
+            long[] dims, long[] maxdims, long[] chunks,
+            int gzip, int ncomp, int intelace, Object data) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation create image.");
     }
 
@@ -286,8 +270,7 @@ public class NC2File extends FileFormat {
     }
 
     @Override
-    public void writeAttribute(HObject obj, hdf.object.Attribute attr,
-            boolean attrExisted) throws Exception {
+    public void writeAttribute(HObject obj, hdf.object.Attribute attr, boolean attrExisted) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation - write attribute.");
     }
 
@@ -301,25 +284,24 @@ public class NC2File extends FileFormat {
         throw new UnsupportedOperationException("Unsupported operation - copy dataset.");
     }
 
-    /**
+    /*
      * Copy attributes of the source object to the destination object.
      */
     public void copyAttributes(HObject src, HObject dst) {
         throw new UnsupportedOperationException("Unsupported operation copy attributes with HObject.");
     }
 
-    /**
+    /*
      * Copy attributes of the source object to the destination object.
      */
     public void copyAttributes(int srcID, int dstID) {
         throw new UnsupportedOperationException("Unsupported operation - copy attributes.");
     }
 
-    /** converts a ucar.nc2.Attribute into an hdf.object.Attribute */
+    /* converts a ucar.nc2.Attribute into an hdf.object.Attribute */
     public static hdf.object.Attribute convertAttribute(HObject parent, ucar.nc2.Attribute netcdfAttr) {
         hdf.object.Attribute ncsaAttr = null;
 
-        log.trace("convertAttribute(): start");
         if (netcdfAttr == null) {
             return null;
         }
@@ -350,15 +332,10 @@ public class NC2File extends FileFormat {
      * retrieve the sub-tree of that group, recursively.
      */
     private void loadIntoMemory() {
-        log.trace("loadIntoMemory(): start");
-
         if (fid < 0) {
             log.debug("loadIntoMemory(): Invalid File Id");
-            log.trace("loadIntoMemory(): finish");
             return;
         }
-
-        log.trace("loadIntoMemory(): finish");
     }
 
     /**
@@ -373,11 +350,8 @@ public class NC2File extends FileFormat {
 
         if (parentObj == null) {
             log.debug("depth_first(): Parent object is null");
-            log.trace("depth_first(): finish");
             return;
         }
-
-        log.trace("depth_first(): finish");
     } // private depth_first()
 
     /**
@@ -414,8 +388,7 @@ public class NC2File extends FileFormat {
 
     // implementing FileFormat
     @Override
-    public HObject get(String path) throws Exception
-    {
+    public HObject get(String path) throws Exception {
         throw new UnsupportedOperationException("get() is not supported");
     }
 }

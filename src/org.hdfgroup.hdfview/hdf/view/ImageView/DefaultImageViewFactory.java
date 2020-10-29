@@ -39,8 +39,6 @@ public class DefaultImageViewFactory extends ImageViewFactory {
         Object[] initargs = { viewer, dataPropertiesMap };
         ImageView theView = null;
 
-        log.trace("getImageView(): start");
-
         /*
          * If the name of a specific ImageView class to use has been passed in via the
          * data options map, retrieve its name now, otherwise use the default ImageView
@@ -80,8 +78,6 @@ public class DefaultImageViewFactory extends ImageViewFactory {
             log.debug("getImageView(): Error instantiating class:", ex);
             theView = null;
         }
-
-        log.trace("getImageView(): finish");
 
         return theView;
     }
