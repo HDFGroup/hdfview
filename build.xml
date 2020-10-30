@@ -1521,7 +1521,7 @@
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
-            <arg value="${ant.project.name}-${app.version}" />
+            <arg value="${ant.project.name}" />
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
@@ -1539,8 +1539,6 @@
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
             <arg value="The HDF Group" />
-            <arg value="--name" />
-            <arg value="HDFView" />
             <arg value="--license-file" />
             <arg value="${basedir}/COPYING" />
             <!-- File associations -->
@@ -1549,12 +1547,16 @@
             <!-- <arg value="- -file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
             <!-- Launchers -->
+            <!-- <arg value="- -arguments" />
+            <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" /> -->
             <arg value="--arguments" />
-            <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" />
-            <arg value="--arguments" />
-            <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" />
+            <arg value="-Dhdfview.root='$APPDIR'" />
             <arg value="--java-options" />
             <arg value="-Xmx1024M" />
+            <!-- <arg value="- -java-options" />
+            <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" /> -->
+            <arg value="--java-options" />
+            <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
 
             <!-- Runtime images -->
@@ -1586,7 +1588,7 @@
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
-            <arg value="${ant.project.name}-${app.version}" />
+            <arg value="${ant.project.name}" />
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
@@ -1606,8 +1608,6 @@
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
             <arg value="The HDF Group" />
-            <arg value="--name" />
-            <arg value="HDFView" />
             <!-- <arg value="- -license-file" />
             <arg value="${basedir}/COPYING" /> -->
             <!-- File associations -->
@@ -1616,12 +1616,16 @@
             <!-- <arg value="- -file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
             <!-- Launchers -->
+            <!-- <arg value="- -arguments" />
+            <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" /> -->
             <arg value="--arguments" />
-            <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" />
-            <arg value="--arguments" />
-            <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" />
+            <arg value="-Dhdfview.root='$APPDIR'" />
             <arg value="--java-options" />
             <arg value="-Xmx1024M" />
+            <!-- <arg value="- -java-options" />
+            <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" /> -->
+            <arg value="--java-options" />
+            <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
 
             <!-- Runtime images -->
@@ -1640,7 +1644,7 @@
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
-            <arg value="${ant.project.name}-${app.version}" />
+            <arg value="${ant.project.name}" />
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--main-jar" />
@@ -1660,8 +1664,6 @@
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
             <arg value="The HDF Group" />
-            <arg value="--name" />
-            <arg value="HDFView" />
             <!-- <arg value="- -license-file" />
             <arg value="${basedir}/COPYING" /> -->
             <!-- File associations -->
@@ -1671,11 +1673,11 @@
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
             <!-- Launchers -->
             <arg value="--arguments" />
-            <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" />
-            <arg value="--arguments" />
-            <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" />
+            <arg value="-Dhdfview.root='$APPDIR'" />
             <arg value="--java-options" />
             <arg value="-Xmx1024M" />
+            <arg value="--java-options" />
+            <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
 
             <!-- Runtime images -->
@@ -1696,7 +1698,7 @@
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
-            <arg value="${ant.project.name}-${app.version}" />
+            <arg value="${ant.project.name}" />
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
@@ -1714,8 +1716,6 @@
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
             <arg value="The HDF Group" />
-            <arg value="--name" />
-            <arg value="HDFView" />
             <arg value="--license-file" />
             <arg value="${basedir}/COPYING" />
             <!-- File associations -->
@@ -1725,11 +1725,11 @@
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
             <!-- Launchers -->
             <arg value="--arguments" />
-            <arg value="-Djava.library.path=%PROGRAMFILES%/HDF_Group/HDF_Group/${ant.project.name}/lib:%PROGRAMFILES%/HDF_Group/HDF_Group/${ant.project.name}/lib/ext" />
-            <arg value="--arguments" />
-            <arg value="-Dhdfview.root=%PROGRAMFILES%/HDF_Group/HDF_Group/${ant.project.name}" />
+            <arg value="-Dhdfview.root=$APPDIR" />
             <arg value="--java-options" />
             <arg value="-Xmx1024M" />
+            <arg value="--java-options" />
+            <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
 
             <!-- Runtime images -->
