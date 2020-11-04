@@ -1652,6 +1652,8 @@
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
             <arg value="${main-class}"/>
+            <arg value="--dest" />
+            <arg value="${dist.dir}" />
             <!-- Package metadata -->
             <arg value="--app-version" />
             <arg value="${app.version}" />
@@ -1879,15 +1881,17 @@
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
             <arg value="${main-class}"/>
+            <arg value="--dest" />
+            <arg value="${dist.dir}" />
             <!-- Package metadata -->
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2020 by The HDF Group" />
+            <arg value="&quot;Copyright 2006-2020 by The HDF Group&quot;" />
             <arg value="--description" />
-            <arg value="A visual tool for browsing and editing HDF files" />
+            <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
             <arg value="--vendor" />
-            <arg value="The HDF Group" />
+            <arg value="&quot;The HDF Group&quot;" />
             <arg value="--license-file" />
             <arg value="${basedir}/COPYING" />
             <!-- File associations -->
@@ -1901,7 +1905,7 @@
             <arg value="--java-options" />
             <arg value="-Xmx1024M" />
             <arg value="--java-options" />
-            <arg value="-Djava.library.path='$APPDIR'" />
+            <arg value="-Djava.library.path=$APPDIR" />
             <!-- Application images -->
 
             <!-- Runtime images -->
@@ -1934,15 +1938,17 @@
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
             <arg value="${main-class}"/>
+            <arg value="--dest" />
+            <arg value="${dist.dir}" />
             <!-- Package metadata -->
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2020 by The HDF Group" />
+            <arg value="&quot;Copyright 2006-2020 by The HDF Group&quot;" />
             <arg value="--description" />
-            <arg value="A visual tool for browsing and editing HDF files" />
+            <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
             <arg value="--vendor" />
-            <arg value="The HDF Group" />
+            <arg value="&quot;The HDF Group&quot;" />
             <arg value="--license-file" />
             <arg value="${basedir}/COPYING" />
             <!-- File associations -->
@@ -1956,7 +1962,7 @@
             <arg value="--java-options" />
             <arg value="-Xmx1024M" />
             <arg value="--java-options" />
-            <arg value="-Djava.library.path='$APPDIR'" />
+            <arg value="-Djava.library.path=$APPDIR" />
             <!-- Application images -->
 
             <!-- Runtime images -->
