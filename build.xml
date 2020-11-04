@@ -1515,6 +1515,9 @@
     <target name="createJPackage" depends="createJPackageWindows, createJPackageUnix, createJPackageMac"
             description="Create the final package for distribution" />
 
+    <target name="createJXPackage" depends="createJPackageXWindows, createJPackageXUnix, createJPackageXMac"
+            description="Create the final package for distribution" />
+
     <!-- package args for fixed jpackage in OpenJDK15 -->
     <target name="createJPackageXMac" depends="createJPackageBase" if="isMac">
         <!-- <exec executable="${env.JPACKAGE_DIR}/jpackage"> -->
@@ -1741,6 +1744,61 @@
         </exec>
     </target>
 
+    <target name="createJPackageXWindows" depends="createJPackageBase" if="isWindows">
+        <mkdir dir="${dist.dir}" />
+
+        <!-- <exec executable="${env.JPACKAGE_DIR}/jpackage"> -->
+        <exec executable="${java.home}/bin/jpackage">
+            <!-- Basic usage -->
+            <arg value="--name" />
+            <arg value="${ant.project.name}" />
+            <arg value="--module-path" />
+            <arg value="${basedir}/${release.dir}" />
+            <arg value="--input" />
+            <arg value="${release.dir}/lib" />
+            <arg value="--main-jar" />
+            <arg value="${ant.project.name}.jar"/>
+            <arg value="--main-class" />
+            <arg value="${main-class}"/>
+            <!-- Package metadata -->
+            <arg value="--app-version" />
+            <arg value="${app.version}" />
+            <arg value="--copyright" />
+            <arg value="Copyright 2006-2020 by The HDF Group" />
+            <arg value="--description" />
+            <arg value="A visual tool for browsing and editing HDF files" />
+            <arg value="--vendor" />
+            <arg value="The HDF Group" />
+            <arg value="--license-file" />
+            <arg value="${basedir}/COPYING" />
+            <!-- File associations -->
+            <!-- <arg value="- -file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF.properties" /> -->
+            <!-- <arg value="- -file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
+            <!-- Launchers -->
+            <arg value="--arguments" />
+            <arg value="-Dhdfview.root=$APPDIR" />
+            <arg value="--java-options" />
+            <arg value="-Xmx1024M" />
+            <arg value="--java-options" />
+            <arg value="-Djava.library.path='$APPDIR'" />
+            <!-- Application images -->
+
+            <!-- Runtime images -->
+            <arg value="--install-dir" />
+            <arg value="HDF_Group/${ant.project.name}" />
+            <arg value="--runtime-image" />
+            <arg value="${jar.dir}/jre" />
+            <!-- Platform-specific details -->
+            <arg value="--win-console" />
+            <arg value="--win-dir-chooser" />
+            <arg value="--win-per-user-install" />
+            <arg value="--type" />
+            <arg value="msi" />
+        </exec>
+    </target>
+
     <target name="createJPackageWindows" depends="createJPackageBase" if="isWindows">
         <mkdir dir="${dist.dir}" />
 
@@ -1790,6 +1848,7 @@
             <!-- Platform-specific details -->
             <arg value="--win-console" />
             <arg value="--win-dir-chooser" />
+            <arg value="--win-per-user-install" />
         </exec>
     </target>
 
