@@ -1913,8 +1913,8 @@
             <arg value="--win-console" />
             <arg value="--win-dir-chooser" />
             <arg value="--win-per-user-install" />
-            <arg value="--type" />
-            <arg value="msi" />
+            <!-- <arg value="- -type" />
+            <arg value="msi" /> -->
         </exec>
     </target>
 
