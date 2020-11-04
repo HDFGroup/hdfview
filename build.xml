@@ -1571,7 +1571,7 @@
             <arg value="${basedir}/lib/macosx/HDFView.icns" />
             <arg value="--mac-sign" />
             <arg value="--mac-package-identifier" />
-            <arg value="" />
+            <arg value="org.hdfgroup.HDFView" />
             <arg value="--mac-package-name" />
             <arg value="${ant.project.name}-${app.version}" />
             <!-- <arg value="- -mac-package-signing-prefix" />
@@ -1579,7 +1579,7 @@
             <!-- <arg value="- - mac-signing-keychain" />
             <arg value="" /> -->
             <arg value="--mac-signing-key-user-name" />
-            <arg value="${env.SIGNER}" />
+            <arg value="'The HDF Group (${env.SIGNER})'" />
         </exec>
     </target>
 
@@ -1688,6 +1688,56 @@
             <!-- Platform-specific details -->
             <arg value="--type" />
             <arg value="app-image" />
+        </exec>
+    </target>
+
+    <target name="createJPackageXUnix" depends="createJPackageBase" if="isUnix">
+        <!-- <exec executable="${env.JPACKAGE_DIR}/jpackage"> -->
+        <exec executable="${java.home}/bin/jpackage">
+            <!-- Basic usage -->
+            <arg value="--name" />
+            <arg value="${ant.project.name}" />
+            <arg value="--module-path" />
+            <arg value="${basedir}/${release.dir}" />
+            <arg value="--main-jar" />
+            <arg value="${ant.project.name}.jar"/>
+            <arg value="--input" />
+            <arg value="${release.dir}/lib" />
+            <arg value="--main-class" />
+            <arg value="${main-class}"/>
+            <arg value="--dest" />
+            <arg value="${dist.dir}" />
+            <!-- Package metadata -->
+            <arg value="--app-version" />
+            <arg value="${app.version}" />
+            <arg value="--copyright" />
+            <arg value="Copyright 2006-2020 by The HDF Group" />
+            <arg value="--description" />
+            <arg value="A visual tool for browsing and editing HDF files" />
+            <arg value="--vendor" />
+            <arg value="The HDF Group" />
+            <!-- <arg value="- -license-file" />
+            <arg value="${basedir}/COPYING" /> -->
+            <!-- File associations -->
+            <!-- <arg value="- -file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF.properties" /> -->
+            <!-- <arg value="- -file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
+            <!-- Launchers -->
+            <arg value="--arguments" />
+            <arg value="-Dhdfview.root='$APPDIR'" />
+            <arg value="--java-options" />
+            <arg value="-Xmx1024M" />
+            <arg value="--java-options" />
+            <arg value="-Djava.library.path='$APPDIR'" />
+            <!-- Application images -->
+
+            <!-- Runtime images -->
+            <!-- <arg value="- -install-dir" />
+            <arg value="/opt/HDF_Group/${ant.project.name}" /> -->
+            <arg value="--runtime-image" />
+            <arg value="${jar.dir}/jre" />
+            <!-- Platform-specific details -->
         </exec>
     </target>
 
