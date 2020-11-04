@@ -1081,6 +1081,31 @@
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/${app.version}/hdfview.sh to run ${ant.project.name}" />
     </target>
 
+    <target name="createRPMREADME" depends="createREADME">
+        <!-- Unix-specific README.txt replacements -->
+        <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
+        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.rpm - ${ant.project.name} Installer" />
+        <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="" />
+        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="/opt/hdfview/bin/HDFView" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}${line.separator}    Install RPM File Using RPM Command${line.separator}    ------------------------------------------------------------------------------${line.separator}
+            To install a .rpm package in CentOS Linux, enter the following:${line.separator}        sudo rpm –i ${ant.project.name}-${app.version}-1.x86_64.rpm${line.separator}
+            The –i switch tells the package manager you want to install the file.${line.separator}${line.separator}    More information on the RPM installer can be found in the RPM documentation.${line.separator}
+            ------------------------------------------------------------------------------${line.separator}${line.separator}" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="    Install RPM File with dnf${line.separator}
+            ------------------------------------------------------------------------------${line.separator}
+            Alternately, you can use the dnf utility to install .rpm files.${line.separator}${line.separator}
+            Enter the following:${line.separator}
+                sudo dnf localinstall ${ant.project.name}-${app.version}-1.x86_64.rpm${line.separator}
+            The localinstall option instructions dnf to look at your current working directory for the installation${line.separator}${line.separator}" />
+        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="    Remove RPM Package${line.separator}
+            ------------------------------------------------------------------------------${line.separator}
+            The RPM installer can be used to remove (or uninstall) a software package.${line.separator}${line.separator}
+            Enter the following into a terminal window:${line.separator}
+            sudo rpm –e ${ant.project.name}-${app.version}-1.x86_64.rpm${line.separator}
+            The –e option instructs RPM to erase the software.${line.separator}${line.separator}" />
+    </target>
+
     <target name="createMacREADME" depends="createREADME">
         <!-- Mac-specific README.txt replacements -->
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${uname.version}" />
@@ -1245,6 +1270,96 @@
     </target>
 
     <!-- =================================================================
+          XPACKAGE
+          ================================================================= -->
+    <target name="packageX" depends="packageXWindows, packageXUnix, packageXMac"
+        description="Packages up the release directory, the license file and the README file into a distributable form" />
+
+    <target name="packageXWindows" depends="createJXPackage" if="isWindows">
+        <mkdir dir="${dist.dir}" />
+
+        <!-- Copy over license file -->
+        <copy todir="${dist.dir}">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <!-- Create README.txt and add appropriate version information -->
+        <antcall target="createWindowsREADME" />
+
+        <!-- Compress everything into one zip file -->
+        <condition property="win.extension" value="win64" else="win32">
+            <contains string="${os.arch}" substring="64" />
+        </condition>
+        <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-${win.extension}.zip" basedir="${dist.dir}" />
+    </target>
+
+    <target name="packageXUnix" depends="createJXPackage" if="isUnix">
+        <!-- Copy over license file -->
+        <copy todir="${dist.dir}">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+        <!-- Create README.txt and add appropriate version information -->
+        <antcall target="createRPMREADME" />
+
+        <!-- Compress everything into one tar.gz file -->
+        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" compression="gzip">
+            <tarfileset dir="${dist.dir}" filemode="755">
+                <exclude name="temp.tar.gz" />
+            </tarfileset>
+        </tar>
+        <chmod perm="ugo+rx" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
+        <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
+        </target>
+
+    <target name="packageXMac" depends="createJXPackage" if="isMac">
+        <mkdir dir="${dist.dir}" />
+
+        <!-- Copy over license file -->
+        <copy tofile="${dist.dir}/COPYING.txt">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+        <!-- Create README.txt and add appropriate version information -->
+        <antcall target="createMacREADME" />
+
+        <!-- verify gatekeeper -->
+        <exec executable="spctl" dir="${dist.dir}" failonerror="true">
+            <arg value="-vvvv" />
+            <arg value="--assess" />
+            <arg value="--type" />
+            <arg value="install" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <!-- Compress everything into one tar.gz file -->
+        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${uname.version}.tar.gz" compression="gzip">
+            <tarfileset dir="${dist.dir}" filemode="755">
+                <include name="COPYING.txt" />
+                <include name="README.txt" />
+                <include name="${ant.project.name}-${app.version}.dmg" />
+            </tarfileset>
+        </tar>
+
+    </target>
+
+    <!-- =================================================================
           PACKAGE
           ================================================================= -->
     <target name="package" depends="packageWindows, packageUnix, packageMac"
@@ -1362,6 +1477,10 @@
             </tarfileset>
         </tar>
     </target>
+
+    <!-- =================================================================
+          PACKAGE SOURCE
+          ================================================================= -->
 
     <target name="packageSource" depends="packageSourceWindows, packageSourceUnix" description="Packages the application source files into a compressed archive" />
 
