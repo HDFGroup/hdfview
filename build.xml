@@ -1703,7 +1703,7 @@
             <!-- <arg value="- - mac-signing-keychain" />
             <arg value="" /> -->
             <arg value="--mac-signing-key-user-name" />
-            <arg value="'The HDF Group (${env.SIGNER})'" />
+            <arg value="The HDF Group (${env.SIGNER})" />
         </exec>
     </target>
 
