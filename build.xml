@@ -153,7 +153,7 @@
     <property name="h5.dir" value="org.hdfgroup.object" />
     <property name="testsrc.dir" value="test" />
     <property name="test.dir" value="org.hdfgroup.object.test" />
-    <property name="examples.dir" value="org.hdfgroup.object.examples" />
+    <property name="examples.dir" value="org.hdfgroup.object.example.test" />
     <property name="test.hdfview.dir" value="org.hdfgroup.hdfview.test" />
     <property name="samples.dir" value="samples" />
 
@@ -551,29 +551,37 @@
         </java>
     </target>
 
+    <!-- =================================================================
+          EXAMPLES
+          ================================================================= -->
+
     <target name="compile-examples" depends="jar,compile">
-        <mkdir dir="${exclasses.dir}" />
-        <javac srcdir="${examples.dir}" destdir="${classes.dir}" includeantruntime="false" debug="${build.debug}">
-            <classpath>
-                <path refid="project-classpath" />
-                <path refid="application" />
-            </classpath>
+        <mkdir dir="${testclasses.dir}" />
+
+        <javac modulesourcepath="${testsrc.dir}" modulepathref="test-classpath" modulepath="build-classpath"
+            destdir="${testclasses.dir}"
+            classpathref="project-classpath"
+            includes="**/*.java"
+            includeantruntime="false" debug="${build.debug}">
+            <compilerarg value="-Xlint:deprecation" />
+            <compilerarg value="-Xlint:unchecked" />
         </javac>
-        <copy todir="${exclasses.dir}">
-            <fileset dir="${examples.dir}" excludes=" **/*.in **/*.java hdf/** ${test.path}" />
+
+        <copy todir="${testclasses.dir}/${examples.dir}">
+            <fileset dir="${testsrc.dir}/${examples.dir}" excludes=" **/*.in **/*.java hdf/** ${test.path}" />
         </copy>
     </target>
-    <path id="example-classes" location="${exclasses.dir}" />
+    <path id="example-classes" location="${testclasses.dir}" />
 
     <target name="run-examples" depends="compile-examples" description="Runs the examples">
-        <fileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
+        <fileset dir="${testclasses.dir}/${examples.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
     </target>
 
     <target name="run-one-example">
         <dirname property="exfile.dir" file="${exfile}" />
         <basename property="exdir.name" file="${exfile.dir}" />
         <basename property="exfile.name" file="${exfile}" suffix=".class" />
-        <property name="exdir.rel" value="${exclasses.dir}" relative="yes" />
+        <property name="exdir.rel" value="${testclasses.dir}" relative="yes" />
         <basename property="exdirrel.name" file="${exdir.rel}" />
         <echo message="Test example: ${exfile.name}" />
         <java fork="true" classname="${exdirrel.name}/${exdir.name}/${exfile.name}" dir="${classes.dir}">
@@ -583,9 +591,9 @@
                 <path refid="project-classpath" />
                 <path refid="log-classpath" />
                 <path refid="application" />
-                <pathelement path="${classes.dir}" />
+                <pathelement path="${testclasses.dir}/${examples.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}" />
+            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
         </java>
     </target>
