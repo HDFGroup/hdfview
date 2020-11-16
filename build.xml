@@ -1758,7 +1758,7 @@
         <delete file="${dist.dir}/${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
 
         <!-- Code signing the application image -->
-        <exec executable="codesign">
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
             <arg value="--timestamp" />
             <arg value="--options" />
@@ -1770,7 +1770,7 @@
         </exec>
 
         <!-- verify codesign -->
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+        <exec executable="codesign" dir="${dist.dir}">
             <arg value="-vvvv" />
             <arg value="${ant.project.name}.app" />
         </exec>
@@ -1862,7 +1862,7 @@
             <arg value="-volname" />
             <arg value="${ant.project.name}Installer" />
             <arg value="-srcfolder" />
-            <arg value="${ant.project.name}" />
+            <arg value="." />
             <arg value="-ov" />
             <arg value="-format" />
             <arg value="UDZO" />
