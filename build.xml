@@ -1317,6 +1317,8 @@
             <arg value="-Dhdfview.root='$APPDIR'" />
             <arg value="--java-options" />
             <arg value="-Xmx1024M" />
+            <arg value="--java-options" />
+            <arg value="-XstartOnFirstThread" />
             <!-- <arg value="- -java-options" />
             <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" /> -->
             <arg value="--java-options" />
@@ -1588,6 +1590,8 @@
             <arg value="-Dhdfview.root='$APPDIR'" />
             <arg value="--java-options" />
             <arg value="-Xmx1024M" />
+            <arg value="--java-options" />
+            <arg value="-XstartOnFirstThread" />
             <!-- <arg value="- -java-options" />
             <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" /> -->
             <arg value="--java-options" />
