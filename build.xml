@@ -1458,7 +1458,7 @@
     <!-- =================================================================
           BINARY - PACKX
           ================================================================= -->
-    <target name="binaryPackX" depends="binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
+    <target name="binaryPackX" depends="binaryPackXWindows, binaryPackXUnix, binaryPackMac"
         description="Packages up the release directory, the license file and the README file into a distributable form" />
 
     <target name="binaryPackXWindows" depends="createJXPackage" if="isWindows">
