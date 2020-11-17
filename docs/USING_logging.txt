@@ -12,21 +12,9 @@ jar (or other slf4j compatible jar file) by overriding the default jar file.
 
 HDFView:
   To enable logging in HDFView requires that HDFView uses an alternate
-  classpath. This can be accomplished by changing the command line in the
-  hdfview script in the bin folder.
-
-  Windows:
-      start "HDFView" "%JAVABIN%\javaw.exe" -Xmx1024M -Djava.library.path="%INSTALLDIR%\lib;%INSTALLDIR%\lib\ext" -Dhdfview.root="%INSTALLDIR%" -jar "%INSTALLDIR%\lib\jhdfview.jar" -root "%INSTALLDIR%\share" %1
-    to
-      start "HDFView" "%JAVABIN%\javaw.exe" -Xmx1024M -Djava.library.path="%INSTALLDIR%\lib;%INSTALLDIR%\lib\ext" -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dhdfview.root="%INSTALLDIR%" -cp "%INSTALLDIR%\lib\jhdfview.jar;%INSTALLDIR%\lib\ext\slf4j-simple-1.7.25.jar;%INSTALLDIR%\lib\slf4j-api-1.7.25.jar;%INSTALLDIR%\lib" hdf.view.HDFView -root "%INSTALLDIR%\share" %1
-
-  Linux:
-      $JAVABIN/java -Xmx1024M -Djava.library.path="$INSTALLDIR/lib:$INSTALLDIR/lib/ext" -Dhdfview.root="$INSTALLDIR" -jar "$INSTALLDIR/lib/jhdfview.jar" -root "$INSTALLDIR/share" $*
-    to
-      $JAVABIN/java -Xmx1024M -Djava.library.path="$INSTALLDIR/lib:$INSTALLDIR/lib/ext" -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dhdfview.root="$INSTALLDIR -cp $INSTALLDIR/lib/jhdfview.jar:$INSTALLDIR/lib/ext/slf4j-simple-1.7.25.jar:$INSTALLDIR/lib/slf4j-api-1.7.25.jar:$INSTALLDIR/lib hdf.view.HDFView -root $INSTALLDIR/share $*
-
-NOTE that the "-jar $INSTALLDIR/lib/jhdfview.jar" section is changed to
-     "-cp <list of jars>" and add the -Dorg.slf4j.simpleLogger.defaultLogLevel
+  classpath. Currently, this feature has been disabled due to the change
+  to modules. However, logging can be re-enabled by building from source
+  and forcing an alternate logging jar.
 
 org.slf4j.simpleLogger.defaultLogLevel is the default log level for all instances of SimpleLogger.
 It must be one of ("trace", "debug", "info", "warn", or "error"). If not specified, defaults to "info".
