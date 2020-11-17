@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <pkg-ref id="org.hdfgroup.HDFView-3.1.3"/>
+    <product id="org.hdfgroup.HDFView-3.1.3" version="3.1.3"/>
+    <title>HDFView-3.1.3</title>
+    <options customize="never" require-scripts="false" hostArchitectures="x86_64"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="org.hdfgroup.HDFView-3.1.3"/>
+        </line>
+    </choices-outline>
+    <choice id="default" title="HDFView-3.1.3" versStr="3.1.3"/>
+    <choice id="org.hdfgroup.HDFView-3.1.3" title="HDFView-3.1.3" visible="false">
+        <pkg-ref id="org.hdfgroup.HDFView-3.1.3"/>
+    </choice>
+    <pkg-ref id="org.hdfgroup.HDFView-3.1.3" version="3.1.3" onConclusion="none">org.hdfgroup.HDFView-3.1.3.pkg</pkg-ref>
+</installer-gui-script>
