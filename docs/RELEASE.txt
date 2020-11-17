@@ -6,7 +6,7 @@ HDF Libraries
 =============================================================================
 This release was built and tested with HDF 4.2.x and HDF5 1.10.x.
 
-Windows ONLY: HDFView was built with VS 2015, and it requires that
+Windows ONLY: HDFView built with VS 2015 will require that
 the Visual C++ Redistributable Packages be installed on your machine.
 If you cannot access HDF5 files then you do not have these packages.
 You can obtain them from:
@@ -15,7 +15,7 @@ You can obtain them from:
 
 JDK
 =============================================================================
-This release was built and tested with OpenJDK 11.
+This release was built and tested with OpenJDK 15.
 
 Major Enhancements
 ==============================================================================
@@ -39,24 +39,13 @@ Major Enhancements
 
 Major Bug Fixes
 ==============================================================================
-    * Resolved a performance issue with scrolling and resizing of large
-      images.
+    * Resolved an issue with netcdf dimensions
 
-    * Fixed a bug with fill values for unsigned integer type HDF5 datasets.
+    * Fixed a bug with changing the working directory.
 
-    * Fixed a bug with 'paging' through the 3rd dimension of String and
-      Compound type datasets.
+    * Updated all SWT libraries.
 
-    * Fixed a bug with displaying HDF4 String (8-bit integer) attributes.
-
-    * Added check for existence of Image attributes using H5Aexists_by_name to
-      prevent various HDF5 error stacks from appearing when clicking on an
-      image.
-
-    * Fixed an issue with the Object library package depending on the View
-      package, as reported on the HDF Group forum.
-
-    * Fixed a bug with transposing/reshaping data for array datatype datasets.
+    * Converted to Java Modules.
 
 
 Limitations / Known Problems
@@ -85,6 +74,8 @@ Limitations / Known Problems
 
     * Selecting and changing individual points in PaletteView for an image
       palette is broken.
+
+    * Logging and optional HDF4 requires rebuilds from source.
 
 
 Other Notes
