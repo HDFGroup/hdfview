@@ -1,1 +1,5 @@
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 VERSION=hdf-view-3.1.3
+=======
+VERSION=hdf-view-3.1.2
+>>>>>>> 2ef185d Update version and docs

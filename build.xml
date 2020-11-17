@@ -1685,18 +1685,28 @@
     <!-- =================================================================
           BINARY - PACKAGE
           ================================================================= -->
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="binaryPackage" depends="binaryPackX"
         description="Packages into a distributable form"  />
 
     <target name="binaryAppPackage" depends="binaryPack"
         description="Packages the app image into a distributable form"  />
+=======
+    <target name="binaryPackage" depends="binaryPackXWindows, binaryPackXUnix, binaryPackMac"
+        description="Packages up the release directory, the license file and the README file into a distributable form" />
+>>>>>>> 2ef185d Update version and docs
 
     <!-- =================================================================
           BINARY - PACKX
           ================================================================= -->
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="setXPackage">
         <property name="XPackage" value="true" />
     </target>
+=======
+    <target name="binaryPackX" depends="binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
+        description="Packages up the release directory, the license file and the README file into a distributable form" />
+>>>>>>> 2ef185d Update version and docs
 
     <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
         description="Packages up the installer, the license file and the README file into a distributable form"  />
