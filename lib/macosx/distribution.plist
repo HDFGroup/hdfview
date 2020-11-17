@@ -13,5 +13,5 @@
     <choice id="org.hdfgroup.HDFView-3.1.2" title="HDFView-3.1.2" visible="false">
         <pkg-ref id="org.hdfgroup.HDFView-3.1.2"/>
     </choice>
-    <pkg-ref id="org.hdfgroup.HDFView-3.1.2" version="3.1.2.99" onConclusion="none">org.hdfgroup.HDFView-3.1.2.pkg</pkg-ref>
+    <pkg-ref id="org.hdfgroup.HDFView-3.1.2" version="3.1.2" onConclusion="none">org.hdfgroup.HDFView-3.1.2.pkg</pkg-ref>
 </installer-gui-script>
