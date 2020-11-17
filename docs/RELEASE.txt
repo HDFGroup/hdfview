@@ -4,7 +4,7 @@ The current HDFView products can be downloaded at:
 
 HDF Libraries
 =============================================================================
-This release was built and tested with HDF 4.2.x and HDF5 1.10.x.
+This release was built and tested with HDF 4.2.15 and HDF5 1.10.7.
 
 Windows ONLY: HDFView built with VS 2015 will require that
 the Visual C++ Redistributable Packages be installed on your machine.
@@ -15,26 +15,13 @@ You can obtain them from:
 
 JDK
 =============================================================================
-This release was built and tested with OpenJDK 15.
+This release was built and tested with OpenJDK 15. It uses modules and the
+newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================
-    * Significantly reworked the TableView's DataProvider, DataValidator and
-      DataDisplayConverter code in order to reduce code duplication among the
-      different components and steps of retrieving HDF4 and HDF5 data and
-      converting it into a displayable format for a table. Also improved
-      support for displaying Arrays of Compounds due to the refactoring work.
-
-    * Reworked the datatype class structure as well as the overall object and
-      view class structure.
-
-    * Added a field under the "General Object Info" Metadata view tab to
-      display link creation order for groups. Also added a field under the
-      "Object Attribute Info" tab to display attribute creation order info.
-
-    * Added build code to allow building HDFView without HDF4.
-
-    * Added support for building on PPC64LE systems with GTK+-3.0.
+    *  Converted to OpenJDK modules, for a smaller footprint and packaging
+      improvements.
 
 
 Major Bug Fixes
