@@ -21,18 +21,23 @@ newest jpackage for distribution.
 Major Enhancements
 ==============================================================================
     *  Converted to OpenJDK modules, for a smaller footprint and packaging
-      improvements.
+      improvements. Now uses the jpackage command for bundling HDFView and
+      the JRE into a platform specific application.
 
 
 Major Bug Fixes
 ==============================================================================
+    * Converted to Java Modules.
+
+    * Updated all SWT libraries.
+
     * Resolved an issue with netcdf dimensions
 
     * Fixed a bug with changing the working directory.
 
-    * Updated all SWT libraries.
+    * Added code to use committed datatypes in creating new objects.
 
-    * Converted to Java Modules.
+    * Fixed enum creation and use.
 
 
 Limitations / Known Problems
