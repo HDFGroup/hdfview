@@ -19,10 +19,18 @@ This release was built and tested with OpenJDK 15.
 
 Major Enhancements
 ==============================================================================
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     *
+=======
+    *  Converted to OpenJDK modules, for a smaller footprint and packaging
+      improvements. Now uses the jpackage command for bundling HDFView and
+      the JRE into a platform specific application.
+
+>>>>>>> 2a4135b Update section of fixes.
 
 Major Bug Fixes
 ==============================================================================
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     * Added support to read and display non-standard floating point numbers.
     * Added optional startDir to command line options.
     * Corrected user.home vs user.dir confusion.
@@ -30,6 +38,13 @@ Major Bug Fixes
       a. Current Work Directory or user.dir system property
       b. User Home Directory or user.home system property
       c. User selected directory
+=======
+    * Converted to Java Modules.
+
+    * Updated all SWT libraries.
+
+    * Resolved an issue with netcdf dimensions
+>>>>>>> 2a4135b Update section of fixes.
 
 Minor Bug Fixes
 ==============================================================================
@@ -39,6 +54,13 @@ Minor Bug Fixes
       lib version dialog correctly preloads the combo box values.
     * Fixed a bug with changing the working directory.
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+=======
+    * Added code to use committed datatypes in creating new objects.
+
+    * Fixed enum creation and use.
+
+>>>>>>> 2a4135b Update section of fixes.
 
 Limitations / Known Problems
 ==============================================================================
