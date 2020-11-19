@@ -130,6 +130,12 @@
         </and>
     </condition>
 
+    <exec executable="hostname" outputproperty="computer.hostname"/>
+
+    <condition property="isUbuntu">
+        <contains string="${computer.hostname}" substring="ubuntu" />
+    </condition>
+
     <!-- Build 64-bit binary.
        Note: os.arch gives the architecture of the JVM, NOT the OS;
        It is assumed that a ppc JVM is used for building on a powerpc system. -->
@@ -1076,7 +1082,32 @@
             The –e option instructs RPM to erase the software.${line.separator}${line.separator}" />
     </target>
 
-    <target name="createMacREADME" depends="createREADME">
+    <target name="createDEBREADME" depends="createREADME" if="isUbuntu">
+        <!-- Unix-specific README.txt replacements -->
+        <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
+        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.deb - ${ant.project.name} Installer" />
+        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="/opt/hdfview/bin/HDFView" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}${line.separator}    Install DEB File Using dpkg Command${line.separator}    ------------------------------------------------------------------------------${line.separator}
+            To install a .deb package in Ubuntu Linux, enter the following:${line.separator}        sudo dpkg –i ${ant.project.name}-${app.version}-1.x86_64.deb${line.separator}
+            The –i switch tells the package manager you want to install the file.${line.separator}${line.separator}    More information on the dpkg installer can be found in the dpkg documentation.${line.separator}
+            ------------------------------------------------------------------------------${line.separator}${line.separator}" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="    Install deb File with dpkg${line.separator}
+            ------------------------------------------------------------------------------${line.separator}
+            Alternately, you can use the apt utility to install .deb files.${line.separator}${line.separator}
+            Enter the following:${line.separator}
+                sudo apt install ./${ant.project.name}-${app.version}-1.x86_64.deb${line.separator}
+            The ./ relative path (or an absolute path) cause apt to look at your current working directory for the installation${line.separator}${line.separator}" />
+        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="    Remove deb Package${line.separator}
+            ------------------------------------------------------------------------------${line.separator}
+            The dpkg installer can be used to remove (or uninstall) a software package.${line.separator}${line.separator}
+            Enter the following into a terminal window:${line.separator}
+            sudo dpkg –r ${ant.project.name}-${app.version}-1.x86_64.deb${line.separator}
+            The –r option instructs dpkg to erase the software.${line.separator}${line.separator}
+            The remove option instructs apt to erase the software.${line.separator}${line.separator}" />
+    </target>
+
+    <target name="createMacREADME" depends="createREADME" unless="isUbuntu">
         <!-- Mac-specific README.txt replacements -->
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${uname.version}" />
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.dmg - ${ant.project.name} Installer" />
@@ -1456,6 +1487,12 @@
     </target>
 
     <!-- =================================================================
+          BINARY - PACKAGE
+          ================================================================= -->
+    <target name="binaryPackage" depends="binaryPackXWindows, binaryPackXUnix, binaryPackMac"
+        description="Packages up the release directory, the license file and the README file into a distributable form" />
+
+    <!-- =================================================================
           BINARY - PACKX
           ================================================================= -->
     <target name="binaryPackX" depends="binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
@@ -1494,6 +1531,7 @@
         </exec>
 
         <!-- Create README.txt and add appropriate version information -->
+        <antcall target="createDEBREADME" />
         <antcall target="createRPMREADME" />
 
         <!-- Compress everything into one tar.gz file -->
@@ -1504,7 +1542,7 @@
         </tar>
         <chmod perm="ugo+rx" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
         <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
-        </target>
+    </target>
 
     <target name="binaryPackXMac" depends="createJXPackage" if="isMac">
         <mkdir dir="${dist.dir}" />
