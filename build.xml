@@ -133,7 +133,7 @@
     <exec executable="hostname" outputproperty="computer.hostname"/>
 
     <condition property="isUbuntu">
-        <contains arg1="${computer.hostname}" arg2="ubuntu" />
+        <contains string="${computer.hostname}" substring="ubuntu" />
     </condition>
 
     <!-- Build 64-bit binary.
