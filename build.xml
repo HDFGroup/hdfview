@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="HDFView" basedir="." default="main" xmlns:fx="javafx:com.sun.javafx.tools.ant" xmlns:sonar="antlib:org.sonar.ant" xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="HDFView" basedir="." default="main"
+    xmlns:fx="javafx:com.sun.javafx.tools.ant"
+    xmlns:sonar="antlib:org.sonar.ant"
+    xmlns:jacoco="antlib:org.jacoco.ant"
+    xmlns:if="ant:if"
+    xmlns:unless="ant:unless">
     <property environment="env" />
 
     <!-- Configuration files: -->
@@ -290,6 +295,9 @@
      Operating System: ${os.name} ${os.version} ${os.arch}
      Debug Build:      ${build.debug}
     </echo>
+    <echo if:set="isMac">running on MacOS</echo>
+    <echo if:set="isUnix">running on Unix</echo>
+    <echo if:set="isWindows">running on Windows</echo>
 
     <target name="clean" description="Cleans up the build directory">
         <delete dir="${classes.dir}" />
@@ -344,7 +352,7 @@
         </copy>
     </target>
 
-    <target name="compilehdf4" depends="clean" if="h4path">
+    <target name="compilehdf4" depends="clean" if:set="h4path">
         <copy todir="${classes.dir}/${h4.dir}">
             <fileset dir="${src.dir}/${h4.dir}"
                 excludes="${hdf.view.path} ${fits.object.path} ${nc2.object.path} ${h5.object.path} **/*.in **/*.java ${examples.test.path}" />
@@ -425,7 +433,7 @@
             includes="test/modules/**" excludes="Test*.java *.h5" />
     </target>
 
-    <target name="jar" depends="objectjar, compile">
+    <target name="jar" depends="compile, objectjar">
         <mkdir dir="${jar.dir}" />
 
         <pathconvert property="manifest.classpath" pathsep=" ">
@@ -526,7 +534,7 @@
           EXAMPLES
           ================================================================= -->
 
-    <target name="compile-examples" depends="jar,compile">
+    <target name="compile-examples" depends="compile, jar">
         <mkdir dir="${testclasses.dir}" />
 
         <javac modulesourcepath="${testsrc.dir}" modulepathref="test-classpath" modulepath="build-classpath"
@@ -643,7 +651,7 @@
     <target name="jacoco" depends="jacoco-skip, jacoco-run" />
 
     <!-- Define jacoco Scanner for Ant Target -->
-    <target name="jacoco-run" if="${build.jacoco}">
+    <target name="jacoco-run" if:set="${build.jacoco}">
         <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml" onerror="ignore">
             <classpath path="/opt/jacoco-0.8.3/lib/jacocoant.jar" />
         </taskdef>
@@ -651,7 +659,7 @@
         <jacoco:agent property="agentvmparam" destfile="${report.dir}/jacoco.exec" xmlns:jacoco="antlib:org.jacoco.ant" />
     </target>
 
-    <target name="jacoco-skip" unless="${build.jacoco}">
+    <target name="jacoco-skip" unless:set="${build.jacoco}">
         <property name="agentvmparam" value="" />
     </target>
 
@@ -729,7 +737,7 @@
         <sonar:sonar />
     </target>
 
-    <target name="ensure-test4-name" unless="test">
+    <target name="ensure-test4-name" unless:set="test">
         <!-- Capture the path as a delimited property using the refid attribute -->
         <pathconvert pathsep="${line.separator}" property="filesetref" refid="ui-test4-sources">
             <!-- the path stripped -->
@@ -743,7 +751,7 @@
         <fail message="You must run this target with -Dtest=TestName" />
     </target>
 
-    <target name="ensure-test5-name" unless="test">
+    <target name="ensure-test5-name" unless:set="test">
         <!-- Capture the path as a delimited property using the refid attribute -->
         <pathconvert pathsep="${line.separator}" property="fileset5ref" refid="ui-test5-sources">
             <!-- the path stripped -->
@@ -795,7 +803,7 @@
                 <formatter type="xml" />
                 <formatter type="plain" />
 
-                <batchtest fork="yes" todir="${report.dir}" if="@{if}" >
+                <batchtest fork="yes" todir="${report.dir}" if:set="@{if}" >
                     <fileset dir="${classes.dir}/" includes="@{includes}" excludes="@{excludes}" />
                 </batchtest>
             </junit>
@@ -820,7 +828,7 @@
             propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/${test}.class"
             excludes="**/*All* **/*$*"
-            if="h4path"
+            if:set="h4path"
         />
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
@@ -828,7 +836,7 @@
             propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/BugFixTests/${test}.class"
             excludes="**/*All* **/*$*"
-            if="h4path"
+            if:set="h4path"
         />
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
@@ -836,7 +844,7 @@
             propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/FeatureTests/${test}.class"
             excludes="**/*All* **/*$*"
-            if="h4path"
+            if:set="h4path"
         />
 
         <!-- Run any matching HDF5 UI test -->
@@ -880,7 +888,7 @@
     </target>
 
     <!-- Internal target to run HDF4-related HDFView UI tests. -->
-    <target name="-hdf4-ui-tests" if="h4path">
+    <target name="-hdf4-ui-tests" if:set="h4path">
         <mkdir dir="${report.dir}" />
 
         <!-- Run the top-level HDF4 UI tests -->
@@ -1023,7 +1031,10 @@
         </sequential>
     </macrodef>
 
-    <target name="createREADME" description="Creates the project README.txt file">
+    <target name="createREADME" depends="clean-package" description="Creates the project README.txt file">
+        <mkdir dir="${dist.dir}" />
+
+        <echo>Create README.txt and add appropriate information</echo>
         <copy file="${packagefiles.dir}/README.txt.in" tofile="${dist.dir}/README.txt" />
         <replace file="${dist.dir}/README.txt" token="@HDFJAVA_PACKAGE_NAME@" value="${ant.project.name}" />
         <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}" />
@@ -1036,8 +1047,9 @@
         <replace file="${dist.dir}/README.txt" token="@FILE_SEP@" value="${file.separator}" />
     </target>
 
-    <target name="createWindowsREADME" depends="createREADME">
+    <target name="createWindowsREADME" depends="createREADME" if="isWindows">
         <!-- Windows-specific README.txt replacements -->
+        <echo>Create Windows-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.msi       - ${ant.project.name} Installer" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin\HDFView" />
@@ -1047,8 +1059,17 @@
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\bin\${ant.project.name}" />
     </target>
 
-    <target name="createUnixREADME" depends="createREADME">
+    <target name="createUnixREADME" depends="createREADME" if="${isAppUnix}">
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
         <!-- Unix-specific README.txt replacements -->
+        <echo>Create Unix-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.sh - ${ant.project.name} Installer" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin/HDFView" />
@@ -1058,57 +1079,76 @@
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/bin/${ant.project.name}" />
     </target>
 
-    <target name="createRPMREADME" depends="createREADME">
+    <target name="createRPMREADME" depends="createREADME" unless="${isUbuntu}">
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
         <!-- Unix-specific README.txt replacements -->
+        <echo>Create RPM Unix-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
-        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.rpm - ${ant.project.name} Installer" />
+        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="hdfview-${app.version}-${uname.os}.rpm - ${ant.project.name} Installer" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="/opt/hdfview/bin/HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}${line.separator}    Install RPM File Using RPM Command${line.separator}    ------------------------------------------------------------------------------${line.separator}
-            To install a .rpm package in CentOS Linux, enter the following:${line.separator}        sudo rpm –i ${ant.project.name}-${app.version}-1.x86_64.rpm${line.separator}
-            The –i switch tells the package manager you want to install the file.${line.separator}${line.separator}    More information on the RPM installer can be found in the RPM documentation.${line.separator}
+            To install a .rpm package in CentOS Linux, enter the following:${line.separator}        sudo rpm -i hdfview-${app.version}-1.x86_64.rpm${line.separator}
+            The -i switch tells the package manager you want to install the file.${line.separator}${line.separator}    More information on the RPM installer can be found in the RPM documentation.${line.separator}
             ------------------------------------------------------------------------------${line.separator}${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="    Install RPM File with dnf${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             Alternately, you can use the dnf utility to install .rpm files.${line.separator}${line.separator}
             Enter the following:${line.separator}
-                sudo dnf localinstall ${ant.project.name}-${app.version}-1.x86_64.rpm${line.separator}
+                sudo dnf localinstall hdfview-${app.version}-1.x86_64.rpm${line.separator}
             The localinstall option instructions dnf to look at your current working directory for the installation${line.separator}${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="    Remove RPM Package${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             The RPM installer can be used to remove (or uninstall) a software package.${line.separator}${line.separator}
             Enter the following into a terminal window:${line.separator}
-            sudo rpm –e ${ant.project.name}-${app.version}-1.x86_64.rpm${line.separator}
-            The –e option instructs RPM to erase the software.${line.separator}${line.separator}" />
+            sudo rpm -e ${ant.project.name}-${app.version}-1.x86_64${line.separator}
+            The -e option instructs RPM to erase the software.${line.separator}${line.separator}" />
     </target>
 
-    <target name="createDEBREADME" depends="createREADME" if="isUbuntu">
+    <target name="createDEBREADME" depends="createREADME" if="${isUbuntu}">
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
         <!-- Unix-specific README.txt replacements -->
+        <echo>Create DEB Unix-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
-        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.deb - ${ant.project.name} Installer" />
+        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="hdfview-${app.version}-${uname.os}.deb - ${ant.project.name} Installer" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="/opt/hdfview/bin/HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}${line.separator}    Install DEB File Using dpkg Command${line.separator}    ------------------------------------------------------------------------------${line.separator}
-            To install a .deb package in Ubuntu Linux, enter the following:${line.separator}        sudo dpkg –i ${ant.project.name}-${app.version}-1.x86_64.deb${line.separator}
+            To install a .deb package in Ubuntu Linux, enter the following:${line.separator}        sudo dpkg -i hdfview-${app.version}-1.x86_64.deb${line.separator}
             The –i switch tells the package manager you want to install the file.${line.separator}${line.separator}    More information on the dpkg installer can be found in the dpkg documentation.${line.separator}
             ------------------------------------------------------------------------------${line.separator}${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="    Install deb File with dpkg${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             Alternately, you can use the apt utility to install .deb files.${line.separator}${line.separator}
             Enter the following:${line.separator}
-                sudo apt install ./${ant.project.name}-${app.version}-1.x86_64.deb${line.separator}
+                sudo apt install ./hdfview-${app.version}-1.x86_64.deb${line.separator}
             The ./ relative path (or an absolute path) cause apt to look at your current working directory for the installation${line.separator}${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="    Remove deb Package${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             The dpkg installer can be used to remove (or uninstall) a software package.${line.separator}${line.separator}
             Enter the following into a terminal window:${line.separator}
-            sudo dpkg –r ${ant.project.name}-${app.version}-1.x86_64.deb${line.separator}
-            The –r option instructs dpkg to erase the software.${line.separator}${line.separator}
+            sudo dpkg -r hdfview-${app.version}-1.x86_64${line.separator}
+            The -r option instructs dpkg to erase the software.${line.separator}${line.separator}
             The remove option instructs apt to erase the software.${line.separator}${line.separator}" />
     </target>
 
-    <target name="createMacREADME" depends="createREADME" unless="isUbuntu">
+    <target name="createMacREADME" depends="createREADME" if="isMac">
         <!-- Mac-specific README.txt replacements -->
+        <echo>Create Mac-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${uname.version}" />
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.dmg - ${ant.project.name} Installer" />
         <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="" />
@@ -1161,10 +1201,14 @@
         <copy todir="${release.dir}/samples">
             <fileset dir="${samples.dir}" />
         </copy>
+        <echo if:set="isWindows">isWindows=${isWindows}</echo>
+        <echo if:set="isUnix">isUnix=${isUnix}</echo>
+        <echo if:set="isMac">isMac=${isMac}</echo>
     </target>
 
     <target name="deployWindows" depends="deployBase, objectjar,jar,javadoc" if="isWindows">
         <!-- Copy the application and dependencies -->
+        <echo> Copy the windows application and dependencies</echo>
         <copy todir="${release.dir}/lib">
             <fileset dir="${hdf.lib.dir}">
                 <include name="*.jar" />
@@ -1192,6 +1236,7 @@
 
     <target name="deployUnix" depends="deployBase, objectjar, jar, javadoc" if="isUnix">
         <!-- Copy the application and dependencies -->
+        <echo> Copy the unix application and dependencies</echo>
         <copy todir="${release.dir}/lib">
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
                 <include name="libhdf_java.so" />
@@ -1220,6 +1265,7 @@
 
     <target name="deployMac" depends="deployBase, objectjar,jar,javadoc" if="isMac">
         <!-- Copy the application and dependencies -->
+        <echo> Copy the mac application and dependencies</echo>
         <copy todir="${release.dir}/lib">
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
                 <include name="libhdf_java.dylib" />
@@ -1256,7 +1302,7 @@
 
     <target name="packageSource" depends="packageSourceWindows, packageSourceUnix" description="Packages the application source files into a compressed archive" />
 
-    <target name="packageSourceWindows" depends="clean-package" if="isWindows">
+    <target name="packageSourceWindows" depends="clean-package" if:set="isWindows">
         <zip destfile="${build.dir}/${ant.project.name}-${app.version}-source.zip">
             <zipfileset dir="${basedir}" excludes="bin/** build/** .*
                   lib/eos/**
@@ -1273,7 +1319,7 @@
         </zip>
     </target>
 
-    <target name="packageSourceUnix" depends="clean-package" if="isUnix">
+    <target name="packageSourceUnix" depends="clean-package" if:set="isUnix">
         <tar destfile="${build.dir}/${ant.project.name}-${app.version}-source.tar.gz" compression="gzip">
             <tarfileset dir="${basedir}" excludes="bin/** build/** .*
                   lib/eos/**
@@ -1300,6 +1346,60 @@
         <!-- Bundle jre -->
         <echo>Bundling JRE with jdeps and jlink...</echo>
         <jdepslink java.bindir="${java.home}/bin" />
+
+        <condition property="isXMac" else="false">
+            <and>
+                <equals arg1="${isMac}" arg2="true" />
+                <equals arg1="${XPackage}" arg2="true" />
+            </and>
+        </condition>
+        <echo if:set="isXMac">isXMac=${isXMac}</echo>
+
+        <condition property="isXUnix" else="false">
+            <and>
+                <equals arg1="${isUnix}" arg2="true" />
+                <equals arg1="${XPackage}" arg2="true" />
+            </and>
+        </condition>
+        <echo if:set="isXUnix">isXUnix=${isXUnix}</echo>
+
+        <condition property="isXWindows" else="false">
+            <and>
+                <equals arg1="${isWindows}" arg2="true" />
+                <equals arg1="${XPackage}" arg2="true" />
+            </and>
+        </condition>
+        <echo if:set="isXWindows">isXWindows=${isXWindows}</echo>
+
+        <condition property="isAppMac" else="false">
+            <and>
+                <equals arg1="${isMac}" arg2="true" />
+                <not>
+                    <equals arg1="${XPackage}" arg2="true" />
+                </not>
+            </and>
+        </condition>
+        <echo if:set="isAppMac">isAppMac=${isAppMac}</echo>
+
+        <condition property="isAppUnix" else="false">
+            <and>
+                <equals arg1="${isUnix}" arg2="true" />
+                <not>
+                    <equals arg1="${XPackage}" arg2="true" />
+                </not>
+            </and>
+        </condition>
+        <echo if:set="isAppUnix">isAppUnix=${isAppUnix}</echo>
+
+        <condition property="isAppWindows" else="false">
+            <and>
+                <equals arg1="${isWindows}" arg2="true" />
+                <not>
+                    <equals arg1="${XPackage}" arg2="true" />
+                </not>
+            </and>
+        </condition>
+        <echo if:set="isAppWindows">isAppWindows=${isAppWindows}</echo>
     </target>
 
     <!-- =================================================================
@@ -1307,10 +1407,12 @@
          ================================================================= -->
 
     <target name="createJXPackage" depends="createJXPackageWindows, createJXPackageUnix, createJXPackageMac"
-            description="Create the final package for distribution" />
+            description="Create the final package for distribution" >
+    </target>
 
     <!-- package args for fixed jpackage in OpenJDK15 -->
-    <target name="createJXPackageMac" depends="createJPackageBase" if="isMac">
+    <target name="createJXPackageMac" depends="createJPackageBase" if="${isXMac}">
+        <echo> Package the mac application</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -1337,10 +1439,10 @@
             <arg value="--license-file" />
             <arg value="${basedir}/COPYING" />
             <!-- File associations -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF.properties" /> -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <!-- <arg value="- -arguments" />
             <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" /> -->
@@ -1380,7 +1482,8 @@
         </exec>
     </target>
 
-    <target name="createJXPackageUnix" depends="createJPackageBase" if="isUnix">
+    <target name="createJXPackageUnix" depends="createJPackageBase" if="${isXUnix}">
+        <echo> Package the unix application</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -1407,10 +1510,10 @@
             <!-- <arg value="- -license-file" />
             <arg value="${basedir}/COPYING" /> -->
             <!-- File associations -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF.properties" /> -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <arg value="--arguments" />
             <arg value="-Dhdfview.root='$APPDIR'" />
@@ -1429,9 +1532,8 @@
         </exec>
     </target>
 
-    <target name="createJXPackageWindows" depends="createJPackageBase" if="isWindows">
-        <mkdir dir="${dist.dir}" />
-
+    <target name="createJXPackageWindows" depends="createJPackageBase" if="${isXWindows}">
+        <echo> Package the windows application</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -1458,10 +1560,10 @@
             <arg value="--license-file" />
             <arg value="${basedir}/COPYING" />
             <!-- File associations -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF.properties" /> -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <arg value="--arguments" />
             <arg value="-Dhdfview.root=$APPDIR" />
@@ -1479,6 +1581,7 @@
             <!-- Platform-specific details -->
             <arg value="--win-console" />
             <arg value="--win-dir-chooser" />
+            <arg value="--win-menu" />
             <arg value="--win-per-user-install" />
             <!-- create exe installer - msi needs more work -->
             <!-- <arg value="- -type" />
@@ -1489,25 +1592,35 @@
     <!-- =================================================================
           BINARY - PACKAGE
           ================================================================= -->
-    <target name="binaryPackage" depends="binaryPackXWindows, binaryPackXUnix, binaryPackMac"
-        description="Packages up the release directory, the license file and the README file into a distributable form" />
+    <target name="setIfXPackage">
+        <condition property="XPackage" value="true">
+            <not>
+                <equals arg1="${isMac}" arg2="true" />
+            </not>
+        </condition>
+    </target>
+
+    <target name="binaryPackage" depends="setIfXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackMac"
+        description="Packages up the release directory, the license file and the README file into a distributable form"  />
 
     <!-- =================================================================
           BINARY - PACKX
           ================================================================= -->
-    <target name="binaryPackX" depends="binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
-        description="Packages up the release directory, the license file and the README file into a distributable form" />
+    <target name="setXPackage">
+        <property name="XPackage" value="true" />
+    </target>
 
-    <target name="binaryPackXWindows" depends="createJXPackage" if="isWindows">
+    <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
+        description="Packages up the release directory, the license file and the README file into a distributable form"  />
+
+    <target name="binaryPackXWindows" depends="createJXPackage, createWindowsREADME" if="${isXWindows}">
         <mkdir dir="${dist.dir}" />
 
+        <echo> Package the windows binary</echo>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
         </copy>
-
-        <!-- Create README.txt and add appropriate version information -->
-        <antcall target="createWindowsREADME" />
 
         <!-- Compress everything into one zip file -->
         <condition property="win.extension" value="win64" else="win32">
@@ -1516,7 +1629,8 @@
         <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-${win.extension}.zip" basedir="${dist.dir}" />
     </target>
 
-    <target name="binaryPackXUnix" depends="createJXPackage" if="isUnix">
+    <target name="binaryPackXUnix" depends="createJXPackage, createDEBREADME, createRPMREADME" if="${isXUnix}">
+        <echo> Package the unix binary</echo>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -1530,10 +1644,6 @@
             <arg value="-r" />
         </exec>
 
-        <!-- Create README.txt and add appropriate version information -->
-        <antcall target="createDEBREADME" />
-        <antcall target="createRPMREADME" />
-
         <!-- Compress everything into one tar.gz file -->
         <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" compression="gzip">
             <tarfileset dir="${dist.dir}" filemode="755">
@@ -1544,9 +1654,10 @@
         <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
     </target>
 
-    <target name="binaryPackXMac" depends="createJXPackage" if="isMac">
+    <target name="binaryPackXMac" depends="createJXPackage, createMacREADME" if="${isXMac}">
         <mkdir dir="${dist.dir}" />
 
+        <echo> Package the mac binary</echo>
         <!-- Copy over license file -->
         <copy tofile="${dist.dir}/COPYING.txt">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -1559,9 +1670,6 @@
         <exec executable="uname" outputproperty="uname.version">
             <arg value="-r" />
         </exec>
-
-        <!-- Create README.txt and add appropriate version information -->
-        <antcall target="createMacREADME" />
 
         <!-- verify gatekeeper -->
         <exec executable="spctl" dir="${dist.dir}" failonerror="true">
@@ -1590,7 +1698,8 @@
     <target name="createJPackage" depends="createJPackageWindows, createJPackageUnix, createJPackageMac"
             description="Create the final package for distribution" />
 
-    <target name="createJPackageMac" depends="createJPackageBase" if="isMac">
+    <target name="createJPackageMac" depends="createJPackageBase" if="${isAppMac}">
+        <echo> Create the mac package</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -1647,7 +1756,8 @@
         </exec>
     </target>
 
-    <target name="createJPackageUnix" depends="createJPackageBase" if="isUnix">
+    <target name="createJPackageUnix" depends="createJPackageBase" if="${isAppUnix}">
+        <echo> Create the unix package</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -1698,9 +1808,10 @@
         </exec>
     </target>
 
-    <target name="createJPackageWindows" depends="createJPackageBase" if="isWindows">
+    <target name="createJPackageWindows" depends="createJPackageBase" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
 
+        <echo> Create the windows package</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -1727,10 +1838,10 @@
             <arg value="--license-file" />
             <arg value="${basedir}/COPYING" />
             <!-- File associations -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF.properties" /> -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <arg value="--arguments" />
             <arg value="-Dhdfview.root=$APPDIR" />
@@ -1748,7 +1859,10 @@
             <!-- Platform-specific details -->
             <arg value="--win-console" />
             <arg value="--win-dir-chooser" />
+            <arg value="--win-menu" />
             <arg value="--win-per-user-install" />
+            <arg value="--type" />
+            <arg value="app-image" />
         </exec>
     </target>
 
@@ -1756,15 +1870,18 @@
           INSTALL FOR JPACKAGE APP-IMAGE
           ================================================================= -->
 
-    <target name="createInstaller" depends="clean-package, createWindowsInstaller, createUnixInstaller, createMacInstaller" description="Creates a binary installer to install the application on the machine" />
+    <target name="createInstaller" depends="clean-package, createWindowsInstaller, createUnixInstaller, createMacInstaller"
+              description="Creates a binary installer to install the application on the machine" unless:set="XPackage" />
 
-    <target name="createWindowsInstaller" depends="createJPackageWindows" if="isWindows">
+    <target name="createWindowsInstaller" depends="createJPackageWindows" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
+        <echo> Create the windows installer</echo>
     </target>
 
-    <target name="createUnixInstaller" depends="createJPackageUnix" if="isUnix">
+    <target name="createUnixInstaller" depends="createJPackageUnix" if="${isAppUnix}">
         <mkdir dir="${dist.dir}" />
 
+        <echo> Create the unix installer</echo>
         <exec executable="uname" outputproperty="uname.os">
             <arg value="-s" />
         </exec>
@@ -1791,10 +1908,11 @@
         </concat>
     </target>
 
-    <target name="createMacInstaller" depends="createJPackageMac" if="isMac">
+    <target name="createMacInstaller" depends="createJPackageMac" if="${isAppMac}">
         <!-- Remove the extra copy of libjli.dylib which causes notarization to fail -->
         <delete file="${dist.dir}/${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
 
+        <echo> Create the mac installer</echo>
         <!-- Code signing the application image -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -1829,16 +1947,14 @@
     <target name="binaryPack" depends="binaryPackWindows, binaryPackUnix, binaryPackMac"
         description="Packages up the release directory, the license file and the README file into a distributable form" />
 
-    <target name="binaryPackWindows" depends="createInstaller, createJPackage" if="isWindows">
+    <target name="binaryPackWindows" depends="createJPackage, createWindowsREADME, createInstaller" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
 
+        <echo> Create the windows installer binary</echo>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
         </copy>
-
-        <!-- Create README.txt and add appropriate version information -->
-        <antcall target="createWindowsREADME" />
 
         <!-- Compress everything into one zip file -->
         <condition property="win.extension" value="win64" else="win32">
@@ -1847,16 +1963,14 @@
         <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-${win.extension}.zip" basedir="${dist.dir}" />
     </target>
 
-    <target name="binaryPackUnix" depends="createInstaller, createJPackage" if="isUnix">
+    <target name="binaryPackUnix" depends="createJPackage, createUnixREADME, createInstaller" if="${isAppUnix}">
         <mkdir dir="${dist.dir}" />
 
+        <echo> Create the unix installer binary</echo>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
         </copy>
-
-        <!-- Create README.txt and add appropriate version information -->
-        <antcall target="createUnixREADME" />
 
         <!-- Compress everything into one tar.gz file -->
         <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" compression="gzip">
@@ -1868,9 +1982,10 @@
         <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
     </target>
 
-    <target name="binaryPackMac" depends="createInstaller, createJPackage" if="isMac">
+    <target name="binaryPackMac" depends="createJPackage, createMacREADME, createInstaller" if="${isAppMac}">
         <mkdir dir="${dist.dir}" />
 
+        <echo> Create the mac installer binary</echo>
         <!-- Copy over license file -->
         <copy tofile="${dist.dir}/COPYING.txt">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -1883,9 +1998,6 @@
         <exec executable="uname" outputproperty="uname.version">
             <arg value="-r" />
         </exec>
-
-        <!-- Create README.txt and add appropriate version information -->
-        <antcall target="createMacREADME" />
 
         <!-- Add Applications folder link -->
         <exec executable="ln">
