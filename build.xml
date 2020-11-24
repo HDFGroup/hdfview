@@ -352,7 +352,7 @@
         </copy>
     </target>
 
-    <target name="compilehdf4" depends="clean" if:set="h4path">
+    <target name="compilehdf4" depends="clean" if="h4path">
         <copy todir="${classes.dir}/${h4.dir}">
             <fileset dir="${src.dir}/${h4.dir}"
                 excludes="${hdf.view.path} ${fits.object.path} ${nc2.object.path} ${h5.object.path} **/*.in **/*.java ${examples.test.path}" />
@@ -651,7 +651,7 @@
     <target name="jacoco" depends="jacoco-skip, jacoco-run" />
 
     <!-- Define jacoco Scanner for Ant Target -->
-    <target name="jacoco-run" if:set="${build.jacoco}">
+    <target name="jacoco-run" if="${build.jacoco}">
         <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml" onerror="ignore">
             <classpath path="/opt/jacoco-0.8.3/lib/jacocoant.jar" />
         </taskdef>
@@ -659,7 +659,7 @@
         <jacoco:agent property="agentvmparam" destfile="${report.dir}/jacoco.exec" xmlns:jacoco="antlib:org.jacoco.ant" />
     </target>
 
-    <target name="jacoco-skip" unless:set="${build.jacoco}">
+    <target name="jacoco-skip" unless="${build.jacoco}">
         <property name="agentvmparam" value="" />
     </target>
 
@@ -737,7 +737,7 @@
         <sonar:sonar />
     </target>
 
-    <target name="ensure-test4-name" unless:set="test">
+    <target name="ensure-test4-name" unless="test">
         <!-- Capture the path as a delimited property using the refid attribute -->
         <pathconvert pathsep="${line.separator}" property="filesetref" refid="ui-test4-sources">
             <!-- the path stripped -->
@@ -751,7 +751,7 @@
         <fail message="You must run this target with -Dtest=TestName" />
     </target>
 
-    <target name="ensure-test5-name" unless:set="test">
+    <target name="ensure-test5-name" unless="test">
         <!-- Capture the path as a delimited property using the refid attribute -->
         <pathconvert pathsep="${line.separator}" property="fileset5ref" refid="ui-test5-sources">
             <!-- the path stripped -->
@@ -803,7 +803,7 @@
                 <formatter type="xml" />
                 <formatter type="plain" />
 
-                <batchtest fork="yes" todir="${report.dir}" if:set="@{if}" >
+                <batchtest fork="yes" todir="${report.dir}" if="@{if}" >
                     <fileset dir="${classes.dir}/" includes="@{includes}" excludes="@{excludes}" />
                 </batchtest>
             </junit>
@@ -828,7 +828,7 @@
             propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/${test}.class"
             excludes="**/*All* **/*$*"
-            if:set="h4path"
+            if="h4path"
         />
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
@@ -836,7 +836,7 @@
             propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/BugFixTests/${test}.class"
             excludes="**/*All* **/*$*"
-            if:set="h4path"
+            if="h4path"
         />
         <run-junit
             rootdir="${basedir}/${testclasses.dir}"
@@ -844,7 +844,7 @@
             propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
             includes="test/uitest/HDF4UITests/FeatureTests/${test}.class"
             excludes="**/*All* **/*$*"
-            if:set="h4path"
+            if="h4path"
         />
 
         <!-- Run any matching HDF5 UI test -->
@@ -888,7 +888,7 @@
     </target>
 
     <!-- Internal target to run HDF4-related HDFView UI tests. -->
-    <target name="-hdf4-ui-tests" if:set="h4path">
+    <target name="-hdf4-ui-tests" if="h4path">
         <mkdir dir="${report.dir}" />
 
         <!-- Run the top-level HDF4 UI tests -->
@@ -1302,7 +1302,7 @@
 
     <target name="packageSource" depends="packageSourceWindows, packageSourceUnix" description="Packages the application source files into a compressed archive" />
 
-    <target name="packageSourceWindows" depends="clean-package" if:set="isWindows">
+    <target name="packageSourceWindows" depends="clean-package" if="isWindows">
         <zip destfile="${build.dir}/${ant.project.name}-${app.version}-source.zip">
             <zipfileset dir="${basedir}" excludes="bin/** build/** .*
                   lib/eos/**
@@ -1319,7 +1319,7 @@
         </zip>
     </target>
 
-    <target name="packageSourceUnix" depends="clean-package" if:set="isUnix">
+    <target name="packageSourceUnix" depends="clean-package" if="isUnix">
         <tar destfile="${build.dir}/${ant.project.name}-${app.version}-source.tar.gz" compression="gzip">
             <tarfileset dir="${basedir}" excludes="bin/** build/** .*
                   lib/eos/**
@@ -1407,8 +1407,7 @@
          ================================================================= -->
 
     <target name="createJXPackage" depends="createJXPackageWindows, createJXPackageUnix, createJXPackageMac"
-            description="Create the final package for distribution" >
-    </target>
+            description="Create the final package for distribution" />
 
     <!-- package args for fixed jpackage in OpenJDK15 -->
     <target name="createJXPackageMac" depends="createJPackageBase" if="${isXMac}">
@@ -1871,7 +1870,7 @@
           ================================================================= -->
 
     <target name="createInstaller" depends="clean-package, createWindowsInstaller, createUnixInstaller, createMacInstaller"
-              description="Creates a binary installer to install the application on the machine" unless:set="XPackage" />
+              description="Creates a binary installer to install the application on the machine" unless="XPackage" />
 
     <target name="createWindowsInstaller" depends="createJPackageWindows" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
