@@ -1079,7 +1079,7 @@
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/bin/${ant.project.name}" />
     </target>
 
-    <target name="createRPMREADME" depends="createREADME" unless="${isUbuntu}">
+    <target name="createRPMREADME" depends="createREADME" if="${isXrpm}">
         <exec executable="uname" outputproperty="uname.os">
             <arg value="-s" />
         </exec>
@@ -1112,7 +1112,7 @@
             The -e option instructs RPM to erase the software.${line.separator}${line.separator}" />
     </target>
 
-    <target name="createDEBREADME" depends="createREADME" if="${isUbuntu}">
+    <target name="createDEBREADME" depends="createREADME" if="${isXdebian}">
         <exec executable="uname" outputproperty="uname.os">
             <arg value="-s" />
         </exec>
@@ -1363,6 +1363,26 @@
         </condition>
         <echo if:set="isXUnix">isXUnix=${isXUnix}</echo>
 
+        <condition property="isXdebian" else="false">
+            <and>
+                <equals arg1="${isUnix}" arg2="true" />
+                <equals arg1="${isUbuntu}" arg2="true" />
+                <equals arg1="${XPackage}" arg2="true" />
+            </and>
+        </condition>
+        <echo if:set="isXdebian">isXdebian=${isXdebian}</echo>
+
+        <condition property="isXrpm" else="false">
+            <and>
+                <equals arg1="${isUnix}" arg2="true" />
+                <equals arg1="${XPackage}" arg2="true" />
+                <not>
+                    <equals arg1="${isUbuntu}" arg2="true" />
+                </not>
+            </and>
+        </condition>
+        <echo if:set="isXrpm">isXrpm=${isXrpm}</echo>
+
         <condition property="isXWindows" else="false">
             <and>
                 <equals arg1="${isWindows}" arg2="true" />
@@ -1469,13 +1489,11 @@
             <arg value="${basedir}/lib/macosx/HDFView.icns" />
             <arg value="--mac-sign" />
             <arg value="--mac-package-identifier" />
-            <arg value="org.hdfgroup.HDFView" />
+            <arg value="HDFView.hdfgroup.org" />
             <arg value="--mac-package-name" />
             <arg value="${ant.project.name}-${app.version}" />
-            <!-- <arg value="- -mac-package-signing-prefix" />
-            <arg value="org.hdfgroup.HDFView" /> -->
-            <!-- <arg value="- - mac-signing-keychain" />
-            <arg value="" /> -->
+            <arg value="--mac-package-signing-prefix" />
+            <arg value="org.hdfgroup.HDFView" />
             <arg value="--mac-signing-key-user-name" />
             <arg value="The HDF Group (${env.SIGNER})" />
         </exec>
@@ -1591,16 +1609,11 @@
     <!-- =================================================================
           BINARY - PACKAGE
           ================================================================= -->
-    <target name="setIfXPackage">
-        <condition property="XPackage" value="true">
-            <not>
-                <equals arg1="${isMac}" arg2="true" />
-            </not>
-        </condition>
-    </target>
+    <target name="binaryPackage" depends="binaryPackX"
+        description="Packages into a distributable form"  />
 
-    <target name="binaryPackage" depends="setIfXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackMac"
-        description="Packages up the release directory, the license file and the README file into a distributable form"  />
+    <target name="binaryAppPackage" depends="binaryPack"
+        description="Packages the app image into a distributable form"  />
 
     <!-- =================================================================
           BINARY - PACKX
@@ -1610,10 +1623,25 @@
     </target>
 
     <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
-        description="Packages up the release directory, the license file and the README file into a distributable form"  />
+        description="Packages up the installer, the license file and the README file into a distributable form"  />
 
     <target name="binaryPackXWindows" depends="createJXPackage, createWindowsREADME" if="${isXWindows}">
         <mkdir dir="${dist.dir}" />
+
+        <!-- Sign the generated exe -->
+        <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
+            <arg value="sign" />
+            <arg value="/v" />
+            <arg value="/d" />
+            <arg value="${ant.project.name} ${app.version} Utility" />
+            <arg value="/f" />
+            <arg value="${env.CERTIFICATE}" />
+            <arg value="/p" />
+            <arg value="${env.SIGNPASSWORD}" />
+            <arg value="/t" />
+            <arg value="http://timestamp.verisign.com/scripts/timstamp.dll" />
+            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
+        </exec>
 
         <echo> Package the windows binary</echo>
         <!-- Copy over license file -->
@@ -1668,6 +1696,18 @@
 
         <exec executable="uname" outputproperty="uname.version">
             <arg value="-r" />
+        </exec>
+
+        <!-- sign .dmg file on 10.11.5 or higher -->
+        <exec executable="codesign" dir="${dist.dir}">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--verbose=4" />
+            <arg value="--sign" />
+            <arg value="${env.SIGNER}" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
         <!-- verify gatekeeper -->
@@ -1948,6 +1988,21 @@
 
     <target name="binaryPackWindows" depends="createJPackage, createWindowsREADME, createInstaller" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
+
+        <!-- Sign the generated exe -->
+        <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
+            <arg value="sign" />
+            <arg value="/v" />
+            <arg value="/d" />
+            <arg value="${ant.project.name} ${app.version} Utility" />
+            <arg value="/f" />
+            <arg value="${env.CERTIFICATE}" />
+            <arg value="/p" />
+            <arg value="${env.SIGNPASSWORD}" />
+            <arg value="/t" />
+            <arg value="http://timestamp.verisign.com/scripts/timstamp.dll" />
+            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
+        </exec>
 
         <echo> Create the windows installer binary</echo>
         <!-- Copy over license file -->
