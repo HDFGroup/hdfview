@@ -1047,7 +1047,11 @@
         <replace file="${dist.dir}/README.txt" token="@FILE_SEP@" value="${file.separator}" />
     </target>
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="createWindowsREADME" depends="createREADME" if="${isXWindows}">
+=======
+    <target name="createWindowsREADME" depends="createREADME" if="isWindows">
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <!-- Windows-specific README.txt replacements -->
         <echo>Create Windows-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
@@ -1059,6 +1063,7 @@
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute install-dir\${ant.project.name}.exe" />
     </target>
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="createWindowsAppREADME" depends="createREADME" if="${isAppWindows}">
         <!-- Windows-specific README.txt replacements -->
         <echo>Create Windows-specific README.txt and add appropriate version information</echo>
@@ -1069,8 +1074,7 @@
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows, copy ${ant.project.name} directory to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. cd into the new ${ant.project.name}" />
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./${ant.project.name}.exe${line.separator}3. Or execute .\app\${ant.project.name}.bat" />
-    </target>
-
+=======
     <target name="createUnixREADME" depends="createREADME" if="${isAppUnix}">
         <exec executable="uname" outputproperty="uname.os">
             <arg value="-s" />
@@ -1083,6 +1087,36 @@
         <!-- Unix-specific README.txt replacements -->
         <echo>Create Unix-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
+        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.sh - ${ant.project.name} Installer" />
+        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin/HDFView" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name}-${app.version}-${uname.os}.sh to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.sh${line.separator}    use --help for options" />
+        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/bin/${ant.project.name}" />
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
+    </target>
+
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+    <target name="createUnixREADME" depends="createREADME" if="${isAppUnix}">
+=======
+    <target name="createRPMREADME" depends="createREADME" unless="${isUbuntu}">
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+        <!-- Unix-specific README.txt replacements -->
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+        <echo>Create Unix-specific README.txt and add appropriate version information</echo>
+=======
+        <echo>Create RPM Unix-specific README.txt and add appropriate version information</echo>
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
+        <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name} - ${ant.project.name} Directory" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="current-dir/bin/HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
@@ -1103,6 +1137,8 @@
         <!-- Unix-specific README.txt replacements -->
         <echo>Create RPM Unix-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
+=======
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="hdfview-${app.version}-${uname.os}.rpm - ${ant.project.name} Installer" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="/opt/hdfview/bin/HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
@@ -1124,6 +1160,7 @@
             The -e option instructs RPM to erase the software.${line.separator}${line.separator}" />
     </target>
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="createDEBREADME" depends="createREADME" if="${isXdebian}">
         <exec executable="uname" outputproperty="uname.os">
@@ -1170,32 +1207,48 @@
 
 =======
     <target name="createDEBREADME" depends="createREADME" if="isUbuntu">
+=======
+    <target name="createDEBREADME" depends="createREADME" if="${isUbuntu}">
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <!-- Unix-specific README.txt replacements -->
+        <echo>Create DEB Unix-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
-        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.deb - ${ant.project.name} Installer" />
+        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="hdfview-${app.version}-${uname.os}.deb - ${ant.project.name} Installer" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="/opt/hdfview/bin/HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}${line.separator}    Install DEB File Using dpkg Command${line.separator}    ------------------------------------------------------------------------------${line.separator}
-            To install a .deb package in Ubuntu Linux, enter the following:${line.separator}        sudo dpkg –i ${ant.project.name}-${app.version}-1.x86_64.deb${line.separator}
+            To install a .deb package in Ubuntu Linux, enter the following:${line.separator}        sudo dpkg -i hdfview-${app.version}-1.x86_64.deb${line.separator}
             The –i switch tells the package manager you want to install the file.${line.separator}${line.separator}    More information on the dpkg installer can be found in the dpkg documentation.${line.separator}
             ------------------------------------------------------------------------------${line.separator}${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="    Install deb File with dpkg${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             Alternately, you can use the apt utility to install .deb files.${line.separator}${line.separator}
             Enter the following:${line.separator}
-                sudo apt install ./${ant.project.name}-${app.version}-1.x86_64.deb${line.separator}
+                sudo apt install ./hdfview-${app.version}-1.x86_64.deb${line.separator}
             The ./ relative path (or an absolute path) cause apt to look at your current working directory for the installation${line.separator}${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="    Remove deb Package${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             The dpkg installer can be used to remove (or uninstall) a software package.${line.separator}${line.separator}
             Enter the following into a terminal window:${line.separator}
-            sudo dpkg –r ${ant.project.name}-${app.version}-1.x86_64.deb${line.separator}
-            The –r option instructs dpkg to erase the software.${line.separator}${line.separator}
+            sudo dpkg -r hdfview-${app.version}-1.x86_64${line.separator}
+            The -r option instructs dpkg to erase the software.${line.separator}${line.separator}
             The remove option instructs apt to erase the software.${line.separator}${line.separator}" />
     </target>
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="createMacREADME" depends="createREADME" unless="isUbuntu">
 >>>>>>> 3e3e7d8 Use hostname (expect ubuntu substring) for deb readme text
+=======
+    <target name="createMacREADME" depends="createREADME" if="isMac">
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <!-- Mac-specific README.txt replacements -->
         <echo>Create Mac-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${uname.version}" />
@@ -1257,9 +1310,14 @@
 
     <target name="deployWindows" depends="deployBase, objectjar,jar,javadoc" if="isWindows">
         <!-- Copy the application and dependencies -->
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <mkdir dir="${release.dir}/bin" />
         <echo> Copy the windows application and dependencies</echo>
         <copy todir="${release.dir}">
+=======
+        <echo> Copy the windows application and dependencies</echo>
+        <copy todir="${release.dir}/lib">
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
             <fileset dir="${hdf.lib.dir}">
                 <include name="*.jar" />
                 <include name="hdf_java.dll" />
@@ -1302,7 +1360,11 @@
     <target name="deployUnix" depends="deployBase, objectjar, jar, javadoc" if="isUnix">
         <!-- Copy the application and dependencies -->
         <echo> Copy the unix application and dependencies</echo>
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <copy todir="${release.dir}">
+=======
+        <copy todir="${release.dir}/lib">
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
                 <include name="libhdf_java.so" />
                 <include name="*.jar" />
@@ -1339,7 +1401,11 @@
     <target name="deployMac" depends="deployBase, objectjar,jar,javadoc" if="isMac">
         <!-- Copy the application and dependencies -->
         <echo> Copy the mac application and dependencies</echo>
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <copy todir="${release.dir}">
+=======
+        <copy todir="${release.dir}/lib">
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
                 <include name="libhdf_java.dylib" />
                 <include name="*.jar" />
@@ -1436,6 +1502,7 @@
         </condition>
         <echo if:set="isXUnix">isXUnix=${isXUnix}</echo>
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <condition property="isXdebian" else="false">
             <and>
                 <equals arg1="${isUnix}" arg2="true" />
@@ -1456,6 +1523,8 @@
         </condition>
         <echo if:set="isXrpm">isXrpm=${isXrpm}</echo>
 
+=======
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <condition property="isXWindows" else="false">
             <and>
                 <equals arg1="${isWindows}" arg2="true" />
@@ -1534,12 +1603,15 @@
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF.properties" />
             <arg value="--file-associations" />
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
             <arg value="${basedir}/package_files/HDFViewH4.properties" />
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF4.properties" />
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewH5.properties" />
             <arg value="--file-associations" />
+=======
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <!-- <arg value="- -arguments" />
@@ -1610,12 +1682,15 @@
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF.properties" />
             <arg value="--file-associations" />
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
             <arg value="${basedir}/package_files/HDFViewH4.properties" />
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF4.properties" />
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewH5.properties" />
             <arg value="--file-associations" />
+=======
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <arg value="--arguments" />
@@ -1640,6 +1715,7 @@
 
     <target name="createJXPackageWindows" depends="createJPackageBase" if="${isXWindows}">
         <echo> Package the windows application</echo>
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 
         <copy todir="${jar.dir}/jre/bin">
             <fileset dir="${release.dir}/bin">
@@ -1647,6 +1723,8 @@
             </fileset>
         </copy>
 
+=======
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -1676,12 +1754,15 @@
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF.properties" />
             <arg value="--file-associations" />
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
             <arg value="${basedir}/package_files/HDFViewH4.properties" />
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF4.properties" />
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewH5.properties" />
             <arg value="--file-associations" />
+=======
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <arg value="--arguments" />
@@ -1701,6 +1782,7 @@
             <!-- Platform-specific details -->
             <arg value="--win-console" />
             <arg value="--win-dir-chooser" />
+            <arg value="--win-menu" />
             <arg value="--win-per-user-install" />
             <arg value="--win-menu" />
             <arg value="--win-menu-group" />
@@ -1715,6 +1797,7 @@
           BINARY - PACKAGE
           ================================================================= -->
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="binaryPackage" depends="binaryPackX"
         description="Packages into a distributable form"  />
 
@@ -1724,10 +1807,23 @@
     <target name="binaryPackage" depends="binaryPackXWindows, binaryPackXUnix, binaryPackMac"
         description="Packages up the release directory, the license file and the README file into a distributable form" />
 >>>>>>> 2ef185d Update version and docs
+=======
+    <target name="setIfXPackage">
+        <condition property="XPackage" value="true">
+            <not>
+                <equals arg1="${isMac}" arg2="true" />
+            </not>
+        </condition>
+    </target>
+
+    <target name="binaryPackage" depends="setIfXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackMac"
+        description="Packages up the release directory, the license file and the README file into a distributable form"  />
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
 
     <!-- =================================================================
           BINARY - PACKX
           ================================================================= -->
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="setXPackage">
         <property name="XPackage" value="true" />
@@ -1736,13 +1832,23 @@
     <target name="binaryPackX" depends="binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
         description="Packages up the release directory, the license file and the README file into a distributable form" />
 >>>>>>> 2ef185d Update version and docs
+=======
+    <target name="setXPackage">
+        <property name="XPackage" value="true" />
+    </target>
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
 
     <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         description="Packages up the installer, the license file and the README file into a distributable form"  />
+=======
+        description="Packages up the release directory, the license file and the README file into a distributable form"  />
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
 
     <target name="binaryPackXWindows" depends="createJXPackage, createWindowsREADME" if="${isXWindows}">
         <mkdir dir="${dist.dir}" />
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" readonly="false" />
         <!-- Sign the generated exe -->
         <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
@@ -1762,6 +1868,8 @@
             <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
         </exec>
 
+=======
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <echo> Package the windows binary</echo>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
@@ -1791,12 +1899,15 @@
         </exec>
 
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 =======
         <!-- Create README.txt and add appropriate version information -->
         <antcall target="createDEBREADME" />
         <antcall target="createRPMREADME" />
 
 >>>>>>> 3e3e7d8 Use hostname (expect ubuntu substring) for deb readme text
+=======
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <!-- Compress everything into one tar.gz file -->
         <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" compression="gzip">
             <tarfileset dir="${dist.dir}" filemode="755">
@@ -1824,6 +1935,7 @@
             <arg value="-r" />
         </exec>
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <!-- sign .dmg file on 10.11.5 or higher -->
         <exec executable="codesign" dir="${dist.dir}">
             <arg value="--force" />
@@ -1836,6 +1948,8 @@
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
+=======
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <!-- verify gatekeeper -->
         <exec executable="spctl" dir="${dist.dir}" failonerror="true">
             <arg value="-vvvv" />
@@ -1978,6 +2092,7 @@
             </fileset>
         </copy>
 
+        <echo> Create the windows package</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -2001,6 +2116,16 @@
             <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
             <arg value="--vendor" />
             <arg value="&quot;The HDF Group&quot;" />
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+=======
+            <arg value="--license-file" />
+            <arg value="${basedir}/COPYING" />
+            <!-- File associations -->
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
             <!-- Launchers -->
             <arg value="--arguments" />
             <arg value="-Dhdfview.root=$APPDIR" />
@@ -2015,6 +2140,12 @@
             <arg value="${jar.dir}/jre" />
             <!-- Platform-specific details -->
             <arg value="--win-console" />
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+=======
+            <arg value="--win-dir-chooser" />
+            <arg value="--win-menu" />
+            <arg value="--win-per-user-install" />
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
             <arg value="--type" />
             <arg value="app-image" />
         </exec>
@@ -2036,6 +2167,33 @@
         <mkdir dir="${dist.dir}" />
 
         <echo> Create the unix installer</echo>
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+=======
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+        <!-- For Linux/Unix, create install script, then compress HDFView into tar.gz file and concat it with
+         install script to create a self-extracting .sh file -->
+        <copy file="${packagefiles.dir}/unix_install_script.sh.in" tofile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" />
+        <replace file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}" />
+        <replace file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" token="@OS@" value="${uname.os}" />
+        <chmod perm="ugo+rx">
+            <fileset dir="${dist.dir}" includes="${ant.project.name}-${app.version}-${uname.os}.sh" />
+        </chmod>
+
+        <tar destfile="${dist.dir}/temp.tar.gz" compression="gzip">
+            <tarfileset dir="${dist.dir}" prefix="${ant.project.name}" filemode="755" />
+        </tar>
+
+        <concat destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" append="yes" binary="yes">
+            <fileset dir="${dist.dir}" includes="temp.tar.gz" />
+        </concat>
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
     </target>
 
     <target name="createMacInstaller" depends="createJPackageMac" if="${isAppMac}">
@@ -2077,7 +2235,11 @@
     <target name="binaryPack" depends="binaryPackWindows, binaryPackUnix, binaryPackMac"
         description="Packages up the release directory, the license file and the README file into a distributable form" />
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="binaryPackWindows" depends="createJPackage, createWindowsAppREADME, createInstaller" if="${isAppWindows}">
+=======
+    <target name="binaryPackWindows" depends="createJPackage, createWindowsREADME, createInstaller" if="${isAppWindows}">
+>>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <mkdir dir="${dist.dir}" />
 
         <echo> Create the windows installer binary</echo>
