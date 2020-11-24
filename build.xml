@@ -1097,6 +1097,7 @@
     </target>
 
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="createUnixREADME" depends="createREADME" if="${isAppUnix}">
 =======
     <target name="createRPMREADME" depends="createREADME" unless="${isUbuntu}">
@@ -1125,6 +1126,8 @@
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./bin/${ant.project.name}${line.separator}3. Or execute ./lib/app/${ant.project.name}.sh" />
     </target>
 
+=======
+>>>>>>> 5289e73 Updated build based on working tests
     <target name="createRPMREADME" depends="createREADME" if="${isXrpm}">
         <exec executable="uname" outputproperty="uname.os">
             <arg value="-s" />
@@ -1160,6 +1163,7 @@
             The -e option instructs RPM to erase the software.${line.separator}${line.separator}" />
     </target>
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="createDEBREADME" depends="createREADME" if="${isXdebian}">
@@ -1209,6 +1213,9 @@
     <target name="createDEBREADME" depends="createREADME" if="isUbuntu">
 =======
     <target name="createDEBREADME" depends="createREADME" if="${isUbuntu}">
+=======
+    <target name="createDEBREADME" depends="createREADME" if="${isXdebian}">
+>>>>>>> 5289e73 Updated build based on working tests
         <exec executable="uname" outputproperty="uname.os">
             <arg value="-s" />
         </exec>
@@ -1503,6 +1510,7 @@
         <echo if:set="isXUnix">isXUnix=${isXUnix}</echo>
 
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <condition property="isXdebian" else="false">
             <and>
                 <equals arg1="${isUnix}" arg2="true" />
@@ -1525,6 +1533,28 @@
 
 =======
 >>>>>>> 2ab1cb5 Correct target conditionals and update file associations
+=======
+        <condition property="isXdebian" else="false">
+            <and>
+                <equals arg1="${isUnix}" arg2="true" />
+                <equals arg1="${isUbuntu}" arg2="true" />
+                <equals arg1="${XPackage}" arg2="true" />
+            </and>
+        </condition>
+        <echo if:set="isXdebian">isXdebian=${isXdebian}</echo>
+
+        <condition property="isXrpm" else="false">
+            <and>
+                <equals arg1="${isUnix}" arg2="true" />
+                <equals arg1="${XPackage}" arg2="true" />
+                <not>
+                    <equals arg1="${isUbuntu}" arg2="true" />
+                </not>
+            </and>
+        </condition>
+        <echo if:set="isXrpm">isXrpm=${isXrpm}</echo>
+
+>>>>>>> 5289e73 Updated build based on working tests
         <condition property="isXWindows" else="false">
             <and>
                 <equals arg1="${isWindows}" arg2="true" />
@@ -1798,6 +1828,7 @@
           ================================================================= -->
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="binaryPackage" depends="binaryPackX"
         description="Packages into a distributable form"  />
 
@@ -1815,10 +1846,19 @@
             </not>
         </condition>
     </target>
+=======
+    <target name="binaryPackage" depends="binaryPackX"
+        description="Packages into a distributable form"  />
+>>>>>>> 5289e73 Updated build based on working tests
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <target name="binaryPackage" depends="setIfXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackMac"
         description="Packages up the release directory, the license file and the README file into a distributable form"  />
 >>>>>>> 2ab1cb5 Correct target conditionals and update file associations
+=======
+    <target name="binaryAppPackage" depends="binaryPack"
+        description="Packages the app image into a distributable form"  />
+>>>>>>> 5289e73 Updated build based on working tests
 
     <!-- =================================================================
           BINARY - PACKX
@@ -1840,14 +1880,19 @@
 
     <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         description="Packages up the installer, the license file and the README file into a distributable form"  />
 =======
         description="Packages up the release directory, the license file and the README file into a distributable form"  />
 >>>>>>> 2ab1cb5 Correct target conditionals and update file associations
+=======
+        description="Packages up the installer, the license file and the README file into a distributable form"  />
+>>>>>>> 5289e73 Updated build based on working tests
 
     <target name="binaryPackXWindows" depends="createJXPackage, createWindowsREADME" if="${isXWindows}">
         <mkdir dir="${dist.dir}" />
 
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" readonly="false" />
         <!-- Sign the generated exe -->
@@ -1870,6 +1915,23 @@
 
 =======
 >>>>>>> 2ab1cb5 Correct target conditionals and update file associations
+=======
+        <!-- Sign the generated exe -->
+        <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
+            <arg value="sign" />
+            <arg value="/v" />
+            <arg value="/d" />
+            <arg value="${ant.project.name} ${app.version} Utility" />
+            <arg value="/f" />
+            <arg value="${env.CERTIFICATE}" />
+            <arg value="/p" />
+            <arg value="${env.SIGNPASSWORD}" />
+            <arg value="/t" />
+            <arg value="http://timestamp.verisign.com/scripts/timstamp.dll" />
+            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
+        </exec>
+
+>>>>>>> 5289e73 Updated build based on working tests
         <echo> Package the windows binary</echo>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
@@ -1936,6 +1998,7 @@
         </exec>
 
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
         <!-- sign .dmg file on 10.11.5 or higher -->
         <exec executable="codesign" dir="${dist.dir}">
             <arg value="--force" />
@@ -1950,6 +2013,20 @@
 
 =======
 >>>>>>> 2ab1cb5 Correct target conditionals and update file associations
+=======
+        <!-- sign .dmg file on 10.11.5 or higher -->
+        <exec executable="codesign" dir="${dist.dir}">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--verbose=4" />
+            <arg value="--sign" />
+            <arg value="${env.SIGNER}" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+>>>>>>> 5289e73 Updated build based on working tests
         <!-- verify gatekeeper -->
         <exec executable="spctl" dir="${dist.dir}" failonerror="true">
             <arg value="-vvvv" />
@@ -2241,6 +2318,21 @@
     <target name="binaryPackWindows" depends="createJPackage, createWindowsREADME, createInstaller" if="${isAppWindows}">
 >>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <mkdir dir="${dist.dir}" />
+
+        <!-- Sign the generated exe -->
+        <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
+            <arg value="sign" />
+            <arg value="/v" />
+            <arg value="/d" />
+            <arg value="${ant.project.name} ${app.version} Utility" />
+            <arg value="/f" />
+            <arg value="${env.CERTIFICATE}" />
+            <arg value="/p" />
+            <arg value="${env.SIGNPASSWORD}" />
+            <arg value="/t" />
+            <arg value="http://timestamp.verisign.com/scripts/timstamp.dll" />
+            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
+        </exec>
 
         <echo> Create the windows installer binary</echo>
         <!-- Copy over license file -->
