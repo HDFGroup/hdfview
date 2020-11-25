@@ -2194,9 +2194,12 @@
             <arg value="--vendor" />
             <arg value="&quot;The HDF Group&quot;" />
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 =======
             <arg value="--license-file" />
             <arg value="${basedir}/COPYING" />
+=======
+>>>>>>> 2237c8c Option [--license-file] is not valid with type [app-image]
             <!-- File associations -->
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF.properties" />
