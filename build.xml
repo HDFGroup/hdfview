@@ -2195,6 +2195,7 @@
             <arg value="&quot;The HDF Group&quot;" />
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 =======
             <arg value="--license-file" />
             <arg value="${basedir}/COPYING" />
@@ -2206,6 +2207,8 @@
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
 >>>>>>> 2ab1cb5 Correct target conditionals and update file associations
+=======
+>>>>>>> 53aeadd No file associations for app-image
             <!-- Launchers -->
             <arg value="--arguments" />
             <arg value="-Dhdfview.root=$APPDIR" />
@@ -2321,21 +2324,6 @@
     <target name="binaryPackWindows" depends="createJPackage, createWindowsREADME, createInstaller" if="${isAppWindows}">
 >>>>>>> 2ab1cb5 Correct target conditionals and update file associations
         <mkdir dir="${dist.dir}" />
-
-        <!-- Sign the generated exe -->
-        <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
-            <arg value="sign" />
-            <arg value="/v" />
-            <arg value="/d" />
-            <arg value="${ant.project.name} ${app.version} Utility" />
-            <arg value="/f" />
-            <arg value="${env.CERTIFICATE}" />
-            <arg value="/p" />
-            <arg value="${env.SIGNPASSWORD}" />
-            <arg value="/t" />
-            <arg value="http://timestamp.verisign.com/scripts/timstamp.dll" />
-            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
-        </exec>
 
         <echo> Create the windows installer binary</echo>
         <!-- Copy over license file -->
