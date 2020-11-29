@@ -1874,11 +1874,6 @@
             <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
             <arg value="--vendor" />
             <arg value="&quot;The HDF Group&quot;" />
-            <!-- File associations -->
-            <arg value="--file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF.properties" />
-            <arg value="--file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <arg value="--arguments" />
             <arg value="-Dhdfview.root=$APPDIR" />
