@@ -1884,15 +1884,10 @@
             <!-- Application images -->
 
             <!-- Runtime images -->
-            <arg value="--install-dir" />
-            <arg value="HDF_Group/${ant.project.name}" />
             <arg value="--runtime-image" />
             <arg value="${jar.dir}/jre" />
             <!-- Platform-specific details -->
             <arg value="--win-console" />
-            <arg value="--win-dir-chooser" />
-            <arg value="--win-menu" />
-            <arg value="--win-per-user-install" />
             <arg value="--type" />
             <arg value="app-image" />
         </exec>
