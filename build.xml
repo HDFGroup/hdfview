@@ -1632,6 +1632,9 @@
         <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
             <arg value="sign" />
             <arg value="/v" />
+            <arg value="/debug" />
+            <arg value="/fd" />
+            <arg value="SHA256" />
             <arg value="/d" />
             <arg value="${ant.project.name} ${app.version} Utility" />
             <arg value="/f" />
