@@ -1888,8 +1888,6 @@
             <arg value="${jar.dir}/jre" />
             <!-- Platform-specific details -->
             <arg value="--win-console" />
-            <arg value="--win-menu" />
-            <arg value="--win-per-user-install" />
             <arg value="--type" />
             <arg value="app-image" />
         </exec>
