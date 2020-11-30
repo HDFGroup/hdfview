@@ -1884,8 +1884,6 @@
             <!-- Application images -->
 
             <!-- Runtime images -->
-            <arg value="--install-dir" />
-            <arg value="HDF_Group/${ant.project.name}" />
             <arg value="--runtime-image" />
             <arg value="${jar.dir}/jre" />
             <!-- Platform-specific details -->
