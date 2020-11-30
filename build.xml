@@ -2224,8 +2224,11 @@
             <!-- Platform-specific details -->
             <arg value="--win-console" />
 <<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
+<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
 =======
             <arg value="--win-dir-chooser" />
+=======
+>>>>>>> d316f7d win-dir-chooser is not valid with app-image
             <arg value="--win-menu" />
             <arg value="--win-per-user-install" />
 >>>>>>> 2ab1cb5 Correct target conditionals and update file associations
