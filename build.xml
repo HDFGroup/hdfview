@@ -1167,7 +1167,7 @@
     <target name="deployBase" depends="objectjar,jar,javadoc">
         <mkdir dir="${release.dir}" />
         <mkdir dir="${release.dir}/lib" />
-        <mkdir dir="${release.dir}/lib/extra" />
+        <mkdir dir="${release.dir}/extra" />
         <mkdir dir="${release.dir}/samples" />
         <mkdir dir="${release.dir}/doc" />
 
@@ -1177,13 +1177,13 @@
             <fileset dir="${jar.dir}" includes="hdfobject.jar" />
             <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
             <fileset dir="${lib.dir}/extra" includes="slf4j-api${version.slf4j}.jar" excludes="*sources.jar" />
+            <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
         </copy>
 
-        <copy todir="${release.dir}/lib/extra">
+        <copy todir="${release.dir}/extra">
             <fileset dir="${lib.dir}/extra" includes="slf4j-simple${version.slf4j}.jar" excludes="*sources.jar" />
-            <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
         </copy>
 
         <!-- Copy the documentation -->
@@ -1208,6 +1208,7 @@
 
     <target name="deployWindows" depends="deployBase, objectjar,jar,javadoc" if="isWindows">
         <!-- Copy the application and dependencies -->
+        <mkdir dir="${release.dir}/bin" />
         <echo> Copy the windows application and dependencies</echo>
         <copy todir="${release.dir}/lib">
             <fileset dir="${hdf.lib.dir}">
@@ -1216,11 +1217,6 @@
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.lib" />
             </fileset>
-            <fileset dir="${hdf.lib.dir}/../bin">
-                <include name="hdf.dll"/>
-                <include name="mfhdf.dll"/>
-                <include name="xdr.dll"/>
-            </fileset>
 
             <fileset dir="${hdf5.lib.dir}">
                 <include name="*.jar" />
@@ -1228,6 +1224,14 @@
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.lib" />
             </fileset>
+        </copy>
+        <copy todir="${release.dir}/bin">
+            <fileset dir="${hdf.lib.dir}/../bin">
+                <include name="hdf.dll"/>
+                <include name="mfhdf.dll"/>
+                <include name="xdr.dll"/>
+            </fileset>
+
             <fileset dir="${hdf5.lib.dir}/../bin">
                 <include name="hdf5.dll"/>
             </fileset>
@@ -1437,9 +1441,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}" />
-            <!-- <arg value="- -input" />
-            <arg value="${release.dir}/lib" /> -->
+            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="--input" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1506,11 +1510,11 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}" />
+            <arg value="${basedir}/${release.dir}/lib" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
-            <!-- <arg value="- -input" />
-            <arg value="${release.dir}/lib" /> -->
+            <arg value="--input" />
+            <arg value="${release.dir}" />
             <arg value="--main-class" />
             <arg value="${main-class}"/>
             <arg value="--dest" />
@@ -1556,9 +1560,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}" />
-            <!-- <arg value="- -input" />
-            <arg value="${release.dir}/lib" /> -->
+            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="--input" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1747,9 +1751,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}" />
-            <!-- <arg value="- -input" />
-            <arg value="${release.dir}/lib" /> -->
+            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="--input" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1805,11 +1809,11 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}" />
+            <arg value="${basedir}/${release.dir}/lib" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
-            <!-- <arg value="- -input" />
-            <arg value="${release.dir}/lib" /> -->
+            <arg value="--input" />
+            <arg value="${release.dir}" />
             <arg value="--main-class" />
             <arg value="${main-class}"/>
             <arg value="--dest" />
@@ -1859,9 +1863,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}" />
-            <!-- <arg value="- -input" />
-            <arg value="${release.dir}/lib" /> -->
+            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="--input" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
