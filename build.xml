@@ -1443,9 +1443,9 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}/lib" />
             <arg value="--input" />
-            <arg value="${release.dir}" />
+            <arg value="${release.dir}lib/" />
             <arg value="--main-jar" />
-            <arg value="lib/${ant.project.name}.jar"/>
+            <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
             <arg value="${main-class}"/>
             <arg value="--dest" />
@@ -1512,9 +1512,9 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}/lib" />
             <arg value="--input" />
-            <arg value="${release.dir}" />
+            <arg value="${release.dir}lib/" />
             <arg value="--main-jar" />
-            <arg value="lib/${ant.project.name}.jar"/>
+            <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
             <arg value="${main-class}"/>
             <arg value="--dest" />
@@ -1562,9 +1562,9 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}/lib" />
             <arg value="--input" />
-            <arg value="${release.dir}" />
+            <arg value="${release.dir}/lib" />
             <arg value="--main-jar" />
-            <arg value="lib/${ant.project.name}.jar"/>
+            <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
             <arg value="${main-class}"/>
             <arg value="--dest" />
@@ -1753,9 +1753,9 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}/lib" />
             <arg value="--input" />
-            <arg value="${release.dir}" />
+            <arg value="${release.dir}/lib" />
             <arg value="--main-jar" />
-            <arg value="lib/${ant.project.name}.jar"/>
+            <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
             <arg value="${main-class}"/>
             <arg value="--dest" />
@@ -1811,9 +1811,9 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}/lib" />
             <arg value="--input" />
-            <arg value="${release.dir}" />
+            <arg value="${release.dir}/lib" />
             <arg value="--main-jar" />
-            <arg value="lib/${ant.project.name}.jar"/>
+            <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
             <arg value="${main-class}"/>
             <arg value="--dest" />
@@ -1865,9 +1865,9 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}/lib" />
             <arg value="--input" />
-            <arg value="${release.dir}" />
+            <arg value="${release.dir}/lib" />
             <arg value="--main-jar" />
-            <arg value="lib/${ant.project.name}.jar"/>
+            <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
             <arg value="${main-class}"/>
             <arg value="--dest" />
@@ -1916,30 +1916,6 @@
         <mkdir dir="${dist.dir}" />
 
         <echo> Create the unix installer</echo>
-        <exec executable="uname" outputproperty="uname.os">
-            <arg value="-s" />
-        </exec>
-
-        <exec executable="uname" outputproperty="uname.version">
-            <arg value="-r" />
-        </exec>
-
-        <!-- For Linux/Unix, create install script, then compress HDFView into tar.gz file and concat it with
-         install script to create a self-extracting .sh file -->
-        <copy file="${packagefiles.dir}/unix_install_script.sh.in" tofile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" />
-        <replace file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}" />
-        <replace file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" token="@OS@" value="${uname.os}" />
-        <chmod perm="ugo+rx">
-            <fileset dir="${dist.dir}" includes="${ant.project.name}-${app.version}-${uname.os}.sh" />
-        </chmod>
-
-        <tar destfile="${dist.dir}/temp.tar.gz" compression="gzip">
-            <tarfileset dir="${dist.dir}" prefix="${ant.project.name}" filemode="755" />
-        </tar>
-
-        <concat destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.sh" append="yes" binary="yes">
-            <fileset dir="${dist.dir}" includes="temp.tar.gz" />
-        </concat>
     </target>
 
     <target name="createMacInstaller" depends="createJPackageMac" if="${isAppMac}">
