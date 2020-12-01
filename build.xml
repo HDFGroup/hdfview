@@ -1071,12 +1071,12 @@
         <!-- Unix-specific README.txt replacements -->
         <echo>Create Unix-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
-        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.sh - ${ant.project.name} Installer" />
+        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name} - ${ant.project.name} Directory" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin/HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
-        <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name}-${app.version}-${uname.os}.sh to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
-        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}-${uname.os}.sh${line.separator}    use --help for options" />
-        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}/bin/${ant.project.name}" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name} directory to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value=" cd into the new ${ant.project.name}" />
+        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./bin/${ant.project.name}" />
     </target>
 
     <target name="createRPMREADME" depends="createREADME" if="${isXrpm}">
