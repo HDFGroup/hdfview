@@ -1024,7 +1024,7 @@
                 <arg value="--output" />
                 <arg value="${jar.dir}/jre" />
                 <arg value="--module-path" />
-                <arg value="${release.dir}/lib" />
+                <arg value="${release.dir}" />
                 <arg value="--add-modules" />
                 <arg value="java.desktop" />
             </exec>
@@ -1047,7 +1047,7 @@
         <replace file="${dist.dir}/README.txt" token="@FILE_SEP@" value="${file.separator}" />
     </target>
 
-    <target name="createWindowsAppREADME" depends="createREADME" if="isAppWindows">
+    <target name="createWindowsAppREADME" depends="createREADME" if="${isAppWindows}">
         <!-- Windows-specific README.txt replacements -->
         <echo>Create Windows-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
@@ -1059,7 +1059,7 @@
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\bin\${ant.project.name}" />
     </target>
 
-    <target name="createWindowsREADME" depends="createREADME" if="isXWindows">
+    <target name="createWindowsREADME" depends="createREADME" if="${isXWindows}">
         <!-- Windows-specific README.txt replacements -->
         <echo>Create Windows-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
@@ -1186,13 +1186,12 @@
 
     <target name="deployBase" depends="objectjar,jar,javadoc">
         <mkdir dir="${release.dir}" />
-        <mkdir dir="${release.dir}/lib" />
         <mkdir dir="${release.dir}/extra" />
         <mkdir dir="${release.dir}/samples" />
         <mkdir dir="${release.dir}/doc" />
 
         <!-- Copy the application and dependencies -->
-        <copy todir="${release.dir}/lib">
+        <copy todir="${release.dir}">
             <fileset dir="${jar.dir}" includes="${ant.project.name}.jar" />
             <fileset dir="${jar.dir}" includes="hdfobject.jar" />
             <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
@@ -1230,7 +1229,7 @@
         <!-- Copy the application and dependencies -->
         <mkdir dir="${release.dir}/bin" />
         <echo> Copy the windows application and dependencies</echo>
-        <copy todir="${release.dir}/lib">
+        <copy todir="${release.dir}">
             <fileset dir="${hdf.lib.dir}">
                 <include name="*.jar" />
                 <include name="hdf_java.dll" />
@@ -1267,7 +1266,7 @@
     <target name="deployUnix" depends="deployBase, objectjar, jar, javadoc" if="isUnix">
         <!-- Copy the application and dependencies -->
         <echo> Copy the unix application and dependencies</echo>
-        <copy todir="${release.dir}/lib">
+        <copy todir="${release.dir}">
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
                 <include name="libhdf_java.so" />
                 <include name="*.jar" />
@@ -1289,14 +1288,14 @@
             </fileset>
         </copy>
         <chmod perm="ugo+rx">
-            <fileset dir="${release.dir}/lib" includes="**/**" />
+            <fileset dir="${release.dir}" includes="**/**" />
         </chmod>
     </target>
 
     <target name="deployMac" depends="deployBase, objectjar,jar,javadoc" if="isMac">
         <!-- Copy the application and dependencies -->
         <echo> Copy the mac application and dependencies</echo>
-        <copy todir="${release.dir}/lib">
+        <copy todir="${release.dir}">
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
                 <include name="libhdf_java.dylib" />
                 <include name="*.jar" />
@@ -1467,9 +1466,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1536,9 +1535,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}lib/" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1593,9 +1592,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1784,9 +1783,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1842,9 +1841,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1902,9 +1901,9 @@
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
-            <arg value="${basedir}/${release.dir}/lib" />
+            <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
