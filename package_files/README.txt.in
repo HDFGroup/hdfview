@@ -24,7 +24,7 @@ The contents of this directory are:
 @INSTALL_TYPE@
 ===========================================================================
 @INSTALL_PREFIX_HEADER@
-1. Execute @INSTALL_OR_RUN_FILE@
+@INSTALL_OR_RUN_FILE@
 @OPTIONAL_STEP@
 ===========================================================================
 
