@@ -1225,13 +1225,19 @@
                 <exclude name="*.lib" />
             </fileset>
         </copy>
-        <copy todir="${release.dir}/bin">
+        <copy todir="${release.dir}/lib">
+            <fileset dir="${hdf.lib.dir}">
+                <include name="hdf_java.dll" />
+            </fileset>
             <fileset dir="${hdf.lib.dir}/../bin">
                 <include name="hdf.dll"/>
                 <include name="mfhdf.dll"/>
                 <include name="xdr.dll"/>
             </fileset>
 
+            <fileset dir="${hdf5.lib.dir}">
+                <include name="hdf5_java.dll" />
+            </fileset>
             <fileset dir="${hdf5.lib.dir}/../bin">
                 <include name="hdf5.dll"/>
             </fileset>
