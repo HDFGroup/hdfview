@@ -1040,23 +1040,35 @@
         <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION_STRING@" value="${app.version}" />
         <replace file="${dist.dir}/README.txt" token="@HDFVIEW_PACKAGE_VERSION@" value="${app.version}" />
         <replace file="${dist.dir}/README.txt" token="@JDK_VERSION@" value="${java.version}" />
-        <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="STATIC" />
+        <replace file="${dist.dir}/README.txt" token="@LIB_TYPE@" value="SHARED" />
         <replace file="${dist.dir}/README.txt" token="@HDF4_VERSION_STRING@" value="${hdf4.version}" />
         <replace file="${dist.dir}/README.txt" token="@HDF5_VERSION_STRING@" value="${hdf5.version}" />
         <replace file="${dist.dir}/README.txt" token="@JRE_VERSION@" value="${jre.version}" />
         <replace file="${dist.dir}/README.txt" token="@FILE_SEP@" value="${file.separator}" />
     </target>
 
-    <target name="createWindowsREADME" depends="createREADME" if="isWindows">
+    <target name="createWindowsAppREADME" depends="createREADME" if="isAppWindows">
         <!-- Windows-specific README.txt replacements -->
         <echo>Create Windows-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
-        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.msi       - ${ant.project.name} Installer" />
+        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.exe       - ${ant.project.name} Installer" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin\HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows:${line.separator}" />
-        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.exe (or .msi)" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. Execute ${ant.project.name}-${app.version}.exe (or .msi)" />
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\bin\${ant.project.name}" />
+    </target>
+
+    <target name="createWindowsREADME" depends="createREADME" if="isXWindows">
+        <!-- Windows-specific README.txt replacements -->
+        <echo>Create Windows-specific README.txt and add appropriate version information</echo>
+        <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
+        <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}       - ${ant.project.name} Directory" />
+        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin\HDFView" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows, copy ${ant.project.name} directory to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. cd into the new ${ant.project.name}" />
+        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./bin/${ant.project.name}" />
     </target>
 
     <target name="createUnixREADME" depends="createREADME" if="${isAppUnix}">
@@ -1073,9 +1085,9 @@
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name} - ${ant.project.name} Directory" />
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin/HDFView" />
-        <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name} directory to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
-        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value=" cd into the new ${ant.project.name}" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. cd into the new ${ant.project.name}" />
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./bin/${ant.project.name}" />
     </target>
 
@@ -1098,7 +1110,7 @@
             To install a .rpm package in CentOS Linux, enter the following:${line.separator}        sudo rpm -i hdfview-${app.version}-1.x86_64.rpm${line.separator}
             The -i switch tells the package manager you want to install the file.${line.separator}${line.separator}    More information on the RPM installer can be found in the RPM documentation.${line.separator}
             ------------------------------------------------------------------------------${line.separator}${line.separator}" />
-        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="    Install RPM File with dnf${line.separator}
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. Install RPM File with dnf${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             Alternately, you can use the dnf utility to install .rpm files.${line.separator}${line.separator}
             Enter the following:${line.separator}
@@ -1131,7 +1143,7 @@
             To install a .deb package in Ubuntu Linux, enter the following:${line.separator}        sudo dpkg -i hdfview-${app.version}-1.x86_64.deb${line.separator}
             The –i switch tells the package manager you want to install the file.${line.separator}${line.separator}    More information on the dpkg installer can be found in the dpkg documentation.${line.separator}
             ------------------------------------------------------------------------------${line.separator}${line.separator}" />
-        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="    Install deb File with dpkg${line.separator}
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. Install deb File with dpkg${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             Alternately, you can use the apt utility to install .deb files.${line.separator}${line.separator}
             Enter the following:${line.separator}
@@ -1147,6 +1159,14 @@
     </target>
 
     <target name="createMacREADME" depends="createREADME" if="isMac">
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
         <!-- Mac-specific README.txt replacements -->
         <echo>Create Mac-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${uname.version}" />
@@ -1154,7 +1174,7 @@
         <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}:" />
-        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="${ant.project.name}-${app.version}.dmg" />
+        <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. Execute ${ant.project.name}-${app.version}.dmg" />
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="" />
     </target>
 
@@ -1225,7 +1245,7 @@
                 <exclude name="*.lib" />
             </fileset>
         </copy>
-        <copy todir="${release.dir}/lib">
+        <copy todir="${release.dir}/bin">
             <fileset dir="${hdf.lib.dir}">
                 <include name="hdf_java.dll" />
             </fileset>
@@ -1561,6 +1581,13 @@
 
     <target name="createJXPackageWindows" depends="createJPackageBase" if="${isXWindows}">
         <echo> Package the windows application</echo>
+
+        <copy todir="${jar.dir}/jre/bin">
+            <fileset dir="${release.dir}/bin">
+                <include name="*.dll"/>
+            </fileset>
+        </copy>
+
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -1862,8 +1889,14 @@
 
     <target name="createJPackageWindows" depends="createJPackageBase" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
-
         <echo> Create the windows package</echo>
+
+        <copy todir="${jar.dir}/jre/bin">
+            <fileset dir="${release.dir}/bin">
+                <include name="*.dll"/>
+            </fileset>
+        </copy>
+
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--name" />
@@ -1963,7 +1996,7 @@
     <target name="binaryPack" depends="binaryPackWindows, binaryPackUnix, binaryPackMac"
         description="Packages up the release directory, the license file and the README file into a distributable form" />
 
-    <target name="binaryPackWindows" depends="createJPackage, createWindowsREADME, createInstaller" if="${isAppWindows}">
+    <target name="binaryPackWindows" depends="createJPackage, createWindowsAppREADME, createInstaller" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
 
         <echo> Create the windows installer binary</echo>
