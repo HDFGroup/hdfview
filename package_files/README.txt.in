@@ -28,7 +28,8 @@ The contents of this directory are:
 @OPTIONAL_STEP@
 ===========================================================================
 
-The executable will be in the installation location at @EXECUTABLE@
+The executable will be in the installation location,
+    which by default is at @EXECUTABLE@
 
 The general directory layout for each of the supported platforms follows:
 ===========================================================================
