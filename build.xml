@@ -1052,7 +1052,7 @@
         <echo>Create Windows-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.exe (or .msi)  - ${ant.project.name} Installer" />
-        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin\HDFView" />
+        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="C:\Users\user-name\AppData\Local\HDF_Group\HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows:${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. Execute ${ant.project.name}-${app.version}.exe (or .msi)" />
@@ -1064,7 +1064,7 @@
         <echo>Create Windows-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Windows win-${os.arch}" />
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}       - ${ant.project.name} Directory" />
-        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin\HDFView" />
+        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="current-dir\HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows, copy ${ant.project.name} directory to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. cd into the new ${ant.project.name}" />
@@ -1084,7 +1084,7 @@
         <echo>Create Unix-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="${uname.os} ${uname.version}" />
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name} - ${ant.project.name} Directory" />
-        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="bin/HDFView" />
+        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="current-dir/bin/HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name} directory to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. cd into the new ${ant.project.name}" />
@@ -1171,6 +1171,7 @@
         <echo>Create Mac-specific README.txt and add appropriate version information</echo>
         <replace file="${dist.dir}/README.txt" token="@BINARY_PLATFORM@" value="Mac OS X Darwin ${uname.version}" />
         <replace file="${dist.dir}/README.txt" token="@BINARY_FILE@" value="${ant.project.name}-${app.version}.dmg - ${ant.project.name} Installer" />
+        <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="/Applications/HDFView" />
         <replace file="${dist.dir}/README.txt" token="@JAVAMOD_TEXT@" value="" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}:" />
@@ -1288,7 +1289,7 @@
             </fileset>
         </copy>
         <chmod perm="ugo+rx">
-            <fileset dir="${release.dir}" includes="**/**" />
+            <fileset dir="${release.dir}" includes="**/**" excludes="doc/** samples/**" />
         </chmod>
     </target>
 
@@ -1490,6 +1491,12 @@
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF.properties" />
             <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewH4.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF4.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewH5.properties" />
+            <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <!-- <arg value="- -arguments" />
@@ -1559,6 +1566,12 @@
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF.properties" />
             <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewH4.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF4.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewH5.properties" />
+            <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <arg value="--arguments" />
@@ -1568,7 +1581,10 @@
             <arg value="--java-options" />
             <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
-
+            <arg value="--icon" />
+            <arg value="${basedir}/package_files/hdf.png" />
+            <arg value="--linux-menu-group" />
+            <arg value="The HDF Group" />
             <!-- Runtime images -->
             <!-- <arg value="- -install-dir" />
             <arg value="/opt/HDF_Group/${ant.project.name}" /> -->
@@ -1616,6 +1632,12 @@
             <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF.properties" />
             <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewH4.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF4.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewH5.properties" />
+            <arg value="--file-associations" />
             <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
             <!-- Launchers -->
             <arg value="--arguments" />
@@ -1625,7 +1647,8 @@
             <arg value="--java-options" />
             <arg value="-Djava.library.path=$APPDIR" />
             <!-- Application images -->
-
+            <arg value="--icon" />
+            <arg value="${basedir}/package_files/hdf.ico" />
             <!-- Runtime images -->
             <arg value="--install-dir" />
             <arg value="HDF_Group/${ant.project.name}" />
@@ -1634,8 +1657,10 @@
             <!-- Platform-specific details -->
             <arg value="--win-console" />
             <arg value="--win-dir-chooser" />
-            <arg value="--win-menu" />
             <arg value="--win-per-user-install" />
+            <arg value="--win-menu" />
+            <arg value="--win-menu-group" />
+            <arg value="The HDF Group" />
             <!-- create exe installer - msi needs more work -->
             <!-- <arg value="- -type" />
             <arg value="msi" /> -->
@@ -1803,11 +1828,6 @@
             <arg value="The HDF Group" />
             <!-- <arg value="- -license-file" />
             <arg value="${basedir}/COPYING" /> -->
-            <!-- File associations -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF.properties" /> -->
-            <!-- <arg value="- -file-associations" />
-            <arg value="${basedir}/package_files/HDFViewHDF5.properties" /> -->
             <!-- Launchers -->
             <!-- <arg value="- -arguments" />
             <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" /> -->
