@@ -1056,7 +1056,7 @@
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows:${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. Execute ${ant.project.name}-${app.version}.exe (or .msi)" />
-        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute ${ant.project.name}\bin\${ant.project.name}" />
+        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Follow prompts${line.separator}3. Execute install-dir\${ant.project.name}.exe" />
     </target>
 
     <target name="createWindowsAppREADME" depends="createREADME" if="${isAppWindows}">
@@ -1068,7 +1068,7 @@
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows, copy ${ant.project.name} directory to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. cd into the new ${ant.project.name}" />
-        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./${ant.project.name}" />
+        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./${ant.project.name}.exe" />
     </target>
 
     <target name="createUnixREADME" depends="createREADME" if="${isAppUnix}">
