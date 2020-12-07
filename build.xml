@@ -1690,6 +1690,7 @@
     <target name="binaryPackXWindows" depends="createJXPackage, createWindowsREADME" if="${isXWindows}">
         <mkdir dir="${dist.dir}" />
 
+        <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" readonly="false" />
         <!-- Sign the generated exe -->
         <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
             <arg value="sign" />
