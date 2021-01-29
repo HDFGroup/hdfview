@@ -592,12 +592,14 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     public final Object getData() throws Exception, OutOfMemoryError {
         if (!isDataLoaded) {
             data = read(); // load the data
-            originalBuf = data;
-            isDataLoaded = true;
-            nPoints = 1;
-            log.trace("getData: selectedDims length={}",selectedDims.length);
-            for (int j = 0; j < selectedDims.length; j++) {
-                nPoints *= selectedDims[j];
+            if (data != null) {
+                originalBuf = data;
+                isDataLoaded = true;
+                nPoints = 1;
+                log.trace("getData: selectedDims length={}",selectedDims.length);
+                for (int j = 0; j < selectedDims.length; j++) {
+                    nPoints *= selectedDims[j];
+                }
             }
             log.trace("getData: read {}", nPoints);
         }
