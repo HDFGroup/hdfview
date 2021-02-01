@@ -15,7 +15,8 @@ You can obtain them from:
 
 JDK
 =============================================================================
-This release was built and tested with OpenJDK 15.
+This release was built and tested with OpenJDK 15. It uses modules and the
+newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================

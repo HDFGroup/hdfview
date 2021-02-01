@@ -7,7 +7,7 @@
 set (CTEST_PROJECT_NAME "HDFView")
 set (CTEST_NIGHTLY_START_TIME "18:00:00 CST")
 
-set (CTEST_DROP_METHOD "http")
+set (CTEST_DROP_METHOD "https")
 if (CDASH_LOCAL)
   set (CTEST_DROP_SITE "10.10.10.82")
 else ()

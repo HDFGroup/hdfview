@@ -567,7 +567,7 @@ public class H4Vdata extends CompoundDS
             vsid = HDFLibrary.VSattach(getFID(), (int)oid[1], "w");
         }
         catch (HDFException ex) {
-            log.debug("open(): VSattach failure: ", ex);
+            log.debug("open(w): VSattach failure: ", ex);
             vsid = -1;
         }
 
@@ -577,9 +577,10 @@ public class H4Vdata extends CompoundDS
                 vsid = HDFLibrary.VSattach(getFID(), (int)oid[1], "r");
             }
             catch (HDFException ex) {
-                log.debug("open(): VSattach failure: ", ex);
+                log.debug("open(r): VSattach failure: ", ex);
                 vsid = -1;
             }
+            log.debug("open(r): VSattach vsid: {}", vsid);
         }
 
         return vsid;
