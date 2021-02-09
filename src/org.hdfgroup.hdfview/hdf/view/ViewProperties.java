@@ -242,6 +242,8 @@ public class ViewProperties extends PreferenceStore {
      *
      * @param viewRoot
      *            the root directory of the HDFView
+     * @param viewStart
+     *            the starting directory for file searches
      */
     public ViewProperties(String viewRoot, String viewStart) {
         super();
@@ -272,7 +274,6 @@ public class ViewProperties extends PreferenceStore {
         setDefault("h5file.indexType", "H5_INDEX_NAME");
         setDefault("h5file.indexOrder", "H5_ITER_INC");
         setDefault("h4toh5.converter", "");
-        setDefault("work.dir", System.getProperty("user.dir"));
         setDefault("file.extension", "hdf, h4, hdf4, h5, hdf5, he2, he5");
         setDefault("font.size", 12);
         setDefault("font.type", "Serif");

@@ -206,14 +206,16 @@ public class HDFView implements DataViewManager {
      *
      * @param root
      *            the directory where the HDFView is installed.
+     * @param start_dir
+     *            the starting directory for file searches
      */
-    public HDFView(String root, String started) {
+    public HDFView(String root, String start_dir) {
         log.debug("Root is {}", root);
 
         if (display == null || display.isDisposed()) display = new Display();
 
         rootDir = root;
-        startDir = started;
+        startDir = start_dir;
 
         //editGUIs = new Vector<Object>();
 
