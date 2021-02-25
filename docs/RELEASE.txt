@@ -27,26 +27,15 @@ Major Enhancements
 
 Major Bug Fixes
 ==============================================================================
-    * Converted to Java Modules.
-
-    * Updated all SWT libraries.
-
-    * Resolved an issue with netcdf dimensions
-
-    * Fixed a bug with changing the working directory.
-
-    * Added code to use committed datatypes in creating new objects.
-
-    * Fixed enum creation and use.
-
-Minor Bug Fixes
-==============================================================================
     * Added optional startDir to command line options.
     * Corrected user.home vs user.dir confusion.
     * Split Current Working Directory options into three selections:
       a. Current Work Directory or user.dir system property
       b. User Home Directory or user.home system property
       c. User selected directory
+
+Minor Bug Fixes
+==============================================================================
 
 
 Limitations / Known Problems
