@@ -171,7 +171,7 @@ public class HDFView implements DataViewManager {
 
     private static final String        ABOUT_HDFVIEW = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
             + "For " + System.getProperty("os.name") + "\n\n"
-            + "Copyright " + '\u00a9' + " 2006-2020 The HDF Group.\n"
+            + "Copyright " + '\u00a9' + " 2006-2021 The HDF Group.\n"
             + "All rights reserved.";
 
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
@@ -2459,6 +2459,8 @@ public class HDFView implements DataViewManager {
      *        -Dhdf.hdflib.HDFLibrary.hdflib="your HDF4 library path"
      *        -root "the directory where the HDFView is installed"
      *        -start "the directory HDFView searches for files"
+     *        -geometry or -g "the preferred window size as WIDTHxHEIGHT+XOFF+YOFF"
+     *        -java.version "show the version of jave used to build the HDFView and exit"
      *        [filename] "the file to open"
      * </pre>
      *

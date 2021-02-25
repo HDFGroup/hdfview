@@ -315,7 +315,7 @@ public class ImageConversionDialog extends Dialog {
             FileFormat theFile = null;
             Iterator<FileFormat> iterator = fileList.iterator();
             while (iterator.hasNext()) {
-                theFile = iterator.next();
+                theFile = (FileFormat) iterator.next();
                 if (theFile.getFilePath().equals(dstFile)) {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "Convert", "The destination file is being used.");

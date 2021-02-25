@@ -141,7 +141,7 @@ public class H5ScalarDS extends ScalarDS {
      */
     @Override
     public long open() {
-        long did = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
 
         try {
             did = H5.H5Dopen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
@@ -149,7 +149,7 @@ public class H5ScalarDS extends ScalarDS {
         }
         catch (HDF5Exception ex) {
             log.debug("open(): Failed to open dataset {}", getPath() + getName(), ex);
-            did = -1;
+            did = HDF5Constants.H5I_INVALID_HID;
         }
 
         return did;
@@ -233,15 +233,15 @@ public class H5ScalarDS extends ScalarDS {
             return; // already called. Initialize only once
         }
 
-        long did = -1;
-        long tid = -1;
-        long sid = -1;
-        long nativeTID = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
+        long tid = HDF5Constants.H5I_INVALID_HID;
+        long sid = HDF5Constants.H5I_INVALID_HID;
+        long nativeTID = HDF5Constants.H5I_INVALID_HID;
 
         did = open();
         if (did >= 0) {
             // check if it is an external or virtual dataset
-            long pid = -1;
+            long pid = HDF5Constants.H5I_INVALID_HID;
             try {
                 pid = H5.H5Dget_create_plist(did);
                 try {
@@ -299,9 +299,9 @@ public class H5ScalarDS extends ScalarDS {
                 try {
                     datatype = new H5Datatype(getFileFormat(), tid);
 
-                    log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
+                    log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}",
                             tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isNamed(), datatype.isVLEN(),
-                            datatype.isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
+                            datatype.isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isStdRef(), ((H5Datatype) datatype).isRegRef());
                 }
                 catch (Exception ex) {
                     log.debug("init(): failed to create datatype for dataset: ", ex);
@@ -525,8 +525,8 @@ public class H5ScalarDS extends ScalarDS {
             init();
 
         if (datatype == null) {
-            long did = -1;
-            long tid = -1;
+            long did = HDF5Constants.H5I_INVALID_HID;
+            long tid = HDF5Constants.H5I_INVALID_HID;
 
             did = open();
             if (did >= 0) {
@@ -614,9 +614,9 @@ public class H5ScalarDS extends ScalarDS {
 
         long did = open();
         if (did >= 0) {
-            long fspace = -1;
-            long mspace = -1;
-            long tid = -1;
+            long fspace = HDF5Constants.H5I_INVALID_HID;
+            long mspace = HDF5Constants.H5I_INVALID_HID;
+            long tid = HDF5Constants.H5I_INVALID_HID;
 
             try {
                 long[] lsize = { 1 };
@@ -836,6 +836,11 @@ public class H5ScalarDS extends ScalarDS {
                 throw new HDF5Exception("Writing non-string variable-length data is not supported");
             }
 
+            if (dsDatatype.isStdRef()) {
+                log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
+                throw new HDF5Exception("Writing region reference data is not supported");
+            }
+
             if (dsDatatype.isRegRef()) {
                 log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
                 throw new HDF5Exception("Writing region reference data is not supported");
@@ -844,7 +849,7 @@ public class H5ScalarDS extends ScalarDS {
 
         long did = open();
         if (did >= 0) {
-            long[] spaceIDs = { -1, -1 }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
+            long[] spaceIDs = { HDF5Constants.H5I_INVALID_HID, HDF5Constants.H5I_INVALID_HID }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
                 /*
@@ -877,7 +882,7 @@ public class H5ScalarDS extends ScalarDS {
                         /*
                          * Actually read the data now that everything has been setup.
                          */
-                        long tid = -1;
+                        long tid = HDF5Constants.H5I_INVALID_HID;
                         try {
                             log.trace("scalarDatasetCommonIO():read ioType create native");
                             tid = dsDatatype.createNative();
@@ -960,7 +965,7 @@ public class H5ScalarDS extends ScalarDS {
                     /*
                      * Actually write the data now that everything has been setup.
                      */
-                    long tid = -1;
+                    long tid = HDF5Constants.H5I_INVALID_HID;
                     try {
                         tid = dsDatatype.createNative();
 
@@ -1048,9 +1053,9 @@ public class H5ScalarDS extends ScalarDS {
             return attributeList;
         }
 
-        long did = -1;
-        long pcid = -1;
-        long paid = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
+        long pcid = HDF5Constants.H5I_INVALID_HID;
+        long paid = HDF5Constants.H5I_INVALID_HID;
         int indxType = fileFormat.getIndexType(null);
         int order = fileFormat.getIndexOrder(null);
 
@@ -1092,7 +1097,7 @@ public class H5ScalarDS extends ScalarDS {
                         long datumSize = getDatatype().getDatatypeSize();
 
                         if (datumSize < 0) {
-                            long tmptid = -1;
+                            long tmptid = HDF5Constants.H5I_INVALID_HID;
                             try {
                                 tmptid = H5.H5Dget_type(did);
                                 datumSize = H5.H5Tget_size(tmptid);
@@ -1551,10 +1556,10 @@ public class H5ScalarDS extends ScalarDS {
             long[] chunks, int gzip, Object fillValue, Object data) throws Exception {
         H5ScalarDS dataset = null;
         String fullPath = null;
-        long did = -1;
-        long plist = -1;
-        long sid = -1;
-        long tid = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
+        long plist = HDF5Constants.H5I_INVALID_HID;
+        long sid = HDF5Constants.H5I_INVALID_HID;
+        long tid = HDF5Constants.H5I_INVALID_HID;
 
         if ((pgroup == null) || (name == null) || (dims == null) || ((gzip > 0) && (chunks == null))) {
             log.debug("create(): one or more parameters are null");
@@ -1754,9 +1759,9 @@ public class H5ScalarDS extends ScalarDS {
     private Object getAttrValue(long oid, String aname) {
         log.trace("getAttrValue(): start: name={}", aname);
 
-        long aid = -1;
-        long atid = -1;
-        long asid = -1;
+        long aid = HDF5Constants.H5I_INVALID_HID;
+        long atid = HDF5Constants.H5I_INVALID_HID;
+        long asid = HDF5Constants.H5I_INVALID_HID;
         Object avalue = null;
 
         try {
@@ -1852,8 +1857,8 @@ public class H5ScalarDS extends ScalarDS {
 
     private boolean isStringAttributeOf(long objID, String name, String value) {
         boolean retValue = false;
-        long aid = -1;
-        long atid = -1;
+        long aid = HDF5Constants.H5I_INVALID_HID;
+        long atid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             if (H5.H5Aexists_by_name(objID, ".", name, HDF5Constants.H5P_DEFAULT)) {
@@ -1901,11 +1906,11 @@ public class H5ScalarDS extends ScalarDS {
         }
 
         Dataset dataset = null;
-        long srcdid = -1;
-        long dstdid = -1;
-        long plist = -1;
-        long tid = -1;
-        long sid = -1;
+        long srcdid = HDF5Constants.H5I_INVALID_HID;
+        long dstdid = HDF5Constants.H5I_INVALID_HID;
+        long plist = HDF5Constants.H5I_INVALID_HID;
+        long tid = HDF5Constants.H5I_INVALID_HID;
+        long sid = HDF5Constants.H5I_INVALID_HID;
         String dname = null;
         String path = null;
 
@@ -2040,8 +2045,8 @@ public class H5ScalarDS extends ScalarDS {
     @Override
     public String getPaletteName(int idx) {
         byte[] refs = getPaletteRefs();
-        long did = -1;
-        long palID = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
+        long palID = HDF5Constants.H5I_INVALID_HID;
         String paletteName = null;
 
         if (refs == null) {
@@ -2086,9 +2091,9 @@ public class H5ScalarDS extends ScalarDS {
     public byte[][] readPalette(int idx) {
         byte[][] thePalette = null;
         byte[] refs = getPaletteRefs();
-        long did = -1;
-        long palID = -1;
-        long tid = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
+        long palID = HDF5Constants.H5I_INVALID_HID;
+        long tid = HDF5Constants.H5I_INVALID_HID;
 
         if (refs == null) {
             log.debug("readPalette(): refs is null");
@@ -2246,9 +2251,9 @@ public class H5ScalarDS extends ScalarDS {
      * length is 8*numberOfPalettes.
      */
     private byte[] getPaletteRefs(long did) {
-        long aid = -1;
-        long sid = -1;
-        long atype = -1;
+        long aid = HDF5Constants.H5I_INVALID_HID;
+        long sid = HDF5Constants.H5I_INVALID_HID;
+        long atype = HDF5Constants.H5I_INVALID_HID;
         int size = 0;
         int rank = 0;
         byte[] refbuf = null;
@@ -2318,8 +2323,8 @@ public class H5ScalarDS extends ScalarDS {
      *             If there is an error at the HDF5 library level.
      */
     public void extend(long[] newDims) throws HDF5Exception {
-        long did = -1;
-        long sid = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
+        long sid = HDF5Constants.H5I_INVALID_HID;
 
         did = open();
         if (did >= 0) {
