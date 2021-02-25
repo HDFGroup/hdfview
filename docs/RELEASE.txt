@@ -39,6 +39,15 @@ Major Bug Fixes
 
     * Fixed enum creation and use.
 
+Minor Bug Fixes
+==============================================================================
+    * Added optional startDir to command line options.
+    * Corrected user.home vs user.dir confusion.
+    * Split Current Working Directory options into three selections:
+      a. Current Work Directory or user.dir system property
+      b. User Home Directory or user.home system property
+      c. User selected directory
+
 
 Limitations / Known Problems
 ==============================================================================
