@@ -158,7 +158,7 @@ public class ViewProperties extends PreferenceStore {
     private static ArrayList<String> recentFiles            = new ArrayList<>(MAX_RECENT_FILES + 5);
 
     /** default starting file directory */
-    private static String            workDir                = System.getProperty("user.home");
+    private static String            workDir                = System.getProperty("user.dir");
 
     /** default HDF file extensions */
     private static String            fileExt                = "hdf, h4, hdf4, h5, hdf5, he2, he5";
@@ -242,8 +242,10 @@ public class ViewProperties extends PreferenceStore {
      *
      * @param viewRoot
      *            the root directory of the HDFView
+     * @param viewStart
+     *            the starting directory for file searches
      */
-    public ViewProperties(String viewRoot) {
+    public ViewProperties(String viewRoot, String viewStart) {
         super();
 
         // look for the property file in the user's home directory
@@ -255,10 +257,11 @@ public class ViewProperties extends PreferenceStore {
 
         setRootDir(viewRoot);
         log.trace("rootDir is {}", rootDir);
+        setWorkDir(viewStart);
 
         setUsersGuide(rootDir + usersGuide);
 
-        setDefault("users.guide", System.getProperty("user.dir") + "/UsersGuide/index.html");
+        setDefault("users.guide", viewRoot + "/UsersGuide/index.html");
         setDefault("image.contrast", false);
         setDefault("image.showvalues", false);
         setDefault("file.mode", "r");
@@ -271,7 +274,6 @@ public class ViewProperties extends PreferenceStore {
         setDefault("h5file.indexType", "H5_INDEX_NAME");
         setDefault("h5file.indexOrder", "H5_ITER_INC");
         setDefault("h4toh5.converter", "");
-        setDefault("work.dir", System.getProperty("user.home"));
         setDefault("file.extension", "hdf, h4, hdf4, h5, hdf5, he2, he5");
         setDefault("font.size", 12);
         setDefault("font.type", "Serif");
@@ -1506,7 +1508,7 @@ public class ViewProperties extends PreferenceStore {
             workPath = System.getProperty("hdfview.workdir");
             log.trace("getWorkDir: hdfview.workdir={}", workPath);
             if (workPath == null) {
-                workPath = System.getProperty("user.home");
+                workPath = System.getProperty("user.dir");
             }
         }
         log.trace("getWorkDir: final workPath={}", workPath);

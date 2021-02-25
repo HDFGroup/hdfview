@@ -142,7 +142,7 @@ public abstract class AbstractWindowTest {
 
                         while (true) {
                             // open and layout the shell
-                            HDFView window = new HDFView(rootDir);
+                            HDFView window = new HDFView(rootDir, null);
 
                             // Set the testing state to handle the problem with testing
                             // of native dialogs

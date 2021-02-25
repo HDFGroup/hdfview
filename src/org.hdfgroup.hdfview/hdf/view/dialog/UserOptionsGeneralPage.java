@@ -46,8 +46,8 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
     private Combo fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
 
-    private Button checkCurrentUserDir, checkAutoContrast, checkShowValues;
-    private Button currentDirButton, rwButton, helpButton;
+    private Button checkCurrentUserDir, checkUserHomeDir, checkAutoContrast, checkShowValues;
+    private Button currentDirButton, userHomeButton, rwButton, helpButton;
     private Button checkReadOnly, checkReadAll;
 
     private boolean isFontChanged;
@@ -95,6 +95,8 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         if (workField != null) {
             String workPath = workField.getText();
             if (checkCurrentUserDir.getSelection())
+                workPath = System.getProperty("user.dir");
+            else if (checkUserHomeDir.getSelection())
                 workPath = System.getProperty("user.home");
 
             if ((workPath != null) && (workPath.length() > 0)) {
@@ -214,9 +216,20 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         workField.setText(workDir);
 
-        if (workDir.equals(System.getProperty("user.home"))) {
+        if (workDir.equals(System.getProperty("user.dir"))) {
             checkCurrentUserDir.setSelection(true);
+            checkUserHomeDir.setSelection(false);
             workField.setEnabled(false);
+        }
+        else if (workDir.equals(System.getProperty("user.home"))) {
+            checkCurrentUserDir.setSelection(false);
+            checkUserHomeDir.setSelection(true);
+            workField.setEnabled(false);
+        }
+        else {
+            checkCurrentUserDir.setSelection(false);
+            checkUserHomeDir.setSelection(false);
+            workField.setEnabled(true);
         }
 
         log.trace("UserOptionsGeneralPage: workDir={}", workDir);
@@ -319,14 +332,31 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         checkCurrentUserDir = new Button(workingDirectoryGroup, SWT.CHECK);
         checkCurrentUserDir.setFont(curFont);
-        checkCurrentUserDir.setText("\"Current Working Directory\" or");
+        checkCurrentUserDir.setText("\"User Work\" or");
         checkCurrentUserDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         checkCurrentUserDir.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 boolean isCheckCurrentUserDirSelected = checkCurrentUserDir.getSelection();
+                if (isCheckCurrentUserDirSelected)
+                    checkUserHomeDir.setSelection(false);
                 workField.setEnabled(!isCheckCurrentUserDirSelected);
                 currentDirButton.setEnabled(!isCheckCurrentUserDirSelected);
+            }
+        });
+
+        checkUserHomeDir = new Button(workingDirectoryGroup, SWT.CHECK);
+        checkUserHomeDir.setFont(curFont);
+        checkUserHomeDir.setText("\"User Home\" or");
+        checkUserHomeDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        checkUserHomeDir.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                boolean isCheckUserHomeDirSelected = checkUserHomeDir.getSelection();
+                if (isCheckUserHomeDirSelected)
+                    checkCurrentUserDir.setSelection(false);
+                workField.setEnabled(!isCheckUserHomeDirSelected);
+                currentDirButton.setEnabled(!isCheckUserHomeDirSelected);
             }
         });
 
