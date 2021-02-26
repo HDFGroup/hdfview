@@ -4,7 +4,7 @@ The current HDFView products can be downloaded at:
 
 HDF Libraries
 =============================================================================
-This release was built and tested with HDF 4.2.x and HDF5 1.10.x.
+This release was built and tested with HDF 4.2.x and HDF5 1.1x.x.
 
 Windows ONLY: HDFView built with VS 2015 will require that
 the Visual C++ Redistributable Packages be installed on your machine.
@@ -24,7 +24,12 @@ Major Enhancements
 
 Major Bug Fixes
 ==============================================================================
-    *
+    * Added optional startDir to command line options.
+    * Corrected user.home vs user.dir confusion.
+    * Split Current Working Directory options into three selections:
+      a. Current Work Directory or user.dir system property
+      b. User Home Directory or user.home system property
+      c. User selected directory
 
 
 Limitations / Known Problems

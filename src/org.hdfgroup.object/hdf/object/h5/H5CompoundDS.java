@@ -369,8 +369,9 @@ public class H5CompoundDS extends CompoundDS {
                 try {
                     datatype = new H5Datatype(getFileFormat(), tid);
 
-                    log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}", tid,
-                            datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
+                    log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}", tid,
+                            datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(),
+                            ((H5Datatype) datatype).isStdRef(), ((H5Datatype) datatype).isRegRef());
 
                     H5Datatype.extractCompoundInfo((H5Datatype) datatype, "", flatNameList, flatTypeList);
                 }
