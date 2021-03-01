@@ -423,8 +423,9 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {}
 
-                recentFilesCombo.add(filename, 0);
-                recentFilesCombo.select(0);
+                // first entry is always the workdir
+                recentFilesCombo.add(filename, 1);
+                recentFilesCombo.select(1);
 
                 ((HDFView) viewer).showMetaData(selectedObject);
             }

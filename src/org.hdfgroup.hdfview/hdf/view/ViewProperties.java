@@ -258,6 +258,7 @@ public class ViewProperties extends PreferenceStore {
         setRootDir(viewRoot);
         log.trace("rootDir is {}", rootDir);
         setWorkDir(viewStart);
+        setDefault("work.dir", viewStart);
 
         setUsersGuide(rootDir + usersGuide);
 
@@ -1297,8 +1298,10 @@ public class ViewProperties extends PreferenceStore {
         setMaxMembers(getInt("max.members"));
 
         // load the most recent file list from the property file
-        log.trace("load user properties: most recent file list");
+        log.trace("load user properties: most recent file list with {}", getWorkDir());
         String theFile = null;
+        // first entry should be the working dir
+        recentFiles.add(getWorkDir());
         for (int i = 0; i < MAX_RECENT_FILES; i++) {
             theFile = getString("recent.file" + i);
             if ((theFile != null) && !recentFiles.contains(theFile)) {
@@ -1419,8 +1422,10 @@ public class ViewProperties extends PreferenceStore {
         int size = recentFiles.size();
         int minSize = Math.min(size, MAX_RECENT_FILES);
         log.trace("save user properties: most recent files size={}", size);
-        for (int i = 0; i < minSize; i++) {
-            theFile = recentFiles.get(i);
+        // The first entry is always the working dir
+        for (int i = 0; i < minSize - 1; i++) {
+            theFile = recentFiles.get(i+1);
+            log.trace("save user properties: save recent file={}", theFile);
             if ((theFile != null) && (theFile.length() > 0)) setValue("recent.file" + i, theFile);
         }
 
