@@ -20,24 +20,19 @@ newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================
-    *  Converted to OpenJDK modules, for a smaller footprint and packaging
-      improvements. Now uses the jpackage command for bundling HDFView and
-      the JRE into a platform specific application.
-
+    *
 
 Major Bug Fixes
 ==============================================================================
-    * Converted to Java Modules.
+    * Added optional startDir to command line options.
+    * Corrected user.home vs user.dir confusion.
+    * Split Current Working Directory options into three selections:
+      a. Current Work Directory or user.dir system property
+      b. User Home Directory or user.home system property
+      c. User selected directory
 
-    * Updated all SWT libraries.
-
-    * Resolved an issue with netcdf dimensions
-
-    * Fixed a bug with changing the working directory.
-
-    * Added code to use committed datatypes in creating new objects.
-
-    * Fixed enum creation and use.
+Minor Bug Fixes
+==============================================================================
 
 
 Limitations / Known Problems
