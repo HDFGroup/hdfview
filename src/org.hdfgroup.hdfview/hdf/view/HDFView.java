@@ -325,8 +325,9 @@ public class HDFView implements DataViewManager {
                     }
                     catch (Exception ex) {}
 
-                    urlBar.add(currentFile, 0);
-                    urlBar.select(0);
+                    // first entry is always the workdir
+                    urlBar.add(currentFile, 1);
+                    urlBar.select(1);
                 }
                 catch (Exception ex) {
                     showError(ex.toString());
@@ -570,8 +571,9 @@ public class HDFView implements DataViewManager {
                         log.debug("unable to remove {} from urlBar", filename);
                     }
 
-                    urlBar.add(filename, 0);
-                    urlBar.select(0);
+                    // first entry is always the workdir
+                    urlBar.add(filename, 1);
+                    urlBar.select(1);
                 }
                 catch (Exception ex) {
                     display.beep();
@@ -638,8 +640,9 @@ public class HDFView implements DataViewManager {
                         log.debug("unable to remove {} from urlBar", filename);
                     }
 
-                    urlBar.add(filename, 0);
-                    urlBar.select(0);
+                    // first entry is always the workdir
+                    urlBar.add(filename, 1);
+                    urlBar.select(1);
                 }
                 catch (Exception ex) {
                     display.beep();
@@ -1085,7 +1088,6 @@ public class HDFView implements DataViewManager {
         // Recent files combo box
         urlBar = new Combo(shell, SWT.BORDER | SWT.SINGLE);
         urlBar.setFont(currentFont);
-// TODO add current working dir at beginnig of the list.
         urlBar.setItems(ViewProperties.getMRF().toArray(new String[0]));
         urlBar.setVisibleItemCount(ViewProperties.MAX_RECENT_FILES);
         urlBar.deselectAll();
@@ -1764,8 +1766,9 @@ public class HDFView implements DataViewManager {
                 log.trace("unable to remove {} from urlBar", filename);
             }
 
-            urlBar.add(filename, 0);
-            urlBar.select(0);
+            // first entry is always the workdir
+            urlBar.add(filename, 1);
+            urlBar.select(1);
         }
         else {
             if (!isTesting) {
@@ -1808,8 +1811,9 @@ public class HDFView implements DataViewManager {
                         log.trace("unable to remove {} from urlBar", chosenFiles[i].getAbsolutePath());
                     }
 
-                    urlBar.add(chosenFiles[i].getAbsolutePath(), 0);
-                    urlBar.select(0);
+                    // first entry is always the workdir
+                    urlBar.add(chosenFiles[i].getAbsolutePath(), 1);
+                    urlBar.select(1);
 
                     log.trace("openLocalFile treeView.openFile(chosenFiles[{}]: {}",i,chosenFiles[i].getAbsolutePath());
                     try {
@@ -1855,8 +1859,9 @@ public class HDFView implements DataViewManager {
                     log.trace("unable to remove {} from urlBar", chosenFile.getAbsolutePath());
                 }
 
-                urlBar.add(chosenFile.getAbsolutePath(), 0);
-                urlBar.select(0);
+                // first entry is always the workdir
+                urlBar.add(chosenFile.getAbsolutePath(), 1);
+                urlBar.select(1);
 
                 log.trace("openLocalFile treeView.openFile(chosenFile[{}]: {}", chosenFile.getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                 try {
@@ -1977,8 +1982,9 @@ public class HDFView implements DataViewManager {
                     log.trace("unable to remove {} from urlBar", filename);
                 }
 
-                urlBar.add(filename, 0);
-                urlBar.select(0);
+                // first entry is always the workdir
+                urlBar.add(filename, 1);
+                urlBar.select(1);
             }
             catch (Exception ex) {
                 showError(ex.toString());
