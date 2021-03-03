@@ -1489,7 +1489,7 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1565,7 +1565,7 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}lib/" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1631,7 +1631,7 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1832,7 +1832,7 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1885,7 +1885,7 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
@@ -1945,7 +1945,7 @@
             <arg value="--module-path" />
             <arg value="${basedir}/${release.dir}" />
             <arg value="--input" />
-            <arg value="${release.dir}/lib" />
+            <arg value="${release.dir}" />
             <arg value="--main-jar" />
             <arg value="${ant.project.name}.jar"/>
             <arg value="--main-class" />
