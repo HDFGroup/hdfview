@@ -14,6 +14,7 @@
 
 package hdf.view.TableView;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -623,6 +624,19 @@ public class DataValidatorFactory {
                             /* Floating-point type */
                             Double.parseDouble((String) newValue);
                         }
+                        break;
+
+
+                    case 16:
+                        if (datasetDatatype.isFloat()) {
+                            BigDecimal bigValue = new BigDecimal((String) newValue);
+
+                            /*
+                             * BigDecimal maxRange =
+                             * BigDecimal.valueOf(Long.MAX_VALUE).multiply(BigDecimal.valueOf(2)).add(BigDecimal.valueOf
+                             * (1)); if (bigValue.compareTo(maxRange) > 0) throw new
+                             * NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
+                             */                        }
                         break;
 
                     default:

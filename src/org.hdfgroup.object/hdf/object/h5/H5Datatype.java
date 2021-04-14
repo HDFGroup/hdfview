@@ -15,7 +15,12 @@
 package hdf.object.h5;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -566,6 +571,174 @@ public class H5Datatype extends Datatype {
         }
 
         return out;
+    }
+
+    /**
+     * Convert from an array of BigDecimal into an array of bytes
+     *
+     * @param start
+     *            The position in the input array of BigDecimal to start
+     * @param len
+     *            The number of 'BigDecimal' to convert
+     * @param data
+     *            The input array of BigDecimal
+     * @return an array of bytes
+     */
+    public byte[] bigDecimalToByte(int start, int len, BigDecimal[] data) {
+        int ii;
+        byte[] bd = new byte[(int)datatypeSize];
+        byte[] data = new byte[(int)datatypeSize];
+        byte[] bdbytes = new byte[(int)datatypeSize * len];
+
+        for (ii = 0; ii < len; ii++) {
+            BigDecimal entry = data[start + ii];
+            data = convertBigDecimalToByte(entry);
+            if (datatypeOrder == ORDER_BE) {
+                int k = 0;
+                for(int j = (int)datatypeSize - 1; j >= 0; j--)
+                    bd[k++] = data[j];
+            }
+            else
+                System.arraycopy(data, 0, bd, 0, (int)datatypeSize);
+            System.arraycopy(bd, 0, bdbytes, ii * 16, 16);
+        }
+        return bdbytes;
+    }
+
+    /**
+     * Convert from a single BigDecimal object from an array of BigDecimal into an array of bytes
+     *
+     * @param start
+     *            The position in the input array of BigDecimal to start
+     * @param data
+     *            The input Float
+     * @return an array of bytes
+     */
+    public byte[] bigDecimalToByte(BigDecimal[] data, int start) {
+        byte[] bdbytes = new byte[(int)datatypeSize];
+        bdbytes = bigDecimalToByte(start, 1, data);
+        return bdbytes;
+    }
+
+    /**
+     * Convert a BigDecimal to a byte array .
+     *
+     * @param num
+     *        The BigDecimal number to convert
+     *
+     * @return A byte array representing the BigDecimal.
+     */
+    public byte[] convertBigDecimalToByte(BigDecimal num) {
+        BigInteger sig = new BigInteger(num.unscaledValue().toString());
+        byte[] bsig = sig.toByteArray();
+        int scale = num.scale();
+        byte[] bscale = new byte[] {
+          (byte)(scale >>> 24),
+          (byte)(scale >>> 16),
+          (byte)(scale >>> 8),
+          (byte)(scale)
+        };
+        byte[] both = new byte[bscale.length + bsig.length];
+        System.arraycopy(bscale, 0, both, 0, bscale.length);
+        System.arraycopy(bsig, 0, both, bscale.length, bsig.length);
+        return both;
+    }
+
+    /**
+     * Convert a range from an array of bytes into an array of BigDecimal
+     *
+     * @param start
+     *            The position in the input array of bytes to start
+     * @param len
+     *            The number of 'BigDecimal' to convert
+     * @param data
+     *            The input array of bytes
+     * @return an array of 'len' BigDecimal
+     */
+    public BigDecimal[] byteToBigDecimal(int start, int len, byte[] data) {
+        int ii;
+        byte[] bd = new byte[(int)datatypeSize];
+        BigDecimal[] BDarray = new BigDecimal[len];
+
+        for (ii = 0; ii < len; ii++) {
+            int rawpos = (start + ii) * (int)datatypeSize;
+            if (datatypeOrder == ORDER_BE) {
+                int k = 0;
+                for(int j = (int)datatypeSize - 1; j >= 0; j--)
+                    bd[k++] = data[rawpos + j];
+            }
+            else
+                System.arraycopy(data, rawpos, bd, 0, (int)datatypeSize);
+            BDarray[ii] = convertByteToBigDecimal(bd);
+        }
+        return BDarray;
+    }
+
+    /**
+     * Convert 4 bytes from an array of bytes into a single BigDecimal
+     *
+     * @param start
+     *            The position in the input array of bytes to start
+     * @param data
+     *            The input array of bytes
+     * @return The BigDecimal value of the bytes.
+     */
+    public BigDecimal byteToBigDecimal(byte[] data, int start) {
+        BigDecimal[] bdval = new BigDecimal[1];
+        bdval = byteToBigDecimal(start, 1, data);
+        return (bdval[0]);
+    }
+
+    /**
+     * Convert byte array data to a BigDecimal.
+     *
+     * @param raw
+     *        The byte array to convert to a BigDecimal
+     *
+     * @return A BigDecimal representing the byte array.
+     */
+    public BigDecimal convertByteToBigDecimal(byte[] raw) {
+        BitSet rawset = BitSet.valueOf(raw);
+
+        boolean sign = rawset.get(nativeOffset + (int)nativeFPspos);
+        BitSet mantissaset = rawset.get(nativeOffset + (int)nativeFPmpos, nativeOffset + (int)nativeFPmpos + (int)nativeFPmsize);
+        BitSet exponentset = rawset.get(nativeOffset + (int)nativeFPepos, nativeOffset + (int)nativeFPepos + (int)nativeFPesize);
+        byte[] expraw = Arrays.copyOf(exponentset.toByteArray(), (int)(nativeFPesize + 7)/8);
+        byte[] bexp = new byte[expraw.length];
+        if (datatypeOrder == ORDER_LE) {
+            int k = 0;
+            for(int j = expraw.length - 1; j >= 0; j--)
+                bexp[k++] = expraw[j];
+        }
+        else
+            System.arraycopy(expraw, 0, bexp, 0, expraw.length);
+        BigInteger bscale = new BigInteger(bexp);
+        long scale = bscale.longValue();
+        scale -= nativeFPebias;
+        double powscale = Math.pow(2, scale);
+
+        byte[] manraw = Arrays.copyOf(mantissaset.toByteArray(), (int)(nativeFPmsize + 7)/8);
+        byte[] bman = new byte[manraw.length];
+        if (datatypeOrder == ORDER_BE) {
+            int k = 0;
+            for(int j = manraw.length - 1; j >= 0; j--)
+                bman[k++] = manraw[j];
+        }
+        else
+            System.arraycopy(manraw, 0, bman, 0, manraw.length);
+        BitSet manset = BitSet.valueOf(bman);
+
+        double val = 0.0;
+        for (int i = 0; i < (int)nativeFPmsize; i++) {
+            if (manset.get((int)nativeFPmsize - 1 - i))
+                val += Math.pow(2, -(i));
+        }
+        if (nativeFPnorm == HDF5Constants.H5T_NORM_IMPLIED || nativeFPnorm == HDF5Constants.H5T_NORM_MSBSET)
+            val += 1;
+        BigDecimal sig = BigDecimal.valueOf(val);
+        if (sign)
+            sig.negate(MathContext.DECIMAL128);
+        return sig.multiply(new BigDecimal(powscale, MathContext.DECIMAL128));
     }
 
     /*
@@ -1146,7 +1319,10 @@ public class H5Datatype extends Datatype {
                 break;
             case CLASS_FLOAT:
                 try {
-                    tid = H5.H5Tcopy((datatypeSize == 8) ? HDF5Constants.H5T_NATIVE_DOUBLE : HDF5Constants.H5T_NATIVE_FLOAT);
+                    if (datatypeSize > 8)
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_LDOUBLE);
+                    else
+                        tid = H5.H5Tcopy((datatypeSize == 8) ? HDF5Constants.H5T_NATIVE_DOUBLE : HDF5Constants.H5T_NATIVE_FLOAT);
 
                     if (datatypeOrder == Datatype.ORDER_BE) {
                         H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
@@ -1482,6 +1658,9 @@ public class H5Datatype extends Datatype {
                     break;
                 case 8:
                     data = new double[nPoints];
+                    break;
+                case 16:
+                    data = new byte[nPoints*16];
                     break;
                 default:
                     break;
