@@ -587,19 +587,19 @@ public class H5Datatype extends Datatype {
     public byte[] bigDecimalToByte(int start, int len, BigDecimal[] data) {
         int ii;
         byte[] bd = new byte[(int)datatypeSize];
-        byte[] data = new byte[(int)datatypeSize];
+        byte[] bdconv = new byte[(int)datatypeSize];
         byte[] bdbytes = new byte[(int)datatypeSize * len];
 
         for (ii = 0; ii < len; ii++) {
             BigDecimal entry = data[start + ii];
-            data = convertBigDecimalToByte(entry);
+            bdconv = convertBigDecimalToByte(entry);
             if (datatypeOrder == ORDER_BE) {
                 int k = 0;
                 for(int j = (int)datatypeSize - 1; j >= 0; j--)
-                    bd[k++] = data[j];
+                    bd[k++] = bdconv[j];
             }
             else
-                System.arraycopy(data, 0, bd, 0, (int)datatypeSize);
+                System.arraycopy(bdconv, 0, bd, 0, (int)datatypeSize);
             System.arraycopy(bd, 0, bdbytes, ii * 16, 16);
         }
         return bdbytes;
