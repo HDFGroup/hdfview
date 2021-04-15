@@ -26,6 +26,7 @@ import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.Utils;
+import hdf.object.h5.H5Datatype;
 import hdf.view.Tools;
 
 /**
@@ -57,7 +58,6 @@ public class DataProviderFactory {
         dataFormatReference = dataObject;
 
         HDFDataProvider dataProvider = getDataProvider(dataObject.getDatatype(), dataBuf, dataTransposed);
-
 
         return dataProvider;
     }
