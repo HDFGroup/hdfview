@@ -593,6 +593,7 @@ public class H5Datatype extends Datatype {
         for (ii = 0; ii < len; ii++) {
             BigDecimal entry = data[start + ii];
             bdconv = convertBigDecimalToByte(entry);
+            /* bitsets operate assuming LE order, BigInteger/BigDecimal expect BE */
             if (datatypeOrder == ORDER_BE) {
                 int k = 0;
                 for(int j = (int)datatypeSize - 1; j >= 0; j--)
@@ -662,6 +663,7 @@ public class H5Datatype extends Datatype {
 
         for (ii = 0; ii < len; ii++) {
             int rawpos = (start + ii) * (int)datatypeSize;
+            /* bitsets operate assuming LE order, BigInteger/BigDecimal expect BE */
             if (datatypeOrder == ORDER_BE) {
                 int k = 0;
                 for(int j = (int)datatypeSize - 1; j >= 0; j--)
@@ -705,6 +707,7 @@ public class H5Datatype extends Datatype {
         BitSet exponentset = rawset.get(nativeOffset + (int)nativeFPepos, nativeOffset + (int)nativeFPepos + (int)nativeFPesize);
         byte[] expraw = Arrays.copyOf(exponentset.toByteArray(), (int)(nativeFPesize + 7)/8);
         byte[] bexp = new byte[expraw.length];
+        /* bitsets operate assuming LE order, BigInteger/BigDecimal expect BE */
         if (datatypeOrder == ORDER_LE) {
             int k = 0;
             for(int j = expraw.length - 1; j >= 0; j--)
@@ -719,6 +722,7 @@ public class H5Datatype extends Datatype {
 
         byte[] manraw = Arrays.copyOf(mantissaset.toByteArray(), (int)(nativeFPmsize + 7)/8);
         byte[] bman = new byte[manraw.length];
+        /* bitsets operate assuming LE order, BigInteger/BigDecimal expect BE */
         if (datatypeOrder == ORDER_BE) {
             int k = 0;
             for(int j = manraw.length - 1; j >= 0; j--)
@@ -728,6 +732,7 @@ public class H5Datatype extends Datatype {
             System.arraycopy(manraw, 0, bman, 0, manraw.length);
         BitSet manset = BitSet.valueOf(bman);
 
+        // calculate mantissa value
         double val = 0.0;
         for (int i = 0; i < (int)nativeFPmsize; i++) {
             if (manset.get((int)nativeFPmsize - 1 - i))
@@ -2045,6 +2050,7 @@ public class H5Datatype extends Datatype {
         boolean attrExisted = false;
         Attribute attr = (Attribute) info;
 
+        log.trace("writeMetadata(): Attribute");
         if (attributeList == null) {
             this.getMetadata();
         }
