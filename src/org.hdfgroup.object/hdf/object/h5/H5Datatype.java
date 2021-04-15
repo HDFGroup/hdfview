@@ -15,7 +15,12 @@
 package hdf.object.h5;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +62,8 @@ public class H5Datatype extends Datatype {
     private boolean isRefObj = false;
 
     private boolean isRegRef = false;
+
+    private boolean isStdRef = false;
 
     private int nAttributes = -1;
 
@@ -151,7 +158,7 @@ public class H5Datatype extends Datatype {
                 }
             }
 
-            long tid = -1;
+            long tid = HDF5Constants.H5I_INVALID_HID;
             try {
                 tid = H5.H5Topen(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
                 fromNative(tid);
@@ -350,7 +357,7 @@ public class H5Datatype extends Datatype {
                 tid = H5.H5Topen(getFID(), getFullName(), HDF5Constants.H5P_DEFAULT);
             }
             catch (HDF5Exception ex) {
-                tid = -1;
+                tid = HDF5Constants.H5I_INVALID_HID;
             }
         }
 
@@ -388,7 +395,7 @@ public class H5Datatype extends Datatype {
         objInfo.num_attrs = nAttributes;
 
         if ((objInfo.num_attrs < 0) && (fileFormat != null)) {
-            long tid = -1;
+            long tid = HDF5Constants.H5I_INVALID_HID;
             try {
                 tid = H5.H5Topen(getFID(), getFullName(), HDF5Constants.H5P_DEFAULT);
                 fromNative(tid);
@@ -566,6 +573,174 @@ public class H5Datatype extends Datatype {
         return out;
     }
 
+    /**
+     * Convert from an array of BigDecimal into an array of bytes
+     *
+     * @param start
+     *            The position in the input array of BigDecimal to start
+     * @param len
+     *            The number of 'BigDecimal' to convert
+     * @param data
+     *            The input array of BigDecimal
+     * @return an array of bytes
+     */
+    public byte[] bigDecimalToByte(int start, int len, BigDecimal[] data) {
+        int ii;
+        byte[] bd = new byte[(int)datatypeSize];
+        byte[] bdconv = new byte[(int)datatypeSize];
+        byte[] bdbytes = new byte[(int)datatypeSize * len];
+
+        for (ii = 0; ii < len; ii++) {
+            BigDecimal entry = data[start + ii];
+            bdconv = convertBigDecimalToByte(entry);
+            if (datatypeOrder == ORDER_BE) {
+                int k = 0;
+                for(int j = (int)datatypeSize - 1; j >= 0; j--)
+                    bd[k++] = bdconv[j];
+            }
+            else
+                System.arraycopy(bdconv, 0, bd, 0, (int)datatypeSize);
+            System.arraycopy(bd, 0, bdbytes, ii * 16, 16);
+        }
+        return bdbytes;
+    }
+
+    /**
+     * Convert from a single BigDecimal object from an array of BigDecimal into an array of bytes
+     *
+     * @param start
+     *            The position in the input array of BigDecimal to start
+     * @param data
+     *            The input Float
+     * @return an array of bytes
+     */
+    public byte[] bigDecimalToByte(BigDecimal[] data, int start) {
+        byte[] bdbytes = new byte[(int)datatypeSize];
+        bdbytes = bigDecimalToByte(start, 1, data);
+        return bdbytes;
+    }
+
+    /**
+     * Convert a BigDecimal to a byte array .
+     *
+     * @param num
+     *        The BigDecimal number to convert
+     *
+     * @return A byte array representing the BigDecimal.
+     */
+    public byte[] convertBigDecimalToByte(BigDecimal num) {
+        BigInteger sig = new BigInteger(num.unscaledValue().toString());
+        byte[] bsig = sig.toByteArray();
+        int scale = num.scale();
+        byte[] bscale = new byte[] {
+          (byte)(scale >>> 24),
+          (byte)(scale >>> 16),
+          (byte)(scale >>> 8),
+          (byte)(scale)
+        };
+        byte[] both = new byte[bscale.length + bsig.length];
+        System.arraycopy(bscale, 0, both, 0, bscale.length);
+        System.arraycopy(bsig, 0, both, bscale.length, bsig.length);
+        return both;
+    }
+
+    /**
+     * Convert a range from an array of bytes into an array of BigDecimal
+     *
+     * @param start
+     *            The position in the input array of bytes to start
+     * @param len
+     *            The number of 'BigDecimal' to convert
+     * @param data
+     *            The input array of bytes
+     * @return an array of 'len' BigDecimal
+     */
+    public BigDecimal[] byteToBigDecimal(int start, int len, byte[] data) {
+        int ii;
+        byte[] bd = new byte[(int)datatypeSize];
+        BigDecimal[] BDarray = new BigDecimal[len];
+
+        for (ii = 0; ii < len; ii++) {
+            int rawpos = (start + ii) * (int)datatypeSize;
+            if (datatypeOrder == ORDER_BE) {
+                int k = 0;
+                for(int j = (int)datatypeSize - 1; j >= 0; j--)
+                    bd[k++] = data[rawpos + j];
+            }
+            else
+                System.arraycopy(data, rawpos, bd, 0, (int)datatypeSize);
+            BDarray[ii] = convertByteToBigDecimal(bd);
+        }
+        return BDarray;
+    }
+
+    /**
+     * Convert 4 bytes from an array of bytes into a single BigDecimal
+     *
+     * @param start
+     *            The position in the input array of bytes to start
+     * @param data
+     *            The input array of bytes
+     * @return The BigDecimal value of the bytes.
+     */
+    public BigDecimal byteToBigDecimal(byte[] data, int start) {
+        BigDecimal[] bdval = new BigDecimal[1];
+        bdval = byteToBigDecimal(start, 1, data);
+        return (bdval[0]);
+    }
+
+    /**
+     * Convert byte array data to a BigDecimal.
+     *
+     * @param raw
+     *        The byte array to convert to a BigDecimal
+     *
+     * @return A BigDecimal representing the byte array.
+     */
+    public BigDecimal convertByteToBigDecimal(byte[] raw) {
+        BitSet rawset = BitSet.valueOf(raw);
+
+        boolean sign = rawset.get(nativeOffset + (int)nativeFPspos);
+        BitSet mantissaset = rawset.get(nativeOffset + (int)nativeFPmpos, nativeOffset + (int)nativeFPmpos + (int)nativeFPmsize);
+        BitSet exponentset = rawset.get(nativeOffset + (int)nativeFPepos, nativeOffset + (int)nativeFPepos + (int)nativeFPesize);
+        byte[] expraw = Arrays.copyOf(exponentset.toByteArray(), (int)(nativeFPesize + 7)/8);
+        byte[] bexp = new byte[expraw.length];
+        if (datatypeOrder == ORDER_LE) {
+            int k = 0;
+            for(int j = expraw.length - 1; j >= 0; j--)
+                bexp[k++] = expraw[j];
+        }
+        else
+            System.arraycopy(expraw, 0, bexp, 0, expraw.length);
+        BigInteger bscale = new BigInteger(bexp);
+        long scale = bscale.longValue();
+        scale -= nativeFPebias;
+        double powscale = Math.pow(2, scale);
+
+        byte[] manraw = Arrays.copyOf(mantissaset.toByteArray(), (int)(nativeFPmsize + 7)/8);
+        byte[] bman = new byte[manraw.length];
+        if (datatypeOrder == ORDER_BE) {
+            int k = 0;
+            for(int j = manraw.length - 1; j >= 0; j--)
+                bman[k++] = manraw[j];
+        }
+        else
+            System.arraycopy(manraw, 0, bman, 0, manraw.length);
+        BitSet manset = BitSet.valueOf(bman);
+
+        double val = 0.0;
+        for (int i = 0; i < (int)nativeFPmsize; i++) {
+            if (manset.get((int)nativeFPmsize - 1 - i))
+                val += Math.pow(2, -(i));
+        }
+        if (nativeFPnorm == HDF5Constants.H5T_NORM_IMPLIED || nativeFPnorm == HDF5Constants.H5T_NORM_MSBSET)
+            val += 1;
+        BigDecimal sig = BigDecimal.valueOf(val);
+        if (sign)
+            sig.negate(MathContext.DECIMAL128);
+        return sig.multiply(new BigDecimal(powscale, MathContext.DECIMAL128));
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -657,7 +832,7 @@ public class H5Datatype extends Datatype {
 
             datatypeSign = NATIVE; // default
             if (nativeClass == HDF5Constants.H5T_ARRAY) {
-                long tmptid = -1;
+                long tmptid = HDF5Constants.H5I_INVALID_HID;
                 datatypeClass = CLASS_ARRAY;
                 try {
                     int ndims = H5.H5Tget_array_ndims(tid);
@@ -694,7 +869,7 @@ public class H5Datatype extends Datatype {
                         String memberName = H5.H5Tget_member_name(tid, i);
                         log.trace("fromNative(): compound type [{}] name={} start", i, memberName);
                         long memberOffset = H5.H5Tget_member_offset(tid, i);
-                        long memberID = -1;
+                        long memberID = HDF5Constants.H5I_INVALID_HID;
                         H5Datatype membertype = null;
                         try {
                             memberID = H5.H5Tget_member_type(tid, i);
@@ -787,6 +962,12 @@ public class H5Datatype extends Datatype {
                 datatypeClass = CLASS_REFERENCE;
                 log.trace("fromNative(): reference type");
                 try {
+                    isStdRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF);
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): H5T_STD_REF: ", ex);
+                }
+                try {
                     isRegRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
                 }
                 catch (Exception ex) {
@@ -801,8 +982,8 @@ public class H5Datatype extends Datatype {
             }
             else if (nativeClass == HDF5Constants.H5T_ENUM) {
                 datatypeClass = CLASS_ENUM;
-                long tmptid = -1;
-                long basetid = -1;
+                long tmptid = HDF5Constants.H5I_INVALID_HID;
+                long basetid = HDF5Constants.H5I_INVALID_HID;
                 try {
                     log.trace("fromNative(): enum type");
                     basetid = H5.H5Tget_super(tid);
@@ -855,7 +1036,7 @@ public class H5Datatype extends Datatype {
                 }
             }
             else if (nativeClass == HDF5Constants.H5T_VLEN) {
-                long tmptid = -1;
+                long tmptid = HDF5Constants.H5I_INVALID_HID;
                 datatypeClass = CLASS_VLEN;
                 isVLEN = true;
                 try {
@@ -908,7 +1089,7 @@ public class H5Datatype extends Datatype {
     public static long toNative(long tid) {
         // data type information
         log.trace("toNative(): tid={} start", tid);
-        long nativeID = -1;
+        long nativeID = HDF5Constants.H5I_INVALID_HID;
 
         try {
             nativeID = H5.H5Tget_native_type(tid);
@@ -936,8 +1117,8 @@ public class H5Datatype extends Datatype {
     @SuppressWarnings("rawtypes")
     @Override
     public long createNative() {
-        long tid = -1;
-        long tmptid = -1;
+        long tid = HDF5Constants.H5I_INVALID_HID;
+        long tmptid = HDF5Constants.H5I_INVALID_HID;
 
         String the_path = getFullName();
         // isNamed == true should have non-null fileFormat
@@ -976,7 +1157,7 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("createNative(): native array datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
                 finally {
                     close(tmptid);
@@ -1016,7 +1197,7 @@ public class H5Datatype extends Datatype {
                             memberOffset = -1;
                         }
 
-                        long memberID = -1;
+                        long memberID = HDF5Constants.H5I_INVALID_HID;
                         try {
                             memberID = memberType.createNative();
                             log.trace("createNative(): {} member[{}] with offset={} ID={}: ", memberName, i,
@@ -1035,7 +1216,7 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("createNative(): native compound datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
                 break;
             case CLASS_INTEGER:
@@ -1129,7 +1310,7 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("createNative(): native enum datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
                 finally {
                     close(tmptid);
@@ -1138,7 +1319,10 @@ public class H5Datatype extends Datatype {
                 break;
             case CLASS_FLOAT:
                 try {
-                    tid = H5.H5Tcopy((datatypeSize == 8) ? HDF5Constants.H5T_NATIVE_DOUBLE : HDF5Constants.H5T_NATIVE_FLOAT);
+                    if (datatypeSize > 8)
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_LDOUBLE);
+                    else
+                        tid = H5.H5Tcopy((datatypeSize == 8) ? HDF5Constants.H5T_NATIVE_DOUBLE : HDF5Constants.H5T_NATIVE_FLOAT);
 
                     if (datatypeOrder == Datatype.ORDER_BE) {
                         H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
@@ -1166,7 +1350,7 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("createNative(): native floating-point datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
 
                 break;
@@ -1178,7 +1362,7 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("createNative(): native character datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
 
                 break;
@@ -1200,21 +1384,25 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("createNative(): native string datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
 
                 break;
             case CLASS_REFERENCE:
                 try {
                     long objRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ);
-
-                    tid = H5.H5Tcopy((datatypeSize > objRefTypeSize) ? HDF5Constants.H5T_STD_REF_DSETREG
+                    long dsetRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_DSETREG);
+                    // use datatypeSize as which type to copy
+                    if (datatypeSize > dsetRefTypeSize)
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF);
+                    else
+                        tid = H5.H5Tcopy((datatypeSize > objRefTypeSize) ? HDF5Constants.H5T_STD_REF_DSETREG
                             : HDF5Constants.H5T_STD_REF_OBJ);
                 }
                 catch (Exception ex) {
                     log.debug("createNative(): native reference datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
 
                 break;
@@ -1235,7 +1423,7 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("createNative(): native variable-length datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
                 finally {
                     close(tmptid);
@@ -1287,7 +1475,7 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("createNative(): native bitfield datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
 
                 break;
@@ -1307,7 +1495,7 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("createNative(): native opaque datatype creation failed: ", ex);
                     if (tid >= 0) close(tid);
-                    tid = -1;
+                    tid = HDF5Constants.H5I_INVALID_HID;
                 }
 
                 break;
@@ -1471,6 +1659,9 @@ public class H5Datatype extends Datatype {
                 case 8:
                     data = new double[nPoints];
                     break;
+                case 16:
+                    data = new byte[nPoints*16];
+                    break;
                 default:
                     break;
             }
@@ -1557,7 +1748,7 @@ public class H5Datatype extends Datatype {
         }
 
         StringBuilder description = new StringBuilder();
-        long tid = -1;
+        long tid = HDF5Constants.H5I_INVALID_HID;
 
         switch (datatypeClass) {
             case CLASS_CHAR:
@@ -1854,6 +2045,7 @@ public class H5Datatype extends Datatype {
         boolean attrExisted = false;
         Attribute attr = (Attribute) info;
 
+        log.trace("writeMetadata(): Attribute");
         if (attributeList == null) {
             this.getMetadata();
         }
@@ -1926,6 +2118,254 @@ public class H5Datatype extends Datatype {
         return isRegRef;
     }
 
+    public boolean isStdRef() {
+        return isStdRef;
+    }
+
+    public boolean isReference() {
+        return (datatypeClass == Datatype.CLASS_REFERENCE);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.Datatype#getReferenceType()
+     */
+    @Override
+    public long getReferenceType() throws HDF5Exception {
+        if (isRegRef)
+            return HDF5Constants.H5T_STD_REF_DSETREG;
+        if (isRefObj)
+            return HDF5Constants.H5T_STD_REF_OBJ;
+        if (isStdRef)
+            return HDF5Constants.H5T_STD_REF;
+        return -1;
+    }
+
+    /**
+     * Checks if a reference datatype is all zero.
+     *
+     * @param refarr
+     *            the reference datatype data to be checked.
+     *
+     * @return true is the reference datatype data is all zero; otherwise returns false.
+     */
+    public static final boolean zeroArrayCheck(final byte[] refarr) {
+        for (byte b : refarr) {
+            if (b != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Get the reference datatype reference name.
+     *
+     * @param refarr
+     *            the reference datatype data to be queried.
+     *
+     * @return the reference datatype name string, null otherwise.
+     */
+    public static final String getReferenceName(byte[] refarr) {
+        String ref_name = H5.H5Rget_file_name(refarr) + H5.H5Rget_obj_name(refarr, HDF5Constants.H5P_DEFAULT);
+
+        if (H5.H5Rget_type(refarr) == HDF5Constants.H5R_ATTR)
+            ref_name += H5.H5Rget_attr_name(refarr);
+
+        return ref_name;
+    }
+
+    /**
+     * Get the reference datatype region reference as string.
+     *
+     * @param refarr
+     *            the reference datatype data to be queried.
+     *
+     * @return the reference datatype name string, null otherwise.
+     */
+    public static final String getReferenceRegion(byte[] refarr) {
+        String strVal = null;
+        try {
+            int ref_type = (int)H5.H5Rget_type(refarr);
+            if (ref_type == HDF5Constants.H5R_OBJECT1) {
+                log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_OBJECT1");
+                try {
+                    int obj_type = H5.H5Rget_obj_type3(refarr, HDF5Constants.H5P_DEFAULT);
+                    if (obj_type == HDF5Constants.H5O_TYPE_DATASET) {
+                        long new_obj_id = HDF5Constants.H5I_INVALID_HID;
+                        try {
+                            new_obj_id = H5.H5Ropen_object(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                            long new_obj_sid = HDF5Constants.H5I_INVALID_HID;
+                            try {
+                                new_obj_sid = H5.H5Ropen_region(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                String regStr = getReferenceName(refarr);
+                                long region_type = HDF5Constants.H5I_INVALID_HID;
+                                try {
+                                    region_type = H5.H5Sget_select_type(new_obj_id);
+                                    if (HDF5Constants.H5S_SEL_POINTS == region_type) {
+                                        strVal = regStr + " REGION_TYPE POINT";
+                                        //regStr += " REGION_TYPE POINT";
+                                        //strVal = dump_region_points(regStr, new_obj_sid, new_obj_id);
+                                    }
+                                    else {
+                                        strVal = regStr + " REGION_TYPE BLOCK";
+                                        //regStr += " REGION_TYPE BLOCK";
+                                        //strVal = dump_region_blocks(regStr, new_obj_sid, new_obj_id);
+                                    }
+                                }
+                                catch (Exception ex4) {
+                                    log.debug("Reference Region Type", ex4);
+                                }
+                            }
+                            catch (Exception ex3) {
+                                log.debug("Reference Object Space Open", ex3);
+                            }
+                            finally {
+                                H5.H5Sclose(new_obj_sid);
+                            }
+                        }
+                        catch (Exception ex2) {
+                            log.debug("Reference Object Open", ex2);
+                        }
+                        finally {
+                            H5.H5Dclose(new_obj_id);
+                        }
+                    } //obj_type == HDF5Constants.H5O_TYPE_DATASET
+                }
+                catch (Exception ex1) {
+                    log.debug("Reference Object Type", ex1);
+                }
+            }
+            else if (ref_type == HDF5Constants.H5R_DATASET_REGION1) {
+                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_DATASET_REGION1");
+                    strVal = "H5R_DATASET_REGION1";
+            }
+            else if (ref_type == HDF5Constants.H5R_OBJECT2) {
+                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_OBJECT2");
+                    try {
+                        int obj_type = H5.H5Rget_obj_type3(refarr, HDF5Constants.H5P_DEFAULT);
+                        if (obj_type == HDF5Constants.H5O_TYPE_DATASET) {
+                            strVal = "H5R_OBJECT2:H5O_TYPE_DATASET";
+                        }
+                    }
+                    catch (Exception ex1) {
+                        log.debug("Reference Object Type", ex1);
+                    }
+            }
+            else if (ref_type == HDF5Constants.H5R_DATASET_REGION2) {
+                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_DATASET_REGION2");
+                    strVal = "H5R_DATASET_REGION2";
+            }
+            else if (ref_type == HDF5Constants.H5R_ATTR) {
+                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_ATTR");
+                    strVal = "H5R_ATTR";
+            }
+        }
+        catch (Exception ex) {
+            log.debug("reference type failure", ex);
+        }
+        finally {
+            H5.H5Rdestroy(refarr);
+        }
+        return strVal;
+    }
+
+    /**
+     * Get the reference datatype region data as string.
+     *
+     * @param refarr
+     *            the reference datatype data to be queried.
+     *
+     * @return the reference datatype data, null otherwise.
+     */
+    public static final String getReferenceRegionData(byte[] refarr) {
+        String strVal = null;
+        try {
+            int ref_type = (int)H5.H5Rget_type(refarr);
+            if (ref_type == HDF5Constants.H5R_OBJECT1) {
+                log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_OBJECT1");
+                try {
+                    int obj_type = H5.H5Rget_obj_type3(refarr, HDF5Constants.H5P_DEFAULT);
+                    if (obj_type == HDF5Constants.H5O_TYPE_DATASET) {
+                        long new_obj_id = HDF5Constants.H5I_INVALID_HID;
+                        try {
+                            new_obj_id = H5.H5Ropen_object(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                            long new_obj_sid = HDF5Constants.H5I_INVALID_HID;
+                            try {
+                                new_obj_sid = H5.H5Ropen_region(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                String regStr = getReferenceName(refarr);
+                                long region_type = HDF5Constants.H5I_INVALID_HID;
+                                try {
+                                    region_type = H5.H5Sget_select_type(new_obj_id);
+                                    if (HDF5Constants.H5S_SEL_POINTS == region_type) {
+                                        strVal = regStr + " REGION_TYPE POINT";
+                                        //regStr += " REGION_TYPE POINT";
+                                        //strVal = dump_region_points(regStr, new_obj_sid, new_obj_id);
+                                    }
+                                    else {
+                                        strVal = regStr + " REGION_TYPE BLOCK";
+                                        //regStr += " REGION_TYPE BLOCK";
+                                        //strVal = dump_region_blocks(regStr, new_obj_sid, new_obj_id);
+                                    }
+                                }
+                                catch (Exception ex4) {
+                                    log.debug("Reference Region Type", ex4);
+                                }
+                            }
+                            catch (Exception ex3) {
+                                log.debug("Reference Object Space Open", ex3);
+                            }
+                            finally {
+                                H5.H5Sclose(new_obj_sid);
+                            }
+                        }
+                        catch (Exception ex2) {
+                            log.debug("Reference Object Open", ex2);
+                        }
+                        finally {
+                            H5.H5Dclose(new_obj_id);
+                        }
+                    } //obj_type == HDF5Constants.H5O_TYPE_DATASET
+                }
+                catch (Exception ex1) {
+                    log.debug("Reference Object Type", ex1);
+                }
+            }
+            else if (ref_type == HDF5Constants.H5R_DATASET_REGION1) {
+                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_DATASET_REGION1");
+                    strVal = "H5R_DATASET_REGION1";
+            }
+            else if (ref_type == HDF5Constants.H5R_OBJECT2) {
+                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_OBJECT2");
+                    try {
+                        int obj_type = H5.H5Rget_obj_type3(refarr, HDF5Constants.H5P_DEFAULT);
+                        if (obj_type == HDF5Constants.H5O_TYPE_DATASET) {
+                            strVal = "H5R_OBJECT2:H5O_TYPE_DATASET";
+                        }
+                    }
+                    catch (Exception ex1) {
+                        log.debug("Reference Object Type", ex1);
+                    }
+            }
+            else if (ref_type == HDF5Constants.H5R_DATASET_REGION2) {
+                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_DATASET_REGION2");
+                    strVal = "H5R_DATASET_REGION2";
+            }
+            else if (ref_type == HDF5Constants.H5R_ATTR) {
+                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_ATTR");
+                    strVal = "H5R_ATTR";
+            }
+        }
+        catch (Exception ex) {
+            log.debug("reference type failure", ex);
+        }
+        finally {
+            H5.H5Rdestroy(refarr);
+        }
+        return strVal;
+    }
+
     public int getNativeStrPad() {
         return nativeStrPad;
     }
@@ -1944,7 +2384,7 @@ public class H5Datatype extends Datatype {
      * nest.e
      * </pre>
      *
-     *@param dtype
+     * @param dtype
      *            the datatype to extract compound info from
      * @param name
      *            the name of the compound datatype
@@ -2038,8 +2478,8 @@ public class H5Datatype extends Datatype {
     public long createCompoundFieldType(String memberName) throws HDF5Exception {
         log.trace("createCompoundFieldType(): start member_name={}", memberName);
 
-        long topTID = -1;
-        long tmpTID1 = -1;
+        long topTID = HDF5Constants.H5I_INVALID_HID;
+        long tmpTID1 = HDF5Constants.H5I_INVALID_HID;
 
         try {
             if (this.isArray()) {
@@ -2119,7 +2559,7 @@ public class H5Datatype extends Datatype {
         }
         catch (Exception ex) {
             log.debug("createCompoundFieldType(): creation of compound field type failed: ", ex);
-            topTID = -1;
+            topTID = HDF5Constants.H5I_INVALID_HID;
         }
         finally {
             close(tmpTID1);
@@ -2141,7 +2581,20 @@ public class H5Datatype extends Datatype {
         return (tclass == HDF5Constants.H5T_COMPOUND || tclass == HDF5Constants.H5T_ENUM || tclass == HDF5Constants.H5T_VLEN || tclass == HDF5Constants.H5T_ARRAY);
     }
 
+    private boolean datatypeIsReference(long tid) {
+        long tclass = HDF5Constants.H5T_NO_CLASS;
+
+        try {
+            tclass = H5.H5Tget_class(tid);
+        }
+        catch (Exception ex) {
+            log.debug("datatypeIsReference():", ex);
+        }
+
+        return (tclass == HDF5Constants.H5T_REFERENCE);
+    }
+
     private boolean datatypeIsAtomic(long tid) {
-        return !datatypeIsComplex(tid) || isOpaque() || isBitField();
+        return !datatypeIsComplex(tid) || !isReference() || isOpaque() || isBitField();
     }
 }

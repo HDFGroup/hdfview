@@ -24,6 +24,7 @@ Major Enhancements
 
 Major Bug Fixes
 ==============================================================================
+    * Added spport to read and display non-standard floatg pint numbers.
     * Added optional startDir to command line options.
     * Corrected user.home vs user.dir confusion.
     * Split Current Working Directory options into three selections:
@@ -33,6 +34,10 @@ Major Bug Fixes
 
 Minor Bug Fixes
 ==============================================================================
+    * Corrected the create new attribute dialog from trying to write
+      the attribute twice.
+    * Added an initilize lib version bounds function. Now the change
+      lib version dialog correctly preloads the combo box values.
 
 
 Limitations / Known Problems
@@ -41,7 +46,7 @@ Limitations / Known Problems
       default display mode, as the data is loaded in its entirety. To view
       large datasets, it is recommended to right click on a data object and
       use the "Open As" menu item, where a subset of data to view can be
-      selected.
+      selected. This also includes files with very large numbers of objects.
 
     * Writing of variable-length types other than variable-length strings is
       currently unsupported.

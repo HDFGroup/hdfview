@@ -382,10 +382,9 @@ public class H5Attribute extends Attribute {
 
         try {
             long typeClass = H5.H5Tget_class(data_type);
+            long size = H5.H5Tget_size(data_type);
 
             if (typeClass == HDF5Constants.H5T_INTEGER) {
-                long size = H5.H5Tget_size(data_type);
-
                 currentData = HDFNativeData.byteToInt((int) start, (int) (len / size), data);
             }
             else if (typeClass == HDF5Constants.H5T_FLOAT) {

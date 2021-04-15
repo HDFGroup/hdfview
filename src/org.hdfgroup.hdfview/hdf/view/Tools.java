@@ -36,6 +36,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -2281,6 +2282,16 @@ public final class Tools {
         return sb.toString();
     }
 
+    public static final String toBinaryString(BigDecimal v, int nbytes) {
+        StringBuilder sb = new StringBuilder();
+        /*
+         * String val = String.format("%" + (8 * nbytes) + "s", v.toString(2)).replace(" ", "0").toUpperCase(); //
+         * Insert spacing for (int i = 0; i < nbytes; i++) { sb.append(val.substring(i * nbytes, nbytes * (i + 1))); if
+         * (i < nbytes - 1) sb.append(" "); }
+         */
+        return sb.toString();
+    }
+
     public static final String toBinaryString(BigInteger v, int nbytes) {
         StringBuilder sb = new StringBuilder();
         String val = String.format("%" + (8 * nbytes) + "s", v.toString(2)).replace(" ", "0").toUpperCase();
@@ -2340,6 +2351,10 @@ public final class Tools {
      */
     public static final String toHexString (BigInteger v, int nbytes) {
         return String.format("%" + (2 * nbytes) + "s", v.toString(16)).replace(" ", "0").toUpperCase();
+    }
+
+    public static final String toHexString (BigDecimal v, int nbytes) {
+        return null; // String.format("%" + (2 * nbytes) + "s", v.toString(16)).replace(" ", "0").toUpperCase();
     }
 
     /**
