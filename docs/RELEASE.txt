@@ -20,14 +20,11 @@ newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================
-    *  Converted to OpenJDK modules, for a smaller footprint and packaging
-      improvements. Now uses the jpackage command for bundling HDFView and
-      the JRE into a platform specific application.
-
+    *
 
 Major Bug Fixes
 ==============================================================================
-    * Added spport to read and display non-standard floatg pint numbers.
+    * Added support to read and display non-standard floating point numbers.
     * Added optional startDir to command line options.
     * Corrected user.home vs user.dir confusion.
     * Split Current Working Directory options into three selections:

@@ -14,7 +14,6 @@
 package hdf.view.TableView;
 
 import java.lang.reflect.Array;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.util.HashMap;
@@ -30,6 +29,7 @@ import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.h5.H5Datatype;
 import hdf.view.Tools;
+import hdf.view.TableView.DataDisplayConverterFactory.HDFDisplayConverter;
 
 /**
  * A Factory class to return a concrete class implementing the IDisplayConverter

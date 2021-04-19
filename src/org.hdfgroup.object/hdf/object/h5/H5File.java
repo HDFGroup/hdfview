@@ -3021,10 +3021,10 @@ public class H5File extends FileFormat {
      *
      * @param file_export_name
      *            The file name to export data into.
-     * @param file_name
-     *            The name of the HDF5 file containing the dataset.
-     * @param object_path
-     *            The full path of the dataset to be exported.
+     * @param object
+     *            The id of the HDF5 dataset.
+     * @param binary_order
+     *            The data byte order
      *
      * @throws Exception
      *            If there is a failure.
