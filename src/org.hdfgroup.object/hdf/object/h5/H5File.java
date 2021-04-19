@@ -1187,6 +1187,7 @@ public class H5File extends FileFormat {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
+    @Override
     public void initLibBounds() throws Exception {
         if (fid >= 0) {
             /* Get the file's file access property list */
