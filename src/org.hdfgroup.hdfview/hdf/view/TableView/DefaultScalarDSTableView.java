@@ -62,6 +62,7 @@ import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.Utils;
+import hdf.object.h5.H5Datatype;
 import hdf.view.HDFView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
@@ -653,7 +654,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         natTable.addLayerListener(new ScalarDSCellSelectionListener());
 
         // Create popup menu for region or object ref.
-        if (isRegRef || isObjRef) {
+        if (isStdRef || isRegRef || isObjRef) {
             natTable.addConfiguration(new RefContextMenu(natTable));
         }
 
@@ -694,7 +695,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             return dataValue;
         }
 
-        if (isRegRef) {
+        if (isStdRef) {
+            // std. ref data are stored in bytes
+            selectedData = new byte[size];
+        }
+        else if (isRegRef) {
             // reg. ref data are stored in strings
             selectedData = new String[size];
         }
@@ -1108,13 +1113,59 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     } // end of showRegRefData(String reg)
 
     /**
+     * Display data pointed to by region references. Data of each region is shown in
+     * a separate spreadsheet. The std. ref. information is stored in bytes
+     *
+     * @param reg
+     *            the array of bytes that contain the std. ref information.
+     *
+     */
+    @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected void showStdRefData(byte[] refarr) {
+        log.trace("showStdRefData(): start: refarr={}", refarr);
+
+        if (refarr == null || !H5Datatype.zeroArrayCheck(refarr)) {
+            Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
+            log.debug("showStdRefData(): ref is null or invalid");
+            return;
+        }
+
+        //long loc_id = HDF5Constants.H5I_INVALID_HID;
+        H5Datatype.getReferenceRegionData(refarr);
+
+        //if (loc_id >= 0) {
+            /*
+             * try { dsetCopy.getData(); } catch (Exception ex) { log.debug("showStdRefData(): getData failure: ", ex);
+             * Tools.showError(shell, "Select", "Region Reference: " + ex.getMessage()); } Class<?> theClass = null;
+             * String viewName = null; switch (viewType) { case IMAGE: viewName = HDFView.getListOfImageViews().get(0);
+             * break; case TABLE: viewName = (String) HDFView.getListOfTableViews().get(0); break; default: viewName =
+             * null; } try { theClass = Class.forName(viewName); } catch (Exception ex) { try { theClass =
+             * ViewProperties.loadExtClass().loadClass(viewName); } catch (Exception ex2) { theClass = null; } } // Use
+             * default dataview if (theClass == null) { switch (viewType) { case IMAGE: viewName =
+             * ViewProperties.DEFAULT_IMAGEVIEW_NAME; break; case TABLE: viewName =
+             * ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME; break; default: viewName = null; } try { theClass =
+             * Class.forName(viewName); } catch (Exception ex) {
+             * log.debug("showStdRefData(): no suitable display class found"); Tools.showError(shell, "Select",
+             * "Could not show reference data: no suitable display class found"); return; } } HashMap map = new
+             * HashMap(1); map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy); Object[] args = { viewer, map }; try
+             * { Tools.newInstance(theClass, args); } catch (Exception ex) {
+             * log.debug("showStdRefData(): Could not show reference data: ", ex); Tools.showError(shell, "Select",
+             * "Could not show reference data: " + ex.toString());
+             *            }
+             */
+            //try {H5.H5Dclose(loc_id);} catch (Exception ex) {}
+        //}
+    } // end of showStdRefData(byte[] refarr)
+
+    /**
      * Update cell value label and cell value field when a cell is selected
      */
     private class ScalarDSCellSelectionListener implements ILayerListener {
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
-                log.trace("ScalarDSCellSelectionListener: CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                log.trace("ScalarDSCellSelectionListener: CellSelected isStdRef={} isRegRef={} isObjRef={}", isStdRef, isRegRef, isObjRef);
 
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
@@ -1134,7 +1185,18 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     return;
                 }
 
-                if (isRegRef) {
+                if (isStdRef) {
+                    if (H5Datatype.zeroArrayCheck((byte[])val)) {
+                        strVal = null;
+                    }
+                    boolean displayValues = ViewProperties.showRegRefValues();
+
+                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected displayValues={}", displayValues);
+                    if (displayValues && val != null) {
+                        strVal = H5Datatype.getReferenceRegionData((byte[])val);
+                    }
+                }
+                else if (isRegRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
 
                     log.trace("ScalarDSCellSelectionListener:RegRef CellSelected displayValues={}", displayValues);

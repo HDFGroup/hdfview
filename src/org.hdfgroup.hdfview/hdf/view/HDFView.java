@@ -116,6 +116,9 @@ public class HDFView implements DataViewManager {
     /* The directory where HDFView is installed */
     private String                     rootDir;
 
+    /* The initial directory where HDFView looks for files */
+    private String                     startDir;
+
     /* The current working directory */
     private String                     currentDir;
 
@@ -168,7 +171,7 @@ public class HDFView implements DataViewManager {
 
     private static final String        ABOUT_HDFVIEW = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
             + "For " + System.getProperty("os.name") + "\n\n"
-            + "Copyright " + '\u00a9' + " 2006-2020 The HDF Group.\n"
+            + "Copyright " + '\u00a9' + " 2006-2021 The HDF Group.\n"
             + "All rights reserved.";
 
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
@@ -203,17 +206,20 @@ public class HDFView implements DataViewManager {
      *
      * @param root
      *            the directory where the HDFView is installed.
+     * @param start_dir
+     *            the starting directory for file searches
      */
-    public HDFView(String root) {
+    public HDFView(String root, String start_dir) {
         log.debug("Root is {}", root);
 
         if (display == null || display.isDisposed()) display = new Display();
 
         rootDir = root;
+        startDir = start_dir;
 
         //editGUIs = new Vector<Object>();
 
-        props = new ViewProperties(rootDir);
+        props = new ViewProperties(rootDir, startDir);
         try {
             props.load();
         }
@@ -230,7 +236,7 @@ public class HDFView implements DataViewManager {
             currentDir = ViewProperties.getWorkDir();
 
         if (currentDir == null)
-            currentDir = System.getProperty("user.home");
+            currentDir = System.getProperty("user.dir");
 
         log.info("Current directory is {}", currentDir);
 
@@ -319,8 +325,9 @@ public class HDFView implements DataViewManager {
                     }
                     catch (Exception ex) {}
 
-                    urlBar.add(currentFile, 0);
-                    urlBar.select(0);
+                    // first entry is always the workdir
+                    urlBar.add(currentFile, 1);
+                    urlBar.select(1);
                 }
                 catch (Exception ex) {
                     showError(ex.toString());
@@ -564,8 +571,9 @@ public class HDFView implements DataViewManager {
                         log.debug("unable to remove {} from urlBar", filename);
                     }
 
-                    urlBar.add(filename, 0);
-                    urlBar.select(0);
+                    // first entry is always the workdir
+                    urlBar.add(filename, 1);
+                    urlBar.select(1);
                 }
                 catch (Exception ex) {
                     display.beep();
@@ -632,8 +640,9 @@ public class HDFView implements DataViewManager {
                         log.debug("unable to remove {} from urlBar", filename);
                     }
 
-                    urlBar.add(filename, 0);
-                    urlBar.select(0);
+                    // first entry is always the workdir
+                    urlBar.add(filename, 1);
+                    urlBar.select(1);
                 }
                 catch (Exception ex) {
                     display.beep();
@@ -839,7 +848,8 @@ public class HDFView implements DataViewManager {
 
                 // TODO: this functionality is currently broken because isWorkDirChanged() is not exposed correctly.
                 // if (userOptionDialog.isWorkDirChanged())
-                //     currentDir = ViewProperties.getWorkDir();
+                // this will always overwrite the currentDir until isWorkDirChanged() is fixed
+                currentDir = ViewProperties.getWorkDir();
 
                 //if (userOptionDialog.isFontChanged()) {
                 Font font = null;
@@ -1756,8 +1766,9 @@ public class HDFView implements DataViewManager {
                 log.trace("unable to remove {} from urlBar", filename);
             }
 
-            urlBar.add(filename, 0);
-            urlBar.select(0);
+            // first entry is always the workdir
+            urlBar.add(filename, 1);
+            urlBar.select(1);
         }
         else {
             if (!isTesting) {
@@ -1800,8 +1811,9 @@ public class HDFView implements DataViewManager {
                         log.trace("unable to remove {} from urlBar", chosenFiles[i].getAbsolutePath());
                     }
 
-                    urlBar.add(chosenFiles[i].getAbsolutePath(), 0);
-                    urlBar.select(0);
+                    // first entry is always the workdir
+                    urlBar.add(chosenFiles[i].getAbsolutePath(), 1);
+                    urlBar.select(1);
 
                     log.trace("openLocalFile treeView.openFile(chosenFiles[{}]: {}",i,chosenFiles[i].getAbsolutePath());
                     try {
@@ -1847,8 +1859,9 @@ public class HDFView implements DataViewManager {
                     log.trace("unable to remove {} from urlBar", chosenFile.getAbsolutePath());
                 }
 
-                urlBar.add(chosenFile.getAbsolutePath(), 0);
-                urlBar.select(0);
+                // first entry is always the workdir
+                urlBar.add(chosenFile.getAbsolutePath(), 1);
+                urlBar.select(1);
 
                 log.trace("openLocalFile treeView.openFile(chosenFile[{}]: {}", chosenFile.getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                 try {
@@ -1969,8 +1982,9 @@ public class HDFView implements DataViewManager {
                     log.trace("unable to remove {} from urlBar", filename);
                 }
 
-                urlBar.add(filename, 0);
-                urlBar.select(0);
+                // first entry is always the workdir
+                urlBar.add(filename, 1);
+                urlBar.select(1);
             }
             catch (Exception ex) {
                 showError(ex.toString());
@@ -2450,6 +2464,9 @@ public class HDFView implements DataViewManager {
      *        -Dhdf.hdf5lib.H5.hdf5lib="your HDF5 library path"
      *        -Dhdf.hdflib.HDFLibrary.hdflib="your HDF4 library path"
      *        -root "the directory where the HDFView is installed"
+     *        -start "the directory HDFView searches for files"
+     *        -geometry or -g "the preferred window size as WIDTHxHEIGHT+XOFF+YOFF"
+     *        -java.version "show the version of jave used to build the HDFView and exit"
      *        [filename] "the file to open"
      * </pre>
      *
@@ -2459,9 +2476,10 @@ public class HDFView implements DataViewManager {
         if (display == null || display.isDisposed()) display = new Display();
 
         String rootDir = System.getProperty("hdfview.root");
-        log.trace("main: rootDir = {} ", rootDir);
         if (rootDir == null)
             rootDir = System.getProperty("user.dir");
+        String startDir = System.getProperty("user.dir");
+        log.trace("main: rootDir = {}  startDir = {}", rootDir, startDir);
 
         File tmpFile = null;
         Monitor primaryMonitor = display.getPrimaryMonitor();
@@ -2485,6 +2503,19 @@ public class HDFView implements DataViewManager {
                         rootDir = tmpFile.getPath();
                     else if(tmpFile.isFile())
                         rootDir = tmpFile.getParent();
+                }
+                catch (Exception ex) {}
+            }
+            else if ("-start".equalsIgnoreCase(args[i])) {
+                j--;
+                try {
+                    j--;
+                    tmpFile = new File(args[++i]);
+
+                    if(tmpFile.isDirectory())
+                        startDir = tmpFile.getPath();
+                    else if(tmpFile.isFile())
+                        startDir = tmpFile.getParent();
                 }
                 catch (Exception ex) {}
             }
@@ -2558,12 +2589,13 @@ public class HDFView implements DataViewManager {
 
         final ArrayList<File> theFileList = fList;
         final String the_rootDir = rootDir;
+        final String the_startDir = startDir;
         final int the_X = X, the_Y = Y, the_W = W, the_H = H;
 
         display.syncExec(new Runnable() {
             @Override
             public void run() {
-                HDFView app = new HDFView(the_rootDir);
+                HDFView app = new HDFView(the_rootDir, the_startDir);
 
                 // TODO: Look for a better solution to native dialog problem
                 app.setTestState(false);

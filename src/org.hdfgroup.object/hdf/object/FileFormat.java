@@ -1992,6 +1992,16 @@ public abstract class FileFormat extends File {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getLibBounds.");
     }
 
+    /**
+     * Initialize the bounds of library versions
+     *
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
+    public void initLibBounds() throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:initLibBounds.");
+    }
+
     public String getLibBoundsDescription() {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getLibBoundsDescription.");
     }

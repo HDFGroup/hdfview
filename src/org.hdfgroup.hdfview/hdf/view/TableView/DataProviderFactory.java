@@ -26,6 +26,7 @@ import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.Utils;
+import hdf.object.h5.H5Datatype;
 import hdf.view.Tools;
 
 /**
@@ -57,7 +58,6 @@ public class DataProviderFactory {
         dataFormatReference = dataObject;
 
         HDFDataProvider dataProvider = getDataProvider(dataObject.getDatatype(), dataBuf, dataTransposed);
-
 
         return dataProvider;
     }
@@ -1364,10 +1364,69 @@ public class DataProviderFactory {
 
     private static class RefDataProvider extends HDFDataProvider {
 
+        private final long typeSize;
+        private final H5Datatype h5dtype;
+
         RefDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
 
             log = org.slf4j.LoggerFactory.getLogger(RefDataProvider.class);
+
+            h5dtype = (H5Datatype)dtype;
+            typeSize = dtype.getDatatypeSize();
+        }
+
+        @Override
+        public Object getDataValue(int columnIndex, int rowIndex) {
+            log.trace("getDataValue({}, {}): start", rowIndex, columnIndex);
+
+            try {
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
+
+                bufIndex *= typeSize;
+                theValue = populateReferenceRegion(dataBuf, bufIndex);
+            }
+            catch (Exception ex) {
+                log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
+                theValue = DataFactoryUtils.errStr;
+            }
+
+            log.trace("getDataValue({}, {})({}): finish", rowIndex, columnIndex, theValue);
+
+            return theValue;
+        }
+
+        @Override
+        public Object getDataValue(Object obj, int index) {
+            log.trace("getDataValue({}, {}): start", obj, index);
+
+            try {
+                index *= typeSize;
+                theValue = populateReferenceRegion(obj, index);
+            }
+            catch (Exception ex) {
+                log.debug("getDataValue({}, {}): ", obj, index, ex);
+                theValue = DataFactoryUtils.errStr;
+            }
+
+            log.trace("getDataValue({}, {})({}): finish", obj, index, theValue);
+
+            return theValue;
+        }
+
+        private String populateReferenceRegion(Object byteBuf, int startIndex) {
+            byte[] byteElements = new byte[(int) typeSize];
+            String regionStr = null;
+
+            for (int i = 0; i < typeSize; i++) {
+                byteElements[i] = Array.getByte(byteBuf, startIndex + i);
+            }
+            if (h5dtype.zeroArrayCheck(byteElements))
+                regionStr = "NULL";
+            else
+                regionStr = h5dtype.getReferenceRegion(byteElements);
+
+            return regionStr;
         }
 
     }

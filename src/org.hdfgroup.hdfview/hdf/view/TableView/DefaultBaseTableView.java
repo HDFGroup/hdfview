@@ -124,6 +124,7 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.object.h5.H5Datatype;
 import hdf.view.Chart;
 import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
@@ -200,7 +201,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
     protected boolean                       isDisplayTypeChar, isDataTransposed;
 
-    protected boolean                       isRegRef = false, isObjRef = false;
+    protected boolean                       isRegRef = false, isObjRef = false, isStdRef = false;
     protected boolean                       showAsHex = false, showAsBin = false;
 
     // Keep references to the selection and data layers for ease of access
@@ -407,16 +408,15 @@ public abstract class DefaultBaseTableView implements TableView {
 
         log.trace("Data object isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar, isEnumConverted);
 
-        if (dataObject.getDatatype().isRef()) {
-            if (dataObject.getDatatype().getDatatypeSize() > 8) {
-                isReadOnly = true;
-                isRegRef = true;
+        if (dtype.isRef()) {
+            if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
+                isStdRef = ((H5Datatype)dtype).isStdRef();
+                isRegRef = ((H5Datatype)dtype).isRegRef();
+                isObjRef = ((H5Datatype)dtype).isRefObj();
             }
-            else
-                isObjRef = true;
         }
 
-        log.trace("Data object isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
+        log.trace("Data object isStdRef={} isRegRef={} isObjRef={} showAsHex={}", isStdRef, isRegRef, isObjRef, showAsHex);
 
         // Setup subset information
         int rank = dataObject.getRank();
@@ -518,7 +518,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         /* Create the actual NatTable */
-        log.debug("table creation", ((HObject) dataObject).getName());
+        log.debug("table creation {}", ((HObject) dataObject).getName());
         try {
             dataTable = createTable(content, dataObject);
             if (dataTable == null) {
@@ -1037,6 +1037,8 @@ public abstract class DefaultBaseTableView implements TableView {
     protected abstract void showObjRefData(long ref);
 
     protected abstract void showRegRefData(String reg);
+
+    protected abstract void showStdRefData(byte[] reg);
 
     /**
      * Display data pointed to by object references. Data of each object is shown in
@@ -2464,7 +2466,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
             });
 
-            if (isRegRef || isObjRef) {
+            if (isStdRef || isRegRef || isObjRef) {
                 // Show data pointed to by reference on double click
                 this.addConfiguration(new AbstractUiBindingConfiguration() {
                     @Override
@@ -2472,7 +2474,7 @@ public abstract class DefaultBaseTableView implements TableView {
                         uiBindingRegistry.registerDoubleClickBinding(new MouseEventMatcher(), new IMouseAction() {
                             @Override
                             public void run(NatTable table, MouseEvent event) {
-                                if (!(isRegRef || isObjRef)) return;
+                                if (!(isStdRef || isRegRef || isObjRef)) return;
 
                                 viewType = ViewType.TABLE;
 
@@ -2509,7 +2511,9 @@ public abstract class DefaultBaseTableView implements TableView {
                                 }
                                 int len = Array.getLength(selectedRows);
                                 for (int i = 0; i < len; i++) {
-                                    if (isRegRef)
+                                    if (isStdRef)
+                                        showStdRefData((byte[]) Array.get(theData, selectedRows[i]));
+                                    else if (isRegRef)
                                         showRegRefData((String) Array.get(theData, selectedRows[i]));
                                     else if (isObjRef)
                                         showObjRefData(Array.getLong(theData, selectedRows[i]));
@@ -2719,7 +2723,11 @@ public abstract class DefaultBaseTableView implements TableView {
                     log.trace("show reference data: Show data as {}: len={}", viewType, len);
 
                     for (int i = 0; i < len; i++) {
-                        if (isRegRef) {
+                        if (isStdRef) {
+                            log.trace("show reference data: Show data[{}] as {}: isStdRef={}", i, viewType, isStdRef);
+                            showStdRefData((byte[]) Array.get(theData, i));
+                        }
+                        else if (isRegRef) {
                             log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i, viewType, isRegRef);
                             showRegRefData((String) Array.get(theData, i));
                         }
@@ -2769,7 +2777,11 @@ public abstract class DefaultBaseTableView implements TableView {
                     log.trace("show reference data: Show data as {}: len={}", viewType, len);
 
                     for (int i = 0; i < len; i++) {
-                        if (isRegRef) {
+                        if (isStdRef) {
+                            log.trace("show reference data: Show data[{}] as {}: isStdRef={}", i, viewType, isStdRef);
+                            showStdRefData((byte[]) Array.get(theData, i));
+                        }
+                        else if (isRegRef) {
                             log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i, viewType, isRegRef);
                             showRegRefData((String) Array.get(theData, i));
                         }
@@ -2784,52 +2796,56 @@ public abstract class DefaultBaseTableView implements TableView {
             // item = new MenuItem(menu, SWT.PUSH);
             // item.setText("Show As &Text");
             // item.addSelectionListener(new SelectionAdapter() {
-            // public void widgetSelected(SelectionEvent e) {
-            // viewType = ViewType.IMAGE;
+            //     public void widgetSelected(SelectionEvent e) {
+            //         viewType = ViewType.IMAGE;
             //
-            // log.trace("show reference data: Show data as {}: ", viewType);
+            //         log.trace("show reference data: Show data as {}: ", viewType);
             //
-            // Object theData = getSelectedData();
-            //  (theData == null) {
-            // shell.getDisplay().beep();
-            // Tools.showError(shell, "Select", "No data selected.");
-            // return;
-            // }
+            //         Object theData = getSelectedData();
+            //         if (theData == null) {
+            //             shell.getDisplay().beep();
+            //             Tools.showError(shell, "Select", "No data selected.");
+            //             return;
+            //         }
             //
-            // // Since NatTable returns the selected row positions as a Set<Range>, convert
-            // this to
-            // // an Integer[]
-            // Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
-            // Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
-            // Iterator<Range> i1 = rowPositions.iterator();
-            // while(i1.hasNext()) {
-            // selectedRowPos.addAll(i1.next().getMembers());
-            // }
+            //         // Since NatTable returns the selected row positions as a Set<Range>,
+            //         // convert this to an Integer[]
+            //         Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
+            //         Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+            //         Iterator<Range> i1 = rowPositions.iterator();
+            //         while(i1.hasNext()) {
+            //             selectedRowPos.addAll(i1.next().getMembers());
+            //         }
             //
-            // Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
-            // int[] selectedCols = selectionLayer.getFullySelectedColumnPositions();
-            //  (selectedRows == null || selectedRows.length <= 0) {
-            // log.trace("show reference data: Show data as {}: selectedRows is empty",
-            // viewType);
-            // return;
-            // }
+            //         Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
+            //         int[] selectedCols = selectionLayer.getFullySelectedColumnPositions();
+            //         if (selectedRows == null || selectedRows.length <= 0) {
+            //             log.trace("show reference data: Show data as {}: selectedRows is empty",
+            //                       viewType);
+            //             return;
+            //         }
             //
-            // int len = Array.getLength(selectedRows) * Array.getLength(selectedCols);
-            // log.trace("show reference data: Show data as {}: len={}", viewType, len);
+            //         int len = Array.getLength(selectedRows) * Array.getLength(selectedCols);
+            //         log.trace("show reference data: Show data as {}: len={}", viewType, len);
             //
-            //  (int i = 0; i < len; i++) {
-            //  (isRegRef) {
-            // log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i,
-            // viewType, isRegRef);
-            // showRegRefData((String) Array.get(theData, i));
-            // }
-            // else if (isObjRef) {
-            // log.trace("show reference data: Show data[{}] as {}: isObjRef={}", i,
-            // viewType, isObjRef);
-            // showObjRefData(Array.getLong(theData, i));
-            // }
-            // }
-            // }
+            //         if (int i = 0; i < len; i++) {
+            //             if (isStdRef) {
+            //                 log.trace("show reference data: Show data[{}] as {}: isStdRef={}", i,
+            //                           viewType, isStdRef);
+            //                 showStdRefData((byte[]) Array.get(theData, i));
+            //             }
+            //             else if (isRegRef) {
+            //                 log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i,
+            //                           viewType, isRegRef);
+            //                 showRegRefData((String) Array.get(theData, i));
+            //             }
+            //             else if (isObjRef) {
+            //                 log.trace("show reference data: Show data[{}] as {}: isObjRef={}", i,
+            //                           viewType, isObjRef);
+            //                 showObjRefData(Array.getLong(theData, i));
+            //             }
+            //         }
+            //     }
             // });
 
             return new PopupMenuBuilder(table, menu);

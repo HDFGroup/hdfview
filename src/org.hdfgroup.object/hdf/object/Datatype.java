@@ -703,6 +703,15 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     public abstract void fromNative(long nativeID);
 
     /**
+     * If the datatype is a reference, then return the type.
+     *
+     * @return the datatype reference type if successful; otherwise returns negative value.
+     */
+    public long getReferenceType() {
+        return -1;
+    }
+
+    /**
      * Returns a short text description of this datatype.
      *
      * @return a short text description of this datatype
