@@ -46,7 +46,7 @@ Limitations / Known Problems
       default display mode, as the data is loaded in its entirety. To view
       large datasets, it is recommended to right click on a data object and
       use the "Open As" menu item, where a subset of data to view can be
-      selected. This also includes files with very large numbers of objects.
+      selected.
 
     * HDFView also cannot nicely handle large numbers of objects, because of
       a design issue that requires HDFView to visit all the objects in a file.
