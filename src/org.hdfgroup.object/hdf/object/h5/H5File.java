@@ -117,6 +117,7 @@ public class H5File extends FileFormat {
     public static final int LIBVER_EARLIEST = HDF5Constants.H5F_LIBVER_EARLIEST;
     public static final int LIBVER_V18 = HDF5Constants.H5F_LIBVER_V18;
     public static final int LIBVER_V110 = HDF5Constants.H5F_LIBVER_V110;
+    public static final int LIBVER_V112 = HDF5Constants.H5F_LIBVER_V112;
 
     /***************************************************************************
      * Constructor
@@ -1069,6 +1070,9 @@ public class H5File extends FileFormat {
         else if(lowStr.equals("V110")) {
             low = HDF5Constants.H5F_LIBVER_V110;
         }
+        else if(lowStr.equals("V112")) {
+            low = HDF5Constants.H5F_LIBVER_V112;
+        }
         else if(lowStr.equals("Latest")) {
             low = HDF5Constants.H5F_LIBVER_LATEST;
         }
@@ -1084,6 +1088,9 @@ public class H5File extends FileFormat {
         }
         else if(highStr.equals("V110")) {
             high = HDF5Constants.H5F_LIBVER_V110;
+        }
+        else if(highStr.equals("V112")) {
+            high = HDF5Constants.H5F_LIBVER_V112;
         }
         else if(highStr.equals("Latest")) {
             high = HDF5Constants.H5F_LIBVER_LATEST;
@@ -1131,6 +1138,9 @@ public class H5File extends FileFormat {
             else if(lowStr.equals("V110")) {
                 low = HDF5Constants.H5F_LIBVER_V110;
             }
+            else if(lowStr.equals("V112")) {
+                low = HDF5Constants.H5F_LIBVER_V112;
+            }
             else if(lowStr.equals("Latest")) {
                 low = HDF5Constants.H5F_LIBVER_LATEST;
             }
@@ -1146,6 +1156,9 @@ public class H5File extends FileFormat {
             }
             else if(highStr.equals("V110")) {
                 high = HDF5Constants.H5F_LIBVER_V110;
+            }
+            else if(highStr.equals("V112")) {
+                high = HDF5Constants.H5F_LIBVER_V112;
             }
             else if(highStr.equals("Latest")) {
                 high = HDF5Constants.H5F_LIBVER_LATEST;
@@ -1218,6 +1231,9 @@ public class H5File extends FileFormat {
         else if (libver[0] == HDF5Constants.H5F_LIBVER_V110) {
             libversion = "V110 and ";
         }
+        else if (libver[0] == HDF5Constants.H5F_LIBVER_V112) {
+            libversion = "V112 and ";
+        }
         else if (libver[0] == HDF5Constants.H5F_LIBVER_LATEST) {
             libversion = "Latest and ";
         }
@@ -1229,6 +1245,9 @@ public class H5File extends FileFormat {
         }
         else if (libver[1] == HDF5Constants.H5F_LIBVER_V110) {
             libversion += "V110";
+        }
+        else if (libver[1] == HDF5Constants.H5F_LIBVER_V112) {
+            libversion += "V112";
         }
         else if (libver[1] == HDF5Constants.H5F_LIBVER_LATEST) {
             libversion += "Latest";
