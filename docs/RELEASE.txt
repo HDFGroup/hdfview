@@ -24,7 +24,7 @@ Major Enhancements
 
 Major Bug Fixes
 ==============================================================================
-    * Added spport to read and display non-standard floatg pint numbers.
+    * Added support to read and display non-standard floating point numbers.
     * Added optional startDir to command line options.
     * Corrected user.home vs user.dir confusion.
     * Split Current Working Directory options into three selections:
