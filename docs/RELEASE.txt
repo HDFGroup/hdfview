@@ -48,6 +48,9 @@ Limitations / Known Problems
       use the "Open As" menu item, where a subset of data to view can be
       selected. This also includes files with very large numbers of objects.
 
+    * HDFView also cannot nicely handle large numbers of objects, because of
+      a design issue that requires HDFView to visit all the objects in a file.
+
     * Writing of variable-length types other than variable-length strings is
       currently unsupported.
 
