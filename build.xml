@@ -1266,12 +1266,6 @@
         <!-- Create the run batch file -->
         <copy file="${packagefiles.dir}/hdfview.bat.in" tofile="${release.dir}/hdfview.bat" />
 
-        <!-- Set the correct classpath for the batch file -->
-        <pathconvert targetos="windows" property="runscript.classpath" refid="jar-classpath">
-            <map from="${basedir}" to="%INSTALLDIR%" />
-            <map from="${hdf.lib.dir}" to="%INSTALLDIR%\\lib" />
-            <map from="${hdf5.lib.dir}" to="$INSTALLDIR\\lib" />
-        </pathconvert>
         <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar" />
         <replace file="${release.dir}/hdfview.bat" token="@SLF4J@" value="${runscript.slf4j}" />
     </target>
