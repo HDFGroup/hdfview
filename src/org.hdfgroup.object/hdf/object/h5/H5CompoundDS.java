@@ -1178,7 +1178,10 @@ public class H5CompoundDS extends CompoundDS {
         else if (dtype.isFloat()) {
             log.trace("convertByteMember(): converting byte array to float array");
 
-            theObj = HDFNativeData.byteToFloat(byteData);
+            if (dtype.getDatatypeSize() == 16)
+                theObj = dtype.byteToBigDecimal(byteData, 0);
+            else
+                theObj = HDFNativeData.byteToFloat(byteData);
         }
         else if (dtype.isRef()) {
             log.trace("convertByteMember(): reference type - converting byte array to long array");

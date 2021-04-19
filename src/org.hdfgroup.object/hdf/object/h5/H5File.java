@@ -575,6 +575,10 @@ public class H5File extends FileFormat {
                                     log.trace("getAttribute(): isText: converting byte array to string array");
                                     value = Attribute.byteToString((byte[]) value, (int) attr.getDatatype().getDatatypeSize());
                                 }
+                                else if (attr.getDatatype().isFloat() && attr.getDatatype().getDatatypeSize() == 16) {
+                                    log.trace("scalarDatasetCommonIO(): isFloat: converting byte array to BigDecimal array");
+                                    value = ((H5Datatype)attr.getDatatype()).byteToBigDecimal(0, (int) lsize, (byte[]) value);
+                                }
                                 else if (((H5Datatype)attr.getDatatype()).isRefObj()) {
                                     log.trace("getAttribute(): Attribute[{}] isREF: converting byte array to long array", i);
                                     value = HDFNativeData.byteToLong((byte[]) value);
@@ -3005,10 +3009,11 @@ public class H5File extends FileFormat {
      * @throws Exception
      *            If there is a failure.
      */
-    @Override
-    public void exportDataset(String file_export_name, String file_name, String object_path, int binary_order)
+    public void exportDataset(String file_export_name, Dataset object, int binary_order)
             throws Exception {
-        H5.H5export_dataset(file_export_name, file_name, object_path, binary_order);
+        long did = object.open();
+        H5.H5export_dataset(file_export_name, did, object.getFullName(), binary_order);
+        object.close(did);
     }
 
     /**
