@@ -562,8 +562,8 @@ public class NewAttributeDialog extends NewDataObjectDialog {
         attr.setData(value);
 
         try {
-            parentObj.getFileFormat().writeAttribute(parentObj, attr, false);
             if (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot() && h4GrAttrRadioButton.getSelection()) {
+                parentObj.getFileFormat().writeAttribute(parentObj, attr, false);
                 // don't find a good way to write HDF4 global
                 // attribute. Use the isExisted to separate the
                 // global attribute is GR or SD
@@ -573,7 +573,7 @@ public class NewAttributeDialog extends NewDataObjectDialog {
                 }
             }
             else {
-                log.trace("writeMetadata()");
+                log.trace("writeMetadata() via write()");
                 attr.write();
             }
         }
