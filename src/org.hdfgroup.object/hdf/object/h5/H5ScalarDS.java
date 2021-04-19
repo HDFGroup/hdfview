@@ -15,6 +15,7 @@
 package hdf.object.h5;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Vector;
@@ -860,7 +861,7 @@ public class H5ScalarDS extends ScalarDS {
                     if ((originalBuf == null) || dsDatatype.isEnum() || dsDatatype.isText() || dsDatatype.isRefObj()
                             || ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
                         try {
-                            theData = H5Datatype.allocateArray(dsDatatype, (int) totalSelectedSpacePoints);
+                            theData = H5Datatype.allocateArray(dsDatatype, (int)totalSelectedSpacePoints);
                         }
                         catch (OutOfMemoryError err) {
                             log.debug("scalarDatasetCommonIO(): Out of memory");
@@ -917,6 +918,19 @@ public class H5ScalarDS extends ScalarDS {
                             log.trace("scalarDatasetCommonIO(): isText: converting byte array to string array");
                             theData = byteToString((byte[]) theData, (int) dsDatatype.getDatatypeSize());
                         }
+                        else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
+                            log.trace("scalarDatasetCommonIO(): isFloat: converting byte array to BigDecimal array");
+                            theData = dsDatatype.byteToBigDecimal(0, (int)totalSelectedSpacePoints, (byte[]) theData);
+                        }
+                        else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() && dsDatatype.getDatatypeBase().getDatatypeSize() == 16) {
+                            log.trace("scalarDatasetCommonIO(): isArray and isFloat: converting byte array to BigDecimal array");
+                            long[] arrayDims = dsDatatype.getArrayDims();
+                            int asize = (int)totalSelectedSpacePoints;
+                            for (int j = 0; j < arrayDims.length; j++) {
+                                asize *= arrayDims[j];
+                            }
+                            theData = ((H5Datatype)dsDatatype.getDatatypeBase()).byteToBigDecimal(0, asize, (byte[]) theData);
+                        }
                         else if (dsDatatype.isRefObj()) {
                             log.trace("scalarDatasetCommonIO(): isREF: converting byte array to long array");
                             theData = HDFNativeData.byteToLong((byte[]) theData);
@@ -949,7 +963,12 @@ public class H5ScalarDS extends ScalarDS {
                         }
                         else if (dsDatatype.isEnum() && (Array.get(writeBuf, 0) instanceof String)) {
                             log.trace("scalarDatasetCommonIO(): converting enum names to values");
-                            tmpData = dsDatatype.convertEnumNameToValue((String[]) writeBuf);
+                            throw new Exception("data conversion failure: cannot write BigDecimal values");
+                            //tmpData = dsDatatype.convertEnumNameToValue((String[]) writeBuf);
+                        }
+                        else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
+                            log.trace("scalarDatasetCommonIO(): isFloat: converting BigDecimal array to byte array");
+                            tmpData = dsDatatype.bigDecimalToByte(0, (int)totalSelectedSpacePoints, (BigDecimal[]) writeBuf);
                         }
                     }
                     catch (Exception ex) {
@@ -2199,7 +2218,10 @@ public class H5ScalarDS extends ScalarDS {
                     break;
                 case Datatype.CLASS_FLOAT:
                     log.trace("parseFillValue(): class CLASS_FLOAT");
-                    if (datatypeSize == 8) {
+                    if (datatypeSize > 8) {
+                        data =  valStr.getBytes();
+                    }
+                    else if (datatypeSize == 8) {
                         data = HDFNativeData.doubleToByte(valDbl);
                     }
                     else {
