@@ -29,7 +29,6 @@ import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.h5.H5Datatype;
 import hdf.view.Tools;
-import hdf.view.TableView.DataDisplayConverterFactory.HDFDisplayConverter;
 
 /**
  * A Factory class to return a concrete class implementing the IDisplayConverter
