@@ -3023,7 +3023,7 @@ public class H5File extends FileFormat {
      * @param file_export_name
      *            The file name to export data into.
      * @param object
-     *            The id of the HDF5 dataset.
+     *            The HDF5 dataset object.
      * @param binary_order
      *            The data byte order
      *
@@ -3032,9 +3032,7 @@ public class H5File extends FileFormat {
      */
     public void exportDataset(String file_export_name, Dataset object, int binary_order)
             throws Exception {
-        long did = object.open();
-        H5.H5export_dataset(file_export_name, did, object.getFullName(), binary_order);
-        object.close(did);
+        H5.H5export_dataset(file_export_name, object.getFile(), object.getFullName(), binary_order);
     }
 
     /**
