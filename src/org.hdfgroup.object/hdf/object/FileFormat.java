@@ -1919,17 +1919,15 @@ public abstract class FileFormat extends File {
      *
      * @param file_export_name
      *            The file name to export data into.
-     * @param file_name
-     *            The name of the HDF5 file containing the dataset.
-     * @param object_path
-     *            The full path of the dataset to be exported.
+     * @param object
+     *            The HDF5 dataset object.
      * @param binary_order
      *            The data byte order
      *
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void exportDataset(String file_export_name, String file_name, String object_path, int binary_order) throws Exception {
+    public void exportDataset(String file_export_name, Dataset object, int binary_order) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:exportDataset.");
     }
 
