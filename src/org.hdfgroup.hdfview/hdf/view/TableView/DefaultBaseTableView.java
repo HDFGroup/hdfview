@@ -124,6 +124,7 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.object.h5.H5Datatype;
 import hdf.view.Chart;
 import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
@@ -200,7 +201,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
     protected boolean                       isDisplayTypeChar, isDataTransposed;
 
-    protected boolean                       isRegRef = false, isObjRef = false;
+    protected boolean                       isRegRef = false, isObjRef = false, isStdRef = false;
     protected boolean                       showAsHex = false, showAsBin = false;
 
     // Keep references to the selection and data layers for ease of access
@@ -412,11 +413,9 @@ public abstract class DefaultBaseTableView implements TableView {
                 isReadOnly = true;
                 isRegRef = true;
             }
-            else
-                isObjRef = true;
         }
 
-        log.trace("Data object isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
+        log.trace("Data object isStdRef={} isRegRef={} isObjRef={} showAsHex={}", isStdRef, isRegRef, isObjRef, showAsHex);
 
         // Setup subset information
         int rank = dataObject.getRank();
@@ -1037,6 +1036,8 @@ public abstract class DefaultBaseTableView implements TableView {
     protected abstract void showObjRefData(long ref);
 
     protected abstract void showRegRefData(String reg);
+
+    protected abstract void showStdRefData(byte[] reg);
 
     /**
      * Display data pointed to by object references. Data of each object is shown in
@@ -2464,7 +2465,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
             });
 
-            if (isRegRef || isObjRef) {
+            if (isStdRef || isRegRef || isObjRef) {
                 // Show data pointed to by reference on double click
                 this.addConfiguration(new AbstractUiBindingConfiguration() {
                     @Override
@@ -2472,7 +2473,7 @@ public abstract class DefaultBaseTableView implements TableView {
                         uiBindingRegistry.registerDoubleClickBinding(new MouseEventMatcher(), new IMouseAction() {
                             @Override
                             public void run(NatTable table, MouseEvent event) {
-                                if (!(isRegRef || isObjRef)) return;
+                                if (!(isStdRef || isRegRef || isObjRef)) return;
 
                                 viewType = ViewType.TABLE;
 
@@ -2509,7 +2510,9 @@ public abstract class DefaultBaseTableView implements TableView {
                                 }
                                 int len = Array.getLength(selectedRows);
                                 for (int i = 0; i < len; i++) {
-                                    if (isRegRef)
+                                    if (isStdRef)
+                                        showStdRefData((byte[]) Array.get(theData, selectedRows[i]));
+                                    else if (isRegRef)
                                         showRegRefData((String) Array.get(theData, selectedRows[i]));
                                     else if (isObjRef)
                                         showObjRefData(Array.getLong(theData, selectedRows[i]));
@@ -2719,7 +2722,11 @@ public abstract class DefaultBaseTableView implements TableView {
                     log.trace("show reference data: Show data as {}: len={}", viewType, len);
 
                     for (int i = 0; i < len; i++) {
-                        if (isRegRef) {
+                        if (isStdRef) {
+                            log.trace("show reference data: Show data[{}] as {}: isStdRef={}", i, viewType, isStdRef);
+                            showStdRefData((byte[]) Array.get(theData, i));
+                        }
+                        else if (isRegRef) {
                             log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i, viewType, isRegRef);
                             showRegRefData((String) Array.get(theData, i));
                         }
@@ -2769,7 +2776,11 @@ public abstract class DefaultBaseTableView implements TableView {
                     log.trace("show reference data: Show data as {}: len={}", viewType, len);
 
                     for (int i = 0; i < len; i++) {
-                        if (isRegRef) {
+                        if (isStdRef) {
+                            log.trace("show reference data: Show data[{}] as {}: isStdRef={}", i, viewType, isStdRef);
+                            showStdRefData((byte[]) Array.get(theData, i));
+                        }
+                        else if (isRegRef) {
                             log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i, viewType, isRegRef);
                             showRegRefData((String) Array.get(theData, i));
                         }

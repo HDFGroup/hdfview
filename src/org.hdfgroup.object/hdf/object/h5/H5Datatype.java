@@ -63,6 +63,8 @@ public class H5Datatype extends Datatype {
 
     private boolean isRegRef = false;
 
+    private boolean isStdRef = false;
+
     private int nAttributes = -1;
 
     private H5O_info_t objInfo;
@@ -141,7 +143,7 @@ public class H5Datatype extends Datatype {
     @Deprecated
     public H5Datatype(FileFormat theFile, String name, String path, long[] oid) {
         super(theFile, name, path, oid);
-        objInfo = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
+        objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
 
         if (theFile != null) {
             if (oid == null) {
@@ -965,6 +967,12 @@ public class H5Datatype extends Datatype {
                 datatypeClass = CLASS_REFERENCE;
                 log.trace("fromNative(): reference type");
                 try {
+                    isStdRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF);
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): H5T_STD_REF: ", ex);
+                }
+                try {
                     isRegRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
                 }
                 catch (Exception ex) {
@@ -1388,8 +1396,12 @@ public class H5Datatype extends Datatype {
             case CLASS_REFERENCE:
                 try {
                     long objRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ);
-
-                    tid = H5.H5Tcopy((datatypeSize > objRefTypeSize) ? HDF5Constants.H5T_STD_REF_DSETREG
+                    long dsetRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_DSETREG);
+                    // use datatypeSize as which type to copy
+                    if (datatypeSize > dsetRefTypeSize)
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF);
+                    else
+                        tid = H5.H5Tcopy((datatypeSize > objRefTypeSize) ? HDF5Constants.H5T_STD_REF_DSETREG
                             : HDF5Constants.H5T_STD_REF_OBJ);
                 }
                 catch (Exception ex) {

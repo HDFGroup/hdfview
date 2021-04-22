@@ -175,7 +175,7 @@ public class H5CompoundDS extends CompoundDS {
     @Deprecated
     public H5CompoundDS(FileFormat theFile, String theName, String thePath, long[] oid) {
         super(theFile, theName, thePath, oid);
-        objInfo = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
+        objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
 
         if ((oid == null) && (theFile != null)) {
             // retrieve the object ID
@@ -369,8 +369,9 @@ public class H5CompoundDS extends CompoundDS {
                 try {
                     datatype = new H5Datatype(getFileFormat(), tid);
 
-                    log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}", tid,
-                            datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
+                    log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}", tid,
+                            datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(),
+                            ((H5Datatype) datatype).isStdRef(), ((H5Datatype) datatype).isRegRef());
 
                     H5Datatype.extractCompoundInfo((H5Datatype) datatype, "", flatNameList, flatTypeList);
                 }
