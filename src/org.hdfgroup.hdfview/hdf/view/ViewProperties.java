@@ -158,7 +158,7 @@ public class ViewProperties extends PreferenceStore {
     private static ArrayList<String> recentFiles            = new ArrayList<>(MAX_RECENT_FILES + 5);
 
     /** default starting file directory */
-    private static String            workDir                = System.getProperty("user.home");
+    private static String            workDir                = System.getProperty("user.dir");
 
     /** default HDF file extensions */
     private static String            fileExt                = "hdf, h4, hdf4, h5, hdf5, he2, he5";
@@ -242,8 +242,10 @@ public class ViewProperties extends PreferenceStore {
      *
      * @param viewRoot
      *            the root directory of the HDFView
+     * @param viewStart
+     *            the starting directory for file searches
      */
-    public ViewProperties(String viewRoot) {
+    public ViewProperties(String viewRoot, String viewStart) {
         super();
 
         // look for the property file in the user's home directory
@@ -255,10 +257,12 @@ public class ViewProperties extends PreferenceStore {
 
         setRootDir(viewRoot);
         log.trace("rootDir is {}", rootDir);
+        setWorkDir(viewStart);
+        setDefault("work.dir", viewStart);
 
         setUsersGuide(rootDir + usersGuide);
 
-        setDefault("users.guide", System.getProperty("user.dir") + "/UsersGuide/index.html");
+        setDefault("users.guide", viewRoot + "/UsersGuide/index.html");
         setDefault("image.contrast", false);
         setDefault("image.showvalues", false);
         setDefault("file.mode", "r");
@@ -271,7 +275,6 @@ public class ViewProperties extends PreferenceStore {
         setDefault("h5file.indexType", "H5_INDEX_NAME");
         setDefault("h5file.indexOrder", "H5_ITER_INC");
         setDefault("h4toh5.converter", "");
-        setDefault("work.dir", System.getProperty("user.home"));
         setDefault("file.extension", "hdf, h4, hdf4, h5, hdf5, he2, he5");
         setDefault("font.size", 12);
         setDefault("font.type", "Serif");
@@ -1295,8 +1298,10 @@ public class ViewProperties extends PreferenceStore {
         setMaxMembers(getInt("max.members"));
 
         // load the most recent file list from the property file
-        log.trace("load user properties: most recent file list");
+        log.trace("load user properties: most recent file list with {}", getWorkDir());
         String theFile = null;
+        // first entry should be the working dir
+        recentFiles.add(getWorkDir());
         for (int i = 0; i < MAX_RECENT_FILES; i++) {
             theFile = getString("recent.file" + i);
             if ((theFile != null) && !recentFiles.contains(theFile)) {
@@ -1417,8 +1422,10 @@ public class ViewProperties extends PreferenceStore {
         int size = recentFiles.size();
         int minSize = Math.min(size, MAX_RECENT_FILES);
         log.trace("save user properties: most recent files size={}", size);
-        for (int i = 0; i < minSize; i++) {
-            theFile = recentFiles.get(i);
+        // The first entry is always the working dir
+        for (int i = 0; i < minSize - 1; i++) {
+            theFile = recentFiles.get(i+1);
+            log.trace("save user properties: save recent file={}", theFile);
             if ((theFile != null) && (theFile.length() > 0)) setValue("recent.file" + i, theFile);
         }
 
@@ -1506,7 +1513,7 @@ public class ViewProperties extends PreferenceStore {
             workPath = System.getProperty("hdfview.workdir");
             log.trace("getWorkDir: hdfview.workdir={}", workPath);
             if (workPath == null) {
-                workPath = System.getProperty("user.home");
+                workPath = System.getProperty("user.dir");
             }
         }
         log.trace("getWorkDir: final workPath={}", workPath);

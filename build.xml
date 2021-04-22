@@ -995,7 +995,7 @@
             </doctitle>
 
             <bottom>
-                <![CDATA[Copyright © 2020. All Rights Reserved.]]>
+                <![CDATA[Copyright © 2021. All Rights Reserved.]]>
             </bottom>
 
             <group title="object packages" packages="hdf.object.*" />
@@ -1068,7 +1068,7 @@
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for Windows, copy ${ant.project.name} directory to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. cd into the new ${ant.project.name}" />
-        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./${ant.project.name}.exe" />
+        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./${ant.project.name}.exe${line.separator}3. Or execute .\app\${ant.project.name}.bat" />
     </target>
 
     <target name="createUnixREADME" depends="createREADME" if="${isAppUnix}">
@@ -1088,7 +1088,7 @@
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Running" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}, copy ${ant.project.name} directory to where you want${line.separator}to install ${ant.project.name} and:${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. cd into the new ${ant.project.name}" />
-        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./bin/${ant.project.name}" />
+        <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="2. Execute ./bin/${ant.project.name}${line.separator}3. Or execute ./lib/app/${ant.project.name}.sh" />
     </target>
 
     <target name="createRPMREADME" depends="createREADME" if="${isXrpm}">
@@ -1262,6 +1262,12 @@
                 <include name="hdf5.dll"/>
             </fileset>
         </copy>
+
+        <!-- Create the run batch file -->
+        <copy file="${packagefiles.dir}/hdfview.bat.in" tofile="${release.dir}/hdfview.bat" />
+
+        <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar" />
+        <replace file="${release.dir}/hdfview.bat" token="@SLF4J@" value="${runscript.slf4j}" />
     </target>
 
     <target name="deployUnix" depends="deployBase, objectjar, jar, javadoc" if="isUnix">
@@ -1288,6 +1294,14 @@
                 <filename regex="libhdf5\.so(\.[0-9][0-9][0-9])$"/>
             </fileset>
         </copy>
+
+        <!-- Create the .sh run script -->
+        <copy file="${packagefiles.dir}/hdfview.sh.in" tofile="${release.dir}/hdfview.sh" />
+
+        <!-- Set the correct classpath for the run script -->
+        <property name="runscript.slf4j" value="slf4j-nop${version.slf4j}.jar" />
+        <replace file="${release.dir}/hdfview.sh" token="@SLF4J@" value="${runscript.slf4j}" />
+
         <chmod perm="ugo+rx">
             <fileset dir="${release.dir}" includes="**/**" excludes="doc/** samples/**" />
         </chmod>

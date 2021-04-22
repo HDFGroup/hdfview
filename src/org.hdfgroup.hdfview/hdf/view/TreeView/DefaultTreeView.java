@@ -66,6 +66,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import hdf.hdf5lib.HDF5Constants;
+
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
 import hdf.object.Dataset;
@@ -423,8 +425,9 @@ public class DefaultTreeView implements TreeView {
                 }
                 catch (Exception ex) {}
 
-                recentFilesCombo.add(filename, 0);
-                recentFilesCombo.select(0);
+                // first entry is always the workdir
+                recentFilesCombo.add(filename, 1);
+                recentFilesCombo.select(1);
 
                 ((HDFView) viewer).showMetaData(selectedObject);
             }
@@ -3119,7 +3122,34 @@ public class DefaultTreeView implements TreeView {
             openShell.setLayout(new GridLayout(1, true));
 
             String[] lowValues = { "Earliest", "V18", "V110", "Latest" };
+            int[] lowConstants = { HDF5Constants.H5F_LIBVER_EARLIEST, HDF5Constants.H5F_LIBVER_V18, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_LATEST };
             String[] highValues = { "V18", "V110", "Latest" };
+            int[] highConstants = { HDF5Constants.H5F_LIBVER_V18, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_LATEST };
+
+            // Try to retrieve the existing version bounds
+            int[] current = null;
+            try {
+                current = selectedObject.getFileFormat().getLibBounds();
+            }
+            catch (Exception err) {
+                openShell.getDisplay().beep();
+                Tools.showError(openShell, "Version bounds", "Error when getting lib version bounds, using default");
+                current = new int[]{HDF5Constants.H5F_LIBVER_EARLIEST, HDF5Constants.H5F_LIBVER_LATEST};
+            }
+            int lowidx = 0;
+            for(int i = 0; i < lowConstants.length; i++) {
+                if(lowConstants[i] == current[0]){
+                    lowidx = i;
+                    break;
+                }
+            }
+            int highidx = 0;
+            for(int i = 0; i < highConstants.length; i++) {
+                if(highConstants[i] == current[1]){
+                    highidx = i;
+                    break;
+                }
+            }
 
             // Dummy label
             new Label(openShell, SWT.LEFT);
@@ -3131,7 +3161,7 @@ public class DefaultTreeView implements TreeView {
             final Combo earliestCombo = new Combo(openShell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
             earliestCombo.setFont(curFont);
             earliestCombo.setItems(lowValues);
-            earliestCombo.select(0);
+            earliestCombo.select(lowidx);
             earliestCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             label = new Label(openShell, SWT.LEFT);
@@ -3141,7 +3171,7 @@ public class DefaultTreeView implements TreeView {
             final Combo latestCombo = new Combo(openShell, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
             latestCombo.setFont(curFont);
             latestCombo.setItems(highValues);
-            latestCombo.select(0);
+            latestCombo.select(highidx);
             latestCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             // Dummy label to consume remain space after resizing

@@ -1,0 +1,45 @@
+File search location process in HDFView:
+
+# Default command line invocation of HDFView.
+java -Djava.library.path="INSTALLDIR/lib/app:INSTALLDIR/lib/app/ext" -Dhdfview.root="INSTALLDIR/lib/app" -cp "INSTALLDIR/lib/app/*" hdf.view.HDFView "ARGS"
+#    INSTALLDIR is the installation folder of the HDFView package.
+#    ARGS are one or more of the following (noted by *);
+       Usage:
+           java(w)
+           -Djava.library.path="INSTALLDIR/lib/app:INSTALLDIR/lib/app/ext"
+           -Dhdfview.root="INSTALLDIR/lib/app"
+           -cp "INSTALLDIR/lib/app/*"
+       *        -Dhdf.hdf5lib.H5.hdf5lib="your HDF5 library path"
+       *        -Dhdf.hdflib.HDFLibrary.hdflib="your HDF4 library path"
+           hdf.view.HDFView
+       *        -root "the directory where the HDFView is installed"
+       *        -start "the directory HDFView searches for files"
+       *        -geometry or -g "the preferred window size as WIDTHxHEIGHT+XOFF+YOFF"
+       *        -java.version "show the version of jave used to build the HDFView and exit"
+       *        [filename] "the file to open"
+
+The following locations are involved in where the working directory for a file search dialog will begin.
+--------------------------------------------------------------------------------------------------------
+ INITIAL WORKING DIRECTORY
+   A. A system property, hdfview.workdir, which will be used as the initial working directory.
+      This would require adding a define to the command line invocation of HDFView;
+        java ... -Dhdfview.workdir="some/path" ...
+   B. A specified directory as the value to the startDir argument from the command line invocation of HDFView.
+      java ... hdf.view.HDFView startDir=some_location "ARGS"
+   C. A directory specified by the system property, user.dir.
+      which is usually the current user location HDFView was launched
+
+   The difference between A and B is that the -startDir=some_location can be passed into a script containing the command line.
+
+ ACTIVE WORKING DIRECTORY
+   A. The initial working directory as described above.
+   B. The directory used to load a file specified as an argument on the command line invocation of HDFView.
+      java ... hdf.view.HDFView startDir=some_location "ARGS"
+   C. A location saved in the HDFView property file, .hdfview3.1.2 in the user home directory.
+      work.dir=dir_path
+      This is property is only set by using the "User Options" dialog.
+   D. The last directory used to load a file using the HDFView file search dialog.
+   E. Using the "User Options" dialog to reset the working directory:
+      1. To the user home directory.
+      2. To the system identified working directory.
+      3. To a directory selected by the user using a file system browse dialog or typed into a text box.

@@ -407,8 +407,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
         log.trace("Data object isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar, isEnumConverted);
 
-        if (dataObject.getDatatype().isRef()) {
-            if (dataObject.getDatatype().getDatatypeSize() > 8) {
+        if (dtype.isRef()) {
+            if (dtype.getDatatypeSize() > 8) {
                 isReadOnly = true;
                 isRegRef = true;
             }
@@ -518,7 +518,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         /* Create the actual NatTable */
-        log.debug("table creation", ((HObject) dataObject).getName());
+        log.debug("table creation {}", ((HObject) dataObject).getName());
         try {
             dataTable = createTable(content, dataObject);
             if (dataTable == null) {
@@ -2784,52 +2784,56 @@ public abstract class DefaultBaseTableView implements TableView {
             // item = new MenuItem(menu, SWT.PUSH);
             // item.setText("Show As &Text");
             // item.addSelectionListener(new SelectionAdapter() {
-            // public void widgetSelected(SelectionEvent e) {
-            // viewType = ViewType.IMAGE;
+            //     public void widgetSelected(SelectionEvent e) {
+            //         viewType = ViewType.IMAGE;
             //
-            // log.trace("show reference data: Show data as {}: ", viewType);
+            //         log.trace("show reference data: Show data as {}: ", viewType);
             //
-            // Object theData = getSelectedData();
-            //  (theData == null) {
-            // shell.getDisplay().beep();
-            // Tools.showError(shell, "Select", "No data selected.");
-            // return;
-            // }
+            //         Object theData = getSelectedData();
+            //         if (theData == null) {
+            //             shell.getDisplay().beep();
+            //             Tools.showError(shell, "Select", "No data selected.");
+            //             return;
+            //         }
             //
-            // // Since NatTable returns the selected row positions as a Set<Range>, convert
-            // this to
-            // // an Integer[]
-            // Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
-            // Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
-            // Iterator<Range> i1 = rowPositions.iterator();
-            // while(i1.hasNext()) {
-            // selectedRowPos.addAll(i1.next().getMembers());
-            // }
+            //         // Since NatTable returns the selected row positions as a Set<Range>,
+            //         // convert this to an Integer[]
+            //         Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
+            //         Set<Integer> selectedRowPos = new LinkedHashSet<Integer>();
+            //         Iterator<Range> i1 = rowPositions.iterator();
+            //         while(i1.hasNext()) {
+            //             selectedRowPos.addAll(i1.next().getMembers());
+            //         }
             //
-            // Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
-            // int[] selectedCols = selectionLayer.getFullySelectedColumnPositions();
-            //  (selectedRows == null || selectedRows.length <= 0) {
-            // log.trace("show reference data: Show data as {}: selectedRows is empty",
-            // viewType);
-            // return;
-            // }
+            //         Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
+            //         int[] selectedCols = selectionLayer.getFullySelectedColumnPositions();
+            //         if (selectedRows == null || selectedRows.length <= 0) {
+            //             log.trace("show reference data: Show data as {}: selectedRows is empty",
+            //                       viewType);
+            //             return;
+            //         }
             //
-            // int len = Array.getLength(selectedRows) * Array.getLength(selectedCols);
-            // log.trace("show reference data: Show data as {}: len={}", viewType, len);
+            //         int len = Array.getLength(selectedRows) * Array.getLength(selectedCols);
+            //         log.trace("show reference data: Show data as {}: len={}", viewType, len);
             //
-            //  (int i = 0; i < len; i++) {
-            //  (isRegRef) {
-            // log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i,
-            // viewType, isRegRef);
-            // showRegRefData((String) Array.get(theData, i));
-            // }
-            // else if (isObjRef) {
-            // log.trace("show reference data: Show data[{}] as {}: isObjRef={}", i,
-            // viewType, isObjRef);
-            // showObjRefData(Array.getLong(theData, i));
-            // }
-            // }
-            // }
+            //         if (int i = 0; i < len; i++) {
+            //             if (isStdRef) {
+            //                 log.trace("show reference data: Show data[{}] as {}: isStdRef={}", i,
+            //                           viewType, isStdRef);
+            //                 showStdRefData((byte[]) Array.get(theData, i));
+            //             }
+            //             else if (isRegRef) {
+            //                 log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i,
+            //                           viewType, isRegRef);
+            //                 showRegRefData((String) Array.get(theData, i));
+            //             }
+            //             else if (isObjRef) {
+            //                 log.trace("show reference data: Show data[{}] as {}: isObjRef={}", i,
+            //                           viewType, isObjRef);
+            //                 showObjRefData(Array.getLong(theData, i));
+            //             }
+            //         }
+            //     }
             // });
 
             return new PopupMenuBuilder(table, menu);

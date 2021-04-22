@@ -1,0 +1,33 @@
+----------------------------------
+
+Windows file association steps:
+
+1. Right click on a file with the extension you want to associate.
+2. Select properties.
+3. On General tab, click the change button on the "Opens with" line.
+4. Click on the "More Apps" link
+5. Scroll to the bottom of the list
+6. Click on the "Look for another app on this PC" link
+7. Navigate to the installation of HDFView.
+8. Select the HDFView.exe file.
+9. Click the open button.
+10. Click "OK" button
+----------------------------------
+
+Linux file associations steps:
+
+1. Right click on a file with the extension you want to associate.
+2. Select "Open With ..." or "Open With Other Application"
+3. Depending on system, search for HDFView and select application.
+   There may be other options such as "run in a terminal"
+
+The associations can also be changed/updated in the mime mapping files.
+   global associations : /usr/share/applications/mimeapps.list
+   or                  : /etc/gnome/defaults.list
+
+   user associations   : ~/.local/share/applications/mimeapps.list
+   or                  : ~/.config/mimeapps.list
+
+Command to change the files:
+  xdg-mime
+
