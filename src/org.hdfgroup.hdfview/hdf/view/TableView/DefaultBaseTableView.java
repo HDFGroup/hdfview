@@ -409,10 +409,9 @@ public abstract class DefaultBaseTableView implements TableView {
         log.trace("Data object isDisplayTypeChar={} isEnumConverted={}", isDisplayTypeChar, isEnumConverted);
 
         if (dtype.isRef()) {
-            if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-                isStdRef = ((H5Datatype)dtype).isStdRef();
-                isRegRef = ((H5Datatype)dtype).isRegRef();
-                isObjRef = ((H5Datatype)dtype).isRefObj();
+            if (dtype.getDatatypeSize() > 8) {
+                isReadOnly = true;
+                isRegRef = true;
             }
         }
 
