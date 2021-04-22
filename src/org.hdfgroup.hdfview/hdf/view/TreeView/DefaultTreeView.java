@@ -2276,7 +2276,7 @@ public class DefaultTreeView implements TreeView {
         }
 
         try {
-            selectedObject.getFileFormat().exportDataset(filename, dataset.getFile(), dataset.getFullName(), binaryOrder);
+            selectedObject.getFileFormat().exportDataset(filename, dataset, binaryOrder);
             viewer.showStatus("Data saved to: " + filename);
         }
         catch (Exception ex) {
