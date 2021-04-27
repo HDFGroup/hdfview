@@ -1494,7 +1494,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2020 by The HDF Group" />
+            <arg value="Copyright 2006-2021 by The HDF Group" />
             <arg value="--description" />
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
@@ -1570,7 +1570,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2020 by The HDF Group" />
+            <arg value="Copyright 2006-2021 by The HDF Group" />
             <arg value="--description" />
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
@@ -1636,7 +1636,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="&quot;Copyright 2006-2020 by The HDF Group&quot;" />
+            <arg value="&quot;Copyright 2006-2021 by The HDF Group&quot;" />
             <arg value="--description" />
             <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
             <arg value="--vendor" />
@@ -1837,7 +1837,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2020 by The HDF Group" />
+            <arg value="Copyright 2006-2021 by The HDF Group" />
             <arg value="--description" />
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
@@ -1890,7 +1890,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2020 by The HDF Group" />
+            <arg value="Copyright 2006-2021 by The HDF Group" />
             <arg value="--description" />
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
@@ -1950,7 +1950,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="&quot;Copyright 2006-2020 by The HDF Group&quot;" />
+            <arg value="&quot;Copyright 2006-2021 by The HDF Group&quot;" />
             <arg value="--description" />
             <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
             <arg value="--vendor" />
