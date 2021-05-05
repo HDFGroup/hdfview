@@ -16,7 +16,6 @@ package hdf.object.h5;
 
 import java.io.File;
 import java.lang.reflect.Array;
-import java.nio.ByteBuffer;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -117,7 +116,6 @@ public class H5File extends FileFormat {
     public static final int LIBVER_EARLIEST = HDF5Constants.H5F_LIBVER_EARLIEST;
     public static final int LIBVER_V18 = HDF5Constants.H5F_LIBVER_V18;
     public static final int LIBVER_V110 = HDF5Constants.H5F_LIBVER_V110;
-    public static final int LIBVER_V112 = HDF5Constants.H5F_LIBVER_V112;
 
     /***************************************************************************
      * Constructor
@@ -1070,9 +1068,6 @@ public class H5File extends FileFormat {
         else if(lowStr.equals("V110")) {
             low = HDF5Constants.H5F_LIBVER_V110;
         }
-        else if(lowStr.equals("V112")) {
-            low = HDF5Constants.H5F_LIBVER_V112;
-        }
         else if(lowStr.equals("Latest")) {
             low = HDF5Constants.H5F_LIBVER_LATEST;
         }
@@ -1088,9 +1083,6 @@ public class H5File extends FileFormat {
         }
         else if(highStr.equals("V110")) {
             high = HDF5Constants.H5F_LIBVER_V110;
-        }
-        else if(highStr.equals("V112")) {
-            high = HDF5Constants.H5F_LIBVER_V112;
         }
         else if(highStr.equals("Latest")) {
             high = HDF5Constants.H5F_LIBVER_LATEST;
@@ -1138,9 +1130,6 @@ public class H5File extends FileFormat {
             else if(lowStr.equals("V110")) {
                 low = HDF5Constants.H5F_LIBVER_V110;
             }
-            else if(lowStr.equals("V112")) {
-                low = HDF5Constants.H5F_LIBVER_V112;
-            }
             else if(lowStr.equals("Latest")) {
                 low = HDF5Constants.H5F_LIBVER_LATEST;
             }
@@ -1156,9 +1145,6 @@ public class H5File extends FileFormat {
             }
             else if(highStr.equals("V110")) {
                 high = HDF5Constants.H5F_LIBVER_V110;
-            }
-            else if(highStr.equals("V112")) {
-                high = HDF5Constants.H5F_LIBVER_V112;
             }
             else if(highStr.equals("Latest")) {
                 high = HDF5Constants.H5F_LIBVER_LATEST;
@@ -1232,9 +1218,6 @@ public class H5File extends FileFormat {
         else if (libver[0] == HDF5Constants.H5F_LIBVER_V110) {
             libversion = "V110 and ";
         }
-        else if (libver[0] == HDF5Constants.H5F_LIBVER_V112) {
-            libversion = "V112 and ";
-        }
         else if (libver[0] == HDF5Constants.H5F_LIBVER_LATEST) {
             libversion = "Latest and ";
         }
@@ -1246,9 +1229,6 @@ public class H5File extends FileFormat {
         }
         else if (libver[1] == HDF5Constants.H5F_LIBVER_V110) {
             libversion += "V110";
-        }
-        else if (libver[1] == HDF5Constants.H5F_LIBVER_V112) {
-            libversion += "V112";
         }
         else if (libver[1] == HDF5Constants.H5F_LIBVER_LATEST) {
             libversion += "Latest";
@@ -2446,11 +2426,11 @@ public class H5File extends FileFormat {
         // two seconds
         int[] objTypes = new int[nelems];
         long[] fNos = new long[nelems];
-        hdf.hdf5lib.structs.H5O_token_t[] objTokens = new hdf.hdf5lib.structs.H5O_token_t[nelems];
+        long[] objRefs = new long[nelems];
         String[] objNames = new String[nelems];
 
         try {
-            H5.H5Gget_obj_info_full(fid, fullPath, objNames, objTypes, null, fNos, objTokens, indexType, indexOrder);
+            H5.H5Gget_obj_info_full(fid, fullPath, objNames, objTypes, null, fNos, objRefs, indexType, indexOrder);
         }
         catch (HDF5Exception ex) {
             log.debug("depth_first({}): failure: ", parentObject, ex);
@@ -2469,8 +2449,7 @@ public class H5File extends FileFormat {
             obj_name = objNames[i];
             obj_type = objTypes[i];
             log.trace("depth_first({}): obj_name={}, obj_type={}", parentObject, obj_name, obj_type);
-            long objref = ByteBuffer.wrap(objTokens[i].data).getLong();
-            long oid[] = { objref, fNos[i] };
+            long oid[] = { objRefs[i], fNos[i] };
 
             if (obj_name == null) {
                 log.trace("depth_first({}): continue after null obj_name", parentObject);
@@ -3044,7 +3023,7 @@ public class H5File extends FileFormat {
      * @param file_export_name
      *            The file name to export data into.
      * @param object
-     *            The HDF5 dataset object.
+     *            The id of the HDF5 dataset.
      * @param binary_order
      *            The data byte order
      *
@@ -3053,7 +3032,9 @@ public class H5File extends FileFormat {
      */
     public void exportDataset(String file_export_name, Dataset object, int binary_order)
             throws Exception {
-        H5.H5export_dataset(file_export_name, object.getFile(), object.getFullName(), binary_order);
+        long did = object.open();
+        H5.H5export_dataset(file_export_name, did, object.getFullName(), binary_order);
+        object.close(did);
     }
 
     /**

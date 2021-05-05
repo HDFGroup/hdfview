@@ -58,7 +58,7 @@ public class H5Link extends HObject implements MetaDataContainer {
             long[] oid) {
         super(theFile, theName, thePath, oid);
 
-        obj_info = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
+        obj_info = new H5O_info_t(-1L, -1L, -1, 0, -1L, 0L, 0L, 0L, 0L, null,null,null);
     }
 
     @Override

@@ -79,54 +79,6 @@ HelloWorld/
   runtime/      // Java runtime image
 ===========================================================================
 
-The general directory layout for each of the supported platforms follows:
-===========================================================================
-Linux
-===========================================================================
-@HDFJAVA_PACKAGE_NAME@/
-  bin/            // Application launchers
-    @HDFJAVA_PACKAGE_NAME@
-  lib/
-    app/
-      doc/        // @HDFJAVA_PACKAGE_NAME@ documents
-      extra/      // logging jar for simple logs
-      mods/       // Application duplicates
-      samples/    // @HDFJAVA_PACKAGE_NAME@ sample files
-      @HDFJAVA_PACKAGE_NAME@.cfg     // Configuration info, created by jpackage
-      @HDFJAVA_PACKAGE_NAME@.jar     // JAR file, copied from the --input directory
-    runtime/      // Java runtime image
-===========================================================================
-macOS
-===========================================================================
-@HDFJAVA_PACKAGE_NAME@.app/
-  Contents/
-    Info.plist
-    MacOS/         // Application launchers
-      @HDFJAVA_PACKAGE_NAME@
-    Resources/           // Icons, etc.
-    app/
-      doc/        // @HDFJAVA_PACKAGE_NAME@ documents
-      extra/      // logging jar for simple logs
-      mods/       // Application duplicates
-      samples/    // @HDFJAVA_PACKAGE_NAME@ sample files
-      @HDFJAVA_PACKAGE_NAME@.cfg     // Configuration info, created by jpackage
-      @HDFJAVA_PACKAGE_NAME@.jar     // JAR file, copied from the --input directory
-    runtime/      // Java runtime image
-===========================================================================
-Windows
-===========================================================================
-HelloWorld/
-  @HDFJAVA_PACKAGE_NAME@.exe       // Application launchers
-  app/
-    doc/        // @HDFJAVA_PACKAGE_NAME@ documents
-    extra/      // logging jar for simple logs
-    mods/       // Application duplicates
-    samples/    // @HDFJAVA_PACKAGE_NAME@ sample files
-    @HDFJAVA_PACKAGE_NAME@.cfg     // Configuration info, created by jpackage
-    @HDFJAVA_PACKAGE_NAME@.jar     // JAR file, copied from the --input directory
-  runtime/      // Java runtime image
-===========================================================================
-
 Documentation for this release can be found at the following URL:
    https://portal.hdfgroup.org/display/HDFVIEW/HDFView
 

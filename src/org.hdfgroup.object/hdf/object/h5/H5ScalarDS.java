@@ -120,7 +120,7 @@ public class H5ScalarDS extends ScalarDS {
         super(theFile, theName, thePath, oid);
         unsignedConverted = false;
         paletteRefs = null;
-        objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
+        objInfo = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
 
         if ((oid == null) && (theFile != null)) {
             // retrieve the object ID
@@ -300,9 +300,9 @@ public class H5ScalarDS extends ScalarDS {
                 try {
                     datatype = new H5Datatype(getFileFormat(), tid);
 
-                    log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}",
+                    log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
                             tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isNamed(), datatype.isVLEN(),
-                            datatype.isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isStdRef(), ((H5Datatype) datatype).isRegRef());
+                            datatype.isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
                 }
                 catch (Exception ex) {
                     log.debug("init(): failed to create datatype for dataset: ", ex);
@@ -835,11 +835,6 @@ public class H5ScalarDS extends ScalarDS {
             if (dsDatatype.isVLEN() && !dsDatatype.isText()) {
                 log.debug("scalarDatasetCommonIO(): Cannot write non-string variable-length data");
                 throw new HDF5Exception("Writing non-string variable-length data is not supported");
-            }
-
-            if (dsDatatype.isStdRef()) {
-                log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
-                throw new HDF5Exception("Writing region reference data is not supported");
             }
 
             if (dsDatatype.isRegRef()) {

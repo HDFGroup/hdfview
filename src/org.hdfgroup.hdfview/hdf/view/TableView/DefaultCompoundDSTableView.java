@@ -180,7 +180,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         natTable.addLayerListener(new CompoundDSCellSelectionListener());
 
         // Create popup menu for region or object ref.
-        //if (isStdRef || isRegRef || isObjRef) {
+        //if (isRegRef || isObjRef) {
         //    natTable.addConfiguration(new RefContextMenu(natTable));
         //}
 
@@ -220,11 +220,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
         log.trace("getSelectedData(): size={} cName={} nt={}", size, cName, nt);
 
-        if (isStdRef) {
-            // std. ref data are stored in bytess
-            selectedData = new byte[size];
-        }
-        else if (isRegRef) {
+        if (isRegRef) {
             // reg. ref data are stored in strings
             selectedData = new String[size];
         }
@@ -278,11 +274,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         // Currently no support for show Reg. Ref. Data in Compound Datasets
     }
 
-    @Override
-    protected void showStdRefData(byte[] reg) {
-        // Currently no support for show Std. Ref. Data in Compound Datasets
-    }
-
     /**
      * Returns an IEditableRule that determines whether cells can be edited.
      *
@@ -320,7 +311,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
-                log.trace("ScalarDSCellSelectionListener: CellSelected isStdRef={} isRegRef={} isObjRef={}", isStdRef, isRegRef, isObjRef);
+                log.trace("ScalarDSCellSelectionListener: CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
 
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
