@@ -1140,20 +1140,20 @@
         <replace file="${dist.dir}/README.txt" token="@EXECUTABLE@" value="/opt/hdfview/bin/HDFView" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_TYPE@" value="Installation" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_PREFIX_HEADER@" value="To install ${ant.project.name} for ${uname.os}${line.separator}    Install DEB File Using dpkg Command${line.separator}    ------------------------------------------------------------------------------${line.separator}
-            To install a .deb package in Ubuntu Linux, enter the following:${line.separator}        sudo dpkg -i hdfview-${app.version}-1.x86_64.deb${line.separator}
+            To install a .deb package in Ubuntu Linux, enter the following:${line.separator}        sudo dpkg -i hdfview-${app.version}-1_amd64.deb${line.separator}
             The –i switch tells the package manager you want to install the file.${line.separator}${line.separator}    More information on the dpkg installer can be found in the dpkg documentation.${line.separator}
             ------------------------------------------------------------------------------${line.separator}${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@INSTALL_OR_RUN_FILE@" value="1. Install deb File with dpkg${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             Alternately, you can use the apt utility to install .deb files.${line.separator}${line.separator}
             Enter the following:${line.separator}
-                sudo apt install ./hdfview-${app.version}-1.x86_64.deb${line.separator}
+                sudo apt install ./hdfview-${app.version}-1_amd64.deb${line.separator}
             The ./ relative path (or an absolute path) cause apt to look at your current working directory for the installation${line.separator}${line.separator}" />
         <replace file="${dist.dir}/README.txt" token="@OPTIONAL_STEP@" value="    Remove deb Package${line.separator}
             ------------------------------------------------------------------------------${line.separator}
             The dpkg installer can be used to remove (or uninstall) a software package.${line.separator}${line.separator}
             Enter the following into a terminal window:${line.separator}
-            sudo dpkg -r hdfview-${app.version}-1.x86_64${line.separator}
+            sudo dpkg -r hdfview-${app.version}-1_amd64${line.separator}
             The -r option instructs dpkg to erase the software.${line.separator}${line.separator}
             The remove option instructs apt to erase the software.${line.separator}${line.separator}" />
     </target>
