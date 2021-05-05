@@ -13,9 +13,5 @@
     <choice id="org.hdfgroup.HDFView-3.1.3" title="HDFView-3.1.3" visible="false">
         <pkg-ref id="org.hdfgroup.HDFView-3.1.3"/>
     </choice>
-<<<<<<< Upstream, based on branch 'release/hdfview-3.1.3' of https://github.com/HDFGroup/hdfview.git
     <pkg-ref id="org.hdfgroup.HDFView-3.1.3" version="3.1.3" onConclusion="none">org.hdfgroup.HDFView-3.1.3.pkg</pkg-ref>
-=======
-    <pkg-ref id="org.hdfgroup.HDFView-3.1.2" version="3.1.2" onConclusion="none">org.hdfgroup.HDFView-3.1.2.pkg</pkg-ref>
->>>>>>> 7cdea18 Correct typo
 </installer-gui-script>
