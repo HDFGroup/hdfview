@@ -12,7 +12,7 @@ setlocal enabledelayedexpansion
 pushd %~dp0
 
 rem Adjust the following variable to match your environment
-set INSTALLDIR=%cd%
+set INSTALLDIR=%cd%\\..
 set PATH=%INSTALLDIR%\\app;%PATH%
 set JAVABIN=%INSTALLDIR%\\runtime\\bin
 
