@@ -318,7 +318,7 @@ public class HDFView implements DataViewManager {
                 currentFile = theFile.getAbsolutePath();
 
                 try {
-                    treeView.openFile(currentFile, FileFormat.WRITE);
+                    treeView.openFile(currentFile, ViewProperties.isReadOnly() ? FileFormat.READ : FileFormat.WRITE);
 
                     try {
                         urlBar.remove(currentFile);
