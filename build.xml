@@ -1285,6 +1285,10 @@
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
                 <filename regex="libmfhdf\.so(\.[0-9])$"/>
             </fileset>
+            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
+                <filename regex="libxdr\.so(\.[0-9])$"/>
+                <exclude name="*.a" />
+            </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
                 <include name="libhdf5_java.so" />
                 <include name="*.jar" />
