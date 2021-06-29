@@ -14,6 +14,10 @@
 
     <record name="antoutput.log" action="start" append="${build.antoutput.append}" loglevel="verbose" />
 
+    <!-- MAC notary: -->
+    <property name="notarize.account" value="" />
+    <property name="notarize.keychain_key" value="xdfm-pjev-jiko-appd" />
+
     <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
     <loadfile property="app.version" srcFile="${basedir}/VERSION">
         <filterchain>
@@ -1479,6 +1483,14 @@
 
     <!-- package args for fixed jpackage in OpenJDK15 -->
     <target name="createJXPackageMac" depends="createJPackageBase" if="${isXMac}">
+        <!-- unlock keychain -->
+        <exec executable="security" dir="${dist.dir}" failonerror="true">
+            <arg value="unlock-keychain" />
+            <arg value="-p" />
+            <arg value="${env.SIGNERPASSWD}" />
+            <arg value="login.keychain" />
+        </exec>
+
         <echo> Package the mac application</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
@@ -1498,7 +1510,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2021 by The HDF Group" />
+            <arg value="Copyright 2006 by The HDF Group" />
             <arg value="--description" />
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
@@ -1574,7 +1586,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2021 by The HDF Group" />
+            <arg value="Copyright 2006 by The HDF Group" />
             <arg value="--description" />
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
@@ -1640,7 +1652,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="&quot;Copyright 2006-2021 by The HDF Group&quot;" />
+            <arg value="&quot;Copyright 2006 by The HDF Group&quot;" />
             <arg value="--description" />
             <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
             <arg value="--vendor" />
@@ -1782,6 +1794,14 @@
             <arg value="-r" />
         </exec>
 
+        <!-- unlock keychain -->
+        <exec executable="security" dir="${dist.dir}" failonerror="true">
+            <arg value="unlock-keychain" />
+            <arg value="-p" />
+            <arg value="${env.SIGNERPASSWD}" />
+            <arg value="login.keychain" />
+        </exec>
+
         <!-- sign .dmg file on 10.11.5 or higher -->
         <exec executable="codesign" dir="${dist.dir}">
             <arg value="--force" />
@@ -1841,7 +1861,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2021 by The HDF Group" />
+            <arg value="Copyright 2006 by The HDF Group" />
             <arg value="--description" />
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
@@ -1894,7 +1914,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="Copyright 2006-2021 by The HDF Group" />
+            <arg value="Copyright 2006 by The HDF Group" />
             <arg value="--description" />
             <arg value="A visual tool for browsing and editing HDF files" />
             <arg value="--vendor" />
@@ -1954,7 +1974,7 @@
             <arg value="--app-version" />
             <arg value="${app.version}" />
             <arg value="--copyright" />
-            <arg value="&quot;Copyright 2006-2021 by The HDF Group&quot;" />
+            <arg value="&quot;Copyright 2006 by The HDF Group&quot;" />
             <arg value="--description" />
             <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
             <arg value="--vendor" />
@@ -1996,9 +2016,161 @@
         <echo> Create the unix installer</echo>
     </target>
 
+    <target name="submit-notary">
+        <exec executable="/usr/bin/xcrun" failonerror="true">
+            <redirector output="retUUID.txt" alwayslog="true"/>
+            <arg value="altool"/>
+            <arg value="--notarize-app"/>
+            <arg value="--type"/>
+            <arg value="osx"/>
+            <arg value="--primary-bundle-id"/>
+            <arg value="app.${ant.project.name}-${app.version}"/>
+            <arg value="--username"/>
+            <arg value="thehdfgroup@hdfgroup.org"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+            <arg value="--file"/>
+            <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
+        </exec>
+        <loadfile property="retUUID" srcfile="retUUID.txt">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <echo>notarize-app:${retUUID}</echo>
+    </target>
+
+    <target name="check-notary-state">
+        <loadfile property="retUUID" srcfile="retUUID.txt">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
+            <redirector output="notary.txt" alwayslog="true"/>
+            <arg value="altool"/>
+            <arg value="--notarization-info"/>
+            <arg value="${retUUID}"/>
+            <arg value="--username"/>
+            <arg value="thehdfgroup@hdfgroup.org"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+        </exec>
+        <echo>notarize-info:${logInfo}</echo>
+    </target>
+
+    <target name="post-notary">
+        <loadfile property="retUUID" srcfile="retUUID.txt">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
+            <redirector output="notary.txt" alwayslog="true"/>
+            <arg value="altool"/>
+            <arg value="--notarization-info"/>
+            <arg value="${retUUID}"/>
+            <arg value="--username"/>
+            <arg value="thehdfgroup@hdfgroup.org"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+        </exec>
+        <echo>notarize-info:${logInfo}</echo>
+
+        <waitfor maxwait="10" maxwaitunit="minute" checkevery="5" checkeveryunit="second">
+            <antcall target="check-notary-state" />
+            <resourcecontains resource="notary.txt" substring="success"/>
+        </waitfor>
+    </target>
+
+    <!-- Staple the received notarization to the app -->
+    <!-- run this after notarization is completed -->
+    <target name="staple-notary">
+        <echo message="--- Stapling notarization to Mac Build ---"/>
+        <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
+            <arg value="stapler"/>
+            <arg value="staple"/>
+            <arg value="${ant.project.name}-${app.version}.dmg"/>
+        </exec>
+
+        <!-- verify staple -->
+        <exec executable="/usr/bin/xcrun" dir="${dist.dir}">
+            <arg value="stapler"/>
+            <arg value="validate"/>
+            <arg value="-v" />
+            <arg value="${ant.project.name}-${app.version}.dmg"/>
+        </exec>
+    </target>
+
     <target name="createMacInstaller" depends="createJPackageMac" if="${isAppMac}">
-        <!-- Remove the extra copy of libjli.dylib which causes notarization to fail -->
-        <delete file="${dist.dir}/${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
+        <!-- unlock keychain -->
+        <exec executable="security" dir="${dist.dir}" failonerror="true">
+            <arg value="unlock-keychain" />
+            <arg value="-p" />
+            <arg value="${env.SIGNERPASSWD}" />
+            <arg value="login.keychain" />
+        </exec>
+
+        <!-- sign dylib files -->
+        <echo message="Code sign dylib files"/>
+        <apply executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
+            <arg value="--sign" />
+            <arg value="${env.SIGNER}" />
+            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/app" casesensitive="yes">
+                <include name="**/*.dylib"/>
+            </fileset>
+        </apply>
+
+        <echo> Sign APP's runtime</echo>
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
+            <arg value="--sign" />
+            <arg value="${env.SIGNER}" />
+            <arg value="${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
+        </exec>
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
+            <arg value="--sign" />
+            <arg value="${env.SIGNER}" />
+            <arg value="${ant.project.name}.app/Contents/MacOS/${ant.project.name}" />
+        </exec>
 
         <echo> Create the mac installer</echo>
         <!-- Code signing the application image -->
@@ -2007,11 +2179,63 @@
             <arg value="--timestamp" />
             <arg value="--options" />
             <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
             <arg value="${env.SIGNER}" />
             <arg value="${ant.project.name}.app/" />
         </exec>
+
+        <!-- create dmg -->
+        <exec executable="${java.home}/bin/jpackage">
+            <!-- Basic usage -->
+            <arg value="--name" />
+            <arg value="${ant.project.name}" />
+            <arg value="--dest" />
+            <arg value="${dist.dir}" />
+            <!-- Package metadata -->
+            <arg value="--app-version" />
+            <arg value="${app.version}" />
+            <arg value="--copyright" />
+            <arg value="&quot;Copyright 2006 by The HDF Group&quot;" />
+            <arg value="--description" />
+            <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
+            <arg value="--vendor" />
+            <arg value="&quot;The HDF Group&quot;" />
+            <!-- <arg value="- -license-file" />
+            <arg value="${basedir}/COPYING" /> -->
+            <arg value="--type" />
+            <arg value="dmg" />
+            <arg value="--app-image" />
+            <arg value="${dist.dir}/${ant.project.name}.app" />
+        </exec>
+
+        <!-- Code signing the dmg -->
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
+            <arg value="--sign" />
+            <arg value="${env.SIGNER}" />
+            <arg value="--deep" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <exec dir="${dist.dir}" executable="hdiutil">
+            <arg value="verify" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <antcall target="submit-notary" />
+
+        <antcall target="post-notary" />
+
+        <antcall target="staple-notary" />
 
         <!-- verify codesign -->
         <exec executable="codesign" dir="${dist.dir}">
@@ -2087,41 +2311,8 @@
             <arg value="-r" />
         </exec>
 
-        <!-- Add Applications folder link -->
-        <exec executable="ln">
-            <arg value="-s" />
-            <arg value="/Applications" />
-            <arg value="${dist.dir}/Applications" />
-        </exec>
-
-        <!-- Create .dmg file -->
         <exec dir="${dist.dir}" executable="hdiutil">
-            <arg value="create" />
-            <arg value="-volname" />
-            <arg value="${ant.project.name}Installer" />
-            <arg value="-srcfolder" />
-            <arg value="." />
-            <arg value="-ov" />
-            <arg value="-format" />
-            <arg value="UDZO" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
-        </exec>
-
-        <exec dir="${dist.dir}" executable="hdiutil">
-            <arg value="internet-enable" />
-            <arg value="-yes" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
-        </exec>
-
-        <!-- sign .dmg file on 10.11.5 or higher -->
-        <exec executable="codesign" dir="${dist.dir}">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--verbose=4" />
-            <arg value="--sign" />
-            <arg value="${env.SIGNER}" />
+            <arg value="verify" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
