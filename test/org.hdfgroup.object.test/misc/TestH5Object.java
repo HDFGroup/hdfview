@@ -12,7 +12,8 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
-import hdf.object.Attribute;
+
+import hdf.object.AttributeDataset;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -23,6 +24,7 @@ import hdf.object.ScalarDS;
 import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
+import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ScalarDS;
 
 /**
@@ -203,7 +205,7 @@ public class TestH5Object
             final String attrName = "Test attribute";
             final String[] attrValue = {"Test for group attribute"};
             final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, Datatype.NATIVE, Datatype.NATIVE);
-            final Attribute attr = new Attribute(g1, attrName, attrType, attrDims);
+            final H5ScalarAttr attr = new H5ScalarAttr(g1, attrName, attrType, attrDims);
             attr.write(attrValue);
         } catch (final Exception ex) { failed(message, ex, file); return null; }
 
@@ -769,7 +771,7 @@ public class TestH5Object
             file = new H5File(fname);
             final Dataset dset = (Dataset)file.get(NAME_DATASET_ATTR);
 
-            List<Attribute> attrs = H5File.getAttribute(dset);
+            List<AttributeDataset> attrs = H5File.getAttribute(dset);
             if ((attrs == null) || (attrs.size() < 1)) {
                 failed(message, new HDF5LibraryException("failed to read attributes from dataset"), file);
                 return 1;

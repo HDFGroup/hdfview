@@ -135,6 +135,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
             Matcher<Shell> classMatcher = widgetOfType(Shell.class);
             Matcher<Shell> regexMatcher = withRegex(".*Import.*");
+            @SuppressWarnings("unchecked")
             Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -199,6 +200,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
             Matcher<Shell> classMatcher = widgetOfType(Shell.class);
             Matcher<Shell> regexMatcher = withRegex("Save Dataset Data To Text File.*");
+            @SuppressWarnings("unchecked")
             Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -272,6 +274,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
             Matcher<Shell> classMatcher = widgetOfType(Shell.class);
             Matcher<Shell> regexMatcher = withRegex("Save Current Data To Binary File.*");
+            @SuppressWarnings("unchecked")
             Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 

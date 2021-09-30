@@ -69,6 +69,28 @@ public class H5BugFixTest {
         }
     }
 
+    protected void closeFile() {
+        if (testFile != null) {
+            try {
+                testFile.close();
+            }
+            catch (final Exception ex) {
+            }
+            testFile = null;
+        }
+    }
+
+    protected void checkObjCount(long fileid) {
+        long nObjs = 0;
+        try {
+            nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+        }
+        catch (final Exception ex) {
+            fail("H5.H5Fget_obj_count() failed. " + ex);
+        }
+        assertEquals(1, nObjs); // file id should be the only one left open
+    }
+
     @BeforeClass
     public static void createFile() throws Exception {
         try {
@@ -119,12 +141,8 @@ public class H5BugFixTest {
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            try {
-                testFile.close();
-            }
-            catch (final Exception ex) {
-            }
-            testFile = null;
+            checkObjCount(testFile.getFID());
+            closeFile();
         }
         try {
             int openID = H5.getOpenIDCount();
@@ -303,7 +321,6 @@ public class H5BugFixTest {
     @Test
     public void testBug863() throws Exception {
         log.debug("testBug863");
-        long nObjs = 0; // number of object left open
         Dataset dset = null;
         final String dnames[] = { H5TestFile.NAME_DATASET_CHAR, H5TestFile.NAME_DATASET_COMPOUND,
                 H5TestFile.NAME_DATASET_COMPOUND_SUB, H5TestFile.NAME_DATASET_ENUM, H5TestFile.NAME_DATASET_FLOAT,
@@ -313,12 +330,11 @@ public class H5BugFixTest {
         // test two open options: open full tree or open individual object only
         for (int openOption = 0; openOption < 2; openOption++) {
             for (int i = 0; i < NLOOPS; i++) {
-                nObjs = 0;
                 final H5File file = new H5File(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
 
                 if (openOption == 0) {
                     try {
-                        file.open(); // opent the full tree
+                        file.open(); // open the full tree
                     }
                     catch (final Exception ex) {
                         fail("file.open() failed. " + ex);
@@ -350,23 +366,15 @@ public class H5BugFixTest {
                     fail("file.get() failed. " + ex);
                 }
 
-                try {
-                    nObjs = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL);
-                }
-                catch (final Exception ex) {
-                    fail("H5.H5Fget_obj_count() failed. " + ex);
-                }
-
+                checkObjCount(file.getFID());
                 try {
                     file.close();
                 }
                 catch (final Exception ex) {
                     fail("file.close() failed. " + ex);
                 }
-
-                assertTrue(nObjs <= 1); // file id should be the only this left
-                // open
             } //  (int i=0; i<NLOOPS; i++)
         } //  (int openOption=0; openOption<2; openOption++)
+        testFile = null;
     }
 }

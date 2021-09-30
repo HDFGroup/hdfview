@@ -98,29 +98,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     protected transient Object[] memberDims;
 
     /**
-     * The datatypes of compound members.
-     */
-    protected Datatype[] memberTypes;
-
-    /**
-     * The array to store flags to indicate if a member of this compound
-     * dataset is selected for read/write.
-     * <p>
-     * If a member is selected, the read/write will perform on the member.
-     * Applications such as HDFView will only display the selected members of
-     * the compound dataset.
-     *
-     * <pre>
-     * For example, if a compound dataset has four members
-     *     String[] memberNames = {"X", "Y", "Z", "TIME"};
-     * and
-     *     boolean[] isMemberSelected = {true, false, false, true};
-     * members "X" and "TIME" are selected for read and write.
-     * </pre>
-     */
-    protected boolean[] isMemberSelected;
-
-    /**
      * Constructs a CompoundDS object with the given file, dataset name and path.
      * <p>
      * The dataset object represents an existing dataset in the file. For
@@ -173,34 +150,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     @Override
     public final int getMemberCount() {
         return numberOfMembers;
-    }
-
-    /**
-     * Returns the number of selected members of the compound dataset.
-     *
-     * Selected members are the compound fields which are selected for
-     * read/write.
-     * <p>
-     * For example, in a compound datatype of {int A, float B, char[] C},
-     * users can choose to retrieve only {A, C} from the dataset. In this
-     * case, getSelectedMemberCount() returns two.
-     *
-     * @return the number of selected members.
-     */
-    @Override
-    public final int getSelectedMemberCount() {
-        int count = 0;
-
-        if (isMemberSelected != null) {
-            for (int i = 0; i < isMemberSelected.length; i++) {
-                if (isMemberSelected[i]) {
-                    count++;
-                }
-            }
-        }
-        log.trace("count of selected members={}", count);
-
-        return count;
     }
 
     /**
@@ -399,26 +348,39 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     }
 
     /**
-     * Returns an array of datatype objects of selected compound members.
-     *
-     * @return an array of datatype objects of selected compound members.
+     * Resets selection of dataspace
      */
-    @Override
-    public final Datatype[] getSelectedMemberTypes() {
-        if (isMemberSelected == null) {
-            log.debug("getSelectedMemberTypes(): isMemberSelected array is null");
-            return memberTypes;
-        }
-
-        int idx = 0;
-        Datatype[] types = new Datatype[getSelectedMemberCount()];
-        for (int i = 0; i < isMemberSelected.length; i++) {
-            if (isMemberSelected[i]) {
-                types[idx++] = memberTypes[i];
+    protected void resetSelection() {
+        for (int i = 0; i < rank; i++) {
+            startDims[i] = 0;
+            selectedDims[i] = 1;
+            if (selectedStride != null) {
+                selectedStride[i] = 1;
             }
         }
 
-        return types;
+        if (rank == 1) {
+            selectedIndex[0] = 0;
+            selectedDims[0] = dims[0];
+        }
+        else if (rank == 2) {
+            selectedIndex[0] = 0;
+            selectedIndex[1] = 1;
+            selectedDims[0] = dims[0];
+            selectedDims[1] = dims[1];
+        }
+        else if (rank > 2) {
+            selectedIndex[0] = 0; // width, the fastest dimension
+            selectedIndex[1] = 1; // height
+            selectedIndex[2] = 2; // frames
+
+            selectedDims[selectedIndex[0]] = dims[selectedIndex[0]];
+            selectedDims[selectedIndex[1]] = dims[selectedIndex[1]];
+            selectedDims[selectedIndex[2]] = dims[selectedIndex[2]];
+        }
+
+        isDataLoaded = false;
+        setAllMemberSelection(true);
     }
 
     /**

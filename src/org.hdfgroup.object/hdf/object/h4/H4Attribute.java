@@ -47,15 +47,15 @@ import hdf.object.HObject;
  * // The value of the attribute
  * int[] value = {0, 255};
  * // Create a new attribute
- * Attribute dataRange = new Attribute(name, type, dims);
+ * AttributeDataset dataRange = new Attribute(name, type, dims);
  * // Set the attribute value
  * dataRange.setValue(value);
  * // See FileFormat.writeAttribute() for how to attach an attribute to an object,
- * &#64;see hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
+ * &#64;see hdf.object.FileFormat#writeAttribute(HObject, AttributeDataset, boolean)
  * </pre>
  *
  *
- * For an atomic datatype, the value of an Attribute will be a 1D array of integers, floats and
+ * For an atomic datatype, the value of an AttributeDataset will be a 1D array of integers, floats and
  * strings. For a compound datatype, it will be a 1D array of strings with field members separated
  * by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
  * float} of three data points.
@@ -91,7 +91,7 @@ public class H4Attribute extends Attribute {
      *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
-     * Attribute attr = new Attribute(attrName, attrType, attrDims);
+     * AttributeDataset attr = new Attribute(attrName, attrType, attrDims);
      * attr.setValue(classValue);
      * </pre>
      *

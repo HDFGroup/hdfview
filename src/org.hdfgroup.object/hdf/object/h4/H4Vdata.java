@@ -21,6 +21,7 @@ import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
 import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -95,7 +96,7 @@ public class H4Vdata extends CompoundDS
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of AttributeDataset.
      */
     @SuppressWarnings("rawtypes")
     private List                                attributeList;
@@ -472,7 +473,7 @@ public class H4Vdata extends CompoundDS
                     }
 
                     long[] attrDims = {attrInfo[1]};
-                    Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    AttributeDataset attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     if (j>=0)
                         attr.setProperty("field", memberNames[j]);
                     attributeList.add(attr);
@@ -524,13 +525,13 @@ public class H4Vdata extends CompoundDS
     public void writeMetadata(Object info) throws Exception
     {
         // only attribute metadata is supported.
-        if (!(info instanceof Attribute)) {
+        if (!(info instanceof AttributeDataset)) {
             log.debug("writeMetadata(): Object not an Attribute");
             return;
         }
 
         try {
-            getFileFormat().writeAttribute(this, (Attribute)info, true);
+            getFileFormat().writeAttribute(this, (AttributeDataset)info, true);
 
             if (attributeList == null) {
                 attributeList = new Vector();

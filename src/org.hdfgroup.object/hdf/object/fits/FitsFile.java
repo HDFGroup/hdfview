@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 
+import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -352,7 +354,7 @@ public class FitsFile extends FileFormat
      * @param attrExisted The indicator if the given attribute exists.
      */
     @Override
-    public void writeAttribute(HObject obj, hdf.object.Attribute attr, boolean attrExisted) throws Exception {
+    public void writeAttribute(HObject obj, hdf.object.AttributeDataset attr, boolean attrExisted) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 

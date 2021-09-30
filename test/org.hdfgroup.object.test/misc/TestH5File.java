@@ -17,12 +17,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Attribute;
+
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ScalarDS;
 
 /**
@@ -65,7 +66,7 @@ public class TestH5File
             printNode(root, "    ");
         }
 
-	try {
+    try {
         h5file.close();
         } catch (Exception ex)
         {
@@ -114,7 +115,7 @@ public class TestH5File
                     System.out.println(h5DS);
 
                     // test H5CompoundDS attributes
-                    Attribute attr = null;
+                    H5ScalarAttr attr = null;
                     List info = null;
                     try { info = h5DS.getMetadata(); }
                     catch (Exception ex) { System.out.println(ex); }
@@ -125,7 +126,7 @@ public class TestH5File
                         n = info.size();
                         for (int i=0; i<n; i++)
                         {
-                            attr = (Attribute)info.get(i);
+                            attr = (H5ScalarAttr)info.get(i);
                             System.out.println(attr);
                         }
                     }
@@ -173,7 +174,7 @@ public class TestH5File
             } //while (nodes.hasMoreElements())
         } //if (root != null)
 
-	try {
+    try {
         h5file.close();
         } catch (Exception ex)
         {
@@ -211,7 +212,7 @@ public class TestH5File
                     System.out.println(h5DS);
 
                     // test H5CompoundDS attributes
-                    Attribute attr = null;
+                    H5ScalarAttr attr = null;
                     List info = null;
 
                     try { info = h5DS.getMetadata(); }
@@ -223,7 +224,7 @@ public class TestH5File
                         n = info.size();
                         for (int i=0; i<n; i++)
                         {
-                            attr = (Attribute)info.get(i);
+                            attr = (H5ScalarAttr)info.get(i);
                             System.out.println(attr);
                         }
                     }
@@ -251,7 +252,7 @@ public class TestH5File
             } //while (nodes.hasMoreElements())
         } //if (root != null)
 
-	try {
+    try {
         h5file.close();
         } catch (Exception ex)
         {
@@ -289,7 +290,7 @@ public class TestH5File
                     System.out.println(g);
 
                     // test H5CompoundDS attributes
-                    Attribute attr = null;
+                    H5ScalarAttr attr = null;
                     List info = null;
                     try { g.getMetadata(); }
                     catch (Exception ex) { System.out.println(ex); }
@@ -301,14 +302,14 @@ public class TestH5File
                     int n = info.size();
                     for (int i=0; i<n; i++)
                     {
-                        attr = (Attribute)info.get(i);
+                        attr = (H5ScalarAttr)info.get(i);
                         System.out.println(attr);
                     }
                 } //if (obj instanceof H5Group
             } //while (nodes.hasMoreElements())
         } //if (root != null)
 
-	try {
+    try {
         h5file.close();
         } catch (Exception ex)
         {
@@ -325,7 +326,7 @@ public class TestH5File
             System.exit(1);
         }
 
-	System.out.println("Tree: for: "+argv[0]);
+    System.out.println("Tree: for: "+argv[0]);
         TestH5File.testTree(argv[0]);
     }
 

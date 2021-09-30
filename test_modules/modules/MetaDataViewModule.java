@@ -14,7 +14,7 @@
 
 package modules;
 
-import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.HObject;
 import hdf.view.MetaDataView.MetaDataView;
 
@@ -30,12 +30,12 @@ public class MetaDataViewModule implements MetaDataView {
     }
 
     @Override
-    public Attribute addAttribute(HObject obj) {
+    public AttributeDataset addAttribute(HObject obj) {
         return null;
     }
 
     @Override
-    public Attribute deleteAttribute(HObject obj) {
+    public AttributeDataset deleteAttribute(HObject obj) {
         return null;
     }
 

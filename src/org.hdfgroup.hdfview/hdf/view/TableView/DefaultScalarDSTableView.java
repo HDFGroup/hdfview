@@ -1183,6 +1183,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                                     int idx = 0;
                                     while (st.hasMoreTokens()) {
+                                        int space_type = dset.getSpaceType();
                                         int rank = dset.getRank();
                                         long[] start = dset.getStartDims();
                                         long[] count = dset.getSelectedDims();
@@ -1413,6 +1414,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         private final String columnNames[];
 
+        private final int    space_type;
         private final int    rank;
 
         private final long[] startArray;
@@ -1422,6 +1424,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         private final int    ncols;
 
         public ScalarDSColumnHeaderDataProvider(DataFormat theDataObject) {
+            space_type = theDataObject.getSpaceType();
             rank = theDataObject.getRank();
 
             startArray = theDataObject.getStartDims();

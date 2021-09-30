@@ -139,6 +139,15 @@ public interface DataFormat {
     public abstract Datatype getDatatype();
 
     /**
+     * Returns the space type for the data object. It returns a
+     * negative number if it failed to retrieve the type information from
+     * the file.
+     *
+     * @return the space type for the data object.
+     */
+    public abstract int getSpaceType();
+
+    /**
      * Returns the rank (number of dimensions) of the data object. It returns a
      * negative number if it failed to retrieve the dimension information from
      * the file.

@@ -220,6 +220,8 @@ public class H4Datatype extends Datatype {
             case HDFConstants.DFNT_INT32:
             case HDFConstants.DFNT_UINT32:
                 log.trace("allocateArray(): allocating int array of size {}", datasize);
+                if (datasize == NATIVE)
+                    datasize = 4;
                 data = new int[datasize];
                 break;
             case HDFConstants.DFNT_INT64:

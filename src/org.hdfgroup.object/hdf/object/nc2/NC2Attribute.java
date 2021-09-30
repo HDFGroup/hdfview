@@ -47,11 +47,11 @@ import hdf.object.HObject;
  * // The value of the attribute
  * int[] value = {0, 255};
  * // Create a new attribute
- * Attribute dataRange = new Attribute(name, type, dims);
+ * AttributeDataset dataRange = new Attribute(name, type, dims);
  * // Set the attribute value
  * dataRange.setValue(value);
  * // See FileFormat.writeAttribute() for how to attach an attribute to an object,
- * &#64;see hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
+ * &#64;see hdf.object.FileFormat#writeAttribute(HObject, AttributeDataset, boolean)
  * </pre>
  *
  *
@@ -91,7 +91,7 @@ public class NC2Attribute extends Attribute {
      *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
-     * Attribute attr = new Attribute(attrName, attrType, attrDims);
+     * AttributeDataset attr = new Attribute(attrName, attrType, attrDims);
      * attr.setValue(classValue);
      * </pre>
      *
@@ -130,7 +130,7 @@ public class NC2Attribute extends Attribute {
      *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
-     * Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
+     * AttributeDataset attr = new Attribute(attrName, attrType, attrDims, classValue);
      * </pre>
      *
      * @param parentObj

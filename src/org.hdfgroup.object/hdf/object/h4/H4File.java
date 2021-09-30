@@ -28,6 +28,7 @@ import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
 
 import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -497,7 +498,7 @@ public class H4File extends FileFormat {
      * @throws HDFException if the attribute can not be written
      */
     @Override
-    public void writeAttribute(HObject obj, Attribute attr, boolean isSDglobalAttr) throws HDFException {
+    public void writeAttribute(HObject obj, AttributeDataset attr, boolean isSDglobalAttr) throws HDFException {
         log.trace("writeAttribute(): start: obj={} attribute={} isSDglobalAttr={}", obj, attr, isSDglobalAttr);
 
         String attrName = attr.getName();
@@ -1446,7 +1447,7 @@ public class H4File extends FileFormat {
                             catch (Exception ex) {
                                 log.debug("getFileAnnotation(): failed to create datatype for attribute: ", ex);
                             }
-                            Attribute newAttr = new Attribute(getRootObject(), annName + " #" + i, attrType, attrDims);
+                            AttributeDataset newAttr = new Attribute(getRootObject(), annName + " #" + i, attrType, attrDims);
                             attrList.add(newAttr);
                             newAttr.setData(str);
                         }
@@ -1557,7 +1558,7 @@ public class H4File extends FileFormat {
                     log.debug("getGRglobalAttribute(): failed to create datatype for attribute: ", ex);
                 }
 
-                Attribute attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
+                AttributeDataset attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
             } // (int i=0; i<numberOfAttributes; i++)
         } // (b && numberOfAttributes>0)
@@ -1647,7 +1648,7 @@ public class H4File extends FileFormat {
                     log.debug("getSDSglobalAttribute(): failed to create datatype for attribute: ", ex);
                 }
 
-                Attribute attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
+                AttributeDataset attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
             } // (int i=0; i<numberOfAttributes; i++)
         } // (b && numberOfAttributes>0)

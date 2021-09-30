@@ -418,7 +418,7 @@ public class NewAttributeDialog extends NewDataObjectDialog {
                         }
                         value = s;
                     }
-                    else if (tsize == 4) {
+                    else if ((tsize == 4) || (tsize == -1)) {
                         int[] i = new int[arraySize];
                         long lv = 0;
                         for (int j = 0; j < count; j++) {
@@ -487,7 +487,7 @@ public class NewAttributeDialog extends NewDataObjectDialog {
                         }
                         value = s;
                     }
-                    else if (tsize == 4) {
+                    else if ((tsize == 4) || (tsize == -1)) {
                         int[] i = new int[arraySize];
 
                         for (int j = 0; j < count; j++) {
@@ -520,7 +520,7 @@ public class NewAttributeDialog extends NewDataObjectDialog {
             }
 
             if (tclass == Datatype.CLASS_FLOAT) {
-                if (tsize == 4) {
+                if ((tsize == 4) || (tsize == -1)) {
                     float[] f = new float[arraySize];
                     for (int j = 0; j < count; j++) {
                         theToken = st.nextToken().trim();

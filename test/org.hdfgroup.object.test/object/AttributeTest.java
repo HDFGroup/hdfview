@@ -17,12 +17,13 @@ import org.junit.Test;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ScalarAttr;
 
 /**
  * @author Rishi R. Sinha
@@ -34,8 +35,30 @@ public class AttributeTest {
 
     private H5File testFile = null;
     private H5Group testGroup = null;
-    private Attribute strAttr = null;
-    private Attribute arrayIntAttr = null;
+    private AttributeDataset strAttr = null;
+    private AttributeDataset arrayIntAttr = null;
+
+    protected void closeFile() {
+        if (testFile != null) {
+            try {
+                testFile.close();
+            }
+            catch (final Exception ex) {
+            }
+            testFile = null;
+        }
+    }
+
+    protected void checkObjCount(long fileid) {
+        long nObjs = 0;
+        try {
+            nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+        }
+        catch (final Exception ex) {
+            fail("H5.H5Fget_obj_count() failed. " + ex);
+        }
+        assertEquals(1, nObjs); // file id should be the only one left open
+    }
 
     @BeforeClass
     public static void createFile() throws Exception {
@@ -79,28 +102,34 @@ public class AttributeTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+        try {
+            testFile = (H5File) H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         assertNotNull(testFile);
-        testGroup = (H5Group) testFile.get(H5TestFile.NAME_GROUP_ATTR);
-        assertNotNull(testGroup);
-        List testAttrs = testGroup.getMetadata();
-        assertNotNull(testAttrs);
-        strAttr = (Attribute) testAttrs.get(1);
-        assertNotNull(strAttr);
-        arrayIntAttr = (Attribute) testAttrs.get(0);
-        assertNotNull(arrayIntAttr);
+
+        try {
+            testGroup = (H5Group) testFile.get(H5TestFile.NAME_GROUP_ATTR);
+            assertNotNull(testGroup);
+            List testAttrs = testGroup.getMetadata();
+            assertNotNull(testAttrs);
+            strAttr = (AttributeDataset) testAttrs.get(1);
+            assertNotNull(strAttr);
+            arrayIntAttr = (AttributeDataset) testAttrs.get(0);
+            assertNotNull(arrayIntAttr);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            try {
-                testFile.close();
-            }
-            catch (final Exception ex) {
-                log.debug("testfile close failure: ", ex);
-            }
-            testFile = null;
+            checkObjCount(testFile.getFID());
+            closeFile();
         }
         try {
             int openID = H5.getOpenIDCount();
@@ -113,7 +142,7 @@ public class AttributeTest {
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#Attribute(java.lang.String, hdf.object.Datatype, long[])} .
+     * Test method for {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype, long[])} .
      * <p>
      * Here we test:
      * <ul>
@@ -137,23 +166,15 @@ public class AttributeTest {
             fail("new H5Datatype failed. " + ex);
         }
 
-        Attribute attr = new Attribute(null, attrName, attrType, attrDims);
+        AttributeDataset attr = new H5ScalarAttr(testGroup, attrName, attrType, attrDims);
         attr.setData(classValue);
         assertNotNull(attr);
         assertEquals(classValue[0], attr.toString("|"));
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
      * Test method for
-     * {@link hdf.object.Attribute#Attribute(java.lang.String, hdf.object.Datatype, long[], java.lang.Object)}
+     * {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype, long[], java.lang.Object)}
      * .
      * <p>
      * Here we test:
@@ -176,17 +197,9 @@ public class AttributeTest {
             fail("new H5Datatype failed. " + ex);
         }
 
-        Attribute attr = new Attribute(null, attrName, attrType, attrDims, classValue);
+        AttributeDataset attr = new H5ScalarAttr(testGroup, attrName, attrType, attrDims, classValue);
         assertNotNull(attr);
         assertEquals(classValue[0], attr.toString("|"));
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
@@ -225,19 +238,10 @@ public class AttributeTest {
             log.trace("testGetData(): Out of memory");
             fail("Out of memory");
         }
-
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#setData(java.lang.Object)}.
+     * Test method for {@link hdf.object.AttributeDataset#setData(java.lang.Object)}.
      * <p>
      * Here we test:
      * <ul>
@@ -253,10 +257,12 @@ public class AttributeTest {
 
         try {
             prevValue = (String[]) strAttr.getData();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             log.trace("testSetData(): getData() failure:", ex);
             fail("getData() failure " + ex);
-        } catch (OutOfMemoryError e) {
+        }
+        catch (OutOfMemoryError e) {
             log.trace("testSetData(): Out of memory");
             fail("Out of memory");
         }
@@ -265,10 +271,12 @@ public class AttributeTest {
 
         try {
             assertEquals((strAttr.getData()), "Temp String Value");
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             log.trace("testSetData(): getData() failure:", ex);
             fail("getData() failure " + ex);
-        } catch (OutOfMemoryError e) {
+        }
+        catch (OutOfMemoryError e) {
             log.trace("testSetData(): Out of memory");
             fail("Out of memory");
         }
@@ -279,10 +287,12 @@ public class AttributeTest {
 
         try {
             intPrevValue = (int[]) arrayIntAttr.getData();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             log.trace("testSetData(): getData() failure:", ex);
             fail("getData() failure " + ex);
-        } catch (OutOfMemoryError e) {
+        }
+        catch (OutOfMemoryError e) {
             log.trace("testSetData(): Out of memory");
             fail("Out of memory");
         }
@@ -295,24 +305,17 @@ public class AttributeTest {
         catch (Exception ex) {
             log.trace("testSetData(): getData() failure:", ex);
             fail("getData() failure " + ex);
-        } catch (OutOfMemoryError e) {
+        }
+        catch (OutOfMemoryError e) {
             log.trace("testSetData(): Out of memory");
             fail("Out of memory");
         }
 
         arrayIntAttr.setData(intPrevValue);
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#getName()}.
+     * Test method for {@link hdf.object.AttributeDataset#getName()}.
      * <p>
      * Here we test:
      * <ul>
@@ -324,18 +327,10 @@ public class AttributeTest {
         log.debug("testGetName");
         assertTrue(strAttr.getName().equals("strAttr"));
         assertTrue(arrayIntAttr.getName().equals("arrayInt"));
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#getRank()}.
+     * Test method for {@link hdf.object.AttributeDataset#getRank()}.
      * <p>
      * Here we test:
      * <ul>
@@ -347,18 +342,10 @@ public class AttributeTest {
         log.debug("testGetRank");
         assertEquals(strAttr.getRank(), 1);
         assertEquals(arrayIntAttr.getRank(), 1);
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#getDataDims()}.
+     * Test method for {@link hdf.object.AttributeDataset#getDataDims()}.
      * <p>
      * Here we test:
      * <ul>
@@ -370,18 +357,10 @@ public class AttributeTest {
         log.debug("testGetDataDims");
         assertEquals(strAttr.getDims()[0], 1);
         assertEquals(arrayIntAttr.getDims()[0], 10);
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#getType()}.
+     * Test method for {@link hdf.object.AttributeDataset#getType()}.
      * <p>
      * Here we test:
      * <ul>
@@ -394,18 +373,10 @@ public class AttributeTest {
         assertTrue(strAttr.getDatatype().getDescription()
                 .equals("String, length = 20, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII"));
         assertTrue(arrayIntAttr.getDatatype().getDescription().equals("32-bit integer"));
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#isUnsigned()}.
+     * Test method for {@link hdf.object.AttributeDataset#isUnsigned()}.
      * <p>
      * Here we test:
      * <ul>
@@ -417,18 +388,10 @@ public class AttributeTest {
         log.debug("testIsUnsigned");
         assertFalse(strAttr.getDatatype().isUnsigned());
         assertFalse(arrayIntAttr.getDatatype().isUnsigned());
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
-     * Test method for {@link hdf.object.Attribute#toString(java.lang.String)}.
+     * Test method for {@link hdf.object.AttributeDataset#toString(java.lang.String)}.
      * <p>
      * Here we test:
      * <ul>
@@ -440,14 +403,6 @@ public class AttributeTest {
         log.debug("testToStringString");
         assertTrue(strAttr.toString(",").equals("String attribute."));
         assertTrue(arrayIntAttr.toString(",").equals("1,2,3,4,5,6,7,8,9,10"));
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
 }

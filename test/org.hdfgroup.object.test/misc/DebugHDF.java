@@ -21,7 +21,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
-import hdf.object.Attribute;
+
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -34,6 +34,7 @@ import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ScalarDS;
 
 public class DebugHDF {
@@ -192,10 +193,10 @@ public class DebugHDF {
 
         // create ref attributes
         Datatype attr_dtype = file.createDatatype( Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
-        Attribute attr = new Attribute(ds, "ref", attr_dtype, new long[] { 1 });
+        H5ScalarAttr attr = new H5ScalarAttr(ds, "ref", attr_dtype, new long[] { 1 });
         attr.setData(ds.getFullName());
         file.writeAttribute(ds, attr, false);
-        attr = new Attribute(ds, "refs", attr_dtype, new long[] { 2 });
+        attr = new H5ScalarAttr(ds, "refs", attr_dtype, new long[] { 2 });
         attr.setData(ref_buf);
         attr.write();
 
@@ -258,7 +259,7 @@ public class DebugHDF {
         Datatype attr_dtype = testFile.createDatatype(
             Datatype.CLASS_STRING, 5,
             Datatype.NATIVE, Datatype.NATIVE);
-        Attribute attr = new Attribute(dataset, "foo", attr_dtype, attr_dims);
+        H5ScalarAttr attr = new H5ScalarAttr(dataset, "foo", attr_dtype, attr_dims);
 
         //byte[] bvalue = Dataset.stringToByte(attr_value, 5);
         attr.setData(attr_value);
@@ -277,7 +278,7 @@ public class DebugHDF {
         root = (Group)testFile.getRootObject();
         dataset = (Dataset)root.getMemberList().get(0);
         List attrList = dataset.getMetadata();
-        attr = (Attribute)attrList.get(0);
+        attr = (H5ScalarAttr)attrList.get(0);
         attr.getData();
         testFile.close();
     }
@@ -596,7 +597,7 @@ public class DebugHDF {
         // create and write an attribute to the dataset
         long[] attrDims = {2};
         int[] attrValue = {0, 10000};
-        Attribute attr = new Attribute(dataset, "range", dtype, attrDims);
+        H5ScalarAttr attr = new H5ScalarAttr(dataset, "range", dtype, attrDims);
         attr.setData(attrValue); // set the attribute value
         attr.write();
 
@@ -608,7 +609,7 @@ public class DebugHDF {
 
         // retrieve the dataset and attribute
         dataset = (Dataset)file.get(dname);
-        attr = (Attribute)dataset.getMetadata().get(0);
+        attr = (H5ScalarAttr)dataset.getMetadata().get(0);
 
         // change the attribute value
         if (attr!=null) {
@@ -953,7 +954,7 @@ public class DebugHDF {
                 Datatype.CLASS_INTEGER, 4, Datatype.NATIVE,
                 Datatype.NATIVE);
 
-        Attribute attr = new Attribute(root, "attribute int", attrType, dims0D);
+        H5ScalarAttr attr = new H5ScalarAttr(root, "attribute int", attrType, dims0D);
 
         int[] attrValue = { 15 }; // attribute value
 
@@ -994,7 +995,7 @@ public class DebugHDF {
         Group root = (Group) testFile.getRootObject();
 
         /** read Attribute */
-        Attribute attr = (Attribute) root.getMetadata().get(0);
+        H5ScalarAttr attr = (H5ScalarAttr) root.getMetadata().get(0);
         // System.out.println(attr);
 
         attr.getName(); // -> attribute int
@@ -1507,7 +1508,7 @@ public class DebugHDF {
         int[] attrValue = {0, 10000}; // attribute value
 
         // create a attribute of 1D integer of size two
-        Attribute attr = new Attribute(dataset, "data range", dtype, attrDims);
+        H5ScalarAttr attr = new H5ScalarAttr(dataset, "data range", dtype, attrDims);
         attr.setData(attrValue); // set the attribute value
 
         // attach the attribute to the dataset
@@ -1515,7 +1516,7 @@ public class DebugHDF {
 
         // read the attribute into memory
         List attrList = dataset.getMetadata();
-        attr = (Attribute)attrList.get(0);
+        attr = (H5ScalarAttr)attrList.get(0);
 
         // print out attribute value
         System.out.println( attr.toString() );
@@ -2813,19 +2814,19 @@ public class DebugHDF {
         final Group root = (Group) testFile.getRootObject();
 
         Vector v = new Vector();
-        v.addElement(new Float(1.2));
-        v.addElement(new Float(2.3));
-        v.addElement(new Float(4.5));
+        v.addElement(Double.valueOf(1.2));
+        v.addElement(Double.valueOf(2.3));
+        v.addElement(Double.valueOf(4.5));
 
         putData(testFile, root, "Vector Dataset",v,true, null);
         v = getData(root, "Vector Dataset");
         System.out.println("first time getData " + v);
 
         //adding five more elements tothe vector
-        v.addElement(new Float(4));
-        v.addElement(new Float(5));
-        v.addElement(new Float(6));
-        v.addElement(new Float(7));
+        v.addElement(Float.valueOf(4));
+        v.addElement(Float.valueOf(5));
+        v.addElement(Float.valueOf(6));
+        v.addElement(Float.valueOf(7));
         final long[] extended_dims = {7};
         putData(testFile, root, "Vector Dataset",v,false, extended_dims);
         System.out.println("After adding four more elements to the vector");
@@ -3570,7 +3571,7 @@ public class DebugHDF {
         final String attrName = "Test attribute";
         final String[] attrValue = {"Test for group attribute"};
         final Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, attrValue[0].length()+1, Datatype.NATIVE, Datatype.NATIVE);
-        final Attribute attr = new Attribute(g1, attrName, attrType, attrDims);
+        final H5ScalarAttr attr = new H5ScalarAttr(g1, attrName, attrType, attrDims);
         attr.setData(attrValue);
         attr.write();
 

@@ -8,7 +8,7 @@ import java.util.Vector;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Attribute;
+
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -16,6 +16,7 @@ import hdf.object.Group;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
+import hdf.object.h5.H5ScalarAttr;
 
 public class TestH5MemoryLeak
 {
@@ -371,8 +372,8 @@ public class TestH5MemoryLeak
         final H5Datatype strAttrType = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
         final H5Datatype intAttrType = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
 
-        final Attribute ATTRIBUTE_STR = new Attribute(null, "attrName", strAttrType, new long[] { 1 }, new String[] {"attrValue"});
-        final Attribute ATTRIBUTE_INT_ARRAY = new Attribute(null, "arrayInt", intAttrType, new long[] { 10 }, new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        final H5ScalarAttr ATTRIBUTE_STR = new H5ScalarAttr(null, "attrName", strAttrType, new long[] { 1 }, new String[] {"attrValue"});
+        final H5ScalarAttr ATTRIBUTE_INT_ARRAY = new H5ScalarAttr(null, "arrayInt", intAttrType, new long[] { 10 }, new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
 
         file = new H5File(NAME_FILE_H5, FileFormat.CREATE);
         file.open();

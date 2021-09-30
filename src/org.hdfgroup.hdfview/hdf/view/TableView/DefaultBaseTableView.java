@@ -419,6 +419,7 @@ public abstract class DefaultBaseTableView implements TableView {
         log.trace("Data object isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
 
         // Setup subset information
+        int space_type = dataObject.getSpaceType();
         int rank = dataObject.getRank();
         int[] selectedIndex = dataObject.getSelectedIndex();
         long[] count = dataObject.getSelectedDims();
@@ -1023,6 +1024,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         dataValue = null;
         try {
+            log.trace("loadData(): call getData()");
             dataValue = dataObject.getData();
         }
         catch (Exception ex) {
@@ -2597,6 +2599,7 @@ public abstract class DefaultBaseTableView implements TableView {
     protected class RowHeaderDataProvider implements IDataProvider {
 
         private final int    rank;
+        private final int    space_type;
         private final long[] dims;
         private final long[] startArray;
         private final long[] strideArray;
@@ -2608,6 +2611,7 @@ public abstract class DefaultBaseTableView implements TableView {
         private final int    nrows;
 
         public RowHeaderDataProvider(DataFormat theDataObject) {
+            this.space_type = theDataObject.getSpaceType();
             this.rank = theDataObject.getRank();
             this.dims = theDataObject.getSelectedDims();
             this.startArray = theDataObject.getStartDims();

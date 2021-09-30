@@ -135,14 +135,15 @@ public abstract class AbstractWindowTest {
                 public void run() {
                     try {
                         Vector<File> fList = new Vector<>();
-                        String rootDir = System.getProperty("hdfview.workdir");
+                        String rootDir = System.getProperty("hdfview.rootdir");
                         if (rootDir == null) rootDir = System.getProperty("user.dir");
+                        String startDir = System.getProperty("hdfview.workdir");
 
                         int W = 800, H = 600, X = 0, Y = 0;
 
                         while (true) {
                             // open and layout the shell
-                            HDFView window = new HDFView(rootDir, null);
+                            HDFView window = new HDFView(rootDir, startDir);
 
                             // Set the testing state to handle the problem with testing
                             // of native dialogs
@@ -306,6 +307,7 @@ public abstract class AbstractWindowTest {
         try {
             SWTBotTree filetree = bot.tree();
 
+            filetree.select(hdfFile.getName());
             filetree.getTreeItem(hdfFile.getName()).click();
 
             bot.shells()[0].activate();
@@ -444,6 +446,7 @@ public abstract class AbstractWindowTest {
 
         Matcher<Shell> classMatcher = widgetOfType(Shell.class);
         Matcher<Shell> regexMatcher = withRegex(strippedObjectName + objectShellTitleRegex);
+        @SuppressWarnings("unchecked")
         Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
         bot.waitUntil(Conditions.waitForShell(shellMatcher));
 

@@ -21,6 +21,7 @@ import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
 import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -44,7 +45,7 @@ public class H4Group extends Group
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of AttributeDataset.
      */
     @SuppressWarnings("rawtypes")
     private List                            attributeList;
@@ -156,7 +157,7 @@ public class H4Group extends Group
                     }
 
                     long[] attrDims = {attrInfo[1]};
-                    Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    AttributeDataset attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     attributeList.add(attr);
 
                     Object buf = null;
@@ -202,13 +203,13 @@ public class H4Group extends Group
     public void writeMetadata(Object info) throws Exception
     {
         // only attribute metadata is supported.
-        if (!(info instanceof Attribute)) {
+        if (!(info instanceof AttributeDataset)) {
             log.debug("writeMetadata(): Object not an Attribute");
             return;
         }
 
         try {
-            getFileFormat().writeAttribute(this, (Attribute)info, true);
+            getFileFormat().writeAttribute(this, (AttributeDataset)info, true);
 
             if (attributeList == null) {
                 attributeList = new Vector();

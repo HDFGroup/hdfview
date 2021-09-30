@@ -3,13 +3,14 @@ package test.object;
 import java.util.Vector;
 
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
+import hdf.object.h5.H5ScalarAttr;
 
 /**
  * Creates an HDF5 file for unit tests.
@@ -79,8 +80,8 @@ public class H5TestFile {
     public static final String[] COMPOUND_MEMBER_NAMES = { "int32", "float32", "string", "uint32" };
     public static final H5Datatype[] COMPOUND_MEMBER_DATATYPES = { null, null, null, null };
 
-    public static Attribute ATTRIBUTE_STR = null;
-    public static Attribute ATTRIBUTE_INT_ARRAY = null;
+    public static H5ScalarAttr ATTRIBUTE_STR = null;
+    public static H5ScalarAttr ATTRIBUTE_INT_ARRAY = null;
 
     /**
      * Creates an HDF5 test file.
@@ -157,8 +158,8 @@ public class H5TestFile {
 
         log.debug("create attributes");
         // attributes
-        ATTRIBUTE_STR = new Attribute(g1, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
-        ATTRIBUTE_INT_ARRAY = new Attribute(g1, "arrayInt", typeInt, new long[] { 10 },
+        ATTRIBUTE_STR = new H5ScalarAttr(g1, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new H5ScalarAttr(g1, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
 
         ATTRIBUTE_STR.write();
@@ -181,8 +182,8 @@ public class H5TestFile {
 
         // attach attributes to all datasets
         for (int i = 0; i < dsets.length; i++) {
-            ATTRIBUTE_STR = new Attribute(dsets[i], "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
-            ATTRIBUTE_INT_ARRAY = new Attribute(dsets[i], "arrayInt", typeInt, new long[] { 10 },
+            ATTRIBUTE_STR = new H5ScalarAttr(dsets[i], "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+            ATTRIBUTE_INT_ARRAY = new H5ScalarAttr(dsets[i], "arrayInt", typeInt, new long[] { 10 },
                     new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
             ATTRIBUTE_STR.write();
             ATTRIBUTE_INT_ARRAY.write();
@@ -195,7 +196,7 @@ public class H5TestFile {
         final Vector attrs = (Vector) dsets[7].getMetadata();
         final int n = attrs.size();
         for (int i = 0; i < n; i++) {
-            final Attribute attr = (Attribute) attrs.get(i);
+            final H5ScalarAttr attr = (H5ScalarAttr) attrs.get(i);
             if ("PALETTE".equals(attr.getName())) {
                 attr.write(oid);
             }
@@ -204,32 +205,32 @@ public class H5TestFile {
         log.debug("create committed");
         Datatype dnative = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
         Datatype dtype = file.createNamedDatatype(dnative, NAME_DATATYPE_INT);
-        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
-        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+        ATTRIBUTE_STR = new H5ScalarAttr(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new H5ScalarAttr(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
         dnative = file.createDatatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.SIGN_NONE);
         dtype = file.createNamedDatatype(dnative, NAME_DATATYPE_UINT);
-        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
-        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+        ATTRIBUTE_STR = new H5ScalarAttr(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new H5ScalarAttr(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
         dnative = file.createDatatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
         dtype = file.createNamedDatatype(dnative, NAME_DATATYPE_FLOAT);
-        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
-        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+        ATTRIBUTE_STR = new H5ScalarAttr(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new H5ScalarAttr(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();
 
         dnative = file.createDatatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
         dtype = file.createNamedDatatype(dnative, NAME_DATATYPE_STR);
-        ATTRIBUTE_STR = new Attribute(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
-        ATTRIBUTE_INT_ARRAY = new Attribute(dtype, "arrayInt", typeInt, new long[] { 10 },
+        ATTRIBUTE_STR = new H5ScalarAttr(dtype, "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
+        ATTRIBUTE_INT_ARRAY = new H5ScalarAttr(dtype, "arrayInt", typeInt, new long[] { 10 },
                 new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         ATTRIBUTE_STR.write();
         ATTRIBUTE_INT_ARRAY.write();

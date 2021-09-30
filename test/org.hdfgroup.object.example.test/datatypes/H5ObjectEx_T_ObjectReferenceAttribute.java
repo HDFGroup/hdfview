@@ -15,12 +15,13 @@ import java.util.Map;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Attribute;
+
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ScalarDS;
 
 public class H5ObjectEx_T_ObjectReferenceAttribute {
@@ -126,7 +127,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
 
         // Create the attribute and write the array data to it.
         try {
-            Attribute attr = new Attribute(dset, ATTRIBUTENAME, typeRef, dims);
+            H5ScalarAttr attr = new H5ScalarAttr(dset, ATTRIBUTENAME, typeRef, dims);
             attr.setData(dset_data);
             file.writeAttribute(dset, attr, false);
         }
