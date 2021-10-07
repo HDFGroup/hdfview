@@ -1,4 +1,4 @@
-package test.object.misc;
+package misc;
 
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
@@ -1525,7 +1525,7 @@ public class TestH5Object
      * Main routine for the testing. Use "-f" to save the test result to a log file.
      * If "-f" flag is specified, the test results will printed to System.out.
      * <p>
-     * For example, "test.object.TestH5Object -f test.log" to save the test results
+     * For example, "object.TestH5Object -f test.log" to save the test results
      *     at file test.log.
      * @param args
      ****************************************************************************/

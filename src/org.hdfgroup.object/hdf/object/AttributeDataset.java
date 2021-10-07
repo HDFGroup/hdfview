@@ -174,7 +174,11 @@ public abstract class AttributeDataset extends Dataset {
 
         datatype = attrType;
 
-        data = attrValue;
+        if (attrValue != null) {
+            data = attrValue;
+            originalBuf = attrValue;
+            isDataLoaded = true;
+        }
         properties = new HashMap();
 
         if (attrDims == null) {

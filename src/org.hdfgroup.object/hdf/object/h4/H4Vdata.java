@@ -302,11 +302,7 @@ public class H4Vdata extends CompoundDS
             }
 
             try {
-                HDFLibrary.VSread(
-                        id,
-                        member_data,
-                        (int)selectedDims[0],
-                        HDFConstants.FULL_INTERLACE);
+                HDFLibrary.VSread(id, member_data, (int)selectedDims[0], HDFConstants.FULL_INTERLACE);
                 if ((memberTIDs[i] == HDFConstants.DFNT_CHAR) ||
                         (memberTIDs[i] ==  HDFConstants.DFNT_UCHAR8)) {
                     // convert characters to string

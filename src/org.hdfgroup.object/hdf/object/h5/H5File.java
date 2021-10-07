@@ -528,6 +528,12 @@ public class H5File extends FileFormat {
                             log.debug("getAttribute(): Attribute[{}] H5Tclose(tid {}) failure: ", i, tid, ex);
                         }
                         try {
+                            H5.H5Sclose(sid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("getAttribute(): Attribute[{}] H5Sclose(aid {}) failure: ", i, sid, ex);
+                        }
+                        try {
                             H5.H5Aclose(aid);
                         }
                         catch (Exception ex) {

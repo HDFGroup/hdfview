@@ -1,4 +1,4 @@
-package test.object;
+package object;
 
 import java.util.Vector;
 

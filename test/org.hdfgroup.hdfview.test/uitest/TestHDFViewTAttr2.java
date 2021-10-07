@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.junit.Assert.assertTrue;
@@ -18,7 +18,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestHDFViewTAttr2 extends AbstractWindowTest {
     private static final String testFilename = "tattr2.h5";
@@ -252,7 +252,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
             retriever.testAllTableLocations(testExpectedData);
 
             tableShell.bot().menu("Close").click();
@@ -264,7 +264,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
             retriever.testAllTableLocations(test2DExpectedData);
 
             tableShell.bot().menu("Close").click();
@@ -277,7 +277,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
             retriever.setPagingActive(true);
 
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
             retriever.testAllTableLocations(test3DPage1ExpectedData);
 
             tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
@@ -409,7 +409,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
             retriever.testAllTableLocations(testExpectedData);
 
             tableShell.bot().menu("Close").click();
@@ -421,7 +421,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
 
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
             retriever.testAllTableLocations(test2DExpectedData);
 
             tableShell.bot().menu("Close").click();
@@ -436,7 +436,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, testname);
             retriever.setPagingActive(true);
 
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
             //retriever.testAllTableLocations(test3DPage1ExpectedData);
 
             tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();

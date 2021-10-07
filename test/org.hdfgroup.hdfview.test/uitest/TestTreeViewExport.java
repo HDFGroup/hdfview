@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
@@ -20,7 +20,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestTreeViewExport extends AbstractWindowTest {
     private String filename = "testds.h5";
@@ -71,7 +71,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
             datasetShell.bot().text(2).setText(datasetdimsize);
 
             // Create 64-bit dataset
-            datasetShell.bot().comboBox(2).setSelection("64");
+            datasetShell.bot().comboBox(3).setSelection("64");
 
             val = datasetShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("createImportHDF5Dataset()", "wrong dataset name", datasetname, val),

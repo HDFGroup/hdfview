@@ -1,4 +1,4 @@
-package test.object.misc;
+package misc;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
