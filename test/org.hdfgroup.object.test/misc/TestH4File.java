@@ -10,7 +10,7 @@
  *                                                                          *
  ****************************************************************************/
 
-package test.object.misc;
+package misc;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;

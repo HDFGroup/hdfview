@@ -2991,14 +2991,17 @@ public class DefaultTreeView implements TreeView {
             reloadFile = true;
         }
 
+        /** @return the current value of the index type. */
         public int getIndexType() {
             return indexType;
         }
 
+        /** @return the current value of the index order. */
         public int getIndexOrder() {
             return indexOrder;
         }
 
+        /** @return the current value of the reloadFile. */
         public boolean isReloadFile() {
             return reloadFile;
         }

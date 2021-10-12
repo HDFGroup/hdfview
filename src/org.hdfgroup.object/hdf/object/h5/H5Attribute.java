@@ -41,7 +41,6 @@ import hdf.object.MetaDataContainer;
  * dataset, group or named datatype.
  * <p>
  * Like a dataset, an attribute has a name, datatype and dataspace.
- *
  * <p>
  * For more details on attributes, <a href=
  * "https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5
@@ -177,7 +176,7 @@ public class H5Attribute extends Attribute {
     @Override
     public long open() {
         long aid = super.open();
-        long pObjID = -1;
+        long pObjID = HDF5Constants.H5I_INVALID_HID;
 
         try {
             pObjID = parentObject.open();
@@ -193,7 +192,7 @@ public class H5Attribute extends Attribute {
         }
         catch (Exception ex) {
             log.debug("open(): Failed to open attribute {}: ", getName(), ex);
-            aid = -1;
+            aid = HDF5Constants.H5I_INVALID_HID;
         }
         finally {
             parentObject.close(pObjID);
@@ -230,9 +229,9 @@ public class H5Attribute extends Attribute {
         }
 
         if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-            long aid = -1;
-            long tid = -1;
-            int tclass = -1;
+            long aid = HDF5Constants.H5I_INVALID_HID;
+            long tid = HDF5Constants.H5I_INVALID_HID;
+            int tclass = HDF5Constants.H5I_INVALID_HID;
             flatNameList = new Vector<>();
             flatTypeList = new Vector<>();
             long[] memberTIDs = null;

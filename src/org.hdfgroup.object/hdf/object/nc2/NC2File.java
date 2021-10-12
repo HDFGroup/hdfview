@@ -25,6 +25,7 @@ import java.util.Vector;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.iosp.netcdf3.N3header;
+import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -270,7 +271,7 @@ public class NC2File extends FileFormat {
     }
 
     @Override
-    public void writeAttribute(HObject obj, hdf.object.Attribute attr, boolean attrExisted) throws Exception {
+    public void writeAttribute(HObject obj, hdf.object.AttributeDataset attr, boolean attrExisted) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation - write attribute.");
     }
 

@@ -174,11 +174,11 @@
 
     <property name="build.dir" value="build" />
     <property name="classes.dir" value="${build.dir}/classes" />
-    <property name="testclasses.dir" value="${build.dir}/classes/test" />
-    <property name="uitestclasses.dir" value="${build.dir}/classes/test/uitest" />
-    <property name="hdf4uitestclasses.dir" value="${build.dir}/classes/test/uitest/HDF4UITests" />
-    <property name="hdf5uitestclasses.dir" value="${build.dir}/classes/test/uitest/HDF5UITests" />
-    <property name="exclasses.dir" value="${build.dir}/classes/examples" />
+    <property name="testclasses.dir" value="${classes.dir}/${test.dir}" />
+    <property name="uitestclasses.dir" value="${classes.dir}/${test.hdfview.dir}" />
+    <property name="hdf4uitestclasses.dir" value="${uitestclasses.dir}/uitest/HDF4UITests" />
+    <property name="hdf5uitestclasses.dir" value="${uitestclasses.dir}/uitest/HDF5UITests" />
+    <property name="exclasses.dir" value="${classes.dir}/${examples.dir}" />
     <property name="jar.dir" value="${build.dir}/jar" />
     <property name="report.dir" value="${build.dir}/junitreport" />
 
@@ -232,7 +232,7 @@
         <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
     </path>
     <path id="unit-classpath">
-        <fileset dir="${lib.dir}" includes="extra/junit-4.11.jar extra/hamcrest-core-1.3.jar" excludes="*sources.jar" />
+        <fileset dir="${lib.dir}" includes="extra/junit-4.13.2.jar extra/hamcrest-core-1.3.jar" excludes="*sources.jar" />
     </path>
     <path id="swtbot-classpath">
         <fileset dir="${lib.dir}/ext/swt/swtbot" includes="*swtbot*.jar *log4j*.jar" excludes="*sources.jar" />
@@ -313,10 +313,10 @@
         <delete dir="${build.dir}" />
 
         <mkdir dir="${classes.dir}/${object.dir}" />
-        <mkdir dir="${classes.dir}/${h4.dir}" />
-        <mkdir dir="${classes.dir}/${fits.dir}" />
-        <mkdir dir="${classes.dir}/${nc2.dir}" />
-        <mkdir dir="${classes.dir}/${h5.dir}" />
+        <!-- <mkdir dir="${classes.dir}/${h4.dir}" /> -->
+        <!-- <mkdir dir="${classes.dir}/${fits.dir}" /> -->
+        <!-- <mkdir dir="${classes.dir}/${nc2.dir}" /> -->
+        <!-- <mkdir dir="${classes.dir}/${h5.dir}" /> -->
         <mkdir dir="${classes.dir}/${hdfview.dir}" />
         <mkdir dir="${classes.dir}/hdf" />
     </target>
@@ -421,7 +421,7 @@
     </target>
     <path id="hdfobject-jar" location="${jar.dir}/hdfobject.jar" />
 
-    <target name="modulejar" depends="compile-test">
+    <target name="modulejar" depends="compile-uitest, compile-test">
         <mkdir dir="${testclasses.dir}/lib/ext" />
 
         <pathconvert property="manifest.classpath" pathsep=" ">
@@ -539,32 +539,31 @@
           ================================================================= -->
 
     <target name="compile-examples" depends="compile, jar">
-        <mkdir dir="${testclasses.dir}" />
+        <!-- <mkdir dir="${testclasses.dir}" /> -->
 
-        <javac modulesourcepath="${testsrc.dir}" modulepathref="test-classpath" modulepath="build-classpath"
-            destdir="${testclasses.dir}"
+        <!-- <javac modulesourcepath="${testsrc.dir}/${examples.dir}" modulepathref="test-classpath" modulepath="build-classpath"
+            destdir="${testclasses.dir}/${examples.dir}"
             classpathref="project-classpath"
             includes="**/*.java"
             includeantruntime="false" debug="${build.debug}">
             <compilerarg value="-Xlint:deprecation" />
             <compilerarg value="-Xlint:unchecked" />
-        </javac>
+        </javac> -->
 
-        <copy todir="${testclasses.dir}/${examples.dir}">
+        <copy todir="${exclasses.dir}">
             <fileset dir="${testsrc.dir}/${examples.dir}" excludes=" **/*.in **/*.java hdf/** ${test.path}" />
         </copy>
     </target>
-    <path id="example-classes" location="${testclasses.dir}" />
 
     <target name="run-examples" depends="compile-examples" description="Runs the examples">
-        <fileset dir="${testclasses.dir}/${examples.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
+        <fileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
     </target>
 
     <target name="run-one-example">
         <dirname property="exfile.dir" file="${exfile}" />
         <basename property="exdir.name" file="${exfile.dir}" />
         <basename property="exfile.name" file="${exfile}" suffix=".class" />
-        <property name="exdir.rel" value="${testclasses.dir}" relative="yes" />
+        <property name="exdir.rel" value="${exclasses.dir}" relative="yes" />
         <basename property="exdirrel.name" file="${exdir.rel}" />
         <echo message="Test example: ${exfile.name}" />
         <java fork="true" classname="${exdirrel.name}/${exdir.name}/${exfile.name}" dir="${classes.dir}">
@@ -574,7 +573,7 @@
                 <path refid="project-classpath" />
                 <path refid="log-classpath" />
                 <path refid="application" />
-                <pathelement path="${testclasses.dir}/${examples.dir}" />
+                <pathelement path="${exclasses.dir}" />
             </classpath>
             <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
@@ -583,7 +582,7 @@
 
     <target name="clean-examples">
         <delete>
-            <fileset dir="${classes.dir}" includes="**/*.h5" />
+            <fileset dir="${exclasses.dir}" includes="**/*.h5" />
         </delete>
     </target>
 
@@ -591,8 +590,62 @@
           TESTS
           ================================================================= -->
 
-    <target name="compile-test" depends="objectjar, jar">
-        <mkdir dir="${testclasses.dir}" />
+    <target name="compile-test" depends="objectjar, jar, compile-objtest, compile-uitest, compile-examples">
+        <!-- <mkdir dir="${testclasses.dir}" /> -->
+
+        <javac modulesourcepath="${testsrc.dir}" modulepathref="test-classpath" modulepath="build-classpath"
+            destdir="${classes.dir}"
+            classpathref="test-classpath"
+            includes="**/*.java"
+            includeantruntime="false" debug="${build.debug}">
+            <compilerarg value="-Xlint:deprecation" />
+            <compilerarg value="-Xlint:unchecked" />
+        </javac>
+
+        <!-- <copy todir="${testclasses.dir}/${test.dir}">
+            <fileset dir="${testsrc.dir}/${test.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
+        </copy> -->
+        <!-- <mkdir dir="${testclasses.dir}/${test.dir}/lib/ext" /> -->
+    </target>
+
+    <target name="compile-objtest" depends="objectjar, jar">
+        <!-- <mkdir dir="${testclasses.dir}" /> -->
+
+        <!-- <javac modulesourcepath="${testsrc.dir}/${test.dir}" modulepathref="test-classpath" modulepath="build-classpath"
+            destdir="${testclasses.dir}"
+            classpathref="test-classpath"
+            includes="**/*.java"
+            includeantruntime="false" debug="${build.debug}">
+            <compilerarg value="-Xlint:deprecation" />
+            <compilerarg value="-Xlint:unchecked" />
+        </javac> -->
+
+        <copy todir="${testclasses.dir}">
+            <fileset dir="${testsrc.dir}/${test.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
+        </copy>
+        <mkdir dir="${testclasses.dir}/lib/ext" />
+    </target>
+
+    <target name="compile-uitest" depends="objectjar, jar">
+        <!-- <mkdir dir="${uitestclasses.dir}" /> -->
+
+        <!-- <javac modulesourcepath="${testsrc.dir}/${test.hdfview.dir}" modulepathref="test-classpath" modulepath="build-classpath"
+            destdir="${uitestclasses.dir}"
+            classpathref="test-classpath"
+            includes="**/*.java"
+            includeantruntime="false" debug="${build.debug}">
+            <compilerarg value="-Xlint:deprecation" />
+            <compilerarg value="-Xlint:unchecked" />
+        </javac> -->
+
+        <copy todir="${uitestclasses.dir}">
+            <fileset dir="${testsrc.dir}/${test.hdfview.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
+        </copy>
+        <mkdir dir="${uitestclasses.dir}/lib/ext" />
+    </target>
+
+    <target name="compile-uimodtest" depends="modulejar, jar">
+        <!--<mkdir dir="${testclasses.dir}" />
 
         <javac modulesourcepath="${testsrc.dir}" modulepathref="test-classpath" modulepath="build-classpath"
             destdir="${testclasses.dir}"
@@ -606,14 +659,14 @@
         <copy todir="${testclasses.dir}/${test.dir}">
             <fileset dir="${testsrc.dir}/${test.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
         </copy>
-        <mkdir dir="${testclasses.dir}/lib/ext" />
+        <mkdir dir="${testclasses.dir}/lib/ext" /> -->
     </target>
 
     <path id="alltest-classes" location="${testclasses.dir}" />
 
     <target name="clean-junit-uitest">
         <delete>
-            <filelist dir="${testclasses.dir}/uitest/" files="
+            <filelist dir="${uitestclasses.dir}" files="
         closebutton.hdf,
         dataset_saveto_test.h5,
         image_saveto_test.h5,
@@ -650,6 +703,7 @@
         DS64BITS.txt,
         DU64BITS.bin" />
         </delete>
+        <mkdir dir="${uitestclasses.dir}" />
     </target>
 
     <target name="jacoco" depends="jacoco-skip, jacoco-run" />
@@ -667,7 +721,7 @@
         <property name="agentvmparam" value="" />
     </target>
 
-    <target name="junit-debug-test" depends="objectjar,compile-test,clean-junit-uitest,jacoco">
+    <target name="junit-debug-test" depends="objectjar,clean-junit-uitest,compile-test,jacoco">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -678,7 +732,7 @@
             <classpath>
                 <path refid="test-classpath" />
                 <path refid="build-classpath" />
-                <pathelement location="${testclasses.dir}/${test.dir}" />
+                <pathelement location="${testclasses.dir}" />
             </classpath>
             <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
@@ -688,7 +742,7 @@
         </junit>
     </target>
 
-    <target name="junit-single-test" depends="objectjar,compile-test,clean-junit-uitest,jacoco">
+    <target name="junit-single-test" depends="objectjar,clean-junit-uitest,compile-test,jacoco">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -697,7 +751,7 @@
             <classpath>
                 <path refid="test-classpath" />
                 <path refid="build-classpath" />
-                <pathelement location="${testclasses.dir}/${test.dir}" />
+                <pathelement location="${testclasses.dir}" />
             </classpath>
             <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
@@ -707,7 +761,7 @@
         </junit>
     </target>
 
-    <target name="junit" depends="objectjar,compile-test,clean-junit-uitest,jacoco" description="Runs the Object Library tests">
+    <target name="junit" depends="objectjar,clean-junit-uitest,compile-test,jacoco" description="Runs the Object Library tests">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -716,7 +770,7 @@
             <classpath>
                 <path refid="test-classpath" />
                 <path refid="build-classpath" />
-                <pathelement location="${testclasses.dir}/${test.dir}" />
+                <pathelement location="${testclasses.dir}" />
             </classpath>
             <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
@@ -725,7 +779,7 @@
             <formatter type="plain" />
 
             <batchtest fork="yes" todir="${report.dir}">
-                <fileset dir="${testclasses.dir}/${test.dir}/" includes="**/object/*Test*" excludes="**/object/*All*,**/object/H5Test*" />
+                <fileset dir="${testclasses.dir}/" includes="**/object/*Test*" excludes="**/object/*All*,**/object/H5Test*" />
             </batchtest>
         </junit>
     </target>
@@ -774,15 +828,16 @@
          these to the appropriate paths, UI tests in different nested folder structures are able
          to find the test files they are looking for simply by name, instead of having to specify
          a relative pathname.  -->
-    <macrodef name="run-junit">
-        <attribute name="rootdir" default="${basedir}/${testclasses.dir}" />
-        <attribute name="workdir" default="${basedir}/${testclasses.dir}/uitest" />
+    <macrodef name="run-ui-junit">
+        <attribute name="rootdir" default="${basedir}/${uitestclasses.dir}" />
+        <attribute name="workdir" default="${basedir}/${uitestclasses.dir}/uitest" />
         <attribute name="propfile" default="${user.home}/.hdfview${app.version}" />
         <attribute name="includes" default="**/*Test*" />
         <attribute name="excludes" default="**/*All* **/*$*" />
         <attribute name="if" default="" />
         <sequential>
-            <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
+        <echo message="JUnit Testing: @{includes}" />
+        <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
                 <!-- Run in debug logging level because trace generates way too much output.
                      We will run manually using trace logging output when there are UI test failures. -->
                 <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -790,12 +845,9 @@
                 <jvmarg line="${agentvmparam}" />
 
                 <classpath>
-                    <path refid="project-classpath" />
-                    <path refid="log-classpath" />
-                    <path refid="unit-classpath" />
-                    <path refid="swtbot-classpath" />
-                    <pathelement location="${classes.dir}" />
-                    <path refid="application" />
+                    <path refid="test-classpath" />
+                    <path refid="build-classpath" />
+                    <pathelement location="${uitestclasses.dir}" />
                 </classpath>
 
                 <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
@@ -804,90 +856,39 @@
                 <sysproperty key="hdfview.propfile" path="@{propfile}" />
                 <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
 
-                <formatter type="xml" />
-                <formatter type="plain" />
-
-                <batchtest fork="yes" todir="${report.dir}" if="@{if}" >
-                    <fileset dir="${classes.dir}/" includes="@{includes}" excludes="@{excludes}" />
-                </batchtest>
+                <test name="uitest.${test}" todir="${report.dir}" outfile="TEST-uitest.${test}">
+                  <formatter type="xml" />
+                  <formatter type="plain" />
+                </test>
             </junit>
         </sequential>
     </macrodef>
 
-    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, compile-test, clean-junit-uitest, ensure-test5-name, ensure-test4-name, jacoco">
+    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, clean-junit-uitest, compile-test, ensure-test5-name, ensure-test4-name, jacoco">
         <mkdir dir="${report.dir}" />
 
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="**/uitest/${test}*"
-            excludes="**/uitest/*$*"
-        />
-
-        <!-- Run any matching HDF4 UI test -->
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF4UITests/${test}.class"
-            excludes="**/*All* **/*$*"
-            if="h4path"
-        />
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/BugFixTests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF4UITests/BugFixTests/${test}.class"
-            excludes="**/*All* **/*$*"
-            if="h4path"
-        />
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/FeatureTests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF4UITests/FeatureTests/${test}.class"
-            excludes="**/*All* **/*$*"
-            if="h4path"
-        />
-
-        <!-- Run any matching HDF5 UI test -->
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF5UITests/${test}.class"
-            excludes="**/*All* **/*$*"
-        />
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/BugFixTests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF5UITests/BugFixTests/${test}.class"
-            excludes="**/*All* **/*$*"
-        />
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/FeatureTests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF5UITests/FeatureTests/${test}.class"
+        <run-ui-junit
+            rootdir="${basedir}/${uitestclasses.dir}"
+            workdir="${basedir}/${uitestclasses.dir}/uitest"
+            propfile="${basedir}/${uitestclasses.dir}/.hdfview${app.version}"
+            includes="**/${uitestclasses.dir}/${test}.class"
             excludes="**/*All* **/*$*"
         />
     </target>
 
     <!-- Top-level target for UI tests. Calls separate targets for HDFView UI tests, HDF4 UI tests and HDF5 UI tests. -->
-    <target name="junit-uitest" depends="jar, compile-test, clean-junit-uitest, jacoco, -hdfview-ui-tests, -hdf4-ui-tests, -hdf5-ui-tests" description="Runs the UI tests" />
+    <target name="junit-uitest" depends="jar, clean-junit-uitest, jacoco, compile-test, -hdfview-ui-tests, -hdf4-ui-tests, -hdf5-ui-tests" description="Runs the UI tests" />
 
     <!-- Internal target to run HDFView UI tests that are independent of FileFormats. -->
-    <target name="-hdfview-ui-tests" depends="jar, compile-test, clean-junit-uitest">
+    <target name="-hdfview-ui-tests" depends="jar, compile-uitest, clean-junit-uitest">
         <mkdir dir="${report.dir}" />
 
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/*Test*.class"
-            excludes="**/*AbstractWindowTest* **/*CLGeometry **/*All* **/*$*"
+        <run-ui-junit
+            rootdir="${basedir}/${uitestclasses.dir}"
+            workdir="${basedir}/${uitestclasses.dir}/uitest"
+            propfile="${basedir}/${uitestclasses.dir}/.hdfview${app.version}"
+            includes="**/${uitestclasses.dir}/${test}.class"
+            excludes="**/*All* **/*$*"
         />
     </target>
 
@@ -896,68 +897,69 @@
         <mkdir dir="${report.dir}" />
 
         <!-- Run the top-level HDF4 UI tests -->
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF4UITests/*Test*.class"
+        <run-ui-junit
+            rootdir="${basedir}/${hdf4uitestclasses.dir}"
+            workdir="${basedir}/${hdf4uitestclasses.dir}"
+            propfile="${basedir}/${uitestclasses.dir}/.hdfview${app.version}"
+            includes="**/${hdf4uitestclasses.dir}/${test}.class"
             excludes="**/*All* **/*$*"
+            if="h4path"
         />
 
         <!-- Run the HDF4 bug fix tests -->
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/BugFixTests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF4UITests/BugFixTests/*Test*.class"
+        <!-- <run-ui-junit
+            rootdir="${basedir}/${hdf4uitestclasses.dir}"
+            workdir="${basedir}/${hdf4uitestclasses.dir}/BugFixTests"
+            propfile="${basedir}/${hdf4uitestclasses.dir}/.hdfview${app.version}"
+            includes="${hdf4uitestclasses.dir}/BugFixTests/*Test*.class"
             excludes="**/*All* **/*$*"
-        />
+        /> -->
 
         <!-- Run the HDF4 feature tests -->
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF4UITests/FeatureTests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF4UITests/FeatureTests/*Test*.class"
+        <!-- <run-ui-junit
+            rootdir="${basedir}/${hdf4uitestclasses.dir}"
+            workdir="${basedir}/${hdf4uitestclasses.dir}/FeatureTests"
+            propfile="${basedir}/${hdf4uitestclasses.dir}/.hdfview${app.version}"
+            includes="${hdf4uitestclasses.dir}/FeatureTests/*Test*.class"
             excludes="**/*All* **/*$*"
-        />
+        /> -->
     </target>
 
     <target name="-hdf5-ui-tests">
         <mkdir dir="${report.dir}" />
 
         <!-- Run the top-level HDF5 UI tests -->
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF5UITests/*Test*.class"
+        <run-ui-junit
+            rootdir="${basedir}/${hdf5uitestclasses.dir}"
+            workdir="${basedir}/${hdf5uitestclasses.dir}"
+            propfile="${basedir}/${uitestclasses.dir}/.hdfview${app.version}"
+            includes="${hdf5uitestclasses.dir}/${test}.class"
             excludes="**/*All* **/*$*"
         />
 
         <!-- Run the HDF5 bug fix tests -->
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/BugFixTests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF5UITests/BugFixTests/*Test*.class"
+        <!-- <run-ui-junit
+            rootdir="${basedir}/${hdf5uitestclasses.dir}"
+            workdir="${basedir}/${hdf5uitestclasses.dir}/BugFixTests"
+            propfile="${basedir}/${hdf5uitestclasses.dir}/.hdfview${app.version}"
+            includes="${hdf5uitestclasses.dir}/BugFixTests/*Test*.class"
             excludes="**/*All* **/*$*"
-        />
+        /> -->
 
         <!-- Run the HDF5 feature tests -->
-        <run-junit
-            rootdir="${basedir}/${testclasses.dir}"
-            workdir="${basedir}/${testclasses.dir}/uitest/HDF5UITests/FeatureTests"
-            propfile="${basedir}/${testclasses.dir}/uitest/.hdfview${app.version}"
-            includes="test/uitest/HDF5UITests/FeatureTests/*Test*.class"
+        <!-- <run-ui-junit
+            rootdir="${basedir}/${hdf5uitestclasses.dir}"
+            workdir="${basedir}/${hdf5uitestclasses.dir}/FeatureTests"
+            propfile="${basedir}/${hdf5uitestclasses.dir}/.hdfview${app.version}"
+            includes="${hdf5uitestclasses.dir}/FeatureTests/*Test*.class"
             excludes="**/*All* **/*$*"
-        />
+        /> -->
     </target>
 
-    <target name="junit-uimodules" depends="jar,modulejar,compile-test,clean-junit-uitest,jacoco" description="Runs the tests for the UI modules">
+    <target name="junit-uimodules" depends="jar,modulejar,compile-uimodtest,clean-junit-uitest,jacoco" description="Runs the tests for the UI modules">
         <mkdir dir="${report.dir}" />
 
-        <run-junit
+        <run-ui-junit
             rootdir="${basedir}/${testclasses.dir}"
             workdir="${basedir}/${testclasses.dir}/modules"
             includes="**/modules/*Test*"

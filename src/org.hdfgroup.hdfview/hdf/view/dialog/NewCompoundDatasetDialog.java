@@ -100,7 +100,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
     private Button                checkContiguous, checkChunked;
 
     /**
-     * Constructs a NewDatasetDialog with specified list of possible parent
+     * Constructs a NewCompoundDatasetDialog with specified list of possible parent
      * groups.
      *
      * @param parent

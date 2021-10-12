@@ -357,12 +357,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     public Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
         super(theFile, null, null, null);
-        if ((tsize == 0) || (tsize < 0 && tsize != NATIVE))
+        if ((tsize == 0) || (tsize < 0 && tsize != Datatype.NATIVE))
             throw new Exception("invalid datatype size - " + tsize);
-        if ((torder != ORDER_LE) && (torder != ORDER_BE) && (torder != ORDER_VAX)
-                && (torder != ORDER_NONE) && (torder != NATIVE))
+        if ((torder != Datatype.ORDER_LE) && (torder != Datatype.ORDER_BE) && (torder != Datatype.ORDER_VAX)
+                && (torder != Datatype.ORDER_NONE) && (torder != Datatype.NATIVE))
             throw new Exception("invalid datatype order - " + torder);
-        if ((tsign != SIGN_NONE) && (tsign != SIGN_2) && (tsign != NATIVE))
+        if ((tsign != Datatype.SIGN_NONE) && (tsign != Datatype.SIGN_2) && (tsign != Datatype.NATIVE))
             throw new Exception("invalid datatype sign - " + tsign);
 
         datatypeClass = tclass;
@@ -659,6 +659,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         return compoundMemberTypes;
     }
 
+    public final List<Long> getCompoundMemberOffsets() {
+        return compoundMemberOffsets;
+    }
+
     /**
      * Converts the datatype object to a native datatype.
      *
@@ -948,6 +952,15 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     public boolean isBitField() {
         return (datatypeClass == Datatype.CLASS_BITFIELD);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.DataFormat#clear()
+     */
+    @Override
+    public void clear() {
     }
 
     /*

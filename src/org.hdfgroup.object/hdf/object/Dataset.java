@@ -47,6 +47,11 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     protected transient Object          data;
 
     /**
+     * The type of space for the dataset.
+     */
+    protected int             space_type;
+
+    /**
      * The number of dimensions of the dataset.
      */
     protected int             rank;
@@ -166,6 +171,29 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     protected long            nPoints             = 1;
 
     /**
+     * The array to store flags to indicate if a member of this compound
+     * dataset is selected for read/write.
+     * <p>
+     * If a member is selected, the read/write will perform on the member.
+     * Applications such as HDFView will only display the selected members of
+     * the compound dataset.
+     *
+     * <pre>
+     * For example, if a compound dataset has four members
+     *     String[] memberNames = {"X", "Y", "Z", "TIME"};
+     * and
+     *     boolean[] isMemberSelected = {true, false, false, true};
+     * members "X" and "TIME" are selected for read and write.
+     * </pre>
+     */
+    protected boolean[] isMemberSelected;
+
+    /**
+     * The datatypes of the compound attribute's members.
+     */
+    protected Datatype[] memberTypes = null;
+
+    /**
      * The data buffer that contains the raw data directly reading from file
      * (before any data conversion).
      */
@@ -215,6 +243,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
         datatype = null;
         rank = -1;
+        space_type = -1;
         data = null;
         dims = null;
         maxDims = null;
@@ -248,6 +277,19 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             convertedBuf = null;
         }
         isDataLoaded = false;
+    }
+
+    /**
+     * Returns the type of space for the dataset.
+     *
+     * @return the type of space for the dataset.
+     */
+    @Override
+    public final int getSpaceType() {
+        if (!inited)
+            init();
+
+        return space_type;
     }
 
     /**
@@ -464,7 +506,9 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final void write() throws Exception {
+        log.trace("Dataset: write enter");
         if (data != null) {
+            log.trace("Dataset: write data");
             write(data);
         }
     }
@@ -589,7 +633,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @throws OutOfMemoryError if memory is exhausted
      */
     @Override
-    public final Object getData() throws Exception, OutOfMemoryError {
+    public Object getData() throws Exception, OutOfMemoryError {
+        log.trace("getData(): isDataLoaded={}", isDataLoaded);
         if (!isDataLoaded) {
             data = read(); // load the data
             if (data != null) {
@@ -618,10 +663,13 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final void setData(Object d) {
-        if (!(this instanceof Attribute))
+        if (!(this instanceof AttributeDataset))
             throw new UnsupportedOperationException("setData: unsupported for non-Attribute objects");
 
+        log.trace("setData(): isDataLoaded={}", isDataLoaded);
         data = d;
+        originalBuf = data;
+        isDataLoaded = true;
     }
 
     /**
@@ -676,6 +724,10 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         if (!inited) init();
 
         if ((selectedDims == null) || (selectedIndex == null)) {
+            return 0;
+        }
+
+        if ((selectedDims.length < 1) || (selectedIndex.length < 1)) {
             return 0;
         }
 
@@ -828,6 +880,55 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     @Override
     public Datatype getDatatype() {
         return datatype;
+    }
+
+    /**
+     * Returns the number of selected members of the compound attribute.
+     *
+     * Selected members are the compound fields which are selected for read/write.
+     * <p>
+     * For example, in a compound datatype of {int A, float B, char[] C}, users can
+     * choose to retrieve only {A, C} from the attribute. In this case,
+     * getSelectedMemberCount() returns two.
+     *
+     * @return the number of selected members.
+     */
+    public int getSelectedMemberCount() {
+        int count = 0;
+
+        if (isMemberSelected != null) {
+            for (int i = 0; i < isMemberSelected.length; i++) {
+                if (isMemberSelected[i]) {
+                    count++;
+                }
+            }
+        }
+
+        log.trace("getSelectedMemberCount(): count of selected members={}", count);
+
+        return count;
+    }
+
+    /**
+     * Returns an array of datatype objects of selected compound members.
+     *
+     * @return an array of datatype objects of selected compound members.
+     */
+    public Datatype[] getSelectedMemberTypes() {
+        if (isMemberSelected == null) {
+            log.debug("getSelectedMemberTypes(): isMemberSelected array is null");
+            return memberTypes;
+        }
+
+        int idx = 0;
+        Datatype[] types = new Datatype[getSelectedMemberCount()];
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            if (isMemberSelected[i]) {
+                types[idx++] = memberTypes[i];
+            }
+        }
+
+        return types;
     }
 
     /**

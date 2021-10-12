@@ -1232,6 +1232,30 @@ public abstract class FileFormat extends File {
             long[] dims, long[] maxdims, long[] chunks,
             int gzip, Object fillValue, Object data) throws Exception;
 
+    /**
+     * Creates a new dataset in a file with/without chunking/compression.
+     *
+     * @param name
+     *            name of the new dataset, e.g. "2D integer"
+     * @param pgroup
+     *            parent group where the new dataset is created.
+     * @param type
+     *            datatype of the new dataset.
+     * @param dims
+     *            dimension sizes of the new dataset, e.g. long[] dims = {100, 50}.
+     * @param maxdims
+     *            maximum dimension sizes of the new dataset, null if maxdims is the same as dims.
+     * @param chunks
+     *            chunk sizes of the new dataset, null if no chunking.
+     * @param gzip
+     *            GZIP compression level (1 to 9), 0 or negative values if no compression.
+     * @param data
+     *            data written to the new dataset, null if no data is written to the new dataset.
+     *
+     * @return The new dataset if successful; otherwise returns null
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
     public Dataset createScalarDS(String name, Group pgroup, Datatype type,
             long[] dims, long[] maxdims, long[] chunks,
             int gzip, Object data) throws Exception {
@@ -1530,7 +1554,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public abstract void writeAttribute(HObject obj, Attribute attr, boolean attrExisted) throws Exception;
+    public abstract void writeAttribute(HObject obj, AttributeDataset attr, boolean attrExisted) throws Exception;
 
     // REVIEW DOCS for writeAttribute(). Check and document exceptions.
 
@@ -2000,30 +2024,80 @@ public abstract class FileFormat extends File {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:initLibBounds.");
     }
 
+    /**
+     * Gets the bounds of library versions as text.
+     *
+     * @return libversion The earliest and latest version of the library.
+     *
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
     public String getLibBoundsDescription() {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getLibBoundsDescription.");
     }
 
+    /** @return the int value of the index type value.
+     *
+     * @param strtype
+     *            The name of the index type.
+     *
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
     public static int getIndexTypeValue(String strtype) {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexTypeValue.");
     }
 
+    /** @return the int value of the index type.
+     *
+     * @param strtype
+     *            The name of the index type.
+     */
     public int getIndexType(String strtype) {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexType.");
     }
 
+    /** set the int value of the index type.
+     *
+     * @param indexType
+     *            The value of the index type.
+     *
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
     public void setIndexType(int indexType) {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setIndexType.");
     }
 
+    /** @return the int value of the index order value.
+     *
+     * @param strorder
+     *            The name of the index order.
+     */
     public static int getIndexOrderValue(String strorder) {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexOrderValue.");
     }
 
+    /** @return the int value of the index order.
+     *
+     * @param strorder
+     *            The name of the index order.
+     *
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
     public int getIndexOrder(String strorder) {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexOrder.");
     }
 
+    /** set the int value of the index order.
+     *
+     * @param indexOrder
+     *            The index order.
+     *
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing class.
+     */
     public void setIndexOrder(int indexOrder) {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setIndexOrder.");
     }

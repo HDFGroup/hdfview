@@ -93,6 +93,7 @@ public class ViewProperties extends PreferenceStore {
     public static final String DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultScalarDSTableView";
     public static final String DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.TableView.DefaultScalarAttributeTableView";
     public static final String DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultCompoundDSTableView";
+    public static final String DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.TableView.DefaultCompoundAttributeTableView";
 
     /** Default MetaDataView class names */
     public static final String DEFAULT_GROUP_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultGroupMetaDataView";
@@ -257,8 +258,9 @@ public class ViewProperties extends PreferenceStore {
 
         setRootDir(viewRoot);
         log.trace("rootDir is {}", rootDir);
-        setWorkDir(viewStart);
-        setDefault("work.dir", viewStart);
+        if (viewStart != null)
+            setWorkDir(viewStart);
+        setDefault("work.dir", getWorkDir());
 
         setUsersGuide(rootDir + usersGuide);
 
@@ -360,7 +362,6 @@ public class ViewProperties extends PreferenceStore {
         try {
             extdir = new File(dirname);
             jars = extdir.list();
-            log.trace("loadExtClass: dirname is {} with {} jars", dirname, jars.length);
         }
         catch (Exception ex0) {
             log.debug("loadExtClass: load dirname: {}+lib/ext failed", rootPath, ex0);

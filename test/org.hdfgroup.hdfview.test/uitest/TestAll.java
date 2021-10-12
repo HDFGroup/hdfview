@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

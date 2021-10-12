@@ -24,6 +24,7 @@ import hdf.hdflib.HDFDeflateCompInfo;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
 import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -520,7 +521,7 @@ public class H4GRImage extends ScalarDS
                 }
 
                 long[] attrDims = {attrInfo[1]};
-                Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                AttributeDataset attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
                 Object buf = null;
@@ -566,13 +567,13 @@ public class H4GRImage extends ScalarDS
     public void writeMetadata(Object info) throws Exception
     {
         // only attribute metadata is supported.
-        if (!(info instanceof Attribute)) {
+        if (!(info instanceof AttributeDataset)) {
             log.debug("writeMetadata(): Object not an Attribute - exit");
             return;
         }
 
         try {
-            getFileFormat().writeAttribute(this, (Attribute)info, true);
+            getFileFormat().writeAttribute(this, (AttributeDataset)info, true);
 
             if (attributeList == null) {
                 attributeList = new Vector();

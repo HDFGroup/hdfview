@@ -14,7 +14,7 @@
 
 package hdf.view.MetaDataView;
 
-import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.HObject;
 import hdf.view.DataView.DataView;
 
@@ -30,16 +30,16 @@ public abstract interface MetaDataView extends DataView {
      *
      * @param obj  the attribute to add
      *
-     * @return the Attribute object
+     * @return the AttributeDataset object
      */
-    public abstract Attribute addAttribute(HObject obj);
+    public abstract AttributeDataset addAttribute(HObject obj);
 
     /** Delete an attribute from a data object.
      *
      * @param obj  the attribute to delte
      *
-     * @return the Attribute object
+     * @return the AttributeDataset object
      */
-    public abstract Attribute deleteAttribute(HObject obj);
+    public abstract AttributeDataset deleteAttribute(HObject obj);
 
 }

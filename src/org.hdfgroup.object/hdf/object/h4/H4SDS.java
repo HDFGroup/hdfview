@@ -28,6 +28,7 @@ import hdf.hdflib.HDFNBITCompInfo;
 import hdf.hdflib.HDFSKPHUFFCompInfo;
 import hdf.hdflib.HDFSZIPCompInfo;
 import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -112,7 +113,7 @@ public class H4SDS extends ScalarDS
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of AttributeDataset.
      */
     @SuppressWarnings("rawtypes")
     private List                            attributeList;
@@ -536,7 +537,7 @@ public class H4SDS extends ScalarDS
                 }
 
                 long[] attrDims = {attrInfo[1]};
-                Attribute attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                AttributeDataset attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
                 Object buf = null;
@@ -600,7 +601,7 @@ public class H4SDS extends ScalarDS
         }
 
         try {
-            getFileFormat().writeAttribute(this, (Attribute)info, true);
+            getFileFormat().writeAttribute(this, (AttributeDataset)info, true);
 
             if (attributeList == null) {
                 attributeList = new Vector();

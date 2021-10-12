@@ -1,4 +1,4 @@
-package test.uitest.HDF4UITests;
+package uitest.HDF4UITests;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -11,8 +11,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest;
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestHDFTreeView extends AbstractWindowTest {
 
@@ -52,7 +52,7 @@ public class TestHDFTreeView extends AbstractWindowTest {
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "testVGLongname()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedData);
 

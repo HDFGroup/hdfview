@@ -18,7 +18,7 @@ import java.lang.reflect.Constructor;
 import java.util.BitSet;
 import java.util.HashMap;
 
-import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
 import hdf.object.FileFormat;
@@ -71,9 +71,9 @@ public class DefaultTableViewFactory extends TableViewFactory {
                 dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
             else if (dataObject instanceof CompoundDS)
                 dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
-            else if (dataObject instanceof Attribute) {
-                if (((Attribute) dataObject).getDatatype().isCompound())
-                    dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
+            else if (dataObject instanceof AttributeDataset) {
+                if (((AttributeDataset) dataObject).getDatatype().isCompound())
+                    dataViewName = ViewProperties.DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME;
                 else
                     dataViewName = ViewProperties.DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME;
             }
@@ -130,6 +130,7 @@ public class DefaultTableViewFactory extends TableViewFactory {
                 try {
                     ((DataFormat) dCopy).init();
 
+                    int space_type = ((DataFormat) dataObject).getSpaceType();
                     int rank = ((DataFormat) dataObject).getRank();
                     System.arraycopy(((DataFormat) dataObject).getDims(), 0, ((DataFormat) dCopy).getDims(), 0, rank);
                     System.arraycopy(((DataFormat) dataObject).getStartDims(), 0, ((DataFormat) dCopy).getStartDims(),0, rank);

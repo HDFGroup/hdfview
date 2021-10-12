@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.junit.Assert.assertTrue;
@@ -26,9 +26,11 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestTreeViewFiles extends AbstractWindowTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestTreeViewFiles.class);
+
     @Test
     public void openHDF5ScalarGroup() {
         String filename = "tscalarintsize.h5";
@@ -462,7 +464,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDS()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedData);
 
@@ -542,8 +544,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             SWTBotNatTable dataTable = getNatTable(tableShell);
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
+            log.trace("testTableLocations is 0, 0");
             retriever.testTableLocations(0, 0, expectedData);
 
             closeShell(tableShell);
@@ -553,7 +556,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             dataTable = getNatTable(tableShell);
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedDataR);
 
@@ -597,7 +600,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             dataTable = getNatTable(tableShell);
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testTableLocations(0, 0, expectedDataR);
 
@@ -629,7 +632,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             dataTable = getNatTable(tableShell);
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testTableLocation(3, 2, "0");
 

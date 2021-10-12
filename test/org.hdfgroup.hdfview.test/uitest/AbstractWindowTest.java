@@ -11,15 +11,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package test.uitest;
-
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withRegex;
-import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+package uitest;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -40,6 +32,9 @@ import org.eclipse.swtbot.nebula.nattable.finder.widgets.Position;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withRegex;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot;
@@ -57,11 +52,20 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import hdf.HDFVersions;
 import hdf.view.HDFView;
+import uitest.AbstractWindowTest.FILE_MODE;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public abstract class AbstractWindowTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractWindowTest.class);
+
     protected static String HDF5VERSION = "HDF5 " + HDFVersions.getPropertyVersionHDF5();
     protected static String HDF4VERSION = "HDF " + HDFVersions.getPropertyVersionHDF4();
     // the version of the HDFViewer
@@ -135,14 +139,15 @@ public abstract class AbstractWindowTest {
                 public void run() {
                     try {
                         Vector<File> fList = new Vector<>();
-                        String rootDir = System.getProperty("hdfview.workdir");
+                        String rootDir = System.getProperty("hdfview.rootdir");
                         if (rootDir == null) rootDir = System.getProperty("user.dir");
+                        String startDir = System.getProperty("hdfview.workdir");
 
                         int W = 800, H = 600, X = 0, Y = 0;
 
                         while (true) {
                             // open and layout the shell
-                            HDFView window = new HDFView(rootDir, null);
+                            HDFView window = new HDFView(rootDir, startDir);
 
                             // Set the testing state to handle the problem with testing
                             // of native dialogs
@@ -223,7 +228,7 @@ public abstract class AbstractWindowTest {
                     val.equals(hdf_file.getName()));
 
             fileNameShell.bot().button("   &OK   ").click();
-            bot.waitUntil(shellCloses(fileNameShell));
+            bot.waitUntil(Conditions.shellCloses(fileNameShell));
 
             SWTBotTree filetree = bot.tree();
             bot.waitUntil(Conditions.treeHasRows(filetree, open_files + 1));
@@ -287,7 +292,7 @@ public abstract class AbstractWindowTest {
             assertTrue("createFile() wrong file name: expected '" + name + "' but was '" + val + "'", val.equals(name));
 
             shell.bot().button("   &OK   ").click();
-            shell.bot().waitUntil(shellCloses(shell));
+            shell.bot().waitUntil(Conditions.shellCloses(shell));
 
             assertTrue("createFile() File '" + hdfFile + "' not created", hdfFile.exists());
             open_files++;
@@ -306,6 +311,7 @@ public abstract class AbstractWindowTest {
         try {
             SWTBotTree filetree = bot.tree();
 
+            filetree.select(hdfFile.getName());
             filetree.getTreeItem(hdfFile.getName()).click();
 
             bot.shells()[0].activate();
@@ -444,6 +450,7 @@ public abstract class AbstractWindowTest {
 
         Matcher<Shell> classMatcher = widgetOfType(Shell.class);
         Matcher<Shell> regexMatcher = withRegex(strippedObjectName + objectShellTitleRegex);
+        @SuppressWarnings("unchecked")
         Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
         bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -514,7 +521,7 @@ public abstract class AbstractWindowTest {
             /*
              * Utility function to offset the table row position for extra header info.
              */
-            public void setContainerHeaderOffset(int containerHeaderOffset) {
+            public void setContainerHeaderOffset(int containerRowHeaderOffset, int containerColHeaderOffset) {
                 throw new UnsupportedOperationException("subclasses must implement setContainerHeaderOffset()");
             }
 
@@ -553,13 +560,16 @@ public abstract class AbstractWindowTest {
         private static class NatTableDataRetriever extends TableDataRetriever {
 
             private final SWTBotNatTable table;
-            private int containerHeaderOffset = 0;
+            private int containerRowHeaderOffset = 0;
+            private int containerColHeaderOffset = 0;
             boolean pagingActive = false;
+            Position lastVisibleCellPos = new Position(1 + containerRowHeaderOffset, 1 + containerColHeaderOffset);
 
             NatTableDataRetriever(SWTBotNatTable tableObj, String funcName) {
                 super(funcName);
 
                 this.table = tableObj;
+                log.trace("lastVisibleCellPos: row is {}, col is {}", lastVisibleCellPos.row, lastVisibleCellPos.column);
             }
 
             @Override
@@ -571,12 +581,14 @@ public abstract class AbstractWindowTest {
                 if (pagingActive) textboxIndex = 2;
 
                 // TODO: temporary workaround until the solution below works.
-                Position cellPos = table.scrollViewport(new Position(1 + containerHeaderOffset, 1), rowIndex, colIndex);
-                table.click(cellPos.row, cellPos.column);
+                log.trace("rowIndex is {}, colIndex is {}", rowIndex, colIndex);
+                lastVisibleCellPos = table.scrollViewport(lastVisibleCellPos, rowIndex, colIndex);
+                log.trace("lastVisibleCellPos: row is {}, col is {}", lastVisibleCellPos.row, lastVisibleCellPos.column);
+                table.click(lastVisibleCellPos.row, lastVisibleCellPos.column);
                 String val = bot.shells()[1].bot().text(textboxIndex).getText();
 
                 // Disabled until Data conversion can be figured out
-                // String val = table.getCellDataValueByPosition(rowPosition, columnPosition);
+                // String val = table.getCellDataValueByPosition(rowIndex, colIndex);
 
                 sb.setLength(0);
                 sb.append("wrong value at table index ").append("(").append(rowIndex).append(", ").append(colIndex).append(")");
@@ -590,8 +602,10 @@ public abstract class AbstractWindowTest {
             }
 
             @Override
-            public void setContainerHeaderOffset(int containerHeaderOffset) {
-                this.containerHeaderOffset = containerHeaderOffset;
+            public void setContainerHeaderOffset(int containerRowHeaderOffset, int containerColHeaderOffset) {
+                this.containerRowHeaderOffset = containerRowHeaderOffset;
+                this.containerColHeaderOffset = containerColHeaderOffset;
+                lastVisibleCellPos = new Position(1 + containerRowHeaderOffset, 1 + containerColHeaderOffset);
             }
 
         }

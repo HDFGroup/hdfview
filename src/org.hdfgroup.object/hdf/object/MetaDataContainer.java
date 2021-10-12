@@ -88,4 +88,10 @@ public interface MetaDataContainer {
      * @return true if it has any attributes, false otherwise.
      */
     public abstract boolean hasAttribute();
+
+    /**
+     * Removes all of the elements from metadata list.
+     * The list should be empty after this call returns.
+     */
+    public abstract void clear();
 }
