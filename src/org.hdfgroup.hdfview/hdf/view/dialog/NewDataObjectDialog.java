@@ -426,6 +426,7 @@ public class NewDataObjectDialog extends Dialog {
                         tsize = 8;
                         break;
                     default:
+                        tsize = -1;
                         break;
                 }
                 log.trace("CLASS_INTEGER or CLASS_ENUM: tsize={}", tsize);
@@ -478,7 +479,11 @@ public class NewDataObjectDialog extends Dialog {
                 }
                 else
                     thedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
-                datatype = fileFormat.createNamedDatatype(thedatatype, name);
+
+                if(isH5)
+                    datatype = fileFormat.createNamedDatatype(thedatatype, name);
+                else
+                    datatype = thedatatype;
             }
             catch (Exception ex) {
                 shell.getDisplay().beep();

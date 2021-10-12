@@ -74,11 +74,16 @@ public class H5Link extends HObject implements MetaDataContainer {
     public List getMetadata() throws Exception {
 
         try{
-            this.linkTargetObjName= H5File.getLinkTargetName(this);
-        }catch(Exception ex){
+            this.linkTargetObjName = H5File.getLinkTargetName(this);
+        }
+        catch(Exception ex){
         }
 
         return null;
+    }
+
+    @Override
+    public void clear() {
     }
 
     public boolean hasAttribute() {

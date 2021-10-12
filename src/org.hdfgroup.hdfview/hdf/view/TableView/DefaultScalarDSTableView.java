@@ -1125,14 +1125,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     protected void showStdRefData(byte[] refarr) {
         log.trace("showStdRefData(): start: refarr={}", refarr);
 
-        if (refarr == null || !H5Datatype.zeroArrayCheck(refarr)) {
+        if (refarr == null || H5Datatype.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
             log.debug("showStdRefData(): ref is null or invalid");
             return;
         }
 
         //long loc_id = HDF5Constants.H5I_INVALID_HID;
-        H5Datatype.getReferenceRegionData(refarr);
+        H5Datatype.getReferenceRegion(refarr, true);
 
         //if (loc_id >= 0) {
             /*
@@ -1193,7 +1193,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                     log.trace("ScalarDSCellSelectionListener:StdRef CellSelected displayValues={}", displayValues);
                     if (displayValues && val != null) {
-                        strVal = H5Datatype.getReferenceRegionData((byte[])val);
+                        strVal = H5Datatype.getReferenceRegion((byte[])val, true);
                     }
                 }
                 else if (isRegRef) {
@@ -1245,6 +1245,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                                     int idx = 0;
                                     while (st.hasMoreTokens()) {
+                                        int space_type = dset.getSpaceType();
                                         int rank = dset.getRank();
                                         long[] start = dset.getStartDims();
                                         long[] count = dset.getSelectedDims();
@@ -1475,6 +1476,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         private final String columnNames[];
 
+        private final int    space_type;
         private final int    rank;
 
         private final long[] startArray;
@@ -1484,6 +1486,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         private final int    ncols;
 
         public ScalarDSColumnHeaderDataProvider(DataFormat theDataObject) {
+            space_type = theDataObject.getSpaceType();
             rank = theDataObject.getRank();
 
             startArray = theDataObject.getStartDims();

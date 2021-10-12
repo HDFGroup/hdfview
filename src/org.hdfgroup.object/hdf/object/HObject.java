@@ -398,7 +398,7 @@ public abstract class HObject implements Serializable {
                 theFullName = theName;
             }
             else {
-                if (this instanceof Attribute)
+                if (this instanceof AttributeDataset)
                     theFullName = theName;
                 else
                     theFullName = "/" + theName;

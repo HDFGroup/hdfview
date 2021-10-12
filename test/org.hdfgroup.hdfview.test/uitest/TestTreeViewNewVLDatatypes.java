@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -37,8 +37,8 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             dtShell.bot().text(0).setText(dtname);
 
-            dtShell.bot().comboBox(1).setSelection("VLEN_INTEGER");
-            dtShell.bot().comboBox(2).setSelection("16");
+            dtShell.bot().comboBox(2).setSelection("VLEN_INTEGER");
+            dtShell.bot().comboBox(3).setSelection("16");
 
             dtShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(dtShell));
@@ -95,8 +95,8 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             dsShell.bot().text(0).setText(dsname);
 
-            dsShell.bot().comboBox(1).setSelection("VLEN_FLOAT");
-            dsShell.bot().comboBox(2).setSelection("32");
+            dsShell.bot().comboBox(2).setSelection("VLEN_FLOAT");
+            dsShell.bot().comboBox(3).setSelection("32");
 
             dsShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(dsShell));
@@ -157,8 +157,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             daShell.bot().text(0).setText(daname);
 
-            daShell.bot().comboBox(0).setSelection("VLEN_STRING");
-            daShell.bot().text(2).setText("ABC");
+            daShell.bot().comboBox(1).setSelection("VLEN_STRING");
 
             daShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(daShell));

@@ -50,7 +50,7 @@ public class NC2Dataset extends ScalarDS {
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of AttributeDataset.
      */
     @SuppressWarnings("rawtypes")
     private List                            attributeList;

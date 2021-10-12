@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -12,7 +12,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestTreeViewFilters extends AbstractWindowTest {
     private static final String testFilename = "tfilters.h5";

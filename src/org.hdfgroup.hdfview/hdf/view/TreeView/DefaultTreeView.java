@@ -2991,14 +2991,17 @@ public class DefaultTreeView implements TreeView {
             reloadFile = true;
         }
 
+        /** @return the current value of the index type. */
         public int getIndexType() {
             return indexType;
         }
 
+        /** @return the current value of the index order. */
         public int getIndexOrder() {
             return indexOrder;
         }
 
+        /** @return the current value of the reloadFile. */
         public boolean isReloadFile() {
             return reloadFile;
         }
@@ -3121,10 +3124,10 @@ public class DefaultTreeView implements TreeView {
             openShell.setImage(ViewProperties.getHdfIcon());
             openShell.setLayout(new GridLayout(1, true));
 
-            String[] lowValues = { "Earliest", "V18", "V110", "V112", "V114", "Latest" };
-            int[] lowConstants = { HDF5Constants.H5F_LIBVER_EARLIEST, HDF5Constants.H5F_LIBVER_V18, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_V114, HDF5Constants.H5F_LIBVER_LATEST };
-            String[] highValues = { "V18", "V110", "V112", "V114", "Latest" };
-            int[] highConstants = { HDF5Constants.H5F_LIBVER_V18, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_V114, HDF5Constants.H5F_LIBVER_LATEST };
+            String[] lowValues = { "Earliest", "V18", "V110", "V112", "Latest" };
+            int[] lowConstants = { HDF5Constants.H5F_LIBVER_EARLIEST, HDF5Constants.H5F_LIBVER_V18, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_LATEST };
+            String[] highValues = { "V18", "V110", "V112", "Latest" };
+            int[] highConstants = { HDF5Constants.H5F_LIBVER_V18, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_LATEST };
 
             // Try to retrieve the existing version bounds
             int[] current = null;

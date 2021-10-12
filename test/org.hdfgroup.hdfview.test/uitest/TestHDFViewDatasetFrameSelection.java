@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.junit.Assert.assertTrue;

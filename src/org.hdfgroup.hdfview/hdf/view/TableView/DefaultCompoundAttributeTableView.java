@@ -12,34 +12,22 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.view.MetaDataView;
+package hdf.view.TableView;
 
-import hdf.object.AttributeDataset;
-import hdf.object.HObject;
-import hdf.view.DataView.DataView;
+import java.util.HashMap;
 
-/**
- *
- *The metadata view interface for displaying metadata information
- *
- * @author Peter X. Cao
- * @version 2.4 9/6/2007
- */
-public abstract interface MetaDataView extends DataView {
-    /** Add an attribute to a data object.
-     *
-     * @param obj  the attribute to add
-     *
-     * @return the AttributeDataset object
-     */
-    public abstract AttributeDataset addAttribute(HObject obj);
+import hdf.view.DataView.DataViewManager;
 
-    /** Delete an attribute from a data object.
-     *
-     * @param obj  the attribute to delte
-     *
-     * @return the AttributeDataset object
-     */
-    public abstract AttributeDataset deleteAttribute(HObject obj);
+public class DefaultCompoundAttributeTableView extends DefaultCompoundDSTableView implements TableView {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultCompoundAttributeTableView.class);
+
+    public DefaultCompoundAttributeTableView(DataViewManager theView) {
+        this(theView, null);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public DefaultCompoundAttributeTableView(DataViewManager theView, HashMap dataPropertiesMap) {
+        super(theView, dataPropertiesMap);
+    }
 }

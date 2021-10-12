@@ -23,10 +23,12 @@ import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
-import hdf.object.Attribute;
+
+import hdf.object.AttributeDataset;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.h5.H5MetaDataContainer;
 
 /**
  * An H5Group object represents an existing HDF5 group in file.
@@ -51,15 +53,11 @@ public class H5Group extends Group {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Group.class);
 
     /**
-     * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * The metadata object for this data object. Members of the metadata are instances of AttributeDataset.
      */
-    @SuppressWarnings("rawtypes")
-    protected List            attributeList;
+    private H5MetaDataContainer objMetadata;
 
-    private int               nAttributes      = -1;
-
-    private H5O_info_t        obj_info;
+    private H5O_info_t        objInfo;
 
     /**
      * Constructs an HDF5 group with specific name, path, and parent.
@@ -96,7 +94,8 @@ public class H5Group extends Group {
     public H5Group(FileFormat theFile, String name, String path, Group parent, long[] oid) {
         super(theFile, name, path, parent, oid);
         nMembersInFile = -1;
-        obj_info = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
+        objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
+        objMetadata = new H5MetaDataContainer(theFile, name, path, this);
 
         if ((oid == null) && (theFile != null)) {
             // retrieve the object ID
@@ -115,29 +114,31 @@ public class H5Group extends Group {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#hasAttribute()
+     * @see hdf.object.MetaDataContainer#hasAttribute()
      */
     @Override
     public boolean hasAttribute() {
-        obj_info.num_attrs = nAttributes;
+        objInfo.num_attrs = objMetadata.getObjectAttributeSize();
 
-        if (obj_info.num_attrs < 0) {
+        if (objInfo.num_attrs < 0) {
             long gid = open();
             if (gid > 0) {
                 try {
-                    obj_info = H5.H5Oget_info(gid);
-
+                    objInfo = H5.H5Oget_info(gid);
                 }
                 catch (Exception ex) {
-                    obj_info.num_attrs = 0;
+                    objInfo.num_attrs = 0;
                 }
-                close(gid);
+                finally {
+                    close(gid);
+                }
+                objMetadata.setObjectAttributeSize((int) objInfo.num_attrs);
             }
         }
 
-        log.trace("hasAttribute(): nAttributes={}", obj_info.num_attrs);
+        log.trace("hasAttribute(): nAttributes={}", objInfo.num_attrs);
 
-        return (obj_info.num_attrs > 0);
+        return (objInfo.num_attrs > 0);
     }
 
     /*
@@ -167,22 +168,19 @@ public class H5Group extends Group {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.Group#clear()
+     * @see hdf.object.MetaDataContainer#clear()
      */
     @SuppressWarnings("rawtypes")
     @Override
     public void clear() {
         super.clear();
-
-        if (attributeList != null) {
-            ((Vector) attributeList).setSize(0);
-        }
+        objMetadata.clear();
     }
 
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#getMetadata()
+     * @see hdf.object.MetaDataContainer#getMetadata()
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -193,93 +191,66 @@ public class H5Group extends Group {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#getMetadata(int...)
+     * @see hdf.object.MetaDataContainer#getMetadata(int...)
      */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws HDF5Exception {
-        if (attributeList == null) {
-            int indxType = fileFormat.getIndexType(null);
-            int order = fileFormat.getIndexOrder(null);
-
-            if (attrPropList.length > 0) {
-                indxType = attrPropList[0];
-                if (attrPropList.length > 1) {
-                    order = attrPropList[1];
-                }
-            }
-            try {
-                attributeList = H5File.getAttribute(this, indxType, order);
-            }
-            catch (Exception ex) {
-                log.debug("getMetadata(): H5File.getAttribute failure: ", ex);
-            }
-        }
-
         try {
-            if (!this.isRoot()) this.linkTargetObjName = H5File.getLinkTargetName(this);
+            this.linkTargetObjName = H5File.getLinkTargetName(this);
         }
         catch (Exception ex) {
-            log.debug("getMetadata(): getLinkTargetName failure: ", ex);
+            log.debug("getMetadata(): getLinkTargetName failed: ", ex);
         }
 
-        return attributeList;
+        List<AttributeDataset> attrlist = null;
+        try {
+            attrlist = objMetadata.getMetadata(attrPropList);
+        }
+        catch (Exception ex) {
+            log.debug("getMetadata(): getMetadata failed: ", ex);
+        }
+        return attrlist;
     }
 
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
+     * @see hdf.object.MetaDataContainer#writeMetadata(java.lang.Object)
      */
     @Override
     @SuppressWarnings("unchecked")
     public void writeMetadata(Object info) throws Exception {
-        // only attribute metadata is supported.
-        if (!(info instanceof Attribute)) {
-            log.debug("writeMetadata(): Object not an Attribute");
+        try {
+            objMetadata.writeMetadata(info);
+        }
+        catch (Exception ex) {
+            log.debug("writeMetadata(): Object not an AttributeDataset");
             return;
-        }
-
-        boolean attrExisted = false;
-        Attribute attr = (Attribute) info;
-        log.trace("writeMetadata(): {}", attr.getName());
-
-        if (attributeList == null) {
-            this.getMetadata();
-        }
-
-        if (attributeList != null) attrExisted = attributeList.contains(attr);
-
-        getFileFormat().writeAttribute(this, attr, attrExisted);
-        // add the new attribute into attribute list
-        if (!attrExisted) {
-            attributeList.add(attr);
-            nAttributes = attributeList.size();
         }
     }
 
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
+     * @see hdf.object.MetaDataContainer#removeMetadata(java.lang.Object)
      */
     @Override
     @SuppressWarnings("rawtypes")
     public void removeMetadata(Object info) throws HDF5Exception {
-        // only attribute metadata is supported.
-        if (!(info instanceof Attribute)) {
-            log.debug("removeMetadata(): Object not an Attribute");
+        try {
+            objMetadata.removeMetadata(info);
+        }
+        catch (Exception ex) {
+            log.debug("removeMetadata(): Object not an AttributeDataset");
             return;
         }
 
-        Attribute attr = (Attribute) info;
+        AttributeDataset attr = (AttributeDataset) info;
         log.trace("removeMetadata(): {}", attr.getName());
         long gid = open();
         if(gid >= 0) {
             try {
                 H5.H5Adelete(gid, attr.getName());
-                List attrList = getMetadata();
-                attrList.remove(attr);
-                nAttributes = attributeList.size();
             }
             finally {
                 close(gid);
@@ -293,17 +264,17 @@ public class H5Group extends Group {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
+     * @see hdf.object.MetaDataContainer#updateMetadata(java.lang.Object)
      */
     @Override
     public void updateMetadata(Object info) throws HDF5Exception {
-        // only attribute metadata is supported.
-        if (!(info instanceof Attribute)) {
-            log.debug("updateMetadata(): Object not an Attribute");
+        try {
+            objMetadata.updateMetadata(info);
+        }
+        catch (Exception ex) {
+            log.debug("updateMetadata(): Object not an AttributeDataset");
             return;
         }
-
-        nAttributes = -1;
     }
 
     /*

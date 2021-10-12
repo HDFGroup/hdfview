@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.junit.Assert.fail;
 
@@ -9,7 +9,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 /*
  * Tests the ability of HDFView to display integer values as Hexadecimal
