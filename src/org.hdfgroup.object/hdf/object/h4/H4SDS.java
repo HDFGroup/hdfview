@@ -27,7 +27,7 @@ import hdf.hdflib.HDFLibrary;
 import hdf.hdflib.HDFNBITCompInfo;
 import hdf.hdflib.HDFSKPHUFFCompInfo;
 import hdf.hdflib.HDFSZIPCompInfo;
-import hdf.object.Attribute;
+
 import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -35,6 +35,8 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+
+import hdf.object.h4.H4Attribute;
 
 /**
  * H4SDS describes HDF4 Scientific Data Sets (SDS) and operations performed on
@@ -167,7 +169,7 @@ public class H4SDS extends ScalarDS
             long id = open();
 
             if (id >= 0) {
-                try { // retireve attributes of the dataset
+                try { // retrieve attributes of the dataset
                     String[] objName = {""};
                     int[] sdInfo = {0, 0, 0};
                     int[] tmpDim = new int[HDFConstants.MAX_VAR_DIMS];
@@ -537,7 +539,7 @@ public class H4SDS extends ScalarDS
                 }
 
                 long[] attrDims = {attrInfo[1]};
-                AttributeDataset attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                H4Attribute attr = new H4Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
                 Object buf = null;
@@ -595,8 +597,8 @@ public class H4SDS extends ScalarDS
     public void writeMetadata(Object info) throws Exception
     {
         // only attribute metadata is supported.
-        if (!(info instanceof Attribute)) {
-            log.debug("writeMetadata(): Object not an Attribute");
+        if (!(info instanceof AttributeDataset)) {
+            log.debug("writeMetadata(): Object not an H4Attribute");
             return;
         }
 

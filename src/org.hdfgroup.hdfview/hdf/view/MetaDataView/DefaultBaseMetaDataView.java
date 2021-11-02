@@ -70,7 +70,7 @@ import hdf.view.DataView.DataViewManager;
 import hdf.view.TreeView.DefaultTreeView;
 import hdf.view.TreeView.TreeView;
 import hdf.view.dialog.InputDialog;
-import hdf.view.dialog.NewAttributeDialog;
+import hdf.view.dialog.NewStringAttributeDialog;
 import hdf.view.dialog.NewDataObjectDialog;
 import hdf.view.dialog.NewScalarAttributeDialog;
 //import hdf.view.dialog.NewCompoundAttributeDialog;
@@ -763,7 +763,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             attr = dialog.getAttribute();
         }
         else {
-            NewAttributeDialog dialog = new NewAttributeDialog(display.getShells()[0], obj,
+            NewStringAttributeDialog dialog = new NewStringAttributeDialog(display.getShells()[0], obj,
                     ((Group) root).breadthFirstMemberList());
             dialog.open();
             attr = dialog.getAttribute();

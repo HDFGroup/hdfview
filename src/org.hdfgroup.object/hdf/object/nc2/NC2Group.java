@@ -53,7 +53,7 @@ public class NC2Group extends Group {
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of NC2Attribute.
      */
     private List attributeList;
 

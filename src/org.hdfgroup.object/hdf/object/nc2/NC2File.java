@@ -299,9 +299,9 @@ public class NC2File extends FileFormat {
         throw new UnsupportedOperationException("Unsupported operation - copy attributes.");
     }
 
-    /* converts a ucar.nc2.Attribute into an hdf.object.Attribute */
-    public static hdf.object.Attribute convertAttribute(HObject parent, ucar.nc2.Attribute netcdfAttr) {
-        hdf.object.Attribute ncsaAttr = null;
+    /* converts a ucar.nc2.Attribute into an hdf.object.nc2.NC2Attribute */
+    public static hdf.object.nc2.NC2Attribute convertAttribute(HObject parent, ucar.nc2.Attribute netcdfAttr) {
+        hdf.object.nc2.NC2Attribute ncsaAttr = null;
 
         if (netcdfAttr == null) {
             return null;
@@ -317,7 +317,7 @@ public class NC2File extends FileFormat {
         catch (Exception ex) {
             attrType = null;
         }
-        ncsaAttr = new hdf.object.Attribute(parent, attrName, attrType, attrDims);
+        ncsaAttr = new hdf.object.nc2.NC2Attribute(parent, attrName, attrType, attrDims);
         Object[] attrValues = { netcdfAttr.getValue(0) };
         ncsaAttr.setData(attrValues);
 

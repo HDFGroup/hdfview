@@ -19,13 +19,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.object.fits.FitsAttribute;
+
 import nom.tam.fits.BasicHDU;
 import nom.tam.fits.Header;
 import nom.tam.fits.HeaderCard;
@@ -50,7 +51,7 @@ public class FitsDataset extends ScalarDS
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of AttributeDataset.
      */
     private List attributeList;
 
@@ -161,14 +162,14 @@ public class FitsDataset extends ScalarDS
         attributeList = new Vector();
         HeaderCard hc = null;
         Iterator it = header.iterator();
-        Attribute attr = null;
+        FitsAttribute attr = null;
         Datatype dtype = new FitsDatatype(Datatype.CLASS_STRING, 80, 0, 0);
         long[] dims = {1};
         String value = null;
         while (it.hasNext()) {
             value = "";
             hc = (HeaderCard)it.next();
-            attr = new Attribute(this, hc.getKey(), dtype, dims);
+            attr = new FitsAttribute(this, hc.getKey(), dtype, dims);
             String tvalue = hc.getValue();
             if (tvalue != null) {
                 value += tvalue;

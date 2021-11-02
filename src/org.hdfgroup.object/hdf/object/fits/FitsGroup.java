@@ -36,7 +36,7 @@ public class FitsGroup extends Group
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of AttributeDatset.
      */
     private List attributeList;
 

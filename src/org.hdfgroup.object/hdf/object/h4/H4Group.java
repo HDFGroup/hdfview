@@ -20,12 +20,14 @@ import java.util.Vector;
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
-import hdf.object.Attribute;
+
 import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+
+import hdf.object.h4.H4Attribute;
 
 /**
  * An H4Group is a vgroup in HDF4, inheriting from Group.
@@ -45,7 +47,7 @@ public class H4Group extends Group
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of AttributeDataset.
+     * instance of H4Attribute.
      */
     @SuppressWarnings("rawtypes")
     private List                            attributeList;
@@ -157,7 +159,7 @@ public class H4Group extends Group
                     }
 
                     long[] attrDims = {attrInfo[1]};
-                    AttributeDataset attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    H4Attribute attr = new H4Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     attributeList.add(attr);
 
                     Object buf = null;
@@ -204,7 +206,7 @@ public class H4Group extends Group
     {
         // only attribute metadata is supported.
         if (!(info instanceof AttributeDataset)) {
-            log.debug("writeMetadata(): Object not an Attribute");
+            log.debug("writeMetadata(): Object not an H4Attribute");
             return;
         }
 

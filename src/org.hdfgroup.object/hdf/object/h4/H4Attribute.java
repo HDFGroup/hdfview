@@ -14,7 +14,17 @@
 
 package hdf.object.h4;
 
-import hdf.object.Attribute;
+import java.lang.reflect.Array;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import hdf.object.AttributeDataset;
+import hdf.object.CompoundDataFormat;
+import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
@@ -55,7 +65,7 @@ import hdf.object.HObject;
  * </pre>
  *
  *
- * For an atomic datatype, the value of an AttributeDataset will be a 1D array of integers, floats and
+ * For an atomic datatype, the value of an H4Attribute will be a 1D array of integers, floats and
  * strings. For a compound datatype, it will be a 1D array of strings with field members separated
  * by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
  * float} of three data points.
@@ -65,11 +75,78 @@ import hdf.object.HObject;
  * @version 2.0 4/2/2018
  * @author Peter X. Cao, Jordan T. Henderson
  */
-public class H4Attribute extends Attribute {
+public class H4Attribute extends AttributeDataset implements DataFormat, CompoundDataFormat {
 
     private static final long serialVersionUID = 2072473407027648309L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4Attribute.class);
+
+    /** Fields for Compound datatype attributes */
+
+    /**
+     * A list of names of all compound fields including nested fields.
+     * <p>
+     * The nested names are separated by CompoundDS.SEPARATOR. For example, if
+     * compound attribute "A" has the following nested structure,
+     *
+     * <pre>
+     * A --&gt; m01
+     * A --&gt; m02
+     * A --&gt; nest1 --&gt; m11
+     * A --&gt; nest1 --&gt; m12
+     * A --&gt; nest1 --&gt; nest2 --&gt; m21
+     * A --&gt; nest1 --&gt; nest2 --&gt; m22
+     * i.e.
+     * A = { m01, m02, nest1{m11, m12, nest2{ m21, m22}}}
+     * </pre>
+     *
+     * The flatNameList of compound attribute "A" will be {m01, m02, nest1[m11,
+     * nest1[m12, nest1[nest2[m21, nest1[nest2[m22}
+     *
+     */
+    protected List<String> flatNameList;
+
+    /**
+     * A list of datatypes of all compound fields including nested fields.
+     */
+    protected List<Datatype> flatTypeList;
+
+    /**
+     * The number of members of the compound attribute.
+     */
+    protected int numberOfMembers = 0;
+
+    /**
+     * The names of the members of the compound attribute.
+     */
+    protected String[] memberNames = null;
+
+    /**
+     * Array containing the total number of elements of the members of this compound
+     * attribute.
+     * <p>
+     * For example, a compound attribute COMP has members of A, B and C as
+     *
+     * <pre>
+     *     COMP {
+     *         int A;
+     *         float B[5];
+     *         double C[2][3];
+     *     }
+     * </pre>
+     *
+     * memberOrders is an integer array of {1, 5, 6} to indicate that member A has
+     * one element, member B has 5 elements, and member C has 6 elements.
+     */
+    protected int[] memberOrders = null;
+
+    /**
+     * The dimension sizes of each member.
+     * <p>
+     * The i-th element of the Object[] is an integer array (int[]) that contains
+     * the dimension sizes of the i-th member.
+     */
+    protected transient Object[] memberDims = null;
 
     /**
      * Create an attribute with specified name, data type and dimension sizes.
@@ -148,7 +225,16 @@ public class H4Attribute extends Attribute {
      */
     @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
     public H4Attribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
-        super(parentObj, attrName, attrType, null);
+        super(parentObj, attrName, attrType, attrDims, attrValue);
+
+        log.trace("Attribute: start {}", parentObj);
+
+        unsignedConverted = false;
+
+        log.trace("attrName={}, attrType={}, attrValue={}, rank={}, isUnsigned={}, isScalar={}",
+                attrName, getDatatype().getDescription(), data, rank, getDatatype().isUnsigned(), isScalar);
+
+        resetSelection();
     }
 
     /*
@@ -204,8 +290,9 @@ public class H4Attribute extends Attribute {
 
     @Override
     public void init() {
-        super.init();
         if (inited) {
+            resetSelection();
+            log.trace("init(): Attribute already inited");
             return;
         }
 
@@ -218,5 +305,257 @@ public class H4Attribute extends Attribute {
         }
 
         resetSelection();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.Dataset#clearData()
+     */
+    @Override
+    public void clearData() {
+        super.clearData();
+        unsignedConverted = false;
+    }
+
+    @Override
+    public Object read() throws Exception, OutOfMemoryError {
+        if (!inited) init();
+
+        /*
+         * TODO: For now, convert a compound Attribute's data (String[]) into a List for
+         * convenient processing
+         */
+        if (getDatatype().isCompound() && !(data instanceof List)) {
+            List<String> valueList = Arrays.asList((String[]) data);
+
+            data = valueList;
+        }
+
+        return data;
+    }
+
+    /**
+     * Returns the number of members of the compound attribute.
+     *
+     * @return the number of members of the compound attribute.
+     */
+    @Override
+    public int getMemberCount() {
+        return numberOfMembers;
+    }
+
+    /**
+     * Returns the names of the members of the compound attribute. The names of
+     * compound members are stored in an array of Strings.
+     * <p>
+     * For example, for a compound datatype of {int A, float B, char[] C}
+     * getMemberNames() returns ["A", "B", "C"}.
+     *
+     * @return the names of compound members.
+     */
+    @Override
+    public String[] getMemberNames() {
+        return memberNames;
+    }
+
+    /**
+     * Returns an array of the names of the selected members of the compound dataset.
+     *
+     * @return an array of the names of the selected members of the compound dataset.
+     */
+    public final String[] getSelectedMemberNames() {
+        if (isMemberSelected == null) {
+            log.debug("getSelectedMemberNames(): isMemberSelected array is null");
+            return memberNames;
+        }
+
+        int idx = 0;
+        String[] names = new String[getSelectedMemberCount()];
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            if (isMemberSelected[i]) {
+                names[idx++] = memberNames[i];
+            }
+        }
+
+        return names;
+    }
+
+    /**
+     * Checks if a member of the compound attribute is selected for read/write.
+     *
+     * @param idx
+     *            the index of compound member.
+     *
+     * @return true if the i-th memeber is selected; otherwise returns false.
+     */
+    @Override
+    public boolean isMemberSelected(int idx) {
+        if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
+            return isMemberSelected[idx];
+        }
+
+        return false;
+    }
+
+    /**
+     * Selects the i-th member for read/write.
+     *
+     * @param idx
+     *            the index of compound member.
+     */
+    @Override
+    public void selectMember(int idx) {
+        if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
+            isMemberSelected[idx] = true;
+        }
+    }
+
+    /**
+     * Selects/deselects all members.
+     *
+     * @param selectAll
+     *            The indicator to select or deselect all members. If true, all
+     *            members are selected for read/write. If false, no member is
+     *            selected for read/write.
+     */
+    @Override
+    public void setAllMemberSelection(boolean selectAll) {
+        if (isMemberSelected == null) {
+            return;
+        }
+
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            isMemberSelected[i] = selectAll;
+        }
+    }
+
+    /**
+     * Returns array containing the total number of elements of the members of the
+     * compound attribute.
+     * <p>
+     * For example, a compound attribute COMP has members of A, B and C as
+     *
+     * <pre>
+     *     COMP {
+     *         int A;
+     *         float B[5];
+     *         double C[2][3];
+     *     }
+     * </pre>
+     *
+     * getMemberOrders() will return an integer array of {1, 5, 6} to indicate that
+     * member A has one element, member B has 5 elements, and member C has 6
+     * elements.
+     *
+     * @return the array containing the total number of elements of the members of
+     *         the compound attribute.
+     */
+    @Override
+    public int[] getMemberOrders() {
+        return memberOrders;
+    }
+
+    /**
+     * Returns array containing the total number of elements of the selected members
+     * of the compound attribute.
+     *
+     * <p>
+     * For example, a compound attribute COMP has members of A, B and C as
+     *
+     * <pre>
+     *     COMP {
+     *         int A;
+     *         float B[5];
+     *         double C[2][3];
+     *     }
+     * </pre>
+     *
+     * If A and B are selected, getSelectedMemberOrders() returns an array of {1, 5}
+     *
+     * @return array containing the total number of elements of the selected members
+     *         of the compound attribute.
+     */
+    @Override
+    public int[] getSelectedMemberOrders() {
+        if (isMemberSelected == null) {
+            log.debug("getSelectedMemberOrders(): isMemberSelected array is null");
+            return memberOrders;
+        }
+
+        int idx = 0;
+        int[] orders = new int[getSelectedMemberCount()];
+        for (int i = 0; i < isMemberSelected.length; i++) {
+            if (isMemberSelected[i]) {
+                orders[idx++] = memberOrders[i];
+            }
+        }
+
+        return orders;
+    }
+
+    /**
+     * Returns the dimension sizes of the i-th member.
+     * <p>
+     * For example, a compound attribute COMP has members of A, B and C as
+     *
+     * <pre>
+     *     COMP {
+     *         int A;
+     *         float B[5];
+     *         double C[2][3];
+     *     }
+     * </pre>
+     *
+     * getMemberDims(2) returns an array of {2, 3}, while getMemberDims(1) returns
+     * an array of {5}, and getMemberDims(0) returns null.
+     *
+     * @param i
+     *            the i-th member
+     *
+     * @return the dimension sizes of the i-th member, null if the compound member
+     *         is not an array.
+     */
+    @Override
+    public int[] getMemberDims(int i) {
+        if (memberDims == null) {
+            return null;
+        }
+
+        return (int[]) memberDims[i];
+    }
+
+    /**
+     * Returns an array of datatype objects of compound members.
+     * <p>
+     * Each member of a compound attribute has its own datatype. The datatype of a
+     * member can be atomic or other compound datatype (nested compound). The
+     * datatype objects are setup at init().
+     * <p>
+     *
+     * @return the array of datatype objects of the compound members.
+     */
+    @Override
+    public Datatype[] getMemberTypes() {
+        return memberTypes;
+    }
+
+    /**
+     * Given an array of bytes representing a compound Datatype and a start index
+     * and length, converts len number of bytes into the correct Object type and
+     * returns it.
+     *
+     * @param data
+     *            The byte array representing the data of the compound Datatype
+     * @param data_type
+     *            The type of data to convert the bytes to
+     * @param start
+     *            The start index of the bytes to get
+     * @param len
+     *            The number of bytes to convert
+     * @return The converted type of the bytes
+     */
+    protected Object convertCompoundByteMember(byte[] data, long data_type, long start, long len) {
+        return null;
     }
 }

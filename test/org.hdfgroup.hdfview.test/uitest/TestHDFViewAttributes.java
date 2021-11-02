@@ -622,7 +622,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
 
             /* Now repeat the process for the previously-created dataset */
-            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
+            /* Howexer the dataset has dimension coords */
+            attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname + " (dimension)");
             tableShell = openAttributeContext(attrTable, attrName, 1);
             tableShell.close();
         }

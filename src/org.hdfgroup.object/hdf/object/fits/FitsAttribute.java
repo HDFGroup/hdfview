@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.object.nc2;
+package hdf.object.fits;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 import hdf.object.AttributeDataset;
 import hdf.object.DataFormat;
@@ -56,7 +57,7 @@ import hdf.object.HObject;
  * // The value of the attribute
  * int[] value = {0, 255};
  * // Create a new attribute
- * AttributeDataset dataRange = new Attribute(name, type, dims);
+ * FitsAttribute dataRange = new FitsAttribute(name, type, dims);
  * // Set the attribute value
  * dataRange.setValue(value);
  * // See FileFormat.writeAttribute() for how to attach an attribute to an object,
@@ -64,7 +65,7 @@ import hdf.object.HObject;
  * </pre>
  *
  *
- * For an atomic datatype, the value of an Attribute will be a 1D array of integers, floats and
+ * For an atomic datatype, the value of an FitsAttribute will be a 1D array of integers, floats and
  * strings. For a compound datatype, it will be a 1D array of strings with field members separated
  * by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
  * float} of three data points.
@@ -74,11 +75,11 @@ import hdf.object.HObject;
  * @version 2.0 4/2/2018
  * @author Peter X. Cao, Jordan T. Henderson
  */
-public class NC2Attribute extends AttributeDataset implements DataFormat {
+public class FitsAttribute extends AttributeDataset implements DataFormat {
 
     private static final long serialVersionUID = 2072473407027648309L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2Attribute.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FitsAttribute.class);
 
     /**
      * Create an attribute with specified name, data type and dimension sizes.
@@ -100,7 +101,7 @@ public class NC2Attribute extends AttributeDataset implements DataFormat {
      *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
-     * AttributeDataset attr = new Attribute(attrName, attrType, attrDims);
+     * FitsAttribute attr = new FitsAttribute(attrName, attrType, attrDims);
      * attr.setValue(classValue);
      * </pre>
      *
@@ -115,7 +116,7 @@ public class NC2Attribute extends AttributeDataset implements DataFormat {
      *
      * @see hdf.object.Datatype
      */
-    public NC2Attribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims) {
+    public FitsAttribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims) {
         this(parentObj, attrName, attrType, attrDims, null);
     }
 
@@ -139,11 +140,11 @@ public class NC2Attribute extends AttributeDataset implements DataFormat {
      *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
-     * NC2Attribute attr = new NC2Attribute(attrName, attrType, attrDims, classValue);
+     * FitsAttribute attr = new FitsAttribute(attrName, attrType, attrDims, classValue);
      * </pre>
      *
      * @param parentObj
-     *            the HObject to which this Attribute is attached.
+     *            the HObject to which this FitsAttribute is attached.
      * @param attrName
      *            the name of the attribute.
      * @param attrType
@@ -156,10 +157,10 @@ public class NC2Attribute extends AttributeDataset implements DataFormat {
      * @see hdf.object.Datatype
      */
     @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
-    public NC2Attribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
+    public FitsAttribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
         super(parentObj, attrName, attrType, attrDims, attrValue);
 
-        log.trace("NC2Attribute: start {}", parentObj);
+        log.trace("FitsAttribute: start {}", parentObj);
 
         unsignedConverted = false;
 
@@ -176,36 +177,12 @@ public class NC2Attribute extends AttributeDataset implements DataFormat {
      */
     @Override
     public long open() {
-        long aid = -1;
-        long pObjID = -1;
-
         if (parentObject == null) {
             log.debug("open(): attribute's parent object is null");
             return -1;
         }
 
-        try {
-            pObjID = parentObject.open();
-            if (pObjID >= 0) {
-                if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
-                    log.trace("open(): FILE_TYPE_NC3");
-                    /*
-                     * TODO: Get type of netcdf3 object this is attached to and retrieve attribute info.
-                     */
-                }
-            }
-
-            log.trace("open(): aid={}", aid);
-        }
-        catch (Exception ex) {
-            log.debug("open(): Failed to open attribute {}: ", getName(), ex);
-            aid = -1;
-        }
-        finally {
-            parentObject.close(pObjID);
-        }
-
-        return aid;
+        return -1;
     }
 
     /*
@@ -215,33 +192,15 @@ public class NC2Attribute extends AttributeDataset implements DataFormat {
      */
     @Override
     public void close(long aid) {
-        if (aid >= 0) {
-            if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
-                log.trace("close(): FILE_TYPE_NC3");
-                /*
-                 * TODO: Get type of netcdf3 object this is attached to and close attribute.
-                 */
-            }
-        }
     }
 
     @Override
     public void init() {
         if (inited) {
             resetSelection();
-            log.trace("init(): NC2Attribute already inited");
+            log.trace("init(): FitsAttribute already inited");
             return;
         }
-
-        if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
-            log.trace("init(): FILE_TYPE_NC3");
-            /*
-             * TODO: If netcdf3 attribute object needs to init dependent objects.
-             */
-            inited = true;
-        }
-
-        resetSelection();
     }
 
     /*
@@ -258,6 +217,7 @@ public class NC2Attribute extends AttributeDataset implements DataFormat {
     @Override
     public Object read() throws Exception, OutOfMemoryError {
         if (!inited) init();
+
         return data;
     }
 }

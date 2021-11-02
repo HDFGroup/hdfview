@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 
-import hdf.object.Attribute;
 import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;

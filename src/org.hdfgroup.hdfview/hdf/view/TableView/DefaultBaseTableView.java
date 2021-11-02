@@ -304,7 +304,8 @@ public abstract class DefaultBaseTableView implements TableView {
         /* Retrieve any display properties passed in via the HashMap parameter */
         HObject hObject = null;
 
-        if (ViewProperties.isIndexBase1()) indexBase = 1;
+        if (ViewProperties.isIndexBase1())
+            indexBase = 1;
 
         if (dataPropertiesMap != null) {
             hObject = (HObject) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.OBJECT);

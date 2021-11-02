@@ -23,7 +23,7 @@ import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFDeflateCompInfo;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
-import hdf.object.Attribute;
+
 import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -31,6 +31,8 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+
+import hdf.object.h4.H4Attribute;
 
 /**
  * H4GRImage describes an HDF4 general raster(GR) image and operations performed on
@@ -108,7 +110,7 @@ public class H4GRImage extends ScalarDS
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of H4Attribute.
      */
     @SuppressWarnings("rawtypes")
     private List                            attributeList;
@@ -521,7 +523,7 @@ public class H4GRImage extends ScalarDS
                 }
 
                 long[] attrDims = {attrInfo[1]};
-                AttributeDataset attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                H4Attribute attr = new H4Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
                 Object buf = null;

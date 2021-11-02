@@ -42,23 +42,25 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.Attribute;
+import hdf.object.AttributeDataset;
 import hdf.object.Datatype;
+import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
+
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
 /**
- * NewAttributeDialog displays components for adding a new attribute.
+ * NewStringAttributeDialog displays components for adding a new attribute.
  *
  * @author Jordan T. Henderson
  * @version 2.4 1/7/2016
  */
-public class NewAttributeDialog extends NewDataObjectDialog {
+public class NewStringAttributeDialog extends NewDataObjectDialog {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewAttributeDialog.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewStringAttributeDialog.class);
 
     /** the default length of a string attribute */
     public static final int   DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;
@@ -76,19 +78,24 @@ public class NewAttributeDialog extends NewDataObjectDialog {
 
     private Label             arrayLengthLabel;
 
+    protected boolean isH4;
+    protected boolean isN3;
+
     /**
-     * Constructs a NewAttributeDialog with specified object (dataset, group, or
+     * Constructs a NewStringAttributeDialog with specified object (dataset, group, or
      * image) for the new attribute to be attached to.
      *
      * @param parent
      *            the parent shell of the dialog
-     * @param obj
-     *            the object for the attribute to be attached to.
+     * @param pObject
+     *            the parent object which the new attribute is attached to.
      * @param objs
-     *            the specified objects.
+     *            the list of all objects.
      */
-    public NewAttributeDialog(Shell parent, HObject obj, List<HObject> objs) {
-        super(parent, obj, objs);
+    public NewStringAttributeDialog(Shell parent, HObject pObject, List<HObject> objs) {
+        super(parent, pObject, objs);
+        isH4 = pObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
+        isN3 = pObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3));
     }
 
     public void open() {
@@ -558,7 +565,23 @@ public class NewAttributeDialog extends NewDataObjectDialog {
         }
 
         long[] dims = { arraySize };
-        Attribute attr = new Attribute(parentObj, attrName, datatype, dims);
+        AttributeDataset attr = null;
+        try {
+            if (isH4)
+                attr = new hdf.object.h4.H4Attribute(parentObj, attrName, datatype, dims);
+            else
+                attr = new hdf.object.nc2.NC2Attribute(parentObj, attrName, datatype, dims);
+        }
+        catch (Exception ex) {
+            Tools.showError(shell, "Create", ex.getMessage());
+            log.debug("createAttribute(): ", ex);
+            return false;
+        }
+        if (attr ==null) {
+            Tools.showError(shell, "Create", "Attribute could not be created");
+            log.debug("createAttribute(): failed");
+            return false;
+        }
         attr.setData(value);
 
         try {
@@ -724,7 +747,7 @@ public class NewAttributeDialog extends NewDataObjectDialog {
     }
 
     /** @return the new attribute created. */
-    public Attribute getAttribute() {
-        return (Attribute)newObject;
+    public AttributeDataset getAttribute() {
+        return (AttributeDataset)newObject;
     }
 }

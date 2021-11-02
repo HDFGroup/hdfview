@@ -654,12 +654,12 @@
             includeantruntime="false" debug="${build.debug}">
             <compilerarg value="-Xlint:deprecation" />
             <compilerarg value="-Xlint:unchecked" />
-        </javac>
+        </javac> -->
 
         <copy todir="${testclasses.dir}/${test.dir}">
             <fileset dir="${testsrc.dir}/${test.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
         </copy>
-        <mkdir dir="${testclasses.dir}/lib/ext" /> -->
+        <!--<mkdir dir="${testclasses.dir}/lib/ext" /> -->
     </target>
 
     <path id="alltest-classes" location="${testclasses.dir}" />

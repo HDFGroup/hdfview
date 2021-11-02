@@ -17,9 +17,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import hdf.hdflib.HDFConstants;
-import hdf.object.Attribute;
+
 import hdf.object.Group;
 import hdf.object.HObject;
+
+import hdf.object.h4.H4Attribute;
 import hdf.object.h4.H4File;
 import hdf.object.h4.H4GRImage;
 import hdf.object.h4.H4Group;
@@ -116,7 +118,7 @@ public class TestH4File
                     System.out.println(g);
 
                     // test H4CompoundDS attributes
-                    Attribute attr = null;
+                    H4Attribute attr = null;
                     List info = null;
                     try { info = g.getMetadata(); }
                     catch (Exception ex) {}
@@ -128,14 +130,14 @@ public class TestH4File
                     int n = info.size();
                     for (int i=0; i<n; i++)
                     {
-                        attr = (Attribute)info.get(i);
+                        attr = (H4Attribute)info.get(i);
                         System.out.println(attr);
                     }
                 } //if (obj instanceof H4Group
             } //while (nodes.hasMoreElements())
         } //if (root != null)
 
-	try {
+    try {
         h4file.close();
         } catch (Exception ex)
         {
@@ -173,7 +175,7 @@ public class TestH4File
                     System.out.println(sds);
 
                     // test H4CompoundDS attributes
-                    Attribute attr = null;
+                    H4Attribute attr = null;
                     List info = null;
                     try {
                         info = sds.getMetadata();
@@ -186,7 +188,7 @@ public class TestH4File
                         n = info.size();
                         for (int i=0; i<n; i++)
                         {
-                            attr = (Attribute)info.get(i);
+                            attr = (H4Attribute)info.get(i);
                             System.out.println(attr);
                         }
                     }
@@ -214,7 +216,7 @@ public class TestH4File
             } //while (nodes.hasMoreElements())
         } //if (root != null)
 
-	try {
+    try {
         h4file.close();
         } catch (Exception ex)
         {
@@ -252,7 +254,7 @@ public class TestH4File
                     System.out.println(vdata);
 
                     // test H4CompoundDS attributes
-                    Attribute attr = null;
+                    H4Attribute attr = null;
                     List info = null;
                     try {
                         info = vdata.getMetadata();
@@ -265,7 +267,7 @@ public class TestH4File
                         n = info.size();
                         for (int i=0; i<n; i++)
                         {
-                            attr = (Attribute)info.get(i);
+                            attr = (H4Attribute)info.get(i);
                             System.out.println(attr);
                         }
                     }
@@ -313,7 +315,7 @@ public class TestH4File
             } //while (nodes.hasMoreElements())
         } //if (root != null)
 
-	try {
+    try {
         h4file.close();
         } catch (Exception ex)
         {
@@ -351,7 +353,7 @@ public class TestH4File
                     System.out.println(sds);
 
                     // test H4CompoundDS attributes
-                    Attribute attr = null;
+                    H4Attribute attr = null;
                     List info = null;
                     try {
                         info = sds.getMetadata();
@@ -364,7 +366,7 @@ public class TestH4File
                         n = info.size();
                         for (int i=0; i<n; i++)
                         {
-                            attr = (Attribute)info.get(i);
+                            attr = (H4Attribute)info.get(i);
                             System.out.println(attr);
                         }
                     }
@@ -392,7 +394,7 @@ public class TestH4File
             } //while (nodes.hasMoreElements())
         } //if (root != null)
 
-	try {
+    try {
         h4file.close();
         } catch (Exception ex)
         {

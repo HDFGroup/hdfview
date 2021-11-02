@@ -27,13 +27,14 @@ import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
 
-import hdf.object.Attribute;
 import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+
+import hdf.object.h4.H4Attribute;
 
 /**
  * This class provides file level APIs. File access APIs include retrieving the
@@ -1447,7 +1448,7 @@ public class H4File extends FileFormat {
                             catch (Exception ex) {
                                 log.debug("getFileAnnotation(): failed to create datatype for attribute: ", ex);
                             }
-                            AttributeDataset newAttr = new Attribute(getRootObject(), annName + " #" + i, attrType, attrDims);
+                            H4Attribute newAttr = new H4Attribute(getRootObject(), annName + " #" + i, attrType, attrDims);
                             attrList.add(newAttr);
                             newAttr.setData(str);
                         }
@@ -1558,7 +1559,7 @@ public class H4File extends FileFormat {
                     log.debug("getGRglobalAttribute(): failed to create datatype for attribute: ", ex);
                 }
 
-                AttributeDataset attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
+                H4Attribute attr = new H4Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
             } // (int i=0; i<numberOfAttributes; i++)
         } // (b && numberOfAttributes>0)
@@ -1648,7 +1649,7 @@ public class H4File extends FileFormat {
                     log.debug("getSDSglobalAttribute(): failed to create datatype for attribute: ", ex);
                 }
 
-                AttributeDataset attr = new Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
+                H4Attribute attr = new H4Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
             } // (int i=0; i<numberOfAttributes; i++)
         } // (b && numberOfAttributes>0)

@@ -20,13 +20,15 @@ import java.util.Vector;
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
-import hdf.object.Attribute;
+
 import hdf.object.AttributeDataset;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
+
+import hdf.object.h4.H4Attribute;
 
 /**
  * H4Vdata describes a multi-dimension array of HDF4 vdata, inheriting CompoundDS.
@@ -96,7 +98,7 @@ public class H4Vdata extends CompoundDS
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of AttributeDataset.
+     * instance of H4Attribute.
      */
     @SuppressWarnings("rawtypes")
     private List                                attributeList;
@@ -469,7 +471,7 @@ public class H4Vdata extends CompoundDS
                     }
 
                     long[] attrDims = {attrInfo[1]};
-                    AttributeDataset attr = new Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    H4Attribute attr = new H4Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     if (j>=0)
                         attr.setProperty("field", memberNames[j]);
                     attributeList.add(attr);
@@ -522,7 +524,7 @@ public class H4Vdata extends CompoundDS
     {
         // only attribute metadata is supported.
         if (!(info instanceof AttributeDataset)) {
-            log.debug("writeMetadata(): Object not an Attribute");
+            log.debug("writeMetadata(): Object not an H4Attribute");
             return;
         }
 
