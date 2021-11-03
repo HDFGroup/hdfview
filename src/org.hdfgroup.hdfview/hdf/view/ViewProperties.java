@@ -91,9 +91,7 @@ public class ViewProperties extends PreferenceStore {
 
     /** Default TableView class names */
     public static final String DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultScalarDSTableView";
-    public static final String DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.TableView.DefaultScalarAttributeTableView";
     public static final String DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultCompoundDSTableView";
-    public static final String DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME = "hdf.view.TableView.DefaultCompoundAttributeTableView";
 
     /** Default MetaDataView class names */
     public static final String DEFAULT_GROUP_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultGroupMetaDataView";
