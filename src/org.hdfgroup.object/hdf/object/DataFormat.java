@@ -26,9 +26,9 @@ package hdf.object;
  * @author Jordan T. Henderson
  */
 public interface DataFormat {
-    public abstract boolean isInited();
+    public boolean isInited();
 
-    public abstract void init();
+    public void init();
 
     /**
      * Retrieves the object's data from the file.
@@ -38,7 +38,7 @@ public interface DataFormat {
      * @throws Exception
      *             if the data can not be retrieved
      */
-    public abstract Object getData() throws Exception, OutOfMemoryError;
+    public Object getData() throws Exception, OutOfMemoryError;
 
     /**
      *
@@ -46,7 +46,7 @@ public interface DataFormat {
      * @param data
      *            the data to write.
      */
-    public abstract void setData(Object data);
+    public void setData(Object data);
 
     /**
      * Clears the current data buffer in memory and forces the next read() to load
@@ -60,7 +60,7 @@ public interface DataFormat {
      * @see #getData()
      * @see #read()
      */
-    public abstract void clearData();
+    public void clearData();
 
     /**
      * Reads the data from file.
@@ -81,7 +81,7 @@ public interface DataFormat {
      * @throws OutOfMemoryError
      *             if memory is exhausted
      */
-    public abstract Object read() throws Exception, OutOfMemoryError;
+    public Object read() throws Exception, OutOfMemoryError;
 
     /**
      * Writes a memory buffer to the object in the file.
@@ -92,7 +92,7 @@ public interface DataFormat {
      * @throws Exception
      *             if data can not be written
      */
-    public abstract void write(Object buf) throws Exception;
+    public void write(Object buf) throws Exception;
 
     /**
      * Writes the current memory buffer to the object in the file.
@@ -100,7 +100,7 @@ public interface DataFormat {
      * @throws Exception
      *             if data can not be written
      */
-    public abstract void write() throws Exception;
+    public void write() throws Exception;
 
     /**
      * Converts the data values of this data object to appropriate Java integers if
@@ -129,14 +129,14 @@ public interface DataFormat {
      *
      * @return the fill values for the data object.
      */
-    public abstract Object getFillValue();
+    public Object getFillValue();
 
     /**
      * Returns the datatype of the data object.
      *
      * @return the datatype of the data object.
      */
-    public abstract Datatype getDatatype();
+    public Datatype getDatatype();
 
     /**
      * Returns the space type for the data object. It returns a
@@ -145,7 +145,7 @@ public interface DataFormat {
      *
      * @return the space type for the data object.
      */
-    public abstract int getSpaceType();
+    public int getSpaceType();
 
     /**
      * Returns the rank (number of dimensions) of the data object. It returns a
@@ -154,7 +154,7 @@ public interface DataFormat {
      *
      * @return the number of dimensions of the data object.
      */
-    public abstract int getRank();
+    public int getRank();
 
     /**
      * Returns the array that contains the dimension sizes of the data value of
@@ -163,7 +163,7 @@ public interface DataFormat {
      *
      * @return the dimension sizes of the data object.
      */
-    public abstract long[] getDims();
+    public long[] getDims();
 
 
     /****************************************************************
@@ -199,7 +199,7 @@ public interface DataFormat {
      *
      * @return the dimension sizes of the selected subset.
      */
-    public abstract long[] getSelectedDims();
+    public long[] getSelectedDims();
 
     /**
      * Returns the starting position of a selected subset.
@@ -227,7 +227,7 @@ public interface DataFormat {
      *
      * @return the starting position of a selected subset.
      */
-    public abstract long[] getStartDims();
+    public long[] getStartDims();
 
     /**
      * Returns the selectedStride of the selected dataset.
@@ -256,7 +256,7 @@ public interface DataFormat {
      *
      * @return the selectedStride of the selected dataset.
      */
-    public abstract long[] getStride();
+    public long[] getStride();
 
     /**
      * Returns the indices of display order.
@@ -363,7 +363,7 @@ public interface DataFormat {
      *
      * @return the string representation of compression information.
      */
-    public abstract String getCompression();
+    public String getCompression();
 
     /**
      * Get runtime Class of the original data buffer if converted.
@@ -371,5 +371,5 @@ public interface DataFormat {
      * @return the Class of the original data buffer
      */
     @SuppressWarnings("rawtypes")
-    public abstract Class getOriginalClass();
+    public Class getOriginalClass();
 }
