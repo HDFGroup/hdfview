@@ -71,12 +71,6 @@ public class DefaultTableViewFactory extends TableViewFactory {
                 dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
             else if (dataObject instanceof CompoundDS)
                 dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
-            else if (dataObject instanceof AttributeDataset) {
-                if (((AttributeDataset) dataObject).getDatatype().isCompound())
-                    dataViewName = ViewProperties.DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME;
-                else
-                    dataViewName = ViewProperties.DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME;
-            }
             else
                 dataViewName = null;
         }
