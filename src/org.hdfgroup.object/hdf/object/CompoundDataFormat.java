@@ -32,7 +32,7 @@ public interface CompoundDataFormat extends DataFormat {
      *
      * @return the number of members of the compound data object.
      */
-    public int getMemberCount();
+    int getMemberCount();
 
     /**
      * Returns the number of selected members of the compound data object.
@@ -45,7 +45,7 @@ public interface CompoundDataFormat extends DataFormat {
      *
      * @return the number of selected members.
      */
-    public int getSelectedMemberCount();
+    int getSelectedMemberCount();
 
     /**
      * Returns the names of the members of the compound data object. The names of
@@ -56,14 +56,14 @@ public interface CompoundDataFormat extends DataFormat {
      *
      * @return the names of compound members.
      */
-    public String[] getMemberNames();
+    String[] getMemberNames();
 
     /**
      * Returns an array of the names of the selected compound members.
      *
      * @return an array of the names of the selected compound members.
      */
-    public String[] getSelectedMemberNames();
+    String[] getSelectedMemberNames();
 
     /**
      * Checks if a member of the compound data object is selected for read/write.
@@ -73,7 +73,7 @@ public interface CompoundDataFormat extends DataFormat {
      *
      * @return true if the i-th memeber is selected; otherwise returns false.
      */
-    public boolean isMemberSelected(int idx);
+    boolean isMemberSelected(int idx);
 
     /**
      * Selects the i-th member for read/write.
@@ -81,7 +81,7 @@ public interface CompoundDataFormat extends DataFormat {
      * @param idx
      *            the index of compound member.
      */
-    public void selectMember(int idx);
+    void selectMember(int idx);
 
     /**
      * Selects/deselects all members.
@@ -91,7 +91,7 @@ public interface CompoundDataFormat extends DataFormat {
      *            members are selected for read/write. If false, no member is
      *            selected for read/write.
      */
-    public void setAllMemberSelection(boolean selectAll);
+    void setAllMemberSelection(boolean selectAll);
 
     /**
      * Returns array containing the total number of elements of the members of the
@@ -114,7 +114,7 @@ public interface CompoundDataFormat extends DataFormat {
      * @return the array containing the total number of elements of the members of
      *         the compound data object.
      */
-    public int[] getMemberOrders();
+    int[] getMemberOrders();
 
     /**
      * Returns array containing the total number of elements of the selected members
@@ -136,7 +136,7 @@ public interface CompoundDataFormat extends DataFormat {
      * @return array containing the total number of elements of the selected members
      *         of the compound data object.
      */
-    public int[] getSelectedMemberOrders();
+    int[] getSelectedMemberOrders();
 
     /**
      * Returns the dimension sizes of the i-th member.
@@ -160,7 +160,7 @@ public interface CompoundDataFormat extends DataFormat {
      * @return the dimension sizes of the i-th member, null if the compound member
      *         is not an array.
      */
-    public int[] getMemberDims(int i);
+    int[] getMemberDims(int i);
 
     /**
      * Returns an array of datatype objects of the compound members.
@@ -172,13 +172,13 @@ public interface CompoundDataFormat extends DataFormat {
      *
      * @return the array of datatype objects of the compound members.
      */
-    public Datatype[] getMemberTypes();
+    Datatype[] getMemberTypes();
 
     /**
      * Returns an array of datatype objects of the selected compound members.
      *
      * @return an array of datatype objects of the selected compound members.
      */
-    public Datatype[] getSelectedMemberTypes();
+    Datatype[] getSelectedMemberTypes();
 
 }

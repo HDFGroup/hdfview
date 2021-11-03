@@ -26,9 +26,9 @@ package hdf.object;
  * @author Jordan T. Henderson
  */
 public interface DataFormat {
-    public boolean isInited();
+    boolean isInited();
 
-    public void init();
+    void init();
 
     /**
      * Retrieves the object's data from the file.
@@ -38,7 +38,7 @@ public interface DataFormat {
      * @throws Exception
      *             if the data can not be retrieved
      */
-    public Object getData() throws Exception, OutOfMemoryError;
+    Object getData() throws Exception, OutOfMemoryError;
 
     /**
      *
@@ -46,7 +46,7 @@ public interface DataFormat {
      * @param data
      *            the data to write.
      */
-    public void setData(Object data);
+    void setData(Object data);
 
     /**
      * Clears the current data buffer in memory and forces the next read() to load
@@ -60,7 +60,7 @@ public interface DataFormat {
      * @see #getData()
      * @see #read()
      */
-    public void clearData();
+    void clearData();
 
     /**
      * Reads the data from file.
@@ -81,7 +81,7 @@ public interface DataFormat {
      * @throws OutOfMemoryError
      *             if memory is exhausted
      */
-    public Object read() throws Exception, OutOfMemoryError;
+    Object read() throws Exception, OutOfMemoryError;
 
     /**
      * Writes a memory buffer to the object in the file.
@@ -92,7 +92,7 @@ public interface DataFormat {
      * @throws Exception
      *             if data can not be written
      */
-    public void write(Object buf) throws Exception;
+    void write(Object buf) throws Exception;
 
     /**
      * Writes the current memory buffer to the object in the file.
@@ -100,7 +100,7 @@ public interface DataFormat {
      * @throws Exception
      *             if data can not be written
      */
-    public void write() throws Exception;
+    void write() throws Exception;
 
     /**
      * Converts the data values of this data object to appropriate Java integers if
@@ -111,7 +111,7 @@ public interface DataFormat {
      *
      * @return the converted data buffer.
      */
-    public Object convertFromUnsignedC();
+    Object convertFromUnsignedC();
 
     /**
      * Converts Java integer data values of this data object back to unsigned C-type
@@ -122,21 +122,21 @@ public interface DataFormat {
      *
      * @return the converted data buffer.
      */
-    public Object convertToUnsignedC();
+    Object convertToUnsignedC();
 
     /**
      * Returns the fill values for the data object.
      *
      * @return the fill values for the data object.
      */
-    public Object getFillValue();
+    Object getFillValue();
 
     /**
      * Returns the datatype of the data object.
      *
      * @return the datatype of the data object.
      */
-    public Datatype getDatatype();
+    Datatype getDatatype();
 
     /**
      * Returns the space type for the data object. It returns a
@@ -145,7 +145,7 @@ public interface DataFormat {
      *
      * @return the space type for the data object.
      */
-    public int getSpaceType();
+    int getSpaceType();
 
     /**
      * Returns the rank (number of dimensions) of the data object. It returns a
@@ -154,7 +154,7 @@ public interface DataFormat {
      *
      * @return the number of dimensions of the data object.
      */
-    public int getRank();
+    int getRank();
 
     /**
      * Returns the array that contains the dimension sizes of the data value of
@@ -163,7 +163,7 @@ public interface DataFormat {
      *
      * @return the dimension sizes of the data object.
      */
-    public long[] getDims();
+    long[] getDims();
 
 
     /****************************************************************
@@ -199,7 +199,7 @@ public interface DataFormat {
      *
      * @return the dimension sizes of the selected subset.
      */
-    public long[] getSelectedDims();
+    long[] getSelectedDims();
 
     /**
      * Returns the starting position of a selected subset.
@@ -227,7 +227,7 @@ public interface DataFormat {
      *
      * @return the starting position of a selected subset.
      */
-    public long[] getStartDims();
+    long[] getStartDims();
 
     /**
      * Returns the selectedStride of the selected dataset.
@@ -256,7 +256,7 @@ public interface DataFormat {
      *
      * @return the selectedStride of the selected dataset.
      */
-    public long[] getStride();
+    long[] getStride();
 
     /**
      * Returns the indices of display order.
@@ -286,7 +286,7 @@ public interface DataFormat {
      *
      * @return the array of the indices of display order.
      */
-    public int[] getSelectedIndex();
+    int[] getSelectedIndex();
 
     /**************************************************************************
      * * The following two definitions are used primarily for GUI applications. * *
@@ -322,7 +322,7 @@ public interface DataFormat {
      *
      * @return the size of dimension of the vertical axis.
      */
-    public long getHeight();
+    long getHeight();
 
     /**
      * Returns the dimension size of the horizontal axis.
@@ -354,7 +354,7 @@ public interface DataFormat {
      *
      * @return the size of dimension of the horizontal axis.
      */
-    public long getWidth();
+    long getWidth();
 
     /**
      * Returns the string representation of compression information.
@@ -363,7 +363,7 @@ public interface DataFormat {
      *
      * @return the string representation of compression information.
      */
-    public String getCompression();
+    String getCompression();
 
     /**
      * Get runtime Class of the original data buffer if converted.
@@ -371,5 +371,5 @@ public interface DataFormat {
      * @return the Class of the original data buffer
      */
     @SuppressWarnings("rawtypes")
-    public Class getOriginalClass();
+    Class getOriginalClass();
 }
