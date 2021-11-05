@@ -15,6 +15,8 @@
 package hdf.object.h5;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,14 +31,16 @@ import hdf.hdf5lib.exceptions.HDF5DataFiltersException;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5O_info_t;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 import hdf.object.Utils;
+
 import hdf.object.h5.H5MetaDataContainer;
 
 /**
@@ -83,45 +87,17 @@ import hdf.object.h5.H5MetaDataContainer;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H5CompoundDS extends CompoundDS {
+public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
     private static final long serialVersionUID = -5968625125574032736L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundDS.class);
 
     /**
-     * The metadata object for this data object. Members of the metadata are instances of AttributeDataset.
+     * The metadata object for this data object. Members of the metadata are instances of Attribute.
      */
     private H5MetaDataContainer objMetadata;
 
     private H5O_info_t objInfo;
-
-    /**
-     * A list of names of all fields including nested fields.
-     * <p>
-     * The nested names are separated by CompoundDS.SEPARATOR. For example, if compound dataset "A" has
-     * the following nested structure,
-     *
-     * <pre>
-     * A --&gt; m01
-     * A --&gt; m02
-     * A --&gt; nest1 --&gt; m11
-     * A --&gt; nest1 --&gt; m12
-     * A --&gt; nest1 --&gt; nest2 --&gt; m21
-     * A --&gt; nest1 --&gt; nest2 --&gt; m22
-     * i.e.
-     * A = { m01, m02, nest1{m11, m12, nest2{ m21, m22}}}
-     * </pre>
-     *
-     * The flatNameList of compound dataset "A" will be {m01, m02, nest1[m11, nest1[m12,
-     * nest1[nest2[m21, nest1[nest2[m22}
-     *
-     */
-    private List<String> flatNameList;
-
-    /**
-     * A list of datatypes of all fields including nested fields.
-     */
-    private List<Datatype> flatTypeList;
 
     /** flag to indicate if the dataset is an external dataset */
     private boolean isExternal = false;
@@ -129,14 +105,6 @@ public class H5CompoundDS extends CompoundDS {
     /** flag to indicate if the dataset is a virtual dataset */
     private boolean isVirtual = false;
     private List<String> virtualNameList;
-
-    /*
-     * Enum to indicate the type of I/O to perform inside of the common I/O
-     * function.
-     */
-    protected static enum IO_TYPE {
-        READ, WRITE
-    };
 
     /**
      * Constructs an instance of a HDF5 compound dataset with given file, dataset name and path.
@@ -544,11 +512,6 @@ public class H5CompoundDS extends CompoundDS {
         return datatype;
     }
 
-    @Override
-    public Object getFillValue() {
-        return null;
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -734,7 +697,7 @@ public class H5CompoundDS extends CompoundDS {
             init();
 
         try {
-            readData = compoundDatasetCommonIO(IO_TYPE.READ, null);
+            readData = compoundDatasetCommonIO(H5File.IO_TYPE.READ, null);
         }
         catch (Exception ex) {
             log.debug("read(): failed to read compound dataset: ", ex);
@@ -765,7 +728,7 @@ public class H5CompoundDS extends CompoundDS {
             init();
 
         try {
-            compoundDatasetCommonIO(IO_TYPE.WRITE, buf);
+            compoundDatasetCommonIO(H5File.IO_TYPE.WRITE, buf);
         }
         catch (Exception ex) {
             log.debug("write(Object): failed to write compound dataset: ", ex);
@@ -773,7 +736,22 @@ public class H5CompoundDS extends CompoundDS {
         }
     }
 
-    private Object compoundDatasetCommonIO(IO_TYPE ioType, Object writeBuf) throws Exception {
+    /*
+     * Routine to convert datatypes that are read in as byte arrays to
+     * regular types.
+     */
+    protected Object convertByteMember(final Datatype dtype, byte[] byteData) {
+        Object theObj = null;
+
+        if (dtype.isFloat() && dtype.getDatatypeSize() == 16)
+            theObj = ((H5Datatype)dtype).byteToBigDecimal(byteData, 0);
+        else
+            theObj = super.convertByteMember(dtype, byteData);
+
+        return theObj;
+    }
+
+    private Object compoundDatasetCommonIO(H5File.IO_TYPE ioType, Object writeBuf) throws Exception {
         H5Datatype dsDatatype = (H5Datatype) getDatatype();
         Object theData = null;
 
@@ -785,7 +763,7 @@ public class H5CompoundDS extends CompoundDS {
         /*
          * I/O type-specific pre-initialization.
          */
-        if (ioType == IO_TYPE.WRITE) {
+        if (ioType == H5File.IO_TYPE.WRITE) {
             if ((writeBuf == null) || !(writeBuf instanceof List)) {
                 log.debug("compoundDatasetCommonIO(): writeBuf is null or invalid");
                 throw new Exception("write buffer is null or invalid");
@@ -857,7 +835,7 @@ public class H5CompoundDS extends CompoundDS {
      * running counter so that we can index properly into the flattened name list
      * generated from H5Datatype.extractCompoundInfo() at dataset init time.
      */
-    private Object compoundTypeIO(IO_TYPE ioType, long did, long[] spaceIDs, int nSelPoints, final H5Datatype cmpdType,
+    private Object compoundTypeIO(H5File.IO_TYPE ioType, long did, long[] spaceIDs, int nSelPoints, final H5Datatype cmpdType,
             Object writeBuf, int[] globalMemberIndex) {
         Object theData = null;
 
@@ -869,7 +847,6 @@ public class H5CompoundDS extends CompoundDS {
             for (int i = 0; i < arrayDims.length; i++) {
                 arrSize *= arrayDims[i];
             }
-
             theData = compoundTypeIO(ioType, did, spaceIDs, arrSize, (H5Datatype) cmpdType.getDatatypeBase(), writeBuf, globalMemberIndex);
         }
         else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
@@ -899,10 +876,10 @@ public class H5CompoundDS extends CompoundDS {
             List<Object> memberDataList = null;
             List<Datatype> typeList = cmpdType.getCompoundMemberTypes();
 
-            log.trace("compoundTypeIO(): {} {} members:", (ioType == IO_TYPE.READ) ? "read" : "write",
+            log.trace("compoundTypeIO(): {} {} members:", (ioType == H5File.IO_TYPE.READ) ? "read" : "write",
                     typeList.size());
 
-            if (ioType == IO_TYPE.READ) {
+            if (ioType == H5File.IO_TYPE.READ) {
                 memberDataList = (List<Object>) H5Datatype.allocateArray(cmpdType, nSelPoints);
             }
 
@@ -946,9 +923,10 @@ public class H5CompoundDS extends CompoundDS {
                         }
                     }
 
-                    log.trace("compoundTypeIO(): member[{}]({}) is type {}", i, memberName, memberType.getDescription());
+                    log.trace("compoundTypeIO(): member[{}]({}) is type {}", i, memberName,
+                            memberType.getDescription());
 
-                    if (ioType == IO_TYPE.READ) {
+                    if (ioType == H5File.IO_TYPE.READ) {
                         try {
                             if (memberType.isCompound())
                                 memberData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType, writeBuf, globalMemberIndex);
@@ -1238,151 +1216,6 @@ public class H5CompoundDS extends CompoundDS {
         }
     }
 
-    /*
-     * Private routine to convert datatypes that are read in as byte arrays to
-     * regular types.
-     */
-    private Object convertByteMember(final H5Datatype dtype, byte[] byteData) {
-        Object theObj = null;
-
-        if (dtype.getDatatypeSize() == 1) {
-            /*
-             * Normal byte[] type, such as an integer datatype of size 1.
-             */
-            theObj = byteData;
-        }
-        else if (dtype.isString() && !dtype.isVarStr() && convertByteToString) {
-            log.trace("convertByteMember(): converting byte array to string array");
-
-            theObj = byteToString(byteData, (int) dtype.getDatatypeSize());
-        }
-        else if (dtype.isInteger()) {
-            log.trace("convertByteMember(): converting byte array to integer array");
-
-            theObj = HDFNativeData.byteToInt(byteData);
-        }
-        else if (dtype.isFloat()) {
-            log.trace("convertByteMember(): converting byte array to float array");
-
-            if (dtype.getDatatypeSize() == 16)
-                theObj = dtype.byteToBigDecimal(byteData, 0);
-            else
-                theObj = HDFNativeData.byteToFloat(byteData);
-        }
-        else if (dtype.isRef()) {
-            log.trace("convertByteMember(): reference type - converting byte array to long array");
-
-            theObj = HDFNativeData.byteToLong(byteData);
-        }
-        else if (dtype.isArray()) {
-            H5Datatype baseType = (H5Datatype) dtype.getDatatypeBase();
-
-            /*
-             * Retrieve the real base datatype in the case of ARRAY of ARRAY datatypes.
-             */
-            while (baseType.isArray()) baseType = (H5Datatype) baseType.getDatatypeBase();
-
-            /*
-             * Optimize for the common cases of Arrays.
-             */
-            switch (baseType.getDatatypeClass()) {
-                case Datatype.CLASS_INTEGER:
-                case Datatype.CLASS_FLOAT:
-                case Datatype.CLASS_CHAR:
-                case Datatype.CLASS_STRING:
-                case Datatype.CLASS_BITFIELD:
-                case Datatype.CLASS_OPAQUE:
-                case Datatype.CLASS_COMPOUND:
-                case Datatype.CLASS_REFERENCE:
-                case Datatype.CLASS_ENUM:
-                case Datatype.CLASS_VLEN:
-                case Datatype.CLASS_TIME:
-                    theObj = convertByteMember(baseType, byteData);
-                    break;
-
-                case Datatype.CLASS_ARRAY:
-                {
-                    H5Datatype arrayType = (H5Datatype) dtype.getDatatypeBase();
-
-                    long[] arrayDims = dtype.getArrayDims();
-                    int arrSize = 1;
-                    for (int i = 0; i < arrayDims.length; i++) {
-                        arrSize *= arrayDims[i];
-                    }
-
-                    theObj = new Object[arrSize];
-
-                    for (int i = 0; i < arrSize; i++) {
-                        byte[] indexedBytes = Arrays.copyOfRange(byteData, (int) (i * arrayType.getDatatypeSize()),
-                                (int) ((i + 1) * arrayType.getDatatypeSize()));
-                        ((Object[]) theObj)[i] = convertByteMember(arrayType, indexedBytes);
-                    }
-
-                    break;
-                }
-
-                case Datatype.CLASS_NO_CLASS:
-                default:
-                    log.debug("convertByteMember(): invalid datatype class");
-                    theObj = new String("*ERROR*");
-            }
-        }
-        else if (dtype.isCompound()) {
-            /*
-             * TODO: still valid after reading change?
-             */
-            theObj = convertCompoundByteMembers(dtype, byteData);
-        }
-        else {
-            theObj = byteData;
-        }
-
-        return theObj;
-    }
-
-    /**
-     * Given an array of bytes representing a compound Datatype, converts each of
-     * its members into Objects and returns the results.
-     *
-     * @param dtype
-     *            The compound datatype to convert
-     * @param data
-     *            The byte array representing the data of the compound Datatype
-     * @return The converted types of the bytes
-     */
-    private Object convertCompoundByteMembers(final H5Datatype dtype, byte[] data) {
-        List<Object> theData = null;
-
-        List<Datatype> allSelectedTypes = Arrays.asList(this.getSelectedMemberTypes());
-        List<Datatype> localTypes = new ArrayList<>(dtype.getCompoundMemberTypes());
-        Iterator<Datatype> localIt = localTypes.iterator();
-        while (localIt.hasNext()) {
-            Datatype curType = localIt.next();
-
-            if (curType.isCompound())
-                continue;
-
-            if (!allSelectedTypes.contains(curType))
-                localIt.remove();
-        }
-
-        theData = new ArrayList<>(localTypes.size());
-        for (int i = 0, index = 0; i < localTypes.size(); i++) {
-            Datatype curType = localTypes.get(i);
-
-            if (curType.isCompound())
-                theData.add(convertCompoundByteMembers((H5Datatype) curType,
-                        Arrays.copyOfRange(data, index, index + (int) curType.getDatatypeSize())));
-            else
-                theData.add(convertByteMember((H5Datatype) curType,
-                        Arrays.copyOfRange(data, index, index + (int) curType.getDatatypeSize())));
-
-            index += curType.getDatatypeSize();
-        }
-
-        return theData;
-    }
-
     @Override
     public Object convertFromUnsignedC() {
         throw new UnsupportedOperationException("H5CompoundDS:convertFromUnsignedC Unsupported operation.");
@@ -1399,7 +1232,7 @@ public class H5CompoundDS extends CompoundDS {
      * @see hdf.object.MetaDataContainer#getMetadata()
      */
     @Override
-    public List<AttributeDataset> getMetadata() throws HDF5Exception {
+    public List<Attribute> getMetadata() throws HDF5Exception {
         return this.getMetadata(fileFormat.getIndexType(null), fileFormat.getIndexOrder(null));
     }
 
@@ -1408,7 +1241,7 @@ public class H5CompoundDS extends CompoundDS {
      *
      * @see hdf.object.MetaDataContainer#getMetadata(int...)
      */
-    public List<AttributeDataset> getMetadata(int... attrPropList) throws HDF5Exception {
+    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
         if (!isInited()) {
             init();
         }
@@ -1676,7 +1509,7 @@ public class H5CompoundDS extends CompoundDS {
             }
         }
 
-        List<AttributeDataset> attrlist = null;
+        List<Attribute> attrlist = null;
         try {
             attrlist = objMetadata.getMetadata(attrPropList);
         }
@@ -1697,7 +1530,7 @@ public class H5CompoundDS extends CompoundDS {
             objMetadata.writeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("writeMetadata(): Object not an AttributeDataset");
+            log.debug("writeMetadata(): Object not an Attribute");
             return;
         }
     }
@@ -1713,16 +1546,16 @@ public class H5CompoundDS extends CompoundDS {
             objMetadata.removeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("removeMetadata(): Object not an AttributeDataset");
+            log.debug("removeMetadata(): Object not an Attribute");
             return;
         }
 
-        AttributeDataset attr = (AttributeDataset) info;
-        log.trace("removeMetadata(): {}", attr.getName());
+        Attribute attr = (Attribute) info;
+        log.trace("removeMetadata(): {}", attr.getAttributeName());
         long did = open();
         if (did >= 0) {
             try {
-                H5.H5Adelete(did, attr.getName());
+                H5.H5Adelete(did, attr.getAttributeName());
             }
             finally {
                 close(did);
@@ -1741,7 +1574,7 @@ public class H5CompoundDS extends CompoundDS {
             objMetadata.updateMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("updateMetadata(): Object not an AttributeDataset");
+            log.debug("updateMetadata(): Object not an Attribute");
             return;
         }
     }
@@ -2191,5 +2024,4 @@ public class H5CompoundDS extends CompoundDS {
         else
             return -1;
     }
-
 }

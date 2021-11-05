@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
@@ -309,19 +309,19 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
         }
         log.trace("Create: lsize={}", lsize);
 
-        AttributeDataset attr = null;
+        Attribute attr = null;
         try {
             H5Datatype datatype = (H5Datatype)createNewDatatype(null);
 
             if (datatype.isCompound())
-                attr = new H5CompoundAttr(parentObj, attrName, datatype, dims);
+                attr = (Attribute)new H5CompoundAttr(parentObj, attrName, datatype, dims);
             else
-                attr = new H5ScalarAttr(parentObj, attrName, datatype, dims);
+                attr = (Attribute)new H5ScalarAttr(parentObj, attrName, datatype, dims);
             Object value = H5Datatype.allocateArray(datatype, (int) lsize);
-            attr.setData(value);
+            attr.setAttributeData(value);
 
             log.trace("writeMetadata() via write()");
-            attr.write();
+            attr.writeAttribute();
         }
         catch (Exception ex) {
             Tools.showError(shell, "Create", ex.getMessage());
@@ -329,7 +329,7 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
             return false;
         }
 
-        newObject = attr;
+        newObject = (HObject)attr;
 
         return true;
     }
@@ -470,7 +470,7 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
     }
 
     /** @return the new attribute created. */
-    public AttributeDataset getAttribute() {
-        return (AttributeDataset)newObject;
+    public Attribute getAttribute() {
+        return (Attribute)newObject;
     }
 }

@@ -3,14 +3,16 @@ package object;
 import java.util.Vector;
 
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
+
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarAttr;
+import hdf.object.h5.H5ScalarDS;
 
 /**
  * Creates an HDF5 file for unit tests.
@@ -193,12 +195,12 @@ public class H5TestFile {
         final Dataset pal = file.createScalarDS(NAME_DATASET_IMAGE_PALETTE, null, typeByte, new long[] { 256, 3 },
                 null, null, -1, DATA_PALETTE);
         long[] oid = pal.getOID();
-        final Vector attrs = (Vector) dsets[7].getMetadata();
+        final Vector attrs = (Vector) ((H5ScalarDS)dsets[7]).getMetadata();
         final int n = attrs.size();
         for (int i = 0; i < n; i++) {
             final H5ScalarAttr attr = (H5ScalarAttr) attrs.get(i);
-            if ("PALETTE".equals(attr.getName())) {
-                attr.write(oid);
+            if ("PALETTE".equals(attr.getAttributeName())) {
+                attr.writeAttribute(oid);
             }
         }
 

@@ -25,6 +25,8 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.object.MetaDataContainer;
+
 import hdf.object.fits.FitsAttribute;
 
 import nom.tam.fits.BasicHDU;
@@ -43,7 +45,7 @@ import nom.tam.fits.HeaderCard;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class FitsDataset extends ScalarDS
+public class FitsDataset extends ScalarDS implements MetaDataContainer
 {
     private static final long serialVersionUID = 3944770379558335171L;
 
@@ -51,7 +53,7 @@ public class FitsDataset extends ScalarDS
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of AttributeDataset.
+     * instance of Attribute.
      */
     private List attributeList;
 
@@ -73,15 +75,14 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see hdf.object.DataFormat#hasAttribute()
-     */
-    @Override
-    public boolean hasAttribute () { return false; }
-
-    /*
-     * (non-Javadoc)
      * @see hdf.object.Dataset#copy(hdf.object.Group, java.lang.String, long[], java.lang.Object)
      */
+    @Override
+    public boolean hasAttribute() {
+        return false;
+    }
+
+    // Implementing Dataset
     @Override
     public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
             throws Exception {
@@ -144,7 +145,6 @@ public class FitsDataset extends ScalarDS
      * @see hdf.object.DataFormat#getMetadata()
      */
     @SuppressWarnings("rawtypes")
-    @Override
     public List getMetadata() throws Exception {
         if (attributeList != null) {
             return attributeList;
@@ -178,7 +178,7 @@ public class FitsDataset extends ScalarDS
             if (tvalue != null) {
                 value += " / " + tvalue;
             }
-            attr.setData(value);
+            attr.setAttributeData(value);
             attributeList.add(attr);
         }
 
@@ -189,7 +189,6 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
-    @Override
     public void writeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("writeMetadata operation unsupported for FITS.");
@@ -199,7 +198,6 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
-    @Override
     public void removeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("removeMetadata operation unsupported for FITS.");
@@ -209,7 +207,6 @@ public class FitsDataset extends ScalarDS
      * (non-Javadoc)
      * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
-    @Override
     public void updateMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("updateMetadata operation unsupported for FITS.");
@@ -220,7 +217,9 @@ public class FitsDataset extends ScalarDS
      * @see hdf.object.HObject#open()
      */
     @Override
-    public long open() { return -1;}
+    public long open() {
+        return -1;
+    }
 
     /*
      * (non-Javadoc)
@@ -304,13 +303,14 @@ public class FitsDataset extends ScalarDS
         inited = true;
     }
 
+    /* Implement abstart ScalarDS */
+
     /*
      * (non-Javadoc)
      * @see hdf.object.ScalarDS#getPalette()
      */
     @Override
-    public byte[][] getPalette()
-    {
+    public byte[][] getPalette() {
         if (palette == null) {
             palette = readPalette(0);
         }
@@ -324,6 +324,15 @@ public class FitsDataset extends ScalarDS
      */
     @Override
     public byte[][] readPalette(int idx) {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.ScalarDS#getPaletteRefs()
+     */
+    @Override
+    public byte[] getPaletteRefs() {
         return null;
     }
 
@@ -355,15 +364,6 @@ public class FitsDataset extends ScalarDS
             Object data) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPaletteRefs()
-     */
-    @Override
-    public byte[] getPaletteRefs() {
-        return null;
     }
 
     /*

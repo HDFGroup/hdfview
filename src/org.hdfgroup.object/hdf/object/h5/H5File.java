@@ -30,7 +30,8 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
-import hdf.object.AttributeDataset;
+
+import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -38,7 +39,9 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
-import hdf.object.h5.H5AttributeDataset;
+import hdf.object.h5.H5Attribute;
+import hdf.object.h5.H5CompoundAttr;
+import hdf.object.h5.H5ScalarAttr;
 
 /**
  * H5File is an implementation of the FileFormat class for HDF5 files.
@@ -122,7 +125,7 @@ public class H5File extends FileFormat {
      * Enum to indicate the type of I/O to perform inside of the common I/O
      * function.
      */
-    protected static enum IO_TYPE {
+    public static enum IO_TYPE {
         READ, WRITE
     };
 
@@ -366,7 +369,7 @@ public class H5File extends FileFormat {
      *
      * @see #getAttribute(HObject,int,int)
      */
-    public static final List<AttributeDataset> getAttribute(HObject obj) throws HDF5Exception {
+    public static final List<Attribute> getAttribute(HObject obj) throws HDF5Exception {
         return H5File.getAttribute(obj, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC);
     }
 
@@ -407,9 +410,9 @@ public class H5File extends FileFormat {
      *             this exception.
      */
 
-    public static final List<AttributeDataset> getAttribute(HObject obj, int idx_type, int order) throws HDF5Exception {
+    public static final List<Attribute> getAttribute(HObject obj, int idx_type, int order) throws HDF5Exception {
         log.trace("getAttribute(): start: obj={} idx_type={} order={}", obj, idx_type, order);
-        List<AttributeDataset> attributeList = null;
+        List<Attribute> attributeList = null;
         long objID = -1;
         long aid = -1;
         long sid = -1;
@@ -491,12 +494,12 @@ public class H5File extends FileFormat {
                             attrType = null;
                         }
 
-                        H5AttributeDataset attr = null;
+                        Attribute attr = null;
                         if (attrType.isCompound())
-                            attr = new H5CompoundAttr(obj, nameA, attrType, dims);
+                            attr = (Attribute)new H5CompoundAttr(obj, nameA, attrType, dims);
                         else
-                            attr = new H5ScalarAttr(obj, nameA, attrType, dims);
-                       attributeList.add(attr);
+                            attr = (Attribute)new H5ScalarAttr(obj, nameA, attrType, dims);
+                        attributeList.add(attr);
 
                         // retrieve the attribute value
                         if (lsize <= 0) {
@@ -510,8 +513,8 @@ public class H5File extends FileFormat {
                         }
 
                         try {
-                            //attr.AttributeCommonIO(aid, H5AttributeDataset.IO_TYPE.READ, null);
-                            attr.getData();
+                            //attr.AttributeCommonIO(aid, H5File.IO_TYPE.READ, null);
+                            attr.getAttributeData();
                         }
                         catch (Exception ex) {
                             log.debug("getAttribute(): failed to read attribute: ", ex);
@@ -620,41 +623,41 @@ public class H5File extends FileFormat {
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-        AttributeDataset attr = new H5ScalarAttr(dataset, attrName, attrType, null);
-        attr.write(classValue);
+        Attribute attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+        attr.writeAttribute(classValue);
 
         attrName = "IMAGE_VERSION";
         String[] versionValue = { "1.2" };
         attrType = new H5Datatype(Datatype.CLASS_STRING, versionValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-        attr = new H5ScalarAttr(dataset, attrName, attrType, null);
-        attr.write(versionValue);
+        attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+        attr.writeAttribute(versionValue);
 
         long[] attrDims = { 2 };
         attrName = "IMAGE_MINMAXRANGE";
         byte[] attrValueInt = { 0, (byte) 255 };
         attrType = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-        attr = new H5ScalarAttr(dataset, attrName, attrType, attrDims);
-        attr.write(attrValueInt);
+        attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, attrDims);
+        attr.writeAttribute(attrValueInt);
 
         attrName = "IMAGE_SUBCLASS";
         String[] subclassValue = { subclass };
         attrType = new H5Datatype(Datatype.CLASS_STRING, subclassValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-        attr = new H5ScalarAttr(dataset, attrName, attrType, null);
-        attr.write(subclassValue);
+        attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+        attr.writeAttribute(subclassValue);
 
         if ((selectionFlag == ScalarDS.INTERLACE_PIXEL) || (selectionFlag == ScalarDS.INTERLACE_PLANE)) {
             attrName = "INTERLACE_MODE";
             String[] interlaceValue = { interlaceMode };
             attrType = new H5Datatype(Datatype.CLASS_STRING, interlaceValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-            attr = new H5ScalarAttr(dataset, attrName, attrType, null);
-            attr.write(interlaceValue);
+            attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+            attr.writeAttribute(interlaceValue);
         }
         else {
             attrName = "PALETTE";
             long[] palRef = { 0 }; // set ref to null
             attrType = new H5Datatype(Datatype.CLASS_REFERENCE, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-            attr = new H5ScalarAttr(dataset, attrName, attrType, null);
-            attr.write(palRef);
+            attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+            attr.writeAttribute(palRef);
         }
     }
 
@@ -1949,12 +1952,12 @@ public class H5File extends FileFormat {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.FileFormat#writeAttribute(hdf.object.HObject, hdf.object.AttributeDataset, boolean)
+     * @see hdf.object.FileFormat#writeAttribute(hdf.object.HObject, hdf.object.Attribute, boolean)
      */
     @Override
-    public void writeAttribute(HObject obj, AttributeDataset attr, boolean attrExisted) throws HDF5Exception {
+    public void writeAttribute(HObject obj, Attribute attr, boolean attrExisted) throws HDF5Exception {
         String obj_name = obj.getFullName();
-        String name = attr.getName();
+        String name = attr.getAttributeName();
         long tid = -1;
         long sid = -1;
         long aid = -1;
@@ -1966,13 +1969,13 @@ public class H5File extends FileFormat {
             return;
         }
 
-        if ((tid = attr.getDatatype().createNative()) >= 0) {
-            log.trace("writeAttribute(): tid {} from toNative :{}", tid, attr.getDatatype().getDescription());
+        if ((tid = attr.getAttributeDatatype().createNative()) >= 0) {
+            log.trace("writeAttribute(): tid {} from toNative :{}", tid, attr.getAttributeDatatype().getDescription());
             try {
-                if (attr.isScalar())
+                if (attr.isAttributeScalar())
                     sid = H5.H5Screate(HDF5Constants.H5S_SCALAR);
                 else
-                    sid = H5.H5Screate_simple(attr.getRank(), attr.getDims(), null);
+                    sid = H5.H5Screate_simple(attr.getAttributeRank(), attr.getAttributeDims(), null);
 
                 if (attrExisted) {
                     aid = H5.H5Aopen_by_name(objID, obj_name, name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
@@ -1985,7 +1988,7 @@ public class H5File extends FileFormat {
                 // update value of the attribute
                 Object attrValue;
                 try {
-                    attrValue = attr.getData();
+                    attrValue = attr.getAttributeData();
                 }
                 catch (Exception ex) {
                     attrValue = null;
@@ -1995,7 +1998,7 @@ public class H5File extends FileFormat {
                 log.trace("writeAttribute(): getValue");
                 if (attrValue != null) {
                     try {
-                        ((H5AttributeDataset)attr).AttributeCommonIO(aid, H5AttributeDataset.IO_TYPE.WRITE, attrValue);
+                        ((H5Attribute)attr).AttributeCommonIO(aid, H5File.IO_TYPE.WRITE, attrValue);
                     }
                     catch (Exception ex) {
                         log.debug("writeAttribute(): failed to write attribute: ", ex);

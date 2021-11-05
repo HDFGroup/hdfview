@@ -24,15 +24,16 @@ import hdf.hdflib.HDFDeflateCompInfo;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.object.MetaDataContainer;
 
-import hdf.object.h4.H4Attribute;
+import hdf.object.h4.H4ScalarAttribute;
 
 /**
  * H4GRImage describes an HDF4 general raster(GR) image and operations performed on
@@ -102,7 +103,7 @@ import hdf.object.h4.H4Attribute;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H4GRImage extends ScalarDS
+public class H4GRImage extends ScalarDS implements MetaDataContainer
 {
     private static final long serialVersionUID = 1029672744963360976L;
 
@@ -110,7 +111,7 @@ public class H4GRImage extends ScalarDS
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of H4Attribute.
+     * instance of H4ScalarAttribute.
      */
     @SuppressWarnings("rawtypes")
     private List                            attributeList;
@@ -303,13 +304,25 @@ public class H4GRImage extends ScalarDS
         return dataset;
     }
 
-    // ***** need to implement from ScalarDS *****
-    @Override
-    public byte[][] readPalette(int idx) { return null;}
+    /* Implement abstract ScalarDS */
 
-    // ***** need to implement from ScalarDS *****
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.ScalarDS#readPalette(int)
+     */
     @Override
-    public byte[] getPaletteRefs() { return null;}
+    public byte[][] readPalette(int idx) {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.ScalarDS#getPaletteRefs()
+     */
+    @Override
+    public byte[] getPaletteRefs() {
+        return null;
+    }
 
     // implementing ScalarDS
     @Override
@@ -523,7 +536,7 @@ public class H4GRImage extends ScalarDS
                 }
 
                 long[] attrDims = {attrInfo[1]};
-                H4Attribute attr = new H4Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                H4ScalarAttribute attr = new H4ScalarAttribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
                 Object buf = null;
@@ -549,7 +562,7 @@ public class H4GRImage extends ScalarDS
                         buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                     }
 
-                    attr.setData(buf);
+                    attr.setAttributeData(buf);
                 }
             } //  (int i=0; i<n; i++)
         }
@@ -569,13 +582,13 @@ public class H4GRImage extends ScalarDS
     public void writeMetadata(Object info) throws Exception
     {
         // only attribute metadata is supported.
-        if (!(info instanceof AttributeDataset)) {
-            log.debug("writeMetadata(): Object not an Attribute - exit");
+        if (!(info instanceof Attribute)) {
+            log.debug("writeMetadata(): Object not an H4ScalarAttribute - exit");
             return;
         }
 
         try {
-            getFileFormat().writeAttribute(this, (AttributeDataset)info, true);
+            getFileFormat().writeAttribute(this, (H4ScalarAttribute)info, true);
 
             if (attributeList == null) {
                 attributeList = new Vector();

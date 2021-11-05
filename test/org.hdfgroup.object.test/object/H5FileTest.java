@@ -26,7 +26,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5L_info_t;
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -1807,14 +1807,14 @@ public class H5FileTest {
             fail("new H5Datatype failed. " + ex);
         }
 
-        AttributeDataset attr1 = new H5ScalarAttr(g1, "intAttr", attrType1, new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
-        AttributeDataset attr2 = new H5ScalarAttr(g1, "strAttr", attrType2, new long[] { 1 }, new String[] { "String attribute." });
-        AttributeDataset attr3 = new H5ScalarAttr(g1, "floatAttr", attrType3, new long[] { 2 }, new float[] { 2, 4 });
+        Attribute attr1 = new H5ScalarAttr(g1, "intAttr", attrType1, new long[] { 10 }, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        Attribute attr2 = new H5ScalarAttr(g1, "strAttr", attrType2, new long[] { 1 }, new String[] { "String attribute." });
+        Attribute attr3 = new H5ScalarAttr(g1, "floatAttr", attrType3, new long[] { 2 }, new float[] { 2, 4 });
 
         try {
-            attr1.write();
-            attr2.write();
-            attr3.write();
+            attr1.writeAttribute();
+            attr2.writeAttribute();
+            attr3.writeAttribute();
         }
         catch (final Exception ex) {
             fail("g1.writeMetadata() failed. " + ex);
@@ -1831,7 +1831,7 @@ public class H5FileTest {
         try {
             attributeList = H5File.getAttribute(g1, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC);
             // Retrieve attributes in increasing creation order.
-            assertEquals(attr2.getName(), attributeList.get(1).toString());
+            assertEquals(attr2.getAttributeName(), attributeList.get(1).toString());
         }
         catch (final Exception ex) {
             fail("file.getAttribute() failed. " + ex);
@@ -1840,7 +1840,7 @@ public class H5FileTest {
         try {
             attributeList = H5File.getAttribute(g1);
             // Retrieve attributes in increasing alphabetical order.
-            assertEquals(attr2.getName(), attributeList.get(2).toString());
+            assertEquals(attr2.getAttributeName(), attributeList.get(2).toString());
         }
         catch (final Exception ex) {
             fail("file.getAttribute() failed. " + ex);
@@ -1916,10 +1916,10 @@ public class H5FileTest {
             fail("new H5Datatype failed. " + ex);
         }
 
-        AttributeDataset attr1 = new H5ScalarAttr(d1, "strAttr", attrType, new long[] { 1 }, new String[] { "String attribute." });
+        Attribute attr1 = new H5ScalarAttr(d1, "strAttr", attrType, new long[] { 1 }, new String[] { "String attribute." });
 
         try {
-            attr1.write();
+            attr1.writeAttribute();
         }
         catch (final Exception ex) {
             fail("d1.writeMetadata() failed. " + ex);
@@ -2006,24 +2006,24 @@ public class H5FileTest {
             fail("new H5Datatype failed. " + ex);
         }
 
-        AttributeDataset attr1 = new H5ScalarAttr(g1, "strAttr", attrType, new long[] { 1 }, new String[] { "String attribute." });
+        Attribute attr1 = new H5ScalarAttr(g1, "strAttr", attrType, new long[] { 1 }, new String[] { "String attribute." });
 
         try {
-            attr1.write();
+            attr1.writeAttribute();
         }
         catch (final Exception ex) {
             fail("g1.writeMetadata() failed. " + ex);
         }
         try {
             attr1.setParentObject(t1);
-            attr1.write();
+            attr1.writeAttribute();
         }
         catch (final Exception ex) {
             fail("d1.writeMetadata() failed. " + ex);
         }
         try {
             attr1.setParentObject(d1);
-            attr1.write();
+            attr1.writeAttribute();
         }
         catch (final Exception ex) {
             fail("d1.writeMetadata() failed. " + ex);
@@ -2031,8 +2031,8 @@ public class H5FileTest {
 
         try {
             file.renameAttribute(g1, "strAttr", "GroupAttribute");
-            file.renameAttribute(t1, attr1.getName(), "DatatypeAttribute");
-            file.renameAttribute(d1, attr1.getName(), "DatasetAttribute");
+            file.renameAttribute(t1, attr1.getAttributeName(), "DatatypeAttribute");
+            file.renameAttribute(d1, attr1.getAttributeName(), "DatasetAttribute");
         }
         catch (final Exception ex) {
             ex.printStackTrace();

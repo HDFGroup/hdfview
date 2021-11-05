@@ -21,7 +21,6 @@ import java.util.StringTokenizer;
 
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 
-import hdf.object.AttributeDataset;
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;

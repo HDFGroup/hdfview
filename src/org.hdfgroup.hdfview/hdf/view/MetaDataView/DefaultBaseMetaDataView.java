@@ -54,7 +54,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -374,12 +374,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (attrList != null) {
             attrNumberLabel.setText("Number of attributes = " + numAttributes);
 
-            AttributeDataset attr = null;
+            Attribute attr = null;
             for (int i = 0; i < numAttributes; i++) {
-                attr = (AttributeDataset) attrList.get(i);
+                attr = (Attribute) attrList.get(i);
 
-                log.trace("createAttributeInfoPane(): attr[{}] is {} of type {}", i, attr.getName(),
-                        attr.getDatatype().getDescription());
+                log.trace("createAttributeInfoPane(): attr[{}] is {} of type {}", i, attr.getAttributeName(),
+                        attr.getAttributeDatatype().getDescription());
 
                 addAttributeTableItem(attrTable, attr);
             }
@@ -682,7 +682,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     return;
                 }
 
-                AttributeDataset attr = (AttributeDataset) attrTable.getItem(selectionIndex).getData();
+                Attribute attr = (Attribute) attrTable.getItem(selectionIndex).getData();
                 renameAttribute(attr, result);
             }
         });
@@ -751,11 +751,11 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     }
 
     @Override
-    public AttributeDataset addAttribute(HObject obj) {
+    public Attribute addAttribute(HObject obj) {
         if (obj == null) return null;
 
         HObject root = obj.getFileFormat().getRootObject();
-        AttributeDataset attr = null;
+        Attribute attr = null;
         if (isH5) {
             NewScalarAttributeDialog dialog = new NewScalarAttributeDialog(display.getShells()[0], obj,
                     ((Group) root).breadthFirstMemberList());
@@ -786,7 +786,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     }
 
     @Override
-    public AttributeDataset deleteAttribute(HObject obj) {
+    public Attribute deleteAttribute(HObject obj) {
         if (obj == null) return null;
 
         int idx = attrTable.getSelectionIndex();
@@ -810,9 +810,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             return null;
         }
 
-        AttributeDataset attr = (AttributeDataset) attrList.get(idx);
+        Attribute attr = (Attribute) attrList.get(idx);
 
-        log.trace("deleteAttribute(): Attribute selected for deletion: {}", attr.getName());
+        log.trace("deleteAttribute(): Attribute selected for deletion: {}", attr.getAttributeName());
 
         try {
             ((MetaDataContainer) obj).removeMetadata(attr);
@@ -832,13 +832,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         return attr;
     }
 
-    private void renameAttribute(AttributeDataset attr, String newName) {
+    private void renameAttribute(Attribute attr, String newName) {
         if ((attr == null) || (newName == null) || (newName = newName.trim()) == null || (newName.length() < 1)) {
             log.debug("renameAttribute(): Attribute is null or Attribute's new name is null");
             return;
         }
 
-        String attrName = attr.getName();
+        String attrName = attr.getAttributeName();
 
         log.trace("renameAttribute(): oldName={} newName={}", attrName, newName);
 
@@ -883,19 +883,19 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
      * @param newValue
      *            the string of the new value.
      */
-    private void updateAttributeValue(AttributeDataset attr, String newValue) {
+    private void updateAttributeValue(Attribute attr, String newValue) {
         if ((attr == null) || (newValue == null) || (newValue = newValue.trim()) == null || (newValue.length() < 1)) {
             log.debug("updateAttributeValue(): Attribute is null or Attribute's new value is null");
             return;
         }
 
-        String attrName = attr.getName();
+        String attrName = attr.getAttributeName();
         Object data;
 
         log.trace("updateAttributeValue(): changing value of attribute '{}'", attrName);
 
         try {
-            data = attr.getData();
+            data = attr.getAttributeData();
         }
         catch (Exception ex) {
             log.debug("updateAttributeValue(): getData() failure:", ex);
@@ -921,7 +921,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (cIndex >= 0) {
             cNT = cName.charAt(cIndex + 1);
         }
-        boolean isUnsigned = attr.getDatatype().isUnsigned();
+        boolean isUnsigned = attr.getAttributeDatatype().isUnsigned();
 
         log.trace("updateAttributeValue(): array_length={} cName={} NT={} isUnsigned={}", arrayLength, cName,
                 cNT, isUnsigned);
@@ -1066,7 +1066,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             return;
         }
 
-        attrTable.getItem(selectionIndex).setText(3, attr.toString(", "));
+        attrTable.getItem(selectionIndex).setText(3, attr.toAttributeString(", "));
 
         if (dataObject instanceof MetaDataContainer) {
             try {
@@ -1079,16 +1079,16 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         }
     }
 
-    private void addAttributeTableItem(Table table, AttributeDataset attr) {
+    private void addAttributeTableItem(Table table, Attribute attr) {
         if (table == null || attr == null) {
             log.debug("addAttributeTableItem(): table or attribute is null");
             return;
         }
 
-        String attrName = attr.getName();
-        String attrType = attr.getDatatype().getDescription();
+        String attrName = attr.getAttributeName();
+        String attrType = attr.getAttributeDatatype().getDescription();
         StringBuilder attrSize = new StringBuilder();
-        String attrValue = attr.toString(", ", 50);
+        String attrValue = attr.toAttributeString(", ", 50);
         String[] rowData = new String[attrTableColNames.length];
 
         if (attrName == null) attrName = "null";
@@ -1106,11 +1106,11 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             rowData[0] = attrName;
         }
 
-        if (attr.isScalar()) {
+        if (attr.isAttributeScalar()) {
             attrSize.append("Scalar");
         }
         else {
-            long[] dims = attr.getDims();
+            long[] dims = attr.getAttributeDims();
             attrSize.append(String.valueOf(dims[0]));
             for (int j = 1; j < dims.length; j++) {
                 attrSize.append(" x ").append(dims[j]);

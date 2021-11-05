@@ -22,6 +22,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 
 import ucar.ma2.DataType;
@@ -38,7 +39,7 @@ import ucar.nc2.Variable;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class NC2Dataset extends ScalarDS {
+public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     private static final long serialVersionUID = -6031051694304457461L;
 
     private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(NC2Dataset.class);
@@ -51,7 +52,7 @@ public class NC2Dataset extends ScalarDS {
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of AttributeDataset.
+     * instance of Attribute.
      */
     @SuppressWarnings("rawtypes")
     private List                            attributeList;
@@ -283,28 +284,6 @@ public class NC2Dataset extends ScalarDS {
         inited = true;
     }
 
-    // Implementing ScalarDS
-    @Override
-    public byte[][] getPalette() {
-        if (palette == null) {
-            palette = readPalette(0);
-        }
-
-        return palette;
-    }
-
-    /**
-     * read specific image palette from file.
-     *
-     * @param idx
-     *            the palette index to read
-     * @return the palette data into two-dimension byte array, byte[3][256]
-     */
-    @Override
-    public byte[][] readPalette(int idx) {
-        return null;
-    }
-
     /**
      * Creates a new dataset.
      *
@@ -337,9 +316,29 @@ public class NC2Dataset extends ScalarDS {
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
-    /**
-     * returns the byte array of palette refs. returns null if there is no
-     * palette attribute attached to this dataset.
+    /* Implement abstract ScalarDS */
+
+    @Override
+    public byte[][] getPalette() {
+        if (palette == null) {
+            palette = readPalette(0);
+        }
+
+        return palette;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.ScalarDS#readPalette(int)
+     */
+    @Override
+    public byte[][] readPalette(int idx) {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.ScalarDS#getPaletteRefs()
      */
     @Override
     public byte[] getPaletteRefs() {
@@ -378,5 +377,4 @@ public class NC2Dataset extends ScalarDS {
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
-
 }

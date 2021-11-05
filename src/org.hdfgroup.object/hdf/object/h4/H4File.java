@@ -27,14 +27,14 @@ import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 
-import hdf.object.h4.H4Attribute;
+import hdf.object.h4.H4ScalarAttribute;
 
 /**
  * This class provides file level APIs. File access APIs include retrieving the
@@ -499,12 +499,12 @@ public class H4File extends FileFormat {
      * @throws HDFException if the attribute can not be written
      */
     @Override
-    public void writeAttribute(HObject obj, AttributeDataset attr, boolean isSDglobalAttr) throws HDFException {
+    public void writeAttribute(HObject obj, Attribute attr, boolean isSDglobalAttr) throws HDFException {
         log.trace("writeAttribute(): start: obj={} attribute={} isSDglobalAttr={}", obj, attr, isSDglobalAttr);
 
-        String attrName = attr.getName();
-        long attrType = attr.getDatatype().createNative();
-        long[] dims = attr.getDims();
+        String attrName = attr.getAttributeName();
+        long attrType = attr.getAttributeDatatype().createNative();
+        long[] dims = attr.getAttributeDims();
         int count = 1;
         if (dims != null) {
             for (int i = 0; i < dims.length; i++) {
@@ -516,7 +516,7 @@ public class H4File extends FileFormat {
 
         Object attrValue;
         try {
-            attrValue = attr.getData();
+            attrValue = attr.getAttributeData();
         }
         catch (Exception ex) {
             attrValue = null;
@@ -1448,7 +1448,7 @@ public class H4File extends FileFormat {
                             catch (Exception ex) {
                                 log.debug("getFileAnnotation(): failed to create datatype for attribute: ", ex);
                             }
-                            H4Attribute newAttr = new H4Attribute(getRootObject(), annName + " #" + i, attrType, attrDims);
+                            H4ScalarAttribute newAttr = new H4ScalarAttribute(getRootObject(), annName + " #" + i, attrType, attrDims);
                             attrList.add(newAttr);
                             newAttr.setData(str);
                         }
@@ -1559,7 +1559,7 @@ public class H4File extends FileFormat {
                     log.debug("getGRglobalAttribute(): failed to create datatype for attribute: ", ex);
                 }
 
-                H4Attribute attr = new H4Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
+                H4ScalarAttribute attr = new H4ScalarAttribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
             } // (int i=0; i<numberOfAttributes; i++)
         } // (b && numberOfAttributes>0)
@@ -1649,7 +1649,7 @@ public class H4File extends FileFormat {
                     log.debug("getSDSglobalAttribute(): failed to create datatype for attribute: ", ex);
                 }
 
-                H4Attribute attr = new H4Attribute(getRootObject(), attrName[0], attrType, attrDims, buf);
+                H4ScalarAttribute attr = new H4ScalarAttribute(getRootObject(), attrName[0], attrType, attrDims, buf);
                 attrList.add(attr);
             } // (int i=0; i<numberOfAttributes; i++)
         } // (b && numberOfAttributes>0)

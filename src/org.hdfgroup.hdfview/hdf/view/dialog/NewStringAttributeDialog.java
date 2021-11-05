@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -565,10 +565,10 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         }
 
         long[] dims = { arraySize };
-        AttributeDataset attr = null;
+        Attribute attr = null;
         try {
             if (isH4)
-                attr = new hdf.object.h4.H4Attribute(parentObj, attrName, datatype, dims);
+                attr = new hdf.object.h4.H4ScalarAttribute(parentObj, attrName, datatype, dims);
             else
                 attr = new hdf.object.nc2.NC2Attribute(parentObj, attrName, datatype, dims);
         }
@@ -582,7 +582,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
             log.debug("createAttribute(): failed");
             return false;
         }
-        attr.setData(value);
+        attr.setAttributeData(value);
 
         try {
             if (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot() && h4GrAttrRadioButton.getSelection()) {
@@ -597,7 +597,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
             }
             else {
                 log.trace("writeMetadata() via write()");
-                attr.write();
+                attr.writeAttribute();
             }
         }
         catch (Exception ex) {
@@ -606,7 +606,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
             return false;
         }
 
-        newObject = attr;
+        newObject = (HObject)attr;
 
         return true;
     }
@@ -747,7 +747,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
     }
 
     /** @return the new attribute created. */
-    public AttributeDataset getAttribute() {
-        return (AttributeDataset)newObject;
+    public Attribute getAttribute() {
+        return (Attribute)newObject;
     }
 }

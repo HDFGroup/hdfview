@@ -128,7 +128,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
         // Create the attribute and write the array data to it.
         try {
             H5ScalarAttr attr = new H5ScalarAttr(dset, ATTRIBUTENAME, typeRef, dims);
-            attr.setData(dset_data);
+            attr.setAttributeData(dset_data);
             file.writeAttribute(dset, attr, false);
         }
         catch (Exception e) {

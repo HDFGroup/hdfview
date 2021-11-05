@@ -33,9 +33,8 @@ import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5DataFiltersException;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 
-import hdf.object.AttributeDataset;
-import hdf.object.CompoundDataFormat;
-import hdf.object.DataFormat;
+import hdf.object.Attribute;
+import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -44,7 +43,7 @@ import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.Utils;
 
-import hdf.object.h5.H5AttributeDataset;
+import hdf.object.h5.H5Datatype;
 
 /**
  * The H5CompoundAttr class defines an HDF5 attribute of compound datatypes.
@@ -91,83 +90,17 @@ import hdf.object.h5.H5AttributeDataset;
  * @version 1.0 6/15/2021
  * @author Allen Byrne
  */
-public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFormat {
+public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
     private static final long serialVersionUID = 2072473407027648309L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundAttr.class);
 
-    /**
-     * A single character to separate the names of nested compound fields. An
-     * extended ASCII character, 0x95, is used to avoid common characters in
-     * compound names.
-     */
-    public static final String SEPARATOR = "\u0095";
+    /** The HObject to which this NC2Attribute is attached, Attribute interface */
+    protected HObject         parentObject;
 
-    /**
-     * The number of members of the compound attribute.
-     */
-    protected int numberOfMembers = 0;
-
-    /**
-     * The names of the members of the compound attribute.
-     */
-    protected String[] memberNames = null;
-
-    /**
-     * Array containing the total number of elements of the members of this compound
-     * attribute.
-     * <p>
-     * For example, a compound attribute COMP has members of A, B and C as
-     *
-     * <pre>
-     *     COMP {
-     *         int A;
-     *         float B[5];
-     *         double C[2][3];
-     *     }
-     * </pre>
-     *
-     * memberOrders is an integer array of {1, 5, 6} to indicate that member A has
-     * one element, member B has 5 elements, and member C has 6 elements.
-     */
-    protected int[] memberOrders = null;
-
-    /**
-     * The dimension sizes of each member.
-     * <p>
-     * The i-th element of the Object[] is an integer array (int[]) that contains
-     * the dimension sizes of the i-th member.
-     */
-    protected transient Object[] memberDims = null;
-
-    /**
-     * A list of names of all fields including nested fields.
-     * <p>
-     * The nested names are separated by CompoundDS.SEPARATOR. For example, if compound dataset "A" has
-     * the following nested structure,
-     *
-     * <pre>
-     * A --&gt; m01
-     * A --&gt; m02
-     * A --&gt; nest1 --&gt; m11
-     * A --&gt; nest1 --&gt; m12
-     * A --&gt; nest1 --&gt; nest2 --&gt; m21
-     * A --&gt; nest1 --&gt; nest2 --&gt; m22
-     * i.e.
-     * A = { m01, m02, nest1{m11, m12, nest2{ m21, m22}}}
-     * </pre>
-     *
-     * The flatNameList of compound dataset "A" will be {m01, m02, nest1[m11, nest1[m12,
-     * nest1[nest2[m21, nest1[nest2[m22}
-     *
-     */
-    private List<String> flatNameList;
-
-    /**
-     * A list of datatypes of all fields including nested fields.
-     */
-    private List<Datatype> flatTypeList;
+    /** additional information and properties for the attribute, Attribute interface */
+    private transient Map<String, Object> properties;
 
     /**
      * Create an attribute with specified name, data type and dimension sizes.
@@ -205,9 +138,35 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
      */
     @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
     public H5CompoundAttr(HObject parentObj, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
-        super(parentObj, attrName, attrType, attrDims, attrValue);
+        super((parentObj == null) ? null : parentObj.getFileFormat(), attrName,
+                (parentObj == null) ? null : parentObj.getFullName(), null);
 
         log.trace("CompoundAttr: start {}", parentObj);
+        this.parentObject = parentObj;
+
+        datatype = attrType;
+
+        if (attrValue != null) {
+            data = attrValue;
+            originalBuf = attrValue;
+            isDataLoaded = true;
+        }
+        properties = new HashMap();
+
+        if (attrDims == null) {
+            rank = 1;
+            dims = new long[] { 1 };
+            isScalar = true;
+        }
+        else {
+            dims = attrDims;
+            rank = dims.length;
+            isScalar = false;
+        }
+
+        selectedDims = new long[rank];
+        startDims = new long[rank];
+        selectedStride = new long[rank];
 
         numberOfMembers = 0;
         memberNames = null;
@@ -232,7 +191,7 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
             return HDF5Constants.H5I_INVALID_HID;
         }
 
-        long aid = super.open();
+        long aid = HDF5Constants.H5I_INVALID_HID;
         long pObjID = HDF5Constants.H5I_INVALID_HID;
 
         try {
@@ -301,10 +260,10 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
      *
      * // 1) get datatype and dataspace information from file
      * attr.init();
-     * rank = attr.getRank(); // rank = 2, a 2D attribute
+     * rank = attr.getAttributeRank(); // rank = 2, a 2D attribute
      * count = attr.getSelectedDims();
      * start = attr.getStartDims();
-     * dims = attr.getDims();
+     * dims = attr.getAttributeDims();
      *
      * // 2) select only one data point
      * for (int i = 0; i &lt; rank; i++) {
@@ -313,7 +272,7 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
      * }
      *
      * // 3) read one data point
-     * data = attr.getData();
+     * data = attr.getAttributeData();
      *
      * // 4) reset selection to the whole attribute
      * attr.init();
@@ -322,7 +281,7 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
      * attr.clearData();
      *
      * // 6) Read the whole attribute
-     * data = attr.getData();
+     * data = attr.getAttributeData();
      * </pre>
      */
     @Override
@@ -494,230 +453,6 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
         }
     }
 
-    /**
-     * Resets selection of dataspace
-     */
-    protected void resetSelection() {
-        super.resetSelection();
-
-        setAllMemberSelection(true);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see hdf.object.Dataset#clearData()
-     */
-    @Override
-    public void clearData() {
-        super.clearData();
-    }
-
-    /**
-     * Returns the number of members of the compound attribute.
-     *
-     * @return the number of members of the compound attribute.
-     */
-    @Override
-    public int getMemberCount() {
-        return numberOfMembers;
-    }
-
-    /**
-     * Returns the names of the members of the compound attribute. The names of
-     * compound members are stored in an array of Strings.
-     * <p>
-     * For example, for a compound datatype of {int A, float B, char[] C}
-     * getMemberNames() returns ["A", "B", "C"}.
-     *
-     * @return the names of compound members.
-     */
-    @Override
-    public String[] getMemberNames() {
-        return memberNames;
-    }
-
-    /**
-     * Returns an array of the names of the selected members of the compound dataset.
-     *
-     * @return an array of the names of the selected members of the compound dataset.
-     */
-    public final String[] getSelectedMemberNames() {
-        if (isMemberSelected == null) {
-            log.debug("getSelectedMemberNames(): isMemberSelected array is null");
-            return memberNames;
-        }
-
-        int idx = 0;
-        String[] names = new String[getSelectedMemberCount()];
-        for (int i = 0; i < isMemberSelected.length; i++) {
-            if (isMemberSelected[i]) {
-                names[idx++] = memberNames[i];
-            }
-        }
-
-        return names;
-    }
-
-    /**
-     * Checks if a member of the compound attribute is selected for read/write.
-     *
-     * @param idx
-     *            the index of compound member.
-     *
-     * @return true if the i-th memeber is selected; otherwise returns false.
-     */
-    @Override
-    public boolean isMemberSelected(int idx) {
-        if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
-            return isMemberSelected[idx];
-        }
-
-        return false;
-    }
-
-    /**
-     * Selects the i-th member for read/write.
-     *
-     * @param idx
-     *            the index of compound member.
-     */
-    @Override
-    public void selectMember(int idx) {
-        if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
-            isMemberSelected[idx] = true;
-        }
-    }
-
-    /**
-     * Selects/deselects all members.
-     *
-     * @param selectAll
-     *            The indicator to select or deselect all members. If true, all
-     *            members are selected for read/write. If false, no member is
-     *            selected for read/write.
-     */
-    @Override
-    public void setAllMemberSelection(boolean selectAll) {
-        if (isMemberSelected == null) {
-            return;
-        }
-
-        for (int i = 0; i < isMemberSelected.length; i++) {
-            isMemberSelected[i] = selectAll;
-        }
-    }
-
-    /**
-     * Returns array containing the total number of elements of the members of the
-     * compound attribute.
-     * <p>
-     * For example, a compound attribute COMP has members of A, B and C as
-     *
-     * <pre>
-     *     COMP {
-     *         int A;
-     *         float B[5];
-     *         double C[2][3];
-     *     }
-     * </pre>
-     *
-     * getMemberOrders() will return an integer array of {1, 5, 6} to indicate that
-     * member A has one element, member B has 5 elements, and member C has 6
-     * elements.
-     *
-     * @return the array containing the total number of elements of the members of
-     *         the compound attribute.
-     */
-    @Override
-    public int[] getMemberOrders() {
-        return memberOrders;
-    }
-
-    /**
-     * Returns array containing the total number of elements of the selected members
-     * of the compound attribute.
-     *
-     * <p>
-     * For example, a compound attribute COMP has members of A, B and C as
-     *
-     * <pre>
-     *     COMP {
-     *         int A;
-     *         float B[5];
-     *         double C[2][3];
-     *     }
-     * </pre>
-     *
-     * If A and B are selected, getSelectedMemberOrders() returns an array of {1, 5}
-     *
-     * @return array containing the total number of elements of the selected members
-     *         of the compound attribute.
-     */
-    @Override
-    public int[] getSelectedMemberOrders() {
-        if (isMemberSelected == null) {
-            log.debug("getSelectedMemberOrders(): isMemberSelected array is null");
-            return memberOrders;
-        }
-
-        int idx = 0;
-        int[] orders = new int[getSelectedMemberCount()];
-        for (int i = 0; i < isMemberSelected.length; i++) {
-            if (isMemberSelected[i]) {
-                orders[idx++] = memberOrders[i];
-            }
-        }
-
-        return orders;
-    }
-
-    /**
-     * Returns the dimension sizes of the i-th member.
-     * <p>
-     * For example, a compound attribute COMP has members of A, B and C as
-     *
-     * <pre>
-     *     COMP {
-     *         int A;
-     *         float B[5];
-     *         double C[2][3];
-     *     }
-     * </pre>
-     *
-     * getMemberDims(2) returns an array of {2, 3}, while getMemberDims(1) returns
-     * an array of {5}, and getMemberDims(0) returns null.
-     *
-     * @param i
-     *            the i-th member
-     *
-     * @return the dimension sizes of the i-th member, null if the compound member
-     *         is not an array.
-     */
-    @Override
-    public int[] getMemberDims(int i) {
-        if (memberDims == null) {
-            return null;
-        }
-
-        return (int[]) memberDims[i];
-    }
-
-    /**
-     * Returns an array of datatype objects of compound members.
-     * <p>
-     * Each member of a compound attribute has its own datatype. The datatype of a
-     * member can be atomic or other compound datatype (nested compound). The
-     * datatype objects are setup at init().
-     * <p>
-     *
-     * @return the array of datatype objects of the compound members.
-     */
-    @Override
-    public Datatype[] getMemberTypes() {
-        return memberTypes;
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -817,13 +552,13 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
      * selected[1] = dims[1] / stride[1];
      * selected[2] = dims[1] / stride[2];
      *
-     * // when AttributeDataset.getData() is called, the selection above will be used since
+     * // when H5CompoundAttr.getData() is called, the selection above will be used since
      * // the dimension arrays are passed by reference. Changes of these arrays
      * // outside the attribute object directly change the values of these array
      * // in the attribute object.
      * </pre>
      * <p>
-     * For CompoundAttr, the memory data object is an java.util.List object. Each
+     * For H5CompoundAttr, the memory data object is an java.util.List object. Each
      * element of the list is a data array that corresponds to a compound field.
      * <p>
      * For example, if compound attribute "comp" has the following nested
@@ -875,16 +610,6 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
         }
 
         return data;
-    }
-
-    /**
-     * Returns the fill values for the dataset.
-     *
-     * @return the fill values for a compound dataset is null.
-     */
-    @Override
-    public Object getFillValue() {
-        return null;
     }
 
     /*
@@ -980,7 +705,7 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
             init();
 
         try {
-            readData = compoundAttributeCommonIO(IO_TYPE.READ, null);
+            readData = compoundAttributeCommonIO(H5File.IO_TYPE.READ, null);
         }
         catch (Exception ex) {
             log.debug("read(): failed to read compound attribute: ", ex);
@@ -1004,15 +729,23 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
      */
     @Override
     public void write(Object buf) throws Exception {
-        super.write(buf);
         if (this.getFileFormat().isReadOnly())
             throw new Exception("cannot write to compound attribute in file opened as read-only");
 
-        if (!isInited())
-            init();
+        if (!buf.equals(data))
+            setData(buf);
+
+        init();
+
+        if (parentObject == null) {
+            log.debug("write(Object): parent object is null; nowhere to write attribute to");
+            return;
+        }
+
+        ((MetaDataContainer) getParentObject()).writeMetadata(this);
 
         try {
-            compoundAttributeCommonIO(IO_TYPE.WRITE, buf);
+            compoundAttributeCommonIO(H5File.IO_TYPE.WRITE, buf);
         }
         catch (Exception ex) {
             log.debug("write(Object): failed to write compound attribute: ", ex);
@@ -1021,7 +754,22 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
         resetSelection();
     }
 
-    private Object compoundAttributeCommonIO(IO_TYPE ioType, Object writeBuf) throws Exception {
+    /*
+     * Routine to convert datatypes that are read in as byte arrays to
+     * regular types.
+     */
+    protected Object convertByteMember(final Datatype dtype, byte[] byteData) {
+        Object theObj = null;
+
+        if (dtype.isFloat() && dtype.getDatatypeSize() == 16)
+            theObj = ((H5Datatype)dtype).byteToBigDecimal(byteData, 0);
+        else
+            theObj = super.convertByteMember(dtype, byteData);
+
+        return theObj;
+    }
+
+    private Object compoundAttributeCommonIO(H5File.IO_TYPE ioType, Object writeBuf) throws Exception {
         H5Datatype dsDatatype = (H5Datatype)getDatatype();
         Object theData = null;
 
@@ -1033,7 +781,7 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
         /*
          * I/O type-specific pre-initialization.
          */
-        if (ioType == IO_TYPE.WRITE) {
+        if (ioType == H5File.IO_TYPE.WRITE) {
             if ((writeBuf == null) || !(writeBuf instanceof List)) {
                 log.debug("compoundAttributeCommonIO(): writeBuf is null or invalid");
                 throw new Exception("write buffer is null or invalid");
@@ -1070,129 +818,6 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
         return theData;
     }
 
-    @Override
-    protected Object AttributeCommonIO(long attr_id, IO_TYPE ioType, Object objBuf) throws Exception {
-        H5Datatype dsDatatype = (H5Datatype) getDatatype();
-        Object theData = null;
-
-        long dt_size = dsDatatype.getDatatypeSize();
-        log.trace("AttributeCommonIO(): create native");
-        long tid = dsDatatype.createNative();
-        if (ioType == IO_TYPE.READ) {
-            log.trace("AttributeCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}", dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(), dsDatatype.isRefObj());
-
-            long lsize = 1;
-            for (int j = 0; j < dims.length; j++) {
-                lsize *= dims[j];
-            }
-            log.trace("AttributeCommonIO():read ioType dt_size={} lsize={}", dt_size, lsize);
-
-            try {
-                // Read data.
-                Object attr_data = new byte[(int)(dt_size * lsize)];
-
-                try {
-                    H5.H5Aread(attr_id, tid, attr_data);
-                }
-                catch (Exception ex) {
-                    log.debug("AttributeCommonIO(): H5Aread failure: ", ex);
-                }
-                theData = compoundTypeIO(dsDatatype, (int)lsize, dsDatatype, attr_data, new int[]{0});
-            }
-            catch (Exception ex) {
-                log.debug("AttributeCommonIO():read ioType read failure: ", ex);
-                throw new Exception(ex.getMessage(), ex);
-            }
-            finally {
-                dsDatatype.close(tid);
-            }
-            for (int i = 0; i < ((ArrayList<Object[]>)theData).size(); i++) {
-                Object theobj = ((ArrayList<Object[]>)theData).get(i);
-                log.trace("AttributeCommonIO():read ioType data: {}", theobj);
-            }
-            originalBuf = theData;
-            isDataLoaded = true;
-        } // IO_TYPE.READ
-        else {
-            theData = compoundTypeWriteIO(dsDatatype, dsDatatype, objBuf, new int[]{0});
-            try {
-                H5.H5Awrite(attr_id, tid, theData);
-            }
-            catch (Exception ex) {
-                log.debug("AttributeCommonIO(): H5Awrite failure: ", ex);
-            }
-            finally {
-                dsDatatype.close(tid);
-            }
-        } // IO_TYPE.WRITE
-
-        return theData;
-    }
-
-    @Override
-    protected Object AttributeSelection() throws Exception {
-        return originalBuf;
-//        H5Datatype dsDatatype = (H5Datatype) getDatatype();
-//        Object theData = H5Datatype.allocateArray(dsDatatype, (int)nPoints);
-//        if (dsDatatype.isText() && convertByteToString && (theData instanceof byte[])) {
-//        log.trace("AttributeSelection(): isText: converting byte array to string array");
-//        theData = byteToString((byte[]) theData, (int) dsDatatype.getDatatypeSize());
-//    }
-//    else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
-//        log.trace("AttributeSelection(): isFloat: converting byte array to BigDecimal array");
-//        theData = dsDatatype.byteToBigDecimal(0, (int)nPoints, (byte[]) theData);
-//    }
-//    else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() && dsDatatype.getDatatypeBase().getDatatypeSize() == 16) {
-//        log.trace("AttributeSelection(): isArray and isFloat: converting byte array to BigDecimal array");
-//        long[] arrayDims = dsDatatype.getArrayDims();
-//        int asize = (int)nPoints;
-//        for (int j = 0; j < arrayDims.length; j++) {
-//            asize *= arrayDims[j];
-//        }
-//        theData = ((H5Datatype)dsDatatype.getDatatypeBase()).byteToBigDecimal(0, asize, (byte[]) theData);
-//    }
-//    else if (dsDatatype.isRefObj()) {
-//            log.trace("AttributeSelection(): isREF: converting byte array to long array");
-//            theData = HDFNativeData.byteToLong((byte[]) theData);
-//        }
-//        Object theOrig = originalBuf;
-
-        /*
-         * Copy the selection from originalBuf to theData Only three dims are involved and selected data is 2 dimensions
-         * selectedDims[selectedIndex[0]] is the row dimension selectedDims[selectedIndex[1]] is the col dimension
-         * selectedDims[selectedIndex[2]] is the frame dimension
-         */
-//        long[] start = getStartDims();
-//        long curFrame = start[selectedIndex[2]];
-//        for (int col = 0; col < (int)selectedDims[selectedIndex[1]]; col++) {
-//            for (int row = 0; row < (int)selectedDims[selectedIndex[0]]; row++) {
-
-//                int k = (int)startDims[selectedIndex[2]] * (int)selectedDims[selectedIndex[2]];
-//                int index = row * (int)selectedDims[selectedIndex[1]] + col;
-//                log.trace("compoundAttributeSelection(): point{} row:col:k={}:{}:{}", curFrame, row, col, k);
-//                int fromIndex = ((int)curFrame * (int)selectedDims[selectedIndex[1]] * (int)selectedDims[selectedIndex[0]] +
-//                                        col * (int)selectedDims[selectedIndex[0]] +
-//                                        row);// * (int) dsDatatype.getDatatypeSize();
-//                int toIndex = (col * (int)selectedDims[selectedIndex[0]] +
-//                        row);// * (int) dsDatatype.getDatatypeSize();
-//                int objSize = 1;
-//                if (dsDatatype.isArray()) {
-//                    long[] arrayDims = dsDatatype.getArrayDims();
-//                    objSize = (int)arrayDims.length;
-//                }
-//                for (int i = 0; i < ((ArrayList<Object[]>)theOrig).size(); i++) {
-//                    Object theOrigobj = ((ArrayList<Object[]>)theOrig).get(i);
-//                    Object theDataobj = ((ArrayList<Object[]>)theData).get(i);
-//                    log.trace("compoundAttributeSelection(): theOrig={} theData={}", theOrigobj, theDataobj);
-//                    System.arraycopy(theOrig, fromIndex, theData, toIndex, objSize);
-//                }
-//            }
-//        }
-
-//        log.trace("compoundAttributeSelection(): theData={}", theData);
-//        return theData;
-    }
-
     /*
      * Private recursive routine to read/write an entire compound datatype field by
      * field. This routine is called recursively for ARRAY of COMPOUND and VLEN of
@@ -1205,6 +830,7 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
     private Object compoundTypeIO(H5Datatype parentType, int nSelPoints, final H5Datatype cmpdType,
             Object dataBuf, int[] globalMemberIndex) {
         Object theData = null;
+
         if (cmpdType.isArray()) {
             log.trace("compoundTypeIO(): ARRAY type");
 
@@ -1266,10 +892,11 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
                     }
 
                     /*
-                     * Since the type list used here is not a flattened structure, we need to skip the member selection
-                     * check for compound types, as otherwise having a single member not selected would skip the
-                     * reading/writing for the entire compound type. The member selection check will be deferred to the
-                     * recursive compound read/write below.
+                     * Since the type list used here is not a flattened structure, we need to skip
+                     * the member selection check for compound types, as otherwise having a single
+                     * member not selected would skip the reading/writing for the entire compound
+                     * type. The member selection check will be deferred to the recursive compound
+                     * read/write below.
                      */
                     if (!memberType.isCompound()) {
                         if (!isMemberSelected[globalMemberIndex[0] % this.getMemberCount()]) {
@@ -1496,6 +1123,170 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
     }
 
     /*
+     * Routine to convert datatypes that are in object arrays to
+     * bytes.
+     */
+    private byte[] convertMemberByte(final Datatype dtype, Object theObj) {
+        byte[] byteData = null;
+
+        if (dtype.getDatatypeSize() == 1) {
+            /*
+             * Normal byte[] type, such as an integer datatype of size 1.
+             */
+            byteData = (byte[])theObj;
+        }
+        else if (dtype.isString() && !dtype.isVarStr() && convertByteToString) {
+            log.trace("convertMemberByte(): converting string array to byte array");
+
+            byteData = stringToByte((String[])theObj, (int) dtype.getDatatypeSize());
+        }
+        else if (dtype.isInteger()) {
+            log.trace("convertMemberByte(): converting integer array to byte array");
+
+            switch ((int)dtype.getDatatypeSize()) {
+            case 1:
+                /*
+                 * Normal byte[] type, such as an integer datatype of size 1.
+                 */
+                byteData = (byte[])theObj;
+                break;
+            case 2:
+                byteData = HDFNativeData.shortToByte(0, 1, (short[])theObj);
+                break;
+            case 4:
+                byteData = HDFNativeData.intToByte(0, 1, (int[])theObj);
+                break;
+            case 8:
+                byteData = HDFNativeData.longToByte(0, 1, (long[])theObj);
+                break;
+            default:
+                log.debug("convertMemberByte(): invalid datatype size");
+                byteData = null;
+                break;
+            }
+        }
+        else if (dtype.isFloat()) {
+            log.trace("convertMemberByte(): converting float array to byte array");
+
+            if (dtype.getDatatypeSize() == 16)
+                byteData = ((H5Datatype)dtype).bigDecimalToByte((BigDecimal[])theObj, 0);
+            else if (dtype.getDatatypeSize() == 8)
+                byteData = HDFNativeData.doubleToByte(0, 1, (double[])theObj);
+            else
+                byteData = HDFNativeData.floatToByte(0, 1, (float[])theObj);
+        }
+        else if (dtype.isRef()) {
+            log.trace("convertMemberByte(): reference type - converting long array to byte array");
+
+            byteData = HDFNativeData.longToByte(0, 1, (long[])theObj);
+        }
+        else if (dtype.isArray()) {
+            Datatype baseType = dtype.getDatatypeBase();
+
+            /*
+             * Retrieve the real base datatype in the case of ARRAY of ARRAY datatypes.
+             */
+            while (baseType.isArray())
+                baseType = baseType.getDatatypeBase();
+
+            /*
+             * Optimize for the common cases of Arrays.
+             */
+            switch (baseType.getDatatypeClass()) {
+                case Datatype.CLASS_INTEGER:
+                case Datatype.CLASS_FLOAT:
+                case Datatype.CLASS_CHAR:
+                case Datatype.CLASS_STRING:
+                case Datatype.CLASS_BITFIELD:
+                case Datatype.CLASS_OPAQUE:
+                case Datatype.CLASS_COMPOUND:
+                case Datatype.CLASS_REFERENCE:
+                case Datatype.CLASS_ENUM:
+                case Datatype.CLASS_VLEN:
+                case Datatype.CLASS_TIME:
+                    byteData = convertMemberByte(baseType, theObj);
+                    break;
+
+                case Datatype.CLASS_ARRAY:
+                {
+                    Datatype arrayType = dtype.getDatatypeBase();
+
+                    long[] arrayDims = dtype.getArrayDims();
+                    int arrSize = 1;
+                    for (int i = 0; i < arrayDims.length; i++) {
+                        arrSize *= arrayDims[i];
+                    }
+
+                    byteData = new byte[arrSize * (int)arrayType.getDatatypeSize()];
+
+                    for (int i = 0; i < arrSize; i++) {
+                        byte[] indexedBytes = convertMemberByte(arrayType, ((Object[]) theObj)[i]);
+                        System.arraycopy(indexedBytes, 0, byteData, (int)(i * arrayType.getDatatypeSize()), (int)arrayType.getDatatypeSize());
+                    }
+
+                    break;
+                }
+
+                case Datatype.CLASS_NO_CLASS:
+                default:
+                    log.debug("convertMemberByte(): invalid datatype class");
+                    byteData = null;
+            }
+        }
+        else if (dtype.isCompound()) {
+            /*
+             * TODO: still valid after reading change?
+             */
+            byteData = (byte[])convertCompoundMemberBytes(dtype, (List<Object>)theObj);
+        }
+        else {
+            byteData = (byte[])theObj;
+        }
+
+        return byteData;
+    }
+
+    /**
+     * Given an array of objects representing a compound Datatype, converts each of
+     * its members into bytes and returns the results.
+     *
+     * @param dtype
+     *            The compound datatype to convert
+     * @param theObj
+     *            The object array representing the data of the compound Datatype
+     * @return The converted bytes of the objects
+     */
+    private byte[] convertCompoundMemberBytes(final Datatype dtype, List<Object> theObj) {
+        List<Datatype> allSelectedTypes = Arrays.asList(this.getSelectedMemberTypes());
+        List<Datatype> localTypes = new ArrayList<>(dtype.getCompoundMemberTypes());
+        Iterator<Datatype> localIt = localTypes.iterator();
+        while (localIt.hasNext()) {
+            Datatype curType = localIt.next();
+
+            if (curType.isCompound())
+                continue;
+
+            if (!allSelectedTypes.contains(curType))
+                localIt.remove();
+        }
+
+        byte[] byteData = new byte[(int)dtype.getDatatypeSize()];
+        for (int i = 0, index = 0; i < localTypes.size(); i++) {
+            Datatype curType = localTypes.get(i);
+            byte[] indexedBytes = null;
+            if (curType.isCompound())
+                indexedBytes = convertCompoundMemberBytes(curType, (List<Object>)theObj.get(i));
+            else
+                indexedBytes = convertMemberByte(curType, theObj.get(i));
+
+            System.arraycopy(indexedBytes, 0, byteData, index + (int)curType.getDatatypeSize(), (int)curType.getDatatypeSize());
+            index += curType.getDatatypeSize();
+        }
+
+        return byteData;
+    }
+
+    /*
      * Private routine to convert a single field of a compound datatype.
      */
     private Object writeSingleCompoundMember(final H5Datatype memberType, Object theData) throws Exception {
@@ -1549,8 +1340,198 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
         return tmpData;
     }
 
+    @Override
+    public Object convertFromUnsignedC() {
+        throw new UnsupportedOperationException("H5CompoundDS:convertFromUnsignedC Unsupported operation.");
+    }
+
+    @Override
+    public Object convertToUnsignedC() {
+        throw new UnsupportedOperationException("H5CompoundDS:convertToUnsignedC Unsupported operation.");
+    }
+
+    /* Implement interface Attribute */
+
     /**
-     * Returns a string representation of the data value of the attribute. For
+     * Returns the HObject to which this Attribute is currently "attached".
+     *
+     * @return the HObject to which this Attribute is currently "attached".
+     */
+    public HObject getParentObject() {
+        return parentObject;
+    }
+
+    /**
+     * Sets the HObject to which this Attribute is "attached".
+     *
+     * @param pObj
+     *            the new HObject to which this Attribute is "attached".
+     */
+    public void setParentObject(HObject pObj) {
+        parentObject = pObj;
+    }
+
+    /**
+     * set a property for the attribute.
+     *
+     * @param key the attribute Map key
+     * @param value the attribute Map value
+     */
+    public void setProperty(String key, Object value)
+    {
+        properties.put(key, value);
+    }
+
+    /**
+     * get a property for a given key.
+     *
+     * @param key the attribute Map key
+     *
+     * @return the property
+     */
+    public Object getProperty(String key)
+    {
+        return properties.get(key);
+    }
+
+    /**
+     * get all property keys.
+     *
+     * @return the Collection of property keys
+     */
+    public Collection<String> getPropertyKeys()
+    {
+        return properties.keySet();
+    }
+
+    /**
+     * Returns the name of the object. For example, "Raster Image #2".
+     *
+     * @return The name of the object.
+     */
+    public final String getAttributeName() {
+        return getName();
+    }
+
+    /**
+     * Retrieves the attribute data from the file.
+     *
+     * @return the attribute data.
+     *
+     * @throws Exception
+     *             if the data can not be retrieved
+     */
+    public final Object getAttributeData() throws Exception, OutOfMemoryError {
+        return getData();
+    }
+    /**
+     * Returns the datatype of the attribute.
+     *
+     * @return the datatype of the attribute.
+     */
+    public final Datatype getAttributeDatatype() {
+        return getDatatype();
+    }
+    /**
+     * Returns the space type for the attribute. It returns a
+     * negative number if it failed to retrieve the type information from
+     * the file.
+     *
+     * @return the space type for the attribute.
+     */
+    public final int getAttributeSpaceType() {
+        return getSpaceType();
+    }
+    /**
+     * Returns the rank (number of dimensions) of the attribute. It returns a
+     * negative number if it failed to retrieve the dimension information from
+     * the file.
+     *
+     * @return the number of dimensions of the attribute.
+     */
+    public final int getAttributeRank() {
+        return getRank();
+    }
+    /**
+     * Returns the array that contains the dimension sizes of the data value of
+     * the attribute. It returns null if it failed to retrieve the dimension
+     * information from the file.
+     *
+     * @return the dimension sizes of the attribute.
+     */
+    public final long[] getAttributeDims() {
+        return getDims();
+    }
+
+    /**
+     * @return true if the data is a single scalar point; otherwise, returns
+     *         false.
+     */
+    public boolean isAttributeScalar() {
+        return isScalar();
+    }
+
+    /**
+     * Not for public use in the future.
+     * <p>
+     * setData() is not safe to use because it changes memory buffer
+     * of the dataset object. Dataset operations such as write/read
+     * will fail if the buffer type or size is changed.
+     *
+     * @param d  the object data -must be an array of Objects
+     */
+    public void setAttributeData(Object d) {
+        setData(d);
+    }
+
+    /**
+     * Writes the memory buffer of this dataset to file.
+     *
+     * @throws Exception if buffer can not be written
+     */
+    public void writeAttribute() throws Exception {
+        write();
+    }
+
+    /**
+     * Writes the given data buffer into this attribute in a file.
+     * <p>
+     * The data buffer is a vector that contains the data values of compound fields. The data is written
+     * into file as one data blob.
+     *
+     * @param buf
+     *            The vector that contains the data values of compound fields.
+     *
+     * @throws Exception
+     *             If there is an error at the library level.
+     */
+    public void writeAttribute(Object buf) throws Exception {
+        write(buf);
+    }
+
+    /**
+     * Returns a string representation of the data value. For
+     * example, "0, 255".
+     * <p>
+     * For a compound datatype, it will be a 1D array of strings with field
+     * members separated by the delimiter. For example,
+     * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
+     * float} of three data points.
+     * <p>
+     *
+     * @param delimiter
+     *            The delimiter used to separate individual data points. It
+     *            can be a comma, semicolon, tab or space. For example,
+     *            toString(",") will separate data by commas.
+     *
+     * @return the string representation of the data values.
+     */
+    public String toAttributeString(String delimiter) {
+        return toString(delimiter, -1);
+    }
+
+    /**
+     * Returns a string representation of the data value. For
      * example, "0, 255".
      * <p>
      * For a compound datatype, it will be a 1D array of strings with field
@@ -1568,181 +1549,130 @@ public class H5CompoundAttr extends H5AttributeDataset implements CompoundDataFo
      *
      * @return the string representation of the data values.
      */
-    @Override
-    public String toString(String delimiter, int maxItems) {
-        Object theData = originalBuf;
-        if (theData == null) {
-            log.debug("toString: value is null");
-            return null;
-        }
+    public String toAttributeString(String delimiter, int maxItems) {
+        return toString(delimiter, maxItems);
+    }
 
-        if (!(theData instanceof List<?>)) {
-            log.trace("toString: value is not list");
-            return null;
-        }
+    /* Implement interface H5Attribute */
 
-        // attribute value is an array
-        StringBuilder sb = new StringBuilder();
-        int numberTypes = ((ArrayList<Object[]>)theData).size();
-        List<Datatype> cmpdTypes =  getDatatype().getCompoundMemberTypes();
-        int n = Array.getLength(((ArrayList<Object[]>)theData).get(0));
-        if ((maxItems > 0) && (n > maxItems))
-            n = maxItems;
+    public Object AttributeCommonIO(long attr_id, H5File.IO_TYPE ioType, Object objBuf) throws Exception {
+        H5Datatype dsDatatype = (H5Datatype) getDatatype();
+        Object theData = null;
 
-        for (int i = 0; i < n; i++) {
-            if (i > 0)
-                sb.append(delimiter);
-            sb.append("{");
-            for (int dv = 0; dv < numberTypes; dv++) {
-                if (dv > 0)
-                    sb.append(delimiter);
+        long dt_size = dsDatatype.getDatatypeSize();
+        log.trace("AttributeCommonIO(): create native");
+        long tid = dsDatatype.createNative();
+        if (ioType == H5File.IO_TYPE.READ) {
+            log.trace("AttributeCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}", dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(), dsDatatype.isRefObj());
 
-                Object theobj = ((ArrayList<Object[]>)theData).get(dv);
+            long lsize = 1;
+            for (int j = 0; j < dims.length; j++) {
+                lsize *= dims[j];
+            }
+            log.trace("AttributeCommonIO():read ioType dt_size={} lsize={}", dt_size, lsize);
 
-                Class<? extends Object> valClass = theobj.getClass();
+            try {
+                // Read data.
+                Object attr_data = new byte[(int)(dt_size * lsize)];
 
-                if (!valClass.isArray()) {
-                    log.trace("toString: member - not array");
-                    String strValue = theobj.toString();
-                    if (maxItems > 0 && strValue.length() > maxItems) {
-                        // truncate the extra characters
-                        strValue = strValue.substring(0, maxItems);
-                    }
-                    sb.append(strValue);
-                    continue;
+                try {
+                    H5.H5Aread(attr_id, tid, attr_data);
                 }
-
-                log.trace("toString[{}]: is_enum={} is_unsigned={}", i, cmpdTypes.get(dv).isEnum(),
-                        cmpdTypes.get(dv).isUnsigned());
-
-                if (cmpdTypes.get(dv).isEnum()) {
-                    String cname = valClass.getName();
-                    char dname = cname.charAt(cname.lastIndexOf('[') + 1);
-                    log.trace("toString: is_enum with cname={} dname={}", cname, dname);
-
-                    Map<String, String> map = cmpdTypes.get(dv).getEnumMembers();
-                    String theValue = null;
-                    switch (dname) {
-                        case 'B':
-                            byte[] barray = (byte[]) theobj;
-                            short sValue = barray[i];
-                            theValue = String.valueOf(sValue);
-                            if (map.containsKey(theValue)) {
-                                sb.append(map.get(theValue));
-                            }
-                            else
-                                sb.append(sValue);
-                            break;
-                        case 'S':
-                            short[] sarray = (short[]) theobj;
-                            int iValue = sarray[0];
-                            theValue = String.valueOf(iValue);
-                            if (map.containsKey(theValue)) {
-                                sb.append(map.get(theValue));
-                            }
-                            else
-                                sb.append(iValue);
-                            break;
-                        case 'I':
-                            int[] iarray = (int[]) theobj;
-                            long lValue = iarray[i];
-                            theValue = String.valueOf(lValue);
-                            if (map.containsKey(theValue)) {
-                                sb.append(map.get(theValue));
-                            }
-                            else
-                                sb.append(lValue);
-                            break;
-                        case 'J':
-                            long[] larray = (long[]) theobj;
-                            Long l = larray[i];
-                            theValue = Long.toString(l);
-                            if (map.containsKey(theValue)) {
-                                sb.append(map.get(theValue));
-                            }
-                            else
-                                sb.append(theValue);
-                            break;
-                        default:
-                            sb.append(Array.get(theobj, i));
-                            break;
-                    }
+                catch (Exception ex) {
+                    log.debug("AttributeCommonIO(): H5Aread failure: ", ex);
                 }
-                else if (cmpdTypes.get(dv).isUnsigned()) {
-                    String cname = valClass.getName();
-                    char dname = cname.charAt(cname.lastIndexOf('[') + 1);
-                    log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
+                theData = compoundTypeIO(dsDatatype, (int)lsize, dsDatatype, attr_data, new int[]{0});
+            }
+            catch (Exception ex) {
+                log.debug("AttributeCommonIO():read ioType read failure: ", ex);
+                throw new Exception(ex.getMessage(), ex);
+            }
+            finally {
+                dsDatatype.close(tid);
+            }
+            for (int i = 0; i < ((ArrayList<Object[]>)theData).size(); i++) {
+                Object theobj = ((ArrayList<Object[]>)theData).get(i);
+                log.trace("AttributeCommonIO():read ioType data: {}", theobj);
+            }
+            originalBuf = theData;
+            isDataLoaded = true;
+        } // H5File.IO_TYPE.READ
+        else {
+            theData = compoundTypeWriteIO(dsDatatype, dsDatatype, objBuf, new int[]{0});
+            try {
+                H5.H5Awrite(attr_id, tid, theData);
+            }
+            catch (Exception ex) {
+                log.debug("AttributeCommonIO(): H5Awrite failure: ", ex);
+            }
+            finally {
+                dsDatatype.close(tid);
+            }
+        } // H5File.IO_TYPE.WRITE
 
-                    switch (dname) {
-                        case 'B':
-                            byte[] barray = (byte[]) theobj;
-                            short sValue = barray[i];
-                            if (sValue < 0) {
-                                sValue += 256;
-                            }
-                            sb.append(sValue);
-                            break;
-                        case 'S':
-                            short[] sarray = (short[]) theobj;
-                            int iValue = sarray[i];
-                            if (iValue < 0) {
-                                iValue += 65536;
-                            }
-                            sb.append(iValue);
-                            break;
-                        case 'I':
-                            int[] iarray = (int[]) theobj;
-                            long lValue = iarray[i];
-                            if (lValue < 0) {
-                                lValue += 4294967296L;
-                            }
-                            sb.append(lValue);
-                            break;
-                        case 'J':
-                            long[] larray = (long[]) theobj;
-                            Long l = larray[i];
-                            String theValue = Long.toString(l);
-                            if (l < 0) {
-                                l = (l << 1) >>> 1;
-                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                                BigInteger big2 = new BigInteger(l.toString());
-                                BigInteger big = big1.add(big2);
-                                theValue = big.toString();
-                            }
-                            sb.append(theValue);
-                            break;
-                        default:
-                            String strValue = Array.get(theobj, i).toString();
-                            if (maxItems > 0 && strValue.length() > maxItems) {
-                                // truncate the extra characters
-                                strValue = strValue.substring(0, maxItems);
-                            }
-                            sb.append(strValue);
-                            break;
-                    }
-                }
-                else {
-                    log.trace("toString: not enum or unsigned");
-                    Object value = Array.get(theobj, i);
-                    String strValue;
+        return theData;
+    }
 
-                    if (value == null) {
-                        strValue = "null";
-                    }
-                    else {
-                        strValue = value.toString();
-                    }
+    public Object AttributeSelection() throws Exception {
+        return originalBuf;
+//        H5Datatype dsDatatype = (H5Datatype) getDatatype();
+//        Object theData = H5Datatype.allocateArray(dsDatatype, (int)nPoints);
+//        if (dsDatatype.isText() && convertByteToString && (theData instanceof byte[])) {
+//        log.trace("AttributeSelection(): isText: converting byte array to string array");
+//        theData = byteToString((byte[]) theData, (int) dsDatatype.getDatatypeSize());
+//    }
+//    else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
+//        log.trace("AttributeSelection(): isFloat: converting byte array to BigDecimal array");
+//        theData = dsDatatype.byteToBigDecimal(0, (int)nPoints, (byte[]) theData);
+//    }
+//    else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() && dsDatatype.getDatatypeBase().getDatatypeSize() == 16) {
+//        log.trace("AttributeSelection(): isArray and isFloat: converting byte array to BigDecimal array");
+//        long[] arrayDims = dsDatatype.getArrayDims();
+//        int asize = (int)nPoints;
+//        for (int j = 0; j < arrayDims.length; j++) {
+//            asize *= arrayDims[j];
+//        }
+//        theData = ((H5Datatype)dsDatatype.getDatatypeBase()).byteToBigDecimal(0, asize, (byte[]) theData);
+//    }
+//    else if (dsDatatype.isRefObj()) {
+//            log.trace("AttributeSelection(): isREF: converting byte array to long array");
+//            theData = HDFNativeData.byteToLong((byte[]) theData);
+//        }
+//        Object theOrig = originalBuf;
 
-                    if (maxItems > 0 && strValue.length() > maxItems) {
-                        // truncate the extra characters
-                        strValue = strValue.substring(0, maxItems);
-                    }
-                    sb.append(strValue);
-                }
-            }  // end for (int dv = 0; dv < numberTypes; dv++)
-            sb.append("}");
-        }  // end for (int i = 1; i < n; i++)
+        /*
+         * Copy the selection from originalBuf to theData Only three dims are involved and selected data is 2 dimensions
+         * selectedDims[selectedIndex[0]] is the row dimension selectedDims[selectedIndex[1]] is the col dimension
+         * selectedDims[selectedIndex[2]] is the frame dimension
+         */
+//        long[] start = getStartDims();
+//        long curFrame = start[selectedIndex[2]];
+//        for (int col = 0; col < (int)selectedDims[selectedIndex[1]]; col++) {
+//            for (int row = 0; row < (int)selectedDims[selectedIndex[0]]; row++) {
 
-        return sb.toString();
+//                int k = (int)startDims[selectedIndex[2]] * (int)selectedDims[selectedIndex[2]];
+//                int index = row * (int)selectedDims[selectedIndex[1]] + col;
+//                log.trace("compoundAttributeSelection(): point{} row:col:k={}:{}:{}", curFrame, row, col, k);
+//                int fromIndex = ((int)curFrame * (int)selectedDims[selectedIndex[1]] * (int)selectedDims[selectedIndex[0]] +
+//                                        col * (int)selectedDims[selectedIndex[0]] +
+//                                        row);// * (int) dsDatatype.getDatatypeSize();
+//                int toIndex = (col * (int)selectedDims[selectedIndex[0]] +
+//                        row);// * (int) dsDatatype.getDatatypeSize();
+//                int objSize = 1;
+//                if (dsDatatype.isArray()) {
+//                    long[] arrayDims = dsDatatype.getArrayDims();
+//                    objSize = (int)arrayDims.length;
+//                }
+//                for (int i = 0; i < ((ArrayList<Object[]>)theOrig).size(); i++) {
+//                    Object theOrigobj = ((ArrayList<Object[]>)theOrig).get(i);
+//                    Object theDataobj = ((ArrayList<Object[]>)theData).get(i);
+//                    log.trace("compoundAttributeSelection(): theOrig={} theData={}", theOrigobj, theDataobj);
+//                    System.arraycopy(theOrig, fromIndex, theData, toIndex, objSize);
+//                }
+//            }
+//        }
+
+//        log.trace("compoundAttributeSelection(): theData={}", theData);
+//        return theData;
     }
 }

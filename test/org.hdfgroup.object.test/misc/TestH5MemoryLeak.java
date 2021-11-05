@@ -17,6 +17,7 @@ import hdf.object.ScalarDS;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarAttr;
+import hdf.object.h5.H5ScalarDS;
 
 public class TestH5MemoryLeak
 {
@@ -265,7 +266,7 @@ public class TestH5MemoryLeak
                             Object data = dset.getData();
                             try { dset.write(data); } catch (Exception ex) {}
 
-                            dset.getMetadata();
+                            ((H5ScalarDS)dset).getMetadata();
 
                             // copy data into a new datast
                             if (dset instanceof ScalarDS) {

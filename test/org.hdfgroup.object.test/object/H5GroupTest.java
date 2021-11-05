@@ -28,7 +28,7 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5G_info_t;
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -537,15 +537,15 @@ public class H5GroupTest {
 
         final int n = attrs.size();
         for (int i = 0; i < n; i++) {
-            final AttributeDataset attr = (AttributeDataset) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            final Attribute attr = (Attribute) attrs.get(i);
+            final H5Datatype dtype = (H5Datatype) attr.getAttributeDatatype();
             if (dtype.isString()) {
-                log.debug("testGetMetadata[{}] - ATTRIBUTE_STR:{} = attr:{}", i, ATTRIBUTE_STR_NAME, attr.getName());
-                assertTrue(ATTRIBUTE_STR_NAME.equals(attr.getName()));
+                log.debug("testGetMetadata[{}] - ATTRIBUTE_STR:{} = attr:{}", i, ATTRIBUTE_STR_NAME, attr.getAttributeName());
+                assertTrue(ATTRIBUTE_STR_NAME.equals(attr.getAttributeName()));
 
                 try {
                     assertTrue(
-                            ((String[]) ATTRIBUTE_STR)[0].equals(((String[]) attr.getData())[0]));
+                            ((String[]) ATTRIBUTE_STR)[0].equals(((String[]) attr.getAttributeData())[0]));
                 }
                 catch (Exception ex) {
                     log.trace("testGetMetadata(): getData() failure:", ex);
@@ -558,12 +558,12 @@ public class H5GroupTest {
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
                 try {
-                    log.debug("testGetMetadata[{}] - ATTRIBUTE_INT_ARRAY:{} = attr:{}", i, ATTRIBUTE_INT_ARRAY_NAME, attr.getName());
-                    assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getName()));
+                    log.debug("testGetMetadata[{}] - ATTRIBUTE_INT_ARRAY:{} = attr:{}", i, ATTRIBUTE_INT_ARRAY_NAME, attr.getAttributeName());
+                    assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getAttributeName()));
                     final int[] expected = (int[]) ATTRIBUTE_INT_ARRAY;
                     assertNotNull(expected);
                     log.debug("testGetMetadata - expected.length:{}", expected.length);
-                    final int[] ints = (int[]) attr.getData();
+                    final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
                     log.debug("testGetMetadata - ints.length:{}", ints.length);
                     for (int j = 0; j < expected.length; j++) {
@@ -598,7 +598,7 @@ public class H5GroupTest {
     public void testWriteMetadata() {
         log.debug("testWriteMetadata");
         List attrs = null;
-        AttributeDataset attr = null;
+        Attribute attr = null;
 
         try {
             attrs = (List) testGroup.getMetadata();
@@ -612,11 +612,11 @@ public class H5GroupTest {
         // update existing attribute
         int n = attrs.size();
         for (int i = 0; i < n; i++) {
-            attr = (AttributeDataset) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            attr = (Attribute) attrs.get(i);
+            final H5Datatype dtype = (H5Datatype) attr.getAttributeDatatype();
             if (dtype.isString()) {
                 try {
-                    final String[] strs = (String[]) attr.getData();
+                    final String[] strs = (String[]) attr.getAttributeData();
                     strs[0] = TEST_VALUE_STR;
                 }
                 catch (Exception ex) {
@@ -630,7 +630,7 @@ public class H5GroupTest {
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
                 try {
-                    final int[] ints = (int[]) attr.getData();
+                    final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
                     for (int j = 0; j < ints.length; j++) {
                         ints[j] = TEST_VALUE_INT;
@@ -646,7 +646,7 @@ public class H5GroupTest {
                 }
             }
             try {
-                attr.write();
+                attr.writeAttribute();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
@@ -654,10 +654,10 @@ public class H5GroupTest {
         } //  (int i=0; i<n; i++)
 
         // attache a new attribute
-        attr = (AttributeDataset)new H5ScalarAttr(testGroup, "float attribute", typeFloat, new long[] { 1 },
+        attr = (Attribute)new H5ScalarAttr(testGroup, "float attribute", typeFloat, new long[] { 1 },
                 new float[] { TEST_VALUE_FLOAT });
         try {
-            attr.write();
+            attr.writeAttribute();
         }
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);
@@ -685,14 +685,14 @@ public class H5GroupTest {
         assertTrue(attrs.size() > 0);
 
         n = attrs.size();
-        AttributeDataset newAttr = null;
+        Attribute newAttr = null;
         for (int i = 0; i < n; i++) {
-            attr = (AttributeDataset) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            attr = (Attribute) attrs.get(i);
+            final H5Datatype dtype = (H5Datatype) attr.getAttributeDatatype();
             if (dtype.isString()) {
                 try {
-                    assertTrue(ATTRIBUTE_STR_NAME.equals(attr.getName()));
-                    assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getData())[0]));
+                    assertTrue(ATTRIBUTE_STR_NAME.equals(attr.getAttributeName()));
+                    assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getAttributeData())[0]));
                 }
                 catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -705,8 +705,8 @@ public class H5GroupTest {
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
                 try {
-                    assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getName()));
-                    final int[] ints = (int[]) attr.getData();
+                    assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getAttributeName()));
+                    final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
                     for (int j = 0; j < ints.length; j++) {
                         assertEquals(TEST_VALUE_INT, ints[j]);
@@ -724,7 +724,7 @@ public class H5GroupTest {
             else if (dtype.getDatatypeClass() == Datatype.CLASS_FLOAT) {
                 try {
                     newAttr = attr;
-                    final float[] floats = (float[]) attr.getData();
+                    final float[] floats = (float[]) attr.getAttributeData();
                     assertEquals(TEST_VALUE_FLOAT, floats[0], Float.MIN_VALUE);
                 }
                 catch (Exception ex) {
@@ -749,11 +749,11 @@ public class H5GroupTest {
         // set the value to original
         n = attrs.size();
         for (int i = 0; i < n; i++) {
-            attr = (AttributeDataset) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            attr = (Attribute) attrs.get(i);
+            final H5Datatype dtype = (H5Datatype) attr.getAttributeDatatype();
             if (dtype.isString()) {
                 try {
-                    final String[] strs = (String[]) attr.getData();
+                    final String[] strs = (String[]) attr.getAttributeData();
                     strs[0] = ((String[]) ATTRIBUTE_STR)[0];
                 }
                 catch (Exception ex) {
@@ -767,7 +767,7 @@ public class H5GroupTest {
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
                 try {
-                    final int[] ints = (int[]) attr.getData();
+                    final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
                     for (int j = 0; j < ints.length; j++) {
                         final int[] expected = (int[]) ATTRIBUTE_INT_ARRAY;
@@ -784,7 +784,7 @@ public class H5GroupTest {
                 }
             }
             try {
-                attr.write();
+                attr.writeAttribute();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);

@@ -954,10 +954,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         return (datatypeClass == Datatype.CLASS_BITFIELD);
     }
 
+    /* Implement interface MetaDataContainer */
+
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#clear()
+     * @see hdf.object.MetaDataContainer#clear()
      */
     @Override
     public void clear() {
@@ -966,7 +968,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#getMetadata()
+     * @see hdf.object.MetaDataContainer#getMetadata()
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -977,7 +979,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
+     * @see hdf.object.MetaDataContainer#writeMetadata(java.lang.Object)
      */
     @Override
     public void writeMetadata(Object info) throws Exception {
@@ -987,7 +989,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
+     * @see hdf.object.MetaDataContainer#removeMetadata(java.lang.Object)
      */
     @Override
     public void removeMetadata(Object info) throws Exception {
@@ -997,7 +999,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
+     * @see hdf.object.MetaDataContainer#updateMetadata(java.lang.Object)
      */
     @Override
     public void updateMetadata(Object info) throws Exception {

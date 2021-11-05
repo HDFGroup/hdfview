@@ -15,18 +15,28 @@
 package hdf.object;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
- * The abstract class provides general APIs to create and manipulate dataset
- * objects, and retrieve dataset properties, datatype and dimension sizes.
+ * The abstract class provides general APIs to create and manipulate dataset/attribute
+ * objects, and retrieve dataset/attribute properties, datatype and dimension sizes.
  * <p>
  * This class provides two convenient functions, read()/write(), to read/write
  * data values. Reading/writing data may take many library calls if we use the
  * library APIs directly. The read() and write functions hide all the details of
  * these calls from users.
  * <p>
- * For more details on dataset,
+ * For more details on dataset and attributes,
  * see <b> <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
  * <p>
  *
@@ -36,7 +46,7 @@ import java.util.List;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Dataset extends HObject implements MetaDataContainer, DataFormat {
+public abstract class Dataset extends HObject implements DataFormat {
     private static final long serialVersionUID    = -3360885430038261178L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
@@ -170,28 +180,14 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /** The number of data points in the memory buffer. */
     protected long            nPoints             = 1;
 
-    /**
-     * The array to store flags to indicate if a member of this compound
-     * dataset is selected for read/write.
-     * <p>
-     * If a member is selected, the read/write will perform on the member.
-     * Applications such as HDFView will only display the selected members of
-     * the compound dataset.
-     *
-     * <pre>
-     * For example, if a compound dataset has four members
-     *     String[] memberNames = {"X", "Y", "Z", "TIME"};
-     * and
-     *     boolean[] isMemberSelected = {true, false, false, true};
-     * members "X" and "TIME" are selected for read and write.
-     * </pre>
-     */
-    protected boolean[] isMemberSelected;
+    /** Flag to indicate if the data is a single scalar point */
+    protected boolean   isScalar;
 
-    /**
-     * The datatypes of the compound attribute's members.
-     */
-    protected Datatype[] memberTypes = null;
+    /** True if this dataset is an image. */
+    protected boolean isImage;
+
+    /** True if this dataset is ASCII text. */
+    protected boolean isText;
 
     /**
      * The data buffer that contains the raw data directly reading from file
@@ -544,6 +540,49 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     }
 
     /**
+     * Resets selection of dataspace
+     */
+    protected void resetSelection() {
+        for (int i = 0; i < rank; i++) {
+            startDims[i] = 0;
+            selectedDims[i] = 1;
+            if (selectedStride != null) {
+                selectedStride[i] = 1;
+            }
+        }
+
+        if (rank == 1) {
+            selectedIndex[0] = 0;
+            selectedDims[0] = dims[0];
+        }
+        else if (rank == 2) {
+            selectedIndex[0] = 0;
+            selectedIndex[1] = 1;
+            selectedDims[0] = dims[0];
+            selectedDims[1] = dims[1];
+        }
+        else if (rank > 2) {
+            if (isImage) {
+                // 3D dataset is arranged in the order of [frame][height][width]
+                selectedIndex[1] = rank - 1; // width, the fastest dimension
+                selectedIndex[0] = rank - 2; // height
+                selectedIndex[2] = rank - 3; // frames
+            }
+            else {
+                selectedIndex[0] = 0; // width, the fastest dimension
+                selectedIndex[1] = 1; // height
+                selectedIndex[2] = 2; // frames
+            }
+
+            selectedDims[selectedIndex[0]] = dims[selectedIndex[0]];
+            selectedDims[selectedIndex[1]] = dims[selectedIndex[1]];
+            selectedDims[selectedIndex[2]] = dims[selectedIndex[2]];
+        }
+
+        isDataLoaded = false;
+    }
+
+    /**
      * Returns the data buffer of the dataset in memory.
      * <p>
      * If data is already loaded into memory, returns the data; otherwise, calls
@@ -663,7 +702,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final void setData(Object d) {
-        if (!(this instanceof AttributeDataset))
+        if (!(this instanceof Attribute))
             throw new UnsupportedOperationException("setData: unsupported for non-Attribute objects");
 
         log.trace("setData(): isDataLoaded={}", isDataLoaded);
@@ -880,55 +919,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     @Override
     public Datatype getDatatype() {
         return datatype;
-    }
-
-    /**
-     * Returns the number of selected members of the compound attribute.
-     *
-     * Selected members are the compound fields which are selected for read/write.
-     * <p>
-     * For example, in a compound datatype of {int A, float B, char[] C}, users can
-     * choose to retrieve only {A, C} from the attribute. In this case,
-     * getSelectedMemberCount() returns two.
-     *
-     * @return the number of selected members.
-     */
-    public int getSelectedMemberCount() {
-        int count = 0;
-
-        if (isMemberSelected != null) {
-            for (int i = 0; i < isMemberSelected.length; i++) {
-                if (isMemberSelected[i]) {
-                    count++;
-                }
-            }
-        }
-
-        log.trace("getSelectedMemberCount(): count of selected members={}", count);
-
-        return count;
-    }
-
-    /**
-     * Returns an array of datatype objects of selected compound members.
-     *
-     * @return an array of datatype objects of selected compound members.
-     */
-    public Datatype[] getSelectedMemberTypes() {
-        if (isMemberSelected == null) {
-            log.debug("getSelectedMemberTypes(): isMemberSelected array is null");
-            return memberTypes;
-        }
-
-        int idx = 0;
-        Datatype[] types = new Datatype[getSelectedMemberCount()];
-        for (int i = 0; i < isMemberSelected.length; i++) {
-            if (isMemberSelected[i]) {
-                types[idx++] = memberTypes[i];
-            }
-        }
-
-        return types;
     }
 
     /**
@@ -1346,6 +1336,14 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         return originalBuf.getClass();
     }
 
+    /**
+     * @return true if the data is a single scalar point; otherwise, returns
+     *         false.
+     */
+    public boolean isScalar() {
+        return isScalar;
+    }
+
     /*
      * Checks if dataset is virtual. Sub-classes must replace
      * this default implementation.
@@ -1374,5 +1372,314 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     public int getVirtualMaps() {
         return -1;
+    }
+
+    /**
+     * Returns a string representation of the data value. For
+     * example, "0, 255".
+     * <p>
+     * For a compound datatype, it will be a 1D array of strings with field
+     * members separated by the delimiter. For example,
+     * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
+     * float} of three data points.
+     * <p>
+     *
+     * @param delimiter
+     *            The delimiter used to separate individual data points. It
+     *            can be a comma, semicolon, tab or space. For example,
+     *            toString(",") will separate data by commas.
+     *
+     * @return the string representation of the data values.
+     */
+    public String toString(String delimiter) {
+        return toString(delimiter, -1);
+    }
+
+    /**
+     * Returns a string representation of the data value. For
+     * example, "0, 255".
+     * <p>
+     * For a compound datatype, it will be a 1D array of strings with field
+     * members separated by the delimiter. For example,
+     * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
+     * float} of three data points.
+     * <p>
+     *
+     * @param delimiter
+     *            The delimiter used to separate individual data points. It
+     *            can be a comma, semicolon, tab or space. For example,
+     *            toString(",") will separate data by commas.
+     * @param maxItems
+     *            The maximum number of Array values to return
+     *
+     * @return the string representation of the data values.
+     */
+    public String toString(String delimiter, int maxItems) {
+        Object theData = originalBuf;
+        if (theData == null) {
+            log.debug("toString: value is null");
+            return null;
+        }
+
+        if (theData instanceof List<?>) {
+            log.trace("toString: value is list");
+            return null;
+        }
+
+        Class<? extends Object> valClass = theData.getClass();
+
+        if (!valClass.isArray()) {
+            log.trace("toString: finish - not array");
+            String strValue = theData.toString();
+            if (maxItems > 0 && strValue.length() > maxItems) {
+                // truncate the extra characters
+                strValue = strValue.substring(0, maxItems);
+            }
+            return strValue;
+        }
+
+        // value is an array
+        StringBuilder sb = new StringBuilder();
+        int n = Array.getLength(theData);
+        if ((maxItems > 0) && (n > maxItems))
+            n = maxItems;
+
+        log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", getDatatype().isEnum(),
+                getDatatype().isUnsigned(), n);
+
+        if (getDatatype().isEnum()) {
+            String cname = valClass.getName();
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+            log.trace("toString: is_enum with cname={} dname={}", cname, dname);
+
+            Map<String, String> map = this.getDatatype().getEnumMembers();
+            String theValue = null;
+            switch (dname) {
+                case 'B':
+                    byte[] barray = (byte[]) theData;
+                    short sValue = barray[0];
+                    theValue = String.valueOf(sValue);
+                    if (map.containsKey(theValue)) {
+                        sb.append(map.get(theValue));
+                    }
+                    else
+                        sb.append(sValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sValue = barray[i];
+                        theValue = String.valueOf(sValue);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(sValue);
+                    }
+                    break;
+                case 'S':
+                    short[] sarray = (short[]) theData;
+                    int iValue = sarray[0];
+                    theValue = String.valueOf(iValue);
+                    if (map.containsKey(theValue)) {
+                        sb.append(map.get(theValue));
+                    }
+                    else
+                        sb.append(iValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        iValue = sarray[i];
+                        theValue = String.valueOf(iValue);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(iValue);
+                    }
+                    break;
+                case 'I':
+                    int[] iarray = (int[]) theData;
+                    long lValue = iarray[0];
+                    theValue = String.valueOf(lValue);
+                    if (map.containsKey(theValue)) {
+                        sb.append(map.get(theValue));
+                    }
+                    else
+                        sb.append(lValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        lValue = iarray[i];
+                        theValue = String.valueOf(lValue);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(lValue);
+                    }
+                    break;
+                case 'J':
+                    long[] larray = (long[]) theData;
+                    Long l = larray[0];
+                    theValue = Long.toString(l);
+                    if (map.containsKey(theValue)) {
+                        sb.append(map.get(theValue));
+                    }
+                    else
+                        sb.append(theValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        l = larray[i];
+                        theValue = Long.toString(l);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(theValue);
+                    }
+                    break;
+                default:
+                    sb.append(Array.get(theData, 0));
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sb.append(Array.get(theData, i));
+                    }
+                    break;
+            }
+        }
+        else if (getDatatype().isUnsigned()) {
+            String cname = valClass.getName();
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+            log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
+
+            switch (dname) {
+                case 'B':
+                    byte[] barray = (byte[]) theData;
+                    short sValue = barray[0];
+                    if (sValue < 0) {
+                        sValue += 256;
+                    }
+                    sb.append(sValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sValue = barray[i];
+                        if (sValue < 0) {
+                            sValue += 256;
+                        }
+                        sb.append(sValue);
+                    }
+                    break;
+                case 'S':
+                    short[] sarray = (short[]) theData;
+                    int iValue = sarray[0];
+                    if (iValue < 0) {
+                        iValue += 65536;
+                    }
+                    sb.append(iValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        iValue = sarray[i];
+                        if (iValue < 0) {
+                            iValue += 65536;
+                        }
+                        sb.append(iValue);
+                    }
+                    break;
+                case 'I':
+                    int[] iarray = (int[]) theData;
+                    long lValue = iarray[0];
+                    if (lValue < 0) {
+                        lValue += 4294967296L;
+                    }
+                    sb.append(lValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        lValue = iarray[i];
+                        if (lValue < 0) {
+                            lValue += 4294967296L;
+                        }
+                        sb.append(lValue);
+                    }
+                    break;
+                case 'J':
+                    long[] larray = (long[]) theData;
+                    Long l = larray[0];
+                    String theValue = Long.toString(l);
+                    if (l < 0) {
+                        l = (l << 1) >>> 1;
+                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                        BigInteger big2 = new BigInteger(l.toString());
+                        BigInteger big = big1.add(big2);
+                        theValue = big.toString();
+                    }
+                    sb.append(theValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        l = larray[i];
+                        theValue = Long.toString(l);
+                        if (l < 0) {
+                            l = (l << 1) >>> 1;
+                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                            BigInteger big2 = new BigInteger(l.toString());
+                            BigInteger big = big1.add(big2);
+                            theValue = big.toString();
+                        }
+                        sb.append(theValue);
+                    }
+                    break;
+                default:
+                    String strValue = Array.get(theData, 0).toString();
+                    if (maxItems > 0 && strValue.length() > maxItems) {
+                        // truncate the extra characters
+                        strValue = strValue.substring(0, maxItems);
+                    }
+                    sb.append(strValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        strValue = Array.get(theData, i).toString();
+                        if (maxItems > 0 && strValue.length() > maxItems) {
+                            // truncate the extra characters
+                            strValue = strValue.substring(0, maxItems);
+                        }
+                        sb.append(strValue);
+                    }
+                    break;
+            }
+        }
+        else {
+            log.trace("toString: not enum or unsigned");
+            Object value = Array.get(theData, 0);
+            String strValue;
+
+            if (value == null) {
+                strValue = "null";
+            }
+            else {
+                strValue = value.toString();
+            }
+
+            if (maxItems > 0 && strValue.length() > maxItems) {
+                // truncate the extra characters
+                strValue = strValue.substring(0, maxItems);
+            }
+            sb.append(strValue);
+
+            for (int i = 1; i < n; i++) {
+                sb.append(delimiter);
+                value = Array.get(theData, i);
+
+                if (value == null) {
+                    strValue = "null";
+                }
+                else {
+                    strValue = value.toString();
+                }
+
+                if (maxItems > 0 && strValue.length() > maxItems) {
+                    // truncate the extra characters
+                    strValue = strValue.substring(0, maxItems);
+                }
+                sb.append(strValue);
+            }
+        }
+
+        return sb.toString();
     }
 }

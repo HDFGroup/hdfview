@@ -73,13 +73,6 @@ public class FitsDatatype extends Datatype
         datatypeDescription = getDescription();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.DataFormat#hasAttribute()
-     */
-    @Override
-    public boolean hasAttribute () { return false; }
-
     /**
      * Allocate an one-dimensional array of byte, short, int, long, float, double,
      * or String to store data retrieved from an fits file based on the given
@@ -267,9 +260,16 @@ public class FitsDatatype extends Datatype
         // Nothing to implement
     }
 
-    // Implementing DataFormat
+    // Implementing MetaDataContainer
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.MetaDataContainer#hasAttribute()
+     */
+    @Override
+    public boolean hasAttribute () { return false; }
 }

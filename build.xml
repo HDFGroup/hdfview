@@ -313,10 +313,6 @@
         <delete dir="${build.dir}" />
 
         <mkdir dir="${classes.dir}/${object.dir}" />
-        <!-- <mkdir dir="${classes.dir}/${h4.dir}" /> -->
-        <!-- <mkdir dir="${classes.dir}/${fits.dir}" /> -->
-        <!-- <mkdir dir="${classes.dir}/${nc2.dir}" /> -->
-        <!-- <mkdir dir="${classes.dir}/${h5.dir}" /> -->
         <mkdir dir="${classes.dir}/${hdfview.dir}" />
         <mkdir dir="${classes.dir}/hdf" />
     </target>
@@ -539,17 +535,6 @@
           ================================================================= -->
 
     <target name="compile-examples" depends="compile, jar">
-        <!-- <mkdir dir="${testclasses.dir}" /> -->
-
-        <!-- <javac modulesourcepath="${testsrc.dir}/${examples.dir}" modulepathref="test-classpath" modulepath="build-classpath"
-            destdir="${testclasses.dir}/${examples.dir}"
-            classpathref="project-classpath"
-            includes="**/*.java"
-            includeantruntime="false" debug="${build.debug}">
-            <compilerarg value="-Xlint:deprecation" />
-            <compilerarg value="-Xlint:unchecked" />
-        </javac> -->
-
         <copy todir="${exclasses.dir}">
             <fileset dir="${testsrc.dir}/${examples.dir}" excludes=" **/*.in **/*.java hdf/** ${test.path}" />
         </copy>
@@ -559,20 +544,21 @@
         <fileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
     </target>
 
-    <target name="run-one-example">
-        <dirname property="exfile.dir" file="${exfile}" />
+    <target name="run-one-example" depends="compile-test" description="Runs one example">
+        <dirname property="exfile.dir" file="${build.exfile}" />
         <basename property="exdir.name" file="${exfile.dir}" />
-        <basename property="exfile.name" file="${exfile}" suffix=".class" />
+        <basename property="exfile.name" file="${build.exfile}" suffix=".class" />
         <property name="exdir.rel" value="${exclasses.dir}" relative="yes" />
         <basename property="exdirrel.name" file="${exdir.rel}" />
         <echo message="Test example: ${exfile.name}" />
-        <java fork="true" classname="${exdirrel.name}/${exdir.name}/${exfile.name}" dir="${classes.dir}">
+        <java fork="true" classname="${exfile.name}" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
             <jvmarg value="${XstartOnFirstThreadFlag}" />
             <classpath>
                 <path refid="project-classpath" />
                 <path refid="log-classpath" />
-                <path refid="application" />
+                <path refid="hdfobject-jar" />
+                <pathelement location="${classes.dir}" />
                 <pathelement path="${exclasses.dir}" />
             </classpath>
             <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
@@ -591,8 +577,6 @@
           ================================================================= -->
 
     <target name="compile-test" depends="objectjar, jar, compile-objtest, compile-uitest, compile-examples">
-        <!-- <mkdir dir="${testclasses.dir}" /> -->
-
         <javac modulesourcepath="${testsrc.dir}" modulepathref="test-classpath" modulepath="build-classpath"
             destdir="${classes.dir}"
             classpathref="test-classpath"
@@ -602,24 +586,9 @@
             <compilerarg value="-Xlint:unchecked" />
         </javac>
 
-        <!-- <copy todir="${testclasses.dir}/${test.dir}">
-            <fileset dir="${testsrc.dir}/${test.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
-        </copy> -->
-        <!-- <mkdir dir="${testclasses.dir}/${test.dir}/lib/ext" /> -->
     </target>
 
     <target name="compile-objtest" depends="objectjar, jar">
-        <!-- <mkdir dir="${testclasses.dir}" /> -->
-
-        <!-- <javac modulesourcepath="${testsrc.dir}/${test.dir}" modulepathref="test-classpath" modulepath="build-classpath"
-            destdir="${testclasses.dir}"
-            classpathref="test-classpath"
-            includes="**/*.java"
-            includeantruntime="false" debug="${build.debug}">
-            <compilerarg value="-Xlint:deprecation" />
-            <compilerarg value="-Xlint:unchecked" />
-        </javac> -->
-
         <copy todir="${testclasses.dir}">
             <fileset dir="${testsrc.dir}/${test.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
         </copy>
@@ -627,17 +596,6 @@
     </target>
 
     <target name="compile-uitest" depends="objectjar, jar">
-        <!-- <mkdir dir="${uitestclasses.dir}" /> -->
-
-        <!-- <javac modulesourcepath="${testsrc.dir}/${test.hdfview.dir}" modulepathref="test-classpath" modulepath="build-classpath"
-            destdir="${uitestclasses.dir}"
-            classpathref="test-classpath"
-            includes="**/*.java"
-            includeantruntime="false" debug="${build.debug}">
-            <compilerarg value="-Xlint:deprecation" />
-            <compilerarg value="-Xlint:unchecked" />
-        </javac> -->
-
         <copy todir="${uitestclasses.dir}">
             <fileset dir="${testsrc.dir}/${test.hdfview.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
         </copy>
@@ -645,17 +603,6 @@
     </target>
 
     <target name="compile-uimodtest" depends="modulejar, jar">
-        <!--<mkdir dir="${testclasses.dir}" />
-
-        <javac modulesourcepath="${testsrc.dir}" modulepathref="test-classpath" modulepath="build-classpath"
-            destdir="${testclasses.dir}"
-            classpathref="test-classpath"
-            includes="**/*.java"
-            includeantruntime="false" debug="${build.debug}">
-            <compilerarg value="-Xlint:deprecation" />
-            <compilerarg value="-Xlint:unchecked" />
-        </javac> -->
-
         <copy todir="${testclasses.dir}/${test.dir}">
             <fileset dir="${testsrc.dir}/${test.dir}" excludes=" **/JUnit*.txt **/*.err **/*.in **/*.java hdf/** ${examples.path}" />
         </copy>
@@ -905,24 +852,6 @@
             excludes="**/*All* **/*$*"
             if="h4path"
         />
-
-        <!-- Run the HDF4 bug fix tests -->
-        <!-- <run-ui-junit
-            rootdir="${basedir}/${hdf4uitestclasses.dir}"
-            workdir="${basedir}/${hdf4uitestclasses.dir}/BugFixTests"
-            propfile="${basedir}/${hdf4uitestclasses.dir}/.hdfview${app.version}"
-            includes="${hdf4uitestclasses.dir}/BugFixTests/*Test*.class"
-            excludes="**/*All* **/*$*"
-        /> -->
-
-        <!-- Run the HDF4 feature tests -->
-        <!-- <run-ui-junit
-            rootdir="${basedir}/${hdf4uitestclasses.dir}"
-            workdir="${basedir}/${hdf4uitestclasses.dir}/FeatureTests"
-            propfile="${basedir}/${hdf4uitestclasses.dir}/.hdfview${app.version}"
-            includes="${hdf4uitestclasses.dir}/FeatureTests/*Test*.class"
-            excludes="**/*All* **/*$*"
-        /> -->
     </target>
 
     <target name="-hdf5-ui-tests">
@@ -936,24 +865,6 @@
             includes="${hdf5uitestclasses.dir}/${test}.class"
             excludes="**/*All* **/*$*"
         />
-
-        <!-- Run the HDF5 bug fix tests -->
-        <!-- <run-ui-junit
-            rootdir="${basedir}/${hdf5uitestclasses.dir}"
-            workdir="${basedir}/${hdf5uitestclasses.dir}/BugFixTests"
-            propfile="${basedir}/${hdf5uitestclasses.dir}/.hdfview${app.version}"
-            includes="${hdf5uitestclasses.dir}/BugFixTests/*Test*.class"
-            excludes="**/*All* **/*$*"
-        /> -->
-
-        <!-- Run the HDF5 feature tests -->
-        <!-- <run-ui-junit
-            rootdir="${basedir}/${hdf5uitestclasses.dir}"
-            workdir="${basedir}/${hdf5uitestclasses.dir}/FeatureTests"
-            propfile="${basedir}/${hdf5uitestclasses.dir}/.hdfview${app.version}"
-            includes="${hdf5uitestclasses.dir}/FeatureTests/*Test*.class"
-            excludes="**/*All* **/*$*"
-        /> -->
     </target>
 
     <target name="junit-uimodules" depends="jar,modulejar,compile-uimodtest,clean-junit-uitest,jacoco" description="Runs the tests for the UI modules">

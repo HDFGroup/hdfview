@@ -35,13 +35,11 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5MetaDataContainer;
-
-import hdf.object.h5.H5AttributeDataset;
 
 /**
  * This class defines HDF5 datatype characteristics and APIs for a data type.
@@ -59,7 +57,7 @@ public class H5Datatype extends Datatype {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Datatype.class);
 
     /**
-     * The metadata object for this data object. Members of the metadata are instances of AttributeDataset.
+     * The metadata object for this data object. Members of the metadata are instances of Attribute.
      */
     private H5MetaDataContainer objMetadata;
 
@@ -2004,7 +2002,7 @@ public class H5Datatype extends Datatype {
      * @see hdf.object.MetaDataContainer#getMetadata()
      */
     @Override
-    public List<AttributeDataset> getMetadata() throws HDF5Exception {
+    public List<Attribute> getMetadata() throws HDF5Exception {
         return this.getMetadata(fileFormat.getIndexType(null), fileFormat.getIndexOrder(null));
     }
 
@@ -2013,7 +2011,7 @@ public class H5Datatype extends Datatype {
      *
      * @see hdf.object.MetaDataContainer#getMetadata(int...)
      */
-    public List<AttributeDataset> getMetadata(int... attrPropList) throws HDF5Exception {
+    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
         // load attributes first
         try {
             this.linkTargetObjName = H5File.getLinkTargetName(this);
@@ -2022,7 +2020,7 @@ public class H5Datatype extends Datatype {
             log.debug("getMetadata(): getLinkTargetName failed: ", ex);
         }
 
-        List<AttributeDataset> attrlist = null;
+        List<Attribute> attrlist = null;
         try {
             attrlist = objMetadata.getMetadata(attrPropList);
         }
@@ -2043,7 +2041,7 @@ public class H5Datatype extends Datatype {
             objMetadata.writeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("writeMetadata(): Object not an AttributeDataset");
+            log.debug("writeMetadata(): Object not an Attribute");
             return;
         }
     }
@@ -2059,14 +2057,14 @@ public class H5Datatype extends Datatype {
             objMetadata.removeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("removeMetadata(): Object not an AttributeDataset");
+            log.debug("removeMetadata(): Object not an Attribute");
             return;
         }
 
-        AttributeDataset attr = (AttributeDataset) info;
+        Attribute attr = (Attribute) info;
         long tid = open();
         try {
-            H5.H5Adelete(tid, attr.getName());
+            H5.H5Adelete(tid, attr.getAttributeName());
         }
         catch (Exception ex) {
             log.debug("removeMetadata(): ", ex);
@@ -2087,7 +2085,7 @@ public class H5Datatype extends Datatype {
             objMetadata.updateMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("updateMetadata(): Object not an AttributeDataset");
+            log.debug("updateMetadata(): Object not an Attribute");
             return;
         }
     }

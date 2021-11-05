@@ -14,10 +14,12 @@ import org.junit.Test;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+
 import hdf.object.FileFormat;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ScalarDS;
 
 /**
  * @author rsinha
@@ -168,7 +170,7 @@ public class ScalarDSTest {
     @Test
     public void testImageFunctionality() {
         log.debug("testImageFunctionality");
-        assertTrue(imageDset.hasAttribute());
+        assertTrue(((H5ScalarDS)imageDset).hasAttribute());
         assertTrue(imageDset.isImage());
         assertTrue(imageDset.isImageDisplay());
 

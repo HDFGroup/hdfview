@@ -52,6 +52,9 @@ import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
+
+import hdf.object.h5.H5CompoundDS;
+
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
@@ -221,7 +224,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 currentSizeField.setText(sizeStr);
 
                 try {
-                    dset.getMetadata();
+                    ((H5CompoundDS)dset).getMetadata();
                 } // get chunking and compression info
                 catch (Exception ex) {
                     log.debug("get chunking and compression info:", ex);

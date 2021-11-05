@@ -17,7 +17,7 @@ package hdf.object.h5;
 import java.util.List;
 import java.util.Vector;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
@@ -43,7 +43,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of AttributeDataset.
+     * instance of Attribute.
      */
     @SuppressWarnings("rawtypes")
     protected List            attributeList;
@@ -191,14 +191,14 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
      */
     public void writeMetadata(Object metadata) throws Exception {
         // only attribute metadata is supported.
-        if (!(metadata instanceof AttributeDataset)) {
-            log.debug("writeMetadata(): Object not an AttributeDataset");
+        if (!(metadata instanceof Attribute)) {
+            log.debug("writeMetadata(): Object not an Attribute");
             return;
         }
 
         boolean attrExisted = false;
-        AttributeDataset attr = (AttributeDataset) metadata;
-        log.trace("writeMetadata(): {}", attr.getName());
+        Attribute attr = (Attribute) metadata;
+        log.trace("writeMetadata(): {}", attr.getAttributeName());
 
         if (attributeList == null) {
             attributeList = ((MetaDataContainer)parentObject).getMetadata();
@@ -226,12 +226,12 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
      */
     public void removeMetadata(Object metadata) throws Exception {
         // only attribute metadata is supported.
-        if (!(metadata instanceof AttributeDataset)) {
-            throw new IllegalArgumentException("Object not an AttributeDataset");
+        if (!(metadata instanceof Attribute)) {
+            throw new IllegalArgumentException("Object not an Attribute");
         }
 
-        AttributeDataset attr = (AttributeDataset) metadata;
-        log.trace("removeMetadata(): {}", attr.getName());
+        Attribute attr = (Attribute) metadata;
+        log.trace("removeMetadata(): {}", attr.getAttributeName());
         List attrList = getMetadata();
         attrList.remove(attr);
         nAttributes = attributeList.size();
@@ -248,8 +248,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
      */
     public void updateMetadata(Object metadata) throws Exception {
         // only attribute metadata is supported.
-        if (!(metadata instanceof AttributeDataset)) {
-            log.debug("updateMetadata(): Object not an AttributeDataset");
+        if (!(metadata instanceof Attribute)) {
+            log.debug("updateMetadata(): Object not an Attribute");
             return;
         }
 

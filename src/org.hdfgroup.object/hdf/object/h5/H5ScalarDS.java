@@ -28,13 +28,16 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
+
+import hdf.object.h5.H5Attribute;
 import hdf.object.h5.H5MetaDataContainer;
 
 /**
@@ -47,13 +50,13 @@ import hdf.object.h5.H5MetaDataContainer;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H5ScalarDS extends ScalarDS {
+public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
     private static final long serialVersionUID = 2887517608230611642L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5ScalarDS.class);
 
     /**
-     * The metadata object for this data object. Members of the metadata are instances of AttributeDataset.
+     * The metadata object for this data object. Members of the metadata are instances of Attribute.
      */
     private H5MetaDataContainer objMetadata;
 
@@ -75,15 +78,7 @@ public class H5ScalarDS extends ScalarDS {
     /**
      * flag to indicate if the datatype in file is the same as dataype in memory
      */
-    private boolean isNativeDatatype = false;
-
-    /*
-     * Enum to indicate the type of I/O to perform inside of the common I/O
-     * function.
-     */
-    protected enum IO_TYPE {
-        READ, WRITE
-    };
+    protected boolean isNativeDatatype = false;
 
     /**
      * Constructs an instance of a H5 scalar dataset with given file, dataset name and path.
@@ -757,7 +752,7 @@ public class H5ScalarDS extends ScalarDS {
             init();
 
         try {
-            readData = scalarDatasetCommonIO(IO_TYPE.READ, null);
+            readData = scalarDatasetCommonIO(H5File.IO_TYPE.READ, null);
         }
         catch (Exception ex) {
             log.debug("read(): failed to read scalar dataset: ", ex);
@@ -785,7 +780,7 @@ public class H5ScalarDS extends ScalarDS {
             init();
 
         try {
-            scalarDatasetCommonIO(IO_TYPE.WRITE, buf);
+            scalarDatasetCommonIO(H5File.IO_TYPE.WRITE, buf);
         }
         catch (Exception ex) {
             log.debug("write(Object): failed to write to scalar dataset: ", ex);
@@ -793,14 +788,14 @@ public class H5ScalarDS extends ScalarDS {
         }
     }
 
-    private Object scalarDatasetCommonIO(IO_TYPE ioType, Object writeBuf) throws Exception {
+    private Object scalarDatasetCommonIO(H5File.IO_TYPE ioType, Object writeBuf) throws Exception {
         H5Datatype dsDatatype = (H5Datatype) getDatatype();
         Object theData = null;
 
         /*
          * I/O type-specific pre-initialization.
          */
-        if (ioType == IO_TYPE.WRITE) {
+        if (ioType == H5File.IO_TYPE.WRITE) {
             if (writeBuf == null) {
                 log.debug("scalarDatasetCommonIO(): writeBuf is null");
                 throw new Exception("write buffer is null");
@@ -833,7 +828,7 @@ public class H5ScalarDS extends ScalarDS {
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
                         selectedStride, selectedDims, spaceIDs);
 
-                if (ioType == IO_TYPE.READ) {
+                if (ioType == H5File.IO_TYPE.READ) {
                     log.trace("scalarDatasetCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}", dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(), dsDatatype.isRefObj());
                     if ((originalBuf == null) || dsDatatype.isEnum() || dsDatatype.isText() || dsDatatype.isRefObj()
                             || ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
@@ -913,7 +908,7 @@ public class H5ScalarDS extends ScalarDS {
                             theData = HDFNativeData.byteToLong((byte[]) theData);
                         }
                     }
-                } // IO_TYPE.READ
+                } // H5File.IO_TYPE.READ
                 else {
                     /*
                      * Perform any necessary data conversions before writing the data.
@@ -982,7 +977,7 @@ public class H5ScalarDS extends ScalarDS {
                     finally {
                         dsDatatype.close(tid);
                     }
-                } // IO_TYPE.WRITE
+                } // H5File.IO_TYPE.WRITE
             }
             finally {
                 if (HDF5Constants.H5S_ALL != spaceIDs[0]) {
@@ -1018,7 +1013,7 @@ public class H5ScalarDS extends ScalarDS {
      * @see hdf.object.MetaDataContainer#getMetadata()
      */
     @Override
-    public List<AttributeDataset> getMetadata() throws HDF5Exception {
+    public List<Attribute> getMetadata() throws HDF5Exception {
         return this.getMetadata(fileFormat.getIndexType(null), fileFormat.getIndexOrder(null));
     }
 
@@ -1027,7 +1022,7 @@ public class H5ScalarDS extends ScalarDS {
      *
      * @see hdf.object.MetaDataContainer#getMetadata(int...)
      */
-    public List<AttributeDataset> getMetadata(int... attrPropList) throws HDF5Exception {
+    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
         if (!isInited()) {
             init();
         }
@@ -1295,7 +1290,7 @@ public class H5ScalarDS extends ScalarDS {
             }
         }
 
-        List<AttributeDataset> attrlist = null;
+        List<Attribute> attrlist = null;
         try {
             attrlist = objMetadata.getMetadata(attrPropList);
         }
@@ -1316,7 +1311,7 @@ public class H5ScalarDS extends ScalarDS {
             objMetadata.writeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("writeMetadata(): Object not an AttributeDataset");
+            log.debug("writeMetadata(): Object not an Attribute");
             return;
         }
     }
@@ -1332,16 +1327,16 @@ public class H5ScalarDS extends ScalarDS {
             objMetadata.removeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("removeMetadata(): Object not an AttributeDataset");
+            log.debug("removeMetadata(): Object not an Attribute");
             return;
         }
 
-        AttributeDataset attr = (AttributeDataset) info;
-        log.trace("removeMetadata(): {}", attr.getName());
+        Attribute attr = (Attribute) info;
+        log.trace("removeMetadata(): {}", attr.getAttributeName());
         long did = open();
         if (did >= 0) {
             try {
-                H5.H5Adelete(did, attr.getName());
+                H5.H5Adelete(did, attr.getAttributeName());
             }
             finally {
                 close(did);
@@ -1360,7 +1355,7 @@ public class H5ScalarDS extends ScalarDS {
             objMetadata.updateMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("updateMetadata(): Object not an AttributeDataset");
+            log.debug("updateMetadata(): Object not an Attribute");
             return;
         }
     }
@@ -1382,14 +1377,8 @@ public class H5ScalarDS extends ScalarDS {
     /**
      * Resets selection of dataspace
      */
-    private void resetSelection() {
-        for (int i = 0; i < rank; i++) {
-            startDims[i] = 0;
-            selectedDims[i] = 1;
-            if (selectedStride != null) {
-                selectedStride[i] = 1;
-            }
-        }
+    protected void resetSelection() {
+        super.resetSelection();
 
         if (interlace == INTERLACE_PIXEL) {
             // 24-bit TRUE color image
@@ -1411,35 +1400,6 @@ public class H5ScalarDS extends ScalarDS {
             selectedIndex[1] = 2; // index for width
             selectedIndex[2] = 0; // index for depth
         }
-        else if (rank == 1) {
-            selectedIndex[0] = 0;
-            selectedDims[0] = dims[0];
-        }
-        else if (rank == 2) {
-            selectedIndex[0] = 0;
-            selectedIndex[1] = 1;
-            selectedDims[0] = dims[0];
-            selectedDims[1] = dims[1];
-        }
-        else if (rank > 2) {
-            if (isImage) {
-                // 3D dataset is arranged in the order of [frame][height][width]
-                selectedIndex[1] = rank - 1; // width, the fastest dimension
-                selectedIndex[0] = rank - 2; // height
-                selectedIndex[2] = rank - 3; // frames
-            }
-            else {
-                selectedIndex[0] = 0; // width, the fastest dimension
-                selectedIndex[1] = 1; // height
-                selectedIndex[2] = 2; // frames
-            }
-
-            selectedDims[selectedIndex[0]] = dims[selectedIndex[0]];
-            selectedDims[selectedIndex[1]] = dims[selectedIndex[1]];
-            selectedDims[selectedIndex[2]] = dims[selectedIndex[2]];
-        }
-
-        isDataLoaded = false;
 
         if ((rank > 1) && (selectedIndex[0] > selectedIndex[1]))
             isDefaultImageOrder = false;

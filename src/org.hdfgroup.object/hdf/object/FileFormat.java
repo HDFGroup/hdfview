@@ -1554,7 +1554,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public abstract void writeAttribute(HObject obj, AttributeDataset attr, boolean attrExisted) throws Exception;
+    public abstract void writeAttribute(HObject obj, Attribute attr, boolean attrExisted) throws Exception;
 
     // REVIEW DOCS for writeAttribute(). Check and document exceptions.
 

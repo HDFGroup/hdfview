@@ -86,16 +86,6 @@ public class NC2Datatype extends Datatype {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#hasAttribute()
-     */
-    @Override
-    public boolean hasAttribute() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
      * @see hdf.object.Datatype#fromNative(long)
      */
     /**
@@ -290,9 +280,19 @@ public class NC2Datatype extends Datatype {
         // No implementation
     }
 
-    // Implementing DataFormat
+    // Implementing MetaDataContainer
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.MetaDataContainer#hasAttribute()
+     */
+    @Override
+    public boolean hasAttribute() {
+        return false;
     }
 }

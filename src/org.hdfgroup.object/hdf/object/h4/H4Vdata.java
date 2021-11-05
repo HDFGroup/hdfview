@@ -21,14 +21,15 @@ import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
+import hdf.object.MetaDataContainer;
 
-import hdf.object.h4.H4Attribute;
+import hdf.object.h4.H4CompoundAttribute;
 
 /**
  * H4Vdata describes a multi-dimension array of HDF4 vdata, inheriting CompoundDS.
@@ -90,7 +91,7 @@ import hdf.object.h4.H4Attribute;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H4Vdata extends CompoundDS
+public class H4Vdata extends CompoundDS implements MetaDataContainer
 {
     private static final long serialVersionUID = -5978700886955419959L;
 
@@ -98,7 +99,7 @@ public class H4Vdata extends CompoundDS
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of H4Attribute.
+     * instance of H4CompoundAttribute.
      */
     @SuppressWarnings("rawtypes")
     private List                                attributeList;
@@ -471,7 +472,7 @@ public class H4Vdata extends CompoundDS
                     }
 
                     long[] attrDims = {attrInfo[1]};
-                    H4Attribute attr = new H4Attribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    H4CompoundAttribute attr = new H4CompoundAttribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     if (j>=0)
                         attr.setProperty("field", memberNames[j]);
                     attributeList.add(attr);
@@ -499,7 +500,7 @@ public class H4Vdata extends CompoundDS
                             buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                         }
 
-                        attr.setData(buf);
+                        attr.setAttributeData(buf);
                         nleft--;
                     }
                 } //  (int i=0; i<n; i++)
@@ -523,13 +524,13 @@ public class H4Vdata extends CompoundDS
     public void writeMetadata(Object info) throws Exception
     {
         // only attribute metadata is supported.
-        if (!(info instanceof AttributeDataset)) {
+        if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an H4Attribute");
             return;
         }
 
         try {
-            getFileFormat().writeAttribute(this, (AttributeDataset)info, true);
+            getFileFormat().writeAttribute(this, (H4ScalarAttribute)info, true);
 
             if (attributeList == null) {
                 attributeList = new Vector();

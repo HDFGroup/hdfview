@@ -15,10 +15,12 @@ import org.junit.Test;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+
 import hdf.object.Dataset;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5File;
+import hdf.object.h5.H5ScalarDS;
 
 /**
  * TestCase for bug fixes.
@@ -348,7 +350,10 @@ public class H5BugFixTest {
                         dset.init();
                         final Object data = dset.getData();
                         dset.write(data);
-                        dset.getMetadata();
+                        if (dset.getDatatype().isCompound())
+                            ((H5CompoundDS)dset).getMetadata();
+                        else
+                            ((H5ScalarDS)dset).getMetadata();
                     }
 
                     // groups

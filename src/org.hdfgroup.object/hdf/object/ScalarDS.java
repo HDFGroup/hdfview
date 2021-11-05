@@ -73,19 +73,9 @@ public abstract class ScalarDS extends Dataset {
     protected byte[][] palette;
 
     /**
-     * True if this dataset is an image.
-     */
-    protected boolean isImage;
-
-    /**
      * True if this dataset is a true color image.
      */
     protected boolean isTrueColor;
-
-    /**
-     * True if this dataset is ASCII text.
-     */
-    protected boolean isText;
 
     /**
      * Flag to indicate is the original unsigned C data is converted.
@@ -139,7 +129,7 @@ public abstract class ScalarDS extends Dataset {
      * @param thePath
      *            the full path of the data object, e.g. "/arrays/".
      * @param oid
-     *            the v of the data object.
+     *            the object id of the data object.
      */
     @Deprecated
     public ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid) {

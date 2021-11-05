@@ -12,31 +12,22 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package modules;
+package hdf.object.h5;
 
 import hdf.object.Attribute;
-import hdf.object.HObject;
-import hdf.view.MetaDataView.MetaDataView;
 
-public class MetaDataViewModule implements MetaDataView {
+import hdf.object.h5.H5File;
 
-    public MetaDataViewModule() {
+/**
+ * An interface that provides general attribute operations for hdf5 object data. For
+ * example, reference to a parent object.
+ * <p>
+ *
+ * @see hdf.object.HObject
+ */
+public interface H5Attribute extends Attribute{
 
-    }
+    Object AttributeCommonIO(long attr_id, H5File.IO_TYPE ioType, Object objBuf) throws Exception;
 
-    @Override
-    public HObject getDataObject() {
-        return null;
-    }
-
-    @Override
-    public Attribute addAttribute(HObject obj) {
-        return null;
-    }
-
-    @Override
-    public Attribute deleteAttribute(HObject obj) {
-        return null;
-    }
-
+    Object AttributeSelection() throws Exception;
 }

@@ -18,7 +18,6 @@ import java.lang.reflect.Constructor;
 import java.util.BitSet;
 import java.util.HashMap;
 
-import hdf.object.AttributeDataset;
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
 import hdf.object.FileFormat;

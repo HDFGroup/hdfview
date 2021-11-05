@@ -24,7 +24,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
@@ -53,7 +53,7 @@ public class H5Group extends Group {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Group.class);
 
     /**
-     * The metadata object for this data object. Members of the metadata are instances of AttributeDataset.
+     * The metadata object for this data object. Members of the metadata are instances of Attribute.
      */
     private H5MetaDataContainer objMetadata;
 
@@ -202,7 +202,7 @@ public class H5Group extends Group {
             log.debug("getMetadata(): getLinkTargetName failed: ", ex);
         }
 
-        List<AttributeDataset> attrlist = null;
+        List<Attribute> attrlist = null;
         try {
             attrlist = objMetadata.getMetadata(attrPropList);
         }
@@ -224,7 +224,7 @@ public class H5Group extends Group {
             objMetadata.writeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("writeMetadata(): Object not an AttributeDataset");
+            log.debug("writeMetadata(): Object not an Attribute");
             return;
         }
     }
@@ -241,16 +241,16 @@ public class H5Group extends Group {
             objMetadata.removeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("removeMetadata(): Object not an AttributeDataset");
+            log.debug("removeMetadata(): Object not an Attribute");
             return;
         }
 
-        AttributeDataset attr = (AttributeDataset) info;
-        log.trace("removeMetadata(): {}", attr.getName());
+        Attribute attr = (Attribute) info;
+        log.trace("removeMetadata(): {}", attr.getAttributeName());
         long gid = open();
         if(gid >= 0) {
             try {
-                H5.H5Adelete(gid, attr.getName());
+                H5.H5Adelete(gid, attr.getAttributeName());
             }
             finally {
                 close(gid);
@@ -272,7 +272,7 @@ public class H5Group extends Group {
             objMetadata.updateMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("updateMetadata(): Object not an AttributeDataset");
+            log.debug("updateMetadata(): Object not an Attribute");
             return;
         }
     }
