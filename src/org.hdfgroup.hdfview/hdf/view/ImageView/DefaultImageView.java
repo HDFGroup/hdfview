@@ -2999,7 +2999,7 @@ public class DefaultImageView implements ImageView
                 brightLevel = -100;
             else if (blevel > 100)
                 brightLevel = 100;
-            else {
+            else
                 brightLevel = blevel;
             brightLevel *= 2;
 
