@@ -1550,7 +1550,180 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
      * @return the string representation of the data values.
      */
     public String toAttributeString(String delimiter, int maxItems) {
-        return toString(delimiter, maxItems);
+        Object theData = originalBuf;
+        if (theData == null) {
+            log.debug("toString: value is null");
+            return null;
+        }
+
+        if (!(theData instanceof List<?>)) {
+            log.trace("toString: value is not list");
+            return null;
+        }
+
+        // attribute value is an array
+        StringBuilder sb = new StringBuilder();
+        int numberTypes = ((ArrayList<Object[]>)theData).size();
+        List<Datatype> cmpdTypes =  getDatatype().getCompoundMemberTypes();
+        int n = Array.getLength(((ArrayList<Object[]>)theData).get(0));
+        if ((maxItems > 0) && (n > maxItems))
+            n = maxItems;
+
+        for (int i = 0; i < n; i++) {
+            if (i > 0)
+                sb.append(delimiter);
+            sb.append("{");
+            for (int dv = 0; dv < numberTypes; dv++) {
+                if (dv > 0)
+                    sb.append(delimiter);
+
+                Object theobj = ((ArrayList<Object[]>)theData).get(dv);
+
+                Class<? extends Object> valClass = theobj.getClass();
+
+                if (!valClass.isArray()) {
+                    log.trace("toString: member - not array");
+                    String strValue = theobj.toString();
+                    if (maxItems > 0 && strValue.length() > maxItems) {
+                        // truncate the extra characters
+                        strValue = strValue.substring(0, maxItems);
+                    }
+                    sb.append(strValue);
+                    continue;
+                }
+
+                log.trace("toString[{}]: is_enum={} is_unsigned={}", i, cmpdTypes.get(dv).isEnum(),
+                        cmpdTypes.get(dv).isUnsigned());
+
+                if (cmpdTypes.get(dv).isEnum()) {
+                    String cname = valClass.getName();
+                    char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+                    log.trace("toString: is_enum with cname={} dname={}", cname, dname);
+
+                    Map<String, String> map = cmpdTypes.get(dv).getEnumMembers();
+                    String theValue = null;
+                    switch (dname) {
+                        case 'B':
+                            byte[] barray = (byte[]) theobj;
+                            short sValue = barray[i];
+                            theValue = String.valueOf(sValue);
+                            if (map.containsKey(theValue)) {
+                                sb.append(map.get(theValue));
+                            }
+                            else
+                                sb.append(sValue);
+                            break;
+                        case 'S':
+                            short[] sarray = (short[]) theobj;
+                            int iValue = sarray[0];
+                            theValue = String.valueOf(iValue);
+                            if (map.containsKey(theValue)) {
+                                sb.append(map.get(theValue));
+                            }
+                            else
+                                sb.append(iValue);
+                            break;
+                        case 'I':
+                            int[] iarray = (int[]) theobj;
+                            long lValue = iarray[i];
+                            theValue = String.valueOf(lValue);
+                            if (map.containsKey(theValue)) {
+                                sb.append(map.get(theValue));
+                            }
+                            else
+                                sb.append(lValue);
+                            break;
+                        case 'J':
+                            long[] larray = (long[]) theobj;
+                            Long l = larray[i];
+                            theValue = Long.toString(l);
+                            if (map.containsKey(theValue)) {
+                                sb.append(map.get(theValue));
+                            }
+                            else
+                                sb.append(theValue);
+                            break;
+                        default:
+                            sb.append(Array.get(theobj, i));
+                            break;
+                    }
+                }
+                else if (cmpdTypes.get(dv).isUnsigned()) {
+                    String cname = valClass.getName();
+                    char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+                    log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
+
+                    switch (dname) {
+                        case 'B':
+                            byte[] barray = (byte[]) theobj;
+                            short sValue = barray[i];
+                            if (sValue < 0) {
+                                sValue += 256;
+                            }
+                            sb.append(sValue);
+                            break;
+                        case 'S':
+                            short[] sarray = (short[]) theobj;
+                            int iValue = sarray[i];
+                            if (iValue < 0) {
+                                iValue += 65536;
+                            }
+                            sb.append(iValue);
+                            break;
+                        case 'I':
+                            int[] iarray = (int[]) theobj;
+                            long lValue = iarray[i];
+                            if (lValue < 0) {
+                                lValue += 4294967296L;
+                            }
+                            sb.append(lValue);
+                            break;
+                        case 'J':
+                            long[] larray = (long[]) theobj;
+                            Long l = larray[i];
+                            String theValue = Long.toString(l);
+                            if (l < 0) {
+                                l = (l << 1) >>> 1;
+                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                                BigInteger big2 = new BigInteger(l.toString());
+                                BigInteger big = big1.add(big2);
+                                theValue = big.toString();
+                            }
+                            sb.append(theValue);
+                            break;
+                        default:
+                            String strValue = Array.get(theobj, i).toString();
+                            if (maxItems > 0 && strValue.length() > maxItems) {
+                                // truncate the extra characters
+                                strValue = strValue.substring(0, maxItems);
+                            }
+                            sb.append(strValue);
+                            break;
+                    }
+                }
+                else {
+                    log.trace("toString: not enum or unsigned");
+                    Object value = Array.get(theobj, i);
+                    String strValue;
+
+                    if (value == null) {
+                        strValue = "null";
+                    }
+                    else {
+                        strValue = value.toString();
+                    }
+
+                    if (maxItems > 0 && strValue.length() > maxItems) {
+                        // truncate the extra characters
+                        strValue = strValue.substring(0, maxItems);
+                    }
+                    sb.append(strValue);
+                }
+            }  // end for (int dv = 0; dv < numberTypes; dv++)
+            sb.append("}");
+        }  // end for (int i = 1; i < n; i++)
+
+        return sb.toString();
     }
 
     /* Implement interface H5Attribute */
