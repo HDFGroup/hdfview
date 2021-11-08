@@ -620,7 +620,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
             if (isH5) {
                 log.trace("createGeneralObjectInfoPane(): get Library Version bounds info");
-                String libversion = dataObject.getFileFormat().getLibBoundsDescription();
+                String libversion = "";
+                try {
+                    libversion = dataObject.getFileFormat().getLibBoundsDescription();
+                }
+                catch (Exception ex) {
+                    log.debug("Get Library Bounds Description failure: ", ex);
+                }
 
                 if (libversion.length() > 0) {
                     label = new Label(generalInfoGroup, SWT.LEFT);

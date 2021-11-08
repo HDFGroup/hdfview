@@ -2003,7 +2003,22 @@ public class H5Datatype extends Datatype {
      */
     @Override
     public List<Attribute> getMetadata() throws HDF5Exception {
-        return this.getMetadata(fileFormat.getIndexType(null), fileFormat.getIndexOrder(null));
+        int gmIndexType = 0;
+        int gmIndexOrder = 0;
+
+        try {
+            gmIndexType = fileFormat.getIndexType(null);
+        }
+        catch (Exception ex) {
+            log.debug("getMetadata(): getIndexType failed: ", ex);
+        }
+        try {
+            gmIndexOrder = fileFormat.getIndexOrder(null);
+        }
+        catch (Exception ex) {
+            log.debug("getMetadata(): getIndexOrder failed: ", ex);
+        }
+        return this.getMetadata(gmIndexType, gmIndexOrder);
     }
 
     /*

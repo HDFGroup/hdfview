@@ -780,8 +780,18 @@ public class DefaultTreeView implements TreeView {
                 ChangeIndexingDialog dialog = new ChangeIndexingDialog(shell, SWT.NONE, selectedFile);
                 dialog.open();
                 if (dialog.isReloadFile()) {
-                    selectedFile.setIndexType(dialog.getIndexType());
-                    selectedFile.setIndexOrder(dialog.getIndexOrder());
+                    try {
+                        selectedFile.setIndexType(dialog.getIndexType());
+                    }
+                    catch (Exception ex) {
+                        log.debug("ChangeIndexingDialog(): setIndexType failed: ", ex);
+                    }
+                    try {
+                        selectedFile.setIndexOrder(dialog.getIndexOrder());
+                    }
+                    catch (Exception ex) {
+                        log.debug("ChangeIndexingDialog(): setIndexOrder failed: ", ex);
+                    }
 
                     try {
                         reopenFile(selectedFile, -1);
@@ -2971,23 +2981,43 @@ public class DefaultTreeView implements TreeView {
             super(parent, style);
 
             selectedFile = viewSelectedFile;
-            indexType = selectedFile.getIndexType(null);
-            indexOrder = selectedFile.getIndexOrder(null);
+            try {
+                indexType = selectedFile.getIndexType(null);
+            }
+            catch (Exception ex) {
+                log.debug("ChangeIndexingDialog(): getIndexType failed: ", ex);
+            }
+            try {
+                indexOrder = selectedFile.getIndexOrder(null);
+            }
+            catch (Exception ex) {
+                log.debug("ChangeIndexingDialog(): getIndexOrder failed: ", ex);
+            }
             reloadFile = false;
         }
 
         private void setIndexOptions() {
-            if (checkIndexByName.getSelection())
-                indexType = selectedFile.getIndexType("H5_INDEX_NAME");
-            else
-                indexType = selectedFile.getIndexType("H5_INDEX_CRT_ORDER");
+            try {
+                if (checkIndexByName.getSelection())
+                    indexType = selectedFile.getIndexType("H5_INDEX_NAME");
+                else
+                    indexType = selectedFile.getIndexType("H5_INDEX_CRT_ORDER");
+            }
+            catch (Exception ex) {
+                log.debug("setIndexOptions(): getIndexType failed: ", ex);
+            }
 
-            if (checkIndexIncrements.getSelection())
-                indexOrder = selectedFile.getIndexOrder("H5_ITER_INC");
-            else if (checkIndexNative.getSelection())
-                indexOrder = selectedFile.getIndexOrder("H5_ITER_NATIVE");
-            else
-                indexOrder = selectedFile.getIndexOrder("H5_ITER_DEC");
+            try {
+                if (checkIndexIncrements.getSelection())
+                    indexOrder = selectedFile.getIndexOrder("H5_ITER_INC");
+                else if (checkIndexNative.getSelection())
+                    indexOrder = selectedFile.getIndexOrder("H5_ITER_NATIVE");
+                else
+                    indexOrder = selectedFile.getIndexOrder("H5_ITER_DEC");
+            }
+            catch (Exception ex) {
+                log.debug("setIndexOptions(): getIndexOrder failed: ", ex);
+            }
 
             reloadFile = true;
         }
@@ -3007,6 +3037,7 @@ public class DefaultTreeView implements TreeView {
             return reloadFile;
         }
 
+        /** open the ChangeIndexingDialog for setting the indexing values. */
         public void open() {
             Shell parent = getParent();
             final Shell openShell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
@@ -3026,16 +3057,29 @@ public class DefaultTreeView implements TreeView {
             indexingTypeGroup.setLayout(new GridLayout(2, true));
             indexingTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+            int initIndexType = 0;
+            try {
+                initIndexType = selectedFile.getIndexType("H5_INDEX_NAME");
+            }
+            catch (Exception ex) {
+                log.debug("open(): getIndexType failed: ", ex);
+            }
             checkIndexByName = new Button(indexingTypeGroup, SWT.RADIO);
             checkIndexByName.setFont(curFont);
             checkIndexByName.setText("By Name");
-            checkIndexByName.setSelection((indexType) == selectedFile.getIndexType("H5_INDEX_NAME"));
+            checkIndexByName.setSelection((indexType) == initIndexType);
             checkIndexByName.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
+            try {
+                initIndexType = selectedFile.getIndexType("H5_INDEX_CRT_ORDER");
+            }
+            catch (Exception ex) {
+                log.debug("open(): getIndexType failed: ", ex);
+            }
             Button byOrder = new Button(indexingTypeGroup, SWT.RADIO);
             byOrder.setFont(curFont);
             byOrder.setText("By Creation Order");
-            byOrder.setSelection((indexType) == selectedFile.getIndexType("H5_INDEX_CRT_ORDER"));
+            byOrder.setSelection((indexType) == initIndexType);
             byOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
             org.eclipse.swt.widgets.Group indexingOrderGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
@@ -3044,22 +3088,41 @@ public class DefaultTreeView implements TreeView {
             indexingOrderGroup.setLayout(new GridLayout(3, true));
             indexingOrderGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+            int initIndexOrder = 0;
+            try {
+                initIndexOrder = selectedFile.getIndexOrder("H5_ITER_INC");
+            }
+            catch (Exception ex) {
+                log.debug("open(): getIndexOrder failed: ", ex);
+            }
             checkIndexIncrements = new Button(indexingOrderGroup, SWT.RADIO);
             checkIndexIncrements.setFont(curFont);
             checkIndexIncrements.setText("Increments");
-            checkIndexIncrements.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_INC"));
+            checkIndexIncrements.setSelection((indexOrder) == initIndexOrder);
             checkIndexIncrements.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
+            try {
+                initIndexOrder = selectedFile.getIndexOrder("H5_ITER_DEC");
+            }
+            catch (Exception ex) {
+                log.debug("open(): getIndexOrder failed: ", ex);
+            }
             Button decrements = new Button(indexingOrderGroup, SWT.RADIO);
             decrements.setFont(curFont);
             decrements.setText("Decrements");
-            decrements.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_DEC"));
+            decrements.setSelection((indexOrder) == initIndexOrder);
             decrements.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
+            try {
+                initIndexOrder = selectedFile.getIndexOrder("H5_ITER_NATIVE");
+            }
+            catch (Exception ex) {
+                log.debug("open(): getIndexOrder failed: ", ex);
+            }
             checkIndexNative = new Button(indexingOrderGroup, SWT.RADIO);
             checkIndexNative.setFont(curFont);
             checkIndexNative.setText("Native");
-            checkIndexNative.setSelection((indexOrder) == selectedFile.getIndexOrder("H5_ITER_NATIVE"));
+            checkIndexNative.setSelection((indexOrder) == initIndexOrder);
             checkIndexNative.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
 
