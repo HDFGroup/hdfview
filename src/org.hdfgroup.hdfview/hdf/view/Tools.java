@@ -840,14 +840,12 @@ public final class Tools {
         double[] fillValue = null;
 
         // no input data
-        if (rawData == null || w<=0 || h<=0) {
+        if (rawData == null || w <= 0 || h <= 0)
             return null;
-        }
 
         // input data is not an array
-        if (!rawData.getClass().isArray()) {
+        if (!rawData.getClass().isArray())
             return null;
-        }
 
         String cname = rawData.getClass().getName();
         char dname = cname.charAt(cname.lastIndexOf('[') + 1);
@@ -858,17 +856,14 @@ public final class Tools {
             minmax[0] = minmax[1] = 0;
         }
 
-        if (dname == 'B') {
+        if (dname == 'B')
             return convertByteData((byte[]) rawData, minmax, w, h, isTransposed, fillValue, convertByteData, byteData, list);
-        }
 
-        if ((byteData == null) || (size != byteData.length)) {
+        if ((byteData == null) || (size != byteData.length))
             byteData = new byte[size]; // reuse the old buffer
-        }
 
-        if (minmax[0] == minmax[1]) {
+        if (minmax[0] == minmax[1])
             Tools.findMinMax(rawData, minmax, fillValue);
-        }
 
         double min = minmax[0];
         double max = minmax[1];
@@ -888,8 +883,9 @@ public final class Tools {
                 short[] s = (short[]) rawData;
                 for (long i = 0; i < h; i++) {
                     for (long j = 0; j < w; j++) {
-                        idxSrc = idxDst =j * h + i;
-                        if (isTransposed) idxDst = i * w + j;
+                        idxSrc = idxDst = j * h + i;
+                        if (isTransposed)
+                            idxDst = i * w + j;
                         byteData[(int)idxDst] = toByte(s[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
@@ -900,7 +896,8 @@ public final class Tools {
                 for (long i = 0; i < h; i++) {
                     for (long j = 0; j < w; j++) {
                         idxSrc = idxDst = (j * h + i);
-                        if (isTransposed) idxDst = i * w + j;
+                        if (isTransposed)
+                            idxDst = i * w + j;
                         byteData[(int)idxDst] = toByte(ia[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
@@ -910,8 +907,9 @@ public final class Tools {
                 long[] l = (long[]) rawData;
                 for (long i = 0; i < h; i++) {
                     for (long j = 0; j < w; j++) {
-                        idxSrc = idxDst =j * h + i;
-                        if (isTransposed) idxDst = i * w + j;
+                        idxSrc = idxDst = j * h + i;
+                        if (isTransposed)
+                            idxDst = i * w + j;
                         byteData[(int)idxDst] = toByte(l[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
@@ -921,8 +919,9 @@ public final class Tools {
                 float[] f = (float[]) rawData;
                 for (long i = 0; i < h; i++) {
                     for (long j = 0; j < w; j++) {
-                        idxSrc = idxDst =j * h + i;
-                        if (isTransposed) idxDst = i * w + j;
+                        idxSrc = idxDst = j * h + i;
+                        if (isTransposed)
+                            idxDst = i * w + j;
                         byteData[(int)idxDst] = toByte(f[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
@@ -932,8 +931,9 @@ public final class Tools {
                 double[] d = (double[]) rawData;
                 for (long i = 0; i < h; i++) {
                     for (long j = 0; j < w; j++) {
-                        idxSrc = idxDst =j * h + i;
-                        if (isTransposed) idxDst = i * w + j;
+                        idxSrc = idxDst = j * h + i;
+                        if (isTransposed)
+                            idxDst = i * w + j;
                         byteData[(int)idxDst] = toByte(d[(int)idxSrc], ratio, min, max, fillValue, (int)idxSrc, list);
                     }
                 }
@@ -953,7 +953,7 @@ public final class Tools {
 
         if (in < min || in > max || isFillValue(in, fill) || isNaNINF(in)) {
             out = 0;
-            if (list!=null)
+            if (list != null)
                 list.add(idx);
         }
         else
@@ -964,10 +964,10 @@ public final class Tools {
 
     private static boolean isFillValue(double in, double[] fill) {
 
-        if (fill==null)
+        if (fill == null)
             return false;
 
-        for (int i=0; i<fill.length; i++) {
+        for (int i = 0; i < fill.length; i++) {
             if (fill[i] == in)
                 return true;
         }
@@ -980,12 +980,12 @@ public final class Tools {
         if (rawData == null) return null;
 
         if (convertByteData) {
-            if (minmax[0] == minmax[1]) {
+            if (minmax[0] == minmax[1])
                 Tools.findMinMax(rawData, minmax, fillValue);
-            }
         }
 
-        if (minmax[0] == 0 && minmax[1] == 255) convertByteData = false; // no need to convert data
+        if (minmax[0] == 0 && minmax[1] == 255)
+            convertByteData = false; // no need to convert data
 
         // no conversion and no transpose
         if (!convertByteData && !isTransposed) {
@@ -998,7 +998,8 @@ public final class Tools {
         }
 
         // don't want to change the original raw data
-        if (byteData == null || rawData == byteData) byteData = new byte[rawData.length];
+        if (byteData == null || rawData == byteData)
+            byteData = new byte[rawData.length];
 
         if (!convertByteData) {
             // do not convert data, just transpose the data
@@ -1023,7 +1024,8 @@ public final class Tools {
         for (long i = 0; i < h; i++) {
             for (long j = 0; j < w; j++) {
                 idxSrc = idxDst =j * h + i;
-                if (isTransposed) idxDst = i * w + j;
+                if (isTransposed)
+                    idxDst = i * w + j;
 
                 if (rawData[(int) idxSrc] > max || rawData[(int) idxSrc] < min) {
                     byteData[(int)idxDst] = (byte) 0;
@@ -1132,20 +1134,17 @@ public final class Tools {
         double[] minmax = new double[2];
 
         // check parameters
-        if ((data == null) || (params == null) || (Array.getLength(data) <= 0) || (params.length < 2)) {
+        if ((data == null) || (params == null) || (Array.getLength(data) <= 0) || (params.length < 2))
             return -1;
-        }
 
         retval = autoContrastComputeMinMax(data, minmax);
 
         // force the min_max method so we can look at the target grids data sets
-        if ((retval < 0) || (minmax[1] - minmax[0] < 10)) {
+        if ((retval < 0) || (minmax[1] - minmax[0] < 10))
             retval = findMinMax(data, minmax, null);
-        }
 
-        if (retval < 0) {
+        if (retval < 0)
             return -1;
-        }
 
         String cname = data.getClass().getName();
         char dname = cname.charAt(cname.lastIndexOf('[') + 1);
@@ -1155,21 +1154,18 @@ public final class Tools {
                 break;
             case 'S':
                 maxDataValue = MAX_INT16;
-                if (isUnsigned) {
+                if (isUnsigned)
                     maxDataValue = MAX_UINT8; // data was upgraded from unsigned byte
-                }
                 break;
             case 'I':
                 maxDataValue = MAX_INT32;
-                if (isUnsigned) {
+                if (isUnsigned)
                     maxDataValue = MAX_UINT16; // data was upgraded from unsigned short
-                }
                 break;
             case 'J':
                 maxDataValue = MAX_INT64;
-                if (isUnsigned) {
+                if (isUnsigned)
                     maxDataValue = MAX_UINT32; // data was upgraded from unsigned int
-                }
                 break;
             default:
                 retval = -1;
@@ -1190,13 +1186,11 @@ public final class Tools {
             double newmax = (minmax[1] + (diff * 0.1));
             double newmin = (minmax[0] - (diff * 0.1));
 
-            if (newmax <= maxDataValue) {
+            if (newmax <= maxDataValue)
                 minmax[1] = newmax;
-            }
 
-            if (newmin >= 0) {
+            if (newmin >= 0)
                 minmax[0] = newmin;
-            }
 
             params[0] = maxDataValue / (minmax[1] - minmax[0]);
             params[1] = -minmax[0];
@@ -1228,9 +1222,8 @@ public final class Tools {
         double min = -MAX_INT64;
         double max = MAX_INT64;
 
-        if ((dataIN == null) || (params == null) || (params.length < 2)) {
+        if ((dataIN == null) || (params == null) || (params.length < 2))
             return null;
-        }
 
         if (minmax != null) {
             min = minmax[0];
@@ -1238,9 +1231,8 @@ public final class Tools {
         }
         // input and output array must be the same size
         size = Array.getLength(dataIN);
-        if ((dataOUT != null) && (size != Array.getLength(dataOUT))) {
+        if ((dataOUT != null) && (size != Array.getLength(dataOUT)))
             return null;
-        }
 
         double gain = params[0];
         double bias = params[1];
@@ -1252,9 +1244,8 @@ public final class Tools {
         switch (dname) {
             case 'B':
                 byte[] bIn = (byte[]) dataIN;
-                if (dataOUT == null) {
+                if (dataOUT == null)
                     dataOUT = new byte[size];
-                }
                 byte[] bOut = (byte[]) dataOUT;
                 byte bMax = (byte) MAX_INT8;
 
@@ -1269,15 +1260,13 @@ public final class Tools {
                 break;
             case 'S':
                 short[] sIn = (short[]) dataIN;
-                if (dataOUT == null) {
+                if (dataOUT == null)
                     dataOUT = new short[size];
-                }
                 short[] sOut = (short[]) dataOUT;
                 short sMax = (short) MAX_INT16;
 
-                if (isUnsigned) {
+                if (isUnsigned)
                     sMax = (short) MAX_UINT8; // data was upgraded from unsigned byte
-                }
 
                 for (int i = 0; i < size; i++) {
                     valueIn = Math.max(sIn[i], min);
@@ -1290,14 +1279,12 @@ public final class Tools {
                 break;
             case 'I':
                 int[] iIn = (int[]) dataIN;
-                if (dataOUT == null) {
+                if (dataOUT == null)
                     dataOUT = new int[size];
-                }
                 int[] iOut = (int[]) dataOUT;
                 int iMax = (int) MAX_INT32;
-                if (isUnsigned) {
+                if (isUnsigned)
                     iMax = (int) MAX_UINT16; // data was upgraded from unsigned short
-                }
 
                 for (int i = 0; i < size; i++) {
                     valueIn = Math.max(iIn[i], min);
@@ -1310,14 +1297,12 @@ public final class Tools {
                 break;
             case 'J':
                 long[] lIn = (long[]) dataIN;
-                if (dataOUT == null) {
+                if (dataOUT == null)
                     dataOUT = new long[size];
-                }
                 long[] lOut = (long[]) dataOUT;
                 long lMax = MAX_INT64;
-                if (isUnsigned) {
+                if (isUnsigned)
                     lMax = MAX_UINT32; // data was upgraded from unsigned int
-                }
 
                 for (int i = 0; i < size; i++) {
                     valueIn = Math.max(lIn[i], min);
@@ -1363,9 +1348,8 @@ public final class Tools {
     public static int autoContrastConvertImageBuffer(Object src, byte[] dst, boolean isUnsigned) {
         int retval = 0;
 
-        if ((src == null) || (dst == null) || (dst.length != Array.getLength(src))) {
+        if ((src == null) || (dst == null) || (dst.length != Array.getLength(src)))
             return -1;
-        }
 
         int size = dst.length;
         String cname = src.getClass().getName();
@@ -1449,15 +1433,13 @@ public final class Tools {
     public static int autoContrastComputeMinMax(Object data, double[] minmax) {
         int retval = 1;
 
-        if ((data == null) || (minmax == null) || (Array.getLength(data) <= 0) || (Array.getLength(minmax) < 2)) {
+        if ((data == null) || (minmax == null) || (Array.getLength(data) <= 0) || (Array.getLength(minmax) < 2))
             return -1;
-        }
 
         double[] avgstd = { 0, 0 };
         retval = computeStatistics(data, avgstd, null);
-        if (retval < 0) {
+        if (retval < 0)
             return retval;
-        }
 
         minmax[0] = avgstd[0] - 3.0 * avgstd[1];
         minmax[1] = avgstd[0] + 3.0 * avgstd[1];
@@ -1481,9 +1463,8 @@ public final class Tools {
     public static int findMinMax(Object data, double[] minmax, Object fillValue) {
         int retval = 1;
 
-        if ((data == null) || (minmax == null) || (Array.getLength(data) <= 0) || (Array.getLength(minmax) < 2)) {
+        if ((data == null) || (minmax == null) || (Array.getLength(data) <= 0) || (Array.getLength(minmax) < 2))
             return -1;
-        }
 
         int n = Array.getLength(data);
         double fill = 0.0;
