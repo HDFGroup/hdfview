@@ -2770,7 +2770,8 @@ public class DefaultTreeView implements TreeView {
         map.put(ViewProperties.DATA_VIEW_KEY.TRANSPOSED, isTransposed);
         map.put(ViewProperties.DATA_VIEW_KEY.INDEXBASE1, isIndexBase1);
         map.put(ViewProperties.DATA_VIEW_KEY.BITMASK, bitmask);
-        if (isApplyBitmaskOnly) map.put(ViewProperties.DATA_VIEW_KEY.BITMASKOP, ViewProperties.BITMASK_OP.AND);
+        if (isApplyBitmaskOnly)
+            map.put(ViewProperties.DATA_VIEW_KEY.BITMASKOP, ViewProperties.BITMASK_OP.AND);
 
         log.trace(
                 "showDataContent(): object={} dataViewName={} isDisplayTypeChar={} isTransposed={} isIndexBase1={} bitmask={}",
