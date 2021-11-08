@@ -83,6 +83,8 @@ import hdf.view.ImageView.DefaultImageView.Rotate90Filter;
  */
 public class DataOptionDialog extends Dialog {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataOptionDialog.class);
+
     private Shell               shell;
 
     private Font                curFont;
