@@ -42,6 +42,13 @@ public class UserOptionsDialog extends PreferenceDialog {
 
     /**
      * UserOptionsDialog displays components for choosing user options.
+     *
+     * @param parent
+     *        the dialog parent shell
+     * @param mgr
+     *        the dialog manager
+     * @param viewRoot
+     *        the root dir for the app
      */
     public UserOptionsDialog(Shell parent, PreferenceManager mgr, String viewRoot) {
         super(parent, mgr);

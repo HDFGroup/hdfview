@@ -261,6 +261,19 @@ public class FitsDatatype extends Datatype
     }
 
     // Implementing MetaDataContainer
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");

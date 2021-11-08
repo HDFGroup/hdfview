@@ -350,6 +350,8 @@ public class ImageConversionDialog extends Dialog {
 
     /**
      * if an image file has been converted.
+     *
+     * @return the state of conversion
      */
     public boolean isFileConverted() {
         return isConverted;
@@ -357,6 +359,8 @@ public class ImageConversionDialog extends Dialog {
 
     /**
      * get the file of an image file that has been converted.
+     *
+     * @return the name of the converted file
      */
     public String getConvertedFile() {
         return convertedFile;

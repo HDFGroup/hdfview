@@ -63,6 +63,16 @@ public class FitsGroup extends Group
     public boolean hasAttribute () { return false; }
 
     // Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     public List getMetadata() throws Exception {
         if (!isRoot()) {
             return null; // there is only one group in the file: the root
@@ -76,10 +86,21 @@ public class FitsGroup extends Group
     }
 
     /**
-     * Creates a new attribute and attached to this dataset if attribute does
-     * not exist. Otherwise, just update the value of the attribute.
+     * Writes a specific piece of metadata (such as an attribute) into the file.
      *
-     * @param info the atribute to attach
+     * If an HDF(4&amp;5) attribute exists in the file, this method updates its
+     * value. If the attribute does not exist in the file, it creates the
+     * attribute in the file and attaches it to the object. It will fail to
+     * write a new attribute to the object where an attribute with the same name
+     * already exists. To update the value of an existing attribute in the file,
+     * one needs to get the instance of the attribute by getMetadata(), change
+     * its values, then use writeMetadata() to write the value.
+     *
+     * @param info
+     *            the metadata to write.
+     *
+     * @throws Exception
+     *             if the metadata can not be written
      */
     public void writeMetadata(Object info) throws Exception {
         // not supported
@@ -87,18 +108,27 @@ public class FitsGroup extends Group
     }
 
     /**
-     * Deletes an attribute from this dataset.
-     * <p>
-     * @param info the attribute to delete.
+     * Deletes an existing piece of metadata from this object.
+     *
+     * @param info
+     *            the metadata to delete.
+     *
+     * @throws Exception
+     *             if the metadata can not be removed
      */
     public void removeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
+    /**
+     * Updates an existing piece of metadata attached to this object.
+     *
+     * @param info
+     *            the metadata to update.
+     *
+     * @throws Exception
+     *             if the metadata can not be updated
      */
     public void updateMetadata(Object info) throws Exception {
         // not supported
@@ -136,6 +166,19 @@ public class FitsGroup extends Group
     }
 
     //Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

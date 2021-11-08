@@ -172,6 +172,11 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
     }
 
     // implementing Dataset
+    /**
+     * Returns the datatype of the data object.
+     *
+     * @return the datatype of the data object.
+     */
     @Override
     public Datatype getDatatype()
     {
@@ -191,6 +196,11 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
         return datatype;
     }
 
+    /**
+     * Returns the fill values for the data object.
+     *
+     * @return the fill values for the data object.
+     */
     @Override
     public Object getFillValue() {
         return null;
@@ -247,6 +257,25 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
     }
 
     // Implementing DataFormat
+    /**
+     * Reads the data from file.
+     * <p>
+     * read() reads the data from file to a memory buffer and returns the memory
+     * buffer. The dataset object does not hold the memory buffer. To store the
+     * memory buffer in the dataset object, one must call getData().
+     * <p>
+     * By default, the whole dataset is read into memory. Users can also select
+     * a subset to read. Subsetting is done in an implicit way.
+     *
+     * @return the data read from file.
+     *
+     * @see #getData()
+     *
+     * @throws Exception
+     *             if object can not be read
+     * @throws OutOfMemoryError
+     *             if memory is exhausted
+     */
     @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
     @Override
     public Object read() throws HDFException
@@ -344,6 +373,15 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
     }
 
     // Implementing DataFormat
+    /**
+     * Writes a memory buffer to the object in the file.
+     *
+     * @param buf
+     *            the data to write
+     *
+     * @throws Exception
+     *             if data can not be written
+     */
     @Override
     public void write(Object buf) throws HDFException
     {
@@ -409,17 +447,45 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
          */
     }
 
+    /**
+     * Converts the data values of this data object to appropriate Java integers if
+     * they are unsigned integers.
+     *
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertFromUnsignedC(Object, Object)
+     *
+     * @return the converted data buffer.
+     */
     @Override
     public Object convertFromUnsignedC() {
         throw new UnsupportedOperationException("H4Vdata:convertFromUnsignedC Unsupported operation.");
     }
 
+    /**
+     * Converts Java integer data values of this data object back to unsigned C-type
+     * integer data if they are unsigned integers.
+     *
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertToUnsignedC(Object, Object)
+     *
+     * @return the converted data buffer.
+     */
     @Override
     public Object convertToUnsignedC() {
         throw new UnsupportedOperationException("H4Vdata:convertToUnsignedC Unsupported operation.");
     }
 
     // Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List getMetadata() throws HDFException
@@ -519,6 +585,23 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
     }
 
     // To do: Implementing DataFormat
+    /**
+     * Writes a specific piece of metadata (such as an attribute) into the file.
+     *
+     * If an HDF(4&amp;5) attribute exists in the file, this method updates its
+     * value. If the attribute does not exist in the file, it creates the
+     * attribute in the file and attaches it to the object. It will fail to
+     * write a new attribute to the object where an attribute with the same name
+     * already exists. To update the value of an existing attribute in the file,
+     * one needs to get the instance of the attribute by getMetadata(), change
+     * its values, then use writeMetadata() to write the value.
+     *
+     * @param info
+     *            the metadata to write.
+     *
+     * @throws Exception
+     *             if the metadata can not be written
+     */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void writeMetadata(Object info) throws Exception
@@ -544,14 +627,30 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
         }
     }
 
-    // To do: Implementing DataFormat
+    /**
+     * Deletes an existing piece of metadata from this object.
+     *
+     * @param info
+     *            the metadata to delete.
+     *
+     * @throws Exception
+     *             if the metadata can not be removed
+     */
     @Override
     public void removeMetadata(Object info) throws HDFException
     {
         log.trace("removeMetadata(): disabled");
     }
 
-    // implementing DataFormat
+    /**
+     * Updates an existing piece of metadata attached to this object.
+     *
+     * @param info
+     *            the metadata to update.
+     *
+     * @throws Exception
+     *             if the metadata can not be updated
+     */
     @Override
     public void updateMetadata(Object info) throws Exception {
         log.trace("updateMetadata(): disabled");
@@ -723,6 +822,19 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
     }
 
     //Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");

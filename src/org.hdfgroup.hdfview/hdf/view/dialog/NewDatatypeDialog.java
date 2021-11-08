@@ -209,6 +209,8 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
 
     /**
      * Create the datatype specified by the settings.
+     *
+     * @return the new object created.
      */
     public Datatype createNewDatatype() {
         String name = null;

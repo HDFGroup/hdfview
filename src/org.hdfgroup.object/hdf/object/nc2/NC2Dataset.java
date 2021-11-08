@@ -75,9 +75,10 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
         nativeDataset = ncDataset;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.DataFormat#hasAttribute()
+    /**
+     * Check if the object has any attributes attached.
+     *
+     * @return true if it has any attributes, false otherwise.
      */
     @Override
     public boolean hasAttribute() {
@@ -100,6 +101,25 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     }
 
     // Implementing DataFormat
+    /**
+     * Reads the data from file.
+     * <p>
+     * read() reads the data from file to a memory buffer and returns the memory
+     * buffer. The dataset object does not hold the memory buffer. To store the
+     * memory buffer in the dataset object, one must call getData().
+     * <p>
+     * By default, the whole dataset is read into memory. Users can also select
+     * a subset to read. Subsetting is done in an implicit way.
+     *
+     * @return the data read from file.
+     *
+     * @see #getData()
+     *
+     * @throws Exception
+     *             if object can not be read
+     * @throws OutOfMemoryError
+     *             if memory is exhausted
+     */
     @Override
     public Object read() throws Exception {
         Object theData = null;
@@ -154,6 +174,15 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     }
 
     // Implementing DataFormat
+    /**
+     * Writes a memory buffer to the object in the file.
+     *
+     * @param buf
+     *            the data to write
+     *
+     * @throws Exception
+     *             if data can not be written
+     */
     @Override
     public void write(Object buf) throws Exception {
         // not supported
@@ -161,6 +190,16 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     }
 
     // Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @Override
     public List getMetadata() throws Exception {
         if (attributeList != null) {
@@ -189,20 +228,54 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     }
 
     // implementing DataFormat
-    @Override
+    /**
+     * Writes a specific piece of metadata (such as an attribute) into the file.
+     *
+     * If an HDF(4&amp;5) attribute exists in the file, this method updates its
+     * value. If the attribute does not exist in the file, it creates the
+     * attribute in the file and attaches it to the object. It will fail to
+     * write a new attribute to the object where an attribute with the same name
+     * already exists. To update the value of an existing attribute in the file,
+     * one needs to get the instance of the attribute by getMetadata(), change
+     * its values, then use writeMetadata() to write the value.
+     *
+     * @param info
+     *            the metadata to write.
+     *
+     * @throws Exception
+     *             if the metadata can not be written
+     */
+   @Override
     public void writeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // implementing DataFormat
+   /**
+    * Deletes an existing piece of metadata from this object.
+    *
+    * @param info
+    *            the metadata to delete.
+    *
+    * @throws Exception
+    *             if the metadata can not be removed
+    */
     @Override
     public void removeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
-    // implementing DataFormat
+    /**
+     * Updates an existing piece of metadata attached to this object.
+     *
+     * @param info
+     *            the metadata to update.
+     *
+     * @throws Exception
+     *             if the metadata can not be updated
+     */
     @Override
     public void updateMetadata(Object info) throws Exception {
         // not supported
@@ -346,7 +419,12 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     }
 
     // implementing ScalarDS
-    @Override
+    /**
+     * Returns the datatype of the data object.
+     *
+     * @return the datatype of the data object.
+     */
+   @Override
     public Datatype getDatatype() {
         if (datatype == null) {
             try {
@@ -374,6 +452,19 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     }
 
     //Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

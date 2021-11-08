@@ -535,6 +535,11 @@ public abstract class Dataset extends HObject implements DataFormat {
      */
     public abstract Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception;
 
+    /**
+     * The status of initialization for this object
+     *
+     * @return true if the data has been initialized
+     */
     @Override
     public final boolean isInited() {
         return inited;
@@ -917,6 +922,11 @@ public abstract class Dataset extends HObject implements DataFormat {
         return chunkSize;
     }
 
+    /**
+     * Returns the datatype of the data object.
+     *
+     * @return the datatype of the data object.
+     */
     @Override
     public Datatype getDatatype() {
         return datatype;
@@ -1358,6 +1368,9 @@ public abstract class Dataset extends HObject implements DataFormat {
     /**
      * Gets the source file name at index if dataset is virtual. Sub-classes must replace
      * this default implementation.
+     *
+     * @param index
+     *            index of the source file name if dataset is virtual.
      *
      * @return filename if the dataset is virtual; otherwise returns null.
      */

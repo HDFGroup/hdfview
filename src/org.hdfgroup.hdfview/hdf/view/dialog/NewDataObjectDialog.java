@@ -113,6 +113,13 @@ public class NewDataObjectDialog extends Dialog {
 
     /**
      * The NewDataObjectDialog constructor.
+     *
+     * @param parent
+     *        the dialog parent shell
+     * @param pGroup
+     *        the dialog parent group object
+     * @param objs
+     *        the list of objects
      */
     public NewDataObjectDialog(Shell parent, HObject pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
@@ -344,6 +351,11 @@ public class NewDataObjectDialog extends Dialog {
 
     /**
      * Create the datatype according to the settings.
+     *
+     * @param name
+     *        the datatype name
+     *
+     * @return the new object created.
      */
     public Datatype createNewDatatype(String name) {
         Datatype datatype = null;

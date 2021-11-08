@@ -403,6 +403,8 @@ public abstract class HObject implements Serializable {
      *            The path of the object.
      * @param theName
      *            The name of the object.
+     *
+     * @return the full name of the object.
      */
     public String createFullname(String thePath, String theName) {
         String theFullName;

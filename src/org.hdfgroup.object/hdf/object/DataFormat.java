@@ -26,7 +26,11 @@ package hdf.object;
  * @author Jordan T. Henderson
  */
 public interface DataFormat {
-    /** The status of initialization for this object */
+    /**
+     * The status of initialization for this object
+     *
+     * @return true if the data has been initialized
+     */
     boolean isInited();
 
     /**

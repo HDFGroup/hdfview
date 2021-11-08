@@ -147,10 +147,17 @@ public abstract class ScalarDS extends Dataset {
         filteredImageValues = new Vector<>();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Clears the current data buffer in memory and forces the next read() to load
+     * the data from file.
+     * <p>
+     * The function read() loads data from file into memory only if the data is not
+     * read. If data is already in memory, read() just returns the memory buffer.
+     * Sometimes we want to force read() to re-read data from file. For example,
+     * when the selection is changed, we need to re-read the data.
      *
-     * @see hdf.object.Dataset#clearData()
+     * @see #getData()
+     * @see #read()
      */
     @Override
     public void clearData() {

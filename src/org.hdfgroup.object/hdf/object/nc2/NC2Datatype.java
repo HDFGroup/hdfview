@@ -281,15 +281,28 @@ public class NC2Datatype extends Datatype {
     }
 
     // Implementing MetaDataContainer
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Check if the object has any attributes attached.
      *
-     * @see hdf.object.MetaDataContainer#hasAttribute()
+     * @return true if it has any attributes, false otherwise.
      */
     @Override
     public boolean hasAttribute() {

@@ -235,6 +235,25 @@ public class FitsAttribute extends ScalarDS implements Attribute {
         }
     }
 
+    /**
+     * Reads the data from file.
+     * <p>
+     * read() reads the data from file to a memory buffer and returns the memory
+     * buffer. The dataset object does not hold the memory buffer. To store the
+     * memory buffer in the dataset object, one must call getData().
+     * <p>
+     * By default, the whole dataset is read into memory. Users can also select
+     * a subset to read. Subsetting is done in an implicit way.
+     *
+     * @return the data read from file.
+     *
+     * @see #getData()
+     *
+     * @throws Exception
+     *             if object can not be read
+     * @throws OutOfMemoryError
+     *             if memory is exhausted
+     */
     @Override
     public Object read() throws Exception, OutOfMemoryError {
         if (!inited) init();
@@ -265,9 +284,14 @@ public class FitsAttribute extends ScalarDS implements Attribute {
         throw new UnsupportedOperationException("readBytes operation unsupported for FITS.");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.Dataset#write(java.lang.Object)
+    /**
+     * Writes a memory buffer to the object in the file.
+     *
+     * @param buf
+     *            the data to write
+     *
+     * @throws Exception
+     *             if data can not be written
      */
     @Override
     public void write(Object buf) throws Exception {

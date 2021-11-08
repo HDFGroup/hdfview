@@ -91,10 +91,10 @@ public class NC2Group extends Group {
         log.trace("NC2Group:{}", name);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Check if the object has any attributes attached.
      *
-     * @see hdf.object.DataFormat#hasAttribute()
+     * @return true if it has any attributes, false otherwise.
      */
     public boolean hasAttribute() {
         return false;
@@ -105,6 +105,16 @@ public class NC2Group extends Group {
     }
 
     // Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {
         if (attributeList != null) {
@@ -148,7 +158,7 @@ public class NC2Group extends Group {
      * not exist. Otherwise, just update the value of the attribute.
      *
      * @param info
-     *            the atribute to attach
+     *            the attribute to attach
      *
      * @throws Exception
      *            if there is an error
@@ -173,19 +183,38 @@ public class NC2Group extends Group {
     }
 
     // implementing DataFormat
+    /**
+     * Updates an attribute from this dataset.
+     *
+     * @param info
+     *            the attribute to update.
+     *
+     * @throws Exception
+     *            if there is an error
+     */
     public void updateMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // Implementing DataFormat
+    /**
+     * open a group.
+     *
+     * @return the group identifier if successful.
+     */
     @Override
     public long open() {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
-    /* close group access */
+    /**
+     * Close a group.
+     *
+     * @param gid
+     *            the identifier of the group to close.
+     */
     @Override
     public void close(long gid) {
         // not supported
@@ -210,7 +239,19 @@ public class NC2Group extends Group {
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
-    // overload to get different lists
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         int hdfType = 0;
@@ -250,6 +291,14 @@ public class NC2Group extends Group {
         return returnList;
     }
 
+    /**
+     * Retrieves the attribute name.
+     *
+     * @param index
+     *             the index of the attribute to get
+     *
+     * @return the attribute string.
+     */
     public String netcdfAttributeString(int index) {
         ucar.nc2.Attribute netcdfAttr = (ucar.nc2.Attribute) netcdfAttributeList.get(index);
         log.trace("netcdfAttributeString(): netcdfAttribute[{}]:{}", index, netcdfAttr.toString());
@@ -257,6 +306,14 @@ public class NC2Group extends Group {
         return returnStr;
     }
 
+    /**
+     * Retrieves the Dimension name.
+     *
+     * @param index
+     *             the index of the Dimension to get
+     *
+     * @return the Dimension string.
+     */
     public String netcdfDimensionString(int index) {
         ucar.nc2.Dimension netcdfDim = (ucar.nc2.Dimension) netcdfDimensionList.get(index);
         log.trace("netcdfDimensionString(): netcdfDimension[{}]:{}", index, netcdfDim.toString());
@@ -272,6 +329,14 @@ public class NC2Group extends Group {
         return objDimensionStr.toString();
     }
 
+    /**
+     * Retrieves the EnumTypedef name.
+     *
+     * @param index
+     *             the index of the EnumTypedef to get
+     *
+     * @return the EnumTypedef string.
+     */
     public String netcdfTypedefString(int index) {
         ucar.nc2.EnumTypedef netcdfType = (ucar.nc2.EnumTypedef) netcdfTypedefList.get(index);
         log.trace("netcdfEnumTypedefString(): netcdfTypedef[{}]:{}", index, netcdfType.toString());

@@ -453,10 +453,10 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns the datatype of the data object.
      *
-     * @see hdf.object.Dataset#getDatatype()
+     * @return the datatype of the data object.
      */
     @Override
     public Datatype getDatatype() {
@@ -1340,11 +1340,29 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         return tmpData;
     }
 
+    /**
+     * Converts the data values of this data object to appropriate Java integers if
+     * they are unsigned integers.
+     *
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertFromUnsignedC(Object, Object)
+     *
+     * @return the converted data buffer.
+     */
     @Override
     public Object convertFromUnsignedC() {
         throw new UnsupportedOperationException("H5CompoundDS:convertFromUnsignedC Unsupported operation.");
     }
 
+    /**
+     * Converts Java integer data values of this data object back to unsigned C-type
+     * integer data if they are unsigned integers.
+     *
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertToUnsignedC(Object, Object)
+     *
+     * @return the converted data buffer.
+     */
     @Override
     public Object convertToUnsignedC() {
         throw new UnsupportedOperationException("H5CompoundDS:convertToUnsignedC Unsupported operation.");

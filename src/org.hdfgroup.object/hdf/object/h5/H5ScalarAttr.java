@@ -387,10 +387,10 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns the datatype of the data object.
      *
-     * @see hdf.object.Dataset#getDatatype()
+     * @return the datatype of the data object.
      */
     @Override
     public Datatype getDatatype() {

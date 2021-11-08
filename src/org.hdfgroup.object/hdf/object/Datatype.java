@@ -981,19 +981,23 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /* Implement interface MetaDataContainer */
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hdf.object.MetaDataContainer#clear()
+    /**
+     * Removes all of the elements from metadata list.
+     * The list should be empty after this call returns.
      */
     @Override
     public void clear() {
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
      *
-     * @see hdf.object.MetaDataContainer#getMetadata()
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -1001,30 +1005,50 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Writes a specific piece of metadata (such as an attribute) into the file.
      *
-     * @see hdf.object.MetaDataContainer#writeMetadata(java.lang.Object)
+     * If an HDF(4&amp;5) attribute exists in the file, this method updates its
+     * value. If the attribute does not exist in the file, it creates the
+     * attribute in the file and attaches it to the object. It will fail to
+     * write a new attribute to the object where an attribute with the same name
+     * already exists. To update the value of an existing attribute in the file,
+     * one needs to get the instance of the attribute by getMetadata(), change
+     * its values, then use writeMetadata() to write the value.
+     *
+     * @param info
+     *            the metadata to write.
+     *
+     * @throws Exception
+     *             if the metadata can not be written
      */
     @Override
     public void writeMetadata(Object info) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:writeMetadata.");
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Deletes an existing piece of metadata from this object.
      *
-     * @see hdf.object.MetaDataContainer#removeMetadata(java.lang.Object)
+     * @param info
+     *            the metadata to delete.
+     *
+     * @throws Exception
+     *             if the metadata can not be removed
      */
     @Override
     public void removeMetadata(Object info) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:removeMetadata.");
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Updates an existing piece of metadata attached to this object.
      *
-     * @see hdf.object.MetaDataContainer#updateMetadata(java.lang.Object)
+     * @param info
+     *            the metadata to update.
+     *
+     * @throws Exception
+     *             if the metadata can not be updated
      */
     @Override
     public void updateMetadata(Object info) throws Exception {

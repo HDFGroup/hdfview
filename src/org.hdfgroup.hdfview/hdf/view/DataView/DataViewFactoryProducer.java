@@ -37,7 +37,18 @@ public class DataViewFactoryProducer {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataViewFactoryProducer.class);
 
-    /** get the requested DataViewFactory */
+    /**
+     * get the requested DataViewFactory
+     *
+     *
+     * @param viewType
+     *             The data view type requested
+     *
+     * @throws Exception
+     *             If there is an error getting the class for a data view factory.
+     *
+     * @return the data view factory.
+     */
     public static DataViewFactory getFactory(DataViewType viewType) throws Exception {
         String factoryClassName = null;
         DataViewFactory theFactory = null;

@@ -485,6 +485,11 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
         return types;
     }
 
+    /**
+     * Returns the fill values for the data object.
+     *
+     * @return the fill values for the data object.
+     */
     @Override
     public Object getFillValue() {
         return null;

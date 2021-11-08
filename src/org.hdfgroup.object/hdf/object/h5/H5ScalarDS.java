@@ -435,10 +435,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Check if the object has any attributes attached.
      *
-     * @see hdf.object.MetaDataContainer#hasAttribute()
+     * @return true if it has any attributes, false otherwise.
      */
     @Override
     public boolean hasAttribute() {
@@ -509,10 +509,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         return (objInfo.num_attrs > 0);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns the datatype of the data object.
      *
-     * @see hdf.object.Dataset#getDatatype()
+     * @return the datatype of the data object.
      */
     @Override
     public Datatype getDatatype() {
@@ -581,10 +581,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         return datatype;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hdf.object.MetaDataContainer#clear()
+    /**
+     * Removes all of the elements from metadata list.
+     * The list should be empty after this call returns.
      */
     @Override
     public void clear() {
@@ -1007,10 +1006,15 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         return theData;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
      *
-     * @see hdf.object.MetaDataContainer#getMetadata()
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
      */
     @Override
     public List<Attribute> getMetadata() throws HDF5Exception {
@@ -1032,10 +1036,18 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         return this.getMetadata(gmIndexType, gmIndexOrder);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     * <p>
+     * Metadata, such as attributes, is stored in a List.
      *
-     * @see hdf.object.MetaDataContainer#getMetadata(int...)
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
      */
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
         if (!isInited()) {
@@ -1315,10 +1327,22 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         return attrlist;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Writes a specific piece of metadata (such as an attribute) into the file.
      *
-     * @see hdf.object.MetaDataContainer#writeMetadata(java.lang.Object)
+     * If an HDF(4&amp;5) attribute exists in the file, this method updates its
+     * value. If the attribute does not exist in the file, it creates the
+     * attribute in the file and attaches it to the object. It will fail to
+     * write a new attribute to the object where an attribute with the same name
+     * already exists. To update the value of an existing attribute in the file,
+     * one needs to get the instance of the attribute by getMetadata(), change
+     * its values, then use writeMetadata() to write the value.
+     *
+     * @param info
+     *            the metadata to write.
+     *
+     * @throws Exception
+     *             if the metadata can not be written
      */
     @Override
     public void writeMetadata(Object info) throws Exception {
@@ -1331,10 +1355,14 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Deletes an existing piece of metadata from this object.
      *
-     * @see hdf.object.MetaDataContainer#removeMetadata(java.lang.Object)
+     * @param info
+     *            the metadata to delete.
+     *
+     * @throws Exception
+     *             if the metadata can not be removed
      */
     @Override
     public void removeMetadata(Object info) throws HDF5Exception {
@@ -1359,10 +1387,14 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Updates an existing piece of metadata attached to this object.
      *
-     * @see hdf.object.MetaDataContainer#updateMetadata(java.lang.Object)
+     * @param info
+     *            the metadata to update.
+     *
+     * @throws Exception
+     *             if the metadata can not be updated
      */
     @Override
     public void updateMetadata(Object info) throws HDF5Exception {
