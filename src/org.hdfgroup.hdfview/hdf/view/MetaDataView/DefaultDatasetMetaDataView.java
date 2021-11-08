@@ -38,6 +38,10 @@ import hdf.object.ScalarDS;
 import hdf.view.Tools;
 import hdf.view.DataView.DataViewManager;
 
+/**
+ *
+ * The metadata view interface for displaying dataset metadata information
+ */
 public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatasetMetaDataView.class);

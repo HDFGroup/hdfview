@@ -100,7 +100,7 @@ public class DataProviderFactory {
         return dataProvider;
     }
 
-    /*
+    /**
      * The base DataProvider which pulls data from a given Array object using direct
      * indices.
      */

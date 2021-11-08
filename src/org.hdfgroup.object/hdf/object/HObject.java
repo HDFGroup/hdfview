@@ -319,6 +319,17 @@ public abstract class HObject implements Serializable {
         path = newPath;
     }
 
+    /**
+     * Sets the full name of the object.
+     * <p>
+     *
+     * @param thePath
+     *            The path of the object.
+     * @param theName
+     *            The name of the object.
+     *
+     * @throws Exception if a failure occurred
+     */
     public void setFullname(String thePath, String theName) throws Exception {
         // file name is packed in the full path
         if ((theName == null) && (thePath != null)) {
@@ -384,6 +395,15 @@ public abstract class HObject implements Serializable {
         this.fullName = createFullname(thePath, theName);
     }
 
+    /**
+     * Creates the full name of the object.
+     * <p>
+     *
+     * @param thePath
+     *            The path of the object.
+     * @param theName
+     *            The name of the object.
+     */
     public String createFullname(String thePath, String theName) {
         String theFullName;
 

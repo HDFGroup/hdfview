@@ -32,6 +32,10 @@ import hdf.object.h5.H5Link;
 import hdf.view.Tools;
 import hdf.view.DataView.DataViewManager;
 
+/**
+ *
+ * The metadata view interface for displaying link metadata information
+ */
 public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultLinkMetaDataView.class);

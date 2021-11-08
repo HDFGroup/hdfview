@@ -21,7 +21,6 @@ import hdf.object.h5.H5File;
 /**
  * An interface that provides general attribute operations for hdf5 object data. For
  * example, reference to a parent object.
- * <p>
  *
  * @see hdf.object.HObject
  */

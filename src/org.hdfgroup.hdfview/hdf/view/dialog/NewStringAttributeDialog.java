@@ -78,7 +78,9 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
 
     private Label             arrayLengthLabel;
 
+    /** If the attribute should be attached to a hdf4 object */
     protected boolean isH4;
+    /** If the attribute should be attached to a netcdf object */
     protected boolean isN3;
 
     /**
@@ -98,6 +100,9 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         isN3 = pObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3));
     }
 
+    /**
+     * Open the NewStringAttributeDialog for adding a new attribute.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

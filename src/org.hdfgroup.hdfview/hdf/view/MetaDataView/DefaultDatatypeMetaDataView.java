@@ -24,6 +24,10 @@ import hdf.object.Datatype;
 import hdf.object.HObject;
 import hdf.view.DataView.DataViewManager;
 
+/**
+ *
+ *The metadata view interface for displaying datatype metadata information
+ */
 public class DefaultDatatypeMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatatypeMetaDataView.class);

@@ -203,9 +203,9 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      *
      * @param theFile
      *            the file that contains the data object.
-     * @param theName
+     * @param dsName
      *            the name of the data object, e.g. "dset".
-     * @param thePath
+     * @param dsPath
      *            the full path of the data object, e.g. "/arrays/".
      * @param oid
      *            the oid of the data object.

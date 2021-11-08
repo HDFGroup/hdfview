@@ -215,6 +215,9 @@ public class DataOptionDialog extends Dialog {
                 FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
     }
 
+    /**
+     * Open the DataOptionDialoDialog used to select display options for an object.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

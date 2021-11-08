@@ -432,6 +432,7 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
     }
 
     //Implementing DataFormat
+    /** FITS does not support metadata */
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

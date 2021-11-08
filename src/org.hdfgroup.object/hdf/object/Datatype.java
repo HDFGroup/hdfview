@@ -154,6 +154,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     public static final int NSGN = 2;
 
+    /**
+     * The description of the datatype.
+     */
     protected String datatypeDescription = null;
 
     /**
@@ -196,6 +199,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * Determines whether this datatype is a variable-length type.
      */
     protected boolean isVLEN = false;
+
+    /**
+     * Determines whether this datatype is a variable-length string type.
+     */
     protected boolean isVariableStr = false;
 
     /**
@@ -651,14 +658,32 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         return arrayDims;
     }
 
+
+    /**
+     * Returns the member names of a Compound Datatype.
+     *
+     * @return member names of a Compound Datatype
+     */
     public final List<String> getCompoundMemberNames() {
         return compoundMemberNames;
     }
 
+
+    /**
+     * Returns member types of a Compound Datatype.
+     *
+     * @return member types of a Compound Datatype
+     */
     public final List<Datatype> getCompoundMemberTypes() {
         return compoundMemberTypes;
     }
 
+
+    /**
+     * Returns the member offsets of a Compound Datatype.
+     *
+     * @return member offsets of a Compound Datatype
+     */
     public final List<Long> getCompoundMemberOffsets() {
         return compoundMemberOffsets;
     }

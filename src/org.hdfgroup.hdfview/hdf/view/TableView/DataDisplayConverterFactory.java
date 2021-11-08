@@ -103,7 +103,7 @@ public class DataDisplayConverterFactory {
 
         return converter;
     }
-
+/** the HDF extension for data converters */
     public static class HDFDisplayConverter extends DisplayConverter {
         protected org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDisplayConverter.class);
         protected NumberFormat     numberFormat = null;

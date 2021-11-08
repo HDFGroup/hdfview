@@ -47,8 +47,10 @@ public class NewDataObjectDialog extends Dialog {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDataObjectDialog.class);
 
+    /** the visual shell for the dialog */
     protected Shell   shell;
 
+    /** the current font */
     protected Font    curFont;
 
     /** the object which the this object is attached */
@@ -64,32 +66,54 @@ public class NewDataObjectDialog extends Dialog {
     protected Text    lengthField;
 
     /** The Choice of the datatypes */
+    /** The named datatype combobox for the object */
     protected Combo   namedChoice;
+    /** The class combobox for the object */
     protected Combo   classChoice;
+    /** The size combobox for the object */
     protected Combo   sizeChoice;
+    /** The endianess combobox for the object */
     protected Combo   endianChoice;
 
     /** The Choice of the object list */
+    /** The committed datatype button for the object */
     protected Button  useCommittedType;
+    /** The unsigned data button for the object */
     protected Button  checkUnsigned;
+    /** The list of objects for the object */
     protected List<?> objList;
+    /** The list of datatypes for the object */
     protected List<Datatype> namedList;
+    /** The length label for the object */
     protected Label   arrayLengthLabel;
 
     /** The attributes of the datatype */
+    /** The default class for the object */
     public int tclass = Datatype.CLASS_NO_CLASS;
+    /** The default size for the object */
     public int tsize = Datatype.NATIVE;
+    /** The default  byte order for the object */
     public int torder = Datatype.NATIVE;
+    /** The default sign for the object */
     public int tsign = Datatype.NATIVE;
+    /** If the object is an enum object */
     public boolean isEnum = false;
+    /** The enum mapping for the object */
     public String strEnumMap = null;
+    /** If the object is a variable length data object */
     public boolean isVLen = false;
+    /** If the object is a variable length string */
     public boolean isVlenStr = false;
 
+    /** The file format associated with this object */
     protected FileFormat fileFormat;
 
+    /** If the object should be attached to a hdf5 object */
     protected boolean isH5;
 
+    /**
+     * The NewDataObjectDialog constructor.
+     */
     public NewDataObjectDialog(Shell parent, HObject pGroup, List<?> objs) {
         super(parent, SWT.APPLICATION_MODAL);
 
@@ -112,7 +136,7 @@ public class NewDataObjectDialog extends Dialog {
         isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
     }
 
-    /* the new dataset properties to be created. */
+    /** the new dataset properties to be created. */
     public void createDatatypeWidget() {
         Label label;
 
@@ -318,6 +342,9 @@ public class NewDataObjectDialog extends Dialog {
         checkUnsigned.setEnabled(true);
     }
 
+    /**
+     * Create the datatype according to the settings.
+     */
     public Datatype createNewDatatype(String name) {
         Datatype datatype = null;
 

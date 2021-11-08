@@ -37,6 +37,7 @@ public class DataViewFactoryProducer {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataViewFactoryProducer.class);
 
+    /** get the requested DataViewFactory */
     public static DataViewFactory getFactory(DataViewType viewType) throws Exception {
         String factoryClassName = null;
         DataViewFactory theFactory = null;

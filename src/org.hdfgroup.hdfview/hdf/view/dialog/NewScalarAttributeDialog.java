@@ -89,6 +89,9 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
         super(parent, pObject, objs);
     }
 
+    /**
+     * Open the NewScalarAttributeDialog for adding a new attribute.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

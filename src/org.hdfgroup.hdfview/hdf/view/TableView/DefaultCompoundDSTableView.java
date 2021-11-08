@@ -59,6 +59,9 @@ import hdf.view.Tools;
 import hdf.view.ViewProperties;
 import hdf.view.DataView.DataViewManager;
 
+/**
+ * A class to construct a CompoundDS TableView.
+ */
 public class DefaultCompoundDSTableView extends DefaultBaseTableView implements TableView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultCompoundDSTableView.class);

@@ -130,6 +130,9 @@ public class NewLinkDialog extends Dialog {
         fileList = files;
     }
 
+    /**
+     * Open the NewLinkDialog for adding a new link.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

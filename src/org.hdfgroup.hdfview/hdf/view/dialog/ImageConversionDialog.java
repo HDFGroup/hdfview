@@ -108,6 +108,9 @@ public class ImageConversionDialog extends Dialog {
         currentDir = dir;
     }
 
+    /**
+     * Open the ImageConversionDialog for converting images.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
@@ -345,10 +348,16 @@ public class ImageConversionDialog extends Dialog {
         return converted;
     }
 
+    /**
+     * if an image file has been converted.
+     */
     public boolean isFileConverted() {
         return isConverted;
     }
 
+    /**
+     * get the file of an image file that has been converted.
+     */
     public String getConvertedFile() {
         return convertedFile;
     }

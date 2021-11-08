@@ -149,6 +149,7 @@ public abstract class Dataset extends HObject implements DataFormat {
 
     /** The compression information. */
     protected StringBuilder   compression;
+    /** The compression information default prefix. */
     public static final String COMPRESSION_GZIP_TXT = "GZIP: level = ";
 
     /** The filters information. */
@@ -1344,7 +1345,7 @@ public abstract class Dataset extends HObject implements DataFormat {
         return isScalar;
     }
 
-    /*
+    /**
      * Checks if dataset is virtual. Sub-classes must replace
      * this default implementation.
      *
@@ -1354,7 +1355,7 @@ public abstract class Dataset extends HObject implements DataFormat {
         return false;
     }
 
-    /*
+    /**
      * Gets the source file name at index if dataset is virtual. Sub-classes must replace
      * this default implementation.
      *
@@ -1364,7 +1365,7 @@ public abstract class Dataset extends HObject implements DataFormat {
         return null;
     }
 
-    /*
+    /**
      * Gets the number of source files if dataset is virtual. Sub-classes must replace
      * this default implementation.
      *

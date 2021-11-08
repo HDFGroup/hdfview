@@ -2032,7 +2032,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public String getLibBoundsDescription() {
+    public String getLibBoundsDescription() throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getLibBoundsDescription.");
     }
 
@@ -2044,7 +2044,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public static int getIndexTypeValue(String strtype) {
+    public static int getIndexTypeValue(String strtype) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexTypeValue.");
     }
 
@@ -2053,7 +2053,7 @@ public abstract class FileFormat extends File {
      * @param strtype
      *            The name of the index type.
      */
-    public int getIndexType(String strtype) {
+    public int getIndexType(String strtype) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexType.");
     }
 
@@ -2065,7 +2065,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void setIndexType(int indexType) {
+    public void setIndexType(int indexType) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setIndexType.");
     }
 
@@ -2074,7 +2074,7 @@ public abstract class FileFormat extends File {
      * @param strorder
      *            The name of the index order.
      */
-    public static int getIndexOrderValue(String strorder) {
+    public static int getIndexOrderValue(String strorder) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexOrderValue.");
     }
 
@@ -2086,7 +2086,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public int getIndexOrder(String strorder) {
+    public int getIndexOrder(String strorder) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexOrder.");
     }
 
@@ -2098,7 +2098,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void setIndexOrder(int indexOrder) {
+    public void setIndexOrder(int indexOrder) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setIndexOrder.");
     }
 }

@@ -121,7 +121,7 @@ public class H5File extends FileFormat {
     public static final int LIBVER_V18 = HDF5Constants.H5F_LIBVER_V18;
     public static final int LIBVER_V110 = HDF5Constants.H5F_LIBVER_V110;
 
-    /*
+    /**
      * Enum to indicate the type of I/O to perform inside of the common I/O
      * function.
      */

@@ -168,6 +168,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
     protected Object                        fillValue;
 
+    /** the valid types of tableviews */
     protected enum ViewType { TABLE, IMAGE };
     protected      ViewType                 viewType = ViewType.TABLE;
 
@@ -2675,7 +2676,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
     }
 
-    // Context-menu for dealing with region and object references
+    /** Context-menu for dealing with region and object references */
     protected class RefContextMenu extends AbstractUiBindingConfiguration {
         private final Menu contextMenu;
 

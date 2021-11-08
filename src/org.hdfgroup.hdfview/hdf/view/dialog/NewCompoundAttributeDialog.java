@@ -116,6 +116,9 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         compoundAttrList = new Vector<>(objs.size());
     }
 
+    /**
+     * Open the NewCompoundAttributeDialog for adding a new compound attribute.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

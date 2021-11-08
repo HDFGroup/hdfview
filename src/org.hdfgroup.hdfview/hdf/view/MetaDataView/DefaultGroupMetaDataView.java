@@ -38,6 +38,10 @@ import hdf.object.nc2.NC2Group;
 import hdf.view.ViewProperties;
 import hdf.view.DataView.DataViewManager;
 
+/**
+ *
+ * The metadata view interface for displaying group metadata information
+ */
 public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultGroupMetaDataView.class);

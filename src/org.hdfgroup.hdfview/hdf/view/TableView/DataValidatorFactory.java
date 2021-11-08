@@ -43,7 +43,7 @@ public class DataValidatorFactory {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataValidatorFactory.class);
 
-    /*
+    /**
      * To keep things clean from an API perspective, keep a static reference to the
      * last CompoundDataFormat that was passed in. This keeps us from needing to
      * pass the CompoundDataFormat object as a parameter to every DataValidator
@@ -120,6 +120,7 @@ public class DataValidatorFactory {
         return validator;
     }
 
+    /** The HDF extension of the data valicdation */
     public static class HDFDataValidator extends DataValidator {
         protected org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDataValidator.class);
 

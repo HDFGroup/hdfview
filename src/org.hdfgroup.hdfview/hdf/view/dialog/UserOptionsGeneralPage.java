@@ -58,6 +58,9 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
     private static String fontname;
 
+    /**
+     * Configuration page for general application settings.
+     */
     public UserOptionsGeneralPage() {
         super("General Settings");
         isFontChanged = false;
@@ -181,14 +184,23 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         return true;
     }
 
+    /**
+     * Checks if the Font setting changed.
+     */
     public boolean isFontChanged() {
         return isFontChanged;
     }
 
+    /**
+     * Checks if the location for the UserGuide changed.
+     */
     public boolean isUserGuideChanged() {
         return isUserGuideChanged;
     }
 
+    /**
+     * Checks if the location of the WorkDir changed.
+     */
     public boolean isWorkDirChanged() {
         return isWorkDirChanged;
     }

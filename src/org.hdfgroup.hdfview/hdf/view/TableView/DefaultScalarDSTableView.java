@@ -68,6 +68,9 @@ import hdf.view.ViewProperties;
 import hdf.view.DataView.DataViewManager;
 import hdf.view.dialog.InputDialog;
 
+/**
+ * A class to construct a ScalarDS TableView.
+ */
 public class DefaultScalarDSTableView extends DefaultBaseTableView implements TableView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarDSTableView.class);

@@ -68,7 +68,6 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
 
     /**
      * @deprecated Not for public use in the future.<br>
-     *             Using {@link #H5Group(FileFormat, String, String, Group)}
      *
      * @param theFile
      *            the file which containing the group.

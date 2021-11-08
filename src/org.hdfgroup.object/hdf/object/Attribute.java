@@ -19,7 +19,6 @@ import java.util.Collection;
 /**
  * An interface that provides general attribute operations for object data. For
  * example, reference to a parent object.
- * <p>
  *
  * @see hdf.object.HObject
  */

@@ -122,6 +122,9 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         compoundDSList = new Vector<>(objs.size());
     }
 
+    /**
+     * Open the NewCompoundDatasetDialog for adding a new compound dataset.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

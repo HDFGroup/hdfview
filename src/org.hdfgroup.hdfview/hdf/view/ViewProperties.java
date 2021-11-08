@@ -38,6 +38,7 @@ import hdf.view.PaletteView.PaletteViewFactory;
 import hdf.view.TableView.TableViewFactory;
 import hdf.view.TreeView.TreeViewFactory;
 
+/** A class to maintain the list of preferences for data and display */
 public class ViewProperties extends PreferenceStore {
     private static final long   serialVersionUID     = -6411465283887959066L;
 
