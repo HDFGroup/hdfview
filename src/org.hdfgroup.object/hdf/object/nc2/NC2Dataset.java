@@ -32,7 +32,7 @@ import ucar.nc2.Variable;
  * NC2Dataset describes an multi-dimension array of HDF5 scalar or atomic data
  * types, such as byte, int, short, long, float, double and string, and
  * operations performed on the scalar dataset
- * <p>
+ *
  * The library predefines a modest number of datatypes. For details, read <a
  * href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/HDF5_Users_Guide/Datatypes/HDF5_Datatypes.htm">HDF5 Datatypes</a>
  *
@@ -57,6 +57,7 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     @SuppressWarnings("rawtypes")
     private List                            attributeList;
 
+    /** the native dataset */
     private Variable nativeDataset;
 
     /**
@@ -87,8 +88,7 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
 
     // Implementing Dataset
     @Override
-    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
-            throws Exception {
+    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -103,11 +103,11 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     // Implementing DataFormat
     /**
      * Reads the data from file.
-     * <p>
+     *
      * read() reads the data from file to a memory buffer and returns the memory
      * buffer. The dataset object does not hold the memory buffer. To store the
      * memory buffer in the dataset object, one must call getData().
-     * <p>
+     *
      * By default, the whole dataset is read into memory. Users can also select
      * a subset to read. Subsetting is done in an implicit way.
      *
@@ -124,9 +124,8 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     public Object read() throws Exception {
         Object theData = null;
 
-        if (nativeDataset == null) {
+        if (nativeDataset == null)
             return null;
-        }
 
         int[] origin = new int[rank];
         int[] shape = new int[rank];
@@ -147,9 +146,8 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
         }
         Object oneD = ncArray.copyTo1DJavaArray();
 
-        if (oneD == null) {
+        if (oneD == null)
             return null;
-        }
 
         if (oneD.getClass().getName().startsWith("[C")) {
             char[] charA = (char[]) oneD;
@@ -192,7 +190,7 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     // Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
@@ -202,18 +200,15 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      */
     @Override
     public List getMetadata() throws Exception {
-        if (attributeList != null) {
+        if (attributeList != null)
             return attributeList;
-        }
 
-        if (nativeDataset == null) {
+        if (nativeDataset == null)
             return (attributeList = null);
-        }
 
         List ncAttrList = nativeDataset.getAttributes();
-        if (ncAttrList == null) {
+        if (ncAttrList == null)
             return (attributeList = null);
-        }
 
         int n = ncAttrList.size();
         attributeList = new Vector(n);
@@ -298,13 +293,11 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      */
     @Override
     public void init() {
-        if (nativeDataset == null) {
+        if (nativeDataset == null)
             return;
-        }
 
-        if (inited) {
+        if (inited)
             return; // already called. Initialize only once
-        }
 
         isText = nativeDataset.getDataType().equals(DataType.STRING);
         boolean isChar = nativeDataset.getDataType().equals(DataType.CHAR);
@@ -320,9 +313,8 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
         }
         else {
             dims = new long[rank];
-            for (int i = 0; i < rank; i++) {
+            for (int i = 0; i < rank; i++)
                 dims[i] = (nativeDataset.getDimension(i).getLength());
-            }
         }
 
         startDims = new long[rank];
@@ -350,9 +342,8 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
             selectedDims[1] = dims[1];
         }
 
-        if ((rank > 1) && isText) {
+        if ((rank > 1) && isText)
             selectedDims[1] = 1;
-        }
 
         inited = true;
     }
@@ -383,8 +374,7 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      *            if there is an error
     */
     public static NC2Dataset create(String name, Group pgroup, Datatype type,
-            long[] dims, long[] maxdims, long[] chunks, int gzip, Object data)
-            throws Exception {
+            long[] dims, long[] maxdims, long[] chunks, int gzip, Object data) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -393,9 +383,8 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
 
     @Override
     public byte[][] getPalette() {
-        if (palette == null) {
+        if (palette == null)
             palette = readPalette(0);
-        }
 
         return palette;
     }
@@ -440,7 +429,6 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
 
     /**
      * Sets the name of the data object.
-     * <p>
      *
      * @param newName
      *            the new name of the object.
@@ -454,7 +442,7 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     //Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList

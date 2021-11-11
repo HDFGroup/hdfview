@@ -24,9 +24,9 @@ import hdf.object.h5.H5ScalarDS;
 
 /**
  * TestCase for bug fixes.
- * <p>
+ *
  * This class tests all the public methods in H5CompoundDS class.
- * <p>
+ *
  * The test file contains the following objects.
  *
  * <pre>
@@ -53,7 +53,8 @@ import hdf.object.h5.H5ScalarDS;
  *
  * @author Peter Cao, The HDF Group
  */
-public class H5BugFixTest {
+public class H5BugFixTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5BugFixTest.class);
     private static final int NLOOPS = 10;
     private static final H5File H5FILE = new H5File();
@@ -76,8 +77,7 @@ public class H5BugFixTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -158,7 +158,7 @@ public class H5BugFixTest {
 
     /**
      * The following program fails because dataset.init() does not reset the selection of dataspace.
-     * <p>
+     *
      * The bug appears on hdf-java 2.4 beta04 or earlier version. It is fixed at later version.
      *
      * <pre>
@@ -176,7 +176,7 @@ public class H5BugFixTest {
      *           fails when attempting to change the value of the 1st and 4th rows (however, it
      *           works for the 0th row).
      * </pre>
-     * <p>
+     *
      */
     @SuppressWarnings("rawtypes")
     @Test
@@ -230,9 +230,8 @@ public class H5BugFixTest {
                 dset.init();
 
                 // select one row only
-                for (int j = 0; j < rank; j++) {
+                for (int j = 0; j < rank; j++)
                     count[j] = 1;
-                }
 
                 // select different rows
                 start[0] = i;
@@ -277,23 +276,20 @@ public class H5BugFixTest {
                     case 0:
                         ints = (int[]) data.get(0);
                         assertNotNull(ints);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertEquals(H5TestFile.DATA_INT[j], ints[j]);
-                        }
                         break;
                     case 1:
                         floats = (float[]) data.get(0);
                         assertNotNull(floats);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertEquals(H5TestFile.DATA_FLOAT[j], floats[j], Float.MIN_VALUE);
-                        }
                         break;
                     case 2:
                         strs = (String[]) data.get(0);
                         assertNotNull(strs);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertTrue(H5TestFile.DATA_STR[j].equals(strs[j]));
-                        }
                         break;
                 }
             } //  (int i=0; i<nmembers; i++) {
@@ -302,7 +298,7 @@ public class H5BugFixTest {
 
     /**
      * The following operation causes memory leak because a group is left open at file.get().
-     * <p>
+     *
      * The bug appears on hdf-java 2.4 beta05 or earlier version. It is fixed at later version.
      *
      * <pre>

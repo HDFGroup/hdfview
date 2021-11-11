@@ -26,7 +26,8 @@ import hdf.object.h5.H5Group;
  * @author Rishi R Sinha
  *
  */
-public class GroupTest {
+public class GroupTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GroupTest.class);
 
     private H5File testFile = null;
@@ -37,8 +38,7 @@ public class GroupTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -122,7 +122,7 @@ public class GroupTest {
 
     /**
      * Test method for {@link hdf.object.Group#clear()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>For the root group clear the list.
@@ -138,7 +138,7 @@ public class GroupTest {
 
     /**
      * Test method for {@link hdf.object.Group#addToMemberList(hdf.object.HObject)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test for boundary conditions
@@ -167,22 +167,19 @@ public class GroupTest {
         H5.H5error_on();
         testGroup.addToMemberList(testGroup.getMemberList().get(0));
 
-        if (testGroup.getMemberList().size() != previous_size) {
+        if (testGroup.getMemberList().size() != previous_size)
             fail("addToMemberList adds an existing member to the member list.");
-        }
 
         testGroup.addToMemberList(tmp);
-        if (!testGroup.getMemberList().get(previous_size).equals(tmp)) {
+        if (!testGroup.getMemberList().get(previous_size).equals(tmp))
             fail("Add to member list does not add to the end.");
-        }
-        if (testGroup.getMemberList().size() != previous_size + 1) {
+        if (testGroup.getMemberList().size() != previous_size + 1)
             fail("Add to member list not working.");
-        }
     }
 
     /**
      * Test method for {@link hdf.object.Group#removeFromMemberList(hdf.object.HObject)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test for boundary conditions
@@ -208,29 +205,26 @@ public class GroupTest {
 
         H5.H5error_off();
         testGroup.removeFromMemberList(null);
-        if (testGroup.getMemberList().size() != previous_size) {
+        if (testGroup.getMemberList().size() != previous_size)
             fail("removeFromMemberList removes a null from the member list.");
-        }
 
         Group tmp = new H5Group(testFile, "tmp", "/grp0/", testGroup);
         testGroup.removeFromMemberList(tmp);
-        if (testGroup.getMemberList().size() != previous_size) {
+        if (testGroup.getMemberList().size() != previous_size)
             fail("removeFromMemberList removes a non existing member from the member list.");
-        }
         H5.H5error_on();
 
         Iterator it = memberList.iterator();
         HObject obj = (HObject) it.next();
         testGroup.removeFromMemberList(obj);
 
-        if (memberList.size() != previous_size - 1) {
+        if (memberList.size() != previous_size - 1)
             fail("The Number of members in list should be " + (previous_size - 1));
-        }
     }
 
     /**
      * Test method for {@link hdf.object.Group#getMemberList()}.
-     * <p>
+     *
      * <ul>
      * <li>testing the member list for the root group.
      * <ul>
@@ -252,7 +246,7 @@ public class GroupTest {
 
     /**
      * Test method for {@link hdf.object.Group#getParent()}.
-     * <p>
+     *
      * <ul>
      * <li>Test to get the parent of group g0.
      * </ul>

@@ -52,15 +52,11 @@ public class H4Group extends Group
     @SuppressWarnings("rawtypes")
     private List                            attributeList;
 
+    /** the number of attributes */
     private int                             nAttributes = -1;
 
     /** The default object ID for HDF4 objects */
     private static final long[]             DEFAULT_OID = {0, 0};
-
-    public H4Group(FileFormat theFile, String name, String path, Group parent)
-    {
-        this(theFile, name, path, parent, null);
-    }
 
     /**
      * Creates a group object with specific name, path, and parent.
@@ -69,16 +65,23 @@ public class H4Group extends Group
      * @param name the name of this group.
      * @param path the full path of this group.
      * @param parent the parent of this group.
+     */
+    public H4Group(FileFormat theFile, String name, String path, Group parent)
+    {
+        this(theFile, name, path, parent, null);
+    }
+
+    /**
+     * Creates a group object with specific name, path, parent and oid.
+     *
+     * @param theFile the HDF file.
+     * @param name the name of this group.
+     * @param path the full path of this group.
+     * @param parent the parent of this group.
      * @param oid the unique identifier of this data object.
      */
     @SuppressWarnings("deprecation")
-    public H4Group(
-        FileFormat theFile,
-        String name,
-        String path,
-        Group parent,
-        long[] oid)
-    {
+    public H4Group(FileFormat theFile, String name, String path, Group parent, long[] oid) {
         super (theFile, name, path, parent, ((oid == null) ? DEFAULT_OID : oid));
     }
 
@@ -87,8 +90,7 @@ public class H4Group extends Group
      * @see hdf.object.DataFormat#hasAttribute()
      */
     @Override
-    public boolean hasAttribute ()
-    {
+    public boolean hasAttribute() {
         if (nAttributes < 0) {
             long vgid = open();
 
@@ -114,18 +116,17 @@ public class H4Group extends Group
     // Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
      *
-     * @throws Exception
+     * @throws HDFException
      *             if the metadata can not be retrieved
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public List getMetadata() throws HDFException
-    {
+    public List getMetadata() throws HDFException {
         if (attributeList != null) {
             log.trace("getMetadata(): attributeList != null");
             return attributeList;
@@ -164,9 +165,8 @@ public class H4Group extends Group
                         b = false;
                     }
 
-                    if (!b) {
+                    if (!b)
                         continue;
-                    }
 
                     long[] attrDims = {attrInfo[1]};
                     H4ScalarAttribute attr = new H4ScalarAttribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
@@ -189,10 +189,8 @@ public class H4Group extends Group
                     }
 
                     if (buf != null) {
-                        if ((attrInfo[0] == HDFConstants.DFNT_CHAR) ||
-                                (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
+                        if ((attrInfo[0] == HDFConstants.DFNT_CHAR) || (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8))
                             buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
-                        }
 
                         attr.setAttributeData(buf);
                     }
@@ -229,8 +227,7 @@ public class H4Group extends Group
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void writeMetadata(Object info) throws Exception
-    {
+    public void writeMetadata(Object info) throws Exception {
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an H4ScalarAttribute");
@@ -240,9 +237,8 @@ public class H4Group extends Group
         try {
             getFileFormat().writeAttribute(this, (H4ScalarAttribute)info, true);
 
-            if (attributeList == null) {
+            if (attributeList == null)
                 attributeList = new Vector();
-            }
 
             attributeList.add(info);
             nAttributes = attributeList.size();
@@ -259,7 +255,7 @@ public class H4Group extends Group
      * @param info
      *            the metadata to delete.
      *
-     * @throws Exception
+     * @throws HDFException
      *             if the metadata can not be removed
      */
     @Override
@@ -283,8 +279,7 @@ public class H4Group extends Group
 
     // Implementing HObject
     @Override
-    public long open()
-    {
+    public long open() {
         log.trace("open(): start: for file={} with ref={}", getFID(), oid[1]);
 
         if (oid[1] <= 0) {
@@ -323,8 +318,7 @@ public class H4Group extends Group
 
     /** close group access. */
     @Override
-    public void close(long vgid)
-    {
+    public void close(long vgid) {
         log.trace("close(): id={}", vgid);
 
         if (vgid >= 0) {
@@ -347,9 +341,7 @@ public class H4Group extends Group
      *
      * @throws Exception if the group can not be created
      */
-    public static H4Group create(String name, Group pgroup)
-            throws Exception
-    {
+    public static H4Group create(String name, Group pgroup) throws Exception {
         log.trace("create(): start: name={} parentGroup={}", name, pgroup);
 
         H4Group group = null;
@@ -367,9 +359,8 @@ public class H4Group extends Group
         }
 
         String path = HObject.SEPARATOR;
-        if (!pgroup.isRoot()) {
+        if (!pgroup.isRoot())
             path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
-        }
         long fileid = file.open();
         if (fileid < 0) {
             log.debug("create(): Invalid File ID");
@@ -409,9 +400,8 @@ public class H4Group extends Group
         long[] oid = {tag, ref};
         group = new H4Group(file, name, path, pgroup, oid);
 
-        if (group != null) {
+        if (group != null)
             pgroup.addToMemberList(group);
-        }
 
         return group;
     }
@@ -419,7 +409,7 @@ public class H4Group extends Group
     //Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList

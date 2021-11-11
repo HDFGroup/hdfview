@@ -26,12 +26,14 @@ import ucar.ma2.DataType;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class NC2Datatype extends Datatype {
+public class NC2Datatype extends Datatype
+{
     private static final long serialVersionUID = 5399364372073889764L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2Datatype.class);
 
-    DataType nativeType = null;
+    /** the native datatype */
+    private DataType nativeType = null;
 
     /**
      * Create an Datatype with specified class, size, byte order and sign. The
@@ -95,11 +97,9 @@ public class NC2Datatype extends Datatype {
      *            UNUSED.
      */
     @Override
-    public void fromNative(long tid)
-    {
-        if (nativeType == null) {
+    public void fromNative(long tid) {
+        if (nativeType == null)
             return;
-        }
 
         datatypeOrder = NATIVE;
         if (nativeType.equals(DataType.CHAR)) {
@@ -157,8 +157,7 @@ public class NC2Datatype extends Datatype {
      * @throws OutOfMemoryError
      *             if the array cannot be allocated
      */
-    public static final Object allocateArray(DataType dtype, int datasize)
-            throws OutOfMemoryError {
+    public static final Object allocateArray(DataType dtype, int datasize) throws OutOfMemoryError {
         if ((datasize <= 0) || (dtype == null)) {
             log.debug("datasize <= 0");
             return null;
@@ -166,27 +165,20 @@ public class NC2Datatype extends Datatype {
 
         Object data = null;
 
-        if (dtype.equals(DataType.BYTE)) {
+        if (dtype.equals(DataType.BYTE))
             data = new byte[datasize];
-        }
-        else if (dtype.equals(DataType.SHORT)) {
+        else if (dtype.equals(DataType.SHORT))
             data = new short[datasize];
-        }
-        else if (dtype.equals(DataType.INT)) {
+        else if (dtype.equals(DataType.INT))
             data = new int[datasize];
-        }
-        else if (dtype.equals(DataType.LONG)) {
+        else if (dtype.equals(DataType.LONG))
             data = new long[datasize];
-        }
-        else if (dtype.equals(DataType.FLOAT)) {
+        else if (dtype.equals(DataType.FLOAT))
             data = new float[datasize];
-        }
-        else if (dtype.equals(DataType.DOUBLE)) {
+        else if (dtype.equals(DataType.DOUBLE))
             data = new double[datasize];
-        }
-        else if (dtype.equals(DataType.STRING)) {
+        else if (dtype.equals(DataType.STRING))
             data = new String[datasize];
-        }
 
         return data;
     }
@@ -198,15 +190,13 @@ public class NC2Datatype extends Datatype {
      */
     @Override
     public String getDescription() {
-        if (datatypeDescription != null) {
+        if (datatypeDescription != null)
             return datatypeDescription;
-        }
 
         String description = null;
 
-        if (nativeType == null) {
+        if (nativeType == null)
             description = "Unknown data type.";
-        }
 
         description = nativeType.toString();
 
@@ -236,29 +226,22 @@ public class NC2Datatype extends Datatype {
      * @see hdf.object.Datatype#createNative()
      */
     @Override
-    public long createNative()
-    {
+    public long createNative() {
         if (datatypeClass == CLASS_INTEGER) {
-            if (datatypeSize == 1) {
+            if (datatypeSize == 1)
                 nativeType = DataType.BYTE;
-            }
-            else if (datatypeSize == 2) {
+            else if (datatypeSize == 2)
                 nativeType = DataType.SHORT;
-            }
-            else if (datatypeSize == 4) {
+            else if (datatypeSize == 4)
                 nativeType = DataType.INT;
-            }
-            else if (datatypeSize == 8) {
+            else if (datatypeSize == 8)
                 nativeType = DataType.LONG;
-            }
         }
         else if (datatypeClass == CLASS_FLOAT) {
-            if (datatypeSize == 4) {
+            if (datatypeSize == 4)
                 nativeType = DataType.FLOAT;
-            }
-            else if (datatypeSize == 8) {
+            else if (datatypeSize == 8)
                 nativeType = DataType.DOUBLE;
-            }
         }
         else if (datatypeClass == CLASS_STRING) {
             nativeType = DataType.STRING;
@@ -283,7 +266,7 @@ public class NC2Datatype extends Datatype {
     // Implementing MetaDataContainer
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList

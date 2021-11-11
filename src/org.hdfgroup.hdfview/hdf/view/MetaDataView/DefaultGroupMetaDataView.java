@@ -46,6 +46,16 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultGroupMetaDataView.class);
 
+    /**
+     *The metadata view interface for displaying metadata information
+     *
+     * @param parentComposite
+     *        the parent visual object
+     * @param viewer
+     *        the viewr to use
+     * @param theObj
+     *        the object to display the metadata info
+     */
     public DefaultGroupMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
     }

@@ -21,7 +21,8 @@ import hdf.object.h5.H5Datatype;
  * @author rsinha
  *
  */
-public class DatatypeTest {
+public class DatatypeTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatatypeTest.class);
 
     private Datatype[] baseTypes = null;
@@ -249,11 +250,11 @@ public class DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.Datatype#getDatatypeClass()}.
-     * <p>
+     *
      * We test for every combination of class, size and possible signs.
      */
     @Test
-    public void testGetDatatypeClass() {
+    public void testGetDatatypeClass()  {
         log.debug("testGetDatatypeClass");
         int counter = 0;
         for (int i = 0; i < n_classes; i++) {
@@ -286,7 +287,7 @@ public class DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.Datatype#getDatatypeSize()}.
-     * <p>
+     *
      * We test for every combination of class, size and possible signs.
      */
     @Test
@@ -323,7 +324,7 @@ public class DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.Datatype#getDatatypeOrder()}.
-     * <p>
+     *
      * We test for every combination of class, size and possible signs.
      */
     @Test
@@ -360,7 +361,7 @@ public class DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.Datatype#getDatatypeSign()}.
-     * <p>
+     *
      * We test for every combination of class, size and possible signs.
      */
     @Test
@@ -397,7 +398,7 @@ public class DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.Datatype#setEnumMembers(java.lang.String)}.
-     * <p>
+     *
      * create a new enum data type set it to two different values and check it.
      */
     @Test
@@ -418,7 +419,7 @@ public class DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.Datatype#getEnumMembers()}.
-     * <p>
+     *
      * look at {@link hdf.object.Datatype#setEnumMembers(java.lang.String)}.
      */
     @Test
@@ -430,7 +431,7 @@ public class DatatypeTest {
     /**
      * Test method for {@link hdf.object.Datatype#getDescription()} . RISHI SINHA - THE METHOD CALLED IS
      * ONE FOR H5 WHICH OVERRIDES THE BASE CALL.
-     * <p>
+     *
      * We test for every combination of class, size and possible signs.
      */
     @Test
@@ -468,7 +469,7 @@ public class DatatypeTest {
 
     /**
      * ABSTRACT METHOD Test method for {@link hdf.object.Datatype#isUnsigned()}.
-     * <p>
+     *
      * We test for every combination of class, size and possible signs.
      */
     @Test

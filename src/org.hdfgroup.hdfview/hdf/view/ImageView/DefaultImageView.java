@@ -113,11 +113,11 @@ import hdf.view.dialog.NewDatasetDialog;
 
 /**
  * ImageView displays an HDF dataset as an image.
- * <p>
+ *
  * A scalar dataset in HDF can be displayed in image or table. By default, an
  * HDF4 GR image and HDF5 image is displayed as an image. Other scalar datasets
  * are display in a two-dimensional table.
- * <p>
+ *
  * Users can also choose to display a scalar dataset as image. Currently this version
  * of the ImageView only supports 8-bit raster image with indexed RGB color
  * model of 256 colors or 24-bit true color raster image. Data of other type
@@ -132,7 +132,7 @@ import hdf.view.dialog.NewDatasetDialog;
  *             max = the maximum of the original data,
  *             min = the minimum of the original data.
  * </pre>
- * <p>
+ *
  * A default color table is provided for images without palette attached to it.
  * Current choice of default palettes include Gray, Rainbow, Nature and Wave.
  * For more infomation on palette,
@@ -2183,18 +2183,18 @@ public class DefaultImageView implements ImageView
 
     /**
      * Creates a true color image.
-     * <p>
+     *
      * The data may be arranged in one of two ways: by pixel or by plane. In
      * both cases, the dataset will have a dataspace with three dimensions,
      * height, width, and components.
-     * <p>
+     *
      * For HDF4, the interlace modes specify orders for the dimensions as:
      *
      * <pre>
      * INTERLACE_PIXEL = [width][height][pixel components]
      * INTERLACE_PLANE = [pixel components][width][height]
      * </pre>
-     * <p>
+     *
      * For HDF5, the interlace modes specify orders for the dimensions as:
      *
      * <pre>
@@ -2867,7 +2867,6 @@ public class DefaultImageView implements ImageView
 
         /**
          * Constructs an image filter to flip horizontally or vertically.
-         * <p>
          *
          * @param d
          *            the flip direction.
@@ -3294,6 +3293,10 @@ public class DefaultImageView implements ImageView
 
     } // private class ContourFilter extends ImageFilter
 
+
+    /**
+     * Makes an image filter for rotating image by 90 degrees.
+     */
     public static class Rotate90Filter extends ImageFilter
     {
         private ColorModel defaultRGB = ColorModel.getRGBdefault();
@@ -3309,10 +3312,27 @@ public class DefaultImageView implements ImageView
         private int dstH;
         private int direction;
 
+        /**
+         * Image filter for rotating image by 90 degrees.
+         *
+         * @param dir
+         *        the direction to rotate the image
+         *        ROTATE_CW_90 or ROTATE_CCW_90
+         */
         public Rotate90Filter(int dir) {
             direction = dir;
         }
 
+        /**
+         * Transform when rotating image by 90 degrees.
+         *
+         * @param x
+         *        the x coordinate to transform
+         * @param y
+         *        the y coordinate to transform
+         * @param retcoord
+         *        the x.y coordinate transformed
+         */
         public void transform(double x, double y, double[] retcoord) {
             if (direction == ROTATE_CW_90) {
                 retcoord[0] = -y;
@@ -3324,6 +3344,16 @@ public class DefaultImageView implements ImageView
             }
         }
 
+        /**
+         * Transform when rotating image by 90 degrees.
+         *
+         * @param x
+         *        the x coordinate to transform
+         * @param y
+         *        the y coordinate to transform
+         * @param retcoord
+         *        the x.y coordinate transformed
+         */
         public void itransform(double x, double y, double[] retcoord) {
             if (direction == ROTATE_CCW_90) {
                 retcoord[0] = -y;
@@ -3335,6 +3365,12 @@ public class DefaultImageView implements ImageView
             }
         }
 
+        /**
+         * Transform the image specified by a rectangle.
+         *
+         * @param rect
+         *        the rectangle coordinates transformed
+         */
         public void transformBBox(Rectangle rect) {
             double minx = Double.POSITIVE_INFINITY;
             double miny = Double.POSITIVE_INFINITY;

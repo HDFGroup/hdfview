@@ -93,18 +93,24 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultBaseMetaDataView.class);
 
+    /** The default display */
     protected final Display               display = Display.getDefault();
 
+    /** The view manger reference */
     protected final DataViewManager       viewManager;
 
     private final Composite               parent;
 
+    /** The metadata container */
     protected final TabFolder             contentTabFolder;
 
+    /** The attribute metadata pane */
     protected final Composite             attributeInfoPane;
 
+    /** The general metadata pane */
     protected final Composite             generalObjectInfoPane;
 
+    /** The current font */
     protected Font                        curFont;
 
     /** The HDF data object */
@@ -119,13 +125,28 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     private int                           numAttributes;
 
-    protected boolean                     isH5, isH4, isN3;
+    /** The HDF data object is hdf5 type */
+    protected boolean                     isH5;
+    /** The HDF data object is hdf4 type */
+    protected boolean                     isH4;
+    /** The HDF data object is netcdf type */
+    protected boolean                     isN3;
 
     private static final String[]         attrTableColNames = { "Name", "Type", "Array Size", "Value[50](...)" };
 
     private static final int              ATTR_TAB_INDEX = 0;
     private static final int              GENERAL_TAB_INDEX = 1;
 
+    /**
+     *The metadata view interface for displaying metadata information
+     *
+     * @param parentComposite
+     *        the parent visual object
+     * @param viewer
+     *        the viewr to use
+     * @param theObj
+     *        the object to display the metadata info
+     */
     public DefaultBaseMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         this.parent = parentComposite;
         this.viewManager = viewer;
@@ -207,6 +228,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         }
     }
 
+    /**
+     * Additional metadata to display
+     */
     protected abstract void addObjectSpecificContent();
 
     private Composite createAttributeInfoPane(Composite parent, final HObject dataObject) {
@@ -560,12 +584,10 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             while (it.hasNext()) {
                 theObj = it.next();
 
-                if (theObj instanceof Group) {
+                if (theObj instanceof Group)
                     groupCount++;
-                }
-                else {
+                else
                     datasetCount++;
-                }
             }
 
             /* Append all of the file's information to the general object info pane */
@@ -599,18 +621,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             label.setFont(curFont);
             label.setText("File Type: ");
 
-            if (isH5) {
+            if (isH5)
                 objTypeStr = "HDF5,  " + fileInfo;
-            }
-            else if (isH4) {
+            else if (isH4)
                 objTypeStr = "HDF4,  " + fileInfo;
-            }
-            else if (isN3) {
+            else if (isN3)
                 objTypeStr = "netCDF3,  " + fileInfo;
-            }
-            else {
+            else
                 objTypeStr = fileInfo;
-            }
 
             text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);

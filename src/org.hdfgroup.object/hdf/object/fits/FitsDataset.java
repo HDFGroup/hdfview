@@ -37,11 +37,11 @@ import nom.tam.fits.HeaderCard;
  * FitsDataset describes an multi-dimension array of HDF5 scalar or atomic data
  * types, such as byte, int, short, long, float, double and string,
  * and operations performed on the scalar dataset
- * <p>
+ *
  * The library predefines a modest number of datatypes. For details, read <a
  * href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/HDF5_Users_Guide/Datatypes/HDF5_Datatypes.htm">
  * The Datatype Interface (H5T)</a>
- * <p>
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -57,6 +57,7 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
      */
     private List attributeList;
 
+    /** the native dataset */
     private BasicHDU nativeDataset;
 
     /**
@@ -85,8 +86,7 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
 
     // Implementing Dataset
     @Override
-    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
-            throws Exception {
+    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
         // not supported
         throw new UnsupportedOperationException("copy operation unsupported for FITS.");
     }
@@ -103,11 +103,11 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
 
     /**
      * Reads the data from file.
-     * <p>
+     *
      * read() reads the data from file to a memory buffer and returns the memory
      * buffer. The dataset object does not hold the memory buffer. To store the
      * memory buffer in the dataset object, one must call getData().
-     * <p>
+     *
      * By default, the whole dataset is read into memory. Users can also select
      * a subset to read. Subsetting is done in an implicit way.
      *
@@ -125,9 +125,8 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
         Object theData = null;
         Object fitsData = null;
 
-        if (nativeDataset == null) {
+        if (nativeDataset == null)
             return null;
-        }
 
         try {
             fitsData = nativeDataset.getData().getData();
@@ -163,7 +162,7 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
@@ -173,18 +172,15 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
      */
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {
-        if (attributeList != null) {
+        if (attributeList != null)
             return attributeList;
-        }
 
-        if (nativeDataset == null) {
+        if (nativeDataset == null)
             return null;
-        }
 
         Header header = nativeDataset.getHeader();
-        if (header == null) {
+        if (header == null)
             return null;
-        }
 
         attributeList = new Vector();
         HeaderCard hc = null;
@@ -198,13 +194,11 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
             hc = (HeaderCard)it.next();
             attr = new FitsAttribute(this, hc.getKey(), dtype, dims);
             String tvalue = hc.getValue();
-            if (tvalue != null) {
+            if (tvalue != null)
                 value += tvalue;
-            }
             tvalue = hc.getComment();
-            if (tvalue != null) {
+            if (tvalue != null)
                 value += " / " + tvalue;
-            }
             attr.setAttributeData(value);
             attributeList.add(attr);
         }
@@ -286,13 +280,11 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
      */
     @Override
     public void init() {
-        if (nativeDataset == null) {
+        if (nativeDataset == null)
             return;
-        }
 
-        if (inited) {
+        if (inited)
             return; // already called. Initialize only once
-        }
 
         int[] axes= null;
         try {
@@ -302,9 +294,8 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
             log.debug("nativeDataset.getAxes():", ex);
         }
 
-        if (axes == null) {
+        if (axes == null)
             return;
-        }
 
 
         rank = axes.length;
@@ -316,9 +307,8 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
         }
         else {
             dims = new long[rank];
-            for (int i=0; i<rank; i++) {
+            for (int i=0; i<rank; i++)
                 dims[i] = axes[i];
-            }
         }
 
         startDims = new long[rank];
@@ -346,9 +336,8 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
             selectedDims[1] = dims[1];
         }
 
-        if ((rank > 1) && isText) {
+        if ((rank > 1) && isText)
             selectedDims[1] = 1;
-        }
 
         inited = true;
     }
@@ -361,9 +350,8 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
      */
     @Override
     public byte[][] getPalette() {
-        if (palette == null) {
+        if (palette == null)
             palette = readPalette(0);
-        }
 
         return palette;
     }
@@ -403,15 +391,8 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
      * @throws Exception
      *            if there is an error
      */
-    public static FitsDataset create(
-            String name,
-            Group pgroup,
-            Datatype type,
-            long[] dims,
-            long[] maxdims,
-            long[] chunks,
-            int gzip,
-            Object data) throws Exception {
+    public static FitsDataset create(String name, Group pgroup, Datatype type,
+            long[] dims, long[] maxdims, long[] chunks, int gzip, Object data) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
@@ -447,17 +428,14 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
     }
 
     private int get1DLength(Object data) throws Exception {
-
-        if (!data.getClass().isArray()) {
+        if (!data.getClass().isArray())
             return 1;
-        }
 
         int len = Array.getLength(data);
 
         int total = 0;
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < len; i++)
             total += get1DLength(Array.get(data, i));
-        }
 
         return total;
     }
@@ -465,9 +443,8 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
     /** copy multi-dimension array of fits data into 1D array */
     private int to1Darray(Object dataIn, Object dataOut, int offset) throws Exception {
         Class component = dataIn.getClass().getComponentType();
-        if (component == null) {
+        if (component == null)
             return offset;
-        }
 
         int size = Array.getLength(dataIn);
         if (!component.isArray()) {
@@ -475,9 +452,8 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
             return offset+size;
         }
 
-        for (int i = size - 1; i >= 0; i--) {
+        for (int i = size - 1; i >= 0; i--)
             offset = to1Darray(Array.get(dataIn, i), dataOut, offset);
-        }
 
         return offset;
     }
@@ -486,7 +462,7 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
     /* FITS does not support metadata */
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList

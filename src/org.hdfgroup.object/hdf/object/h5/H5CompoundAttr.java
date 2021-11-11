@@ -47,25 +47,25 @@ import hdf.object.h5.H5Datatype;
 
 /**
  * The H5CompoundAttr class defines an HDF5 attribute of compound datatypes.
- * <p>
+ *
  * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
  * dataset, group or named datatype.
- * <p>
+ *
  * Like a dataset, an attribute has a name, datatype and dataspace.
- * <p>
+ *
  * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a
  * collection of one or more atomic types or small arrays of such types. Each member of a compound
  * type has a name which is unique within that type, and a byte offset that determines the first
  * byte (smallest byte address) of that member in a compound datum.
- * <p>
+ *
  * For more information on HDF5 attributes and datatypes, read the <a href=
  * "https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5
  * User's Guide</a>.
- * <p>
+ *
  * There are two basic types of compound attributes: simple compound data and nested compound data.
  * Members of a simple compound attribute have atomic datatypes. Members of a nested compound attribute
  * are compound or array of compound data.
- * <p>
+ *
  * Since Java does not understand C structures, we cannot directly read/write compound data values
  * as in the following C example.
  *
@@ -90,8 +90,8 @@ import hdf.object.h5.H5Datatype;
  * @version 1.0 6/15/2021
  * @author Allen Byrne
  */
-public class H5CompoundAttr extends CompoundDS implements H5Attribute {
-
+public class H5CompoundAttr extends CompoundDS implements H5Attribute
+{
     private static final long serialVersionUID = 2072473407027648309L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundAttr.class);
@@ -241,13 +241,13 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
     /**
      * Retrieves datatype and dataspace information from file and sets the attribute
      * in memory.
-     * <p>
+     *
      * The init() is designed to support lazy operation in a attribute object. When a
      * data object is retrieved from file, the datatype, dataspace and raw data are
      * not loaded into memory. When it is asked to read the raw data from file,
      * init() is first called to get the datatype and dataspace information, then
      * load the raw data from file.
-     * <p>
+     *
      * init() is also used to reset the selection of a attribute (start, stride and
      * count) to the default, which is the entire attribute for 1D or 2D datasets. In
      * the following example, init() at step 1) retrieves datatype and dataspace
@@ -498,16 +498,16 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
     /**
      * Returns the data buffer of the attribute in memory.
-     * <p>
+     *
      * If data is already loaded into memory, returns the data; otherwise, calls
      * read() to read data from file into a memory buffer and returns the memory
      * buffer.
-     * <p>
+     *
      * The whole attribute is read into memory. Users can also select
      * a subset from the whole data. Subsetting is done in an implicit way.
-     * <p>
+     *
      * <b>How to Select a Subset</b>
-     * <p>
+     *
      * A selection is specified by three arrays: start, stride and count.
      * <ol>
      * <li>start: offset of a selection
@@ -517,7 +517,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
      * getStartDims(), getStride() and getSelectedDims() returns the start,
      * stride and count arrays respectively. Applications can make a selection
      * by changing the values of the arrays.
-     * <p>
+     *
      * The following example shows how to make a subset. In the example, the
      * attribute is a 4-dimensional array of [200][100][50][10], i.e. dims[0]=200;
      * dims[1]=100; dims[2]=50; dims[3]=10; <br>
@@ -557,10 +557,10 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
      * // outside the attribute object directly change the values of these array
      * // in the attribute object.
      * </pre>
-     * <p>
+     *
      * For H5CompoundAttr, the memory data object is an java.util.List object. Each
      * element of the list is a data array that corresponds to a compound field.
-     * <p>
+     *
      * For example, if compound attribute "comp" has the following nested
      * structure, and member datatypes
      *
@@ -584,9 +584,8 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
     @Override
     public Object getData() throws Exception, OutOfMemoryError {
         log.trace("getData(): isDataLoaded={}", isDataLoaded);
-        if (!isDataLoaded) {
+        if (!isDataLoaded)
             data = read(); // load the data, attributes read all data
-        }
 
         nPoints = 1;
         log.trace("getData(): selectedDims length={}", selectedDims.length);
@@ -605,9 +604,8 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         //     where selectedIndex[0] is the row dimension
         //     where selectedIndex[1] is the col dimension
         //     where selectedIndex[2] is the frame dimension
-        if (rank > 2) {
+        if (rank > 2)
             data = AttributeSelection();
-        }
 
         return data;
     }
@@ -630,15 +628,15 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
             try {
                 long[] lsize = { 1 };
-                for (int j = 0; j < selectedDims.length; j++) {
+                for (int j = 0; j < selectedDims.length; j++)
                     lsize[0] *= selectedDims[j];
-                }
 
                 tid = H5.H5Aget_type(aid);
                 long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("readBytes(): size={}", size);
 
-                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE) throw new Exception("Invalid int size");
+                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE)
+                    throw new Exception("Invalid int size");
 
                 theData = new byte[(int)size];
 
@@ -664,16 +662,16 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
     /**
      * Reads the data from file.
-     * <p>
+     *
      * read() reads the data from file to a memory buffer and returns the memory
      * buffer. The attribute object does not hold the memory buffer. To store the
      * memory buffer in the attribute object, one must call getData().
-     * <p>
+     *
      * By default, the whole attribute is read into memory.
-     * <p>
+     *
      * For CompoundAttr, the memory data object is an java.util.List object. Each
      * element of the list is a data array that corresponds to a compound field.
-     * <p>
+     *
      * For example, if compound dataset "comp" has the following nested
      * structure, and member datatypes
      *
@@ -717,7 +715,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
     /**
      * Writes the given data buffer into this attribute in a file.
-     * <p>
+     *
      * The data buffer is a vector that contains the data values of compound fields. The data is written
      * into file as one data blob.
      *
@@ -1290,7 +1288,6 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
      * Private routine to convert a single field of a compound datatype.
      */
     private Object writeSingleCompoundMember(final H5Datatype memberType, Object theData) throws Exception {
-
         /*
          * Check for any unsupported datatypes before attempting to write this compound
          * member.
@@ -1395,8 +1392,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
      * @param key the attribute Map key
      * @param value the attribute Map value
      */
-    public void setProperty(String key, Object value)
-    {
+    public void setProperty(String key, Object value) {
         properties.put(key, value);
     }
 
@@ -1407,8 +1403,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
      *
      * @return the property
      */
-    public Object getProperty(String key)
-    {
+    public Object getProperty(String key) {
         return properties.get(key);
     }
 
@@ -1417,8 +1412,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
      *
      * @return the Collection of property keys
      */
-    public Collection<String> getPropertyKeys()
-    {
+    public Collection<String> getPropertyKeys() {
         return properties.keySet();
     }
 
@@ -1491,7 +1485,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
     /**
      * Not for public use in the future.
-     * <p>
+     *
      * setData() is not safe to use because it changes memory buffer
      * of the dataset object. Dataset operations such as write/read
      * will fail if the buffer type or size is changed.
@@ -1513,7 +1507,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
     /**
      * Writes the given data buffer into this attribute in a file.
-     * <p>
+     *
      * The data buffer is a vector that contains the data values of compound fields. The data is written
      * into file as one data blob.
      *
@@ -1530,12 +1524,11 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
     /**
      * Returns a string representation of the data value. For
      * example, "0, 255".
-     * <p>
+     *
      * For a compound datatype, it will be a 1D array of strings with field
      * members separated by the delimiter. For example,
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
-     * <p>
      *
      * @param delimiter
      *            The delimiter used to separate individual data points. It
@@ -1551,12 +1544,11 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
     /**
      * Returns a string representation of the data value. For
      * example, "0, 255".
-     * <p>
+     *
      * For a compound datatype, it will be a 1D array of strings with field
      * members separated by the delimiter. For example,
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
-     * <p>
      *
      * @param delimiter
      *            The delimiter used to separate individual data points. It
@@ -1746,6 +1738,21 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
     /* Implement interface H5Attribute */
 
+    /**
+     * The general read and write attribute operations for hdf5 object data.
+     *
+     * @param attr_id
+     *        the attribute to access
+     * @param ioType
+     *        the type of IO operation
+     * @param objBuf
+     *        the data buffer to use for write operation
+     *
+     * @return the attribute data
+     *
+     * @throws Exception
+     *             if the data can not be retrieved
+     */
     public Object AttributeCommonIO(long attr_id, H5File.IO_TYPE ioType, Object objBuf) throws Exception {
         H5Datatype dsDatatype = (H5Datatype) getDatatype();
         Object theData = null;
@@ -1804,6 +1811,14 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         return theData;
     }
 
+    /**
+     * Read a subset of an attribute for hdf5 object data.
+     *
+     * @return the selected attribute data
+     *
+     * @throws Exception
+     *             if the data can not be retrieved
+     */
     public Object AttributeSelection() throws Exception {
         return originalBuf;
 //        H5Datatype dsDatatype = (H5Datatype) getDatatype();

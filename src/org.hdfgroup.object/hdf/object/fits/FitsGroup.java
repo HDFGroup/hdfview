@@ -26,7 +26,7 @@ import hdf.object.Group;
  * structure of a group is similar to that of the UNIX file system in
  * that the group may contain references to other groups or data objects
  * just as the UNIX directory may contain subdirectories or files.
- * <p>
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -45,7 +45,7 @@ public class FitsGroup extends Group
 
     /**
      * Constructs an HDF5 group with specific name, path, and parent.
-     * <p>
+     *
      * @param fileFormat the file which containing the group.
      * @param name the name of this group.
      * @param path the full path of this group.
@@ -60,12 +60,14 @@ public class FitsGroup extends Group
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
-    public boolean hasAttribute () { return false; }
+    public boolean hasAttribute () {
+        return false;
+    }
 
     // Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
@@ -74,13 +76,11 @@ public class FitsGroup extends Group
      *             if the metadata can not be retrieved
      */
     public List getMetadata() throws Exception {
-        if (!isRoot()) {
+        if (!isRoot())
             return null; // there is only one group in the file: the root
-        }
 
-        if (attributeList != null) {
+        if (attributeList != null)
             return attributeList;
-        }
 
         return attributeList;
     }
@@ -142,7 +142,12 @@ public class FitsGroup extends Group
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
-    /** close group access */
+    /**
+     *  close group access
+     *
+     * @param gid
+     *        the group identifier
+     */
     @Override
     public void close(long gid) {
         // not supported
@@ -151,16 +156,18 @@ public class FitsGroup extends Group
 
     /**
      * Creates a new group.
-     * @param name the name of the group to create.
-     * @param pgroup the parent group of the new group.
+     *
+     * @param name
+     *        the name of the group to create.
+     * @param pgroup
+     *        the parent group of the new group.
      *
      * @return the new group if successful. Otherwise returns null.
      *
      * @throws Exception
      *            if there is an error
      */
-    public static FitsGroup create(String name, Group pgroup)
-        throws Exception {
+    public static FitsGroup create(String name, Group pgroup) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
@@ -168,7 +175,7 @@ public class FitsGroup extends Group
     //Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList

@@ -50,13 +50,12 @@ import hdf.object.h5.H5Datatype;
 /**
  * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
  * dataset, group or named datatype.
- * <p>
+ *
  * Like a dataset, an attribute has a name, datatype and dataspace.
- * <p>
+ *
  * For more details on attributes, <a href=
  * "https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5
  * User's Guide</a>
- * <p>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
  *
@@ -90,8 +89,8 @@ import hdf.object.h5.H5Datatype;
  * @version 1.0 6/15/2021
  * @author Allen Byrne
  */
-public class H5ScalarAttr extends ScalarDS implements H5Attribute {
-
+public class H5ScalarAttr extends ScalarDS implements H5Attribute
+{
     private static final long serialVersionUID = 2072473407027648309L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5ScalarAttr.class);
@@ -114,7 +113,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      * or null, and the rank can be either 1 or zero. Attribute is a general class
      * and is independent of file format, e.g., the implementation of attribute
      * applies to both HDF4 and HDF5.
-     * <p>
+     *
      * The following example creates a string attribute with the name "CLASS" and
      * value "IMAGE".
      *
@@ -153,7 +152,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      * or null, and the rank can be either 1 or zero. Attribute is a general class
      * and is independent of file format, e.g., the implementation of attribute
      * applies to both HDF4 and HDF5.
-     * <p>
+     *
      * The following example creates a string attribute with the name "CLASS" and
      * value "IMAGE".
      *
@@ -282,7 +281,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
     /**
      * Retrieves datatype and dataspace information from file and sets the attribute
      * in memory.
-     * <p>
+     *
      * The init() is designed to support lazy operation in a attribute object. When a
      * data object is retrieved from file, the datatype, dataspace and raw data are
      * not loaded into memory. When it is asked to read the raw data from file,
@@ -451,16 +450,16 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
 
     /**
      * Returns the data buffer of the attribute in memory.
-     * <p>
+     *
      * If data is already loaded into memory, returns the data; otherwise, calls
      * read() to read data from file into a memory buffer and returns the memory
      * buffer.
-     * <p>
+     *
      * The whole attribute is read into memory. Users can also select
      * a subset from the whole data. Subsetting is done in an implicit way.
-     * <p>
+     *
      * <b>How to Select a Subset</b>
-     * <p>
+     *
      * A selection is specified by three arrays: start, stride and count.
      * <ol>
      * <li>start: offset of a selection
@@ -470,7 +469,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      * getStartDims(), getStride() and getSelectedDims() returns the start,
      * stride and count arrays respectively. Applications can make a selection
      * by changing the values of the arrays.
-     * <p>
+     *
      * The following example shows how to make a subset. In the example, the
      * attribute is a 4-dimensional array of [200][100][50][10], i.e. dims[0]=200;
      * dims[1]=100; dims[2]=50; dims[3]=10; <br>
@@ -510,11 +509,10 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      * // outside the attribute object directly change the values of these array
      * // in the attribute object.
      * </pre>
-     * <p>
+     *
      * For H5ScalarAttr, the memory data buffer is a one-dimensional array of byte,
      * short, int, float, double or String type based on the datatype of the
      * attribute.
-     * <p>
      *
      * @return the memory buffer of the attribute.
      *
@@ -524,9 +522,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
     @Override
     public Object getData() throws Exception, OutOfMemoryError {
         log.trace("getData(): isDataLoaded={}", isDataLoaded);
-        if (!isDataLoaded) {
+        if (!isDataLoaded)
             data = read(); // load the data, attributes read all data
-        }
 
         nPoints = 1;
         log.trace("getData(): selectedDims length={}", selectedDims.length);
@@ -545,9 +542,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         //     where selectedIndex[0] is the row dimension
         //     where selectedIndex[1] is the col dimension
         //     where selectedIndex[2] is the frame dimension
-        if (rank > 2) {
+        if (rank > 2)
             data = AttributeSelection();
-        }
 
         return data;
     }
@@ -559,8 +555,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      * @see hdf.object.Dataset#copy(hdf.object.Group, java.lang.String, long[], java.lang.Object)
      */
     @Override
-    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
-            throws Exception {
+    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
         // not supported
         throw new UnsupportedOperationException("copy operation unsupported for H5.");
     }
@@ -583,15 +578,15 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
 
             try {
                 long[] lsize = { 1 };
-                for (int j = 0; j < selectedDims.length; j++) {
+                for (int j = 0; j < selectedDims.length; j++)
                     lsize[0] *= selectedDims[j];
-                }
 
                 tid = H5.H5Aget_type(aid);
                 long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("readBytes(): size={}", size);
 
-                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE) throw new Exception("Invalid int size");
+                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE)
+                    throw new Exception("Invalid int size");
 
                 theData = new byte[(int)size];
 
@@ -617,13 +612,13 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
 
     /**
      * Reads the data from file.
-     * <p>
+     *
      * read() reads the data from file to a memory buffer and returns the memory
      * buffer. The attribute object does not hold the memory buffer. To store the
      * memory buffer in the attribute object, one must call getData().
-     * <p>
+     *
      * By default, the whole attribute is read into memory.
-     * <p>
+     *
      * For ScalarAttr, the memory data buffer is a one-dimensional array of byte,
      * short, int, float, double or String type based on the datatype of the
      * attribute.
@@ -761,8 +756,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      * @param key the attribute Map key
      * @param value the attribute Map value
      */
-    public void setProperty(String key, Object value)
-    {
+    public void setProperty(String key, Object value) {
         properties.put(key, value);
     }
 
@@ -773,8 +767,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      *
      * @return the property
      */
-    public Object getProperty(String key)
-    {
+    public Object getProperty(String key) {
         return properties.get(key);
     }
 
@@ -783,8 +776,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      *
      * @return the Collection of property keys
      */
-    public Collection<String> getPropertyKeys()
-    {
+    public Collection<String> getPropertyKeys() {
         return properties.keySet();
     }
 
@@ -857,7 +849,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
 
     /**
      * Not for public use in the future.
-     * <p>
+     *
      * setData() is not safe to use because it changes memory buffer
      * of the dataset object. Dataset operations such as write/read
      * will fail if the buffer type or size is changed.
@@ -879,7 +871,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
 
     /**
      * Writes the given data buffer into this attribute in a file.
-     * <p>
+     *
      * The data buffer is a vector that contains the data values of compound fields. The data is written
      * into file as one data blob.
      *
@@ -896,12 +888,11 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
     /**
      * Returns a string representation of the data value. For
      * example, "0, 255".
-     * <p>
+     *
      * For a compound datatype, it will be a 1D array of strings with field
      * members separated by the delimiter. For example,
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
-     * <p>
      *
      * @param delimiter
      *            The delimiter used to separate individual data points. It
@@ -917,12 +908,11 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
     /**
      * Returns a string representation of the data value. For
      * example, "0, 255".
-     * <p>
+     *
      * For a compound datatype, it will be a 1D array of strings with field
      * members separated by the delimiter. For example,
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
-     * <p>
      *
      * @param delimiter
      *            The delimiter used to separate individual data points. It
@@ -939,6 +929,21 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
 
     /* Implement interface H5Attribute */
 
+    /**
+     * The general read and write attribute operations for hdf5 object data.
+     *
+     * @param attr_id
+     *        the attribute to access
+     * @param ioType
+     *        the type of IO operation
+     * @param objBuf
+     *        the data buffer to use for write operation
+     *
+     * @return the attribute data
+     *
+     * @throws Exception
+     *             if the data can not be retrieved
+     */
     public Object AttributeCommonIO(long attr_id, H5File.IO_TYPE ioType, Object objBuf) throws Exception {
         H5Datatype dsDatatype = (H5Datatype) getDatatype();
         Object theData = null;
@@ -951,17 +956,15 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
             log.trace("AttributeCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}", dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(), dsDatatype.isRefObj());
 
             long lsize = 1;
-            for (int j = 0; j < dims.length; j++) {
+            for (int j = 0; j < dims.length; j++)
                 lsize *= dims[j];
-            }
             log.trace("AttributeCommonIO():read ioType dt_size={} lsize={}", dt_size, lsize);
 
             try {
                 if (dsDatatype.isVarStr()) {
                     String[] strs = new String[(int) lsize];
-                    for (int j = 0; j < lsize; j++) {
+                    for (int j = 0; j < lsize; j++)
                         strs[j] = "";
-                    }
                     try {
                         log.trace("AttributeCommonIO():read ioType H5AreadVL");
                         H5.H5AreadVL(attr_id, tid, strs);
@@ -974,9 +977,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                 }
                 else if (dsDatatype.isCompound()) {
                     String[] strs = new String[(int) lsize];
-                    for (int j = 0; j < lsize; j++) {
+                    for (int j = 0; j < lsize; j++)
                         strs[j] = "";
-                    }
                     try {
                         log.trace("AttributeCommonIO():read ioType H5AreadComplex");
                         H5.H5AreadComplex(attr_id, tid, strs);
@@ -988,9 +990,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                 }
                 else if (dsDatatype.isVLEN()) {
                     String[] strs = new String[(int) lsize];
-                    for (int j = 0; j < lsize; j++) {
+                    for (int j = 0; j < lsize; j++)
                         strs[j] = "";
-                    }
                     try {
                         log.trace("AttributeCommonIO():read ioType H5AreadVL");
                         H5.H5AreadVL(attr_id, tid, strs);
@@ -1010,9 +1011,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                         log.debug("AttributeCommonIO():read ioType out of memory", e);
                         theData = null;
                     }
-                    if (attr_data == null) {
+                    if (attr_data == null)
                         log.debug("AttributeCommonIO():read ioType allocateArray returned null");
-                    }
 
                     log.trace("AttributeCommonIO():read ioType H5Aread isArray()={}", dsDatatype.isArray());
                     try {
@@ -1145,6 +1145,14 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         return theData;
     }
 
+    /**
+     * Read a subset of an attribute for hdf5 object data.
+     *
+     * @return the selected attribute data
+     *
+     * @throws Exception
+     *             if the data can not be retrieved
+     */
     public Object AttributeSelection() throws Exception {
         H5Datatype dsDatatype = (H5Datatype) getDatatype();
         Object theData = H5Datatype.allocateArray(dsDatatype, (int)nPoints);
@@ -1210,11 +1218,9 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      * @see hdf.object.ScalarDS#getPalette()
      */
     @Override
-    public byte[][] getPalette()
-    {
-        if (palette == null) {
+    public byte[][] getPalette() {
+        if (palette == null)
             palette = readPalette(0);
-        }
 
         return palette;
     }

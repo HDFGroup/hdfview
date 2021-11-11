@@ -40,6 +40,16 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultLinkMetaDataView.class);
 
+    /**
+     *The metadata view interface for displaying link metadata information
+     *
+     * @param parentComposite
+     *        the parent visual object
+     * @param viewer
+     *        the viewr to use
+     * @param theObj
+     *        the object to display the metadata info
+     */
     public DefaultLinkMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
     }

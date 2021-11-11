@@ -43,19 +43,19 @@ import hdf.object.Utils;
 
 /**
  * A CompoundDS is a dataset with compound datatype.
- * <p>
+ *
  * A compound datatype is an aggregation of one or more datatypes. Each member
  * of a compound type has a name which is unique within that type, and a
  * datatype of that member in a compound datum. Compound datatypes can be nested,
  * i.e. members of a compound datatype can be some other compound datatype.
- * <p>
+ *
  * For more details on compound datatypes,
  * see <b> <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
- * <p>
+ *
  * Since Java cannot handle C-structured compound data, data in a compound dataset
  * is loaded in to an Java List. Each element of the list is a data array that
  * corresponds to a compound field. The data is read/written by compound field.
- * <p>
+ *
  * For example, if compound dataset "comp" has the following nested structure,
  * and member datatypes
  *
@@ -75,7 +75,8 @@ import hdf.object.Utils;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
+public abstract class CompoundDS extends Dataset implements CompoundDataFormat
+{
     private static final long serialVersionUID = -4880399929644095662L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDS.class);
@@ -100,7 +101,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     /**
      * Returns array containing the total number of elements of the members of
      * this compound dataset.
-     * <p>
+     *
      * For example, a compound dataset COMP has members of A, B and C as
      *
      * <pre>
@@ -118,7 +119,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
 
     /**
      * The dimension sizes of each member.
-     * <p>
+     *
      * The i-th element of the Object[] is an integer array (int[]) that
      * contains the dimension sizes of the i-th member.
      */
@@ -132,7 +133,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     /**
      * The array to store flags to indicate if a member of this compound
      * dataset is selected for read/write.
-     * <p>
+     *
      * If a member is selected, the read/write will perform on the member.
      * Applications such as HDFView will only display the selected members of
      * the compound dataset.
@@ -149,7 +150,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
 
     /**
      * A list of names of all fields including nested fields.
-     * <p>
+     *
      * The nested names are separated by CompoundDS.SEPARATOR. For example, if compound dataset "A" has
      * the following nested structure,
      *
@@ -177,11 +178,11 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
 
     /**
      * Constructs a CompoundDS object with the given file, dataset name and path.
-     * <p>
+     *
      * The dataset object represents an existing dataset in the file. For
      * example, new H5CompoundDS(file, "dset1", "/g0/") constructs a dataset
      * object that corresponds to the dataset, "dset1", at group "/g0/".
-     * <p>
+     *
      * This object is usually constructed at FileFormat.open(), which loads the
      * file structure and object information into memory. It is rarely used
      * elsewhere.
@@ -244,7 +245,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      *
      * Selected members are the compound fields which are selected for
      * read/write.
-     * <p>
+     *
      * For example, in a compound datatype of {int A, float B, char[] C},
      * users can choose to retrieve only {A, C} from the dataset. In this
      * case, getSelectedMemberCount() returns two.
@@ -257,9 +258,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
 
         if (isMemberSelected != null) {
             for (int i = 0; i < isMemberSelected.length; i++) {
-                if (isMemberSelected[i]) {
+                if (isMemberSelected[i])
                     count++;
-                }
             }
         }
         log.trace("count of selected members={}", count);
@@ -270,7 +270,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     /**
      * Returns the names of the members of the compound dataset. The names of
      * compound members are stored in an array of Strings.
-     * <p>
+     *
      * For example, for a compound datatype of {int A, float B, char[] C}
      * getMemberNames() returns ["A", "B", "C"}.
      *
@@ -295,9 +295,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
         int idx = 0;
         String[] names = new String[getSelectedMemberCount()];
         for (int i = 0; i < isMemberSelected.length; i++) {
-            if (isMemberSelected[i]) {
+            if (isMemberSelected[i])
                 names[idx++] = memberNames[i];
-            }
         }
 
         return names;
@@ -313,12 +312,10 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      */
     @Override
     public final boolean isMemberSelected(int idx) {
-        if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
+        if ((isMemberSelected != null) && (isMemberSelected.length > idx))
             return isMemberSelected[idx];
-        }
-        else {
+        else
             return false;
-        }
     }
 
     /**
@@ -329,9 +326,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      */
     @Override
     public final void selectMember(int idx) {
-        if ((isMemberSelected != null) && (isMemberSelected.length > idx)) {
+        if ((isMemberSelected != null) && (isMemberSelected.length > idx))
             isMemberSelected[idx] = true;
-        }
     }
 
     /**
@@ -344,19 +340,17 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      */
     @Override
     public final void setAllMemberSelection(boolean selectAll) {
-        if (isMemberSelected == null) {
+        if (isMemberSelected == null)
             return;
-        }
 
-        for (int i = 0; i < isMemberSelected.length; i++) {
+        for (int i = 0; i < isMemberSelected.length; i++)
             isMemberSelected[i] = selectAll;
-        }
     }
 
     /**
      * Returns array containing the total number of elements of the members of
      * the compound dataset.
-     * <p>
+     *
      * For example, a compound dataset COMP has members of A, B and C as
      *
      * <pre>
@@ -383,7 +377,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      * Returns array containing the total number of elements of the selected
      * members of the compound dataset.
      *
-     * <p>
      * For example, a compound dataset COMP has members of A, B and C as
      *
      * <pre>
@@ -410,9 +403,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
         int idx = 0;
         int[] orders = new int[getSelectedMemberCount()];
         for (int i = 0; i < isMemberSelected.length; i++) {
-            if (isMemberSelected[i]) {
+            if (isMemberSelected[i])
                 orders[idx++] = memberOrders[i];
-            }
         }
 
         return orders;
@@ -420,7 +412,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
 
     /**
      * Returns the dimension sizes of the i-th member.
-     * <p>
+     *
      * For example, a compound dataset COMP has members of A, B and C as
      *
      * <pre>
@@ -449,11 +441,10 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
 
     /**
      * Returns an array of datatype objects of compound members.
-     * <p>
+     *
      * Each member of a compound dataset has its own datatype. The datatype of a
      * member can be atomic or other compound datatype (nested compound).
      * Sub-classes set up the datatype objects at init().
-     * <p>
      *
      * @return the array of datatype objects of the compound members.
      */
@@ -477,9 +468,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
         int idx = 0;
         Datatype[] types = new Datatype[getSelectedMemberCount()];
         for (int i = 0; i < isMemberSelected.length; i++) {
-            if (isMemberSelected[i]) {
+            if (isMemberSelected[i])
                 types[idx++] = memberTypes[i];
-            }
         }
 
         return types;
@@ -500,15 +490,21 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
      */
     @Deprecated
     @Override
-    public Dataset copy(Group pgroup, String name, long[] dims, Object data)
-            throws Exception {
+    public Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception {
         throw new UnsupportedOperationException(
                 "Writing a subset of a compound dataset to a new dataset is not implemented.");
     }
 
-    /*
+    /**
      * Routine to convert datatypes that are read in as byte arrays to
      * regular types.
+     *
+     * @param dtype
+     *        the datatype to convert to
+     * @param byteData
+     *        the bytes to convert
+     *
+     * @return the converted object
      */
     protected Object convertByteMember(final Datatype dtype, byte[] byteData) {
         Object theObj = null;
@@ -595,9 +591,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
 
                     long[] arrayDims = dtype.getArrayDims();
                     int arrSize = 1;
-                    for (int i = 0; i < arrayDims.length; i++) {
+                    for (int i = 0; i < arrayDims.length; i++)
                         arrSize *= arrayDims[i];
-                    }
 
                     theObj = new Object[arrSize];
 

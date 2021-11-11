@@ -29,7 +29,8 @@ import hdf.object.h5.H5ScalarAttr;
  * @author Rishi R. Sinha
  *
  */
-public class AttributeTest {
+public class AttributeTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AttributeTest.class);
     private static final H5File H5FILE = new H5File();
 
@@ -43,8 +44,7 @@ public class AttributeTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -143,7 +143,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype, long[])} .
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Creating a new attribute with no value.
@@ -175,8 +175,7 @@ public class AttributeTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype, long[], java.lang.Object)}
-     * .
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Creating a new attribute with a value.
@@ -242,7 +241,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.Attribute#setData(java.lang.Object)}.
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Setting new value for the two attributes (the string attribute and
@@ -316,7 +315,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.Attribute#getAttributeName()}.
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Getting the names of the two attributes (the string attribute and the int array attribute).
@@ -331,7 +330,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.Attribute#getRank()}.
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Getting the rank for the two attributes (the string attribute and the int array attribute).
@@ -346,7 +345,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.Attribute#getDataDims()}.
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Getting the dimensionalities for the two attributes (the string attribute and the int array attribute).
@@ -361,7 +360,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.Attribute#getType()}.
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Getting the value for the two attributes (the string attribute and the int array attribute).
@@ -377,7 +376,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.Attributet#isUnsigned()}.
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Check if the two attributes (the string attribute and the int array attribute) are unsigned.
@@ -392,7 +391,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.Attribute#toString(java.lang.String)}.
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>the toString method for the two attributes (the string attribute and the int array attribute).

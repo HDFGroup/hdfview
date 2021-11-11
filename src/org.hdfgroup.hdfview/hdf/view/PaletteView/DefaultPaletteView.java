@@ -68,8 +68,8 @@ import hdf.view.ImageView.ImageView;
  * @author Jordan T. Henderson
  * @version 2.4 2/27/16
  */
-public class DefaultPaletteView extends Dialog implements PaletteView {
-
+public class DefaultPaletteView extends Dialog implements PaletteView
+{
     private Shell shell;
 
     private Font curFont;
@@ -101,17 +101,35 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
     private static final String PALETTE_NATURE = "Nature";
     private static final String PALETTE_WAVE = "Wave";
 
-    byte[][] palette;
+    private byte[][] palette;
     private int numberOfPalettes;
     private int[][] paletteData;
 
-    boolean isPaletteChanged = false;
+    private boolean isPaletteChanged = false;
     private boolean isH5 = false;
 
+    /**
+     * Create a dialog for viewing and changing palettes.
+     *
+     * @param parent
+     *        the parent component
+     * @param theImageView
+     *        the associated ImageView
+     */
     public DefaultPaletteView(Shell parent, ImageView theImageView) {
         this(parent, null, theImageView);
     }
 
+    /**
+     * Create a dialog for viewing and change palettes.
+     *
+     * @param parent
+     *        the parent component
+     * @param theViewer
+     *        the data view manager
+     * @param theImageView
+     *        the associated ImageView
+     */
     public DefaultPaletteView(Shell parent, DataViewManager theViewer, ImageView theImageView) {
         super(parent, SWT.APPLICATION_MODAL);
 
@@ -138,9 +156,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 256; j++) {
                 d = imagePalette[i][j];
-                if (d < 0) {
+                if (d < 0)
                     d += 256;
-                }
                 paletteData[i][j] = d;
             }
         }
@@ -153,6 +170,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         createUI();
     }
 
+    /** Create the visual components */
     public void createUI() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
@@ -213,52 +231,40 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 int idx = choicePalette.getSelectionIndex();
-                if (idx <= 0) {
+                if (idx <= 0)
                     return;
-                }
 
                 byte[][] imagePalette = null;
                 Object item = choicePalette.getItem(idx);
 
-                if (item.equals(PALETTE_DEFAULT)) {
+                if (item.equals(PALETTE_DEFAULT))
                     imagePalette = dataset.getPalette();
-                }
-                else if (item.equals(PALETTE_GRAY)) {
+                else if (item.equals(PALETTE_GRAY))
                     imagePalette = Tools.createGrayPalette();
-                }
-                else if (item.equals(PALETTE_REVERSE_GRAY)) {
+                else if (item.equals(PALETTE_REVERSE_GRAY))
                     imagePalette = Tools.createReverseGrayPalette();
-                }
-                else if (item.equals(PALETTE_GRAY_WAVE)) {
+                else if (item.equals(PALETTE_GRAY_WAVE))
                     imagePalette = Tools.createGrayWavePalette();
-                }
-                else if (item.equals(PALETTE_RAINBOW)) {
+                else if (item.equals(PALETTE_RAINBOW))
                     imagePalette = Tools.createRainbowPalette();
-                }
-                else if (item.equals(PALETTE_NATURE)) {
+                else if (item.equals(PALETTE_NATURE))
                     imagePalette = Tools.createNaturePalette();
-                }
-                else if (item.equals(PALETTE_WAVE)) {
+                else if (item.equals(PALETTE_WAVE))
                     imagePalette = Tools.createWavePalette();
-                }
-                else if (idx > 0 && idx <= numberOfPalettes) {
+                else if (idx > 0 && idx <= numberOfPalettes)
                     imagePalette = dataset.readPalette(idx - 1);
-                }
-                else {
+                else
                     imagePalette = Tools.readPalette((String) item);
-                }
 
-                if (imagePalette == null) {
+                if (imagePalette == null)
                     return;
-                }
 
                 int d = 0;
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 256; j++) {
                         d = imagePalette[i][j];
-                        if (d < 0) {
+                        if (d < 0)
                             d += 256;
-                        }
                         paletteData[i][j] = d;
                     }
                 }
@@ -280,9 +286,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
 
         if (isH5 && (dataset instanceof ScalarDS)) {
             byte[] palRefs = dataset.getPaletteRefs();
-            if ((palRefs != null) && (palRefs.length > 8)) {
+            if ((palRefs != null) && (palRefs.length > 8))
                 numberOfPalettes = palRefs.length / 8;
-            }
         }
         for (int i = 1; i < numberOfPalettes; i++) {
             paletteName = dataset.getPaletteName(i);
@@ -307,9 +312,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         showValueButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (paletteValueTable == null) {
+                if (paletteValueTable == null)
                     paletteValueTable = new PaletteValueTable(shell, SWT.NONE);
-                }
 
                 paletteValueTable.open();
             }
@@ -392,12 +396,11 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
             palette[2][i] = (byte) paletteData[2][i];
         }
 
-        IndexColorModel colorModel = new IndexColorModel(8, // bits - the number
-                // of bits each
-                // pixel occupies
+        IndexColorModel colorModel = new IndexColorModel(
+                8,   // bits - the number of bits each pixel occupies
                 256, // size - the size of the color component arrays
-                palette[0], // r - the array of red color components
-                palette[1], // g - the array of green color components
+                palette[0],  // r - the array of red color components
+                palette[1],  // g - the array of green color components
                 palette[2]); // b - the array of blue color components
 
         long w = dataset.getWidth();
@@ -411,19 +414,17 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
             memoryImageSource = null;
         }
 
-        if (memoryImageSource == null) {
-            memoryImageSource = new MemoryImageSource((int) w, (int) h, colorModel, imageView.getImageByteData(), 0,
-                    (int) w);
-        }
-        else {
+        if (memoryImageSource == null)
+            memoryImageSource = new MemoryImageSource((int) w, (int) h, colorModel, imageView.getImageByteData(), 0, (int) w);
+        else
             memoryImageSource.newPixels(imageView.getImageByteData(), colorModel, 0, (int) w);
-        }
 
         currentImage = Tools.toBufferedImage(Toolkit.getDefaultToolkit().createImage(memoryImageSource));
     }
 
     /** The canvas that paints the data lines. */
-    private class ChartCanvas extends Canvas {
+    private class ChartCanvas extends Canvas
+    {
         // Value controlling gap between the sides of the canvas
         // and the drawn elements
         private final int gap = 20;
@@ -560,9 +561,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                 public void mouseMove(MouseEvent e) {
                     if ((e.stateMask & SWT.BUTTON1) != 0) {
                         int x1 = e.x - 40;
-                        if (x1 < 0) {
+                        if (x1 < 0)
                             x1 = 0;
-                        }
                         int y1 = e.y + 20;
 
                         Point size = chartP.getSize();
@@ -570,12 +570,10 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                         double rx = 255 / (double) size.x;
 
                         int lineIdx = 0;
-                        if (checkGreen.getSelection()) {
+                        if (checkGreen.getSelection())
                             lineIdx = 1;
-                        }
-                        else if (checkBlue.getSelection()) {
+                        else if (checkBlue.getSelection())
                             lineIdx = 2;
-                        }
 
                         int idx = 0;
                         double b = (double) (y1 - dragY0) / (double) (x1 - dragX0);
@@ -584,16 +582,13 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                         int i1 = Math.max(dragX0, x1);
                         for (int i = i0; i < i1; i++) {
                             idx = (int) (rx * i);
-                            if (idx > 255) {
+                            if (idx > 255)
                                 continue;
-                            }
                             double value = 255 - (a + b * i) * ry;
-                            if (value < 0) {
+                            if (value < 0)
                                 value = 0;
-                            }
-                            else if (value > 255) {
+                            else if (value > 255)
                                 value = 255;
-                            }
 
                             paletteData[lineIdx][idx] = (int) value;
                         }
@@ -630,8 +625,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
     }
 
     /** The dialog to show the palette values in spreadsheet. */
-    private class PaletteValueTable extends Dialog {
-
+    private class PaletteValueTable extends Dialog
+    {
         private Display display;
         private Shell tableShell;
 
@@ -677,9 +672,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                 public void handleEvent(Event e) {
                     int numColumns = valueTable.getColumnCount();
 
-                    for (int i = 0; i < numColumns; i++) {
+                    for (int i = 0; i < numColumns; i++)
                         valueTable.getColumn(i).setWidth(valueTable.getClientArea().width / numColumns);
-                    }
                 }
             });
 
@@ -707,8 +701,11 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                 TableItem item = new TableItem(valueTable, SWT.NONE);
                 item.setFont(curFont);
 
-                item.setText(new String[] { String.valueOf(i), String.valueOf(paletteData[0][i]),
-                        String.valueOf(paletteData[1][i]), String.valueOf(paletteData[2][i]), null });
+                item.setText(new String[] {
+                        String.valueOf(i),
+                        String.valueOf(paletteData[0][i]),
+                        String.valueOf(paletteData[1][i]),
+                        String.valueOf(paletteData[2][i]), null });
 
                 item.setBackground(0, Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
             }
@@ -750,9 +747,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         }
 
         private void updatePaletteValue(String strValue, int row, int col) {
-            if (strValue == null) {
+            if (strValue == null)
                 return;
-            }
 
             int value = 0;
 
@@ -842,9 +838,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                             return;
                         }
 
-                        if (!visible && rect.intersects(clientArea)) {
+                        if (!visible && rect.intersects(clientArea))
                             visible = true;
-                        }
                     }
 
                     if (!visible)

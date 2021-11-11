@@ -48,8 +48,8 @@ import org.eclipse.swt.widgets.Shell;
  * @author Jordan T. Henderson
  * @version 2.4 2/27/16
  */
-public class Chart extends Dialog {
-
+public class Chart extends Dialog
+{
     private Shell                       shell;
 
     private Font                        curFont;
@@ -112,7 +112,6 @@ public class Chart extends Dialog {
 
     private java.text.DecimalFormat     format;
 
-
     /**
     * Constructs a new ChartView given data and data ranges.
     *
@@ -132,9 +131,8 @@ public class Chart extends Dialog {
     public Chart(Shell parent, String title, int style, double[][] data, double[] xData, double[] yRange) {
         super(parent, style);
 
-        if (data == null) {
+        if (data == null)
             return;
-        }
 
         this.windowTitle = title;
 
@@ -144,7 +142,8 @@ public class Chart extends Dialog {
                     ViewProperties.getFontType(),
                     ViewProperties.getFontSize(),
                     SWT.NORMAL);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             curFont = null;
         }
 
@@ -170,13 +169,11 @@ public class Chart extends Dialog {
                 this.xData = xData;
                 xmin = xmax = xData[0];
                 for (int i = 0; i < len; i++) {
-                    if (xData[i] < xmin) {
+                    if (xData[i] < xmin)
                         xmin = xData[i];
-                    }
 
-                    if (xData[i] > xmax) {
+                    if (xData[i] > xmax)
                         xmax = xData[i];
-                    }
                 }
             }
         }
@@ -199,11 +196,11 @@ public class Chart extends Dialog {
             findDataRange();
         }
 
-        if ((ymax < 0.0001) || (ymax > 100000)) {
+        if ((ymax < 0.0001) || (ymax > 100000))
             format = new java.text.DecimalFormat("###.####E0#");
-        }
     }
 
+    /** Show the Chart dialog. */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM);
@@ -212,12 +209,15 @@ public class Chart extends Dialog {
         shell.setImage(ViewProperties.getHdfIcon());
         shell.setLayout(new GridLayout(1, true));
 
-        if (chartStyle == HISTOGRAM) shell.setMenuBar(createMenuBar(shell));
+        if (chartStyle == HISTOGRAM)
+            shell.setMenuBar(createMenuBar(shell));
 
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
-                if (barColor != null) barColor.dispose();
+                if (curFont != null)
+                    curFont.dispose();
+                if (barColor != null)
+                    barColor.dispose();
             }
         });
 
@@ -319,26 +319,24 @@ public class Chart extends Dialog {
 
     /** Find and set the minimum and maximum values of the data */
     private void findDataRange() {
-        if (data == null) {
+        if (data == null)
             return;
-        }
 
         ymin = ymax = data[0][0];
         for (int i = 0; i < numberOfLines; i++) {
             for (int j = 0; j < numberOfPoints; j++) {
-                if (data[i][j] < ymin) {
+                if (data[i][j] < ymin)
                     ymin = data[i][j];
-                }
 
-                if (data[i][j] > ymax) {
+                if (data[i][j] > ymax)
                     ymax = data[i][j];
-                }
             }
         }
     }
 
     /** The canvas that paints the data lines. */
-    private class ChartCanvas extends Canvas {
+    private class ChartCanvas extends Canvas
+    {
         // Value controlling gap between the sides of the canvas
         // and the drawn elements
         private static final int GAP = 10;
@@ -363,7 +361,8 @@ public class Chart extends Dialog {
 
             this.addPaintListener(new PaintListener() {
                 public void paintControl(PaintEvent e) {
-                    if (numberOfLines <= 0) return;
+                    if (numberOfLines <= 0)
+                        return;
 
                     // Get the graphics context for this paint event
                     GC g = e.gc;
@@ -431,9 +430,8 @@ public class Chart extends Dialog {
                     double y = ymin;
                     double dh = (double) plotHeight / (double) ynpoints;
                     double dy = (ymax - ymin) / (ynpoints);
-                    if (dy > 1) {
+                    if (dy > 1)
                         dy = Math.round(dy * 10.0) / 10.0;
-                    }
                     for (int i = 0; i <= ynpoints; i++) {
                         yp = i * dh;
                         y = i * dy + ymin;
@@ -470,26 +468,21 @@ public class Chart extends Dialog {
                         // draw lines for selected spreadsheet columns
                         for (int i = 0; i < numberOfLines; i++) {
                             // Display each line with a unique color for clarity
-                            if ((lineColors != null) && (lineColors.length >= numberOfLines)) {
+                            if ((lineColors != null) && (lineColors.length >= numberOfLines))
                                 g.setForeground(Display.getCurrent().getSystemColor(lineColors[i]));
-                            }
 
                             // set up the line data for drawing one line a time
-                            if (hasXdata) {
+                            if (hasXdata)
                                 x0 = xgap + xData[0] * xRatio - xD;
-                            }
-                            else {
+                            else
                                 x0 = xgap;
-                            }
                             y0 = a + b * data[i][0];
 
                             for (int j = 1; j < numberOfPoints; j++) {
-                                if (hasXdata) {
+                                if (hasXdata)
                                     x1 = xgap + xData[j] * xRatio - xD;
-                                }
-                                else {
+                                else
                                     x1 = xgap + j * dw;
-                                }
 
                                 y1 = a + b * data[i][j];
                                 g.drawLine((int) x0, (int) y0, (int) x1, (int) y1);
@@ -521,9 +514,8 @@ public class Chart extends Dialog {
                         int barHeight = 0;
                         g.setBackground(barColor);
                         int barWidth = plotWidth / numberOfPoints;
-                        if (barWidth <= 0) {
+                        if (barWidth <= 0)
                             barWidth = 1;
-                        }
                         dw = (double) plotWidth / (double) numberOfPoints;
                         for (int j = 0; j < numberOfPoints; j++) {
                             xp = xgap + j * dw;

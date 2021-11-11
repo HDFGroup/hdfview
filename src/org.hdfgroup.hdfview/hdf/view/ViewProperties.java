@@ -39,7 +39,8 @@ import hdf.view.TableView.TableViewFactory;
 import hdf.view.TreeView.TreeViewFactory;
 
 /** A class to maintain the list of preferences for data and display */
-public class ViewProperties extends PreferenceStore {
+public class ViewProperties extends PreferenceStore
+{
     private static final long   serialVersionUID     = -6411465283887959066L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ViewProperties.class);
@@ -90,14 +91,18 @@ public class ViewProperties extends PreferenceStore {
     /** Default TreeView class names */
     public static final String DEFAULT_TREEVIEW_NAME = "hdf.view.TreeView.DefaultTreeView";
 
-    /** Default TableView class names */
+    /** Default Scalar TableView class names */
     public static final String DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultScalarDSTableView";
+    /** Default Compound TableView class names */
     public static final String DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME = "hdf.view.TableView.DefaultCompoundDSTableView";
 
-    /** Default MetaDataView class names */
+    /** Default Group MetaDataView class names */
     public static final String DEFAULT_GROUP_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultGroupMetaDataView";
+    /** Default Dataset MetaDataView class names */
     public static final String DEFAULT_DATASET_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultDatasetMetaDataView";
+    /** Default Datatype MetaDataView class names */
     public static final String DEFAULT_DATATYPE_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultDatatypeMetaDataView";
+    /** Default Link MetaDataView class names */
     public static final String DEFAULT_LINK_METADATAVIEW_NAME = "hdf.view.MetaDataView.DefaultLinkMetaDataView";
 
     /** Default ImageView class names */
@@ -210,7 +215,8 @@ public class ViewProperties extends PreferenceStore {
      */
     private static int               startMembers          = 0;
 
-    private static Image        hdfIcon, h4Icon, h4IconR, h5Icon, h5IconR, ncIcon, ncIconR,
+    private static Image
+    hdfIcon, h4Icon, h4IconR, h5Icon, h5IconR, ncIcon, ncIconR,
     largeHdfIcon, blankIcon, helpIcon, fileopenIcon, filesaveIcon, filenewIcon, filecloseIcon, foldercloseIcon,
     folderopenIcon, foldercloseIconA, folderopenIconA, datasetIcon, imageIcon, tableIcon, textIcon, datasetIconA,
     imageIconA, tableIconA, textIconA, zoominIcon, zoomoutIcon, paletteIcon, chartIcon, brightIcon, autocontrastIcon,
@@ -285,18 +291,25 @@ public class ViewProperties extends PreferenceStore {
         setDefault("data.delimiter", DELIMITER_TAB);
     }
 
+    /**
+     * Creates a property list file in a directory.
+     *
+     * @param userHomeFile
+     *            the user home directory
+     * @param userDirFile
+     *            the user directory
+     *
+     * @return property list file
+     */
     public static String createPropertyFile(String userHomeFile, String userDirFile) {
         String propFile = System.getProperty("hdfview.propfile");
 
-        if ((propFile != null) && ((new File(propFile)).exists())) {
+        if ((propFile != null) && ((new File(propFile)).exists()))
             propertyFile = propFile;
-        }
-        else if ((new File(userHomeFile)).exists()) {
+        else if ((new File(userHomeFile)).exists())
             propertyFile = userHomeFile;
-        }
-        else if ((new File(userDirFile)).exists()) {
+        else if ((new File(userDirFile)).exists())
             propertyFile = userDirFile;
-        }
         else {
             File pFile = null;
 
@@ -339,13 +352,11 @@ public class ViewProperties extends PreferenceStore {
      * @return the ClassLoader
      */
     public static ClassLoader loadExtClass() {
-        if (extClassLoader != null) {
+        if (extClassLoader != null)
             return extClassLoader;
-        }
-        else {
+        else
             // default classloader
             extClassLoader = ClassLoader.getSystemClassLoader();
-        }
         log.trace("loadExtClass: default classloader is {}", extClassLoader);
 
         String rootPath = System.getProperty("hdfview.root");
@@ -366,9 +377,8 @@ public class ViewProperties extends PreferenceStore {
             log.debug("loadExtClass: load dirname: {}+lib/ext failed", rootPath, ex0);
         }
 
-        if ((jars == null) || (jars.length <= 0)) {
+        if ((jars == null) || (jars.length <= 0))
             return extClassLoader;
-        }
 
         ArrayList<String> jarList = new ArrayList<>(50);
         ArrayList<String> classList = new ArrayList<>(50);
@@ -478,206 +488,257 @@ public class ViewProperties extends PreferenceStore {
         return extClassLoader;
     }
 
+    /** @return the Folder Close Icon */
     public static Image getFoldercloseIcon() {
         return foldercloseIcon;
     }
 
+    /** @return the Folder Close with Attribute Icon */
     public static Image getFoldercloseIconA() {
         return foldercloseIconA;
     }
 
+    /** @return the Folder Open Icon */
     public static Image getFolderopenIcon() {
         return folderopenIcon;
     }
 
+    /** @return the Folder Open with Attribute Icon */
     public static Image getFolderopenIconA() {
         return folderopenIconA;
     }
 
+    /** @return the HDF Icon */
     public static Image getHdfIcon() {
         return hdfIcon;
     }
 
+    /** @return the HDF4 Icon */
     public static Image getH4Icon() {
         return h4Icon;
     }
 
+    /** @return the read-only HDF4 Icon */
     public static Image getH4IconR() {
         return h4IconR;
     }
 
+    /** @return the HDF5 Icon */
     public static Image getH5Icon() {
         return h5Icon;
     }
 
+    /** @return the read-only HDF5 Icon */
     public static Image getH5IconR() {
         return h5IconR;
     }
 
+    /** @return the netcdf Icon */
     public static Image getNC3Icon() {
         return ncIcon;
     }
 
+    /** @return the read-only netcdf Icon */
     public static Image getNC3IconR() {
         return ncIconR;
     }
 
+    /** @return the Dataset Icon */
     public static Image getDatasetIcon() {
         return datasetIcon;
     }
 
+    /** @return the Dataset with Attribute Icon */
     public static Image getDatasetIconA() {
         return datasetIconA;
     }
 
+    /** @return the Datatype Icon */
     public static Image getDatatypeIcon() {
         return datatypeIcon;
     }
 
+    /** @return the Datatype with Attribute Icon */
     public static Image getDatatypeIconA() {
         return datatypeIconA;
     }
 
+    /** @return the Link Icon */
     public static Image getLinkIcon() {
         return linkIcon;
     }
 
+    /** @return the File Open Icon */
     public static Image getFileopenIcon() {
         return fileopenIcon;
     }
 
+    /** @return the File Save Icon */
     public static Image getFilesaveIcon() {
         return filesaveIcon;
     }
 
+    /** @return the File New Icon */
     public static Image getFilenewIcon() {
         return filenewIcon;
     }
 
+    /** @return the File Close Icon */
     public static Image getFilecloseIcon() {
         return filecloseIcon;
     }
 
+    /** @return the Palette Icon */
     public static Image getPaletteIcon() {
         return paletteIcon;
     }
 
+    /** @return the Bright Icon */
     public static Image getBrightIcon() {
         return brightIcon;
     }
 
+    /** @return the Autocontrast Icon */
     public static Image getAutocontrastIcon() {
         return autocontrastIcon;
     }
 
+    /** @return the Image Icon */
     public static Image getImageIcon() {
         return imageIcon;
     }
 
+    /** @return the Table Icon */
     public static Image getTableIcon() {
         return tableIcon;
     }
 
+    /** @return the Text Icon */
     public static Image getTextIcon() {
         return textIcon;
     }
 
+    /** @return the Image with Attribute Icon */
     public static Image getImageIconA() {
         return imageIconA;
     }
 
+    /** @return the Table with Attribute Icon */
     public static Image getTableIconA() {
         return tableIconA;
     }
 
+    /** @return the Text with Attribute Icon */
     public static Image getTextIconA() {
         return textIconA;
     }
 
+    /** @return the Zoom In Icon */
     public static Image getZoominIcon() {
         return zoominIcon;
     }
 
+    /** @return the Zoom Out Icon */
     public static Image getZoomoutIcon() {
         return zoomoutIcon;
     }
 
+    /** @return the Blank Icon */
     public static Image getBlankIcon() {
         return blankIcon;
     }
 
+    /** @return the Help Icon */
     public static Image getHelpIcon() {
         return helpIcon;
     }
 
+    /** @return the Copy Icon */
     public static Image getCopyIcon() {
         return copyIcon;
     }
 
+    /** @return the Cut Icon */
     public static Image getCutIcon() {
         return cutIcon;
     }
 
+    /** @return the Paste Icon */
     public static Image getPasteIcon() {
         return pasteIcon;
     }
 
+    /** @return the Large HDF Icon */
     public static Image getLargeHdfIcon() {
         return largeHdfIcon;
     }
 
+    /** @return the Previous Icon */
     public static Image getPreviousIcon() {
         return previousIcon;
     }
 
+    /** @return the Next Icon */
     public static Image getNextIcon() {
         return nextIcon;
     }
 
+    /** @return the First Icon */
     public static Image getFirstIcon() {
         return firstIcon;
     }
 
-    public static Image getLastIcon() {
+    /** @return the Last Icon */
+   public static Image getLastIcon() {
         return lastIcon;
     }
 
+    /** @return the Chart Icon */
     public static Image getChartIcon() {
         return chartIcon;
     }
 
+    /** @return the Animation Icon */
     public static Image getAnimationIcon() {
         return animationIcon;
     }
 
+    /** @return the Apps Icon */
     public static Image getAppsIcon() {
         return iconAPPS;
     }
 
+    /** @return the Url Icon */
     public static Image getUrlIcon() {
         return iconURL;
     }
 
+    /** @return the Video Icon */
     public static Image getVideoIcon() {
         return iconVIDEO;
     }
 
+    /** @return the Xls Icon */
     public static Image getXlsIcon() {
         return iconXLS;
     }
 
+    /** @return the Pdf Icon */
     public static Image getPdfIcon() {
         return iconPDF;
     }
 
+    /** @return the Audio Icon */
     public static Image getAudioIcon() {
         return iconAUDIO;
     }
 
+    /** @return the Question Icon */
     public static Image getQuestionIcon() {
         return questionIcon;
     }
 
+    /** Load the Icons */
     public static void loadIcons() {
         InputStream s = null;
         // load icon images
@@ -1604,6 +1665,7 @@ public class ViewProperties extends PreferenceStore {
         return paletteList;
     }
 
+    /** @return the SRB account list */
     public static List<String[]> getSrbAccount() {
         return srbAccountList;
     }

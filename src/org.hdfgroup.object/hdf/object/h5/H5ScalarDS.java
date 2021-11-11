@@ -43,14 +43,15 @@ import hdf.object.h5.H5MetaDataContainer;
 /**
  * H5ScalarDS describes a multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
  * float, double and string, and operations performed on the scalar dataset.
- * <p>
+ *
  * The library predefines a modest number of datatypes. For details,
  * read <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/HDF5_Users_Guide/Datatypes/HDF5_Datatypes.htm">HDF5 Datatypes</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
+public class H5ScalarDS extends ScalarDS implements MetaDataContainer
+{
     private static final long serialVersionUID = 2887517608230611642L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5ScalarDS.class);
@@ -60,6 +61,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
      */
     private H5MetaDataContainer objMetadata;
 
+    /** the object properties */
     private H5O_info_t objInfo;
 
     /**
@@ -73,6 +75,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
     /** flag to indicate if the dataset is a virtual dataset */
     private boolean isVirtual = false;
+    /** the list of virtual names */
     private List<String> virtualNameList;
 
     /**
@@ -82,7 +85,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
     /**
      * Constructs an instance of a H5 scalar dataset with given file, dataset name and path.
-     * <p>
+     *
      * For example, in H5ScalarDS(h5file, "dset", "/arrays/"), "dset" is the name of the dataset, "/arrays" is the group
      * path of the dataset.
      *
@@ -178,13 +181,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
     /**
      * Retrieves datatype and dataspace information from file and sets the dataset
      * in memory.
-     * <p>
+     *
      * The init() is designed to support lazy operation in a dataset object. When a
      * data object is retrieved from file, the datatype, dataspace and raw data are
      * not loaded into memory. When it is asked to read the raw data from file,
      * init() is first called to get the datatype and dataspace information, then
      * load the raw data from file.
-     * <p>
+     *
      * init() is also used to reset the selection of a dataset (start, stride and
      * count) to the default, which is the entire dataset for 1D or 2D datasets. In
      * the following example, init() at step 1) retrieves datatype and dataspace
@@ -611,25 +614,23 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
             try {
                 long[] lsize = { 1 };
-                for (int j = 0; j < selectedDims.length; j++) {
+                for (int j = 0; j < selectedDims.length; j++)
                     lsize[0] *= selectedDims[j];
-                }
 
                 fspace = H5.H5Dget_space(did);
                 mspace = H5.H5Screate_simple(rank, selectedDims, null);
 
                 // set the rectangle selection
                 // HDF5 bug: for scalar dataset, H5Sselect_hyperslab gives core dump
-                if (rank * dims[0] > 1) {
-                    H5.H5Sselect_hyperslab(fspace, HDF5Constants.H5S_SELECT_SET, startDims, selectedStride,
-                            selectedDims, null); // set block to 1
-                }
+                if (rank * dims[0] > 1)
+                    H5.H5Sselect_hyperslab(fspace, HDF5Constants.H5S_SELECT_SET, startDims, selectedStride, selectedDims, null); // set block to 1
 
                 tid = H5.H5Dget_type(did);
                 long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("readBytes(): size = {}", size);
 
-                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE) throw new Exception("Invalid int size");
+                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE)
+                    throw new Exception("Invalid int size");
 
                 theData = new byte[(int)size];
 
@@ -667,16 +668,16 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
     /**
      * Reads the data from file.
-     * <p>
+     *
      * read() reads the data from file to a memory buffer and returns the memory
      * buffer. The dataset object does not hold the memory buffer. To store the
      * memory buffer in the dataset object, one must call getData().
-     * <p>
+     *
      * By default, the whole dataset is read into memory. Users can also select
      * a subset to read. Subsetting is done in an implicit way.
-     * <p>
+     *
      * <b>How to Select a Subset</b>
-     * <p>
+     *
      * A selection is specified by three arrays: start, stride and count.
      * <ol>
      * <li>start: offset of a selection
@@ -686,7 +687,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
      * getStartDims(), getStride() and getSelectedDims() returns the start,
      * stride and count arrays respectively. Applications can make a selection
      * by changing the values of the arrays.
-     * <p>
+     *
      * The following example shows how to make a subset. In the example, the
      * dataset is a 4-dimensional array of [200][100][50][10], i.e. dims[0]=200;
      * dims[1]=100; dims[2]=50; dims[3]=10; <br>
@@ -730,7 +731,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
      * // outside the dataset object directly change the values of these array
      * // in the dataset object.
      * </pre>
-     * <p>
+     *
      * For ScalarDS, the memory data buffer is a one-dimensional array of byte,
      * short, int, float, double or String type based on the datatype of the
      * dataset.
@@ -1008,12 +1009,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be retrieved
      */
     @Override
@@ -1038,7 +1039,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList
@@ -1046,13 +1047,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
      *
      * @return the list of metadata objects.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be retrieved
      */
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
-        if (!isInited()) {
+        if (!isInited())
             init();
-        }
 
         try {
             this.linkTargetObjName = H5File.getLinkTargetName(this);
@@ -1084,9 +1084,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         H5.H5Pget_chunk(pcid, rank, chunkSize);
                         int n = chunkSize.length;
                         storageLayout.append("CHUNKED: ").append(chunkSize[0]);
-                        for (int i = 1; i < n; i++) {
+                        for (int i = 1; i < n; i++)
                             storageLayout.append(" X ").append(chunkSize[i]);
-                        }
 
                         if (nfilt > 0) {
                             long nelmts = 1;
@@ -1109,9 +1108,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                                 }
                             }
 
-                            for (int i = 0; i < rank; i++) {
+                            for (int i = 0; i < rank; i++)
                                 nelmts *= dims[i];
-                            }
                             uncompSize = nelmts * datumSize;
 
                             /* compression ratio = uncompressed size / compressed size */
@@ -1193,12 +1191,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                     else {
                         for (int i = 0, k = 0; i < nfilt; i++) {
                             log.trace("getMetadata(): filter[{}]", i);
-                            if (i > 0) {
+                            if (i > 0)
                                 filters.append(", ");
-                            }
-                            if (k > 0) {
+                            if (k > 0)
                                 compression.append(", ");
-                            }
 
                             try {
                                 cdNelmts[0] = 20;
@@ -1206,9 +1202,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                                 cdValues = new int[(int) cdNelmts[0]];
                                 filter = H5.H5Pget_filter(pcid, i, flags, cdNelmts, cdValues, 120, cdName, filterConfig);
                                 log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cdName[0], cdNelmts[0]);
-                                for (int j = 0; j < cdNelmts[0]; j++) {
+                                for (int j = 0; j < cdNelmts[0]; j++)
                                     log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cdValues[j]);
-                                }
                             }
                             catch (Exception err) {
                                 log.debug("getMetadata(): filter[{}] error: ", i, err);
@@ -1248,14 +1243,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                                     log.debug("getMetadata(): H5Zget_filter_info failure: ", ex);
                                     flag = -1;
                                 }
-                                if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) {
+                                if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)
                                     compression.append(": H5Z_FILTER_CONFIG_DECODE_ENABLED");
-                                }
                                 else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED)
                                         || (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED
-                                                + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED))) {
+                                                + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)))
                                     compression.append(": H5Z_FILTER_CONFIG_ENCODE_ENABLED");
-                                }
                             }
                             else {
                                 filters.append("USERDEFINED ").append(cdName[0]).append("(").append(filter).append("): ");
@@ -1269,9 +1262,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         } //  (int i=0; i<nfilt; i++)
                     }
 
-                    if (compression.length() == 0) {
+                    if (compression.length() == 0)
                         compression.append("NONE");
-                    }
                     log.trace("getMetadata(): filter compression={}", compression);
                     log.trace("getMetadata(): filter information={}", filters);
 
@@ -1282,15 +1274,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         int[] at = { 0 };
                         H5.H5Pget_alloc_time(pcid, at);
                         storage.append(", allocation time: ");
-                        if (at[0] == HDF5Constants.H5D_ALLOC_TIME_EARLY) {
+                        if (at[0] == HDF5Constants.H5D_ALLOC_TIME_EARLY)
                             storage.append("Early");
-                        }
-                        else if (at[0] == HDF5Constants.H5D_ALLOC_TIME_INCR) {
+                        else if (at[0] == HDF5Constants.H5D_ALLOC_TIME_INCR)
                             storage.append("Incremental");
-                        }
-                        else if (at[0] == HDF5Constants.H5D_ALLOC_TIME_LATE) {
+                        else if (at[0] == HDF5Constants.H5D_ALLOC_TIME_LATE)
                             storage.append("Late");
-                        }
                         else
                             storage.append("Default");
                     }
@@ -1361,7 +1350,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
      * @param info
      *            the metadata to delete.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be removed
      */
     @Override
@@ -1393,7 +1382,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
      * @param info
      *            the metadata to update.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be updated
      */
     @Override
@@ -1454,6 +1443,30 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
             isDefaultImageOrder = true;
     }
 
+    /**
+     * Creates a scalar dataset in a file with/without chunking and compression.
+     *
+     * @param name
+     *            the name of the dataset to create.
+     * @param pgroup
+     *            parent group where the new dataset is created.
+     * @param type
+     *            the datatype of the dataset.
+     * @param dims
+     *            the dimension size of the dataset.
+     * @param maxdims
+     *            the max dimension size of the dataset. maxdims is set to dims if maxdims = null.
+     * @param chunks
+     *            the chunk size of the dataset. No chunking if chunk = null.
+     * @param gzip
+     *            GZIP compression level (1 to 9). No compression if gzip&lt;=0.
+     * @param data
+     *            the array of data values.
+     *
+     * @return the new scalar dataset if successful; otherwise returns null.
+     *
+     * @throws Exception if there is a failure.
+     */
     public static Dataset create(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
             long[] chunks, int gzip, Object data) throws Exception {
         return create(name, pgroup, type, dims, maxdims, chunks, gzip, null, data);
@@ -1461,7 +1474,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
     /**
      * Creates a scalar dataset in a file with/without chunking and compression.
-     * <p>
+     *
      * The following example shows how to create a string dataset using this function.
      *
      * <pre>
@@ -1533,13 +1546,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         String path = HObject.SEPARATOR;
         if (!pgroup.isRoot()) {
             path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
-            if (name.endsWith("/")) {
+            if (name.endsWith("/"))
                 name = name.substring(0, name.length() - 1);
-            }
             int idx = name.lastIndexOf('/');
-            if (idx >= 0) {
+            if (idx >= 0)
                 name = name.substring(idx + 1);
-            }
         }
 
         fullPath = path + name;
@@ -1548,16 +1559,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         boolean isExtentable = false;
         if (maxdims != null) {
             for (int i = 0; i < maxdims.length; i++) {
-                if (maxdims[i] == 0) {
+                if (maxdims[i] == 0)
                     maxdims[i] = dims[i];
-                }
-                else if (maxdims[i] < 0) {
+                else if (maxdims[i] < 0)
                     maxdims[i] = HDF5Constants.H5S_UNLIMITED;
-                }
 
-                if (maxdims[i] != dims[i]) {
+                if (maxdims[i] != dims[i])
                     isExtentable = true;
-                }
             }
         }
 
@@ -1603,9 +1611,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         }
                     }
 
-                    if (valFill != null) {
+                    if (valFill != null)
                         H5.H5Pset_fill_value(plist, tid, valFill);
-                    }
                 }
 
                 long fid = file.getFID();
@@ -1648,9 +1655,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
             if (data != null) {
                 dataset.init();
                 long[] selected = dataset.getSelectedDims();
-                for (int i = 0; i < rank; i++) {
+                for (int i = 0; i < rank; i++)
                     selected[i] = dims[i];
-                }
                 dataset.write(data);
             }
         }
@@ -1868,12 +1874,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         String dname = null;
         String path = null;
 
-        if (pgroup.isRoot()) {
+        if (pgroup.isRoot())
             path = HObject.SEPARATOR;
-        }
-        else {
+        else
             path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
-        }
         dname = path + dstName;
 
         srcdid = open();
@@ -1984,9 +1988,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
      */
     @Override
     public byte[][] getPalette() {
-        if (palette == null) {
+        if (palette == null)
             palette = readPalette(0);
-        }
 
         return palette;
     }
@@ -2120,12 +2123,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         double valDbl = 0;
         String valStr = null;
 
-        if (fillValue instanceof String) {
+        if (fillValue instanceof String)
             valStr = (String) fillValue;
-        }
-        else if (fillValue.getClass().isArray()) {
+        else if (fillValue.getClass().isArray())
             valStr = Array.get(fillValue, 0).toString();
-        }
 
         if (!type.isString()) {
             try {
@@ -2143,30 +2144,23 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 case Datatype.CLASS_ENUM:
                 case Datatype.CLASS_CHAR:
                     log.trace("parseFillValue(): class CLASS_INT-ENUM-CHAR");
-                    if (datatypeSize == 1) {
+                    if (datatypeSize == 1)
                         data = new byte[] { (byte) valDbl };
-                    }
-                    else if (datatypeSize == 2) {
+                    else if (datatypeSize == 2)
                         data = HDFNativeData.shortToByte((short) valDbl);
-                    }
-                    else if (datatypeSize == 8) {
+                    else if (datatypeSize == 8)
                         data = HDFNativeData.longToByte((long) valDbl);
-                    }
-                    else {
+                    else
                         data = HDFNativeData.intToByte((int) valDbl);
-                    }
                     break;
                 case Datatype.CLASS_FLOAT:
                     log.trace("parseFillValue(): class CLASS_FLOAT");
-                    if (datatypeSize > 8) {
+                    if (datatypeSize > 8)
                         data =  valStr.getBytes();
-                    }
-                    else if (datatypeSize == 8) {
+                    else if (datatypeSize == 8)
                         data = HDFNativeData.doubleToByte(valDbl);
-                    }
-                    else {
+                    else
                         data = HDFNativeData.floatToByte((float) valDbl);
-                    }
                     break;
                 case Datatype.CLASS_STRING:
                     log.trace("parseFillValue(): class CLASS_STRING");
@@ -2225,12 +2219,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                     long[] dims = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, null);
                     log.trace("getPaletteRefs(): rank={}, dims={}", rank, dims);
-                    for (int i = 0; i < rank; i++) {
+                    for (int i = 0; i < rank; i++)
                         size *= (int) dims[i];
-                    }
                 }
 
-                if ((size * 8) < Integer.MIN_VALUE || (size * 8) > Integer.MAX_VALUE) throw new HDF5Exception("Invalid int size");
+                if ((size * 8) < Integer.MIN_VALUE || (size * 8) > Integer.MAX_VALUE)
+                    throw new HDF5Exception("Invalid int size");
 
                 refbuf = new byte[size * 8];
                 atype = H5.H5Aget_type(aid);

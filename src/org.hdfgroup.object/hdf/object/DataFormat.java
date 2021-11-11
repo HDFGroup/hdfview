@@ -18,14 +18,14 @@ package hdf.object;
  * An interface that provides general I/O operations for object data. For
  * example, reading data content from the file into memory or writing data
  * content from memory into the file.
- * <p>
  *
  * @see hdf.object.HObject
  *
  * @version 1.0 4/2/2018
  * @author Jordan T. Henderson
  */
-public interface DataFormat {
+public interface DataFormat
+{
     /**
      * The status of initialization for this object
      *
@@ -59,7 +59,7 @@ public interface DataFormat {
     /**
      * Clears the current data buffer in memory and forces the next read() to load
      * the data from file.
-     * <p>
+     *
      * The function read() loads data from file into memory only if the data is not
      * read. If data is already in memory, read() just returns the memory buffer.
      * Sometimes we want to force read() to re-read data from file. For example,
@@ -72,11 +72,11 @@ public interface DataFormat {
 
     /**
      * Reads the data from file.
-     * <p>
+     *
      * read() reads the data from file to a memory buffer and returns the memory
      * buffer. The dataset object does not hold the memory buffer. To store the
      * memory buffer in the dataset object, one must call getData().
-     * <p>
+     *
      * By default, the whole dataset is read into memory. Users can also select
      * a subset to read. Subsetting is done in an implicit way.
      *
@@ -180,14 +180,14 @@ public interface DataFormat {
 
     /**
      * Returns the dimension sizes of the selected subset.
-     * <p>
+     *
      * The SelectedDims is the number of data points of the selected subset.
      * Applications can use this array to change the size of selected subset.
      *
      * The selected size must be less than or equal to the current dimension size.
      * Combined with the starting position, selected sizes and stride, the subset of
      * a rectangle selection is fully defined.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -211,11 +211,11 @@ public interface DataFormat {
 
     /**
      * Returns the starting position of a selected subset.
-     * <p>
+     *
      * Applications can use this array to change the starting position of a
      * selection. Combined with the selected dimensions, selected sizes and stride,
      * the subset of a rectangle selection is fully defined.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -239,13 +239,13 @@ public interface DataFormat {
 
     /**
      * Returns the selectedStride of the selected dataset.
-     * <p>
+     *
      * Applications can use this array to change how many elements to move in each
      * dimension.
      *
      * Combined with the starting position and selected sizes, the subset of a
      * rectangle selection is defined.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -268,14 +268,13 @@ public interface DataFormat {
 
     /**
      * Returns the indices of display order.
-     * <p>
      *
      * selectedIndex[] is provided for two purposes:
      * <OL>
      * <LI>selectedIndex[] is used to indicate the order of dimensions for display.
      * selectedIndex[0] is for the row, selectedIndex[1] is for the column and
      * selectedIndex[2] for the depth.
-     * <p>
+     *
      * For example, for a four dimension dataset, if selectedIndex[] = {1, 2, 3},
      * then dim[1] is selected as row index, dim[2] is selected as column index and
      * dim[3] is selected as depth index.
@@ -303,7 +302,7 @@ public interface DataFormat {
     /**
      * Returns the dimension size of the vertical axis.
      *
-     * <p>
+     *
      * This function is used by GUI applications such as HDFView. GUI applications
      * display a dataset in a 2D table or 2D image. The display order is specified
      * by the index array of selectedIndex as follow:
@@ -335,7 +334,7 @@ public interface DataFormat {
     /**
      * Returns the dimension size of the horizontal axis.
      *
-     * <p>
+     *
      * This function is used by GUI applications such as HDFView. GUI applications
      * display a dataset in 2D Table or 2D Image. The display order is specified by
      * the index array of selectedIndex as follow:
@@ -366,7 +365,7 @@ public interface DataFormat {
 
     /**
      * Returns the string representation of compression information.
-     * <p>
+     *
      * For example, "SZIP: Pixels per block = 8: H5Z_FILTER_CONFIG_DECODE_ENABLED".
      *
      * @return the string representation of compression information.

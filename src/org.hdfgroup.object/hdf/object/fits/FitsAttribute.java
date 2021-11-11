@@ -34,14 +34,12 @@ import hdf.object.ScalarDS;
 /**
  * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
  * dataset, group or named datatype.
- * <p>
+ *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * <p>
  * For more details on attributes, <a href=
  * "https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5
  * User's Guide</a>
- * <p>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
  *
@@ -96,7 +94,7 @@ public class FitsAttribute extends ScalarDS implements Attribute {
      * or null, and the rank can be either 1 or zero. Attribute is a general class
      * and is independent of file format, e.g., the implementation of attribute
      * applies to both HDF4 and HDF5.
-     * <p>
+     *
      * The following example creates a string attribute with the name "CLASS" and
      * value "IMAGE".
      *
@@ -135,7 +133,7 @@ public class FitsAttribute extends ScalarDS implements Attribute {
      * or null, and the rank can be either 1 or zero. Attribute is a general class
      * and is independent of file format, e.g., the implementation of attribute
      * applies to both HDF4 and HDF5.
-     * <p>
+     *
      * The following example creates a string attribute with the name "CLASS" and
      * value "IMAGE".
      *
@@ -237,11 +235,11 @@ public class FitsAttribute extends ScalarDS implements Attribute {
 
     /**
      * Reads the data from file.
-     * <p>
+     *
      * read() reads the data from file to a memory buffer and returns the memory
      * buffer. The dataset object does not hold the memory buffer. To store the
      * memory buffer in the dataset object, one must call getData().
-     * <p>
+     *
      * By default, the whole dataset is read into memory. Users can also select
      * a subset to read. Subsetting is done in an implicit way.
      *
@@ -306,8 +304,7 @@ public class FitsAttribute extends ScalarDS implements Attribute {
      * @see hdf.object.ScalarDS#getPalette()
      */
     @Override
-    public byte[][] getPalette()
-    {
+    public byte[][] getPalette() {
         if (palette == null) {
             palette = readPalette(0);
         }
@@ -360,8 +357,7 @@ public class FitsAttribute extends ScalarDS implements Attribute {
      * @param key the attribute Map key
      * @param value the attribute Map value
      */
-    public void setProperty(String key, Object value)
-    {
+    public void setProperty(String key, Object value) {
         properties.put(key, value);
     }
 
@@ -372,8 +368,7 @@ public class FitsAttribute extends ScalarDS implements Attribute {
      *
      * @return the property
      */
-    public Object getProperty(String key)
-    {
+    public Object getProperty(String key) {
         return properties.get(key);
     }
 
@@ -382,8 +377,7 @@ public class FitsAttribute extends ScalarDS implements Attribute {
      *
      * @return the Collection of property keys
      */
-    public Collection<String> getPropertyKeys()
-    {
+    public Collection<String> getPropertyKeys() {
         return properties.keySet();
     }
 
@@ -456,7 +450,7 @@ public class FitsAttribute extends ScalarDS implements Attribute {
 
     /**
      * Not for public use in the future.
-     * <p>
+     *
      * setData() is not safe to use because it changes memory buffer
      * of the dataset object. Dataset operations such as write/read
      * will fail if the buffer type or size is changed.
@@ -478,7 +472,7 @@ public class FitsAttribute extends ScalarDS implements Attribute {
 
     /**
      * Writes the given data buffer into this attribute in a file.
-     * <p>
+     *
      * The data buffer is a vector that contains the data values of compound fields. The data is written
      * into file as one data blob.
      *
@@ -495,12 +489,11 @@ public class FitsAttribute extends ScalarDS implements Attribute {
     /**
      * Returns a string representation of the data value. For
      * example, "0, 255".
-     * <p>
+     *
      * For a compound datatype, it will be a 1D array of strings with field
      * members separated by the delimiter. For example,
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
-     * <p>
      *
      * @param delimiter
      *            The delimiter used to separate individual data points. It
@@ -516,12 +509,11 @@ public class FitsAttribute extends ScalarDS implements Attribute {
     /**
      * Returns a string representation of the data value. For
      * example, "0, 255".
-     * <p>
+     *
      * For a compound datatype, it will be a 1D array of strings with field
      * members separated by the delimiter. For example,
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
-     * <p>
      *
      * @param delimiter
      *            The delimiter used to separate individual data points. It

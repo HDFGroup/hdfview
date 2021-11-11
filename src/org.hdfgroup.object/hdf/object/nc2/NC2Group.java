@@ -33,20 +33,30 @@ import ucar.nc2.NetcdfFile;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class NC2Group extends Group {
+public class NC2Group extends Group
+{
     private static final long serialVersionUID = -1261533010442193447L;
 
-    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(NC2Group.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2Group.class);
 
     /**
      * The corresponding netcdf Group for this group.
      */
     protected ucar.nc2.Group netCDFGroup;
 
+    /**
+     * @return the corresponding netcdf Group for this group.
+     */
     public ucar.nc2.Group getNetCDFGroup() {
         return netCDFGroup;
     }
 
+    /**
+     * Set the corresponding netcdf Group for this group.
+     *
+     * @param netCDFGroup
+     *        the ucar.nc2.Group to associate to this group
+     */
     public void setNetCDFGroup(ucar.nc2.Group netCDFGroup) {
         this.netCDFGroup = netCDFGroup;
     }
@@ -57,12 +67,11 @@ public class NC2Group extends Group {
      */
     private List attributeList;
 
-    /**
-     * The list of netcdf typedefs, dimensions and attributes of this data object. Members of the list are
-     * instance of ucar.nc2.*.
-     */
+    /** The list of netcdf typedefs of this data object. Members of the list are instance of ucar.nc2.*. */
     private List netcdfTypedefList;
+    /** The list of netcdf dimensions of this data object. Members of the list are instance of ucar.nc2.*. */
     private List netcdfDimensionList;
+    /** The list of netcdf attributes of this data object. Members of the list are * instance of ucar.nc2.*. */
     private List netcdfAttributeList;
 
     /** The default object ID for NC2 objects */
@@ -100,6 +109,9 @@ public class NC2Group extends Group {
         return false;
     }
 
+    /**
+     * @return true if this group has an attached dimension.
+     */
     public boolean hasDimension() {
         return false;
     }
@@ -107,7 +119,7 @@ public class NC2Group extends Group {
     // Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
@@ -117,9 +129,8 @@ public class NC2Group extends Group {
      */
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {
-        if (attributeList != null) {
+        if (attributeList != null)
             return attributeList;
-        }
 
         NC2File theFile = (NC2File)getFileFormat();
         NetcdfFile ncFile = theFile.getNetcdfFile();
@@ -241,7 +252,7 @@ public class NC2Group extends Group {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList
@@ -263,30 +274,22 @@ public class NC2Group extends Group {
         // use 0 to skip or 1 select in attrPropList to get the list
         // hdf attributes first netcdf attributes second, dimensions third, enumTypes fourth
         log.trace("getMetadata(...): attrPropList={}", attrPropList.length);
-        if (attrPropList.length > 0) {
+        if (attrPropList.length > 0)
             hdfType = attrPropList[0];
-        }
-        if (attrPropList.length > 1) {
+        if (attrPropList.length > 1)
             attrType = attrPropList[1];
-        }
-        if (attrPropList.length > 2) {
+        if (attrPropList.length > 2)
             dimType = attrPropList[2];
-        }
-        if (attrPropList.length > 3) {
+        if (attrPropList.length > 3)
             enumType = attrPropList[3];
-        }
-        if ((hdfType != 0) && (attributeList != null)) {
+        if ((hdfType != 0) && (attributeList != null))
             returnList = attributeList;
-        }
-        else if ((attrType != 0) && (netcdfAttributeList != null)) {
+        else if ((attrType != 0) && (netcdfAttributeList != null))
             returnList = netcdfAttributeList;
-        }
-        else if ((dimType != 0) && (netcdfDimensionList != null)) {
+        else if ((dimType != 0) && (netcdfDimensionList != null))
             returnList = netcdfDimensionList;
-        }
-        else if ((enumType != 0) && (netcdfTypedefList != null)) {
+        else if ((enumType != 0) && (netcdfTypedefList != null))
             returnList = netcdfTypedefList;
-        }
 
         return returnList;
     }

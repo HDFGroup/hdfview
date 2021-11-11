@@ -219,6 +219,9 @@ public class NC2File extends FileFormat {
         return rootObject;
     }
 
+    /**
+     * @return the NetCDF file.
+     */
     public NetcdfFile getNetcdfFile() {
         return ncFile;
     }
@@ -285,21 +288,44 @@ public class NC2File extends FileFormat {
         throw new UnsupportedOperationException("Unsupported operation - copy dataset.");
     }
 
-    /*
-     * Copy attributes of the source object to the destination object.
+    /**
+     * Copies the attributes of one object to another object.
+     *
+     * NC3 does not support attribute copy
+     *
+     * @param src
+     *            The source object.
+     * @param dst
+     *            The destination object.
      */
     public void copyAttributes(HObject src, HObject dst) {
         throw new UnsupportedOperationException("Unsupported operation copy attributes with HObject.");
     }
 
-    /*
-     * Copy attributes of the source object to the destination object.
+    /**
+     * Copies the attributes of one object to another object.
+     *
+     * NC3 does not support attribute copy
+     *
+     * @param srcID
+     *            The source identifier.
+     * @param dstID
+     *            The destination identifier.
      */
     public void copyAttributes(int srcID, int dstID) {
         throw new UnsupportedOperationException("Unsupported operation - copy attributes.");
     }
 
-    /* converts a ucar.nc2.Attribute into an hdf.object.nc2.NC2Attribute */
+    /**
+     * converts a ucar.nc2.Attribute into an hdf.object.nc2.NC2Attribute
+     *
+     * @param parent
+     *            the parent object.
+     * @param netcdfAttr
+     *            the ucar.nc2.Attribute object.
+     *
+     * @return the hdf.object.nc2.NC2Attribute if successful
+     */
     public static hdf.object.nc2.NC2Attribute convertAttribute(HObject parent, ucar.nc2.Attribute netcdfAttr) {
         hdf.object.nc2.NC2Attribute ncsaAttr = null;
 
@@ -327,7 +353,7 @@ public class NC2File extends FileFormat {
 
     /**
      * Retrieves the file structure from disk and returns the root object.
-     * <p>
+     *
      * First gets the top level objects or objects that do not belong to any
      * groups. If a top level object is a group, call the depth_first() to
      * retrieve the sub-tree of that group, recursively.

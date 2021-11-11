@@ -26,7 +26,30 @@ import hdf.object.h5.H5File;
  */
 public interface H5Attribute extends Attribute{
 
+    /**
+     * The general read and write attribute operations for hdf5 object data.
+     *
+     * @param attr_id
+     *        the attribute to access
+     * @param ioType
+     *        the type of IO operation
+     * @param objBuf
+     *        the data buffer to use for write operation
+     *
+     * @return the attribute data
+     *
+     * @throws Exception
+     *             if the data can not be retrieved
+     */
     Object AttributeCommonIO(long attr_id, H5File.IO_TYPE ioType, Object objBuf) throws Exception;
 
+    /**
+     * Read a subset of an attribute for hdf5 object data.
+     *
+     * @return the selected attribute data
+     *
+     * @throws Exception
+     *             if the data can not be retrieved
+     */
     Object AttributeSelection() throws Exception;
 }

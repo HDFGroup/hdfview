@@ -40,9 +40,9 @@ import hdf.object.h5.H5ScalarAttr;
 
 /**
  * TestCase for H5CompoundDS.
- * <p>
+ *
  * This class tests all the public methods in H5CompoundDS class.
- * <p>
+ *
  * The test file contains the following objects.
  *
  * <pre>
@@ -65,9 +65,9 @@ import hdf.object.h5.H5ScalarAttr;
  *         /g0/g00/dataset_float    Dataset {50, 10}
  *         /g0_attr                 Group
  * </pre>
- * <p>
+ *
  * We use the following template to test all the methods:
- * <p>
+ *
  * What to test:
  * <ul>
  * <li>Test for boundary conditions
@@ -86,7 +86,8 @@ import hdf.object.h5.H5ScalarAttr;
  *
  * @author Peter Cao, The HDF Group
  */
-public class H5CompoundDSTest {
+public class H5CompoundDSTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundDSTest.class);
     private static final H5File H5FILE = new H5File();
     private static final int NLOOPS = 10;
@@ -114,8 +115,7 @@ public class H5CompoundDSTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -214,7 +214,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#setName(java.lang.String)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test for boundary conditions
@@ -246,9 +246,8 @@ public class H5CompoundDSTest {
             testDataset.setName(null);
             H5.H5error_on();
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        // Expected - intentional
+        catch (final Exception ex) {}
 
         // set to an existing name
         try {
@@ -256,9 +255,8 @@ public class H5CompoundDSTest {
             testDataset.setName(DNAME_SUB);
             H5.H5error_on();
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        // Expected - intentional
+        catch (final Exception ex) {}
 
         try {
             testDataset.setName(newName);
@@ -309,7 +307,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#open()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>open a dataset identifier
@@ -342,24 +340,21 @@ public class H5CompoundDSTest {
             try {
                 H5.H5Tclose(tid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Sclose(sid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Dclose(did);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
         }
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#close(int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>open a dataset identifier
@@ -394,13 +389,11 @@ public class H5CompoundDSTest {
             try {
                 H5.H5Tclose(tid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Sclose(sid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
 
             try {
                 testDataset.close(did);
@@ -432,7 +425,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#clear()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read data/attributes from file
@@ -478,7 +471,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#init()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>call init()
@@ -514,16 +507,14 @@ public class H5CompoundDSTest {
             // test the dimension sizes
             final long[] dims = testDataset.getDims();
             assertNotNull(dims);
-            for (int i = 0; i < rank; i++) {
+            for (int i = 0; i < rank; i++)
                 assertEquals(H5TestFile.DIMs[i], dims[i]);
-            }
 
             // start at 0
             final long[] start = testDataset.getStartDims();
             assertNotNull(start);
-            for (int i = 0; i < rank; i++) {
+            for (int i = 0; i < rank; i++)
                 assertEquals(0, start[i]);
-            }
 
             // test selection
             final long[] selectedDims = testDataset.getSelectedDims();
@@ -551,9 +542,8 @@ public class H5CompoundDSTest {
             // by default, all members are selected
             final int nmembers = testDataset.getSelectedMemberCount();
             assertTrue(nmembers > 0);
-            for (int i = 0; i < nmembers; i++) {
+            for (int i = 0; i < nmembers; i++)
                 assertTrue(testDataset.isMemberSelected(i));
-            }
 
             // make some change and do another round of test
             // to make sure that the init() resets the default
@@ -561,9 +551,8 @@ public class H5CompoundDSTest {
                 start[i] = 1;
                 selectedDims[0] = 1;
             }
-            for (int i = 0; i < nmembers; i++) {
+            for (int i = 0; i < nmembers; i++)
                 testDataset.setAllMemberSelection(false);
-            }
 
             checkObjCount(testFile.getFID());
         } //  (int loop=0; loop<NLOOPS; loop++)
@@ -571,7 +560,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#read()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read the whole dataset
@@ -616,7 +605,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#read()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read data row by row
@@ -642,9 +631,8 @@ public class H5CompoundDSTest {
                 final long[] count = testDataset.getSelectedDims();
 
                 // select one row only
-                for (int j = 0; j < rank; j++) {
+                for (int j = 0; j < rank; j++)
                     count[j] = 1;
-                }
 
                 // select different rows
                 start[0] = i;
@@ -672,7 +660,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#read()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read data field bu field
@@ -709,23 +697,20 @@ public class H5CompoundDSTest {
                     case 0:
                         final int[] ints = (int[]) data.get(0);
                         assertNotNull(ints);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertEquals(H5TestFile.DATA_INT[j], ints[j]);
-                        }
                         break;
                     case 1:
                         final float[] floats = (float[]) data.get(0);
                         assertNotNull(floats);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertEquals(H5TestFile.DATA_FLOAT[j], floats[j], Float.MIN_VALUE);
-                        }
                         break;
                     case 2:
                         final String[] strs = (String[]) data.get(0);
                         assertNotNull(strs);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertTrue(H5TestFile.DATA_STR[j].equals(strs[j]));
-                        }
                         break;
                 }
             } //  (int i=0; i<nmembers; i++) {
@@ -734,7 +719,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#readBytes()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read the whole dataset in a byte buffer
@@ -762,7 +747,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#write(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read/write the whole dataset
@@ -871,7 +856,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#write(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read/write data row by row
@@ -977,7 +962,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#write(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read/write data field by field
@@ -1016,23 +1001,20 @@ public class H5CompoundDSTest {
                     case 0:
                         final int[] ints = (int[]) data.get(0);
                         assertNotNull(ints);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             ints[j] = TEST_VALUE_INT;
-                        }
                         break;
                     case 1:
                         final float[] floats = (float[]) data.get(0);
                         assertNotNull(floats);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             floats[j] = TEST_VALUE_FLOAT;
-                        }
                         break;
                     case 2:
                         final String[] strs = (String[]) data.get(0);
                         assertNotNull(strs);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             strs[j] = TEST_VALUE_STR;
-                        }
                         break;
                 }
 
@@ -1056,23 +1038,20 @@ public class H5CompoundDSTest {
                     case 0:
                         final int[] ints = (int[]) data.get(0);
                         assertNotNull(ints);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertEquals(TEST_VALUE_INT, ints[j]);
-                        }
                         break;
                     case 1:
                         final float[] floats = (float[]) data.get(0);
                         assertNotNull(floats);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertEquals(TEST_VALUE_FLOAT, floats[j], Float.MIN_VALUE);
-                        }
                         break;
                     case 2:
                         final String[] strs = (String[]) data.get(0);
                         assertNotNull(strs);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertTrue(TEST_VALUE_STR.equals(strs[j]));
-                        }
                         break;
                 }
 
@@ -1101,7 +1080,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#getDatatype()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Get the datatype object of the dataset
@@ -1119,7 +1098,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#isString(int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test a string datatype with isString(int tid)
@@ -1136,7 +1115,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#getSize(int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test a sizes of different defined data types
@@ -1154,8 +1133,7 @@ public class H5CompoundDSTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5CompoundDS#H5CompoundDS(hdf.object.FileFormat, java.lang.String, java.lang.String)}
-     * .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Construct an H5CompoundDS object that exists in file
@@ -1217,23 +1195,20 @@ public class H5CompoundDSTest {
         try {
             nodset = new H5CompoundDS(file, "NO_SUCH_DATASET", "NO_SUCH_PATH");
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        // Expected - intentional
+        catch (final Exception ex) {}
 
         try {
             nodset.init();
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        // Expected - intentional
+        catch (final Exception ex) {}
 
         try {
             nodset.clearData();
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        // Expected - intentional
+        catch (final Exception ex) {}
         data = null;
         try {
             data = (List<?>) nodset.getData();
@@ -1248,8 +1223,7 @@ public class H5CompoundDSTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5CompoundDS#H5CompoundDS(hdf.object.FileFormat, java.lang.String, java.lang.String, long[])}
-     * .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Construct an H5CompoundDS object that exits in file
@@ -1325,21 +1299,18 @@ public class H5CompoundDSTest {
         try {
             dset = new H5CompoundDS(file, "NO_SUCH_DATASET", "NO_SUCH_PATH");
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        // Expected - intentional
+        catch (final Exception ex) {}
         try {
             dset.init();
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        // Expected - intentional
+        catch (final Exception ex) {}
         try {
             dset.clearData();
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        // Expected - intentional
+        catch (final Exception ex) {}
         data = null;
         try {
             data = (List<?>) dset.getData();
@@ -1353,7 +1324,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#getMetadata()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Get all the attributes
@@ -1384,8 +1355,7 @@ public class H5CompoundDSTest {
                 assertTrue(ATTRIBUTE_STR_NAME.equals(attr.getAttributeName()));
 
                 try {
-                    assertTrue(
-                            ((String[]) ATTRIBUTE_STR)[0].equals(((String[]) attr.getAttributeData())[0]));
+                    assertTrue(((String[]) ATTRIBUTE_STR)[0].equals(((String[]) attr.getAttributeData())[0]));
                 }
                 catch (Exception ex) {
                     log.trace("testGetMetadata(): getData() failure:", ex);
@@ -1406,9 +1376,8 @@ public class H5CompoundDSTest {
                     final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
                     log.debug("testGetMetadata - ints.length:{}", ints.length);
-                    for (int j = 0; j < expected.length; j++) {
+                    for (int j = 0; j < expected.length; j++)
                         assertEquals(expected[j], ints[j]);
-                    }
                 }
                 catch (Exception ex) {
                     log.trace("testGetMetadata(): getData() failure:", ex);
@@ -1424,7 +1393,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#writeMetadata(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Update the value of an existing attribute
@@ -1633,7 +1602,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS#removeMetadata(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Remove all existing attributes
@@ -1702,8 +1671,7 @@ public class H5CompoundDSTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5CompoundDS#create(java.lang.String, hdf.object.Group, long[], java.lang.String[], hdf.object.Datatype[], int[], java.lang.Object)}
-     * .
-     * <p>
+     *
      * Create a simple compound dataset, i.e. compound members can be either a scalar data or 1D array.
      *
      * <pre>
@@ -1716,7 +1684,7 @@ public class H5CompoundDSTest {
      *             int[] memberSizes,
      *             Object data) throws Exception
      * </pre>
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Create new compound datasets
@@ -1990,8 +1958,7 @@ public class H5CompoundDSTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5CompoundDS#create(java.lang.String, hdf.object.Group, long[], java.lang.String[], hdf.object.Datatype[], int[], int[][], java.lang.Object)}
-     * .
-     * <p>
+     *
      * Create a simple compound dataset, i.e. compound members can be multiple-dimensional array.
      *
      * <pre>
@@ -2005,7 +1972,7 @@ public class H5CompoundDSTest {
      *             int[][] memberDims,
      *             Object data) throws Exception
      * </pre>
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Create new compound datasets
@@ -2098,8 +2065,7 @@ public class H5CompoundDSTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5CompoundDS#create(java.lang.String, hdf.object.Group, long[], long[], long[], int, java.lang.String[], hdf.object.Datatype[], int[], int[][], java.lang.Object)}
-     * .
-     * <p>
+     *
      * Create a simple compound dataset with compression options, i.e. compound members can be multiple-dimensional
      * array.
      *
@@ -2117,7 +2083,7 @@ public class H5CompoundDSTest {
      *             int[][] memberDims,
      *             Object data) throws Exception
      * </pre>
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Create new compound datasets with level-9 gzip compression
@@ -2191,15 +2157,12 @@ public class H5CompoundDSTest {
         final float[] floats = (float[]) compData.get(1);
         final String[] strs = (String[]) compData.get(2);
 
-        for (int i = 0; i < H5TestFile.DATA_INT.length; i++) {
+        for (int i = 0; i < H5TestFile.DATA_INT.length; i++)
             assertEquals(H5TestFile.DATA_INT[i], ints[i]);
-        }
-        for (int i = 0; i < H5TestFile.DATA_FLOAT.length; i++) {
+        for (int i = 0; i < H5TestFile.DATA_FLOAT.length; i++)
             assertEquals(H5TestFile.DATA_FLOAT[i], floats[i], Float.MIN_VALUE);
-        }
-        for (int i = 0; i < H5TestFile.DATA_STR.length; i++) {
+        for (int i = 0; i < H5TestFile.DATA_STR.length; i++)
             assertTrue(H5TestFile.DATA_STR[i].equals(strs[i]));
-        }
 
         try {
             testFile.delete(dset); // delete the new datast
@@ -2231,7 +2194,7 @@ public class H5CompoundDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5CompoundDS} SerializeToDisk.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>serialize a dataset identifier
@@ -2289,18 +2252,15 @@ public class H5CompoundDSTest {
             try {
                 H5.H5Tclose(tid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Sclose(sid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Dclose(did);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
         }
     }
 

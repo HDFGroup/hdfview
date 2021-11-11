@@ -147,90 +147,126 @@ import hdf.view.dialog.NewDatasetDialog;
  * @author jhenderson
  * @version 1.0 4/13/2018
  */
-public abstract class DefaultBaseTableView implements TableView {
+public abstract class DefaultBaseTableView implements TableView
+{
 
     private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(DefaultBaseTableView.class);
 
     private final Display                   display = Display.getDefault();
+    /** The reference to the display shell used */
     protected final Shell                   shell;
+    /** The current font */
     protected Font                          curFont;
 
-    // The main HDFView
+    /** The main HDFView */
     protected final DataViewManager         viewer;
 
+    /** The reference to the NAT table used */
     protected NatTable                      dataTable;
 
-    // The data object to be displayed in the Table
+    /** The data object to be displayed in the Table */
     protected final DataFormat              dataObject;
 
-    // The data value of the data object
+    /** The data value of the data object */
     protected Object                        dataValue;
 
+    /** The value used for fill */
     protected Object                        fillValue;
 
     /** the valid types of tableviews */
-    protected enum ViewType { TABLE, IMAGE };
+    protected enum ViewType {
+        /** The data view is of type spreadsheet */
+        TABLE,
+        /** The data view is of type image */
+        IMAGE
+    };
+
+    /** The type of view */
     protected      ViewType                 viewType = ViewType.TABLE;
 
-    // Changed to use normalized scientific notation (1 <= coefficient < 10).
-    // private final DecimalFormat scientificFormat = new DecimalFormat("###.#####E0#");
+    /** Changed to use normalized scientific notation (1 is less than coefficient is less than 10). */
     protected final DecimalFormat           scientificFormat = new DecimalFormat("0.0###E0###");
+    /** custom format pattern */
     protected DecimalFormat                 customFormat     = new DecimalFormat("###.#####");
+    /** the normal format to be used for numbers */
     protected final NumberFormat            normalFormat     = null;
+    /** the format to be used for numbers */
     protected NumberFormat                  numberFormat     = normalFormat;
 
-    // Used for bitmask operations on data
+    /** Used for bitmask operations on data */
     protected BitSet                        bitmask = null;
+    /** Used for the type of bitmask operation */
     protected BITMASK_OP                    bitmaskOP = BITMASK_OP.EXTRACT;
 
-    // Fields to keep track of which 'frame' of 3 dimensional data is being displayed
+    /** Fields to keep track of which 'frame' of 3 dimensional data is being displayed */
     private Text                            frameField;
     private long                            curDataFrame = 0;
     private long                            maxDataFrame = 1;
 
-    // The index base used for display row and column numbers of data
+    /** The index base used for display row and column numbers of data */
     protected int                           indexBase = 0;
 
+    /** size of default data length */
     protected int                           fixedDataLength = -1;
 
+    /** default binary order */
     protected int                           binaryOrder;
 
+    /** status if file is read only */
     protected boolean                       isReadOnly = false;
 
+    /** status if the enums are to display converted */
     protected boolean                       isEnumConverted = false;
 
-    protected boolean                       isDisplayTypeChar, isDataTransposed;
+    /** status if the display type is a char */
+    protected boolean                       isDisplayTypeChar;
 
+    /** status if the data is transposed */
+    protected boolean                       isDataTransposed;
+
+    /** reference status */
     protected boolean                       isRegRef = false, isObjRef = false;
+    /** show data as status */
     protected boolean                       showAsHex = false, showAsBin = false;
 
-    // Keep references to the selection and data layers for ease of access
+    /** Keep references to the selection layers for ease of access */
     protected SelectionLayer                selectionLayer;
+    /** Keep references to the data layers for ease of access */
     protected DataLayer                     dataLayer;
 
+    /** reference to the data provider for the row */
     protected IDataProvider                 rowHeaderDataProvider;
+    /** reference to the data provider for the column */
     protected IDataProvider                 columnHeaderDataProvider;
 
+    /** reference to the data provider */
     protected HDFDataProvider               dataProvider;
+    /** reference to the display converter */
     protected HDFDisplayConverter           dataDisplayConverter;
 
     /**
-     * Global variables for GUI components
+     * Global variables for GUI components on the default to show data
      */
+    /** Checkbox menu item for Fixed Data Length default*/
     protected MenuItem                      checkFixedDataLength = null;
+    /** Checkbox menu item for Custom Notation default*/
     protected MenuItem                      checkCustomNotation = null;
+    /** Checkbox menu item for Scientific Notation default */
     protected MenuItem                      checkScientificNotation = null;
+    /** Checkbox menu item for hex default */
     protected MenuItem                      checkHex = null;
+    /** Checkbox menu item for binary default */
     protected MenuItem                      checkBin = null;
+    /** Checkbox menu item for enum default*/
     protected MenuItem                      checkEnum = null;
 
-    // Labeled Group to display the index base
+    /** Labeled Group to display the index base */
     protected org.eclipse.swt.widgets.Group indexBaseGroup;
 
-    // Text field to display the value of the currently selected table cell
+    /** Text field to display the value of the currently selected table cell */
     protected Text                          cellValueField;
 
-    // Label to indicate the current cell location
+    /** Label to indicate the current cell location */
     protected Label                         cellLabel;
 
 
@@ -361,9 +397,8 @@ public abstract class DefaultBaseTableView implements TableView {
         if (!isReadOnly) {
             String compression = dataObject.getCompression();
             if ((compression != null) && compression.startsWith("SZIP")) {
-                if (!compression.endsWith("ENCODE_ENABLED")) {
+                if (!compression.endsWith("ENCODE_ENABLED"))
                     isReadOnly = true;
-                }
             }
         }
 
@@ -726,8 +761,13 @@ public abstract class DefaultBaseTableView implements TableView {
         return toolbar;
     }
 
-    /*
+    /**
      * Creates the menubar for the Shell.
+     *
+     * @param theShell
+     *    the reference to the display shell
+     *
+     * @return the newly created menu
      */
     protected Menu createMenuBar(final Shell theShell) {
         Menu menuBar = new Menu(theShell, SWT.BAR);
@@ -982,7 +1022,8 @@ public abstract class DefaultBaseTableView implements TableView {
                     filename = fChooser.open();
                 }
 
-                if (filename == null) return;
+                if (filename == null)
+                    return;
 
                 File chosenFile = new File(filename);
                 if (!chosenFile.exists()) {
@@ -1000,6 +1041,14 @@ public abstract class DefaultBaseTableView implements TableView {
         return menuBar;
     }
 
+    /**
+     * Loads the data buffer of an object.
+     *
+     * @param dataObject
+     *        the object that has the buffer for the data.
+     *
+     * @throws Exception if a failure occurred
+     */
     protected void loadData(DataFormat dataObject) throws Exception {
         if (!dataObject.isInited()) {
             try {
@@ -1020,9 +1069,8 @@ public abstract class DefaultBaseTableView implements TableView {
         // Make sure entire dataset is not loaded when looking at 3D
         // datasets using the default display mode (double clicking the
         // data object)
-        if (dataObject.getRank() > 2) {
+        if (dataObject.getRank() > 2)
             dataObject.getSelectedDims()[dataObject.getSelectedIndex()[2]] = 1;
-        }
 
         dataValue = null;
         try {
@@ -1036,10 +1084,32 @@ public abstract class DefaultBaseTableView implements TableView {
         }
     }
 
+    /**
+     * Create a data table for a data object.
+     *
+     * @param parent
+     *            the parent object this table will be associated with.
+     * @param dataObject
+     *            the data object this table will be associated with.
+     *
+     * @return the newly created data table
+     */
     protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
 
+    /**
+     * Show the object reference data.
+     *
+     * @param ref
+     *            the identifer for the object reference.
+     */
     protected abstract void showObjRefData(long ref);
 
+    /**
+     * Show the region reference data.
+     *
+     * @param reg
+     *            the identifier for the region reference.
+     */
     protected abstract void showRegRefData(String reg);
 
     /**
@@ -1084,9 +1154,8 @@ public abstract class DefaultBaseTableView implements TableView {
             data = null;
         }
 
-        if (data == null) {
+        if (data == null)
             return;
-        }
 
         Class<?> theClass = null;
         String viewName = null;
@@ -1182,8 +1251,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         // find the object location
         String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf("REGION_TYPE")-1);
-        log.trace("showRegRefData(): isPointSelection={} oidStr={}", isPointSelection,
-                oidStr);
+        log.trace("showRegRefData(): isPointSelection={} oidStr={}", isPointSelection, oidStr);
 
         // decode the region selection
         String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
@@ -1249,8 +1317,7 @@ public abstract class DefaultBaseTableView implements TableView {
                 dsetCopy.init();
             }
             catch (Exception ex) {
-                log.debug("showRegRefData(): continue after copied dataset init failure: ",
-                        ex);
+                log.debug("showRegRefData(): continue after copied dataset init failure: ", ex);
                 continue;
             }
 
@@ -1367,8 +1434,19 @@ public abstract class DefaultBaseTableView implements TableView {
         } // (st.hasMoreTokens())
     } // end of showRegRefData(String reg)
 
+    /**
+     * Get the data editing rule for the object.
+     *
+     * @param dataObject
+     *        the data object
+     *
+     * @return the rule
+     */
     protected abstract IEditableRule getDataEditingRule(DataFormat dataObject);
 
+    /**
+     * Update the display converters.
+     */
     protected void updateDataConversionSettings() {
         if (dataDisplayConverter != null) {
             dataDisplayConverter.setShowAsHex(showAsHex);
@@ -1422,10 +1500,12 @@ public abstract class DefaultBaseTableView implements TableView {
         return selectionLayer.getSelectedColumnPositions().length;
     }
 
+    /** @return the selection layer */
     public SelectionLayer getSelectionLayer() {
         return selectionLayer;
     }
 
+    /** @return the data layer */
     public DataLayer getDataLayer() {
         return dataLayer;
     }
@@ -1433,13 +1513,15 @@ public abstract class DefaultBaseTableView implements TableView {
     // Flip to previous 'frame' of Table data
     private void previousFrame() {
         // Only valid operation if data object has 3 or more dimensions
-        if (dataObject.getRank() < 3) return;
+        if (dataObject.getRank() < 3)
+            return;
 
         long[] start = dataObject.getStartDims();
         int[] selectedIndex = dataObject.getSelectedIndex();
         long curFrame = start[selectedIndex[2]];
 
-        if (curFrame == 0) return; // Current frame is the first frame
+        if (curFrame == 0)
+            return; // Current frame is the first frame
 
         gotoFrame(curFrame - 1);
     }
@@ -1447,14 +1529,16 @@ public abstract class DefaultBaseTableView implements TableView {
     // Flip to next 'frame' of Table data
     private void nextFrame() {
         // Only valid operation if data object has 3 or more dimensions
-        if (dataObject.getRank() < 3) return;
+        if (dataObject.getRank() < 3)
+            return;
 
         long[] start = dataObject.getStartDims();
         int[] selectedIndex = dataObject.getSelectedIndex();
         long[] dims = dataObject.getDims();
         long curFrame = start[selectedIndex[2]];
 
-        if (curFrame == dims[selectedIndex[2]] - 1) return; // Current frame is the last frame
+        if (curFrame == dims[selectedIndex[2]] - 1)
+            return; // Current frame is the last frame
 
         gotoFrame(curFrame + 1);
     }
@@ -1462,13 +1546,15 @@ public abstract class DefaultBaseTableView implements TableView {
     // Flip to the first 'frame' of Table data
     private void firstFrame() {
         // Only valid operation if data object has 3 or more dimensions
-        if (dataObject.getRank() < 3) return;
+        if (dataObject.getRank() < 3)
+            return;
 
         long[] start = dataObject.getStartDims();
         int[] selectedIndex = dataObject.getSelectedIndex();
         long curFrame = start[selectedIndex[2]];
 
-        if (curFrame == 0) return; // Current frame is the first frame
+        if (curFrame == 0)
+            return; // Current frame is the first frame
 
         gotoFrame(0);
     }
@@ -1476,14 +1562,16 @@ public abstract class DefaultBaseTableView implements TableView {
     // Flip to the last 'frame' of Table data
     private void lastFrame() {
         // Only valid operation if data object has 3 or more dimensions
-        if (dataObject.getRank() < 3) return;
+        if (dataObject.getRank() < 3)
+            return;
 
         long[] start = dataObject.getStartDims();
         int[] selectedIndex = dataObject.getSelectedIndex();
         long[] dims = dataObject.getDims();
         long curFrame = start[selectedIndex[2]];
 
-        if (curFrame == dims[selectedIndex[2]] - 1) return; // Current page is the last page
+        if (curFrame == dims[selectedIndex[2]] - 1)
+            return; // Current page is the last page
 
         gotoFrame(dims[selectedIndex[2]] - 1);
     }
@@ -1491,14 +1579,12 @@ public abstract class DefaultBaseTableView implements TableView {
     // Flip to the specified 'frame' of Table data
     private void gotoFrame(long idx) {
         // Only valid operation if data object has 3 or more dimensions
-        if (dataObject.getRank() < 3 || idx == (curDataFrame - indexBase)) {
+        if (dataObject.getRank() < 3 || idx == (curDataFrame - indexBase))
             return;
-        }
 
         // Make sure to save any changes to this frame of data before changing frames
-        if (dataProvider.getIsValueChanged()) {
+        if (dataProvider.getIsValueChanged())
             updateValueInFile();
-        }
 
         long[] start = dataObject.getStartDims();
         int[] selectedIndex = dataObject.getSelectedIndex();
@@ -1562,9 +1648,8 @@ public abstract class DefaultBaseTableView implements TableView {
         int r0 = selectionLayer.getLastSelectedRegion().y; // starting row
         int c0 = selectionLayer.getLastSelectedRegion().x; // starting column
 
-        if ((r0 < 0) || (c0 < 0)) {
+        if ((r0 < 0) || (c0 < 0))
             return;
-        }
 
         int nr = selectionLayer.getSelectedRowCount();
         int nc = selectionLayer.getSelectedColumnPositions().length;
@@ -1574,9 +1659,8 @@ public abstract class DefaultBaseTableView implements TableView {
         try {
             for (int i = r0; i < r1; i++) {
                 sb.append(selectionLayer.getDataValueByPosition(c0, i).toString());
-                for (int j = c0 + 1; j < c1; j++) {
+                for (int j = c0 + 1; j < c1; j++)
                     sb.append("\t").append(selectionLayer.getDataValueByPosition(j, i).toString());
-                }
                 sb.append("\n");
             }
         }
@@ -1596,7 +1680,8 @@ public abstract class DefaultBaseTableView implements TableView {
      * Paste data from the system clipboard to the spreadsheet.
      */
     private void pasteData() {
-        if (!Tools.showConfirm(shell, "Clipboard Data", "Do you want to paste selected data?")) return;
+        if (!Tools.showConfirm(shell, "Clipboard Data", "Do you want to paste selected data?"))
+            return;
 
         int cols = selectionLayer.getPreferredColumnCount();
         int rows = selectionLayer.getPreferredRowCount();
@@ -1609,12 +1694,10 @@ public abstract class DefaultBaseTableView implements TableView {
             c0 = selection.x;
         }
 
-        if (c0 < 0) {
+        if (c0 < 0)
             c0 = 0;
-        }
-        if (r0 < 0) {
+        if (r0 < 0)
             r0 = 0;
-        }
         int r = r0;
         int c = c0;
 
@@ -1691,7 +1774,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
             filename = fChooser.open();
         }
-        if (filename == null) return;
+        if (filename == null)
+            return;
 
         File chosenFile = new File(filename);
         String fname = chosenFile.getAbsolutePath();
@@ -1715,7 +1799,8 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
             }
 
-            if (!Tools.showConfirm(shell, "Save", "File exists. Do you want to replace it?")) return;
+            if (!Tools.showConfirm(shell, "Save", "File exists. Do you want to replace it?"))
+                return;
         }
 
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(chosenFile)));
@@ -1725,23 +1810,19 @@ public abstract class DefaultBaseTableView implements TableView {
 
         // delimiter must include a tab to be consistent with copy/paste for
         // compound fields
-        if (dataObject instanceof CompoundDS) delimiter = "\t";
-
-        if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_TAB)) {
+        if (dataObject instanceof CompoundDS)
             delimiter = "\t";
-        }
-        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SPACE)) {
+
+        if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_TAB))
+            delimiter = "\t";
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SPACE))
             delimiter = " " + delimiter;
-        }
-        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COMMA)) {
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COMMA))
             delimiter = "," + delimiter;
-        }
-        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COLON)) {
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COLON))
             delimiter = ":" + delimiter;
-        }
-        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SEMI_COLON)) {
+        else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SEMI_COLON))
             delimiter = ";" + delimiter;
-        }
 
         int cols = selectionLayer.getPreferredColumnCount();
         int rows = selectionLayer.getPreferredRowCount();
@@ -1890,7 +1971,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
             filename = fChooser.open();
         }
-        if (filename == null) return;
+        if (filename == null)
+            return;
 
         File chosenFile = new File(filename);
         String fname = chosenFile.getAbsolutePath();
@@ -1914,7 +1996,8 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
             }
 
-            if (!Tools.showConfirm(shell, "Save", "File exists. Do you want to replace it?")) return;
+            if (!Tools.showConfirm(shell, "Save", "File exists. Do you want to replace it?"))
+                return;
         }
 
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(chosenFile))) {
@@ -1956,12 +2039,10 @@ public abstract class DefaultBaseTableView implements TableView {
             r0 = lastSelection.y;
             c0 = lastSelection.x;
 
-            if (c0 < 0) {
+            if (c0 < 0)
                 c0 = 0;
-            }
-            if (r0 < 0) {
+            if (r0 < 0)
                 r0 = 0;
-            }
         }
         else {
             r0 = 0;
@@ -1969,7 +2050,8 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         // Start at the first column for compound datasets
-        if (dataObject instanceof CompoundDS) c0 = 0;
+        if (dataObject instanceof CompoundDS)
+            c0 = 0;
 
         String importLine = null;
         StringTokenizer tokenizer1 = null;
@@ -1989,21 +2071,16 @@ public abstract class DefaultBaseTableView implements TableView {
             String delName = ViewProperties.getDataDelimiter();
             String delimiter = "";
 
-            if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_TAB)) {
+            if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_TAB))
                 delimiter = "\t";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SPACE)) {
+            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SPACE))
                 delimiter = " " + delimiter;
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COMMA)) {
+            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COMMA))
                 delimiter = ",";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COLON)) {
+            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_COLON))
                 delimiter = ":";
-            }
-            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SEMI_COLON)) {
+            else if (delName.equalsIgnoreCase(ViewProperties.DELIMITER_SEMI_COLON))
                 delimiter = ";";
-            }
             String token = null;
             int r = r0;
             int c = c0;
@@ -2054,12 +2131,10 @@ public abstract class DefaultBaseTableView implements TableView {
                 }
 
                 // Start at the first column for compound datasets
-                if (dataObject instanceof CompoundDS) {
+                if (dataObject instanceof CompoundDS)
                     c = 0;
-                }
-                else {
+                else
                     c = c0;
-                }
 
                 r++;
             } // ((line != null) && (r < rows))
@@ -2091,7 +2166,8 @@ public abstract class DefaultBaseTableView implements TableView {
             filename = fChooser.open();
         }
 
-        if (filename == null) return;
+        if (filename == null)
+            return;
 
         File chosenFile = new File(filename);
         if (!chosenFile.exists()) {
@@ -2128,7 +2204,6 @@ public abstract class DefaultBaseTableView implements TableView {
      * Convert selected data based on predefined math functions.
      */
     private void mathConversion() throws Exception {
-
         if (isReadOnly) {
             log.debug("mathConversion(): can't convert read-only data");
             return;
@@ -2177,9 +2252,8 @@ public abstract class DefaultBaseTableView implements TableView {
                 Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
                 Set<Integer> selectedRowPos = new LinkedHashSet<>();
                 Iterator<Range> i1 = rowPositions.iterator();
-                while (i1.hasNext()) {
+                while (i1.hasNext())
                     selectedRowPos.addAll(i1.next().getMembers());
-                }
 
                 int r0 = selectedRowPos.toArray(new Integer[0])[0];
                 int c0 = selectionLayer.getSelectedColumnPositions()[0];
@@ -2229,9 +2303,8 @@ public abstract class DefaultBaseTableView implements TableView {
         lpo.open();
 
         int plotType = lpo.getPlotBy();
-        if (plotType == LinePlotOption.NO_PLOT) {
+        if (plotType == LinePlotOption.NO_PLOT)
             return;
-        }
 
         boolean isRowPlot = (plotType == LinePlotOption.ROW_PLOT);
         int xIndex = lpo.getXindex();
@@ -2369,9 +2442,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
         String cname = dataValue.getClass().getName();
         char dname = cname.charAt(cname.lastIndexOf('[') + 1);
-        if ((dname == 'B') || (dname == 'S') || (dname == 'I') || (dname == 'J')) {
+        if ((dname == 'B') || (dname == 'S') || (dname == 'I') || (dname == 'J'))
             cv.setTypeToInteger();
-        }
 
         cv.open();
     }
@@ -2393,7 +2465,8 @@ public abstract class DefaultBaseTableView implements TableView {
         int idx = 0;
         boolean hasInvalid = false;
 
-        if (data == null || yRange == null) return -1;
+        if (data == null || yRange == null)
+            return -1;
 
         yRange[0] = Double.POSITIVE_INFINITY;
         yRange[1] = Double.NEGATIVE_INFINITY;
@@ -2403,19 +2476,22 @@ public abstract class DefaultBaseTableView implements TableView {
 
             for (int j = 0; j < data.length; j++) {
                 hasInvalid = Tools.isNaNINF(data[j][i]);
-                if (xData != null) hasInvalid = hasInvalid || Tools.isNaNINF(xData[i]);
+                if (xData != null)
+                    hasInvalid = hasInvalid || Tools.isNaNINF(xData[i]);
 
                 if (hasInvalid)
                     break;
                 else {
                     data[j][idx] = data[j][i];
-                    if (xData != null) xData[idx] = xData[i];
+                    if (xData != null)
+                        xData[idx] = xData[i];
                     yRange[0] = Math.min(yRange[0], data[j][idx]);
                     yRange[1] = Math.max(yRange[1], data[j][idx]);
                 }
             }
 
-            if (!hasInvalid) idx++;
+            if (!hasInvalid)
+                idx++;
         }
 
         return idx;
@@ -2425,7 +2501,20 @@ public abstract class DefaultBaseTableView implements TableView {
      * An implementation of a GridLayer with support for column grouping and with
      * editing triggered by a double click instead of a single click.
      */
-    protected class EditingGridLayer extends GridLayer {
+    protected class EditingGridLayer extends GridLayer
+    {
+        /** Create the Grid Layer with editing triggered by a
+         *  double click instead of a single click.
+         *
+         * @param bodyLayer
+         *        the body layer
+         * @param columnHeaderLayer
+         *        the Column Header layer
+         * @param rowHeaderLayer
+         *        the Row Header layer
+         * @param cornerLayer
+         *        the Corner Layer
+         */
         public EditingGridLayer(ILayer bodyLayer, ILayer columnHeaderLayer, ILayer rowHeaderLayer, ILayer cornerLayer) {
             super(bodyLayer, columnHeaderLayer, rowHeaderLayer, cornerLayer, false);
 
@@ -2441,12 +2530,10 @@ public abstract class DefaultBaseTableView implements TableView {
                     cellStyle.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR,
                             Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
-                    if (curFont != null) {
+                    if (curFont != null)
                         cellStyle.setAttributeValue(CellStyleAttributes.FONT, curFont);
-                    }
-                    else {
+                    else
                         cellStyle.setAttributeValue(CellStyleAttributes.FONT, Display.getDefault().getSystemFont());
-                    }
 
                     configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, cellStyle,
                             DisplayMode.NORMAL, GridRegion.BODY);
@@ -2476,7 +2563,8 @@ public abstract class DefaultBaseTableView implements TableView {
                         uiBindingRegistry.registerDoubleClickBinding(new MouseEventMatcher(), new IMouseAction() {
                             @Override
                             public void run(NatTable table, MouseEvent event) {
-                                if (!(isRegRef || isObjRef)) return;
+                                if (!(isRegRef || isObjRef))
+                                    return;
 
                                 viewType = ViewType.TABLE;
 
@@ -2575,7 +2663,17 @@ public abstract class DefaultBaseTableView implements TableView {
     /**
      * An implementation of the table's Row Header which adapts to the current font.
      */
-    protected class RowHeader extends RowHeaderLayer {
+    protected class RowHeader extends RowHeaderLayer
+    {
+        /** Create the RowHeader which adapts to the current font.
+         *
+         * @param baseLayer
+         *        the base layer
+         * @param verticalLayerDependency
+         *        the vertical layer dependency
+         * @param selectionLayer
+         *        the selection layer
+         */
         public RowHeader(IUniqueIndexLayer baseLayer, ILayer verticalLayerDependency, SelectionLayer selectionLayer) {
             super(baseLayer, verticalLayerDependency, selectionLayer);
 
@@ -2598,8 +2696,8 @@ public abstract class DefaultBaseTableView implements TableView {
      * Custom Row Header data provider to set row indices based on Index Base for
      * both Scalar Datasets and Compound Datasets.
      */
-    protected class RowHeaderDataProvider implements IDataProvider {
-
+    protected class RowHeaderDataProvider implements IDataProvider
+    {
         private final int    rank;
         private final int    space_type;
         private final long[] dims;
@@ -2607,11 +2705,19 @@ public abstract class DefaultBaseTableView implements TableView {
         private final long[] strideArray;
         private final int[]  selectedIndex;
 
+        /** the start value. */
         protected final int  start;
+        /** the stride value. */
         protected final int  stride;
 
         private final int    nrows;
 
+        /** Create the Row Header data provider to set row indices based on Index Base for
+         *  both Scalar Datasets and Compound Datasets.
+         *
+         * @param theDataObject
+         *        the data object
+         */
         public RowHeaderDataProvider(DataFormat theDataObject) {
             this.space_type = theDataObject.getSpaceType();
             this.rank = theDataObject.getRank();
@@ -2620,12 +2726,10 @@ public abstract class DefaultBaseTableView implements TableView {
             this.strideArray = theDataObject.getStride();
             this.selectedIndex = theDataObject.getSelectedIndex();
 
-            if (rank > 1) {
+            if (rank > 1)
                 this.nrows = (int) theDataObject.getHeight();
-            }
-            else {
+            else
                 this.nrows = (int) dims[0];
-            }
 
             start = (int) startArray[selectedIndex[0]];
             stride = (int) strideArray[selectedIndex[0]];
@@ -2656,7 +2760,17 @@ public abstract class DefaultBaseTableView implements TableView {
      * An implementation of the table's Column Header which adapts to the current
      * font.
      */
-    protected class ColumnHeader extends ColumnHeaderLayer {
+    protected class ColumnHeader extends ColumnHeaderLayer
+    {
+        /** Create the ColumnHeader which adapts to the current font.
+        *
+        * @param baseLayer
+        *        the base layer
+        * @param horizontalLayerDependency
+        *        the horizontal layer dependency
+        * @param selectionLayer
+        *        the selection layer
+        */
         public ColumnHeader(IUniqueIndexLayer baseLayer, ILayer horizontalLayerDependency,
                 SelectionLayer selectionLayer) {
             super(baseLayer, horizontalLayerDependency, selectionLayer);
@@ -2677,9 +2791,15 @@ public abstract class DefaultBaseTableView implements TableView {
     }
 
     /** Context-menu for dealing with region and object references */
-    protected class RefContextMenu extends AbstractUiBindingConfiguration {
+    protected class RefContextMenu extends AbstractUiBindingConfiguration
+    {
         private final Menu contextMenu;
 
+        /** Create the Context-menu for dealing with region and object references.
+         *
+         * @param table
+         *        the NatTable object
+         */
         public RefContextMenu(NatTable table) {
             this.contextMenu = createMenu(table).build();
         }
@@ -2708,9 +2828,8 @@ public abstract class DefaultBaseTableView implements TableView {
                     Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
                     Set<Integer> selectedRowPos = new LinkedHashSet<>();
                     Iterator<Range> i1 = rowPositions.iterator();
-                    while (i1.hasNext()) {
+                    while (i1.hasNext())
                         selectedRowPos.addAll(i1.next().getMembers());
-                    }
 
                     Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
                     int[] selectedCols = selectionLayer.getSelectedColumnPositions();
@@ -2758,9 +2877,8 @@ public abstract class DefaultBaseTableView implements TableView {
                     Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
                     Set<Integer> selectedRowPos = new LinkedHashSet<>();
                     Iterator<Range> i1 = rowPositions.iterator();
-                    while (i1.hasNext()) {
+                    while (i1.hasNext())
                         selectedRowPos.addAll(i1.next().getMembers());
-                    }
 
                     Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
                     int[] selectedCols = selectionLayer.getSelectedColumnPositions();
@@ -2853,8 +2971,8 @@ public abstract class DefaultBaseTableView implements TableView {
         }
     }
 
-    private class LinePlotOption extends Dialog {
-
+    private class LinePlotOption extends Dialog
+    {
         private Shell linePlotOptionShell;
 
         private Button rowButton, colButton;
@@ -2939,9 +3057,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
             colBox.add("array index");
 
-            for (int i = 0; i < ncol; i++) {
+            for (int i = 0; i < ncol; i++)
                 colBox.add("column " + columnHeaderDataProvider.getDataValue(i, 0));
-            }
 
             rowBox = new Combo(content, SWT.SINGLE | SWT.READ_ONLY);
             rowBox.setFont(curFont);
@@ -2951,9 +3068,8 @@ public abstract class DefaultBaseTableView implements TableView {
 
             rowBox.add("array index");
 
-            for (int i = 0; i < nrow; i++) {
+            for (int i = 0; i < nrow; i++)
                 rowBox.add("row " + (start + indexBase + i * stride));
-            }
 
             // Create Ok/Cancel button region
             Composite buttonComposite = new Composite(linePlotOptionShell, SWT.NONE);
@@ -3013,9 +3129,8 @@ public abstract class DefaultBaseTableView implements TableView {
             linePlotOptionShell.open();
 
             Display display = parent.getDisplay();
-            while (!linePlotOptionShell.isDisposed()) {
+            while (!linePlotOptionShell.isDisposed())
                 if (!display.readAndDispatch()) display.sleep();
-            }
         }
 
         int getXindex() {

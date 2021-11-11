@@ -20,7 +20,6 @@ import java.util.List;
  * An interface that provides general I/O operations for object metadata
  * attached to an object. For example, reading metadata content from the file
  * into memory or writing metadata content from memory into the file.
- * <p>
  *
  * @see hdf.object.HObject
  *
@@ -28,10 +27,11 @@ import java.util.List;
  * @author Peter X. Cao, Jordan T. Henderson
  */
 @SuppressWarnings("rawtypes")
-public interface MetaDataContainer {
+public interface MetaDataContainer
+{
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.

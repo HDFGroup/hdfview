@@ -31,22 +31,21 @@ import hdf.object.h4.H4Vdata;
 
 /**
  * Test object at the hdf.object package.
- * <p>
  *
  * @version 1.3.0 10/26/2001
  * @author Peter X. Cao
  */
-public class TestH4File {
+public class TestH4File
+{
     /**
      * Test tree structure of the HDF4 file.
-     * <p>
+     *
      * Tested for regular file: c:\winnt\profiles\xcao\desktop\hdf_files\amortest000171999.hdf Tested with a large file
      * (over 700MB, over 800 datasets) at \\Eirene\sdt\mcgrath\EOS-Data\MODIS\L3\MOD08_E3.A2000337.002.2001037044240.hdf
      * it takes about 5 seconds to retrieve the tree structure through the network. Accessing local file can be a lot of
      * faster.
      */
-    private static void testTree(String fileName)
-    {
+    private static void testTree(String fileName) {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_WRITE);
 
         long t0 = System.currentTimeMillis();
@@ -61,9 +60,8 @@ public class TestH4File {
         System.out.println("Time of retrieving the tree is " + t);
 
         HObject root = h4file.getRootObject();
-        if (root != null) {
+        if (root != null)
             printNode(root, "    ");
-        }
 
         try {
             h4file.close();
@@ -73,22 +71,19 @@ public class TestH4File {
         }
     }
 
-    private static void printNode(HObject node, String indent)
-    {
+    private static void printNode(HObject node, String indent) {
         System.out.println(indent + node);
 
         int n = ((Group) node).breadthFirstMemberList().size();
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++)
             printNode(((Group) node).getMember(i), indent + "    ");
-        }
     }
 
     /**
      * Test H4Group.
      */
     @SuppressWarnings("rawtypes")
-    private static void testH4Group(String fileName)
-    {
+    private static void testH4Group(String fileName) {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_WRITE);
 
         try {
@@ -118,9 +113,8 @@ public class TestH4File {
                     catch (Exception ex) {
                     }
 
-                    if (info == null) {
+                    if (info == null)
                         continue;
-                    }
 
                     int n = info.size();
                     for (int i = 0; i < n; i++) {
@@ -143,8 +137,7 @@ public class TestH4File {
      * Test H4SDS.
      */
     @SuppressWarnings("rawtypes")
-    private static void testH4SDS(String fileName)
-    {
+    private static void testH4SDS(String fileName) {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_READ);
 
         try {
@@ -193,8 +186,7 @@ public class TestH4File {
                         System.out.println(ex);
                     }
 
-                    if ((data != null)
-                            && data.getClass().isArray()) {
+                    if ((data != null) && data.getClass().isArray()) {
                         // print out the first 1000 data points
                         n = Math.min(Array.getLength(data), 1000);
                         StringBuilder sb = new StringBuilder();
@@ -220,8 +212,7 @@ public class TestH4File {
      * Test H4Vdata.
      */
     @SuppressWarnings("rawtypes")
-    private static void testH4Vdata(String fileName)
-    {
+    private static void testH4Vdata(String fileName) {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_READ);
 
         try {
@@ -267,9 +258,8 @@ public class TestH4File {
 
                     n = vdata.getMemberCount();
                     String[] names = vdata.getMemberNames();
-                    for (int i = 0; i < n; i++) {
+                    for (int i = 0; i < n; i++)
                         System.out.println(names[i]);
-                    }
 
                     // compound data
                     List list = null;
@@ -314,8 +304,7 @@ public class TestH4File {
      * Test H4GRImage.
      */
     @SuppressWarnings("rawtypes")
-    private static void testH4GRImage(String fileName)
-    {
+    private static void testH4GRImage(String fileName) {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_READ);
 
         try {
@@ -387,8 +376,7 @@ public class TestH4File {
         }
     }
 
-    public static void main(String[] argv)
-    {
+    public static void main(String[] argv) {
         int argc = argv.length;
 
         if (argc <= 0) {

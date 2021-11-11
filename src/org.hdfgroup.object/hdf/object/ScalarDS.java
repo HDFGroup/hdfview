@@ -21,16 +21,17 @@ import java.util.Vector;
 /**
  * A scalar dataset is a multiple dimension array of scalar points. The Datatype of a scalar dataset must be an atomic
  * datatype. Common datatypes of scalar datasets include char, byte, short, int, long, float, double and string.
- * <p>
+ *
  * A ScalarDS can be an image or spreadsheet data. ScalarDS defines methods to deal with both images and
  * spreadsheets.
- * <p>
+ *
  * ScalarDS is an abstract class. Current implementing classes are the H4SDS, H5GRImage and H5ScalarDS.
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class ScalarDS extends Dataset {
+public abstract class ScalarDS extends Dataset
+{
     private static final long serialVersionUID = 8925371455928203981L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDS.class);
@@ -65,7 +66,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * The indexed RGB color model with 256 colors.
-     * <p>
+     *
      * The palette values are stored in a two-dimensional byte array and arrange by color components of red, green and
      * blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are the red, green and blue
      * components respectively.
@@ -85,6 +86,7 @@ public abstract class ScalarDS extends Dataset {
     /** The fill value of the dataset. */
     protected Object fillValue = null;
 
+    /** The list of filtered image values. */
     private List<Number> filteredImageValues;
 
     /** Flag to indicate if the dataset is displayed as an image. */
@@ -103,7 +105,7 @@ public abstract class ScalarDS extends Dataset {
     /**
      * Constructs an instance of a ScalarDS with specific name and path. An HDF data object must have a name. The path
      * is the group path starting from the root.
-     * <p>
+     *
      * For example, in H5ScalarDS(h5file, "dset", "/arrays/"), "dset" is the name of the dataset, "/arrays" is the group
      * path of the dataset.
      *
@@ -150,7 +152,7 @@ public abstract class ScalarDS extends Dataset {
     /**
      * Clears the current data buffer in memory and forces the next read() to load
      * the data from file.
-     * <p>
+     *
      * The function read() loads data from file into memory only if the data is not
      * read. If data is already in memory, read() just returns the memory buffer.
      * Sometimes we want to force read() to re-read data from file. For example,
@@ -222,21 +224,21 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns the palette of this scalar dataset or null if palette does not exist.
-     * <p>
+     *
      * A Scalar dataset can be displayed as spreadsheet data or an image. When a scalar dataset is displayed as an
      * image, the palette or color table may be needed to translate a pixel value to color components (for example, red,
      * green, and blue). Some scalar datasets have no palette and some datasets have one or more than one palettes. If
      * an associated palette exists but is not loaded, this interface retrieves the palette from the file and returns the
      * palette. If the palette is loaded, it returns the palette. It returns null if there is no palette associated with
      * the dataset.
-     * <p>
+     *
      * Current implementation only supports palette model of indexed RGB with 256 colors. Other models such as
      * YUV", "CMY", "CMYK", "YCbCr", "HSV will be supported in the future.
-     * <p>
+     *
      * The palette values are stored in a two-dimensional byte array and are arranges by color components of red, green and
      * blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are the red, green and blue
      * components respectively.
-     * <p>
+     *
      * Sub-classes have to implement this interface. HDF4 and HDF5 images use different libraries to retrieve the
      * associated palette.
      *
@@ -256,7 +258,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Reads a specific image palette from file.
-     * <p>
+     *
      * A scalar dataset may have multiple palettes attached to it. readPalette(int idx) returns a specific palette
      * identified by its index.
      *
@@ -269,7 +271,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Get the name of a specific image palette from file.
-     * <p>
+     *
      * A scalar dataset may have multiple palettes attached to it. getPaletteName(int idx) returns the name of a
      * specific palette identified by its index.
      *
@@ -287,9 +289,9 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns the byte array of palette refs.
-     * <p>
+     *
      * A palette reference is an object reference that points to the palette dataset.
-     * <p>
+     *
      * For example, Dataset "Iceberg" has an attribute of object reference "Palette". The arrtibute "Palette" has value
      * "2538" that is the object reference of the palette data set "Iceberg Palette".
      *
@@ -299,7 +301,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns true if this dataset is an image.
-     * <p>
+     *
      * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For more
      * details, read <a href="https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification</a>
      *
@@ -311,7 +313,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns true if this dataset is displayed as an image.
-     * <p>
+     *
      * A ScalarDS can be displayed as an image or a spreadsheet in a table.
      *
      * @return true if this dataset is displayed as an image; otherwise, returns false.
@@ -323,7 +325,7 @@ public abstract class ScalarDS extends Dataset {
 
     /**
      * Returns true if this dataset is displayed as an image with default image order.
-     * <p>
+     *
      * A ScalarDS can be displayed as an image with different orders of dimensions.
      *
      * @return true if this dataset is displayed as an image with default image order; otherwise, returns false.

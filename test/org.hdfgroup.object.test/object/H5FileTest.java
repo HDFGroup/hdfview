@@ -40,9 +40,9 @@ import hdf.object.h5.H5ScalarDS;
 
 /**
  * TestCase for H5File.
- * <p>
+ *
  * This class tests all the public methods in H5ScalarDS class.
- * <p>
+ *
  * The test file contains the following objects.
  *
  * <pre>
@@ -65,9 +65,9 @@ import hdf.object.h5.H5ScalarDS;
  *         /g0/g00/dataset_float    Dataset {50, 10}
  *         /g0_attr                 Group
  * </pre>
- * <p>
+ *
  * We use the following template to test all the methods:
- * <p>
+ *
  * What to test:
  * <ul>
  * <li>Test for boundary conditions
@@ -86,7 +86,8 @@ import hdf.object.h5.H5ScalarDS;
  *
  * @author Peter Cao, The HDF Group
  */
-public class H5FileTest {
+public class H5FileTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5FileTest.class);
     private static final H5File H5FILE = new H5File();
     private static final int NLOOPS = 10;
@@ -107,8 +108,7 @@ public class H5FileTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -206,7 +206,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#open()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>open a file identifier
@@ -255,7 +255,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#create(java.lang.String)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file
@@ -288,14 +288,13 @@ public class H5FileTest {
         try {
             file.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
         file.delete();
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5File#getRootNode()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>get the root node
@@ -321,7 +320,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#createGroup(java.lang.String, hdf.object.Group)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file
@@ -374,14 +373,13 @@ public class H5FileTest {
         try {
             file.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
         file.delete();
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5File#createGroup(java.lang.String, hdf.object.Group, int)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file
@@ -445,9 +443,8 @@ public class H5FileTest {
         try {
             grp = file.createGroup("Group1/Group2/Group3", null, gcpl, lcpl);
         }
-        catch (final Exception ex) {
-            ; // Expected -intentional as the order of gplist is invalid.
-        }
+        // Expected -intentional as the order of gplist is invalid.
+        catch (final Exception ex) {}
         H5.H5error_on();
         assertNull(grp);
 
@@ -492,20 +489,18 @@ public class H5FileTest {
             H5.H5Pclose(lcpl);
             H5.H5Pclose(gcpl);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
         H5.H5error_on();
         try {
             file.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
         file.delete();
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5File#createGcpl(int, int, int)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file
@@ -592,8 +587,7 @@ public class H5FileTest {
         try {
             file.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
         file.delete();
     }
 
@@ -613,7 +607,7 @@ public class H5FileTest {
      * {@link hdf.object.h5.H5File#get(java.lang.String)}, <br>
      * {@link hdf.object.h5.H5File#getAttribute(int)}, <br>
      * {@link hdf.object.h5.H5File#writeAttribute(hdf.object.HObject, hdf.object.h5.H5ScalarAttr, boolean)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file
@@ -639,9 +633,8 @@ public class H5FileTest {
 
         // try to get all object in the file
         try {
-            for (int j = 0; j < H5TestFile.OBJ_NAMES.length; j++) {
+            for (int j = 0; j < H5TestFile.OBJ_NAMES.length; j++)
                 assertNotNull(file.get(H5TestFile.OBJ_NAMES[j]));
-            }
         }
         catch (final Exception ex) {
             fail("file.get() failed. " + ex);
@@ -661,7 +654,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#isThisType(java.lang.String)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Check an HDF5 file
@@ -679,7 +672,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#isThisType(hdf.object.FileFormat)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Check an HDF5 file
@@ -694,7 +687,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#copy(hdf.object.HObject, hdf.object.Group)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a new file
@@ -753,9 +746,8 @@ public class H5FileTest {
             }
             catch (final Exception ex) {
                 // image palette probably is copied already
-                if (H5TestFile.NAME_DATASET_IMAGE_PALETTE.equals(srcObj.getFullName())) {
+                if (H5TestFile.NAME_DATASET_IMAGE_PALETTE.equals(srcObj.getFullName()))
                     continue;
-                }
 
                 fail("file.copy() failed on " + srcObj.getFullName() + ". " + ex);
             }
@@ -792,7 +784,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#delete(hdf.object.HObject)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a new file with all types of objects (datasts, groups and datatypes)
@@ -875,7 +867,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#get(java.lang.String)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>ceate a test file
@@ -938,7 +930,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#get(java.lang.String)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>ceate a test file
@@ -1008,7 +1000,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#H5File(java.lang.String, int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create files with READ, WRITE and CREATE opttions
@@ -1138,7 +1130,7 @@ public class H5FileTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5File#open(int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>open a file with H5F_CLOSE_STRONG file access
@@ -1173,14 +1165,12 @@ public class H5FileTest {
         try {
             H5.H5Pclose(plist);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         // try to get all object in the file
         try {
-            for (int j = 0; j < H5TestFile.OBJ_NAMES.length; j++) {
+            for (int j = 0; j < H5TestFile.OBJ_NAMES.length; j++)
                 assertNotNull(file.get(H5TestFile.OBJ_NAMES[j]));
-            }
         }
         catch (final Exception ex) {
             fail("file.get() failed. " + ex);
@@ -1199,7 +1189,7 @@ public class H5FileTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5File#updateReferenceDataset(hdf.object.h5.H5File, hdf.object.h5.H5File)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a new file
@@ -1258,9 +1248,8 @@ public class H5FileTest {
             }
             catch (final Exception ex) {
                 // image palette probably is copied already
-                if (H5TestFile.NAME_DATASET_IMAGE_PALETTE.equals(srcObj.getFullName())) {
+                if (H5TestFile.NAME_DATASET_IMAGE_PALETTE.equals(srcObj.getFullName()))
                     continue;
-                }
 
                 fail("file.copy() failed on " + srcObj.getFullName() + ". " + ex);
             }
@@ -1322,8 +1311,7 @@ public class H5FileTest {
         try {
             H5.H5Dclose(did);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         try {
             file.close();
@@ -1388,8 +1376,7 @@ public class H5FileTest {
         try {
             file.close();
         }
-        catch (Exception ex) {
-        }
+        catch (Exception ex) {}
         try {
             testFile.setLibBounds(null, null);
         }
@@ -1401,8 +1388,7 @@ public class H5FileTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5File#createLink(hdf.object.Group, java.lang.String, hdf.object.HObject, int)}
-     * .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file
@@ -1556,22 +1542,19 @@ public class H5FileTest {
         try {
             grp1.close(gid);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         try {
             file.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
         file.delete();
     }
 
     /**
      * Test method for
      * {@link hdf.object.h5.H5File#createLink(hdf.object.Group, java.lang.String, hdf.object.HObject, int)}
-     * .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file, file1
@@ -1729,28 +1712,25 @@ public class H5FileTest {
         try {
             fgrp1.close(gid);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         // Close file.
         try {
             file1.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         try {
             file2.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
         file1.delete();
         file2.delete();
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5File#getAttribute(int, int, int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file
@@ -1849,14 +1829,12 @@ public class H5FileTest {
         try {
             g1.close(gid);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         try {
             file.close(); // Close file.
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         file.delete();
     }
@@ -1864,7 +1842,7 @@ public class H5FileTest {
     /**
      * Test method for {@link hdf.object.h5.H5File#createDatatype(int, int, int, int, java.lang.String)}.
      * {@link hdf.object.h5.H5Datatype#hasAttribute()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file
@@ -1930,14 +1908,13 @@ public class H5FileTest {
         try {
             file.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
         file.delete();
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5File#renameAttribute(HObject, java.lang.String, java.lang.String)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>create a file
@@ -2042,8 +2019,7 @@ public class H5FileTest {
         try {
             file.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
         file.delete();
     }
 
@@ -2065,6 +2041,5 @@ public class H5FileTest {
             fail("ObjectOutputStream failed: " + err);
         }
         assertTrue(out.toByteArray().length > 0);
-
     }
 }

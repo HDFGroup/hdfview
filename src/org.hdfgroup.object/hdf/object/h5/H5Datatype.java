@@ -43,7 +43,7 @@ import hdf.object.h5.H5MetaDataContainer;
 
 /**
  * This class defines HDF5 datatype characteristics and APIs for a data type.
- * <p>
+ *
  * This class provides several methods to convert an HDF5 datatype identifier to a datatype object, and vice versa. A
  * datatype object is described by four basic fields: datatype class, size, byte order, and sign, while an HDF5 datatype
  * is presented by a datatype identifier.
@@ -51,7 +51,8 @@ import hdf.object.h5.H5MetaDataContainer;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H5Datatype extends Datatype {
+public class H5Datatype extends Datatype
+{
     private static final long serialVersionUID = -750546422258749792L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Datatype.class);
@@ -61,10 +62,13 @@ public class H5Datatype extends Datatype {
      */
     private H5MetaDataContainer objMetadata;
 
+    /** the datatype is an object reference */
     private boolean isRefObj = false;
 
+    /** the datatype is a region reference */
     private boolean isRegRef = false;
 
+    /** the object properties */
     private H5O_info_t objInfo;
 
     /**
@@ -72,30 +76,35 @@ public class H5Datatype extends Datatype {
      */
     private int nativeClass = -1;
 
-    /**
-     * The native properties of the number datatype.
-     */
+    /** The native Precision properties of the number datatype. */
     private long nativePrecision = 0;
+    /** The native Offset properties of the number datatype. */
     private int nativeOffset = -1;
+    /** The native PadLSB properties of the number datatype. */
     private int nativePadLSB = -1;
+    /** The native PadMSB properties of the number datatype. */
     private int nativePadMSB = -1;
 
-    /**
-     * The native properties of the float datatype.
-     */
+    /** The native ebias properties of the float datatype. */
     private long nativeFPebias = 0;
+    /** The native spos properties of the float datatype. */
     private long nativeFPspos = -1;
+    /** The native epos properties of the float datatype. */
     private long nativeFPepos = -1;
+    /** The native esize properties of the float datatype. */
     private long nativeFPesize = -1;
+    /** The native mpos properties of the float datatype. */
     private long nativeFPmpos = -1;
+    /** The native msize properties of the float datatype. */
     private long nativeFPmsize = -1;
+    /** The native norm properties of the float datatype. */
     private int nativeFPnorm = -1;
+    /** The native inpad properties of the float datatype. */
     private int nativeFPinpad = -1;
 
-    /**
-     * The native properties of the string datatype.
-     */
+    /** The native padding properties of the string datatype. */
     private int nativeStrPad = -1;
+    /** The native CSET properties of the string datatype. */
     private int nativeStrCSET = -1;
 
     /**
@@ -105,7 +114,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Constructs an named HDF5 data type object for a given file, dataset name and group path.
-     * <p>
+     *
      * The datatype object represents an existing named datatype in file. For example,
      *
      * <pre>
@@ -173,7 +182,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -207,7 +216,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -243,7 +252,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of H5Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -284,7 +293,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Constructs a Datatype with a given native datatype identifier.
-     * <p>
+     *
      * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
      *
      * <pre>
@@ -310,7 +319,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Constructs a Datatype with a given native datatype identifier.
-     * <p>
+     *
      * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
      *
      * <pre>
@@ -340,7 +349,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Opens access to a named datatype.
-     * <p>
+     *
      * It calls H5.H5Topen(loc, name).
      *
      * @return the datatype identifier if successful; otherwise returns negative value.
@@ -365,7 +374,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Closes a datatype identifier.
-     * <p>
+     *
      * It calls H5.H5close(tid).
      *
      * @param tid
@@ -415,12 +424,12 @@ public class H5Datatype extends Datatype {
 
     /**
      * Converts values in an Enumeration Datatype to names.
-     * <p>
+     *
      * This method searches the identified enumeration datatype for the values appearing in
      * <code>inValues</code> and returns the names corresponding to those values. If a given value is
      * not found in the enumeration datatype, the name corresponding to that value will be set to
      * <code>"ENUM ERR value"</code> in the string array that is returned.
-     * <p>
+     *
      * If the method fails in general, null will be returned instead of a String array. An empty
      * <code>inValues</code> parameter would cause general failure.
      *
@@ -445,12 +454,10 @@ public class H5Datatype extends Datatype {
         String[] outNames = null;
         String cName = inValues.getClass().getName();
         boolean isArray = cName.lastIndexOf('[') >= 0;
-        if (isArray) {
+        if (isArray)
             inSize = Array.getLength(inValues);
-        }
-        else {
+        else
             inSize = 1;
-        }
 
         if (inSize <= 0) {
             log.debug("convertEnumValueToName() failure: inSize length invalid");
@@ -467,20 +474,16 @@ public class H5Datatype extends Datatype {
         outNames = new String[inSize];
         for (int i = 0; i < inSize; i++) {
             if (isArray) {
-                if (enumMembers.containsKey(String.valueOf(Array.get(inValues, i)))) {
+                if (enumMembers.containsKey(String.valueOf(Array.get(inValues, i))))
                     outNames[i] = enumMembers.get(String.valueOf(Array.get(inValues, i)));
-                }
-                else {
+                else
                     outNames[i] = "**ENUM ERR " + Array.get(inValues, i) + "**";
-                }
             }
             else {
-                if (enumMembers.containsKey(String.valueOf(inValues))) {
+                if (enumMembers.containsKey(String.valueOf(inValues)))
                     outNames[i] = enumMembers.get(String.valueOf(inValues));
-                }
-                else {
+                else
                     outNames[i] = "**ENUM ERR " + inValues + "**";
-                }
             }
         }
 
@@ -489,7 +492,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Converts names in an Enumeration Datatype to values.
-     * <p>
+     *
      * This method searches the identified enumeration datatype for the names appearing in
      * <code>inValues</code> and returns the values corresponding to those names.
      *
@@ -521,21 +524,16 @@ public class H5Datatype extends Datatype {
         }
 
         Object[] out = null;
-        if (datatypeSize == 1) {
+        if (datatypeSize == 1)
             out = new Byte[size];
-        }
-        else if (datatypeSize == 2) {
+        else if (datatypeSize == 2)
             out = new Short[size];
-        }
-        else if (datatypeSize == 4) {
+        else if (datatypeSize == 4)
             out = new Integer[size];
-        }
-        else if (datatypeSize == 8) {
+        else if (datatypeSize == 8)
             out = new Long[size];
-        }
-        else {
+        else
             out = new Object[size];
-        }
 
         for (int i = 0; i < size; i++) {
             if (in[i] == null || in[i].length() <= 0)
@@ -632,10 +630,10 @@ public class H5Datatype extends Datatype {
         byte[] bsig = sig.toByteArray();
         int scale = num.scale();
         byte[] bscale = new byte[] {
-          (byte)(scale >>> 24),
-          (byte)(scale >>> 16),
-          (byte)(scale >>> 8),
-          (byte)(scale)
+            (byte)(scale >>> 24),
+            (byte)(scale >>> 16),
+            (byte)(scale >>> 8),
+            (byte)(scale)
         };
         byte[] both = new byte[bscale.length + bsig.length];
         System.arraycopy(bscale, 0, both, 0, bscale.length);
@@ -1080,7 +1078,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * @param tid
-     *            the datatype identification disk.
+     *        the datatype identification disk.
      *
      * @return the memory datatype identifier if successful, and negative otherwise.
      */
@@ -1131,9 +1129,8 @@ public class H5Datatype extends Datatype {
         else
             log.debug("createNative(): isNamed but named path={}", the_path);
 
-        if (tid >= 0) {
+        if (tid >= 0)
             return tid;
-        }
 
         log.trace("createNative(): datatypeClass={} datatypeSize={} baseType={}", datatypeClass, datatypeSize, baseType);
 
@@ -1596,9 +1593,8 @@ public class H5Datatype extends Datatype {
 
         // Scalar members have dimensionality zero, i.e. size =0
         // what can we do about it, set the size to 1
-        if (numPoints == 0) {
+        if (numPoints == 0)
             numPoints = 1;
-        }
 
         log.trace("allocateArray(): tclass={} : tsize={}", typeClass, typeSize);
 
@@ -1606,9 +1602,8 @@ public class H5Datatype extends Datatype {
             log.trace("allocateArray(): is_variable_str={} || isVL={} || is_reg_ref={}", dtype.isVarStr(), dtype.isVLEN(), dtype.isRegRef());
 
             data = new String[numPoints];
-            for (int i = 0; i < numPoints; i++) {
+            for (int i = 0; i < numPoints; i++)
                 ((String[]) data)[i] = "";
-            }
         }
         else if (typeClass == HDF5Constants.H5T_INTEGER) {
             log.trace("allocateArray(): class H5T_INTEGER");
@@ -1687,9 +1682,8 @@ public class H5Datatype extends Datatype {
                     asize *= arrayDims[j];
                 }
 
-                if (baseType != null) {
+                if (baseType != null)
                     data = H5Datatype.allocateArray(baseType, asize);
-                }
             }
             catch (Exception ex) {
                 log.debug("allocateArray(): H5T_ARRAY class failure: ", ex);
@@ -1713,7 +1707,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Returns the size (in bytes) of a given datatype identifier.
-     * <p>
+     *
      * It basically just calls H5Tget_size(tid).
      *
      * @param tid
@@ -1746,9 +1740,8 @@ public class H5Datatype extends Datatype {
     public String getDescription() {
         log.trace("getDescription(): start - isNamed={}", isNamed());
 
-        if (datatypeDescription != null) {
+        if (datatypeDescription != null)
             return datatypeDescription;
-        }
 
         StringBuilder description = new StringBuilder();
         long tid = HDF5Constants.H5I_INVALID_HID;
@@ -1908,9 +1901,8 @@ public class H5Datatype extends Datatype {
                 log.trace("getDescription(): Var Len");
                 description.append("Variable-length");
 
-                if (baseType != null) {
+                if (baseType != null)
                     description.append(" of ").append(baseType.getDescription());
-                }
 
                 break;
             case CLASS_ARRAY:
@@ -1927,9 +1919,8 @@ public class H5Datatype extends Datatype {
                     description.append("]");
                 }
 
-                if (baseType != null) {
+                if (baseType != null)
                     description.append(" of ").append(baseType.getDescription());
-                }
 
                 break;
             default:
@@ -1962,12 +1953,10 @@ public class H5Datatype extends Datatype {
                         && tclass != HDF5Constants.H5T_OPAQUE && tclass != HDF5Constants.H5T_VLEN
                         && tclass != HDF5Constants.H5T_COMPOUND && tclass != HDF5Constants.H5T_ARRAY) {
                     int tsign = H5.H5Tget_sign(tid);
-                    if (tsign == HDF5Constants.H5T_SGN_NONE) {
+                    if (tsign == HDF5Constants.H5T_SGN_NONE)
                         unsigned = true;
-                    }
-                    else {
+                    else
                         log.trace("isUnsigned(): not unsigned");
-                    }
                 }
                 else {
                     log.trace("isUnsigned(): tclass not integer type");
@@ -1997,12 +1986,12 @@ public class H5Datatype extends Datatype {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be retrieved
      */
     @Override
@@ -2027,7 +2016,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList
@@ -2035,7 +2024,7 @@ public class H5Datatype extends Datatype {
      *
      * @return the list of metadata objects.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be retrieved
      */
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
@@ -2091,7 +2080,7 @@ public class H5Datatype extends Datatype {
      * @param info
      *            the metadata to delete.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be removed
      */
     @Override
@@ -2123,7 +2112,7 @@ public class H5Datatype extends Datatype {
      * @param info
      *            the metadata to update.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be updated
      */
     @Override
@@ -2156,14 +2145,29 @@ public class H5Datatype extends Datatype {
         return (datatypeClass == Datatype.CLASS_STRING);
     }
 
+    /**
+     * Checks if this datatype is an object reference type.
+     *
+     * @return true if the datatype is an object reference; false otherwise
+     */
     public boolean isRefObj() {
         return isRefObj;
     }
 
+    /**
+     * Checks if this datatype is a region  reference type.
+     *
+     * @return true if the datatype is a region reference; false otherwise
+     */
     public boolean isRegRef() {
         return isRegRef;
     }
 
+    /**
+     * Checks if this datatype is a reference type.
+     *
+     * @return true if the datatype is reference; false otherwise
+     */
     public boolean isReference() {
         log.trace("isReference():{}", datatypeClass);
         return (datatypeClass == Datatype.CLASS_REFERENCE);
@@ -2193,20 +2197,24 @@ public class H5Datatype extends Datatype {
      */
     public static final boolean zeroArrayCheck(final byte[] refarr) {
         for (byte b : refarr) {
-            if (b != 0) {
+            if (b != 0)
                 return false;
-            }
         }
         return true;
     }
 
+    /**
+     * Gets the string padding.
+     *
+     * @return the string padding value
+     */
     public int getNativeStrPad() {
         return nativeStrPad;
     }
 
     /**
      * Extracts compound information into flat structure.
-     * <p>
+     *
      * For example, compound datatype "nest" has {nest1{a, b, c}, d, e} then extractCompoundInfo() will
      * put the names of nested compound fields into a flat list as
      *
@@ -2298,7 +2306,7 @@ public class H5Datatype extends Datatype {
 
     /**
      * Creates a datatype of a compound with one field.
-     * <p>
+     *
      * This function is needed to read/write data field by field.
      *
      * @param memberName

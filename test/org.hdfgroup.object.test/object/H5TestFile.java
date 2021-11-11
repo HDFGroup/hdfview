@@ -20,7 +20,8 @@ import hdf.object.h5.H5ScalarDS;
  * @author xcao
  *
  */
-public class H5TestFile {
+public class H5TestFile
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5TestFile.class);
     public static final String NAME_FILE_H5 = "TestHDF5.h5";
     public static final String NAME_GROUP = "/g0";
@@ -87,7 +88,7 @@ public class H5TestFile {
 
     /**
      * Creates an HDF5 test file.
-     * <p>
+     *
      * The test file contains the following objects:
      *
      * <pre>
@@ -114,9 +115,8 @@ public class H5TestFile {
         Group g0, g1, g00;
         final Dataset[] dsets = new Dataset[11];
 
-        if ((fileName == null) || (fileName.length() < 1)) {
+        if ((fileName == null) || (fileName.length() < 1))
             fileName = NAME_FILE_H5;
-        }
 
         final H5Datatype typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
         final H5Datatype typeByte = new H5Datatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
@@ -199,9 +199,8 @@ public class H5TestFile {
         final int n = attrs.size();
         for (int i = 0; i < n; i++) {
             final H5ScalarAttr attr = (H5ScalarAttr) attrs.get(i);
-            if ("PALETTE".equals(attr.getAttributeName())) {
+            if ("PALETTE".equals(attr.getAttributeName()))
                 attr.writeAttribute(oid);
-            }
         }
 
         log.debug("create committed");
@@ -243,8 +242,7 @@ public class H5TestFile {
         try {
             file.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         log.debug("create file open to write refs");
         // write object refs to the ref dataset
@@ -264,8 +262,7 @@ public class H5TestFile {
         try {
             file.close();
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         log.debug("create file finished");
         return file;
@@ -273,7 +270,7 @@ public class H5TestFile {
 
     /**
      * Creates the wave palette of the indexed 256-color table.
-     * <p>
+     *
      * The palette values are stored in a two-dimensional byte array and arrange by color components of red, green and
      * blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are the red, green and blue
      * components respectively.

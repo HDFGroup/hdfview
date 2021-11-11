@@ -32,13 +32,13 @@ import hdf.object.h5.H5MetaDataContainer;
 
 /**
  * An H5Group object represents an existing HDF5 group in file.
- * <p>
+ *
  * In HDF5, every object has at least one name. An HDF5 group is used to store a
  * set of the names together in one place, i.e. a group. The general structure
  * of a group is similar to that of the UNIX file system in that the group may
  * contain references to other groups or data objects just as the UNIX directory
  * may contain sub-directories or files.
- * <p>
+ *
  * For more information on HDF5 Groups,
  *
  * <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
@@ -46,7 +46,8 @@ import hdf.object.h5.H5MetaDataContainer;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H5Group extends Group {
+public class H5Group extends Group
+{
 
     private static final long serialVersionUID = -951164512330444150L;
 
@@ -57,6 +58,7 @@ public class H5Group extends Group {
      */
     private H5MetaDataContainer objMetadata;
 
+    /** the object properties */
     private H5O_info_t        objInfo;
 
     /**
@@ -178,12 +180,12 @@ public class H5Group extends Group {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be retrieved
      */
     @Override
@@ -209,7 +211,7 @@ public class H5Group extends Group {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList
@@ -217,7 +219,7 @@ public class H5Group extends Group {
      *
      * @return the list of metadata objects.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be retrieved
      */
     @SuppressWarnings("rawtypes")
@@ -274,7 +276,7 @@ public class H5Group extends Group {
      * @param info
      *            the metadata to delete.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be removed
      */
     @Override
@@ -310,7 +312,7 @@ public class H5Group extends Group {
      * @param info
      *            the metadata to update.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be updated
      */
     @Override
@@ -367,7 +369,7 @@ public class H5Group extends Group {
     /**
      * Creates a new group with a name in a group and with the group creation
      * properties specified in gplist.
-     * <p>
+     *
      * The gplist contains a sequence of group creation property list
      * identifiers, lcpl, gcpl, gapl. It allows the user to create a group with
      * group creation properties. It will close the group creation properties
@@ -426,13 +428,11 @@ public class H5Group extends Group {
         String path = HObject.SEPARATOR;
         if (!pgroup.isRoot()) {
             path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
-            if (name.endsWith("/")) {
+            if (name.endsWith("/"))
                 name = name.substring(0, name.length() - 1);
-            }
             int idx = name.lastIndexOf('/');
-            if (idx >= 0) {
+            if (idx >= 0)
                 name = name.substring(idx + 1);
-            }
         }
 
         fullPath = path + name;
@@ -452,9 +452,8 @@ public class H5Group extends Group {
 
         group = new H5Group(file, name, path, pgroup, oid);
 
-        if (group != null) {
+        if (group != null)
             pgroup.addToMemberList(group);
-        }
 
         if (gcpl > 0) {
             try {
@@ -493,9 +492,8 @@ public class H5Group extends Group {
         super.setPath(newPath);
 
         List members = this.getMemberList();
-        if (members == null) {
+        if (members == null)
             return;
-        }
 
         int n = members.size();
         HObject obj = null;

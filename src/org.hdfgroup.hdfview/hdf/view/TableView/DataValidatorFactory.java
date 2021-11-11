@@ -39,8 +39,8 @@ import hdf.object.h5.H5Datatype;
  * @version 1.0 6/28/2018
  *
  */
-public class DataValidatorFactory {
-
+public class DataValidatorFactory
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataValidatorFactory.class);
 
     /**
@@ -51,6 +51,16 @@ public class DataValidatorFactory {
      */
     private static DataFormat dataFormatReference = null;
 
+    /**
+     * Get the Data Validator for the supplied data object
+     *
+     * @param dataObject
+     *        the data object
+     *
+     * @return the validator instance
+     *
+     * @throws Exception if a failure occurred
+     */
     public static HDFDataValidator getDataValidator(final DataFormat dataObject) throws Exception {
         if (dataObject == null) {
             log.debug("getDataValidator(DataFormat): data object is null");
@@ -121,10 +131,11 @@ public class DataValidatorFactory {
     }
 
     /** The HDF extension of the data valicdation */
-    public static class HDFDataValidator extends DataValidator {
-        protected org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDataValidator.class);
+    public static class HDFDataValidator extends DataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDataValidator.class);
 
-        /*
+        /**
          * This field is only used for CompoundDataValidator, but when the top-level
          * DataValidator is a "container" type, such as an ArrayDataValidator, we have
          * to set this field and pass it through in case there is a
@@ -132,10 +143,28 @@ public class DataValidatorFactory {
          */
         protected int cellColIdx;
 
+        /**
+         * Create the HDF extended Data Validator for the datatype object
+         *
+         * @param dtype
+         *        the datatype object
+         */
         HDFDataValidator(final Datatype dtype) {
             cellColIdx = -1;
         }
 
+        /**
+         * The validate method used to validate the data value for the type.
+         *
+         * @param colIndex
+         *        the column
+         * @param rowIndex
+         *        the row
+         * @param newValue
+         *        the validated value
+         *
+         * @return true if this data is valid
+         */
         @Override
         public boolean validate(int colIndex, int rowIndex, Object newValue) {
             throwValidationFailedException(rowIndex, colIndex, newValue,
@@ -144,6 +173,12 @@ public class DataValidatorFactory {
             return false;
         }
 
+        /**
+         * Validate the data value.
+         *
+         * @param newValue
+         *        the value to validate
+         */
         protected void checkValidValue(Object newValue) throws ValidationFailedException {
             if (newValue == null)
                 throw new ValidationFailedException("value is null");
@@ -152,6 +187,18 @@ public class DataValidatorFactory {
                 throw new ValidationFailedException("value is not a String");
         }
 
+        /**
+         * The validate exception message.
+         *
+         * @param rowIndex
+         *        the row
+         * @param colIndex
+         *        the column
+         * @param newValue
+         *        the invalid value
+         * @param reason
+         *        the reason the value is invalid
+         */
         protected void throwValidationFailedException(int rowIndex, int colIndex, Object newValue, String reason)
                 throws ValidationFailedException {
             throw new ValidationFailedException("Failed to update value at " + "(" + rowIndex + ", "
@@ -167,7 +214,10 @@ public class DataValidatorFactory {
      * Compound datatype, and grabbing the correct validator from the stored
      * list of validators.
      */
-    private static class CompoundDataValidator extends HDFDataValidator {
+    private static class CompoundDataValidator extends HDFDataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDataValidator.class);
+
         private final HashMap<Integer, Integer> baseValidatorIndexMap;
         private final HashMap<Integer, Integer> relCmpdStartIndexMap;
         private final HDFDataValidator[]        memberValidators;
@@ -175,8 +225,6 @@ public class DataValidatorFactory {
 
         CompoundDataValidator(final Datatype dtype) throws Exception {
             super(dtype);
-
-            log = org.slf4j.LoggerFactory.getLogger(CompoundDataValidator.class);
 
             if (!dtype.isCompound()) {
                 log.debug("datatype is not a compound type");
@@ -263,13 +311,14 @@ public class DataValidatorFactory {
      * an ARRAY datatype by calling the appropriate validator (as determined
      * by the supplied datatype) on each of the array's elements.
      */
-    private static class ArrayDataValidator extends HDFDataValidator {
+    private static class ArrayDataValidator extends HDFDataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ArrayDataValidator.class);
+
         private final HDFDataValidator baseValidator;
 
         ArrayDataValidator(final Datatype dtype) throws Exception {
             super(dtype);
-
-            log = org.slf4j.LoggerFactory.getLogger(ArrayDataValidator.class);
 
             if (!dtype.isArray()) {
                 log.debug("datatype is not an array type");
@@ -331,13 +380,14 @@ public class DataValidatorFactory {
      * a variable-length Datatype (note that this DataValidator should not
      * be used for String Datatypes that are variable-length).
      */
-    private static class VlenDataValidator extends HDFDataValidator {
+    private static class VlenDataValidator extends HDFDataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VlenDataValidator.class);
+
         private final HDFDataValidator baseValidator;
 
         VlenDataValidator(Datatype dtype) throws Exception {
             super(dtype);
-
-            log = org.slf4j.LoggerFactory.getLogger(VlenDataValidator.class);
 
             if (!dtype.isVLEN() || dtype.isVarStr()) {
                 log.debug("datatype is not a variable-length type or is a variable-length string type (use StringDataValidator)");
@@ -398,14 +448,15 @@ public class DataValidatorFactory {
      * NatTable DataValidator to validate entered input for a dataset with a String
      * Datatype (including Strings of variable-length).
      */
-    private static class StringDataValidator extends HDFDataValidator {
+    private static class StringDataValidator extends HDFDataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StringDataValidator.class);
+
         private final Datatype datasetDatatype;
         private final boolean isH5String;
 
         StringDataValidator(final Datatype dtype) throws Exception {
             super(dtype);
-
-            log = org.slf4j.LoggerFactory.getLogger(StringDataValidator.class);
 
             if (!dtype.isString()) {
                 log.debug("datatype is not a String type");
@@ -468,13 +519,14 @@ public class DataValidatorFactory {
         }
     }
 
-    private static class CharDataValidator extends HDFDataValidator {
+    private static class CharDataValidator extends HDFDataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CharDataValidator.class);
+
         private final Datatype datasetDatatype;
 
         CharDataValidator(final Datatype dtype) throws Exception {
             super(dtype);
-
-            log = org.slf4j.LoggerFactory.getLogger(CharDataValidator.class);
 
             if (!dtype.isChar()) {
                 log.debug("datatype is not a Character type");
@@ -520,13 +572,14 @@ public class DataValidatorFactory {
      * NatTable DataValidator to validate entered input for a dataset with
      * a numerical Datatype.
      */
-    private static class NumericalDataValidator extends HDFDataValidator {
+    private static class NumericalDataValidator extends HDFDataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NumericalDataValidator.class);
+
         private final Datatype datasetDatatype;
 
         NumericalDataValidator(Datatype dtype) throws Exception {
             super(dtype);
-
-            log = org.slf4j.LoggerFactory.getLogger(NumericalDataValidator.class);
 
             if (!dtype.isInteger() && !dtype.isFloat()) {
                 log.debug("datatype is not an integer or floating-point type");
@@ -655,13 +708,14 @@ public class DataValidatorFactory {
         }
     }
 
-    private static class EnumDataValidator extends HDFDataValidator {
+    private static class EnumDataValidator extends HDFDataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnumDataValidator.class);
+
         private final HDFDataValidator baseValidator;
 
         EnumDataValidator(final Datatype dtype) throws Exception {
             super(dtype);
-
-            log = org.slf4j.LoggerFactory.getLogger(EnumDataValidator.class);
 
             if (!dtype.isEnum()) {
                 log.debug("datatype is not an enum type: exit");
@@ -709,19 +763,21 @@ public class DataValidatorFactory {
         }
     }
 
-    private static class BitfieldDataValidator extends HDFDataValidator {
+    private static class BitfieldDataValidator extends HDFDataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BitfieldDataValidator.class);
+
         BitfieldDataValidator(final Datatype dtype) {
             super(dtype);
-
-            log = org.slf4j.LoggerFactory.getLogger(BitfieldDataValidator.class);
         }
     }
 
-    private static class RefDataValidator extends HDFDataValidator {
+    private static class RefDataValidator extends HDFDataValidator
+    {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RefDataValidator.class);
+
         RefDataValidator(final Datatype dtype) {
             super(dtype);
-
-            log = org.slf4j.LoggerFactory.getLogger(RefDataValidator.class);
         }
     }
 

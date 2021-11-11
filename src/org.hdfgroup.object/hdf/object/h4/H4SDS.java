@@ -43,21 +43,20 @@ import hdf.object.h4.H4ScalarAttribute;
  * H4SDS describes HDF4 Scientific Data Sets (SDS) and operations performed on
  * the SDS. A SDS is a group of data structures used to store and describe
  * multidimensional arrays of scientific data.
- * <p>
+ *
  * The data contained in an SDS array has a data type associated with it. The
  * standard data types supported by the SD interface include 32- and 64-bit
  * floating-point numbers, 8-, 16- and 32-bit signed integers, 8-, 16- and
  * 32-bit unsigned integers, and 8-bit characters.
- * <p>
+ *
  * <b>How to Select a Subset</b>
- * <p>
+ *
  * Dataset defines APIs for reading, writing and subsetting a dataset. No function
  * is defined to select a subset of a data array. The selection is done in an implicit
  * way. Function calls to dimension information such as getSelectedDims() return an array
  * of dimension values, which is a reference to the array in the dataset object.
  * Changes of the array outside the dataset object directly change the values of
  * the array in the dataset object. It is like pointers in C.
- * <p>
  *
  * The following is an example of how to make a subset. In the example, the dataset
  * is a 4-dimension with size of [200][100][50][10], i.e.
@@ -98,7 +97,6 @@ import hdf.object.h4.H4ScalarAttribute;
 
  * </pre>
  *
- * <p>
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -129,16 +127,25 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
     /** the datatype identifier */
     private long                            datatypeID = -1;
 
+    /** the number of attributes */
     private int                             nAttributes = -1;
 
-
-    public H4SDS(FileFormat theFile, String name, String path)
-    {
+    /**
+     * Creates an H4SDS object with specific name and path.
+     *
+     * @param theFile
+     *            the HDF file.
+     * @param name
+     *            the name of this H4SDS.
+     * @param path
+     *            the full path of this H4SDS.
+     */
+    public H4SDS(FileFormat theFile, String name, String path) {
         this(theFile, name, path, null);
     }
 
     /**
-     * Creates an H4SDS object with specific name and path.
+     * Creates an H4SDS object with specific name, path and oid.
      *
      * @param theFile
      *            the HDF file.
@@ -150,8 +157,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
      *            the unique identifier of this data object.
      */
     @SuppressWarnings("deprecation")
-    public H4SDS(FileFormat theFile, String name, String path, long[] oid)
-    {
+    public H4SDS(FileFormat theFile, String name, String path, long[] oid) {
         super(theFile, name, path, oid);
         unsignedConverted = false;
         sdid = ((H4File)getFileFormat()).getSDAccessID();
@@ -162,8 +168,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.DataFormat#hasAttribute()
      */
     @Override
-    public boolean hasAttribute ()
-    {
+    public boolean hasAttribute() {
         if (nAttributes < 0) {
             sdid = ((H4File)getFileFormat()).getSDAccessID();
 
@@ -218,8 +223,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
      * @return the datatype of the data object.
      */
     @Override
-    public Datatype getDatatype()
-    {
+    public Datatype getDatatype() {
         if (!inited)
             init();
 
@@ -238,9 +242,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
 
     // To do: Implementing Dataset
     @Override
-    public Dataset copy(Group pgroup, String dname, long[] dims, Object buff)
-            throws Exception
-    {
+    public Dataset copy(Group pgroup, String dname, long[] dims, Object buff) throws Exception {
         log.trace("copy(): start: parentGroup={} datasetName={}", pgroup, dname);
 
         Dataset dataset = null;
@@ -258,16 +260,13 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
             return null;
         }
 
-        if (dname == null) {
+        if (dname == null)
             dname = getName();
-        }
 
-        if (pgroup.isRoot()) {
+        if (pgroup.isRoot())
             path = HObject.SEPARATOR;
-        }
-        else {
+        else
             path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
-        }
         log.trace("copy(): path={}", path);
 
         srcdid = open();
@@ -299,9 +298,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
 
         // create the new dataset and attach it to the parent group
         tid = datatypeID;
-        dstdid = HDFLibrary.SDcreate(
-                ((H4File)pgroup.getFileFormat()).getSDAccessID(),
-                dname, tid, theRank, count);
+        dstdid = HDFLibrary.SDcreate(((H4File)pgroup.getFileFormat()).getSDAccessID(), dname, tid, theRank, count);
         if (dstdid < 0) {
             log.debug("copy(): Invalid dest SDID");
             return null;
@@ -348,8 +345,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
 
     // Implementing Dataset
     @Override
-    public byte[] readBytes() throws HDFException
-    {
+    public byte[] readBytes() throws HDFException {
         byte[] theData = null;
 
         if (!isInited())
@@ -396,11 +392,11 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
     // Implementing DataFormat
     /**
      * Reads the data from file.
-     * <p>
+     *
      * read() reads the data from file to a memory buffer and returns the memory
      * buffer. The dataset object does not hold the memory buffer. To store the
      * memory buffer in the dataset object, one must call getData().
-     * <p>
+     *
      * By default, the whole dataset is read into memory. Users can also select
      * a subset to read. Subsetting is done in an implicit way.
      *
@@ -408,14 +404,13 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
      *
      * @see #getData()
      *
-     * @throws Exception
+     * @throws HDFException
      *             if object can not be read
      * @throws OutOfMemoryError
      *             if memory is exhausted
      */
     @Override
-    public Object read() throws HDFException, OutOfMemoryError
-    {
+    public Object read() throws HDFException, OutOfMemoryError {
         Object theData = null;
 
         if (!isInited())
@@ -453,9 +448,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
 
                 HDFLibrary.SDreaddata(id, start, stride, select, theData);
 
-                if (isText) {
+                if (isText)
                     theData = byteToString((byte[])theData, select[0]);
-                }
             }
         }
         catch (Exception ex) {
@@ -490,13 +484,12 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
      * @param buf
      *            the data to write
      *
-     * @throws Exception
+     * @throws HDFException
      *             if data can not be written
      */
     @SuppressWarnings("deprecation")
     @Override
-    public void write(Object buf) throws HDFException
-    {
+    public void write(Object buf) throws HDFException {
         if (buf == null) {
             log.debug("write(): Object is null");
             return;
@@ -525,9 +518,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
 
         Object tmpData = buf;
         try {
-            if (getDatatype().isUnsigned() && unsignedConverted) {
+            if (getDatatype().isUnsigned() && unsignedConverted)
                 tmpData = convertToUnsignedC(buf);
-            }
             // assume external data files are located in the same directory as the main file.
             HDFLibrary.HXsetdir(getFileFormat().getParent());
 
@@ -545,18 +537,17 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
     // Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
      *
-     * @throws Exception
+     * @throws HDFException
      *             if the metadata can not be retrieved
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public List getMetadata() throws HDFException
-    {
+    public List getMetadata() throws HDFException {
         if (attributeList != null) {
             log.trace("getMetdata(): attributeList != null");
             return attributeList;
@@ -571,9 +562,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
             HDFLibrary.SDgetinfo(id, objName, tmpDim, sdInfo);
             int n = sdInfo[2];
 
-            if ((attributeList == null) && (n>0)) {
+            if ((attributeList == null) && (n>0))
                 attributeList = new Vector(n, 5);
-            }
 
             boolean b = false;
             String[] attrName = new String[1];
@@ -590,9 +580,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
                     b = false;
                 }
 
-                if (!b) {
+                if (!b)
                     continue;
-                }
 
                 long[] attrDims = {attrInfo[1]};
                 H4ScalarAttribute attr = new H4ScalarAttribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
@@ -667,8 +656,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void writeMetadata(Object info) throws Exception
-    {
+    public void writeMetadata(Object info) throws Exception {
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an H4ScalarAttribute");
@@ -678,9 +666,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
         try {
             getFileFormat().writeAttribute(this, (H4ScalarAttribute)info, true);
 
-            if (attributeList == null) {
+            if (attributeList == null)
                 attributeList = new Vector();
-            }
 
             attributeList.add(info);
             nAttributes = attributeList.size();
@@ -696,7 +683,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
      * @param info
      *            the metadata to delete.
      *
-     * @throws Exception
+     * @throws HDFException
      *             if the metadata can not be removed
      */
     @Override
@@ -720,8 +707,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
 
     // Implementing HObject
     @Override
-    public long open()
-    {
+    public long open() {
         long id=-1;
 
         try {
@@ -729,12 +715,10 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
             int tag = (int)oid[0];
 
             log.trace("open(): tag={}", tag);
-            if (tag == H4SDS.DFTAG_NDG_NETCDF) {
+            if (tag == H4SDS.DFTAG_NDG_NETCDF)
                 index = (int)oid[1]; //HDFLibrary.SDidtoref(id) fails for netCDF
-            }
-            else {
+            else
                 index = HDFLibrary.SDreftoindex(sdid, (int)oid[1]);
-            }
 
             id = HDFLibrary.SDselect(sdid,index);
         }
@@ -748,10 +732,13 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
 
     // Implementing HObject
     @Override
-    public void close(long id)
-    {
-        try { HDFLibrary.SDendaccess(id); }
-        catch (HDFException ex) { log.debug("close(): failure: ", ex); }
+    public void close(long id) {
+        try {
+            HDFLibrary.SDendaccess(id);
+        }
+        catch (HDFException ex) {
+            log.debug("close(): failure: ", ex);
+        }
     }
 
     /**
@@ -759,8 +746,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
      */
     @SuppressWarnings("deprecation")
     @Override
-    public void init()
-    {
+    public void init() {
         if (inited) {
             log.trace("init(): Already initialized");
             return; // already called. Initialize only once
@@ -873,13 +859,11 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
                 }
                 else {
                     chunkSize = new long[rank];
-                    for (int i=0; i<rank; i++) {
+                    for (int i=0; i<rank; i++)
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
-                    }
                     storageLayout.append("CHUNKED: ").append(chunkSize[0]);
-                    for (int i = 1; i < rank; i++) {
+                    for (int i = 1; i < rank; i++)
                         storageLayout.append(" X ").append(chunkSize[i]);
-                    }
                 }
             }
             catch (Exception ex) {
@@ -914,25 +898,21 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
         selectedIndex[2] = 2;
 
         // select only two dimension a time,
-        if (rank == 1) {
+        if (rank == 1)
             selectedDims[0] = dims[0];
-        }
 
         if (rank > 1) {
             selectedDims[0] = dims[0];
-            if (isText) {
+            if (isText)
                 selectedDims[1] = 1;
-            }
-            else {
+            else
                 selectedDims[1] = dims[1];
-            }
         }
     }
 
     // Implementing ScalarDS
     @Override
-    public byte[][] getPalette()
-    {
+    public byte[][] getPalette() {
         return palette;
     }
 
@@ -953,21 +933,10 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
      *
      * @throws Exception if the dataset can not be created
      */
-    public static H4SDS create(
-        String name,
-        Group pgroup,
-        Datatype type,
-        long[] dims,
-        long[] maxdims,
-        long[] chunks,
-        int gzip,
-        Object fillValue,
-        Object data) throws Exception
-    {
+    public static H4SDS create(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
+            long[] chunks, int gzip, Object fillValue, Object data) throws Exception {
         H4SDS dataset = null;
-        if ((pgroup == null) ||
-            (name == null)||
-            (dims == null)) {
+        if ((pgroup == null) || (name == null)|| (dims == null)) {
             log.trace("create(): Parent group, name or dims is null");
             return null;
         }
@@ -980,9 +949,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
         }
 
         String path = HObject.SEPARATOR;
-        if (!pgroup.isRoot()) {
+        if (!pgroup.isRoot())
             path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
-        }
         // prepare the dataspace
         int rank = dims.length;
         int[] idims = new int[rank];
@@ -996,16 +964,14 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
         // the dimension of the lowest rank or the slowest-changing dimension)
         // can be assigned the value SD_UNLIMITED (or 0) to make the first
         // dimension unlimited.
-        if ((maxdims != null) && (maxdims[0]<=0)) {
+        if ((maxdims != null) && (maxdims[0]<=0))
             idims[0] = 0; // set to unlimited dimension.
-        }
 
         int[] ichunks = null;
         if (chunks != null) {
             ichunks = new int[rank];
-            for (int i=0; i<rank; i++) {
+            for (int i=0; i<rank; i++)
                 ichunks[i] = (int)chunks[i];
-            }
         }
 
         // unlimited cannot be used with chunking or compression for HDF 4.2.6 or earlier.
@@ -1025,26 +991,13 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
                 // set fill value to zero.
                 int vsize = HDFLibrary.DFKNTsize(tid);
                 byte[] fill = new byte[vsize];
-                for (int i=0; i<vsize; i++) {
+                for (int i=0; i<vsize; i++)
                     fill[i] = 0;
-                }
                 HDFLibrary.SDsetfillvalue(sdsid, fill);
 
                 // when we create a new dataset with unlimited dimension,
                 // we have to write some data into the dataset or otherwise
                 // the current dataset has zero dimensin size.
-
-                // comment out the following lines because SDwritedata fails when
-                // try to write data into a zero dimension array. 05/25/05
-                // don't know why the code was first put here ????
-                /**
-                if (idims[0] == 0 && data == null)
-                {
-                    idims[0] = (int)dims[0];
-                    data = new byte[tsize*vsize];
-                }
-                 */
-
             }
             catch (Exception ex) {
                 log.debug("create(): failure: ", ex);
@@ -1086,9 +1039,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
             }
         }
 
-        if ((sdsid > 0) && (data != null)) {
+        if ((sdsid > 0) && (data != null))
             HDFLibrary.SDwritedata(sdsid, start, null, idims, data);
-        }
 
         int ref = HDFLibrary.SDidtoref(sdsid);
 
@@ -1096,9 +1048,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
             // add the dataset to the parent group
             vgid = pgroup.open();
             if (vgid < 0) {
-                if (sdsid > 0) {
+                if (sdsid > 0)
                     HDFLibrary.SDendaccess(sdsid);
-                }
                 log.debug("create(): Invalid Parent Group ID");
                 throw (new HDFException("Unable to open the parent group."));
             }
@@ -1109,9 +1060,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
         }
 
         try {
-            if (sdsid > 0) {
+            if (sdsid > 0)
                 HDFLibrary.SDendaccess(sdsid);
-            }
         }
         catch (Exception ex) {
             log.debug("create(): SDendaccess failure: ", ex);
@@ -1120,31 +1070,37 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
         long[] oid = {HDFConstants.DFTAG_NDG, ref};
         dataset = new H4SDS(file, name, path, oid);
 
-        if (dataset != null) {
+        if (dataset != null)
             pgroup.addToMemberList(dataset);
-        }
 
         return dataset;
     }
 
-    public static H4SDS create(
-            String name,
-            Group pgroup,
-            Datatype type,
-            long[] dims,
-            long[] maxdims,
-            long[] chunks,
-            int gzip,
-            Object data) throws Exception
-    {
+    /**
+     * Creates a new dataset.
+     *
+     * @param name the name of the dataset to create.
+     * @param pgroup the parent group of the new dataset.
+     * @param type the datatype of the dataset.
+     * @param dims the dimension size of the dataset.
+     * @param maxdims the max dimension size of the dataset.
+     * @param chunks the chunk size of the dataset.
+     * @param gzip the level of the gzip compression.
+     * @param data the array of data values.
+     *
+     * @return the new dataset if successful. Otherwise returns null.
+     *
+     * @throws Exception if the dataset can not be created
+     */
+    public static H4SDS create(String name, Group pgroup, Datatype type,
+            long[] dims, long[] maxdims, long[] chunks, int gzip, Object data) throws Exception {
         return create(name, pgroup, type, dims, maxdims, chunks, gzip, null, data);
     }
 
     /**
      * copy attributes from one SDS to another SDS
      */
-    private void copyAttribute(long srcdid, long dstdid)
-    {
+    private void copyAttribute(long srcdid, long dstdid) {
         log.trace("copyAttribute(): start: srcdid={} dstdid={}", srcdid, dstdid);
         try {
             String[] objName = {""};
@@ -1167,9 +1123,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
                     b = false;
                 }
 
-                if (!b) {
+                if (!b)
                     continue;
-                }
 
                 // read attribute data from source dataset
                 byte[] attrBuff = new byte[attrInfo[1] * HDFLibrary.DFKNTsize(attrInfo[0])];
@@ -1198,7 +1153,7 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
     //Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList

@@ -18,15 +18,14 @@ package hdf.object;
  * An interface that provides general operations for data with a Compound
  * datatype. For example, getting the names, dataspaces or datatypes of the
  * members of the Compound datatype.
- * <p>
  *
  * @see hdf.object.HObject
  *
  * @version 1.0 5/3/2018
  * @author Jordan T. Henderson
  */
-public interface CompoundDataFormat extends DataFormat {
-
+public interface CompoundDataFormat extends DataFormat
+{
     /**
      * Returns the number of members of the compound data object.
      *
@@ -38,7 +37,7 @@ public interface CompoundDataFormat extends DataFormat {
      * Returns the number of selected members of the compound data object.
      *
      * Selected members are the compound fields which are selected for read/write.
-     * <p>
+     *
      * For example, in a compound datatype of {int A, float B, char[] C}, users can
      * choose to retrieve only {A, C} from the data object. In this case,
      * getSelectedMemberCount() returns two.
@@ -50,7 +49,7 @@ public interface CompoundDataFormat extends DataFormat {
     /**
      * Returns the names of the members of the compound data object. The names of
      * compound members are stored in an array of Strings.
-     * <p>
+     *
      * For example, for a compound datatype of {int A, float B, char[] C}
      * getMemberNames() returns ["A", "B", "C"}.
      *
@@ -96,7 +95,7 @@ public interface CompoundDataFormat extends DataFormat {
     /**
      * Returns array containing the total number of elements of the members of the
      * compound data object.
-     * <p>
+     *
      * For example, a compound dataset COMP has members of A, B and C as
      *
      * <pre>
@@ -120,7 +119,6 @@ public interface CompoundDataFormat extends DataFormat {
      * Returns array containing the total number of elements of the selected members
      * of the compound data object.
      *
-     * <p>
      * For example, a compound dataset COMP has members of A, B and C as
      *
      * <pre>
@@ -140,7 +138,7 @@ public interface CompoundDataFormat extends DataFormat {
 
     /**
      * Returns the dimension sizes of the i-th member.
-     * <p>
+     *
      * For example, a compound dataset COMP has members of A, B and C as
      *
      * <pre>
@@ -164,11 +162,10 @@ public interface CompoundDataFormat extends DataFormat {
 
     /**
      * Returns an array of datatype objects of the compound members.
-     * <p>
+     *
      * Each member of a compound data object has its own datatype. The datatype of a
      * member can be atomic or other compound datatype (nested compound). The
      * datatype objects are setup at init().
-     * <p>
      *
      * @return the array of datatype objects of the compound members.
      */

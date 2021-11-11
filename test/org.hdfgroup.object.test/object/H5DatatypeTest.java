@@ -33,9 +33,9 @@ import hdf.object.h5.H5ScalarAttr;
 
 /**
  * TestCase for H5Datatype.
- * <p>
+ *
  * This class tests all the public methods in H5ScalarDS class.
- * <p>
+ *
  * The test file contains the following objects.
  *
  * <pre>
@@ -58,9 +58,9 @@ import hdf.object.h5.H5ScalarAttr;
  *         /g0/g00/dataset_float    Dataset {50, 10}
  *         /g0_attr                 Group
  * </pre>
- * <p>
+ *
  * We use the following template to test all the methods:
- * <p>
+ *
  * What to test:
  * <ul>
  * <li>Test for boundary conditions
@@ -79,7 +79,8 @@ import hdf.object.h5.H5ScalarAttr;
  *
  * @author Peter Cao, The HDF Group
  */
-public class H5DatatypeTest {
+public class H5DatatypeTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5DatatypeTest.class);
     private static final H5File H5FILE = new H5File();
     private static final int NLOOPS = 10;
@@ -107,8 +108,7 @@ public class H5DatatypeTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -207,7 +207,7 @@ public class H5DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5Datatype#open()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Open a datatype identifier
@@ -246,14 +246,13 @@ public class H5DatatypeTest {
             try {
                 H5.H5Tclose(tid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
         }
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5Datatype#close(int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Open a datatype identifier
@@ -294,22 +293,20 @@ public class H5DatatypeTest {
             try {
                 H5.H5Tclose(tid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
 
             try {
                 tclass = H5.H5Tget_class(tid);
             }
-            catch (final Exception ex) {
-                ; // Expected - intentional
-            }
+            // Expected - intentional
+            catch (final Exception ex) {}
             H5.H5error_on();
         }
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5Datatype#toNative()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Create integer, float and string datatypes in memory
@@ -341,8 +338,7 @@ public class H5DatatypeTest {
         try {
             H5.H5Tclose(tid);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         // test float datatype
         try {
@@ -363,8 +359,7 @@ public class H5DatatypeTest {
         try {
             H5.H5Tclose(tid);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         // test String datatype
         try {
@@ -386,13 +381,12 @@ public class H5DatatypeTest {
         try {
             H5.H5Tclose(tid);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5Datatype#fromNative(int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Create empty datatype object in memory
@@ -412,9 +406,7 @@ public class H5DatatypeTest {
         try {
             type = new H5Datatype(null, -1);
         }
-        catch (Exception ex) {
-            ;
-        }
+        catch (Exception ex) {}
 
         H5.H5error_on();
 
@@ -437,8 +429,7 @@ public class H5DatatypeTest {
         try {
             H5.H5Tclose(tid);
         }
-        catch (final Exception ex) {
-        }
+        catch (final Exception ex) {}
 
         long tids[] = { HDF5Constants.H5T_STD_I32LE, HDF5Constants.H5T_STD_U16LE, HDF5Constants.H5T_STD_I32BE };
         int sizes[] = { 4, 2, 4 };
@@ -460,7 +451,7 @@ public class H5DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5Datatype#isUnsigned()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Check unsigned integer datatype
@@ -479,7 +470,7 @@ public class H5DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5Datatype#getMetadata()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Get all the attributes
@@ -532,9 +523,8 @@ public class H5DatatypeTest {
                     final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
                     log.debug("testGetMetadata - ints.length:{}", ints.length);
-                    for (int j = 0; j < expected.length; j++) {
+                    for (int j = 0; j < expected.length; j++)
                         assertEquals(expected[j], ints[j]);
-                    }
                 }
                 catch (Exception ex) {
                     log.trace("testGetMetadata(): getData() failure:", ex);
@@ -550,7 +540,7 @@ public class H5DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5Datatype#writeMetadata(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Update the value of an existing attribute
@@ -759,7 +749,7 @@ public class H5DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5Datatype#removeMetadata(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Remove all existing attributes
@@ -847,7 +837,7 @@ public class H5DatatypeTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5Datatype} SerializeToDisk.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>serialize a dataset identifier
@@ -911,8 +901,7 @@ public class H5DatatypeTest {
             try {
                 H5.H5Tclose(tid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
         }
     }
 }

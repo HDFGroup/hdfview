@@ -23,28 +23,27 @@ import java.util.Map.Entry;
 
 /**
  * Datatype is an abstract class that defines datatype characteristics and APIs for a data type.
- * <p>
+ *
  * A datatype has four basic characteristics: class, size, byte order and sign. These
  * characteristics are defined in the
  * <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>.
- * <p>
+ *
  * These characteristics apply to all the sub-classes. The sub-classes may have different ways to
  * describe a datatype. We here define the <strong> native datatype</strong> to the datatype used by
  * the sub-class. For example, H5Datatype uses a datatype identifier (hid_t) to specify a datatype.
  * NC2Datatype uses ucar.nc2.DataType object to describe its datatype. "Native" here is different
  * from the "native" definition in the HDF5 library.
- * <p>
+ *
  * Two functions, createNative() and fromNative(), are defined to convert the general
  * characteristics to/from the native datatype. Sub-classes must implement these functions so that
  * the conversion will be done correctly. The values of the CLASS member are not identical to HDF5
  * values for a datatype class.
- * <p>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Datatype extends HObject implements MetaDataContainer {
-
+public abstract class Datatype extends HObject implements MetaDataContainer
+{
     private static final long serialVersionUID = -581324710549963177L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
@@ -259,7 +258,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -292,7 +291,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -329,7 +328,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -392,7 +391,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -429,7 +428,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with a given native datatype identifier.
-     * <p>
+     *
      * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
      *
      * <pre>
@@ -454,7 +453,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with a given native datatype identifier.
-     * <p>
+     *
      * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
      *
      * <pre>
@@ -492,7 +491,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Closes a datatype identifier.
-     * <p>
+     *
      * Sub-classes must replace this default implementation.
      *
      * @param id
@@ -560,7 +559,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Returns the base datatype for this datatype.
-     * <p>
+     *
      * For example, in a dataset of type ARRAY of integer, the datatype of the dataset is ARRAY. The
      * datatype of the base type is integer.
      *
@@ -572,7 +571,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Sets the (key, value) pairs of enum members for enum datatype.
-     * <p>
+     *
      * For Example,
      * <dl>
      * <dt>setEnumMembers("-40=lowTemp, 90=highTemp")</dt>
@@ -618,7 +617,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Returns the HashMap pairs of enum members for enum datatype.
-     * <p>
+     *
      * For Example,
      * <dl>
      * <dt>getEnumMembersAsString()</dt>
@@ -693,7 +692,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *
      * Subclasses must implement it so that this datatype will be converted accordingly. Use close() to
      * close the native identifier; otherwise, the datatype will be left open.
-     * <p>
+     *
      * For example, a HDF5 datatype created from<br>
      *
      * <pre>
@@ -713,9 +712,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Set datatype characteristics (class, size, byte order and sign) from a given datatype identifier.
-     * <p>
+     *
      * Sub-classes must implement it so that this datatype will be converted accordingly.
-     * <p>
+     *
      * For example, if the type identifier is a 64-bit unsigned integer created from HDF5,
      *
      * <pre>
@@ -746,10 +745,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return a short text description of this datatype
      */
     public String getDescription() {
-
-        if (datatypeDescription != null) {
+        if (datatypeDescription != null)
             return datatypeDescription;
-        }
 
         StringBuilder description = new StringBuilder();
 
@@ -819,9 +816,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 break;
         }
 
-        if (baseType != null) {
+        if (baseType != null)
             description.append(" of " + baseType.getDescription());
-        }
 
         return description.toString();
     }
@@ -860,6 +856,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         }
     }
 
+    /**
+     * Checks if this datatype is a boolean type.
+     *
+     * @return true if the datatype is boolean; false otherwise
+     */
     public abstract boolean isText();
 
     /**
@@ -991,7 +992,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.

@@ -23,7 +23,7 @@ import hdf.object.MetaDataContainer;
 
 /**
  * An H5Link object represents an existing HDF5 object in file.
- * <p>
+ *
  * H5Link object is an HDF5 object that is either a soft or an external link to
  * an object in a file that does not exist. The type of the object is unknown.
  * Once the object being linked to is created, and the type is known, then
@@ -33,9 +33,11 @@ import hdf.object.MetaDataContainer;
  * @author Nidhi Gupta
  */
 
-public class H5Link extends HObject implements MetaDataContainer {
+public class H5Link extends HObject implements MetaDataContainer
+{
     private static final long serialVersionUID = -8137277460521594367L;
 
+    /** the object properties */
     @SuppressWarnings("unused")
     private H5O_info_t obj_info;
 
@@ -53,9 +55,20 @@ public class H5Link extends HObject implements MetaDataContainer {
         this (theFile, name, path, null);
     }
 
+    /**
+     * Constructs an HDF5 link with specific name, path, parent and oid.
+     *
+     * @param theFile
+     *            the file which containing the link.
+     * @param theName
+     *            the name of this link, e.g. "link1".
+     * @param thePath
+     *            the full path of this link, e.g. "/groups/".
+     * @param oid
+     *            the oid of this link, e.g. "/groups/".
+     */
     @SuppressWarnings("deprecation")
-    public H5Link(FileFormat theFile, String theName, String thePath,
-            long[] oid) {
+    public H5Link(FileFormat theFile, String theName, String thePath, long[] oid) {
         super(theFile, theName, thePath, oid);
 
         obj_info = new H5O_info_t(-1L, -1L, -1, 0, -1L, 0L, 0L, 0L, 0L, null,null,null);
@@ -72,7 +85,7 @@ public class H5Link extends HObject implements MetaDataContainer {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
@@ -155,7 +168,7 @@ public class H5Link extends HObject implements MetaDataContainer {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList

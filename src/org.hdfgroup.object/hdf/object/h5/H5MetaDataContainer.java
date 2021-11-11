@@ -26,7 +26,6 @@ import hdf.object.MetaDataContainer;
  * An class that provides general I/O operations for object metadata
  * attached to an object. For example, reading metadata content from the file
  * into memory or writing metadata content from memory into the file.
- * <p>
  *
  * @see hdf.object.HObject
  *
@@ -34,7 +33,8 @@ import hdf.object.MetaDataContainer;
  * @author Peter X. Cao, Jordan T. Henderson
  */
 @SuppressWarnings("rawtypes")
-public class H5MetaDataContainer extends HObject implements MetaDataContainer {
+public class H5MetaDataContainer extends HObject implements MetaDataContainer
+{
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Group.class);
 
@@ -48,6 +48,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
     @SuppressWarnings("rawtypes")
     protected List            attributeList;
 
+    /** the number of attributes */
     private int               nAttributes      = -1;
 
     /**
@@ -94,9 +95,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
     @SuppressWarnings("rawtypes")
     @Override
     public void clear() {
-        if (attributeList != null) {
+        if (attributeList != null)
             ((Vector) attributeList).setSize(0);
-        }
     }
 
     /**
@@ -119,6 +119,9 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
 
     /**
      * Updates the object's number of attributes.
+     *
+     * @param objectAttributes
+     *            the number of attributes for an object.
      */
     public void setObjectAttributeSize(int objectAttributes) {
         nAttributes = objectAttributes;
@@ -126,7 +129,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
@@ -155,7 +158,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @param attrPropList
@@ -185,9 +188,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
 
         if (attrPropList.length > 0) {
             indxType = attrPropList[0];
-            if (attrPropList.length > 1) {
+            if (attrPropList.length > 1)
                 order = attrPropList[1];
-            }
         }
         try {
             attributeList = H5File.getAttribute(this.parentObject, indxType, order);
@@ -227,9 +229,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
         Attribute attr = (Attribute) metadata;
         log.trace("writeMetadata(): {}", attr.getAttributeName());
 
-        if (attributeList == null) {
+        if (attributeList == null)
             attributeList = ((MetaDataContainer)parentObject).getMetadata();
-        }
 
         if (attributeList != null)
             attrExisted = attributeList.contains(attr);
@@ -253,9 +254,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
      */
     public void removeMetadata(Object metadata) throws Exception {
         // only attribute metadata is supported.
-        if (!(metadata instanceof Attribute)) {
+        if (!(metadata instanceof Attribute))
             throw new IllegalArgumentException("Object not an Attribute");
-        }
 
         Attribute attr = (Attribute) metadata;
         log.trace("removeMetadata(): {}", attr.getAttributeName());

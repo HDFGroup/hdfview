@@ -22,8 +22,8 @@ import java.util.Collection;
  *
  * @see hdf.object.HObject
  */
-public interface Attribute {
-
+public interface Attribute
+{
     /**
      * Returns the HObject to which this Attribute is currently "attached".
      *
@@ -122,7 +122,7 @@ public interface Attribute {
 
     /**
      * Not for public use in the future.
-     * <p>
+     *
      * setData() is not safe to use because it changes memory buffer
      * of the dataset object. Dataset operations such as write/read
      * will fail if the buffer type or size is changed.
@@ -140,7 +140,7 @@ public interface Attribute {
 
     /**
      * Writes the given data buffer into this attribute in a file.
-     * <p>
+     *
      * The data buffer is a vector that contains the data values of compound fields. The data is written
      * into file as one data blob.
      *
@@ -155,12 +155,11 @@ public interface Attribute {
     /**
      * Returns a string representation of the data value. For
      * example, "0, 255".
-     * <p>
+     *
      * For a compound datatype, it will be a 1D array of strings with field
      * members separated by the delimiter. For example,
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
-     * <p>
      *
      * @param delimiter
      *            The delimiter used to separate individual data points. It
@@ -174,12 +173,11 @@ public interface Attribute {
     /**
      * Returns a string representation of the data value. For
      * example, "0, 255".
-     * <p>
+     *
      * For a compound datatype, it will be a 1D array of strings with field
      * members separated by the delimiter. For example,
      * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
      * float} of three data points.
-     * <p>
      *
      * @param delimiter
      *            The delimiter used to separate individual data points. It
