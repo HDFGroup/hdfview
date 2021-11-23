@@ -14,6 +14,7 @@ import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTableItem;
@@ -51,7 +52,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].click();
-            items[0].contextMenu("New").menu("Group").click();
+            items[0].contextMenu().contextMenu("New").menu("Group").click();
 
             groupShell = bot.shell("New Group...");
             groupShell.activate();
@@ -93,7 +94,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("New").menu("Dataset").click();
+            items[0].getNode(0).contextMenu().contextMenu("New").menu("Dataset").click();
 
             datasetShell = bot.shell("New Dataset...");
             datasetShell.activate();
@@ -118,7 +119,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             items = filetree.getAllItems();
 
             items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -147,9 +148,10 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
                 }
             });
 
-            tableShell.bot().menu("Table").menu("Save Changes to File").click();
+            SWTBotMenu tableMenuItem = tableShell.bot().menu().menu("Table");
+            tableMenuItem.menu("Save Changes to File").click();
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableMenuItem.menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -288,7 +290,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             if (useButton)
                 bot.button("Delete Attribute").click();
             else
-                bot.table().contextMenu("Delete Attribute").click();
+                bot.table().contextMenu().contextMenu("Delete Attribute").click();
 
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*" + VERSION + " - Delete");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
@@ -329,7 +331,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
         try {
             newItem.click();
-            bot.table().contextMenu("Rename Attribute").click();
+            bot.table().contextMenu().contextMenu("Rename Attribute").click();
 
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*" + VERSION + " - Rename Attribute");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
@@ -490,7 +492,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             filetree = bot.tree();
             items = filetree.getAllItems();
-            items[0].contextMenu("Expand All").click();
+            items[0].contextMenu().contextMenu("Expand All").click();
             checkFileTree(filetree, "testHDF5DeleteAttribute()", 3, testFilename);
             attrTable = openAttributeTable(filetree, testFilename, groupname);
             newItem = addH5ScalarAttributeToObject("testHDF5DeleteAttribute()", attrTable, 0);
@@ -611,15 +613,14 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             /* Reload file for good measure */
             SWTBotTreeItem[] items = filetree.getAllItems();
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
-            items[0].contextMenu("Expand All").click();
+            items[0].contextMenu().contextMenu("Expand All").click();
 
             attrTable = openAttributeTable(filetree, testFilename, groupname);
             tableShell = openAttributeContext(attrTable, attrName, 0);
             tableShell.close();
-
 
             /* Now repeat the process for the previously-created dataset */
             /* However the dataset has dimension coords */
@@ -686,10 +687,10 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             /* Reload file for good measure */
             SWTBotTreeItem[] items = filetree.getAllItems();
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
-            items[0].contextMenu("Expand All").click();
+            items[0].contextMenu().contextMenu("Expand All").click();
 
             attrTable = openAttributeTable(filetree, testFilename, groupname);
             tableShell = openAttributeContext(attrTable, attrName, 0);
@@ -724,112 +725,112 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Ignore
-    public void testOpenHDF5CompoundAttribute() {
-        try {
-            /* Test open of attribute by double-click */
+//    @Ignore
+//    public void testOpenHDF5CompoundAttribute() {
+//        try {
+//            /* Test open of attribute by double-click */
+//
+//            /* Test open of attribute by popup menu */
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail(ex.getMessage());
+//        }
+//        catch (AssertionError ae) {
+//            ae.printStackTrace();
+//            fail(ae.getMessage());
+//        }
+//    }
 
-            /* Test open of attribute by popup menu */
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-    }
+//    @Ignore
+//    public void testEditHDF4ScalarAttribute() {
+//        try {
+//
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail(ex.getMessage());
+//        }
+//        catch (AssertionError ae) {
+//            ae.printStackTrace();
+//            fail(ae.getMessage());
+//        }
+//    }
 
-    @Ignore
-    public void testEditHDF4ScalarAttribute() {
-        try {
+//    @Ignore
+//    public void testEditHDF5ScalarAttribute() {
+//        try {
+//
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail(ex.getMessage());
+//        }
+//        catch (AssertionError ae) {
+//            ae.printStackTrace();
+//            fail(ae.getMessage());
+//        }
+//    }
 
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-    }
+//    @Ignore
+//    public void testEditHDF5CompoundAttribute() {
+//        try {
+//
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail(ex.getMessage());
+//        }
+//        catch (AssertionError ae) {
+//            ae.printStackTrace();
+//            fail(ae.getMessage());
+//        }
+//    }
 
-    @Ignore
-    public void testEditHDF5ScalarAttribute() {
-        try {
+//    @Ignore
+//    public void testDiscardHDF4ScalarAttributeEditResults() {
+//        try {
+//
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail(ex.getMessage());
+//        }
+//        catch (AssertionError ae) {
+//            ae.printStackTrace();
+//            fail(ae.getMessage());
+//        }
+//    }
 
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-    }
+//    @Ignore
+//    public void testDiscardHDF5ScalarAttributeEditResults() {
+//        try {
+//
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail(ex.getMessage());
+//        }
+//        catch (AssertionError ae) {
+//            ae.printStackTrace();
+//            fail(ae.getMessage());
+//        }
+//    }
 
-    @Ignore
-    public void testEditHDF5CompoundAttribute() {
-        try {
-
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-    }
-
-    @Ignore
-    public void testDiscardHDF4ScalarAttributeEditResults() {
-        try {
-
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-    }
-
-    @Ignore
-    public void testDiscardHDF5ScalarAttributeEditResults() {
-        try {
-
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-    }
-
-    @Ignore
-    public void testDiscardHDF5CompoundAttributeEditResults() {
-        try {
-
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-    }
+//    @Ignore
+//    public void testDiscardHDF5CompoundAttributeEditResults() {
+//        try {
+//
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail(ex.getMessage());
+//        }
+//        catch (AssertionError ae) {
+//            ae.printStackTrace();
+//            fail(ae.getMessage());
+//        }
+//    }
 
     @Test
     public void testHDF4RenameAttributeFunctionDisabled() {
@@ -854,7 +855,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             assertTrue(
                     constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
                             "rename attribute menuitem not disabled", "disabled", "enabled"),
-                    !bot.table().contextMenu("Rename Attribute").isEnabled());
+                    !bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled());
 
             /* Now repeat the process for the dataset that was created */
             attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
@@ -865,7 +866,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             assertTrue(
                     constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
                             "rename attribute menuitem not disabled", "disabled", "enabled"),
-                    !bot.table().contextMenu("Rename Attribute").isEnabled());
+                    !bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -908,7 +909,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             assertTrue(
                     constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
                             "delete attribute menuitem not disabled", "disabled", "enabled"),
-                    !bot.table().contextMenu("Delete Attribute").isEnabled());
+                    !bot.table().contextMenu().contextMenu("Delete Attribute").isEnabled());
             assertTrue(
                     constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
                             "delete attribute button not disabled", "disabled", "enabled"),
@@ -923,7 +924,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             assertTrue(
                     constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
                             "delete attribute menuitem not disabled", "disabled", "enabled"),
-                    !bot.table().contextMenu("Delete Attribute").isEnabled());
+                    !bot.table().contextMenu().contextMenu("Delete Attribute").isEnabled());
             assertTrue(
                     constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
                             "delete attribute button not disabled", "disabled", "enabled"),
@@ -947,20 +948,20 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Ignore
-    public void testHDF4AttributeEditDisabledForReadOnly() {
-        try {
-
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-    }
+//    @Ignore
+//    public void testHDF4AttributeEditDisabledForReadOnly() {
+//        try {
+//
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail(ex.getMessage());
+//        }
+//        catch (AssertionError ae) {
+//            ae.printStackTrace();
+//            fail(ae.getMessage());
+//        }
+//    }
 
     @Test
     public void testHDF5RenameAttributeDisabledForReadOnly() {
@@ -988,21 +989,21 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
-            items[0].contextMenu("Expand All").click();
+            items[0].contextMenu().contextMenu("Expand All").click();
             checkFileTree(filetree, "testHDF5RenameAttributeDisabledForReadOnly()", 3, testFilename);
             attrTable = openAttributeTable(filetree, testFilename, groupname);
 
             assertTrue(
                     constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
                             "rename attribute menuitem not disabled", "disabled", "enabled"),
-                    !bot.table().contextMenu("Rename Attribute").isEnabled());
+                    !bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled());
 
             attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
 
             assertTrue(
                     constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
                             "rename attribute menuitem not disabled", "disabled", "enabled"),
-                    !bot.table().contextMenu("Rename Attribute").isEnabled());
+                    !bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1022,19 +1023,19 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    @Ignore
-    public void testHDF5AttributeEditDisabledForReadOnly() {
-        try {
-
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
-        }
-    }
+//    @Ignore
+//    public void testHDF5AttributeEditDisabledForReadOnly() {
+//        try {
+//
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail(ex.getMessage());
+//        }
+//        catch (AssertionError ae) {
+//            ae.printStackTrace();
+//            fail(ae.getMessage());
+//        }
+//    }
 
 }

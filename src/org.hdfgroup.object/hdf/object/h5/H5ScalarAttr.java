@@ -649,6 +649,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
         return readData;
     }
 
+    /* Implement abstract Dataset */
+
     /**
      * Writes the given data buffer into this attribute in a file.
      *

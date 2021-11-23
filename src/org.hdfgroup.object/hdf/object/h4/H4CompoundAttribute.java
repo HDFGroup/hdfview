@@ -31,6 +31,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 
 /**
  * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
@@ -205,6 +206,11 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
      */
     @Override
     public long open() {
+        if (parentObject == null) {
+            log.debug("open(): attribute's parent object is null");
+            return -1;
+        }
+
         long aid = -1;
         long pObjID = -1;
 
@@ -305,6 +311,53 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
         return data;
     }
 
+    /* Implement abstract Dataset */
+
+    /**
+     * Writes a memory buffer to the object in the file.
+     *
+     * @param buf
+     *            The buffer that contains the data values.
+     *
+     * @throws Exception
+     *             if data can not be written
+     */
+    @Override
+    public void write(Object buf) throws Exception {
+        log.trace("function of dataset: write(Object) start");
+        if (!buf.equals(data))
+            setData(buf);
+
+        init();
+
+        if (parentObject == null) {
+            log.debug("write(Object): parent object is null; nowhere to write attribute to");
+            return;
+        }
+
+        ((MetaDataContainer) getParentObject()).writeMetadata(this);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.Dataset#copy(hdf.object.Group, java.lang.String, long[], java.lang.Object)
+     */
+    @Override
+    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
+        // not supported
+        throw new UnsupportedOperationException("copy operation unsupported for H4.");
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.Dataset#readBytes()
+     */
+    @Override
+    public byte[] readBytes() throws Exception {
+        // not supported
+        throw new UnsupportedOperationException("readBytes operation unsupported for H4.");
+    }
+
     /**
      * Given an array of bytes representing a compound Datatype and a start index
      * and length, converts len number of bytes into the correct Object type and
@@ -350,51 +403,6 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
     @Override
     public Object convertToUnsignedC() {
         throw new UnsupportedOperationException("H5CompoundDS:convertToUnsignedC Unsupported operation.");
-    }
-
-    /* Implement abstract Dataset */
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.Dataset#copy(hdf.object.Group, java.lang.String, long[], java.lang.Object)
-     */
-    @Override
-    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("copy operation unsupported for H4.");
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.Dataset#readBytes()
-     */
-    @Override
-    public byte[] readBytes() throws Exception {
-        // not supported
-        throw new UnsupportedOperationException("readBytes operation unsupported for H4.");
-    }
-
-    /**
-     * Writes a memory buffer to the object in the file.
-     *
-     * @param buf
-     *            the data to write
-     *
-     * @throws Exception
-     *             if data can not be written
-     */
-    @Override
-    public void write(Object buf) throws Exception {
-        log.trace("function of dataset: write(Object) start");
-        if (!buf.equals(data))
-            setData(buf);
-
-        init();
-
-        if (parentObject == null) {
-            log.debug("write(Object): parent object is null; nowhere to write attribute to");
-            return;
-        }
     }
 
     /* Implement interface Attribute */

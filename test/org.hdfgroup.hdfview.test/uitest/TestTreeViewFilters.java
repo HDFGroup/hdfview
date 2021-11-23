@@ -58,7 +58,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
              *
              * retriever.testAllTableLocations(filtersExpectedData);
              *
-             * tableShell.bot().menu("Close").click();
+             * tableShell.bot().menu().menu("Table").menu("Close").click();
              * bot.waitUntil(Conditions.shellCloses(tableShell));
              */
 
@@ -69,7 +69,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             retriever.testAllTableLocations(filtersExpectedData);
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             tableShell = openTreeviewObject(filetree, testFilename, "alloc_time_incr");
@@ -79,7 +79,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             retriever.testAllTableLocations(filtersExpectedData);
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             tableShell = openTreeviewObject(filetree, testFilename, "alloc_time_late");
@@ -89,7 +89,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             retriever.testAllTableLocations(filtersExpectedData);
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             tableShell = openTreeviewObject(filetree, testFilename, "chunked");
@@ -99,7 +99,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             retriever.testAllTableLocations(filtersExpectedData);
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             tableShell = openTreeviewObject(filetree, testFilename, "compact");
@@ -109,7 +109,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             retriever.testAllTableLocations(filtersExpectedData);
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             tableShell = openTreeviewObject(filetree, testFilename, "contiguous");
@@ -119,7 +119,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             retriever.testAllTableLocations(filtersExpectedData);
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             tableShell = openTreeviewObject(filetree, testFilename, "deflate");
@@ -129,7 +129,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             retriever.testAllTableLocations(filtersExpectedData);
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             tableShell = openTreeviewObject(filetree, testFilename, "fletcher32");
@@ -139,7 +139,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             retriever.testAllTableLocations(filtersExpectedData);
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             /*
@@ -152,7 +152,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
              *
              * retriever.testAllTableLocations(filtersExpectedData);
              *
-             * tableShell.bot().menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
+             * tableShell.bot().menu().menu("Table").menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
              */
 
             /*
@@ -165,7 +165,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
              *
              * retriever.testAllTableLocations(filtersExpectedData);
              *
-             * tableShell.bot().menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
+             * tableShell.bot().menu().menu("Table").menu("Close").click(); bot.waitUntil(Conditions.shellCloses(tableShell));
              */
 
             tableShell = openTreeviewObject(filetree, testFilename, "shuffle");
@@ -175,7 +175,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
 
             retriever.testAllTableLocations(filtersExpectedData);
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             /*
@@ -187,7 +187,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
              *
              * retriever.testAllTableLocations(filtersExpectedData);
              *
-             * tableShell.bot().menu("Close").click();
+             * tableShell.bot().menu().menu("Table").menu("Close").click();
              * bot.waitUntil(Conditions.shellCloses(tableShell));
              */
         }
@@ -201,7 +201,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 

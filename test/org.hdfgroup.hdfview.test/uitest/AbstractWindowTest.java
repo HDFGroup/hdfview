@@ -212,13 +212,16 @@ public abstract class AbstractWindowTest {
         File hdf_file = new File(workDir, name);
 
         try {
+            SWTBotMenu fileMenuItem = bot.menu().menu("File");
+            SWTBotMenu openasMenuItem = fileMenuItem.menu("Open As");
             if (openMode == FILE_MODE.READ_ONLY)
-                bot.menu("Open As").menu("Read-Only").click();
+                openasMenuItem.menu("Read-Only").click();
             else
-                bot.menu("Open As").menu("Read/Write").click();
+                openasMenuItem.menu("Read/Write").click();
 
             fileNameShell = bot.shell("Enter a file name");
             fileNameShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(fileNameShell.getText()));
 
             SWTBotText text = fileNameShell.bot().text();
             text.setText(hdf_file.getName());
@@ -271,19 +274,18 @@ public abstract class AbstractWindowTest {
             hdfFile.delete();
 
         try {
-            SWTBotMenu fileMenuItem;
-
+            SWTBotMenu fileMenuItem = bot.menu().menu("File");
+            SWTBotMenu fileNewMenuItem = fileMenuItem.menu("New");
             if (hdf4Type)
-                fileMenuItem = bot.menu("File").menu("New").menu("HDF4");
+                fileNewMenuItem.menu("HDF4").click();
             else if (hdf5Type)
-                fileMenuItem = bot.menu("File").menu("New").menu("HDF5");
+                fileNewMenuItem.menu("HDF5").click();
             else
                 throw new IllegalArgumentException("unknown file type");
 
-            fileMenuItem.click();
-
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
+            bot.waitUntil(Conditions.shellIsActive(shell.getText()));
 
             SWTBotText text = shell.bot().text();
             text.setText(name);
@@ -292,7 +294,7 @@ public abstract class AbstractWindowTest {
             assertTrue("createFile() wrong file name: expected '" + name + "' but was '" + val + "'", val.equals(name));
 
             shell.bot().button("   &OK   ").click();
-            shell.bot().waitUntil(Conditions.shellCloses(shell));
+            bot.waitUntil(Conditions.shellCloses(shell));
 
             assertTrue("createFile() File '" + hdfFile + "' not created", hdfFile.exists());
             open_files++;
@@ -317,7 +319,8 @@ public abstract class AbstractWindowTest {
             bot.shells()[0].activate();
             bot.waitUntil(Conditions.shellIsActive(bot.shells()[0].getText()));
 
-            bot.menu("File").menu("Close").click();
+            SWTBotMenu fileMenuItem = bot.menu().menu("File");
+            fileMenuItem.menu("Close").click();
 
             if (deleteFile) {
                 if (hdfFile.exists()) {
@@ -332,6 +335,7 @@ public abstract class AbstractWindowTest {
 
                 open_files--;
             }
+            bot.waitUntil(Conditions.treeHasRows(filetree, open_files));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -367,7 +371,8 @@ public abstract class AbstractWindowTest {
             final SWTBotCanvas imageCanvas = thisbot.canvas(1);
 
             // Make sure Show Values is selected
-            SWTBotMenu showValuesMenuItem = thisbot.menu("Image").menu("Show Values");
+            SWTBotMenu imageMenuItem = thisbot.menu().menu("Image");
+            SWTBotMenu showValuesMenuItem = imageMenuItem.menu("Show Values");
             if(!showValuesMenuItem.isChecked()) {
                 showValuesMenuItem.click();
             }
@@ -426,7 +431,7 @@ public abstract class AbstractWindowTest {
 
     protected SWTBotShell openAttributeContext(SWTBotTable attrTable, String objectName, int rowIndex) {
         attrTable.click(rowIndex, 0);
-        attrTable.contextMenu("View/Edit Attribute Value").click();
+        attrTable.contextMenu().contextMenu("View/Edit Attribute Value").click();
 
         return openDataObject(objectName);
     }
@@ -436,7 +441,7 @@ public abstract class AbstractWindowTest {
 
         SWTBotTreeItem foundObject = locateItemByPath(fileItem, objectName);
         foundObject.click();
-        foundObject.contextMenu("Open").click();
+        foundObject.contextMenu().contextMenu("Open").click();
 
         return openDataObject(objectName);
     }

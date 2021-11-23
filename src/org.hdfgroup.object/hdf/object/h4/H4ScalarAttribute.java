@@ -29,6 +29,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 
 /**
@@ -205,13 +206,13 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      */
     @Override
     public long open() {
-        long aid = -1;
-        long pObjID = -1;
-
         if (parentObject == null) {
             log.debug("open(): attribute's parent object is null");
             return -1;
         }
+
+        long aid = -1;
+        long pObjID = -1;
 
         try {
             pObjID = parentObject.open();
@@ -306,7 +307,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * Writes a memory buffer to the object in the file.
      *
      * @param buf
-     *            the data to write
+     *            The buffer that contains the data values.
      *
      * @throws Exception
      *             if data can not be written
@@ -323,6 +324,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
             log.debug("write(Object): parent object is null; nowhere to write attribute to");
             return;
         }
+
+        ((MetaDataContainer) getParentObject()).writeMetadata(this);
     }
 
     /*

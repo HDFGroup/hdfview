@@ -31,7 +31,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].click();
-            items[0].contextMenu("New").menu("Group").click();
+            items[0].contextMenu().contextMenu("New").menu("Group").click();
 
             groupShell = bot.shell("New Group...");
             groupShell.activate();
@@ -71,7 +71,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("New").menu("Dataset").click();
+            items[0].getNode(0).contextMenu().contextMenu("New").menu("Dataset").click();
 
             datasetShell = bot.shell("New Dataset...");
             datasetShell.activate();
@@ -94,7 +94,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             items = filetree.getAllItems();
 
             items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -120,9 +120,9 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                 }
             });
 
-            tableShell.bot().menu("Table").menu("Save Changes to File").click();
+            tableShell.bot().menu().menu("Table").menu("Save Changes to File").click();
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -171,10 +171,10 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             assertTrue("testCopyPasteGroupInSameFile() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Copy").click();
+            items[0].getNode(0).contextMenu().contextMenu("Copy").click();
 
             items[0].click();
-            items[0].contextMenu("Paste").click();
+            items[0].contextMenu().contextMenu("Paste").click();
 
             SWTBotShell copyTargetShell = bot.shells()[1];
             copyTargetShell.activate();
@@ -183,7 +183,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
 
             // Reload file
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -195,7 +195,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                     items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
 
             items[0].getNode(1).click();
-            items[0].getNode(1).getNode(0).contextMenu("Open").click();
+            items[0].getNode(1).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -213,7 +213,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -226,7 +226,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -244,7 +244,53 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
         SWTBotShell tableShell = null;
 
         File hdf_file = createFile(filename);
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            assertTrue(constructWrongValueMessage("testCopyPasteGroupInDifferentFile()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 1);
+            assertTrue("testCopyPasteGroupInDifferentFile() HDF filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+
         File hdf_file2 = createFile(filenameTo);
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            assertTrue(constructWrongValueMessage("testCopyPasteGroupInDifferentFile()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 2);
+            assertTrue("testCopyPasteGroupInDifferentFile() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
+            assertTrue("testCopyPasteGroupInDifferentFile() filetree is missing file '" + filenameTo + "'", items[1].getText().compareTo(filenameTo) == 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+            try {
+                if (hdf_file.exists())
+                    closeFile(hdf_file, true);
+            }
+            catch (Exception ex2) {
+                ex2.printStackTrace();
+            }
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+            try {
+                if (hdf_file.exists())
+                    closeFile(hdf_file, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -260,10 +306,10 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                     items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Copy").click();
+            items[0].getNode(0).contextMenu().contextMenu("Copy").click();
 
             items[1].click();
-            items[1].contextMenu("Paste").click();
+            items[1].contextMenu().contextMenu("Paste").click();
 
             SWTBotShell copyTargetShell = bot.shells()[1];
             copyTargetShell.activate();
@@ -272,14 +318,14 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
 
             // Reload file
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
             // Reload file
             items[1].click();
-            items[1].contextMenu("Reload File").click();
+            items[1].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[1].getText(), true);
@@ -294,7 +340,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                     items[1].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
             items[1].getNode(0).click();
-            items[1].getNode(0).getNode(0).contextMenu("Open").click();
+            items[1].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -312,7 +358,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -345,7 +391,53 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
         SWTBotShell tableShell = null;
 
         File hdf_file = createFile(filename);
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            assertTrue(constructWrongValueMessage("testCutPasteGroupInDifferentFile()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 1);
+            assertTrue("testCutPasteGroupInDifferentFile() HDF filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+
         File hdf_file2 = createFile(filenameTo);
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            assertTrue(constructWrongValueMessage("testCutPasteGroupInDifferentFile()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 2);
+            assertTrue("testCutPasteGroupInDifferentFile() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
+            assertTrue("testCutPasteGroupInDifferentFile() filetree is missing file '" + filenameTo + "'", items[1].getText().compareTo(filenameTo) == 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+            try {
+                if (hdf_file.exists())
+                    closeFile(hdf_file, true);
+            }
+            catch (Exception ex2) {
+                ex2.printStackTrace();
+            }
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+            try {
+                if (hdf_file.exists())
+                    closeFile(hdf_file, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -361,10 +453,10 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                     items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Cut").click();
+            items[0].getNode(0).contextMenu().contextMenu("Cut").click();
 
             items[1].click();
-            items[1].contextMenu("Paste").click();
+            items[1].contextMenu().contextMenu("Paste").click();
 
             SWTBotShell copyTargetShell = bot.shells()[1];
             copyTargetShell.activate();
@@ -373,14 +465,14 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
 
             // Reload file
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
             // Reload file
             items[1].click();
-            items[1].contextMenu("Reload File").click();
+            items[1].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[1].getText(), true);
@@ -392,7 +484,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                     items[1].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
             items[1].getNode(0).click();
-            items[1].getNode(0).getNode(0).contextMenu("Open").click();
+            items[1].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -410,7 +502,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -462,10 +554,10 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             assertTrue("testCopyPasteDatasetInSameFile() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
             items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Copy").click();
+            items[0].getNode(0).getNode(0).contextMenu().contextMenu("Copy").click();
 
             items[0].click();
-            items[0].contextMenu("New").menu("Group").click();
+            items[0].contextMenu().contextMenu("New").menu("Group").click();
 
             SWTBotShell groupShell = bot.shell("New Group...");
             groupShell.activate();
@@ -485,7 +577,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             assertTrue("testCopyPasteDatasetInSameFile() filetree is missing group '" + group_copy_name + "'", items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
 
             items[0].getNode(1).click();
-            items[0].getNode(1).contextMenu("Paste").click();
+            items[0].getNode(1).contextMenu().contextMenu("Paste").click();
 
             SWTBotShell copyTargetShell = bot.shells()[1];
             copyTargetShell.activate();
@@ -494,7 +586,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
 
             // Reload file
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -505,7 +597,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             assertTrue("testCopyPasteDatasetInSameFile() filetree is missing group '" + group_copy_name + "'", items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
 
             items[0].getNode(1).click();
-            items[0].getNode(1).getNode(0).contextMenu("Open").click();
+            items[0].getNode(1).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -523,7 +615,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -536,7 +628,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -555,7 +647,53 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
         SWTBotShell tableShell = null;
 
         File hdf_file = createFile(filename);
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            assertTrue(constructWrongValueMessage("testCopyPasteDatasetInDifferentFile()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 1);
+            assertTrue("testCopyPasteDatasetInDifferentFile() HDF filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+
         File hdf_file2 = createFile(filenameTo);
+        try {
+            SWTBotTree filetree = bot.tree();
+            SWTBotTreeItem[] items = filetree.getAllItems();
+            assertTrue(constructWrongValueMessage("testCopyPasteDatasetInDifferentFile()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
+                    filetree.visibleRowCount() == 2);
+            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
+            assertTrue("testCopyPasteDatasetInDifferentFile() filetree is missing file '" + filenameTo + "'", items[1].getText().compareTo(filenameTo) == 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+            try {
+                if (hdf_file.exists())
+                    closeFile(hdf_file, true);
+            }
+            catch (Exception ex2) {
+                ex2.printStackTrace();
+            }
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+            try {
+                if (hdf_file.exists())
+                    closeFile(hdf_file, true);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -574,10 +712,10 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                     items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
             items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Copy").click();
+            items[0].getNode(0).getNode(0).contextMenu().contextMenu("Copy").click();
 
             items[1].click();
-            items[1].contextMenu("New").menu("Group").click();
+            items[1].contextMenu().contextMenu("New").menu("Group").click();
 
             SWTBotShell groupShell = bot.shell("New Group...");
             groupShell.activate();
@@ -592,7 +730,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(groupShell));
 
             items[1].getNode(0).click();
-            items[1].getNode(0).contextMenu("Paste").click();
+            items[1].getNode(0).contextMenu().contextMenu("Paste").click();
 
             SWTBotShell copyTargetShell = bot.shells()[1];
             copyTargetShell.activate();
@@ -601,11 +739,11 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
 
             // Reload file
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             // Reload file
             items[1].click();
-            items[1].contextMenu("Reload File").click();
+            items[1].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -621,7 +759,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                     items[1].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
             items[1].getNode(0).click();
-            items[1].getNode(0).getNode(0).contextMenu("Open").click();
+            items[1].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -639,7 +777,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -691,10 +829,10 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             assertTrue("testCutPasteDatasetInSameFile() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
 
             items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Cut").click();
+            items[0].getNode(0).getNode(0).contextMenu().contextMenu("Cut").click();
 
             items[0].click();
-            items[0].contextMenu("New").menu("Group").click();
+            items[0].contextMenu().contextMenu("New").menu("Group").click();
 
             SWTBotShell groupShell = bot.shell("New Group...");
             groupShell.activate();
@@ -709,7 +847,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(groupShell));
 
             items[0].getNode(1).click();
-            items[0].getNode(1).contextMenu("Paste").click();
+            items[0].getNode(1).contextMenu().contextMenu("Paste").click();
 
             SWTBotShell copyTargetShell = bot.shells()[1];
             copyTargetShell.activate();
@@ -718,7 +856,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
 
             // Reload file
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -729,7 +867,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
             assertTrue("testCutPasteDatasetInSameFile() filetree is missing group '" + group_copy_name + "'", items[0].getNode(1).getText().compareTo(group_copy_name) == 0);
 
             items[0].getNode(1).getNode(0).click();
-            items[0].getNode(1).getNode(0).contextMenu("Open").click();
+            items[0].getNode(1).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -747,7 +885,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -760,7 +898,7 @@ public class TestHDFViewCutCopyPaste extends AbstractWindowTest {
         }
         finally {
             if (tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
