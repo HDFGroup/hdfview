@@ -49,7 +49,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             assertTrue("testNextFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -106,7 +106,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -134,7 +134,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             assertTrue("testPreviousFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -191,7 +191,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -219,7 +219,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             assertTrue("testFirstFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -282,7 +282,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -310,7 +310,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             assertTrue("testLastFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -367,7 +367,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -395,7 +395,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             assertTrue("testEnterFrame() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -480,7 +480,7 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 

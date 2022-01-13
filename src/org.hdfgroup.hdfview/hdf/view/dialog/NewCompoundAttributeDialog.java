@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
@@ -116,6 +116,9 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         compoundAttrList = new Vector<>(objs.size());
     }
 
+    /**
+     * Open the NewCompoundAttributeDialog for adding a new compound attribute.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
@@ -483,16 +486,16 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         }
         log.trace("Create: lsize={}", lsize);
 
-        AttributeDataset attr = null;
+        Attribute attr = null;
         try {
             H5Datatype datatype = (H5Datatype)createNewDatatype(null);
 
-            attr = new H5CompoundAttr(parentObj, attrName, datatype, dims);
+            attr = (Attribute)new H5CompoundAttr(parentObj, attrName, datatype, dims);
             Object value = H5Datatype.allocateArray(datatype, (int) lsize);
-            attr.setData(value);
+            attr.setAttributeData(value);
 
             log.trace("writeMetadata() via write()");
-            attr.write();
+            attr.writeAttribute();
         }
         catch (Exception ex) {
             Tools.showError(shell, "Create", ex.getMessage());
@@ -500,7 +503,7 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
             return false;
         }
 
-        newObject = attr;
+        newObject = (HObject)attr;
 
         return true;
     }

@@ -118,6 +118,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         dataView = observer;
     }
 
+    /**
+     * Open the NewDataseteDialog for adding a new dataset.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

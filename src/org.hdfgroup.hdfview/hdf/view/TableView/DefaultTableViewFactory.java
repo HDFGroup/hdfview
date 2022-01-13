@@ -18,7 +18,6 @@ import java.lang.reflect.Constructor;
 import java.util.BitSet;
 import java.util.HashMap;
 
-import hdf.object.AttributeDataset;
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
 import hdf.object.FileFormat;
@@ -36,10 +35,22 @@ import hdf.view.DataView.DataViewManager;
  * @author jhenderson
  * @version 1.0 4/18/2018
  */
-public class DefaultTableViewFactory extends TableViewFactory {
-
+public class DefaultTableViewFactory extends TableViewFactory
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTableViewFactory.class);
 
+    /**
+     * Get the TableView for the data object identified by the data properties mapping
+     *
+     * @param viewer
+     *        the data view manager
+     * @param dataPropertiesMap
+     *        the data properties map
+     *
+     * @return the TableView instance
+     *
+     * @throws ClassNotFoundException if a failure occurred
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
@@ -71,12 +82,6 @@ public class DefaultTableViewFactory extends TableViewFactory {
                 dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
             else if (dataObject instanceof CompoundDS)
                 dataViewName = ViewProperties.DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME;
-            else if (dataObject instanceof AttributeDataset) {
-                if (((AttributeDataset) dataObject).getDatatype().isCompound())
-                    dataViewName = ViewProperties.DEFAULT_COMPOUND_ATTRIBUTE_TABLEVIEW_NAME;
-                else
-                    dataViewName = ViewProperties.DEFAULT_SCALAR_ATTRIBUTE_TABLEVIEW_NAME;
-            }
             else
                 dataViewName = null;
         }

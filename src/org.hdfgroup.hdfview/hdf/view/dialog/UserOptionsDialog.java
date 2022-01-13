@@ -34,16 +34,31 @@ public class UserOptionsDialog extends PreferenceDialog {
 
     private Font                          curFont;
 
+    /** The setting of the root directory */
     protected String                      rootDir = null;
 
+    /** The setting of the working directory */
     protected String                      workDir = null;
 
+    /**
+     * UserOptionsDialog displays components for choosing user options.
+     *
+     * @param parent
+     *        the dialog parent shell
+     * @param mgr
+     *        the dialog manager
+     * @param viewRoot
+     *        the root dir for the app
+     */
     public UserOptionsDialog(Shell parent, PreferenceManager mgr, String viewRoot) {
         super(parent, mgr);
 
         rootDir = viewRoot;
     }
 
+    /**
+     * Create the UserOptions Dialog.
+     */
     public void create() {
         super.create();
         getShell().setSize(getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true));

@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
@@ -29,22 +29,22 @@ import hdf.object.h5.H5ScalarAttr;
  * @author Rishi R. Sinha
  *
  */
-public class AttributeTest {
+public class AttributeTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AttributeTest.class);
     private static final H5File H5FILE = new H5File();
 
     private H5File testFile = null;
     private H5Group testGroup = null;
-    private AttributeDataset strAttr = null;
-    private AttributeDataset arrayIntAttr = null;
+    private Attribute strAttr = null;
+    private Attribute arrayIntAttr = null;
 
     protected void closeFile() {
         if (testFile != null) {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -115,9 +115,9 @@ public class AttributeTest {
             assertNotNull(testGroup);
             List testAttrs = testGroup.getMetadata();
             assertNotNull(testAttrs);
-            strAttr = (AttributeDataset) testAttrs.get(1);
+            strAttr = (Attribute) testAttrs.get(1);
             assertNotNull(strAttr);
-            arrayIntAttr = (AttributeDataset) testAttrs.get(0);
+            arrayIntAttr = (Attribute) testAttrs.get(0);
             assertNotNull(arrayIntAttr);
         }
         catch (Exception ex) {
@@ -143,7 +143,7 @@ public class AttributeTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype, long[])} .
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Creating a new attribute with no value.
@@ -166,17 +166,16 @@ public class AttributeTest {
             fail("new H5Datatype failed. " + ex);
         }
 
-        AttributeDataset attr = new H5ScalarAttr(testGroup, attrName, attrType, attrDims);
-        attr.setData(classValue);
+        Attribute attr = new H5ScalarAttr(testGroup, attrName, attrType, attrDims);
+        attr.setAttributeData(classValue);
         assertNotNull(attr);
-        assertEquals(classValue[0], attr.toString("|"));
+        assertEquals(classValue[0], attr.toAttributeString("|"));
     }
 
     /**
      * Test method for
      * {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype, long[], java.lang.Object)}
-     * .
-     * <p>
+     *
      * Here we test:
      * <ul>
      * <li>Creating a new attribute with a value.
@@ -197,9 +196,9 @@ public class AttributeTest {
             fail("new H5Datatype failed. " + ex);
         }
 
-        AttributeDataset attr = new H5ScalarAttr(testGroup, attrName, attrType, attrDims, classValue);
+        Attribute attr = new H5ScalarAttr(testGroup, attrName, attrType, attrDims, classValue);
         assertNotNull(attr);
-        assertEquals(classValue[0], attr.toString("|"));
+        assertEquals(classValue[0], attr.toAttributeString("|"));
     }
 
     /**
@@ -216,7 +215,7 @@ public class AttributeTest {
         log.debug("testGetData");
 
         try {
-            assertEquals(((String[]) strAttr.getData())[0], "String attribute.");
+            assertEquals(((String[]) strAttr.getAttributeData())[0], "String attribute.");
         }
         catch (Exception ex) {
             log.trace("testGetData(): getData() failure:", ex);
@@ -228,7 +227,7 @@ public class AttributeTest {
         }
 
         try {
-            assertTrue(Arrays.equals((int[]) arrayIntAttr.getData(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }));
+            assertTrue(Arrays.equals((int[]) arrayIntAttr.getAttributeData(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }));
         }
         catch (Exception ex) {
             log.trace("testGetData(): getData() failure:", ex);
@@ -241,8 +240,8 @@ public class AttributeTest {
     }
 
     /**
-     * Test method for {@link hdf.object.AttributeDataset#setData(java.lang.Object)}.
-     * <p>
+     * Test method for {@link hdf.object.Attribute#setData(java.lang.Object)}.
+     *
      * Here we test:
      * <ul>
      * <li>Setting new value for the two attributes (the string attribute and
@@ -256,7 +255,7 @@ public class AttributeTest {
         log.debug("testSetData");
 
         try {
-            prevValue = (String[]) strAttr.getData();
+            prevValue = (String[]) strAttr.getAttributeData();
         }
         catch (Exception ex) {
             log.trace("testSetData(): getData() failure:", ex);
@@ -267,10 +266,10 @@ public class AttributeTest {
             fail("Out of memory");
         }
 
-        strAttr.setData("Temp String Value");
+        strAttr.setAttributeData("Temp String Value");
 
         try {
-            assertEquals((strAttr.getData()), "Temp String Value");
+            assertEquals((strAttr.getAttributeData()), "Temp String Value");
         }
         catch (Exception ex) {
             log.trace("testSetData(): getData() failure:", ex);
@@ -281,12 +280,12 @@ public class AttributeTest {
             fail("Out of memory");
         }
 
-        strAttr.setData(prevValue);
+        strAttr.setAttributeData(prevValue);
 
         int[] intPrevValue = null;
 
         try {
-            intPrevValue = (int[]) arrayIntAttr.getData();
+            intPrevValue = (int[]) arrayIntAttr.getAttributeData();
         }
         catch (Exception ex) {
             log.trace("testSetData(): getData() failure:", ex);
@@ -297,10 +296,10 @@ public class AttributeTest {
             fail("Out of memory");
         }
 
-        arrayIntAttr.setData(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        arrayIntAttr.setAttributeData(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
         try {
-            assertTrue(Arrays.equals((int[]) arrayIntAttr.getData(), new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+            assertTrue(Arrays.equals((int[]) arrayIntAttr.getAttributeData(), new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
         }
         catch (Exception ex) {
             log.trace("testSetData(): getData() failure:", ex);
@@ -311,12 +310,12 @@ public class AttributeTest {
             fail("Out of memory");
         }
 
-        arrayIntAttr.setData(intPrevValue);
+        arrayIntAttr.setAttributeData(intPrevValue);
     }
 
     /**
-     * Test method for {@link hdf.object.AttributeDataset#getName()}.
-     * <p>
+     * Test method for {@link hdf.object.Attribute#getAttributeName()}.
+     *
      * Here we test:
      * <ul>
      * <li>Getting the names of the two attributes (the string attribute and the int array attribute).
@@ -325,13 +324,13 @@ public class AttributeTest {
     @Test
     public void testGetName() {
         log.debug("testGetName");
-        assertTrue(strAttr.getName().equals("strAttr"));
-        assertTrue(arrayIntAttr.getName().equals("arrayInt"));
+        assertTrue(strAttr.getAttributeName().equals("strAttr"));
+        assertTrue(arrayIntAttr.getAttributeName().equals("arrayInt"));
     }
 
     /**
-     * Test method for {@link hdf.object.AttributeDataset#getRank()}.
-     * <p>
+     * Test method for {@link hdf.object.Attribute#getRank()}.
+     *
      * Here we test:
      * <ul>
      * <li>Getting the rank for the two attributes (the string attribute and the int array attribute).
@@ -340,13 +339,13 @@ public class AttributeTest {
     @Test
     public void testGetRank() {
         log.debug("testGetRank");
-        assertEquals(strAttr.getRank(), 1);
-        assertEquals(arrayIntAttr.getRank(), 1);
+        assertEquals(strAttr.getAttributeRank(), 1);
+        assertEquals(arrayIntAttr.getAttributeRank(), 1);
     }
 
     /**
-     * Test method for {@link hdf.object.AttributeDataset#getDataDims()}.
-     * <p>
+     * Test method for {@link hdf.object.Attribute#getDataDims()}.
+     *
      * Here we test:
      * <ul>
      * <li>Getting the dimensionalities for the two attributes (the string attribute and the int array attribute).
@@ -355,13 +354,13 @@ public class AttributeTest {
     @Test
     public void testGetDataDims() {
         log.debug("testGetDataDims");
-        assertEquals(strAttr.getDims()[0], 1);
-        assertEquals(arrayIntAttr.getDims()[0], 10);
+        assertEquals(strAttr.getAttributeDims()[0], 1);
+        assertEquals(arrayIntAttr.getAttributeDims()[0], 10);
     }
 
     /**
-     * Test method for {@link hdf.object.AttributeDataset#getType()}.
-     * <p>
+     * Test method for {@link hdf.object.Attribute#getType()}.
+     *
      * Here we test:
      * <ul>
      * <li>Getting the value for the two attributes (the string attribute and the int array attribute).
@@ -370,14 +369,14 @@ public class AttributeTest {
     @Test
     public void testGetType() {
         log.debug("testGetType");
-        assertTrue(strAttr.getDatatype().getDescription()
+        assertTrue(strAttr.getAttributeDatatype().getDescription()
                 .equals("String, length = 20, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII"));
-        assertTrue(arrayIntAttr.getDatatype().getDescription().equals("32-bit integer"));
+        assertTrue(arrayIntAttr.getAttributeDatatype().getDescription().equals("32-bit integer"));
     }
 
     /**
-     * Test method for {@link hdf.object.AttributeDataset#isUnsigned()}.
-     * <p>
+     * Test method for {@link hdf.object.Attributet#isUnsigned()}.
+     *
      * Here we test:
      * <ul>
      * <li>Check if the two attributes (the string attribute and the int array attribute) are unsigned.
@@ -386,13 +385,13 @@ public class AttributeTest {
     @Test
     public void testIsUnsigned() {
         log.debug("testIsUnsigned");
-        assertFalse(strAttr.getDatatype().isUnsigned());
-        assertFalse(arrayIntAttr.getDatatype().isUnsigned());
+        assertFalse(strAttr.getAttributeDatatype().isUnsigned());
+        assertFalse(arrayIntAttr.getAttributeDatatype().isUnsigned());
     }
 
     /**
-     * Test method for {@link hdf.object.AttributeDataset#toString(java.lang.String)}.
-     * <p>
+     * Test method for {@link hdf.object.Attribute#toString(java.lang.String)}.
+     *
      * Here we test:
      * <ul>
      * <li>the toString method for the two attributes (the string attribute and the int array attribute).
@@ -401,8 +400,8 @@ public class AttributeTest {
     @Test
     public void testToStringString() {
         log.debug("testToStringString");
-        assertTrue(strAttr.toString(",").equals("String attribute."));
-        assertTrue(arrayIntAttr.toString(",").equals("1,2,3,4,5,6,7,8,9,10"));
+        assertTrue(strAttr.toAttributeString(",").equals("String attribute."));
+        assertTrue(arrayIntAttr.toAttributeString(",").equals("1,2,3,4,5,6,7,8,9,10"));
     }
 
 }

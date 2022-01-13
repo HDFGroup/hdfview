@@ -23,7 +23,8 @@ import hdf.object.h5.H5File;
  * @author rsinha
  *
  */
-public class FileFormatTest {
+public class FileFormatTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormatTest.class);
     private static final H5File H5FILE = new H5File();
 
@@ -34,8 +35,7 @@ public class FileFormatTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -128,7 +128,7 @@ public class FileFormatTest {
 
     /**
      * Test method for {@link hdf.object.FileFormat#create(java.lang.String, int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Create a file that is already created with option FILE_CREATE_OPEN.
@@ -153,7 +153,7 @@ public class FileFormatTest {
      */
     /**
      * Test method for {@link hdf.object.FileFormat#getNumberOfMembers()}.
-     * <p>
+     *
      * <ul>
      * <li>Test the number of components.
      * </ul>
@@ -166,7 +166,7 @@ public class FileFormatTest {
 
     /**
      * Test method for {@link hdf.object.FileFormat#getFileFormat(java.lang.String)}.
-     * <p>
+     *
      * <ul>
      * <li>Test for HDF5.
      * </ul>
@@ -180,7 +180,7 @@ public class FileFormatTest {
 
     /**
      * Test method for {@link hdf.object.FileFormat#getFileFormatKeys()}.
-     * <p>
+     *
      * <ul>
      * <li>current file formats are HDF5, HDF.
      * </ul>
@@ -199,7 +199,7 @@ public class FileFormatTest {
 
     /**
      * Test method for {@link hdf.object.FileFormat#getFID()}.
-     * <p>
+     *
      * <ul>
      * <li>Make sure the fid is not -1.
      * </ul>
@@ -212,7 +212,7 @@ public class FileFormatTest {
 
     /**
      * Test method for {@link hdf.object.FileFormat#getInstance(java.lang.String)}.
-     * <p>
+     *
      * <ul>
      * <li>Open an non existing file.
      * <li>Open an exisiting file.
@@ -225,9 +225,7 @@ public class FileFormatTest {
         try {
             f = (H5File) FileFormat.getInstance("test_hdf5.h5");
         }
-        catch (Exception ex) {
-            ;
-        }
+        catch (Exception ex) {}
         assertNull(f);
 
         try {
@@ -241,7 +239,7 @@ public class FileFormatTest {
 
     /**
      * Test method for {@link hdf.object.FileFormat#getFileFormats()}.
-     * <p>
+     *
      * <ul>
      * <li>Test that the FileFormat object is formed for HDF5.
      * </ul>

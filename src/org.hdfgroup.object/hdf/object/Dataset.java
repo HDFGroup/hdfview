@@ -15,20 +15,29 @@
 package hdf.object;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
- * The abstract class provides general APIs to create and manipulate dataset
- * objects, and retrieve dataset properties, datatype and dimension sizes.
- * <p>
+ * The abstract class provides general APIs to create and manipulate dataset/attribute
+ * objects, and retrieve dataset/attribute properties, datatype and dimension sizes.
+ *
  * This class provides two convenient functions, read()/write(), to read/write
  * data values. Reading/writing data may take many library calls if we use the
  * library APIs directly. The read() and write functions hide all the details of
  * these calls from users.
- * <p>
- * For more details on dataset,
+ *
+ * For more details on dataset and attributes,
  * see <b> <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
- * <p>
  *
  * @see hdf.object.ScalarDS
  * @see hdf.object.CompoundDS
@@ -36,7 +45,8 @@ import java.util.List;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Dataset extends HObject implements MetaDataContainer, DataFormat {
+public abstract class Dataset extends HObject implements DataFormat
+{
     private static final long serialVersionUID    = -3360885430038261178L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
@@ -69,11 +79,11 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Array that contains the number of data points selected (for read/write)
      * in each dimension.
-     * <p>
+     *
      * The selected size must be less than or equal to the current dimension size.
      * A subset of a rectangle selection is defined by the starting position and
      * selected sizes.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -101,7 +111,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     /**
      * Array that contains the indices of the dimensions selected for display.
-     * <p>
+     *
      * <B>selectedIndex[] is provided for two purposes:</B>
      * <OL>
      * <LI>
@@ -139,6 +149,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     /** The compression information. */
     protected StringBuilder   compression;
+    /** The compression information default prefix. */
     public static final String COMPRESSION_GZIP_TXT = "GZIP: level = ";
 
     /** The filters information. */
@@ -170,28 +181,14 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /** The number of data points in the memory buffer. */
     protected long            nPoints             = 1;
 
-    /**
-     * The array to store flags to indicate if a member of this compound
-     * dataset is selected for read/write.
-     * <p>
-     * If a member is selected, the read/write will perform on the member.
-     * Applications such as HDFView will only display the selected members of
-     * the compound dataset.
-     *
-     * <pre>
-     * For example, if a compound dataset has four members
-     *     String[] memberNames = {"X", "Y", "Z", "TIME"};
-     * and
-     *     boolean[] isMemberSelected = {true, false, false, true};
-     * members "X" and "TIME" are selected for read and write.
-     * </pre>
-     */
-    protected boolean[] isMemberSelected;
+    /** Flag to indicate if the data is a single scalar point */
+    protected boolean   isScalar;
 
-    /**
-     * The datatypes of the compound attribute's members.
-     */
-    protected Datatype[] memberTypes = null;
+    /** True if this dataset is an image. */
+    protected boolean isImage;
+
+    /** True if this dataset is ASCII text. */
+    protected boolean isText;
 
     /**
      * The data buffer that contains the raw data directly reading from file
@@ -201,7 +198,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     /**
      * The array that holds the converted data of unsigned C-type integers.
-     * <p>
+     *
      * For example, Suppose that the original data is an array of unsigned
      * 16-bit short integers. Since Java does not support unsigned integer, the
      * data is converted to an array of 32-bit singed integer. In that case, the
@@ -269,9 +266,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     @SuppressWarnings("rawtypes")
     public void clear() {
         if (data != null) {
-            if (data instanceof List) {
+            if (data instanceof List)
                 ((List) data).clear();
-            }
             data = null;
             originalBuf = null;
             convertedBuf = null;
@@ -324,23 +320,25 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the max dimension sizes of the dataset.
      */
     public final long[] getMaxDims() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
-        if (maxDims == null) return dims;
+        if (maxDims == null)
+            return dims;
 
         return maxDims;
     }
 
     /**
      * Returns the dimension sizes of the selected subset.
-     * <p>
+     *
      * The SelectedDims is the number of data points of the selected subset.
      * Applications can use this array to change the size of selected subset.
      *
      * The selected size must be less than or equal to the current dimension size.
      * Combined with the starting position, selected sizes and stride, the
      * subset of a rectangle selection is fully defined.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -369,11 +367,11 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     /**
      * Returns the starting position of a selected subset.
-     * <p>
+     *
      * Applications can use this array to change the starting position of a
      * selection. Combined with the selected dimensions, selected sizes and
      * stride, the subset of a rectangle selection is fully defined.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -395,20 +393,21 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long[] getStartDims() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
         return startDims;
     }
 
     /**
      * Returns the selectedStride of the selected dataset.
-     * <p>
+     *
      * Applications can use this array to change how many elements to move in
      * each dimension.
      *
      * Combined with the starting position and selected sizes, the subset of a
      * rectangle selection is defined.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -429,17 +428,16 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long[] getStride() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
-        if (rank <= 0) {
+        if (rank <= 0)
             return null;
-        }
 
         if (selectedStride == null) {
             selectedStride = new long[rank];
-            for (int i = 0; i < rank; i++) {
+            for (int i = 0; i < rank; i++)
                 selectedStride[i] = 1;
-            }
         }
 
         return selectedStride;
@@ -448,7 +446,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Sets the flag that indicates if a byte array is converted to a string
      * array.
-     * <p>
+     *
      * In a string dataset, the raw data from file is stored in a byte array. By
      * default, this byte array is converted to an array of strings. For a large
      * dataset (e.g. more than one million strings), the conversion takes a long
@@ -456,7 +454,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * applications, such a conversion can be delayed. For example, A GUI
      * application may convert only the part of the strings that is visible to the
      * users, not the entire data array.
-     * <p>
+     *
      * setConvertByteToString(boolean b) allows users to set the flag so that
      * applications can choose to perform the byte-to-string conversion or not.
      * If the flag is set to false, the getData() returns an array of byte
@@ -483,12 +481,12 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     /**
      * Reads the raw data of the dataset from file to a byte array.
-     * <p>
+     *
      * readBytes() reads raw data to an array of bytes instead of array of its
      * datatype. For example, for a one-dimension 32-bit integer dataset of
      * size 5, readBytes() returns a byte array of size 20 instead of an
      * int array of 5.
-     * <p>
+     *
      * readBytes() can be used to copy data from one dataset to another
      * efficiently because the raw data is not converted to its native type, it
      * saves memory space and CPU time.
@@ -515,11 +513,11 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     /**
      * Creates a new dataset and writes the data buffer to the new dataset.
-     * <p>
+     *
      * This function allows applications to create a new dataset for a given
      * data buffer. For example, users can select a specific interesting part
      * from a large image and create a new image with the selection.
-     * <p>
+     *
      * The new dataset retains the datatype and dataset creation properties of
      * this dataset.
      *
@@ -538,23 +536,70 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     public abstract Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception;
 
+    /**
+     * The status of initialization for this object
+     *
+     * @return true if the data has been initialized
+     */
     @Override
     public final boolean isInited() {
         return inited;
     }
 
     /**
+     * Resets selection of dataspace
+     */
+    protected void resetSelection() {
+        for (int i = 0; i < rank; i++) {
+            startDims[i] = 0;
+            selectedDims[i] = 1;
+            if (selectedStride != null)
+                selectedStride[i] = 1;
+        }
+
+        if (rank == 1) {
+            selectedIndex[0] = 0;
+            selectedDims[0] = dims[0];
+        }
+        else if (rank == 2) {
+            selectedIndex[0] = 0;
+            selectedIndex[1] = 1;
+            selectedDims[0] = dims[0];
+            selectedDims[1] = dims[1];
+        }
+        else if (rank > 2) {
+            if (isImage) {
+                // 3D dataset is arranged in the order of [frame][height][width]
+                selectedIndex[1] = rank - 1; // width, the fastest dimension
+                selectedIndex[0] = rank - 2; // height
+                selectedIndex[2] = rank - 3; // frames
+            }
+            else {
+                selectedIndex[0] = 0; // width, the fastest dimension
+                selectedIndex[1] = 1; // height
+                selectedIndex[2] = 2; // frames
+            }
+
+            selectedDims[selectedIndex[0]] = dims[selectedIndex[0]];
+            selectedDims[selectedIndex[1]] = dims[selectedIndex[1]];
+            selectedDims[selectedIndex[2]] = dims[selectedIndex[2]];
+        }
+
+        isDataLoaded = false;
+    }
+
+    /**
      * Returns the data buffer of the dataset in memory.
-     * <p>
+     *
      * If data is already loaded into memory, returns the data; otherwise, calls
      * read() to read data from file into a memory buffer and returns the memory
      * buffer.
-     * <p>
+     *
      * By default, the whole dataset is read into memory. Users can also select
      * a subset to read. Subsetting is done in an implicit way.
-     * <p>
+     *
      * <b>How to Select a Subset</b>
-     * <p>
+     *
      * A selection is specified by three arrays: start, stride and count.
      * <ol>
      * <li>start: offset of a selection
@@ -564,7 +609,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * getStartDims(), getStride() and getSelectedDims() returns the start,
      * stride and count arrays respectively. Applications can make a selection
      * by changing the values of the arrays.
-     * <p>
+     *
      * The following example shows how to make a subset. In the example, the
      * dataset is a 4-dimensional array of [200][100][50][10], i.e. dims[0]=200;
      * dims[1]=100; dims[2]=50; dims[3]=10; <br>
@@ -604,14 +649,14 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * // outside the dataset object directly change the values of these array
      * // in the dataset object.
      * </pre>
-     * <p>
+     *
      * For ScalarDS, the memory data buffer is a one-dimensional array of byte,
      * short, int, float, double or String type based on the datatype of the
      * dataset.
-     * <p>
+     *
      * For CompoundDS, the memory data object is an java.util.List object. Each
      * element of the list is a data array that corresponds to a compound field.
-     * <p>
+     *
      * For example, if compound dataset "comp" has the following nested
      * structure, and member datatypes
      *
@@ -642,9 +687,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
                 isDataLoaded = true;
                 nPoints = 1;
                 log.trace("getData: selectedDims length={}",selectedDims.length);
-                for (int j = 0; j < selectedDims.length; j++) {
+                for (int j = 0; j < selectedDims.length; j++)
                     nPoints *= selectedDims[j];
-                }
             }
             log.trace("getData: read {}", nPoints);
         }
@@ -654,7 +698,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
 
     /**
      * Not for public use in the future.
-     * <p>
+     *
      * setData() is not safe to use because it changes memory buffer
      * of the dataset object. Dataset operations such as write/read
      * will fail if the buffer type or size is changed.
@@ -663,7 +707,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final void setData(Object d) {
-        if (!(this instanceof AttributeDataset))
+        if (!(this instanceof Attribute))
             throw new UnsupportedOperationException("setData: unsupported for non-Attribute objects");
 
         log.trace("setData(): isDataLoaded={}", isDataLoaded);
@@ -675,7 +719,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Clears the current data buffer in memory and forces the next read() to load
      * the data from file.
-     * <p>
+     *
      * The function read() loads data from file into memory only if the data is
      * not read. If data is already in memory, read() just returns the memory
      * buffer. Sometimes we want to force read() to re-read data from file. For
@@ -692,7 +736,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Returns the dimension size of the vertical axis.
      *
-     * <p>
      * This function is used by GUI applications such as HDFView. GUI
      * applications display a dataset in a 2D table or 2D image. The display
      * order is specified by the index array of selectedIndex as follow:
@@ -721,15 +764,14 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long getHeight() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
-        if ((selectedDims == null) || (selectedIndex == null)) {
+        if ((selectedDims == null) || (selectedIndex == null))
             return 0;
-        }
 
-        if ((selectedDims.length < 1) || (selectedIndex.length < 1)) {
+        if ((selectedDims.length < 1) || (selectedIndex.length < 1))
             return 0;
-        }
 
         return selectedDims[selectedIndex[0]];
     }
@@ -737,7 +779,6 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Returns the dimension size of the horizontal axis.
      *
-     * <p>
      * This function is used by GUI applications such as HDFView. GUI
      * applications display a dataset in 2D Table or 2D Image. The display order is
      * specified by the index array of selectedIndex as follow:
@@ -766,22 +807,20 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final long getWidth() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
-        if ((selectedDims == null) || (selectedIndex == null)) {
+        if ((selectedDims == null) || (selectedIndex == null))
             return 0;
-        }
 
-        if ((selectedDims.length < 2) || (selectedIndex.length < 2)) {
+        if ((selectedDims.length < 2) || (selectedIndex.length < 2))
             return 1;
-        }
 
         return selectedDims[selectedIndex[1]];
     }
 
     /**
      * Returns the indices of display order.
-     * <p>
      *
      * selectedIndex[] is provided for two purposes:
      * <OL>
@@ -789,7 +828,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * selectedIndex[] is used to indicate the order of dimensions for display.
      * selectedIndex[0] is for the row, selectedIndex[1] is for the column and
      * selectedIndex[2] for the depth.
-     * <p>
+     *
      * For example, for a four dimension dataset, if selectedIndex[] = {1, 2, 3},
      * then dim[1] is selected as row index, dim[2] is selected as column index
      * and dim[3] is selected as depth index.
@@ -811,14 +850,15 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final int[] getSelectedIndex() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
         return selectedIndex;
     }
 
     /**
      * Returns the string representation of compression information.
-     * <p>
+     *
      * For example,
      * "SZIP: Pixels per block = 8: H5Z_FILTER_CONFIG_DECODE_ENABLED".
      *
@@ -826,7 +866,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     @Override
     public final String getCompression() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
         return compression.toString();
     }
@@ -837,7 +878,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the string representation of filter information.
      */
     public final String getFilters() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
         return filters.toString();
     }
@@ -848,7 +890,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the string representation of storage layout information.
      */
     public final String getStorageLayout() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
         return storageLayout.toString();
     }
@@ -859,7 +902,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the string representation of storage information.
      */
     public final String getStorage() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
         return storage.toString();
     }
@@ -872,63 +916,20 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      *         chunked.
      */
     public final long[] getChunkSize() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
         return chunkSize;
     }
 
+    /**
+     * Returns the datatype of the data object.
+     *
+     * @return the datatype of the data object.
+     */
     @Override
     public Datatype getDatatype() {
         return datatype;
-    }
-
-    /**
-     * Returns the number of selected members of the compound attribute.
-     *
-     * Selected members are the compound fields which are selected for read/write.
-     * <p>
-     * For example, in a compound datatype of {int A, float B, char[] C}, users can
-     * choose to retrieve only {A, C} from the attribute. In this case,
-     * getSelectedMemberCount() returns two.
-     *
-     * @return the number of selected members.
-     */
-    public int getSelectedMemberCount() {
-        int count = 0;
-
-        if (isMemberSelected != null) {
-            for (int i = 0; i < isMemberSelected.length; i++) {
-                if (isMemberSelected[i]) {
-                    count++;
-                }
-            }
-        }
-
-        log.trace("getSelectedMemberCount(): count of selected members={}", count);
-
-        return count;
-    }
-
-    /**
-     * Returns an array of datatype objects of selected compound members.
-     *
-     * @return an array of datatype objects of selected compound members.
-     */
-    public Datatype[] getSelectedMemberTypes() {
-        if (isMemberSelected == null) {
-            log.debug("getSelectedMemberTypes(): isMemberSelected array is null");
-            return memberTypes;
-        }
-
-        int idx = 0;
-        Datatype[] types = new Datatype[getSelectedMemberCount()];
-        for (int i = 0; i < isMemberSelected.length; i++) {
-            if (isMemberSelected[i]) {
-                types[idx++] = memberTypes[i];
-            }
-        }
-
-        return types;
     }
 
     /**
@@ -947,13 +948,13 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Converts one-dimension array of unsigned C-type integers to a new array
      * of appropriate Java integer in memory.
-     * <p>
+     *
      * Since Java does not support unsigned integer, values of unsigned C-type
      * integers must be converted into its appropriate Java integer. Otherwise,
      * the data value will not displayed correctly. For example, if an unsigned
      * C byte, x = 200, is stored into an Java byte y, y will be -56 instead of
      * the correct value of 200.
-     * <p>
+     *
      * Unsigned C integers are upgrade to Java integers according to the
      * following table:
      *  <table border=1>
@@ -982,7 +983,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * <strong>NOTE: this conversion cannot deal with unsigned 64-bit integers.
      * Therefore, the values of unsigned 64-bit datasets may be wrong in Java
      * applications</strong>.
-     * <p>
+     *
      * If memory data of unsigned integers is converted by
      * convertFromUnsignedC(), convertToUnsignedC() must be called to convert
      * the data back to unsigned C before data is written into file.
@@ -1025,51 +1026,42 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         if (dname == 'B') {
             log.debug("convertFromUnsignedC(): Java convert byte to short");
             short[] sdata = null;
-            if (dataOUT == null) {
+            if (dataOUT == null)
                 sdata = new short[size];
-            }
-            else {
+            else
                 sdata = (short[]) dataOUT;
-            }
 
             byte[] bdata = (byte[]) dataIN;
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++)
                 sdata[i] = (short) ((bdata[i] + 256) & 0xFF);
-            }
 
             dataOUT = sdata;
         }
         else if (dname == 'S') {
             log.debug("convertFromUnsignedC(): Java convert short to int");
             int[] idata = null;
-            if (dataOUT == null) {
+            if (dataOUT == null)
                 idata = new int[size];
-            }
-            else {
+            else
                 idata = (int[]) dataOUT;
-            }
 
             short[] sdata = (short[]) dataIN;
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++)
                 idata[i] = (sdata[i] + 65536) & 0xFFFF;
-            }
 
             dataOUT = idata;
         }
         else if (dname == 'I') {
             log.debug("convertFromUnsignedC(): Java convert int to long");
             long[] ldata = null;
-            if (dataOUT == null) {
+            if (dataOUT == null)
                 ldata = new long[size];
-            }
-            else {
+            else
                 ldata = (long[]) dataOUT;
-            }
 
             int[] idata = (int[]) dataIN;
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++)
                 ldata[i] = (idata[i] + 4294967296L) & 0xFFFFFFFFL;
-            }
 
             dataOUT = ldata;
         }
@@ -1098,7 +1090,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Converts the array of converted unsigned integers back to unsigned C-type
      * integer data in memory.
-     * <p>
+     *
      * If memory data of unsigned integers is converted by
      * convertFromUnsignedC(), convertToUnsignedC() must be called to convert
      * the data back to unsigned C before data is written into file.
@@ -1141,46 +1133,37 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         if (dname == 'S') {
             log.debug("convertToUnsignedC(): Java convert short to byte");
             byte[] bdata = null;
-            if (dataOUT == null) {
+            if (dataOUT == null)
                 bdata = new byte[size];
-            }
-            else {
+            else
                 bdata = (byte[]) dataOUT;
-            }
             short[] sdata = (short[]) dataIN;
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++)
                 bdata[i] = (byte) sdata[i];
-            }
             dataOUT = bdata;
         }
         else if (dname == 'I') {
             log.debug("convertToUnsignedC(): Java convert int to short");
             short[] sdata = null;
-            if (dataOUT == null) {
+            if (dataOUT == null)
                 sdata = new short[size];
-            }
-            else {
+            else
                 sdata = (short[]) dataOUT;
-            }
             int[] idata = (int[]) dataIN;
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++)
                 sdata[i] = (short) idata[i];
-            }
             dataOUT = sdata;
         }
         else if (dname == 'J') {
             log.debug("convertToUnsignedC(): Java convert long to int");
             int[] idata = null;
-            if (dataOUT == null) {
+            if (dataOUT == null)
                 idata = new int[size];
-            }
-            else {
+            else
                 idata = (int[]) dataOUT;
-            }
             long[] ldata = (long[]) dataIN;
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++)
                 idata[i] = (int) ldata[i];
-            }
             dataOUT = idata;
         }
         else {
@@ -1194,18 +1177,18 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Converts an array of bytes into an array of Strings for a fixed string
      * dataset.
-     * <p>
+     *
      * A C-string is an array of chars while an Java String is an object. When a
      * string dataset is read into a Java application, the data is stored in an
      * array of Java bytes. byteToString() is used to convert the array of bytes
      * into an array of Java strings so that applications can display and modify
      * the data content.
-     * <p>
+     *
      * For example, the content of a two element C string dataset is {"ABC",
      * "abc"}. Java applications will read the data into a byte array of {65,
      * 66, 67, 97, 98, 99). byteToString(bytes, 3) returns an array of Java
      * String of strs[0]="ABC", and strs[1]="abc".
-     * <p>
+     *
      * If memory data of strings is converted to Java Strings, stringToByte()
      * must be called to convert the memory data back to byte array before data
      * is written to file.
@@ -1233,9 +1216,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         for (int i = 0; i < n; i++) {
             str = new String(bytes, i * length, length);
             idx = str.indexOf('\0');
-            if (idx >= 0) {
+            if (idx >= 0)
                 str = str.substring(0, idx);
-            }
 
             // trim only the end
             int end = str.length();
@@ -1251,7 +1233,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Converts a string array into an array of bytes for a fixed string
      * dataset.
-     * <p>
+     *
      * If memory data of strings is converted to Java Strings, stringToByte()
      * must be called to convert the memory data back to byte array before data
      * is written to file.
@@ -1280,9 +1262,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
             strBuff.replace(0, length, " ");
 
             if (strings[i] != null) {
-                if (strings[i].length() > length) {
+                if (strings[i].length() > length)
                     strings[i] = strings[i].substring(0, length);
-                }
                 strBuff.replace(0, length, strings[i]);
             }
 
@@ -1296,7 +1277,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
     /**
      * Returns the array of strings that represent the dimension names. Returns
      * null if there is no dimension name.
-     * <p>
+     *
      * Some datasets have pre-defined names for each dimension such as
      * "Latitude" and "Longitude". getDimNames() returns these pre-defined
      * names.
@@ -1304,7 +1285,8 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      * @return the names of dimensions, or null if there is no dimension name.
      */
     public final String[] getDimNames() {
-        if (!inited) init();
+        if (!inited)
+            init();
 
         return dimNames;
     }
@@ -1346,7 +1328,15 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         return originalBuf.getClass();
     }
 
-    /*
+    /**
+     * @return true if the data is a single scalar point; otherwise, returns
+     *         false.
+     */
+    public boolean isScalar() {
+        return isScalar;
+    }
+
+    /**
      * Checks if dataset is virtual. Sub-classes must replace
      * this default implementation.
      *
@@ -1356,9 +1346,12 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         return false;
     }
 
-    /*
+    /**
      * Gets the source file name at index if dataset is virtual. Sub-classes must replace
      * this default implementation.
+     *
+     * @param index
+     *            index of the source file name if dataset is virtual.
      *
      * @return filename if the dataset is virtual; otherwise returns null.
      */
@@ -1366,7 +1359,7 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
         return null;
     }
 
-    /*
+    /**
      * Gets the number of source files if dataset is virtual. Sub-classes must replace
      * this default implementation.
      *
@@ -1374,5 +1367,289 @@ public abstract class Dataset extends HObject implements MetaDataContainer, Data
      */
     public int getVirtualMaps() {
         return -1;
+    }
+
+    /**
+     * Returns a string representation of the data value. For
+     * example, "0, 255".
+     *
+     * For a compound datatype, it will be a 1D array of strings with field
+     * members separated by the delimiter. For example,
+     * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
+     * float} of three data points.
+     *
+     * @param delimiter
+     *            The delimiter used to separate individual data points. It
+     *            can be a comma, semicolon, tab or space. For example,
+     *            toString(",") will separate data by commas.
+     *
+     * @return the string representation of the data values.
+     */
+    public String toString(String delimiter) {
+        return toString(delimiter, -1);
+    }
+
+    /**
+     * Returns a string representation of the data value. For
+     * example, "0, 255".
+     *
+     * For a compound datatype, it will be a 1D array of strings with field
+     * members separated by the delimiter. For example,
+     * "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
+     * float} of three data points.
+     *
+     * @param delimiter
+     *            The delimiter used to separate individual data points. It
+     *            can be a comma, semicolon, tab or space. For example,
+     *            toString(",") will separate data by commas.
+     * @param maxItems
+     *            The maximum number of Array values to return
+     *
+     * @return the string representation of the data values.
+     */
+    public String toString(String delimiter, int maxItems) {
+        Object theData = originalBuf;
+        if (theData == null) {
+            log.debug("toString: value is null");
+            return null;
+        }
+
+        if (theData instanceof List<?>) {
+            log.trace("toString: value is list");
+            return null;
+        }
+
+        Class<? extends Object> valClass = theData.getClass();
+
+        if (!valClass.isArray()) {
+            log.trace("toString: finish - not array");
+            String strValue = theData.toString();
+            if (maxItems > 0 && strValue.length() > maxItems)
+                // truncate the extra characters
+                strValue = strValue.substring(0, maxItems);
+            return strValue;
+        }
+
+        // value is an array
+        StringBuilder sb = new StringBuilder();
+        int n = Array.getLength(theData);
+        if ((maxItems > 0) && (n > maxItems))
+            n = maxItems;
+
+        log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", getDatatype().isEnum(),
+                getDatatype().isUnsigned(), n);
+
+        if (getDatatype().isEnum()) {
+            String cname = valClass.getName();
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+            log.trace("toString: is_enum with cname={} dname={}", cname, dname);
+
+            Map<String, String> map = this.getDatatype().getEnumMembers();
+            String theValue = null;
+            switch (dname) {
+                case 'B':
+                    byte[] barray = (byte[]) theData;
+                    short sValue = barray[0];
+                    theValue = String.valueOf(sValue);
+                    if (map.containsKey(theValue))
+                        sb.append(map.get(theValue));
+                    else
+                        sb.append(sValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sValue = barray[i];
+                        theValue = String.valueOf(sValue);
+                        if (map.containsKey(theValue))
+                            sb.append(map.get(theValue));
+                        else
+                            sb.append(sValue);
+                    }
+                    break;
+                case 'S':
+                    short[] sarray = (short[]) theData;
+                    int iValue = sarray[0];
+                    theValue = String.valueOf(iValue);
+                    if (map.containsKey(theValue))
+                        sb.append(map.get(theValue));
+                    else
+                        sb.append(iValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        iValue = sarray[i];
+                        theValue = String.valueOf(iValue);
+                        if (map.containsKey(theValue))
+                            sb.append(map.get(theValue));
+                        else
+                            sb.append(iValue);
+                    }
+                    break;
+                case 'I':
+                    int[] iarray = (int[]) theData;
+                    long lValue = iarray[0];
+                    theValue = String.valueOf(lValue);
+                    if (map.containsKey(theValue))
+                        sb.append(map.get(theValue));
+                    else
+                        sb.append(lValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        lValue = iarray[i];
+                        theValue = String.valueOf(lValue);
+                        if (map.containsKey(theValue))
+                            sb.append(map.get(theValue));
+                        else
+                            sb.append(lValue);
+                    }
+                    break;
+                case 'J':
+                    long[] larray = (long[]) theData;
+                    Long l = larray[0];
+                    theValue = Long.toString(l);
+                    if (map.containsKey(theValue))
+                        sb.append(map.get(theValue));
+                    else
+                        sb.append(theValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        l = larray[i];
+                        theValue = Long.toString(l);
+                        if (map.containsKey(theValue))
+                            sb.append(map.get(theValue));
+                        else
+                            sb.append(theValue);
+                    }
+                    break;
+                default:
+                    sb.append(Array.get(theData, 0));
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sb.append(Array.get(theData, i));
+                    }
+                    break;
+            }
+        }
+        else if (getDatatype().isUnsigned()) {
+            String cname = valClass.getName();
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+            log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
+
+            switch (dname) {
+                case 'B':
+                    byte[] barray = (byte[]) theData;
+                    short sValue = barray[0];
+                    if (sValue < 0)
+                        sValue += 256;
+                    sb.append(sValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sValue = barray[i];
+                        if (sValue < 0)
+                            sValue += 256;
+                        sb.append(sValue);
+                    }
+                    break;
+                case 'S':
+                    short[] sarray = (short[]) theData;
+                    int iValue = sarray[0];
+                    if (iValue < 0)
+                        iValue += 65536;
+                    sb.append(iValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        iValue = sarray[i];
+                        if (iValue < 0)
+                            iValue += 65536;
+                        sb.append(iValue);
+                    }
+                    break;
+                case 'I':
+                    int[] iarray = (int[]) theData;
+                    long lValue = iarray[0];
+                    if (lValue < 0)
+                        lValue += 4294967296L;
+                    sb.append(lValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        lValue = iarray[i];
+                        if (lValue < 0)
+                            lValue += 4294967296L;
+                        sb.append(lValue);
+                    }
+                    break;
+                case 'J':
+                    long[] larray = (long[]) theData;
+                    Long l = larray[0];
+                    String theValue = Long.toString(l);
+                    if (l < 0) {
+                        l = (l << 1) >>> 1;
+                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                        BigInteger big2 = new BigInteger(l.toString());
+                        BigInteger big = big1.add(big2);
+                        theValue = big.toString();
+                    }
+                    sb.append(theValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        l = larray[i];
+                        theValue = Long.toString(l);
+                        if (l < 0) {
+                            l = (l << 1) >>> 1;
+                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                            BigInteger big2 = new BigInteger(l.toString());
+                            BigInteger big = big1.add(big2);
+                            theValue = big.toString();
+                        }
+                        sb.append(theValue);
+                    }
+                    break;
+                default:
+                    String strValue = Array.get(theData, 0).toString();
+                    if (maxItems > 0 && strValue.length() > maxItems)
+                        // truncate the extra characters
+                        strValue = strValue.substring(0, maxItems);
+                    sb.append(strValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        strValue = Array.get(theData, i).toString();
+                        if (maxItems > 0 && strValue.length() > maxItems)
+                            // truncate the extra characters
+                            strValue = strValue.substring(0, maxItems);
+                        sb.append(strValue);
+                    }
+                    break;
+            }
+        }
+        else {
+            log.trace("toString: not enum or unsigned");
+            Object value = Array.get(theData, 0);
+            String strValue;
+
+            if (value == null)
+                strValue = "null";
+            else
+                strValue = value.toString();
+
+            if (maxItems > 0 && strValue.length() > maxItems)
+                // truncate the extra characters
+                strValue = strValue.substring(0, maxItems);
+            sb.append(strValue);
+
+            for (int i = 1; i < n; i++) {
+                sb.append(delimiter);
+                value = Array.get(theData, i);
+
+                if (value == null)
+                    strValue = "null";
+                else
+                    strValue = value.toString();
+
+                if (maxItems > 0 && strValue.length() > maxItems)
+                    // truncate the extra characters
+                    strValue = strValue.substring(0, maxItems);
+                sb.append(strValue);
+            }
+        }
+
+        return sb.toString();
     }
 }

@@ -83,6 +83,8 @@ import hdf.view.ImageView.DefaultImageView.Rotate90Filter;
  */
 public class DataOptionDialog extends Dialog {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataOptionDialog.class);
+
     private Shell               shell;
 
     private Font                curFont;
@@ -213,6 +215,9 @@ public class DataOptionDialog extends Dialog {
                 FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
     }
 
+    /**
+     * Open the DataOptionDialoDialog used to select display options for an object.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

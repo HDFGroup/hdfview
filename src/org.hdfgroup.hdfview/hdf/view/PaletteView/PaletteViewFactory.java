@@ -26,7 +26,7 @@ import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.TableView.TableView;
 import hdf.view.TreeView.TreeView;
 
-/*
+/**
  * This class extends DataViewFactory so that at runtime it can be determined
  * if a specific DataViewFactory class is a PaletteViewFactory and can thus
  * be used appropriately where a PaletteView is needed.

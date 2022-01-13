@@ -42,38 +42,47 @@ import java.io.Serializable;
  * Group and Dataset. At the bottom level of the hierarchy, HDF4 and HDF5
  * objects have their own implementation, such as H5Group, H5ScalarDS,
  * H5CompoundDS, and H5Datatype.
- * <p>
+ *
  * <b>Warning: HDF4 and HDF5 may have multiple links to the same object. Data
  * objects in this model do not deal with multiple links. Users may create
  * duplicate copies of the same data object with different paths. Applications
  * should check the OID of the data object to avoid duplicate copies of the same
  * object.</b>
- * <p>
+ *
  * HDF4 objects are uniquely identified by the OID (tag_id, ref_id) pair. The
  * ref_id is the object reference count. The tag_id is a pre-defined number to
  * identify the type of object. For example, DFTAG_RI is for raster image,
  * DFTAG_SD is for scientific dataset, and DFTAG_VG is for Vgroup.
- * <p>
+ *
  * HDF5 objects are uniquely identified by the OID containing just the object
- * reference. The OID is usually obtained by H5Rcreate(). The following example
+ * reference. The OID is usually obtained by H5Rcreate_object(). The following example
  * shows how to retrieve an object ID from a file:
  *
  * <pre>
- * // retrieve the object ID
- * try {
- *     byte[] ref_buf = H5.H5Rcreate(h5file.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
- *     long[] oid = new long[1];
- *     oid[0] = HDFNativeData.byteToLong(ref_buf, 0);
- * } catch (Exception ex) {
- * }
+ *      // retrieve the object ID
+ *      try {
+ *           byte[] ref_buf = H5.H5Rcreate_object(h5file.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
+ *           oid = HDFNativeData.byteToLong(ref_buf);
+ *       }
+ *       catch (Exception ex) {
+ *       }
+ *       // Destroy the object reference we were using
+ *       // If the file doesn't exist or tempfile is null, this can throw
+ *       // an exception, but that exception is ignored.
+ *       if (oid) {
+ *           HDFArray theArray = new HDFArray(oid);
+ *           byte[] refBuf = theArray.byteify();
+ *           H5.H5Rdestroy(refBuf);
+ *           oid = null;
+ *       }
  * </pre>
  *
  * @version 2.0 4/2/2018
  * @author Peter X. Cao, Jordan T. Henderson
  * @see <a href="DataFormat.html">hdf.object.DataFormat</a>
  */
-public abstract class HObject implements Serializable {
-
+public abstract class HObject implements Serializable
+{
     /**
      * The serialVersionUID is a universal version identifier for a Serializable
      * class. Deserialization uses this number to ensure that a loaded class
@@ -117,11 +126,11 @@ public abstract class HObject implements Serializable {
 
     /**
      * Array of long integer storing unique identifier for the object.
-     * <p>
+     *
      * HDF4 objects are uniquely identified by a (tag_id, ref_id) pair. i.e.
      * oid[0] = tag, oid[1] = ref_id.<br>
-     * HDF5 objects are uniquely identified by an object reference. i.e.
-     * oid[0] = obj_id.
+     * HDF5 objects are uniquely identified by a reference. i.e.
+     * oid[0...7] = H5R_ref_t.
      */
     protected long[]           oid;
 
@@ -144,7 +153,7 @@ public abstract class HObject implements Serializable {
 
     /**
      * Constructs an instance of a data object with specific name and path.
-     * <p>
+     *
      * For example, in H5ScalarDS(h5file, "dset", "/arrays"), "dset" is the name
      * of the dataset, "/arrays" is the group path of the dataset.
      *
@@ -161,7 +170,7 @@ public abstract class HObject implements Serializable {
 
     /**
      * Constructs an instance of a data object with specific name and path.
-     * <p>
+     *
      * For example, in H5ScalarDS(h5file, "dset", "/arrays"), "dset" is the name
      * of the dataset, "/arrays" is the group path of the dataset.
      *
@@ -179,12 +188,10 @@ public abstract class HObject implements Serializable {
         this.fileFormat = theFile;
         this.oid = oid;
 
-        if (fileFormat != null) {
+        if (fileFormat != null)
             this.filename = fileFormat.getFilePath();
-        }
-        else {
+        else
             this.filename = null;
-        }
 
         try {
             setFullname(thePath, theName);
@@ -192,11 +199,14 @@ public abstract class HObject implements Serializable {
         catch (Exception e) {
             log.debug("setFullname failed", e.getMessage());
         }
+        log.trace("Fullname={} oid={}", this.fullName, this.oid);
+    }
+
+    protected void finalize() throws Throwable {
     }
 
     /**
      * Print out debug information
-     * <p>
      *
      * @param msg
      *            the debug message to print
@@ -207,7 +217,7 @@ public abstract class HObject implements Serializable {
 
     /**
      * Returns the name of the file that contains this data object.
-     * <p>
+     *
      * The file name is necessary because the file of this data object is
      * uniquely identified when multiple files are opened by an application at
      * the same time.
@@ -279,28 +289,24 @@ public abstract class HObject implements Serializable {
         if (newName == null)
             throw new IllegalArgumentException("The new name is NULL");
 
-        if (newName.equals(HObject.SEPARATOR)) {
+        if (newName.equals(HObject.SEPARATOR))
             throw new IllegalArgumentException("The new name cannot be the root");
-        }
 
-        if (newName.startsWith(HObject.SEPARATOR)) {
+        if (newName.startsWith(HObject.SEPARATOR))
             newName = newName.substring(1);
-        }
 
-        if (newName.endsWith(HObject.SEPARATOR)) {
+        if (newName.endsWith(HObject.SEPARATOR))
             newName = newName.substring(0, newName.length() - 2);
-        }
 
-        if (newName.contains(HObject.SEPARATOR)) {
+        if (newName.contains(HObject.SEPARATOR))
             throw new IllegalArgumentException("The new name contains the SEPARATOR character: " + HObject.SEPARATOR);
-        }
 
         name = newName;
     }
 
     /**
      * Sets the path of the object.
-     * <p>
+     *
      * setPath() is needed to change the path for an object when the name of a
      * group containing the object is changed by setName(). The path of the
      * object in memory under this group should be updated to the new path to
@@ -312,13 +318,22 @@ public abstract class HObject implements Serializable {
      * @throws Exception if a failure occurred
      */
     public void setPath(String newPath) throws Exception {
-        if (newPath == null) {
+        if (newPath == null)
             newPath = "/";
-        }
 
         path = newPath;
     }
 
+    /**
+     * Sets the full name of the object.
+     *
+     * @param thePath
+     *            The path of the object.
+     * @param theName
+     *            The name of the object.
+     *
+     * @throws Exception if a failure occurred
+     */
     public void setFullname(String thePath, String theName) throws Exception {
         // file name is packed in the full path
         if ((theName == null) && (thePath != null)) {
@@ -328,14 +343,12 @@ public abstract class HObject implements Serializable {
             }
             else {
                 // the path must starts with "/"
-                if (!thePath.startsWith(HObject.SEPARATOR)) {
+                if (!thePath.startsWith(HObject.SEPARATOR))
                     thePath = HObject.SEPARATOR + thePath;
-                }
 
                 // get rid of the last "/"
-                if (thePath.endsWith(HObject.SEPARATOR)) {
+                if (thePath.endsWith(HObject.SEPARATOR))
                     thePath = thePath.substring(0, thePath.length() - 1);
-                }
 
                 // separate the name and the path
                 theName = thePath.substring(thePath.lastIndexOf(SEPARATOR) + 1);
@@ -349,20 +362,17 @@ public abstract class HObject implements Serializable {
             }
             else {
                 // the full name must starts with "/"
-                if (!theName.startsWith(SEPARATOR)) {
+                if (!theName.startsWith(SEPARATOR))
                     theName = SEPARATOR + theName;
-                }
 
                 // the fullname must not end with "/"
                 int n = theName.length();
-                if (theName.endsWith(SEPARATOR)) {
+                if (theName.endsWith(SEPARATOR))
                     theName = theName.substring(0, n - 1);
-                }
 
                 int idx = theName.lastIndexOf(SEPARATOR);
-                if (idx < 0) {
+                if (idx < 0)
                     thePath = SEPARATOR;
-                }
                 else {
                     thePath = theName.substring(0, idx);
                     theName = theName.substring(idx + 1);
@@ -373,9 +383,8 @@ public abstract class HObject implements Serializable {
         // the path must start and end with "/"
         if (thePath != null) {
             thePath = thePath.replaceAll("//", "/");
-            if (!thePath.endsWith(SEPARATOR)) {
+            if (!thePath.endsWith(SEPARATOR))
                 thePath += SEPARATOR;
-            }
         }
 
         this.name = theName;
@@ -384,6 +393,16 @@ public abstract class HObject implements Serializable {
         this.fullName = createFullname(thePath, theName);
     }
 
+    /**
+     * Creates the full name of the object.
+     *
+     * @param thePath
+     *            The path of the object.
+     * @param theName
+     *            The name of the object.
+     *
+     * @return the full name of the object.
+     */
     public String createFullname(String thePath, String theName) {
         String theFullName;
 
@@ -391,14 +410,12 @@ public abstract class HObject implements Serializable {
             theFullName = thePath + theName;
         }
         else {
-            if (theName == null) {
+            if (theName == null)
                 theFullName = "/";
-            }
-            else if (theName.startsWith("/")) {
+            else if (theName.startsWith("/"))
                 theFullName = theName;
-            }
             else {
-                if (this instanceof AttributeDataset)
+                if (this instanceof Attribute)
                     theFullName = theName;
                 else
                     theFullName = "/" + theName;
@@ -427,10 +444,10 @@ public abstract class HObject implements Serializable {
 
     /**
      * Closes access to the object.
-     * <p>
+     *
      * Sub-classes must implement this interface because different data objects
      * have their own ways of how the data resources are closed.
-     * <p>
+     *
      * For example, H5Group.close() calls the hdf.hdf5lib.H5.H5Gclose()
      * method and closes the group resource specified by the group id.
      *
@@ -445,12 +462,10 @@ public abstract class HObject implements Serializable {
      * @return the file identifier of of the file containing the object.
      */
     public final long getFID() {
-        if (fileFormat != null) {
+        if (fileFormat != null)
             return fileFormat.getFID();
-        }
-        else {
+        else
             return -1;
-        }
     }
 
     /**
@@ -464,7 +479,7 @@ public abstract class HObject implements Serializable {
 
     /**
      * Returns a cloned copy of the object identifier.
-     * <p>
+     *
      * The object OID cannot be modified once it is created. getOID() clones the object OID to ensure
      * the object OID cannot be modified outside of this class.
      *
@@ -480,10 +495,10 @@ public abstract class HObject implements Serializable {
 
     /**
      * Checks if the OID of the object is the same as the given object identifier within the same file.
-     * <p>
+     *
      * HDF4 and HDF5 data objects are identified by their unique OIDs. A data object in a file may have
      * multiple logical names , which are represented in a graph structure as separate objects.
-     * <p>
+     *
      * The HObject.equalsOID(long[] theID) can be used to check if two data objects with different names
      * are pointed to the same object within the same file.
      *
@@ -493,34 +508,31 @@ public abstract class HObject implements Serializable {
      * @return true if the ID of the object equals the given OID; otherwise, returns false.
      */
     public final boolean equalsOID(long[] theID) {
-        if ((theID == null) || (oid == null)) {
+        if ((theID == null) || (oid == null))
             return false;
-        }
 
         int n1 = theID.length;
         int n2 = oid.length;
 
-        if (n1 == 0 || n2 == 0) {
+        if (n1 == 0 || n2 == 0)
             return false;
-        }
 
         int n = Math.min(n1, n2);
         boolean isMatched = (theID[0] == oid[0]);
 
-        for (int i = 1; isMatched && (i < n); i++) {
+        for (int i = 1; isMatched && (i < n); i++)
             isMatched = (theID[i] == oid[i]);
-        }
 
         return isMatched;
     }
 
     /**
      * Returns the name of the object.
-     * <p>
+     *
      * This method overwrites the toString() method in the Java Object class
      * (the root class of all Java objects) so that it returns the name of the
      * HObject instead of the name of the class.
-     * <p>
+     *
      * For example, toString() returns "Raster Image #2" instead of
      * "hdf.object.h4.H4SDS".
      *
@@ -528,9 +540,8 @@ public abstract class HObject implements Serializable {
      */
     @Override
     public String toString() {
-        if (this instanceof Group) {
+        if (this instanceof Group)
             if (((Group) this).isRoot() && this.getFileFormat() != null) return this.getFileFormat().getName();
-        }
 
         if (name != null) return name;
 

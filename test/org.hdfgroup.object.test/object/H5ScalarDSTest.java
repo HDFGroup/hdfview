@@ -29,7 +29,8 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
-import hdf.object.AttributeDataset;
+
+import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -42,9 +43,9 @@ import hdf.object.h5.H5ScalarDS;
 
 /**
  * TestCase for H5ScalarDS.
- * <p>
+ *
  * This class tests all the public methods in H5ScalarDS class.
- * <p>
+ *
  * The test file contains the following objects.
  *
  * <pre>
@@ -67,9 +68,9 @@ import hdf.object.h5.H5ScalarDS;
  *         /g0/g00/dataset_float    Dataset {50, 10}
  *         /g0_attr                 Group
  * </pre>
- * <p>
+ *
  * We use the following template to test all the methods:
- * <p>
+ *
  * What to test:
  * <ul>
  * <li>Test for boundary conditions
@@ -88,7 +89,8 @@ import hdf.object.h5.H5ScalarDS;
  *
  * @author Peter Cao, The HDF Group
  */
-public class H5ScalarDSTest {
+public class H5ScalarDSTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5ScalarDSTest.class);
     private static final H5File H5FILE = new H5File();
     private static final int NLOOPS = 10;
@@ -116,8 +118,7 @@ public class H5ScalarDSTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -216,7 +217,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#setName(java.lang.String)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test for boundary conditions
@@ -248,9 +249,7 @@ public class H5ScalarDSTest {
             testDataset.setName(null);
             H5.H5error_on();
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        catch (final Exception ex) {} // Expected - intentional
 
         // set to an existing name
         try {
@@ -258,9 +257,7 @@ public class H5ScalarDSTest {
             testDataset.setName(H5TestFile.NAME_DATASET_FLOAT);
             H5.H5error_on();
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        catch (final Exception ex) {} // Expected - intentional
 
         try {
             testDataset.setName(newName);
@@ -311,7 +308,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#open()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>open a dataset identifier
@@ -344,24 +341,21 @@ public class H5ScalarDSTest {
             try {
                 H5.H5Tclose(tid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Sclose(sid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Dclose(did);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
         }
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#close(int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>open a dataset identifier
@@ -396,13 +390,11 @@ public class H5ScalarDSTest {
             try {
                 H5.H5Tclose(tid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Sclose(sid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
 
             try {
                 testDataset.close(did);
@@ -434,7 +426,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#clear()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read data/attributes from file
@@ -481,7 +473,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#init()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>call init()
@@ -554,7 +546,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#read()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read the whole dataset of the test dataset
@@ -581,9 +573,8 @@ public class H5ScalarDSTest {
             assertNotNull(ints);
 
             // check the data content
-            for (int i = 0; i < ints.length; i++) {
+            for (int i = 0; i < ints.length; i++)
                 assertEquals(H5TestFile.DATA_INT[i], ints[i]);
-            }
         } //  (int loop=0; loop<NLOOPS; loop++)
 
         // Close default testFile
@@ -622,7 +613,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#read()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read an external dataset
@@ -657,16 +648,20 @@ public class H5ScalarDSTest {
             fail("Failed to open an external file.");
         }
         finally {
-            if (file != null) {
-                try {file.close();} catch(Exception ex){ex.printStackTrace();}
-            }
+            if (file != null)
+                try {
+                    file.close();
+                }
+                catch(Exception ex){
+                    ex.printStackTrace();
+                }
         }
         log.debug("testReadExt finish");
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#read()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read data row by row
@@ -692,9 +687,8 @@ public class H5ScalarDSTest {
                 final long[] count = testDataset.getSelectedDims();
 
                 // select one row only
-                for (int j = 0; j < rank; j++) {
+                for (int j = 0; j < rank; j++)
                     count[j] = 1;
-                }
 
                 // select different rows
                 start[0] = i;
@@ -715,7 +709,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#readBytes()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read the whole dataset in a byte buffer
@@ -743,7 +737,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#write(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read/write the whole dataset
@@ -770,9 +764,8 @@ public class H5ScalarDSTest {
             assertEquals(H5TestFile.DIM_SIZE, Array.getLength(data));
 
             // change the data value
-            for (int i = 0; i < H5TestFile.DIM_SIZE; i++) {
+            for (int i = 0; i < H5TestFile.DIM_SIZE; i++)
                 data[i] = TEST_VALUE_INT;
-            }
 
             // write the data to file
             try {
@@ -822,7 +815,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#write(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read/write a subset of dataset
@@ -852,9 +845,8 @@ public class H5ScalarDSTest {
             }
 
             data = new int[(int) size];
-            for (int j = 0; j < size; j++) {
+            for (int j = 0; j < size; j++)
                 data[j] = TEST_VALUE_INT;
-            }
 
             // write the data to file
             try {
@@ -880,9 +872,8 @@ public class H5ScalarDSTest {
 
             // select the first 1/2 of the datast
             count = testDataset.getSelectedDims();
-            for (int j = 0; j < rank; j++) {
+            for (int j = 0; j < rank; j++)
                 count[j] = dims[j] / 2;
-            }
 
             try {
                 data = (int[]) testDataset.getData();
@@ -894,14 +885,12 @@ public class H5ScalarDSTest {
             assertEquals(size, Array.getLength(data));
 
             // check the data values
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++)
                 assertEquals(TEST_VALUE_INT, data[i]);
-            }
 
             // write the original data into file
-            for (int j = 0; j < rank; j++) {
+            for (int j = 0; j < rank; j++)
                 count[j] = dims[j];
-            }
             try {
                 testDataset.write(H5TestFile.DATA_INT);
             }
@@ -913,7 +902,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#write(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Read/write a subset of null strings
@@ -1001,7 +990,7 @@ public class H5ScalarDSTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5ScalarDS#copy(hdf.object.Group, java.lang.String, long[], java.lang.Object)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Copy all scalar datasets to a new file
@@ -1022,9 +1011,7 @@ public class H5ScalarDSTest {
         try {
             testFile.close();
         }
-        catch (final Exception ex) {
-            ;
-        }
+        catch (final Exception ex) {}
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             tmpFile = new H5File("H5ScalarDS_testCopy.h5", FileFormat.CREATE);
@@ -1051,7 +1038,7 @@ public class H5ScalarDSTest {
                             dset.init();
                             final Object data = dset.getData();
                             dset.write(data);
-                            dset.getMetadata();
+                            ((H5ScalarDS)dset).getMetadata();
 
                             // copy data into a new datast
                             if (dset instanceof ScalarDS) {
@@ -1059,9 +1046,8 @@ public class H5ScalarDSTest {
                                 assertNotNull(dsetNew);
                                 final Object dataCopy = dsetNew.getData();
                                 final int size = Array.getLength(data);
-                                for (int k = 0; k < size; k++) {
+                                for (int k = 0; k < size; k++)
                                     assertEquals(Array.get(data, k), Array.get(dataCopy, k));
-                                }
                             }
                         }
                     }
@@ -1088,20 +1074,18 @@ public class H5ScalarDSTest {
             }
             finally {
                 // delete the testing file
-                if (tmpFile != null) {
+                if (tmpFile != null)
                     tmpFile.delete();
-                }
             }
         } //  (int loop=0; loop<NLOOPS; loop++) {
         // clear the testFile handle now
-        if (testFile != null) {
+        if (testFile != null)
             testFile = null;
-        }
     }
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#getDatatype()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Get datatype
@@ -1127,7 +1111,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#getPalette()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Get the palette from an image
@@ -1159,7 +1143,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#readPalette(int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Get the palette from an image
@@ -1191,7 +1175,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#getPaletteRefs()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Get an array of palette references from an image
@@ -1218,8 +1202,7 @@ public class H5ScalarDSTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5ScalarDS#H5ScalarDS(hdf.object.FileFormat, java.lang.String, java.lang.String)}
-     * .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Construct an H5ScalarDS object that exists in file
@@ -1255,9 +1238,8 @@ public class H5ScalarDSTest {
             }
             assertNotNull(data);
 
-            for (int i = 0; i < H5TestFile.DIM_SIZE; i++) {
+            for (int i = 0; i < H5TestFile.DIM_SIZE; i++)
                 assertEquals(H5TestFile.DATA_INT[i], data[i]);
-            }
 
             // check the name and path
             assertTrue(DNAME_SUB.equals(dset.getFullName()));
@@ -1286,8 +1268,7 @@ public class H5ScalarDSTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5ScalarDS#H5ScalarDS(hdf.object.FileFormat, java.lang.String, java.lang.String, long[])}
-     * .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Construct an H5ScalarDS object that exits in file
@@ -1311,21 +1292,8 @@ public class H5ScalarDSTest {
         assertNotNull(file);
 
         // test existing dataset in file
-        long[] oid = null;
         for (int idx = 0; idx < names.length; idx++) {
-
-            try {
-                final byte[] ref_buf = H5.H5Rcreate(file.getFID(), DNAME_SUB, HDF5Constants.H5R_OBJECT, -1);
-                final long l = HDFNativeData.byteToLong(ref_buf, 0);
-                oid = new long[1];
-                oid[0] = l; // save the object ID
-            }
-            catch (final HDF5Exception ex) {
-                fail("H5.H5Rcreate() failed. " + ex);
-            }
-            assertNotNull(oid);
-
-            H5ScalarDS dset = new H5ScalarDS(file, names[idx], paths[idx], oid);
+            H5ScalarDS dset = new H5ScalarDS(file, names[idx], paths[idx]);
             assertNotNull(dset);
 
             // make sure that the data content is correct
@@ -1337,9 +1305,8 @@ public class H5ScalarDSTest {
             }
             assertNotNull(data);
 
-            for (int i = 0; i < H5TestFile.DIM_SIZE; i++) {
+            for (int i = 0; i < H5TestFile.DIM_SIZE; i++)
                 assertEquals(H5TestFile.DATA_INT[i], data[i]);
-            }
 
             // check the name and path
             assertTrue(DNAME_SUB.equals(dset.getFullName()));
@@ -1367,7 +1334,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#getMetadata()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Get all the attributes
@@ -1391,15 +1358,15 @@ public class H5ScalarDSTest {
 
         final int n = attrs.size();
         for (int i = 0; i < n; i++) {
-            final AttributeDataset attr = (AttributeDataset) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            final Attribute attr = (Attribute) attrs.get(i);
+            final H5Datatype dtype = (H5Datatype) attr.getAttributeDatatype();
             if (dtype.isString()) {
-                log.debug("testGetMetadata[{}] - ATTRIBUTE_STR:{} = attr:{}", i, ATTRIBUTE_STR_NAME, attr.getName());
-                assertTrue(ATTRIBUTE_STR_NAME.equals(attr.getName()));
+                log.debug("testGetMetadata[{}] - ATTRIBUTE_STR:{} = attr:{}", i, ATTRIBUTE_STR_NAME, attr.getAttributeName());
+                assertTrue(ATTRIBUTE_STR_NAME.equals(attr.getAttributeName()));
 
                 try {
                     assertTrue(
-                            ((String[]) ATTRIBUTE_STR)[0].equals(((String[]) attr.getData())[0]));
+                            ((String[]) ATTRIBUTE_STR)[0].equals(((String[]) attr.getAttributeData())[0]));
                 }
                 catch (Exception ex) {
                     log.trace("testGetMetadata(): getData() failure:", ex);
@@ -1412,17 +1379,16 @@ public class H5ScalarDSTest {
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
                 try {
-                    log.debug("testGetMetadata[{}] - ATTRIBUTE_INT_ARRAY:{} = attr:{}", i, ATTRIBUTE_INT_ARRAY_NAME, attr.getName());
-                    assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getName()));
+                    log.debug("testGetMetadata[{}] - ATTRIBUTE_INT_ARRAY:{} = attr:{}", i, ATTRIBUTE_INT_ARRAY_NAME, attr.getAttributeName());
+                    assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getAttributeName()));
                     final int[] expected = (int[]) ATTRIBUTE_INT_ARRAY;
                     assertNotNull(expected);
                     log.debug("testGetMetadata - expected.length:{}", expected.length);
-                    final int[] ints = (int[]) attr.getData();
+                    final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
                     log.debug("testGetMetadata - ints.length:{}", ints.length);
-                    for (int j = 0; j < expected.length; j++) {
+                    for (int j = 0; j < expected.length; j++)
                         assertEquals(expected[j], ints[j]);
-                    }
                 }
                 catch (Exception ex) {
                     log.trace("testGetMetadata(): getData() failure:", ex);
@@ -1438,7 +1404,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#writeMetadata(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Update the value of an existing attribute
@@ -1452,7 +1418,7 @@ public class H5ScalarDSTest {
     public void testWriteMetadata() {
         log.debug("testWriteMetadata");
         List attrs = null;
-        AttributeDataset attr = null;
+        Attribute attr = null;
 
         try {
             attrs = (List) testDataset.getMetadata();
@@ -1466,11 +1432,11 @@ public class H5ScalarDSTest {
         // update existing attribute
         int n = attrs.size();
         for (int i = 0; i < n; i++) {
-            attr = (AttributeDataset) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            attr = (Attribute) attrs.get(i);
+            final H5Datatype dtype = (H5Datatype) attr.getAttributeDatatype();
             if (dtype.isString()) {
                 try {
-                    final String[] strs = (String[]) attr.getData();
+                    final String[] strs = (String[]) attr.getAttributeData();
                     strs[0] = TEST_VALUE_STR;
                 }
                 catch (Exception ex) {
@@ -1484,11 +1450,10 @@ public class H5ScalarDSTest {
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
                 try {
-                    final int[] ints = (int[]) attr.getData();
+                    final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
-                    for (int j = 0; j < ints.length; j++) {
+                    for (int j = 0; j < ints.length; j++)
                         ints[j] = TEST_VALUE_INT;
-                    }
                 }
                 catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -1500,7 +1465,7 @@ public class H5ScalarDSTest {
                 }
             }
             try {
-                attr.write();
+                attr.writeAttribute();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
@@ -1508,10 +1473,10 @@ public class H5ScalarDSTest {
         } //  (int i=0; i<n; i++)
 
         // attache a new attribute
-        attr = (AttributeDataset)new H5ScalarAttr(testDataset, "float attribute", typeFloat, new long[] { 1 },
+        attr = (Attribute)new H5ScalarAttr(testDataset, "float attribute", typeFloat, new long[] { 1 },
                 new float[] { TEST_VALUE_FLOAT });
         try {
-            attr.write();
+            attr.writeAttribute();
         }
         catch (final Exception ex) {
             fail("writeMetadata() failed. " + ex);
@@ -1539,14 +1504,14 @@ public class H5ScalarDSTest {
         assertTrue(attrs.size() > 0);
 
         n = attrs.size();
-        AttributeDataset newAttr = null;
+        Attribute newAttr = null;
         for (int i = 0; i < n; i++) {
-            attr = (AttributeDataset) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            attr = (Attribute) attrs.get(i);
+            final H5Datatype dtype = (H5Datatype) attr.getAttributeDatatype();
             if (dtype.isString()) {
                 try {
-                    assertTrue(ATTRIBUTE_STR_NAME.equals(attr.getName()));
-                    assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getData())[0]));
+                    assertTrue(ATTRIBUTE_STR_NAME.equals(attr.getAttributeName()));
+                    assertTrue(TEST_VALUE_STR.equals(((String[]) attr.getAttributeData())[0]));
                 }
                 catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -1559,12 +1524,11 @@ public class H5ScalarDSTest {
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
                 try {
-                    assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getName()));
-                    final int[] ints = (int[]) attr.getData();
+                    assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getAttributeName()));
+                    final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
-                    for (int j = 0; j < ints.length; j++) {
+                    for (int j = 0; j < ints.length; j++)
                         assertEquals(TEST_VALUE_INT, ints[j]);
-                    }
                 }
                 catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -1578,7 +1542,7 @@ public class H5ScalarDSTest {
             else if (dtype.getDatatypeClass() == Datatype.CLASS_FLOAT) {
                 try {
                     newAttr = attr;
-                    final float[] floats = (float[]) attr.getData();
+                    final float[] floats = (float[]) attr.getAttributeData();
                     assertEquals(TEST_VALUE_FLOAT, floats[0], Float.MIN_VALUE);
                 }
                 catch (Exception ex) {
@@ -1603,11 +1567,11 @@ public class H5ScalarDSTest {
         // set the value to original
         n = attrs.size();
         for (int i = 0; i < n; i++) {
-            attr = (AttributeDataset) attrs.get(i);
-            final H5Datatype dtype = (H5Datatype) attr.getDatatype();
+            attr = (Attribute) attrs.get(i);
+            final H5Datatype dtype = (H5Datatype) attr.getAttributeDatatype();
             if (dtype.isString()) {
                 try {
-                    final String[] strs = (String[]) attr.getData();
+                    final String[] strs = (String[]) attr.getAttributeData();
                     strs[0] = ((String[]) ATTRIBUTE_STR)[0];
                 }
                 catch (Exception ex) {
@@ -1621,7 +1585,7 @@ public class H5ScalarDSTest {
             }
             else if (dtype.getDatatypeClass() == Datatype.CLASS_INTEGER) {
                 try {
-                    final int[] ints = (int[]) attr.getData();
+                    final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
                     for (int j = 0; j < ints.length; j++) {
                         final int[] expected = (int[]) ATTRIBUTE_INT_ARRAY;
@@ -1638,7 +1602,7 @@ public class H5ScalarDSTest {
                 }
             }
             try {
-                attr.write();
+                attr.writeAttribute();
             }
             catch (final Exception ex) {
                 fail("writeMetadata() failed. " + ex);
@@ -1648,7 +1612,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS#removeMetadata(java.lang.Object)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Remove all existing attributes
@@ -1718,8 +1682,7 @@ public class H5ScalarDSTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5ScalarDS#create(java.lang.String, hdf.object.Group, hdf.object.Datatype, long[], long[], long[], int, java.lang.Object)}
-     * .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Create a new dataset of 32-bit float with level-9 gzip compression
@@ -1760,9 +1723,8 @@ public class H5ScalarDSTest {
             fail("dset.getData() failed. " + ex);
         }
         assertNotNull(data);
-        for (int i = 0; i < H5TestFile.DIM_SIZE; i++) {
+        for (int i = 0; i < H5TestFile.DIM_SIZE; i++)
             assertEquals(H5TestFile.DATA_FLOAT[i], data[i], Float.MIN_VALUE);
-        }
 
         try {
             testFile.delete(dset); // delete the new datast
@@ -1794,7 +1756,7 @@ public class H5ScalarDSTest {
 
     /**
      * Test method for {@link hdf.object.h5.H5ScalarDS} SerializeToDisk.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>serialize a dataset identifier
@@ -1852,18 +1814,15 @@ public class H5ScalarDSTest {
             try {
                 H5.H5Tclose(tid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Sclose(sid);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             try {
                 H5.H5Dclose(did);
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
         }
     }
 

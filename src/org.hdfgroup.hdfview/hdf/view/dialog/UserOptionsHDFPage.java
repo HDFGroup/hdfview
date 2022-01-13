@@ -39,8 +39,8 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private Button checkConvertEnum, checkShowRegRefValues, helpButton;
     private Button checkNativeOrder, checkDecOrder, checkIncOrder;
     private Button checkIndexName, checkIndexCreateOrder;
-    private Button earlyLibVersion, early18LibVersion, early110LibVersion, earlyLateLibVersion;
-    private Button lateLibVersion, late18LibVersion, late110LibVersion, lateLateLibVersion;
+    private Button earlyLibVersion, early18LibVersion, early110LibVersion, early112LibVersion, earlyLateLibVersion;
+    private Button lateLibVersion, late18LibVersion, late110LibVersion, late112LibVersion, lateLateLibVersion;
 
     /** Default early libversion for files */
     private static String earlyLibVers;
@@ -54,6 +54,9 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     /** Default index ordering for files */
     private static String indexOrder;
 
+    /**
+     * Configuration page for HDF-specific application settings.
+     */
     public UserOptionsHDFPage() {
         super("HDF Settings");
     }
@@ -94,6 +97,8 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                 ViewProperties.setEarlyLib("v18");
             else if (early110LibVersion.getSelection())
                 ViewProperties.setEarlyLib("v110");
+            else if (early112LibVersion.getSelection())
+                ViewProperties.setEarlyLib("v112");
             else if (earlyLateLibVersion.getSelection())
                 ViewProperties.setEarlyLib("Latest");
             else
@@ -108,6 +113,8 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                 ViewProperties.setLateLib("v18");
             else if (late110LibVersion.getSelection())
                 ViewProperties.setLateLib("v110");
+            else if (late112LibVersion.getSelection())
+                ViewProperties.setLateLib("v112");
             else if (lateLateLibVersion.getSelection())
                 ViewProperties.setLateLib("Latest");
             else
@@ -153,6 +160,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         earlyLibVersion.setSelection(earlyLibVers.compareTo("Earliest") == 0);
         early18LibVersion.setSelection(earlyLibVers.compareTo("v18") == 0);
         early110LibVersion.setSelection(earlyLibVers.compareTo("v110") == 0);
+        early112LibVersion.setSelection(earlyLibVers.compareTo("v112") == 0);
         earlyLateLibVersion.setSelection(earlyLibVers.compareTo("Latest") == 0);
 
         lateLibVers = ViewProperties.getLateLib();
@@ -160,6 +168,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         lateLibVersion.setSelection(lateLibVers.compareTo("Earliest") == 0);
         late18LibVersion.setSelection(lateLibVers.compareTo("v18") == 0);
         late110LibVersion.setSelection(lateLibVers.compareTo("v110") == 0);
+        late112LibVersion.setSelection(lateLibVers.compareTo("v112") == 0);
         lateLateLibVersion.setSelection(lateLibVers.compareTo("Latest") == 0);
 
         checkConvertEnum.setSelection(ViewProperties.isConvertEnum());
@@ -229,6 +238,11 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         early110LibVersion.setText("v110");
         early110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
+        early112LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
+        early112LibVersion.setFont(curFont);
+        early112LibVersion.setText("v112");
+        early112LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+
         earlyLateLibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         earlyLateLibVersion.setFont(curFont);
         earlyLateLibVersion.setText("Latest");
@@ -254,6 +268,11 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         late110LibVersion.setFont(curFont);
         late110LibVersion.setText("v110");
         late110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+
+        late112LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
+        late112LibVersion.setFont(curFont);
+        late112LibVersion.setText("v112");
+        late112LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
         lateLateLibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         lateLateLibVersion.setFont(curFont);

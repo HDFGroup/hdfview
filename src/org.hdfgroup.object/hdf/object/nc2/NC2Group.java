@@ -33,36 +33,45 @@ import ucar.nc2.NetcdfFile;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class NC2Group extends Group {
+public class NC2Group extends Group
+{
     private static final long serialVersionUID = -1261533010442193447L;
 
-    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(NC2Group.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2Group.class);
 
     /**
      * The corresponding netcdf Group for this group.
      */
     protected ucar.nc2.Group netCDFGroup;
 
+    /**
+     * @return the corresponding netcdf Group for this group.
+     */
     public ucar.nc2.Group getNetCDFGroup() {
         return netCDFGroup;
     }
 
+    /**
+     * Set the corresponding netcdf Group for this group.
+     *
+     * @param netCDFGroup
+     *        the ucar.nc2.Group to associate to this group
+     */
     public void setNetCDFGroup(ucar.nc2.Group netCDFGroup) {
         this.netCDFGroup = netCDFGroup;
     }
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of NC2Attribute.
      */
     private List attributeList;
 
-    /**
-     * The list of netcdf typedefs, dimensions and attributes of this data object. Members of the list are
-     * instance of ucar.nc2.*.
-     */
+    /** The list of netcdf typedefs of this data object. Members of the list are instance of ucar.nc2.*. */
     private List netcdfTypedefList;
+    /** The list of netcdf dimensions of this data object. Members of the list are instance of ucar.nc2.*. */
     private List netcdfDimensionList;
+    /** The list of netcdf attributes of this data object. Members of the list are * instance of ucar.nc2.*. */
     private List netcdfAttributeList;
 
     /** The default object ID for NC2 objects */
@@ -91,25 +100,37 @@ public class NC2Group extends Group {
         log.trace("NC2Group:{}", name);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Check if the object has any attributes attached.
      *
-     * @see hdf.object.DataFormat#hasAttribute()
+     * @return true if it has any attributes, false otherwise.
      */
     public boolean hasAttribute() {
         return false;
     }
 
+    /**
+     * @return true if this group has an attached dimension.
+     */
     public boolean hasDimension() {
         return false;
     }
 
     // Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     *
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws Exception {
-        if (attributeList != null) {
+        if (attributeList != null)
             return attributeList;
-        }
 
         NC2File theFile = (NC2File)getFileFormat();
         NetcdfFile ncFile = theFile.getNetcdfFile();
@@ -148,7 +169,7 @@ public class NC2Group extends Group {
      * not exist. Otherwise, just update the value of the attribute.
      *
      * @param info
-     *            the atribute to attach
+     *            the attribute to attach
      *
      * @throws Exception
      *            if there is an error
@@ -173,19 +194,38 @@ public class NC2Group extends Group {
     }
 
     // implementing DataFormat
+    /**
+     * Updates an attribute from this dataset.
+     *
+     * @param info
+     *            the attribute to update.
+     *
+     * @throws Exception
+     *            if there is an error
+     */
     public void updateMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // Implementing DataFormat
+    /**
+     * open a group.
+     *
+     * @return the group identifier if successful.
+     */
     @Override
     public long open() {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
-    /* close group access */
+    /**
+     * Close a group.
+     *
+     * @param gid
+     *            the identifier of the group to close.
+     */
     @Override
     public void close(long gid) {
         // not supported
@@ -210,7 +250,19 @@ public class NC2Group extends Group {
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
-    // overload to get different lists
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     *
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         int hdfType = 0;
@@ -222,34 +274,34 @@ public class NC2Group extends Group {
         // use 0 to skip or 1 select in attrPropList to get the list
         // hdf attributes first netcdf attributes second, dimensions third, enumTypes fourth
         log.trace("getMetadata(...): attrPropList={}", attrPropList.length);
-        if (attrPropList.length > 0) {
+        if (attrPropList.length > 0)
             hdfType = attrPropList[0];
-        }
-        if (attrPropList.length > 1) {
+        if (attrPropList.length > 1)
             attrType = attrPropList[1];
-        }
-        if (attrPropList.length > 2) {
+        if (attrPropList.length > 2)
             dimType = attrPropList[2];
-        }
-        if (attrPropList.length > 3) {
+        if (attrPropList.length > 3)
             enumType = attrPropList[3];
-        }
-        if ((hdfType != 0) && (attributeList != null)) {
+        if ((hdfType != 0) && (attributeList != null))
             returnList = attributeList;
-        }
-        else if ((attrType != 0) && (netcdfAttributeList != null)) {
+        else if ((attrType != 0) && (netcdfAttributeList != null))
             returnList = netcdfAttributeList;
-        }
-        else if ((dimType != 0) && (netcdfDimensionList != null)) {
+        else if ((dimType != 0) && (netcdfDimensionList != null))
             returnList = netcdfDimensionList;
-        }
-        else if ((enumType != 0) && (netcdfTypedefList != null)) {
+        else if ((enumType != 0) && (netcdfTypedefList != null))
             returnList = netcdfTypedefList;
-        }
 
         return returnList;
     }
 
+    /**
+     * Retrieves the attribute name.
+     *
+     * @param index
+     *             the index of the attribute to get
+     *
+     * @return the attribute string.
+     */
     public String netcdfAttributeString(int index) {
         ucar.nc2.Attribute netcdfAttr = (ucar.nc2.Attribute) netcdfAttributeList.get(index);
         log.trace("netcdfAttributeString(): netcdfAttribute[{}]:{}", index, netcdfAttr.toString());
@@ -257,6 +309,14 @@ public class NC2Group extends Group {
         return returnStr;
     }
 
+    /**
+     * Retrieves the Dimension name.
+     *
+     * @param index
+     *             the index of the Dimension to get
+     *
+     * @return the Dimension string.
+     */
     public String netcdfDimensionString(int index) {
         ucar.nc2.Dimension netcdfDim = (ucar.nc2.Dimension) netcdfDimensionList.get(index);
         log.trace("netcdfDimensionString(): netcdfDimension[{}]:{}", index, netcdfDim.toString());
@@ -272,6 +332,14 @@ public class NC2Group extends Group {
         return objDimensionStr.toString();
     }
 
+    /**
+     * Retrieves the EnumTypedef name.
+     *
+     * @param index
+     *             the index of the EnumTypedef to get
+     *
+     * @return the EnumTypedef string.
+     */
     public String netcdfTypedefString(int index) {
         ucar.nc2.EnumTypedef netcdfType = (ucar.nc2.EnumTypedef) netcdfTypedefList.get(index);
         log.trace("netcdfEnumTypedefString(): netcdfTypedef[{}]:{}", index, netcdfType.toString());

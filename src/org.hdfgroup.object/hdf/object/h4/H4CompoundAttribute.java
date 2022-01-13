@@ -12,7 +12,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package hdf.object.nc2;
+package hdf.object.h4;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -23,13 +23,15 @@ import java.util.List;
 import java.util.Map;
 
 import hdf.object.Attribute;
+import hdf.object.CompoundDataFormat;
+import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.object.ScalarDS;
+import hdf.object.MetaDataContainer;
 
 /**
  * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
@@ -64,9 +66,7 @@ import hdf.object.ScalarDS;
  * &#64;see hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
  * </pre>
  *
- *
- * For an atomic datatype, the value of an Attribute will be a 1D array of integers, floats and
- * strings. For a compound datatype, it will be a 1D array of strings with field members separated
+ * For a compound datatype, the value of an H4CompoundAttribute will be a 1D array of strings with field members separated
  * by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int,
  * float} of three data points.
  *
@@ -75,11 +75,11 @@ import hdf.object.ScalarDS;
  * @version 2.0 4/2/2018
  * @author Peter X. Cao, Jordan T. Henderson
  */
-public class NC2Attribute extends ScalarDS implements Attribute
-{
+public class H4CompoundAttribute extends CompoundDS implements Attribute {
+
     private static final long serialVersionUID = 2072473407027648309L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2Attribute.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4CompoundAttribute.class);
 
     /** The HObject to which this NC2Attribute is attached, Attribute interface */
     protected HObject         parentObject;
@@ -122,7 +122,7 @@ public class NC2Attribute extends ScalarDS implements Attribute
      *
      * @see hdf.object.Datatype
      */
-    public NC2Attribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims) {
+    public H4CompoundAttribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims) {
         this(parentObj, attrName, attrType, attrDims, null);
     }
 
@@ -146,7 +146,7 @@ public class NC2Attribute extends ScalarDS implements Attribute
      *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
-     * NC2Attribute attr = new NC2Attribute(attrName, attrType, attrDims, classValue);
+     * Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
      * </pre>
      *
      * @param parentObj
@@ -163,14 +163,13 @@ public class NC2Attribute extends ScalarDS implements Attribute
      * @see hdf.object.Datatype
      */
     @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
-    public NC2Attribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
+    public H4CompoundAttribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
         super((parentObj == null) ? null : parentObj.getFileFormat(), attrName,
                 (parentObj == null) ? null : parentObj.getFullName(), null);
 
-        log.trace("NC2Attribute: start {}", parentObj);
-        this.parentObject = parentObj;
+        log.trace("H4CompoundAttribute: start {}", parentObj);
 
-        unsignedConverted = false;
+        this.parentObject = parentObj;
 
         datatype = attrType;
 
@@ -207,21 +206,21 @@ public class NC2Attribute extends ScalarDS implements Attribute
      */
     @Override
     public long open() {
-        long aid = -1;
-        long pObjID = -1;
-
         if (parentObject == null) {
             log.debug("open(): attribute's parent object is null");
             return -1;
         }
 
+        long aid = -1;
+        long pObjID = -1;
+
         try {
             pObjID = parentObject.open();
             if (pObjID >= 0) {
-                if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
-                    log.trace("open(): FILE_TYPE_NC3");
+                if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
+                    log.trace("open(): FILE_TYPE_HDF4");
                     /*
-                     * TODO: Get type of netcdf3 object this is attached to and retrieve attribute info.
+                     * TODO: Get type of HDF4 object this is attached to and retrieve attribute info.
                      */
                 }
             }
@@ -247,10 +246,10 @@ public class NC2Attribute extends ScalarDS implements Attribute
     @Override
     public void close(long aid) {
         if (aid >= 0) {
-            if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
-                log.trace("close(): FILE_TYPE_NC3");
+            if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
+                log.trace("close(): FILE_TYPE_HDF4");
                 /*
-                 * TODO: Get type of netcdf3 object this is attached to and close attribute.
+                 * TODO: Get type of HDF4 object this is attached to and close attribute.
                  */
             }
         }
@@ -260,14 +259,14 @@ public class NC2Attribute extends ScalarDS implements Attribute
     public void init() {
         if (inited) {
             resetSelection();
-            log.trace("init(): NC2Attribute already inited");
+            log.trace("init(): Attribute already inited");
             return;
         }
 
-        if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
-            log.trace("init(): FILE_TYPE_NC3");
+        if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
+            log.trace("init(): FILE_TYPE_HDF4");
             /*
-             * TODO: If netcdf3 attribute object needs to init dependent objects.
+             * TODO: If HDF4 attribute object needs to init dependent objects.
              */
             inited = true;
         }
@@ -299,6 +298,16 @@ public class NC2Attribute extends ScalarDS implements Attribute
         if (!inited)
             init();
 
+        /*
+         * TODO: For now, convert a compound Attribute's data (String[]) into a List for
+         * convenient processing
+         */
+        if (getDatatype().isCompound() && !(data instanceof List)) {
+            List<String> valueList = Arrays.asList((String[]) data);
+
+            data = valueList;
+        }
+
         return data;
     }
 
@@ -308,7 +317,7 @@ public class NC2Attribute extends ScalarDS implements Attribute
      * Writes a memory buffer to the object in the file.
      *
      * @param buf
-     *            the data to write
+     *            The buffer that contains the data values.
      *
      * @throws Exception
      *             if data can not be written
@@ -325,6 +334,8 @@ public class NC2Attribute extends ScalarDS implements Attribute
             log.debug("write(Object): parent object is null; nowhere to write attribute to");
             return;
         }
+
+        ((MetaDataContainer) getParentObject()).writeMetadata(this);
     }
 
     /*
@@ -334,7 +345,7 @@ public class NC2Attribute extends ScalarDS implements Attribute
     @Override
     public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
         // not supported
-        throw new UnsupportedOperationException("copy operation unsupported for NC2.");
+        throw new UnsupportedOperationException("copy operation unsupported for H4.");
     }
 
     /*
@@ -344,39 +355,54 @@ public class NC2Attribute extends ScalarDS implements Attribute
     @Override
     public byte[] readBytes() throws Exception {
         // not supported
-        throw new UnsupportedOperationException("readBytes operation unsupported for NC2.");
+        throw new UnsupportedOperationException("readBytes operation unsupported for H4.");
     }
 
-    /* Implement abstract ScalarDS */
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPalette()
+    /**
+     * Given an array of bytes representing a compound Datatype and a start index
+     * and length, converts len number of bytes into the correct Object type and
+     * returns it.
+     *
+     * @param data
+     *            The byte array representing the data of the compound Datatype
+     * @param data_type
+     *            The type of data to convert the bytes to
+     * @param start
+     *            The start index of the bytes to get
+     * @param len
+     *            The number of bytes to convert
+     * @return The converted type of the bytes
      */
-    @Override
-    public byte[][] getPalette() {
-        if (palette == null)
-            palette = readPalette(0);
-
-        return palette;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#readPalette(int)
-     */
-    @Override
-    public byte[][] readPalette(int idx) {
+    protected Object convertCompoundByteMember(byte[] data, long data_type, long start, long len) {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPaletteRefs()
+    /**
+     * Converts the data values of this data object to appropriate Java integers if
+     * they are unsigned integers.
+     *
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertFromUnsignedC(Object, Object)
+     *
+     * @return the converted data buffer.
      */
     @Override
-    public byte[] getPaletteRefs() {
-        return null;
+    public Object convertFromUnsignedC() {
+        throw new UnsupportedOperationException("H5CompoundDS:convertFromUnsignedC Unsupported operation.");
+    }
+
+    /**
+     * Converts Java integer data values of this data object back to unsigned C-type
+     * integer data if they are unsigned integers.
+     *
+     * @see hdf.object.Dataset#convertToUnsignedC(Object)
+     * @see hdf.object.Dataset#convertToUnsignedC(Object, Object)
+     *
+     * @return the converted data buffer.
+     */
+    @Override
+    public Object convertToUnsignedC() {
+        throw new UnsupportedOperationException("H5CompoundDS:convertToUnsignedC Unsupported operation.");
     }
 
     /* Implement interface Attribute */

@@ -18,17 +18,25 @@ package hdf.object;
  * An interface that provides general I/O operations for object data. For
  * example, reading data content from the file into memory or writing data
  * content from memory into the file.
- * <p>
  *
  * @see hdf.object.HObject
  *
  * @version 1.0 4/2/2018
  * @author Jordan T. Henderson
  */
-public interface DataFormat {
-    public abstract boolean isInited();
+public interface DataFormat
+{
+    /**
+     * The status of initialization for this object
+     *
+     * @return true if the data has been initialized
+     */
+    boolean isInited();
 
-    public abstract void init();
+    /**
+     * Set the initial state of all the variables
+     */
+    void init();
 
     /**
      * Retrieves the object's data from the file.
@@ -38,7 +46,7 @@ public interface DataFormat {
      * @throws Exception
      *             if the data can not be retrieved
      */
-    public abstract Object getData() throws Exception, OutOfMemoryError;
+    Object getData() throws Exception, OutOfMemoryError;
 
     /**
      *
@@ -46,12 +54,12 @@ public interface DataFormat {
      * @param data
      *            the data to write.
      */
-    public abstract void setData(Object data);
+    void setData(Object data);
 
     /**
      * Clears the current data buffer in memory and forces the next read() to load
      * the data from file.
-     * <p>
+     *
      * The function read() loads data from file into memory only if the data is not
      * read. If data is already in memory, read() just returns the memory buffer.
      * Sometimes we want to force read() to re-read data from file. For example,
@@ -60,15 +68,15 @@ public interface DataFormat {
      * @see #getData()
      * @see #read()
      */
-    public abstract void clearData();
+    void clearData();
 
     /**
      * Reads the data from file.
-     * <p>
+     *
      * read() reads the data from file to a memory buffer and returns the memory
      * buffer. The dataset object does not hold the memory buffer. To store the
      * memory buffer in the dataset object, one must call getData().
-     * <p>
+     *
      * By default, the whole dataset is read into memory. Users can also select
      * a subset to read. Subsetting is done in an implicit way.
      *
@@ -81,7 +89,7 @@ public interface DataFormat {
      * @throws OutOfMemoryError
      *             if memory is exhausted
      */
-    public abstract Object read() throws Exception, OutOfMemoryError;
+    Object read() throws Exception, OutOfMemoryError;
 
     /**
      * Writes a memory buffer to the object in the file.
@@ -92,7 +100,7 @@ public interface DataFormat {
      * @throws Exception
      *             if data can not be written
      */
-    public abstract void write(Object buf) throws Exception;
+    void write(Object buf) throws Exception;
 
     /**
      * Writes the current memory buffer to the object in the file.
@@ -100,7 +108,7 @@ public interface DataFormat {
      * @throws Exception
      *             if data can not be written
      */
-    public abstract void write() throws Exception;
+    void write() throws Exception;
 
     /**
      * Converts the data values of this data object to appropriate Java integers if
@@ -111,7 +119,7 @@ public interface DataFormat {
      *
      * @return the converted data buffer.
      */
-    public Object convertFromUnsignedC();
+    Object convertFromUnsignedC();
 
     /**
      * Converts Java integer data values of this data object back to unsigned C-type
@@ -122,21 +130,21 @@ public interface DataFormat {
      *
      * @return the converted data buffer.
      */
-    public Object convertToUnsignedC();
+    Object convertToUnsignedC();
 
     /**
      * Returns the fill values for the data object.
      *
      * @return the fill values for the data object.
      */
-    public abstract Object getFillValue();
+    Object getFillValue();
 
     /**
      * Returns the datatype of the data object.
      *
      * @return the datatype of the data object.
      */
-    public abstract Datatype getDatatype();
+    Datatype getDatatype();
 
     /**
      * Returns the space type for the data object. It returns a
@@ -145,7 +153,7 @@ public interface DataFormat {
      *
      * @return the space type for the data object.
      */
-    public abstract int getSpaceType();
+    int getSpaceType();
 
     /**
      * Returns the rank (number of dimensions) of the data object. It returns a
@@ -154,7 +162,7 @@ public interface DataFormat {
      *
      * @return the number of dimensions of the data object.
      */
-    public abstract int getRank();
+    int getRank();
 
     /**
      * Returns the array that contains the dimension sizes of the data value of
@@ -163,7 +171,7 @@ public interface DataFormat {
      *
      * @return the dimension sizes of the data object.
      */
-    public abstract long[] getDims();
+    long[] getDims();
 
 
     /****************************************************************
@@ -172,14 +180,14 @@ public interface DataFormat {
 
     /**
      * Returns the dimension sizes of the selected subset.
-     * <p>
+     *
      * The SelectedDims is the number of data points of the selected subset.
      * Applications can use this array to change the size of selected subset.
      *
      * The selected size must be less than or equal to the current dimension size.
      * Combined with the starting position, selected sizes and stride, the subset of
      * a rectangle selection is fully defined.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -199,15 +207,15 @@ public interface DataFormat {
      *
      * @return the dimension sizes of the selected subset.
      */
-    public abstract long[] getSelectedDims();
+    long[] getSelectedDims();
 
     /**
      * Returns the starting position of a selected subset.
-     * <p>
+     *
      * Applications can use this array to change the starting position of a
      * selection. Combined with the selected dimensions, selected sizes and stride,
      * the subset of a rectangle selection is fully defined.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -227,17 +235,17 @@ public interface DataFormat {
      *
      * @return the starting position of a selected subset.
      */
-    public abstract long[] getStartDims();
+    long[] getStartDims();
 
     /**
      * Returns the selectedStride of the selected dataset.
-     * <p>
+     *
      * Applications can use this array to change how many elements to move in each
      * dimension.
      *
      * Combined with the starting position and selected sizes, the subset of a
      * rectangle selection is defined.
-     * <p>
+     *
      * For example, if a 4 X 5 dataset is as follows:
      *
      * <pre>
@@ -256,18 +264,17 @@ public interface DataFormat {
      *
      * @return the selectedStride of the selected dataset.
      */
-    public abstract long[] getStride();
+    long[] getStride();
 
     /**
      * Returns the indices of display order.
-     * <p>
      *
      * selectedIndex[] is provided for two purposes:
      * <OL>
      * <LI>selectedIndex[] is used to indicate the order of dimensions for display.
      * selectedIndex[0] is for the row, selectedIndex[1] is for the column and
      * selectedIndex[2] for the depth.
-     * <p>
+     *
      * For example, for a four dimension dataset, if selectedIndex[] = {1, 2, 3},
      * then dim[1] is selected as row index, dim[2] is selected as column index and
      * dim[3] is selected as depth index.
@@ -286,7 +293,7 @@ public interface DataFormat {
      *
      * @return the array of the indices of display order.
      */
-    public int[] getSelectedIndex();
+    int[] getSelectedIndex();
 
     /**************************************************************************
      * * The following two definitions are used primarily for GUI applications. * *
@@ -295,7 +302,7 @@ public interface DataFormat {
     /**
      * Returns the dimension size of the vertical axis.
      *
-     * <p>
+     *
      * This function is used by GUI applications such as HDFView. GUI applications
      * display a dataset in a 2D table or 2D image. The display order is specified
      * by the index array of selectedIndex as follow:
@@ -322,12 +329,12 @@ public interface DataFormat {
      *
      * @return the size of dimension of the vertical axis.
      */
-    public long getHeight();
+    long getHeight();
 
     /**
      * Returns the dimension size of the horizontal axis.
      *
-     * <p>
+     *
      * This function is used by GUI applications such as HDFView. GUI applications
      * display a dataset in 2D Table or 2D Image. The display order is specified by
      * the index array of selectedIndex as follow:
@@ -354,16 +361,16 @@ public interface DataFormat {
      *
      * @return the size of dimension of the horizontal axis.
      */
-    public long getWidth();
+    long getWidth();
 
     /**
      * Returns the string representation of compression information.
-     * <p>
+     *
      * For example, "SZIP: Pixels per block = 8: H5Z_FILTER_CONFIG_DECODE_ENABLED".
      *
      * @return the string representation of compression information.
      */
-    public abstract String getCompression();
+    String getCompression();
 
     /**
      * Get runtime Class of the original data buffer if converted.
@@ -371,5 +378,5 @@ public interface DataFormat {
      * @return the Class of the original data buffer
      */
     @SuppressWarnings("rawtypes")
-    public abstract Class getOriginalClass();
+    Class getOriginalClass();
 }

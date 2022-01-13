@@ -1,3 +1,4 @@
+/** the hdfview module */
 module org.hdfgroup.hdfview {
     exports hdf;
     exports hdf.view;

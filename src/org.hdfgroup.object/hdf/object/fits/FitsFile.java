@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 
 import hdf.object.Attribute;
-import hdf.object.AttributeDataset;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -37,7 +36,7 @@ import nom.tam.fits.TableHDU;
 /**
  * This class provides file level APIs. File access APIs include retrieving the
  * file hierarchy, opening and closing file, and writing file content to disk.
- * <p>
+ *
  * @version 2.4 9/4/2007
  * @author Peter X. Cao
  */
@@ -66,6 +65,7 @@ public class FitsFile extends FileFormat
 
     /**
      * Constructs an FitsFile object of given file name with read-only access.
+     *
      * @param pathname the file name.
      */
     public FitsFile(String pathname) {
@@ -86,8 +86,9 @@ public class FitsFile extends FileFormat
 
     /**
      * Checks if the given file format is a Fits file.
-     * <p>
+     *
      * @param fileformat the fileformat to be checked.
+     *
      * @return true if the given file is an Fits file; otherwise returns false.
      */
     @Override
@@ -97,13 +98,13 @@ public class FitsFile extends FileFormat
 
     /**
      * Checks if a given file is a Fits file.
-     * <p>
+     *
      * @param filename the file to be checked.
+     *
      * @return true if the given file is an Fits file; otherwise returns false.
      */
     @Override
-    public boolean isThisType(String filename)
-    {
+    public boolean isThisType(String filename) {
         boolean is_fits = false;
         RandomAccessFile raf = null;
         try {
@@ -113,9 +114,8 @@ public class FitsFile extends FileFormat
             raf = null;
         }
 
-        if (raf == null) {
+        if (raf == null)
             return false;
-        }
 
         byte[] header = new byte[80];
         try {
@@ -165,14 +165,18 @@ public class FitsFile extends FileFormat
 
     /**
      * Creates a FitsFile instance with specified file name and READ access.
-     * <p>
+     *
      * @param filename the full path name of the file.
      * @param access the access properties of the file.
      * Regardless of specified access, the FitsFile implementation uses* READ.
+     *
+     * @return the Fits file.
+     *
+     * @throws Exception
+     *             The exception thrown from the File class.
      */
     @Override
-    public FileFormat createInstance(String filename, int access)
-                              throws Exception {
+    public FileFormat createInstance(String filename, int access) throws Exception {
         return new FitsFile(filename);
     }
 
@@ -189,14 +193,12 @@ public class FitsFile extends FileFormat
     }
 
     private HObject loadTree() {
-
         long[] oid = {0};
         // root object does not have a parent path or a parent node
         FitsGroup rootGroup = new FitsGroup(this, "/", null, null, oid);
 
-        if (fitsFile == null) {
+        if (fitsFile == null)
             return rootGroup;
-        }
 
         BasicHDU[] hdus = null;
 
@@ -207,9 +209,8 @@ public class FitsFile extends FileFormat
             log.debug("fitsFile.read():", ex);
         }
 
-        if (hdus == null) {
+        if (hdus == null)
             return rootGroup;
-        }
 
         int n = hdus.length;
         int nImageHDU = 0;
@@ -227,15 +228,12 @@ public class FitsFile extends FileFormat
                 hduName = "RandomGroupsHDU #"+nImageHDU++;
             }
             else if (hdu instanceof TableHDU) {
-                if (hdu instanceof AsciiTableHDU) {
+                if (hdu instanceof AsciiTableHDU)
                     hduName = "AsciiTableHDU #"+nTableHDU++;
-                }
-                else if (hdu instanceof BinaryTableHDU) {
+                else if (hdu instanceof BinaryTableHDU)
                     hduName = "BinaryTableHDU #"+nTableHDU++;
-                }
-                else {
+                else
                     hduName = "TableHDU #"+nTableHDU++;
-                }
             }
 
             if (hduName != null) {
@@ -251,14 +249,12 @@ public class FitsFile extends FileFormat
     // Implementing FileFormat
     @Override
     public void close() throws IOException {
-        if (fitsFile == null) {
+        if (fitsFile == null)
             return;
-        }
 
         DataInput di = fitsFile.getStream();
-        if (di instanceof InputStream) {
+        if (di instanceof InputStream)
             ((InputStream)di).close();
-        }
     }
 
     // Implementing FileFormat
@@ -267,6 +263,9 @@ public class FitsFile extends FileFormat
         return rootObject;
     }
 
+    /**
+    * @return the Fits file.
+    */
     public Fits getFitsFile() {
         return fitsFile;
     }
@@ -317,9 +316,12 @@ public class FitsFile extends FileFormat
         throw new UnsupportedOperationException("Unsupported copy operation.");
     }
 
-    /** copy a dataset into another group.
+    /**
+     * copy a dataset into another group.
+     *
      * @param srcDataset the dataset to be copied.
      * @param pgroup the group where the dataset is copied to.
+     *
      * @return the treeNode containing the new copy of the dataset.
      */
     private void copyDataset(Dataset srcDataset, FitsGroup pgroup) throws Exception {
@@ -330,15 +332,33 @@ public class FitsFile extends FileFormat
         throw new UnsupportedOperationException("Unsupported copyGroup operation.");
     }
 
-    /*
-     * Copy attributes of the source object to the destination object.
+    /**
+     * Copies the attributes of one object to another object.
+     *
+     * FITS does not support attributes
+     *
+     * @param src
+     *            The source object.
+     * @param dst
+     *            The destination object.
+     *
+     * @see #copyAttributes(long, long)
      */
     public void copyAttributes(HObject src, HObject dst) {
         throw new UnsupportedOperationException("Unsupported copyAttributes operation.");
     }
 
-    /*
-     * Copy attributes of the source object to the destination object.
+    /**
+     * Copies the attributes of one object to another object.
+     *
+     * FITS does not support attributes
+     *
+     * @param srcID
+     *            The source identifier.
+     * @param dstID
+     *            The destination identifier.
+     *
+     * @see #copyAttributes(long, long)
      */
     public void copyAttributes(long srcID, long dstID) {
         throw new UnsupportedOperationException("Unsupported copyAttributes with id operation.");
@@ -348,13 +368,15 @@ public class FitsFile extends FileFormat
      * Creates a new attribute and attached to the object if attribute does
      * not exist. Otherwise, just update the value of the attribute.
      *
-     * <p>
-     * @param obj the object which the attribute is to be attached to.
-     * @param attr the atribute to attach.
-     * @param attrExisted The indicator if the given attribute exists.
+     * @param obj
+     *        the object which the attribute is to be attached to.
+     * @param attr
+     *        the atribute to attach.
+     * @param attrExisted
+     *        The indicator if the given attribute exists.
      */
     @Override
-    public void writeAttribute(HObject obj, hdf.object.AttributeDataset attr, boolean attrExisted) throws Exception {
+    public void writeAttribute(HObject obj, hdf.object.Attribute attr, boolean attrExisted) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
@@ -362,8 +384,7 @@ public class FitsFile extends FileFormat
      *  Returns the version of the library.
      */
     @Override
-    public String getLibversion()
-    {
+    public String getLibversion() {
         String ver = "Fits Java (version 2.4)";
 
         return ver;
@@ -371,8 +392,7 @@ public class FitsFile extends FileFormat
 
     // implementing FileFormat
     @Override
-    public HObject get(String path) throws Exception
-    {
+    public HObject get(String path) throws Exception {
         throw new UnsupportedOperationException("get() is not supported");
     }
 }

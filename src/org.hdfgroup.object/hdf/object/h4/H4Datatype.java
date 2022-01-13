@@ -21,7 +21,7 @@ import hdf.object.Datatype;
 
 /**
  * This class defines HDF4 data type characteristics and APIs for a data type.
- * <p>
+ *
  * This class provides several methods to convert an HDF4 datatype identifier to a datatype object,
  * and vice versa. A datatype object is described by four basic fields: datatype class, size, byte
  * order, and sign, while an HDF5 datatype is presented by a datatype identifier.
@@ -36,7 +36,7 @@ public class H4Datatype extends Datatype {
 
     /**
      * Constructs a H4Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of H4Datatype:
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -60,7 +60,7 @@ public class H4Datatype extends Datatype {
      * @param tsign
      *            the sign of the datatype. Valid values are SIGN_NONE, SIGN_2 and NATIVE.
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public H4Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
@@ -70,7 +70,7 @@ public class H4Datatype extends Datatype {
 
     /**
      * Constructs a H4Datatype with a given native datatype identifier.
-     * <p>
+     *
      * For example,
      *
      * <pre>
@@ -88,7 +88,7 @@ public class H4Datatype extends Datatype {
      * @param nativeID
      *            the native datatype identifier.
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public H4Datatype(long nativeID) throws Exception {
@@ -101,21 +101,10 @@ public class H4Datatype extends Datatype {
     /*
      * (non-Javadoc)
      *
-     * @see hdf.object.DataFormat#hasAttribute()
-     */
-    @Override
-    public boolean hasAttribute() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
      * @see hdf.object.Datatype#fromNative(long)
      */
     @Override
-    public void fromNative(long tid)
-    {
+    public void fromNative(long tid) {
         datatypeOrder = NATIVE;
         datatypeSign = NATIVE;
 
@@ -195,8 +184,7 @@ public class H4Datatype extends Datatype {
      * @throws OutOfMemoryError
      *             if the array cannot be allocated
      */
-    public static final Object allocateArray(long datatype, int datasize)
-            throws OutOfMemoryError {
+    public static final Object allocateArray(long datatype, int datasize) throws OutOfMemoryError {
         if (datasize <= 0) {
             log.debug("datasize <= 0");
             return null;
@@ -253,10 +241,8 @@ public class H4Datatype extends Datatype {
      */
     @Override
     public String getDescription() {
-
-        if (datatypeDescription != null) {
+        if (datatypeDescription != null)
             return datatypeDescription;
-        }
 
         String description = null;
 
@@ -326,8 +312,7 @@ public class H4Datatype extends Datatype {
      * @see hdf.object.Datatype#createNative()
      */
     @Override
-    public long createNative()
-    {
+    public long createNative() {
         long tid = -1;
         int tclass = getDatatypeClass();
         int tsize = (int) getDatatypeSize();
@@ -407,9 +392,32 @@ public class H4Datatype extends Datatype {
         // No implementation
     }
 
-    // Implementing DataFormat
+    // Implementing MetaDataContainer
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     *
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
+    }
+
+    /**
+     * Check if the object has any attributes attached.
+     *
+     * @return true if it has any attributes, false otherwise.
+     */
+    @Override
+    public boolean hasAttribute() {
+        return false;
     }
 }
