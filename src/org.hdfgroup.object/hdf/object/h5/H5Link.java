@@ -37,9 +37,11 @@ public class H5Link extends HObject implements MetaDataContainer
 {
     private static final long serialVersionUID = -8137277460521594367L;
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Link.class);
+
     /** the object properties */
     @SuppressWarnings("unused")
-    private H5O_info_t obj_info;
+    private H5O_info_t objInfo;
 
     /**
      * Constructs an HDF5 link with specific name, path, and parent.
@@ -71,7 +73,7 @@ public class H5Link extends HObject implements MetaDataContainer
     public H5Link(FileFormat theFile, String theName, String thePath, long[] oid) {
         super(theFile, theName, thePath, oid);
 
-        obj_info = new H5O_info_t(-1L, -1L, -1, 0, -1L, 0L, 0L, 0L, 0L, null,null,null);
+        objInfo = new H5O_info_t(-1L, -1L, -1, 0, -1L, 0L, 0L, 0L, 0L, null,null,null);
     }
 
     @Override

@@ -1329,10 +1329,10 @@ public class H5File extends FileFormat
         try {
             H5O_info_t info;
             int objType;
-            long oid = H5.H5Oopen(fid, path, HDF5Constants.H5P_DEFAULT);
+            long objid = H5.H5Oopen(fid, path, HDF5Constants.H5P_DEFAULT);
 
-            if (oid >= 0) {
-                info = H5.H5Oget_info(oid);
+            if (objid >= 0) {
+                info = H5.H5Oget_info(objid);
                 objType = info.type;
                 if (objType == HDF5Constants.H5O_TYPE_DATASET) {
                     long did = -1;
@@ -1377,10 +1377,10 @@ public class H5File extends FileFormat
                 }
             }
             try {
-                H5.H5Oclose(oid);
+                H5.H5Oclose(objid);
             }
             catch (Exception ex) {
-                log.debug("get(): H5Oclose(oid {}) failure: ", oid, ex);
+                log.debug("get(): H5Oclose(objid {}) failure: ", objid, ex);
                 ex.printStackTrace();
             }
         }
@@ -1724,10 +1724,12 @@ public class H5File extends FileFormat
         }
 
         else if (type == HDF5Constants.H5L_TYPE_SOFT) {
+            log.trace("createLink(): H5Lcreate_soft: {} in {} as {}", currentObj.getFullName(), fid, new_full_name);
             H5.H5Lcreate_soft(currentObj.getFullName(), fid, new_full_name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
 
         else if (type == HDF5Constants.H5L_TYPE_EXTERNAL) {
+            log.trace("createLink(): H5Lcreate_external: File={} {} in {} as {}", currentObj.getFile(), currentObj.getFullName(), fid, new_full_name);
             H5.H5Lcreate_external(currentObj.getFile(), currentObj.getFullName(), fid, new_full_name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
 
@@ -1747,6 +1749,8 @@ public class H5File extends FileFormat
             log.trace("createLink(): Link target is type H5ScalarDS");
             obj = new H5ScalarDS(this, name, parent_path);
         }
+        else
+            log.trace("createLink(): Link target is type unknown");
 
         return obj;
     }
@@ -2275,7 +2279,7 @@ public class H5File extends FileFormat
             obj_name = objNames[i];
             obj_type = objTypes[i];
             log.trace("depth_first({}): obj_name={}, obj_type={}", parentObject, obj_name, obj_type);
-            long oid[] = { objRefs[i], fNos[i] };
+            long[] oid = { objRefs[i], fNos[i] };
 
             if (obj_name == null) {
                 log.trace("depth_first({}): continue after null obj_name", parentObject);
@@ -2293,7 +2297,7 @@ public class H5File extends FileFormat
             if ((nTotal > 0) && (nTotal < nStart))
                 skipLoad = true;
 
-            // create a new group
+            // create a new objects
             if (obj_type == HDF5Constants.H5O_TYPE_GROUP) {
                 H5Group g = new H5Group(this, obj_name, fullPath, pgroup);
 
@@ -2397,6 +2401,7 @@ public class H5File extends FileFormat
 
         pgroup.close(gid);
 
+        log.debug("depth_first({}): nTotal={}", parentObject, nTotal);
         return nTotal;
     } // private depth_first()
 
@@ -2702,7 +2707,7 @@ public class H5File extends FileFormat
 
         H5G_info_t group_info = null;
         H5O_info_t obj_info = null;
-        long oid = -1;
+        long objid = -1;
         String link_name = null;
         try {
             group_info = H5.H5Gget_info(gid);
@@ -2711,7 +2716,7 @@ public class H5File extends FileFormat
             log.debug("getGroup(): {} H5Gget_info(gid {}) failure: ", name, gid, ex);
         }
         try {
-            oid = H5.H5Oopen(gid, thisFullName, HDF5Constants.H5P_DEFAULT);
+            objid = H5.H5Oopen(gid, thisFullName, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception ex) {
             log.debug("getGroup(): {} H5Oopen(gid {}) failure: ", name, gid, ex);
@@ -2722,7 +2727,7 @@ public class H5File extends FileFormat
         for (int i = 0; i < group_info.nlinks; i++) {
             try {
                 link_name = H5.H5Lget_name_by_idx(gid, thisFullName, indexType, indexOrder, i, HDF5Constants.H5P_DEFAULT);
-                obj_info = H5.H5Oget_info_by_idx(oid, thisFullName, indexType, indexOrder, i, HDF5Constants.H5P_DEFAULT);
+                obj_info = H5.H5Oget_info_by_idx(objid, thisFullName, indexType, indexOrder, i, HDF5Constants.H5P_DEFAULT);
             }
             catch (HDF5Exception ex) {
                 log.debug("getGroup()[{}]: {} name,info failure: ", i, name, ex);
@@ -2763,11 +2768,11 @@ public class H5File extends FileFormat
             }
         } // End of for loop.
         try {
-            if (oid >= 0)
-                H5.H5Oclose(oid);
+            if (objid >= 0)
+                H5.H5Oclose(objid);
         }
         catch (Exception ex) {
-            log.debug("getGroup(): {} H5Oclose(oid {}) failure: ", name, oid, ex);
+            log.debug("getGroup(): {} H5Oclose(oid {}) failure: ", name, objid, ex);
         }
 
         return group;

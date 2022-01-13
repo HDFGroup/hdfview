@@ -180,7 +180,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * Constructs a CompoundDS object with the given file, dataset name and path.
      *
      * The dataset object represents an existing dataset in the file. For
-     * example, new H5CompoundDS(file, "dset1", "/g0/") constructs a dataset
+     * example, new CompoundDS(file, "dset1", "/g0/") constructs a dataset
      * object that corresponds to the dataset, "dset1", at group "/g0/".
      *
      * This object is usually constructed at FileFormat.open(), which loads the
