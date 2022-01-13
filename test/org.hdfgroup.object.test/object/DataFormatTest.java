@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -145,9 +145,9 @@ public class DataFormatTest {
     @Test
     public void testGetMetadata() {
         log.debug("testGetMetadata start");
-        AttributeDataset strAttr = null;
-        AttributeDataset arrayIntAttr = null;
-        AttributeDataset imgAttr = null;
+        Attribute strAttr = null;
+        Attribute arrayIntAttr = null;
+        Attribute imgAttr = null;
         List mdataList = null;
         try {
             mdataList = testGroup.getMetadata();
@@ -156,12 +156,12 @@ public class DataFormatTest {
             fail("getMetadata() failed. " + ex);
         }
         for (int ndx=0; ndx < mdataList.size(); ndx++){
-            AttributeDataset attrobj = (AttributeDataset) mdataList.get(ndx);
-            if (attrobj.getDatatype().isString()) {
+            Attribute attrobj = (Attribute) mdataList.get(ndx);
+            if (attrobj.getAttributeDatatype().isString()) {
                 String[] value = null;
 
                 try {
-                    value = (String[]) attrobj.getData();
+                    value = (String[]) attrobj.getAttributeData();
                 }
                 catch (Exception ex) {
                     log.trace("testGetMetadata(): getData() failure:", ex);
@@ -184,7 +184,7 @@ public class DataFormatTest {
         String[] value = null;
 
         try {
-            value = (String[]) strAttr.getData();
+            value = (String[]) strAttr.getAttributeData();
         }
         catch (Exception ex) {
             log.trace("testGetMetadata(): getData() failure:", ex);
@@ -201,10 +201,10 @@ public class DataFormatTest {
         }
 
         int[] intValue = null;
-        long[] dims = arrayIntAttr.getDims();
+        long[] dims = arrayIntAttr.getAttributeDims();
 
         try {
-            intValue = (int[]) arrayIntAttr.getData();
+            intValue = (int[]) arrayIntAttr.getAttributeData();
         }
         catch (Exception ex) {
             log.trace("testGetMetadata(): getData() failure:", ex);
@@ -249,7 +249,7 @@ public class DataFormatTest {
         assertNotNull(testGroup);
         assertNotNull(attr);
         try {
-            attr.write(classValue);
+            attr.writeAttribute(classValue);
         }
         catch (Exception ex) {
             fail("writeMetadata() failed " + ex.getMessage());
@@ -265,17 +265,17 @@ public class DataFormatTest {
 
         assertEquals(3, mdataList.size());
 
-        AttributeDataset strAttr = null;
-        AttributeDataset arrayIntAttr = null;
-        AttributeDataset imgAttr = null;
+        Attribute strAttr = null;
+        Attribute arrayIntAttr = null;
+        Attribute imgAttr = null;
 
         for (int ndx=0; ndx < mdataList.size(); ndx++){
-            AttributeDataset attrobj = (AttributeDataset) mdataList.get(ndx);
-            if (attrobj.getDatatype().isString()) {
+            Attribute attrobj = (Attribute) mdataList.get(ndx);
+            if (attrobj.getAttributeDatatype().isString()) {
                 String[] value = null;
 
                 try {
-                    value = (String[]) attrobj.getData();
+                    value = (String[]) attrobj.getAttributeData();
                 }
                 catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -298,7 +298,7 @@ public class DataFormatTest {
         String[] value = null;
 
         try {
-            value = (String[]) strAttr.getData();
+            value = (String[]) strAttr.getAttributeData();
         }
         catch (Exception ex) {
             log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -316,10 +316,10 @@ public class DataFormatTest {
         }
 
         int[] intValue = null;
-        long[] dims = arrayIntAttr.getDims();
+        long[] dims = arrayIntAttr.getAttributeDims();
 
         try {
-            intValue = (int[]) arrayIntAttr.getData();
+            intValue = (int[]) arrayIntAttr.getAttributeData();
         }
         catch (Exception ex) {
             log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -337,7 +337,7 @@ public class DataFormatTest {
         }
 
         try {
-            value = (String[]) imgAttr.getData();
+            value = (String[]) imgAttr.getAttributeData();
         }
         catch (Exception ex) {
             log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -372,7 +372,7 @@ public class DataFormatTest {
             fail("getMetadata() failed. " + ex.getMessage());
         }
 
-        AttributeDataset theAttr = (AttributeDataset) mdataList.get(2);
+        Attribute theAttr = (Attribute) mdataList.get(2);
         try {
             testGroup.removeMetadata(theAttr);
         }

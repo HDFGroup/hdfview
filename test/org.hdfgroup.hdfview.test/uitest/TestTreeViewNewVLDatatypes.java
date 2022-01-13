@@ -29,7 +29,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             assertTrue("createNewHDF5VLDatatype() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
-            items[0].contextMenu("New").menu("Datatype").click();
+            items[0].contextMenu().contextMenu("New").menu("Datatype").click();
 
             SWTBotShell dtShell = bot.shell("New Datatype...");
             dtShell.activate();
@@ -60,7 +60,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -87,7 +87,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
-            items[0].contextMenu("New").menu("Dataset").click();
+            items[0].contextMenu().contextMenu("New").menu("Dataset").click();
 
             SWTBotShell dsShell = bot.shell("New Dataset...");
             dsShell.activate();
@@ -118,7 +118,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -178,7 +178,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 

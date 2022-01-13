@@ -19,12 +19,14 @@ import java.util.Vector;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.HDFArray;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
+import hdf.hdf5lib.structs.H5O_token_t;
 
-import hdf.object.AttributeDataset;
+import hdf.object.Attribute;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
@@ -32,13 +34,13 @@ import hdf.object.h5.H5MetaDataContainer;
 
 /**
  * An H5Group object represents an existing HDF5 group in file.
- * <p>
+ *
  * In HDF5, every object has at least one name. An HDF5 group is used to store a
  * set of the names together in one place, i.e. a group. The general structure
  * of a group is similar to that of the UNIX file system in that the group may
  * contain references to other groups or data objects just as the UNIX directory
  * may contain sub-directories or files.
- * <p>
+ *
  * For more information on HDF5 Groups,
  *
  * <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
@@ -46,17 +48,19 @@ import hdf.object.h5.H5MetaDataContainer;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H5Group extends Group {
+public class H5Group extends Group
+{
 
     private static final long serialVersionUID = -951164512330444150L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Group.class);
 
     /**
-     * The metadata object for this data object. Members of the metadata are instances of AttributeDataset.
+     * The metadata object for this data object. Members of the metadata are instances of Attribute.
      */
     private H5MetaDataContainer objMetadata;
 
+    /** the object properties */
     private H5O_info_t        objInfo;
 
     /**
@@ -94,27 +98,62 @@ public class H5Group extends Group {
     public H5Group(FileFormat theFile, String name, String path, Group parent, long[] oid) {
         super(theFile, name, path, parent, oid);
         nMembersInFile = -1;
-        objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
         objMetadata = new H5MetaDataContainer(theFile, name, path, this);
 
-        if ((oid == null) && (theFile != null)) {
-            // retrieve the object ID
+        if (theFile != null) {
+            if (oid == null) {
+                // retrieve the object ID
+                try {
+                    byte[] ref_buf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
+                    this.oid = HDFNativeData.byteToLong(ref_buf);
+                    log.trace("constructor REF {} to OID {}", ref_buf, this.oid);
+                }
+                catch (Exception ex) {
+                    this.oid = new long[]{0, 0, 0, 0, 0, 0, 0, 0};
+                }
+            }
+            log.trace("constructor OID {}", this.oid);
             try {
-                byte[] ref_buf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
-                this.oid = new long[1];
-                this.oid[0] = HDFNativeData.byteToLong(ref_buf, 0);
+                objInfo = H5.H5Oget_info_by_name(theFile.getFID(), this.getFullName(), HDF5Constants.H5O_INFO_BASIC, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
-                this.oid = new long[1];
-                this.oid[0] = 0;
+                objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
             }
+        }
+        else {
+            this.oid = new long[]{0, 0, 0, 0, 0, 0, 0, 0};
+            objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
         }
     }
 
-    /*
-     * (non-Javadoc)
+    protected void finalize() throws Throwable {
+        // Invoke the finalizer of our superclass
+        super.finalize();
+        // Destroy the object reference we were using
+        // If the file doesn't exist or tempfile is null, this can throw
+        // an exception, but that exception is ignored.
+        if (oid != null) {
+            HDFArray theArray = new HDFArray(oid);
+            byte[] refBuf = theArray.byteify();
+            H5.H5Rdestroy(refBuf);
+            oid = null;
+        }
+    }
+
+    /**
+     * Get the token for this object.
      *
-     * @see hdf.object.MetaDataContainer#hasAttribute()
+     * @return true if it has any attributes, false otherwise.
+     */
+    public long[] getToken() {
+        H5O_token_t token = objInfo.token;
+        return HDFNativeData.byteToLong(token.data);
+    }
+
+    /**
+     * Check if the object has any attributes attached.
+     *
+     * @return true if it has any attributes, false otherwise.
      */
     @Override
     public boolean hasAttribute() {
@@ -165,10 +204,9 @@ public class H5Group extends Group {
         return nMembersInFile;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hdf.object.MetaDataContainer#clear()
+    /**
+     * Removes all of the elements from metadata list.
+     * The list should be empty after this call returns.
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -177,21 +215,49 @@ public class H5Group extends Group {
         objMetadata.clear();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
      *
-     * @see hdf.object.MetaDataContainer#getMetadata()
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws HDF5Exception
+     *             if the metadata can not be retrieved
      */
     @Override
     @SuppressWarnings("rawtypes")
     public List getMetadata() throws HDF5Exception {
-        return this.getMetadata(fileFormat.getIndexType(null), fileFormat.getIndexOrder(null));
+        int gmIndexType = 0;
+        int gmIndexOrder = 0;
+
+        try {
+            gmIndexType = fileFormat.getIndexType(null);
+        }
+        catch (Exception ex) {
+            log.debug("getMetadata(): getIndexType failed: ", ex);
+        }
+        try {
+            gmIndexOrder = fileFormat.getIndexOrder(null);
+        }
+        catch (Exception ex) {
+            log.debug("getMetadata(): getIndexOrder failed: ", ex);
+        }
+        return this.getMetadata(gmIndexType, gmIndexOrder);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
      *
-     * @see hdf.object.MetaDataContainer#getMetadata(int...)
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws HDF5Exception
+     *             if the metadata can not be retrieved
      */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws HDF5Exception {
@@ -202,7 +268,7 @@ public class H5Group extends Group {
             log.debug("getMetadata(): getLinkTargetName failed: ", ex);
         }
 
-        List<AttributeDataset> attrlist = null;
+        List<Attribute> attrlist = null;
         try {
             attrlist = objMetadata.getMetadata(attrPropList);
         }
@@ -212,10 +278,22 @@ public class H5Group extends Group {
         return attrlist;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Writes a specific piece of metadata (such as an attribute) into the file.
      *
-     * @see hdf.object.MetaDataContainer#writeMetadata(java.lang.Object)
+     * If an HDF(4&amp;5) attribute exists in the file, this method updates its
+     * value. If the attribute does not exist in the file, it creates the
+     * attribute in the file and attaches it to the object. It will fail to
+     * write a new attribute to the object where an attribute with the same name
+     * already exists. To update the value of an existing attribute in the file,
+     * one needs to get the instance of the attribute by getMetadata(), change
+     * its values, then use writeMetadata() to write the value.
+     *
+     * @param info
+     *            the metadata to write.
+     *
+     * @throws Exception
+     *             if the metadata can not be written
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -224,15 +302,19 @@ public class H5Group extends Group {
             objMetadata.writeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("writeMetadata(): Object not an AttributeDataset");
+            log.debug("writeMetadata(): Object not an Attribute");
             return;
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Deletes an existing piece of metadata from this object.
      *
-     * @see hdf.object.MetaDataContainer#removeMetadata(java.lang.Object)
+     * @param info
+     *            the metadata to delete.
+     *
+     * @throws HDF5Exception
+     *             if the metadata can not be removed
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -241,16 +323,16 @@ public class H5Group extends Group {
             objMetadata.removeMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("removeMetadata(): Object not an AttributeDataset");
+            log.debug("removeMetadata(): Object not an Attribute");
             return;
         }
 
-        AttributeDataset attr = (AttributeDataset) info;
-        log.trace("removeMetadata(): {}", attr.getName());
+        Attribute attr = (Attribute) info;
+        log.trace("removeMetadata(): {}", attr.getAttributeName());
         long gid = open();
         if(gid >= 0) {
             try {
-                H5.H5Adelete(gid, attr.getName());
+                H5.H5Adelete(gid, attr.getAttributeName());
             }
             finally {
                 close(gid);
@@ -261,10 +343,14 @@ public class H5Group extends Group {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Updates an existing piece of metadata attached to this object.
      *
-     * @see hdf.object.MetaDataContainer#updateMetadata(java.lang.Object)
+     * @param info
+     *            the metadata to update.
+     *
+     * @throws HDF5Exception
+     *             if the metadata can not be updated
      */
     @Override
     public void updateMetadata(Object info) throws HDF5Exception {
@@ -272,7 +358,7 @@ public class H5Group extends Group {
             objMetadata.updateMetadata(info);
         }
         catch (Exception ex) {
-            log.debug("updateMetadata(): Object not an AttributeDataset");
+            log.debug("updateMetadata(): Object not an Attribute");
             return;
         }
     }
@@ -320,7 +406,7 @@ public class H5Group extends Group {
     /**
      * Creates a new group with a name in a group and with the group creation
      * properties specified in gplist.
-     * <p>
+     *
      * The gplist contains a sequence of group creation property list
      * identifiers, lcpl, gcpl, gapl. It allows the user to create a group with
      * group creation properties. It will close the group creation properties
@@ -379,13 +465,11 @@ public class H5Group extends Group {
         String path = HObject.SEPARATOR;
         if (!pgroup.isRoot()) {
             path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
-            if (name.endsWith("/")) {
+            if (name.endsWith("/"))
                 name = name.substring(0, name.length() - 1);
-            }
             int idx = name.lastIndexOf('/');
-            if (idx >= 0) {
+            if (idx >= 0)
                 name = name.substring(idx + 1);
-            }
         }
 
         fullPath = path + name;
@@ -399,15 +483,10 @@ public class H5Group extends Group {
             log.debug("create(): H5Gcreate {} H5Gclose(gid {}) failure: ", fullPath, gid, ex);
         }
 
-        byte[] ref_buf = H5.H5Rcreate(file.open(), fullPath, HDF5Constants.H5R_OBJECT, -1);
-        long l = HDFNativeData.byteToLong(ref_buf, 0);
-        long[] oid = { l };
+        group = new H5Group(file, name, path, pgroup);
 
-        group = new H5Group(file, name, path, pgroup, oid);
-
-        if (group != null) {
+        if (group != null)
             pgroup.addToMemberList(group);
-        }
 
         if (gcpl > 0) {
             try {
@@ -446,9 +525,8 @@ public class H5Group extends Group {
         super.setPath(newPath);
 
         List members = this.getMemberList();
-        if (members == null) {
+        if (members == null)
             return;
-        }
 
         int n = members.size();
         HObject obj = null;

@@ -24,7 +24,8 @@ import hdf.object.h5.H5File;
  * @author Rishi R. Sinha
  *
  */
-public class HObjectTest {
+public class HObjectTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HObjectTest.class);
     private static final H5File H5FILE = new H5File();
     private static final String GNAME = H5TestFile.NAME_GROUP;
@@ -38,8 +39,7 @@ public class HObjectTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -127,7 +127,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#getFile()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Make sure file name in object yields same file as filename
@@ -137,14 +137,13 @@ public class HObjectTest {
     public void testGetFile() {
         log.debug("testGetFile");
         String fullFileName = testObj.getFile();
-        if (!fullFileName.endsWith(H5TestFile.NAME_FILE_H5)) {
+        if (!fullFileName.endsWith(H5TestFile.NAME_FILE_H5))
             fail("Wrong File");
-        }
     }
 
     /**
      * Test method for {@link hdf.object.HObject#getName()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>For the base group, find the name of the group and test it against the standard.
@@ -153,14 +152,13 @@ public class HObjectTest {
     @Test
     public void testGetName() {
         log.debug("testGetName");
-        if (!testObj.getName().equals(GNAME.substring(1))) {
+        if (!testObj.getName().equals(GNAME.substring(1)))
             fail("GetName returns wrong name");
-        }
     }
 
     /**
      * Test method for {@link hdf.object.HObject#getFullName()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>For the base group, find the full name of the group and test it against the standard.
@@ -169,14 +167,13 @@ public class HObjectTest {
     @Test
     public void testGetFullName() {
         log.debug("testGetFullName");
-        if (!testObj.getFullName().equals(GNAME)) {
+        if (!testObj.getFullName().equals(GNAME))
             fail("GetFullName returns wrong name");
-        }
     }
 
     /**
      * Test method for {@link hdf.object.HObject#getPath()}. *
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>For the base group, find the path of the group and test it against the standard.
@@ -185,14 +182,13 @@ public class HObjectTest {
     @Test
     public void testGetPath() {
         log.debug("testGetPath");
-        if (!testObj.getPath().equals("/")) {
+        if (!testObj.getPath().equals("/"))
             fail("GetPath returns wrong path");
-        }
     }
 
     /**
      * Test method for {@link hdf.object.HObject#setName(java.lang.String)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test setting the name to null. It should not be set.
@@ -210,17 +206,13 @@ public class HObjectTest {
         try {
             testObj.setName(null);
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        catch (final Exception ex) {} // Expected - intentional
 
         // set to an existing name
         try {
             testObj.setName(H5TestFile.NAME_DATASET_FLOAT);
         }
-        catch (final Exception ex) {
-            ; // Expected - intentional
-        }
+        catch (final Exception ex) {} // Expected - intentional
         H5.H5error_on();
 
         try {
@@ -272,7 +264,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#setPath(java.lang.String)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test setting the path to null. It should not be set.
@@ -287,13 +279,10 @@ public class HObjectTest {
         try {
             testObj.setPath(null);
         }
-        catch (Exception e) {
-            ;
-        }
+        catch (Exception e) {}
 
-        if (!path.equals(testObj.getPath())) {
+        if (!path.equals(testObj.getPath()))
             fail("testPath changed the path name even though null was passed to it.");
-        }
 
         try {
             testObj.setPath("testPath");
@@ -301,9 +290,8 @@ public class HObjectTest {
         catch (Exception e) {
             fail("testPath failed when trying to set it to testPath");
         }
-        if (!testObj.getPath().equals("testPath")) {
+        if (!testObj.getPath().equals("testPath"))
             fail("testPath failed when trying to set it to testPath");
-        }
         try {
             testObj.setPath(path);
         }
@@ -314,7 +302,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#open()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Open the Group and check that the gid returned is less than 1.
@@ -340,7 +328,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#close(int)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Run the tests for opening the group.
@@ -354,7 +342,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#getFID()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>get the FID for the group and make sure that it is the same as the FID for the file.
@@ -368,7 +356,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#equalsOID(long[])}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Check against null. It should fail.
@@ -384,7 +372,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#getFileFormat()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>For the group, check against null.
@@ -400,7 +388,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#getOID()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Check that OIDlist is not null.
@@ -416,7 +404,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#hasAttribute()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Check for Image dataset which has an attribute.
@@ -437,7 +425,7 @@ public class HObjectTest {
 
     /**
      * Test method for {@link hdf.object.HObject#toString()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Check for the group.

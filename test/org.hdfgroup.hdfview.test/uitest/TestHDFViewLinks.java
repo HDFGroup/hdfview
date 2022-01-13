@@ -34,7 +34,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].click();
-            items[0].contextMenu("New").menu("Group").click();
+            items[0].contextMenu().contextMenu("New").menu("Group").click();
 
             groupShell = bot.shell("New Group...");
             groupShell.activate();
@@ -75,7 +75,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("New").menu("Dataset").click();
+            items[0].getNode(0).contextMenu().contextMenu("New").menu("Dataset").click();
 
             datasetShell = bot.shell("New Dataset...");
             datasetShell.activate();
@@ -100,7 +100,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             items = filetree.getAllItems();
 
             items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -127,9 +127,9 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                 }
             });
 
-            tableShell.bot().menu("Table").menu("Save Changes to File").click();
+            tableShell.bot().menu().menu("Table").menu("Save Changes to File").click();
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -181,7 +181,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Test links to groups
             items[0].click();
-            items[0].contextMenu("New").menu("Link").click();
+            items[0].contextMenu().contextMenu("New").menu("Link").click();
 
             SWTBotShell linkShell = bot.shell("New Link...");
             linkShell.activate();
@@ -214,7 +214,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File As").menu("Read/Write").click();
+            items[0].contextMenu().contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -226,7 +226,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Delete link
             items[0].getNode(1).click();
-            items[0].getNode(1).contextMenu("Delete").click();
+            items[0].getNode(1).contextMenu().contextMenu("Delete").click();
 
             SWTBotShell dialog = bot.shells()[1];
             dialog.activate();
@@ -235,14 +235,14 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File As").menu("Read/Write").click();
+            items[0].contextMenu().contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
             // Test links to datasets
             items[0].click();
-            items[0].contextMenu("New").menu("Link").click();
+            items[0].contextMenu().contextMenu("New").menu("Link").click();
 
             linkShell = bot.shell("New Link...");
             linkShell.activate();
@@ -275,7 +275,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -286,7 +286,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                     items[0].getNode(0).getText().compareTo(dataset_link_name) == 0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -306,7 +306,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -359,7 +359,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Test soft link to existing object
             items[0].click();
-            items[0].contextMenu("New").menu("Link").click();
+            items[0].contextMenu().contextMenu("New").menu("Link").click();
 
             SWTBotShell linkShell = bot.shell("New Link...");
             linkShell.activate();
@@ -392,7 +392,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File As").menu("Read/Write").click();
+            items[0].contextMenu().contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -403,7 +403,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Test soft link to non-existing object
             items[0].click();
-            items[0].contextMenu("New").menu("Link").click();
+            items[0].contextMenu().contextMenu("New").menu("Link").click();
 
             linkShell = bot.shell("New Link...");
             linkShell.activate();
@@ -445,7 +445,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File As").menu("Read/Write").click();
+            items[0].contextMenu().contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -474,7 +474,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -485,7 +485,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                     items[0].getNode(2).getText().compareTo("test_nonexisting_object_link") == 0);
 
             items[0].getNode(2).click();
-            items[0].getNode(2).contextMenu("Open").click();
+            items[0].getNode(2).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex
                     .withRegex("test_nonexisting_object_link.*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
@@ -505,7 +505,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -562,7 +562,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Test external link to existing object
             items[0].click();
-            items[0].contextMenu("New").menu("Link").click();
+            items[0].contextMenu().contextMenu("New").menu("Link").click();
 
             SWTBotShell linkShell = bot.shell("New Link...");
             linkShell.activate();
@@ -604,7 +604,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File As").menu("Read/Write").click();
+            items[0].contextMenu().contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -615,7 +615,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                     items[0].getNode(1).getText().compareTo(file_link_name) == 0);
 
             items[0].getNode(1).click();
-            items[0].getNode(1).contextMenu("Open").click();
+            items[0].getNode(1).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(file_link_name + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -639,12 +639,12 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             // assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "0", val),
             // val.equals("0"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             // Test external link to non-existing object
             items[0].click();
-            items[0].contextMenu("New").menu("Link").click();
+            items[0].contextMenu().contextMenu("New").menu("Link").click();
 
             linkShell = bot.shell("New Link...");
             linkShell.activate();
@@ -683,7 +683,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File As").menu("Read/Write").click();
+            items[0].contextMenu().contextMenu("Reload File As").menu("Read/Write").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -711,7 +711,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             // Reload file to update link
             items[0].click();
-            items[0].contextMenu("Reload File").click();
+            items[0].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
@@ -722,7 +722,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                     items[0].getNode(0).getText().compareTo("test_external_nonexisting_link") == 0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex("test_external_nonexisting_link.*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -744,7 +744,7 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "4294950912", val), val.equals("4294950912"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {

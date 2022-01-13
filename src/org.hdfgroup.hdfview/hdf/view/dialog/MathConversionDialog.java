@@ -122,6 +122,9 @@ public class MathConversionDialog extends Dialog {
         functionDescription = tmpStrs;
     }
 
+    /**
+     * Open the MathConversionDialog for converting data.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

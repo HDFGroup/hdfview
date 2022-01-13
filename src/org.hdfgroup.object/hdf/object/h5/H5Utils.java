@@ -18,6 +18,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 
+/** HDF5 utility class */
 public final class H5Utils {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Utils.class);
@@ -70,9 +71,8 @@ public final class H5Utils {
         for (int i = 0; i < rank; i++) {
             if (selectedDims != null) {
                 lsize *= selectedDims[i];
-                if (selectedDims[i] < dsetDims[i]) {
+                if (selectedDims[i] < dsetDims[i])
                     isAllSelected = false;
-                }
             }
         }
 
@@ -96,6 +96,27 @@ public final class H5Utils {
         return lsize;
     }
 
+    /**
+     * Get the total number of datapoints for the hyperslab selection within a dataset.
+     *
+     * @param did
+     *            IN dataset ID
+     * @param dsetDims
+     *            IN dimensions
+     * @param startDims
+     *            IN start dimensions
+     * @param selectedStride
+     *            IN selected stride values
+     * @param selectedDims
+     *            IN selected dimensions
+     * @param spaceIDs
+     *            IN/OUT memory and file space IDs -- spaceIDs[0]=mspace, spaceIDs[1]=fspace
+     *
+     * @return total number of data points selected
+     *
+     * @throws HDF5Exception
+     *             If there is an error at the HDF5 library level.
+     */
     public static final long getTotalSelectedSpacePoints(long did, long[] dsetDims, long[] startDims,
             long[] selectedStride, long[] selectedDims, long[] spaceIDs) throws HDF5Exception {
         long totalSelectedSpacePoints = selectHyperslab(did, dsetDims, startDims, selectedStride, selectedDims, spaceIDs);

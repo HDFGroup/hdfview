@@ -32,6 +32,13 @@ Major Bug Fixes
       b. User Home Directory or user.home system property
       c. User selected directory
 
+Minor Bug Fixes
+==============================================================================
+    * Corrected the create new attribute dialog from trying to write
+      the attribute twice.
+    * Added an initilize lib version bounds function. Now the change
+      lib version dialog correctly preloads the combo box values.
+
 
 Limitations / Known Problems
 ==============================================================================
@@ -62,6 +69,8 @@ Limitations / Known Problems
 
     * Selecting and changing individual points in PaletteView for an image
       palette is broken.
+
+    * Logging and optional HDF4 requires rebuilds from source.
 
 
 Other Notes
