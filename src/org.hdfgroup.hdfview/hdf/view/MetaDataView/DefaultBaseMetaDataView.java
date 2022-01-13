@@ -247,16 +247,16 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (isH5) {
             StringBuilder objCreationStr = new StringBuilder("Creation Order NOT Tracked");
             long ocplID = -1;
-            long oid = -1;
+            long objid = -1;
             int creationOrder = 0;
             try {
-                oid = dataObject.open();
-                if (oid >= 0) {
+                objid = dataObject.open();
+                if (objid >= 0) {
                     if (dataObject instanceof Group) {
-                        ocplID = H5.H5Gget_create_plist(oid);
+                        ocplID = H5.H5Gget_create_plist(objid);
                     }
                     else if (dataObject instanceof Dataset) {
-                        ocplID = H5.H5Dget_create_plist(oid);
+                        ocplID = H5.H5Dget_create_plist(objid);
                     }
                     if (ocplID >= 0) {
                         creationOrder = H5.H5Pget_attr_creation_order(ocplID);
@@ -272,7 +272,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             finally {
                 H5.H5Pclose(ocplID);
-                dataObject.close(oid);
+                dataObject.close(objid);
             }
 
             /* Creation order section */
@@ -539,7 +539,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         long[] oID = dataObject.getOID();
         if (oID != null) {
             oidStr = String.valueOf(oID[0]);
-            if (isH4) oidStr += ", " + oID[1];
+            if (isH4)
+                oidStr += ", " + oID[1];
 
             if (isH5) {
                 label = new Label(generalInfoGroup, SWT.LEFT);

@@ -209,7 +209,7 @@ public class DebugHDF {
 
         // use low level API function, H5.H5Rget_name
         String[] name = { "" };
-        ;
+
         for (int i = 0; i < refs.length; i++) {
             H5.H5Rget_name(file.getFID(), HDF5Constants.H5R_OBJECT, HDFNativeData.longToByte(refs[i]), name, 32);
             System.out.println(name[0]);

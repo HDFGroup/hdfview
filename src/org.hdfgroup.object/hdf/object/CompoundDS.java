@@ -24,12 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
-import hdf.hdf5lib.exceptions.HDF5DataFiltersException;
-import hdf.hdf5lib.exceptions.HDF5Exception;
-import hdf.hdf5lib.structs.H5O_info_t;
 
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;

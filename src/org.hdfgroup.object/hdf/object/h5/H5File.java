@@ -193,6 +193,8 @@ public class H5File extends FileFormat
         // Call FileFormat ctor to set absolute path name
         super(fileName);
         libver = new int[2];
+        libver[0] = HDF5Constants.H5F_LIBVER_EARLIEST;
+        libver[1] = HDF5Constants.H5F_LIBVER_LATEST;
 
         if ((access & FILE_CREATE_OPEN) == FILE_CREATE_OPEN) {
             File f = new File(fileName);
@@ -2431,9 +2433,11 @@ public class H5File extends FileFormat
 
     private HObject copyDataset(Dataset srcDataset, H5Group pgroup, String dstName) throws Exception {
         Dataset dataset = null;
-        long srcdid = -1, dstdid = -1;
+        long srcdid = -1;
+        long dstdid = -1;
         long ocp_plist_id = -1;
-        String dname = null, path = null;
+        String dname = null;
+        String path = null;
 
         if (pgroup.isRoot())
             path = HObject.SEPARATOR;

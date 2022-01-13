@@ -125,10 +125,10 @@ public class H5TestFile
         final H5Datatype typeChar = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.NATIVE);
         final H5Datatype typeEnum = new H5Datatype(Datatype.CLASS_ENUM, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
         typeEnum.setEnumMembers("0=1,1=2");
+        log.debug("create reference type");
         final H5Datatype typeRef = new H5Datatype(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
 
-        log.debug("create compounds");
-
+        log.debug("create compound types");
         COMPOUND_MEMBER_DATATYPES[0] = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
         COMPOUND_MEMBER_DATATYPES[1] = new H5Datatype(Datatype.CLASS_FLOAT, DATATYPE_SIZE, Datatype.NATIVE, Datatype.NATIVE);
         COMPOUND_MEMBER_DATATYPES[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
@@ -149,7 +149,6 @@ public class H5TestFile
         DATA_COMP.add(3, DATA_LONG);
 
         log.debug("filename: " + fileName);
-
         file = new H5File(fileName, FileFormat.CREATE);
         file.open();
 
@@ -176,6 +175,7 @@ public class H5TestFile
         dsets[5] = file.createScalarDS(NAME_DATASET_INT_SUB, g0, typeInt, DIMs, null, CHUNKs, 9, DATA_INT);
         dsets[6] = file.createScalarDS(NAME_DATASET_FLOAT_SUB_SUB, g00, typeFloat, DIMs, null, CHUNKs, 9, DATA_FLOAT);
         dsets[7] = file.createImage(NAME_DATASET_IMAGE, null, typeByte, DIMs, null, CHUNKs, 9, 1, -1, DATA_BYTE);
+        log.debug("create compound datasets");
         dsets[8] = file.createCompoundDS(NAME_DATASET_COMPOUND, null, DIMs, null, CHUNKs, 9, COMPOUND_MEMBER_NAMES,
                 COMPOUND_MEMBER_DATATYPES, null, DATA_COMP);
         dsets[9] = file.createCompoundDS(NAME_DATASET_COMPOUND_SUB, null, DIMs, null, CHUNKs, 9, COMPOUND_MEMBER_NAMES,
@@ -183,6 +183,7 @@ public class H5TestFile
         dsets[10] = file.createScalarDS(NAME_DATASET_OBJ_REF, null, typeRef, DIMs, null, CHUNKs, 9, null);
 
         // attach attributes to all datasets
+        log.debug("attach attributes");
         for (int i = 0; i < dsets.length; i++) {
             ATTRIBUTE_STR = new H5ScalarAttr(dsets[i], "strAttr", typeStr, new long[] { 1 }, new String[] { "String attribute." });
             ATTRIBUTE_INT_ARRAY = new H5ScalarAttr(dsets[i], "arrayInt", typeInt, new long[] { 10 },
@@ -191,7 +192,7 @@ public class H5TestFile
             ATTRIBUTE_INT_ARRAY.write();
         }
 
-        // create a wave palette and attach it to the image
+        log.debug("create a wave palette and attach it to the image");
         final Dataset pal = file.createScalarDS(NAME_DATASET_IMAGE_PALETTE, null, typeByte, new long[] { 256, 3 },
                 null, null, -1, DATA_PALETTE);
         long[] oid = pal.getOID();
@@ -245,7 +246,6 @@ public class H5TestFile
         catch (final Exception ex) {}
 
         log.debug("create file open to write refs");
-        // write object refs to the ref dataset
         file.open();
         log.debug("create file opened");
         final long[] refs = new long[DIM_SIZE];
@@ -257,8 +257,10 @@ public class H5TestFile
             log.debug("create refs[{}]={}", i, oid);
             refs[i] = oid[0];
         }
+        log.debug("write object refs to the ref dataset");
         dsets[10].write(refs);
 
+        log.debug("create file close after refs");
         try {
             file.close();
         }

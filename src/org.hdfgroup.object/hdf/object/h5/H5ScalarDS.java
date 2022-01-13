@@ -800,6 +800,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 log.debug("scalarDatasetCommonIO(): writeBuf is null");
                 throw new Exception("write buffer is null");
             }
+            log.trace("scalarDatasetCommonIO(): check write unsupported datatype data");
 
             /*
              * Check for any unsupported datatypes and fail early before
@@ -921,6 +922,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                         // Check if we need to convert integer data
                         int tsize = (int) dsDatatype.getDatatypeSize();
                         String cname = writeBuf.getClass().getName();
+                        log.trace("scalarDatasetCommonIO(): cname={} of datatype size={}", cname, tsize);
                         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
                         boolean doIntConversion = (((tsize == 1) && (dname == 'S')) || ((tsize == 2) && (dname == 'I'))
                                 || ((tsize == 4) && (dname == 'J')) || (dsDatatype.isUnsigned() && unsignedConverted));

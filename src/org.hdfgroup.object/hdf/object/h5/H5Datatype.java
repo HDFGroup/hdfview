@@ -1127,7 +1127,7 @@ public class H5Datatype extends Datatype
             }
         }
         else
-            log.debug("createNative(): isNamed but named path={}", the_path);
+            log.debug("createNative(): isNamed={} and named path={}", isNamed(), the_path);
 
         if (tid >= 0)
             return tid;
@@ -1386,13 +1386,22 @@ public class H5Datatype extends Datatype
             case CLASS_REFERENCE:
                 try {
                     long objRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ);
-
-                    tid = H5.H5Tcopy((datatypeSize > objRefTypeSize) ? HDF5Constants.H5T_STD_REF_DSETREG
-                            : HDF5Constants.H5T_STD_REF_OBJ);
+                    long dsetRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_DSETREG);
+                    // use datatypeSize as which type to copy
+                    log.debug("createNative(): datatypeSize:{} ", datatypeSize);
+                    if (datatypeSize > objRefTypeSize) {
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_DSETREG);
+                        log.debug("createNative(): HDF5Constants.H5T_STD_REF_DSETREG");
+                    }
+                    else {
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_OBJ);
+                        log.debug("createNative(): HDF5Constants.H5T_STD_REF_OBJ");
+                    }
                 }
                 catch (Exception ex) {
                     log.debug("createNative(): native reference datatype creation failed: ", ex);
-                    if (tid >= 0) close(tid);
+                    if (tid >= 0)
+                        close(tid);
                     tid = HDF5Constants.H5I_INVALID_HID;
                 }
 
