@@ -39,6 +39,7 @@ import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
+
 import hdf.object.h5.H5MetaDataContainer;
 
 /**
@@ -125,13 +126,13 @@ public class H5Datatype extends Datatype
      *
      * @param theFile
      *            the file that contains the datatype.
-     * @param name
+     * @param theName
      *            the name of the dataset such as "dset1".
-     * @param path
+     * @param thePath
      *            the group path to the dataset such as "/g0/".
      */
-    public H5Datatype(FileFormat theFile, String name, String path) {
-        this(theFile, name, path, null);
+    public H5Datatype(FileFormat theFile, String theName, String thePath) {
+        this(theFile, theName, thePath, null);
     }
 
     /**
@@ -140,18 +141,18 @@ public class H5Datatype extends Datatype
      *
      * @param theFile
      *            the file that contains the datatype.
-     * @param name
+     * @param theName
      *            the name of the dataset such as "dset1".
-     * @param path
+     * @param thePath
      *            the group path to the dataset such as "/g0/".
      * @param oid
      *            the oid of the dataset.
      */
     @Deprecated
-    public H5Datatype(FileFormat theFile, String name, String path, long[] oid) {
-        super(theFile, name, path, oid);
+    public H5Datatype(FileFormat theFile, String theName, String thePath, long[] oid) {
+        super(theFile, theName, thePath, oid);
         objInfo = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
-        objMetadata = new H5MetaDataContainer(theFile, name, path, this);
+        objMetadata = new H5MetaDataContainer(theFile, theName, thePath, this);
 
         if (theFile != null) {
             if (oid == null) {
@@ -168,8 +169,7 @@ public class H5Datatype extends Datatype
 
             long tid = HDF5Constants.H5I_INVALID_HID;
             try {
-                tid = H5.H5Topen(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
-                fromNative(tid);
+                tid = open();
             }
             catch (Exception ex) {
                 log.debug("constructor H5Topen() failure");
@@ -178,6 +178,8 @@ public class H5Datatype extends Datatype
                 close(tid);
             }
         }
+        else
+            this.oid = null;
     }
 
     /**
@@ -358,13 +360,16 @@ public class H5Datatype extends Datatype
      */
     @Override
     public long open() {
-        long tid = -1;
+        long tid = HDF5Constants.H5I_INVALID_HID;
 
         if (fileFormat != null) {
             try {
                 tid = H5.H5Topen(getFID(), getFullName(), HDF5Constants.H5P_DEFAULT);
+                fromNative(tid);
+                log.trace("open(): tid={}", tid);
             }
             catch (HDF5Exception ex) {
+                log.debug("open(): Failed to open datatype {}", getFullName(), ex);
                 tid = HDF5Constants.H5I_INVALID_HID;
             }
         }
@@ -401,24 +406,27 @@ public class H5Datatype extends Datatype
     public boolean hasAttribute() {
         objInfo.num_attrs = objMetadata.getObjectAttributeSize();
 
-        if ((objInfo.num_attrs < 0) && (fileFormat != null)) {
-            long tid = HDF5Constants.H5I_INVALID_HID;
-            try {
-                tid = H5.H5Topen(getFID(), getFullName(), HDF5Constants.H5P_DEFAULT);
-                fromNative(tid);
-                objInfo = H5.H5Oget_info(tid);
+        if (objInfo.num_attrs < 0) {
+            long tid = open();
+            if (tid > 0) {
+                try {
+                    objInfo = H5.H5Oget_info(tid);
+                }
+                catch (Exception ex) {
+                    objInfo.num_attrs = 0;
+                    log.debug("hasAttribute(): get object info failure: ", ex);
+                }
+                finally {
+                    close(tid);
+                }
+                objMetadata.setObjectAttributeSize((int) objInfo.num_attrs);
             }
-            catch (Exception ex) {
-                objInfo.num_attrs = 0;
+            else {
+                log.debug("hasAttribute(): could not open group");
             }
-            finally {
-                close(tid);
-            }
-            objMetadata.setObjectAttributeSize((int) objInfo.num_attrs);
         }
 
-        log.trace("hasAttribute(): objInfo.num_attrs={}", objInfo.num_attrs);
-
+        log.trace("hasAttribute(): nAttributes={}", objInfo.num_attrs);
         return (objInfo.num_attrs > 0);
     }
 
@@ -1987,9 +1995,9 @@ public class H5Datatype extends Datatype
      * Removes all of the elements from metadata list.
      * The list should be empty after this call returns.
      */
-    @SuppressWarnings("rawtypes")
     @Override
     public void clear() {
+        super.clear();
         objMetadata.clear();
     }
 
@@ -2037,7 +2045,6 @@ public class H5Datatype extends Datatype
      *             if the metadata can not be retrieved
      */
     public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
-        // load attributes first
         try {
             this.linkTargetObjName = H5File.getLinkTargetName(this);
         }
@@ -2079,7 +2086,6 @@ public class H5Datatype extends Datatype
         }
         catch (Exception ex) {
             log.debug("writeMetadata(): Object not an Attribute");
-            return;
         }
     }
 
@@ -2103,15 +2109,21 @@ public class H5Datatype extends Datatype
         }
 
         Attribute attr = (Attribute) info;
+        log.trace("removeMetadata(): {}", attr.getAttributeName());
         long tid = open();
-        try {
-            H5.H5Adelete(tid, attr.getAttributeName());
+        if (tid >= 0) {
+            try {
+                H5.H5Adelete(tid, attr.getAttributeName());
+            }
+            catch (Exception ex) {
+                log.debug("removeMetadata(): ", ex);
+            }
+            finally {
+                close(tid);
+            }
         }
-        catch (Exception ex) {
-            log.debug("removeMetadata(): ", ex);
-        }
-        finally {
-            close(tid);
+        else {
+            log.debug("removeMetadata(): failed to open datatype");
         }
     }
 
@@ -2135,6 +2147,11 @@ public class H5Datatype extends Datatype
         }
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.HObject#setName(java.lang.String)
+     */
     @Override
     public void setName(String newName) throws Exception {
         if (newName == null)
@@ -2143,6 +2160,7 @@ public class H5Datatype extends Datatype
         H5File.renameObject(this, newName);
         super.setName(newName);
     }
+
     @Override
     public void setFullname(String newPath, String newName) throws Exception {
         H5File.renameObject(this, newPath, newName);

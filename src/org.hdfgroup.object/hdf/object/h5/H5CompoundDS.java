@@ -29,6 +29,7 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5DataFiltersException;
 import hdf.hdf5lib.exceptions.HDF5Exception;
+import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 
 import hdf.object.Attribute;
@@ -41,6 +42,7 @@ import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.Utils;
 
+import hdf.object.h5.H5Attribute;
 import hdf.object.h5.H5MetaDataContainer;
 
 /**
@@ -149,17 +151,21 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
         objInfo = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
         objMetadata = new H5MetaDataContainer(theFile, theName, thePath, this);
 
-        if ((oid == null) && (theFile != null)) {
-            // retrieve the object ID
-            try {
-                byte[] refBuf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
-                this.oid = new long[1];
-                this.oid[0] = HDFNativeData.byteToLong(refBuf, 0);
-            }
-            catch (Exception ex) {
-                log.debug("constructor ID {} for {} failed H5Rcreate", theFile.getFID(), this.getFullName());
+        if (theFile != null) {
+            if (oid == null) {
+                // retrieve the object ID
+                try {
+                    byte[] refBuf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
+                    this.oid = new long[1];
+                    this.oid[0] = HDFNativeData.byteToLong(refBuf, 0);
+                }
+                catch (Exception ex) {
+                    log.debug("constructor ID {} for {} failed H5Rcreate", theFile.getFID(), this.getFullName());
+                }
             }
         }
+        else
+            this.oid = null;
     }
 
     /*
@@ -441,6 +447,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
         if (objInfo.num_attrs < 0) {
             long did = open();
             if (did >= 0) {
+                objInfo.num_attrs = 0;
+
                 try {
                     objInfo = H5.H5Oget_info(did);
                 }
@@ -545,25 +553,23 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
             try {
                 long[] lsize = { 1 };
-                for (int j = 0; j < selectedDims.length; j++) {
+                for (int j = 0; j < selectedDims.length; j++)
                     lsize[0] *= selectedDims[j];
-                }
 
                 fspace = H5.H5Dget_space(did);
                 mspace = H5.H5Screate_simple(rank, selectedDims, null);
 
                 // set the rectangle selection
                 // HDF5 bug: for scalar dataset, H5Sselect_hyperslab gives core dump
-                if (rank * dims[0] > 1) {
-                    H5.H5Sselect_hyperslab(fspace, HDF5Constants.H5S_SELECT_SET, startDims, selectedStride,
-                            selectedDims, null); // set block to 1
-                }
+                if (rank * dims[0] > 1)
+                    H5.H5Sselect_hyperslab(fspace, HDF5Constants.H5S_SELECT_SET, startDims, selectedStride, selectedDims, null); // set block to 1
 
                 tid = H5.H5Dget_type(did);
                 long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("readBytes(): size = {}", size);
 
-                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE) throw new Exception("Invalid int size");
+                if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE)
+                    throw new Exception("Invalid int size");
 
                 theData = new byte[(int)size];
 
@@ -1343,9 +1349,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                                 }
                             }
 
-                            for (int i = 0; i < rank; i++) {
+                            for (int i = 0; i < rank; i++)
                                 nelmts *= dims[i];
-                            }
                             uncompSize = nelmts * datumSize;
 
                             /* compression ratio = uncompressed size / compressed size */
@@ -1427,12 +1432,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                     else {
                         for (int i = 0, k = 0; i < nfilt; i++) {
                             log.trace("getMetadata(): filter[{}]", i);
-                            if (i > 0) {
+                            if (i > 0)
                                 filters.append(", ");
-                            }
-                            if (k > 0) {
+                            if (k > 0)
                                 compression.append(", ");
-                            }
 
                             try {
                                 cdNelmts[0] = 20;
@@ -1440,9 +1443,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                                 cdValues = new int[(int) cdNelmts[0]];
                                 filter = H5.H5Pget_filter(pcid, i, flags, cdNelmts, cdValues, 120, cdName, filterConfig);
                                 log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cdName[0], cdNelmts[0]);
-                                for (int j = 0; j < cdNelmts[0]; j++) {
+                                for (int j = 0; j < cdNelmts[0]; j++)
                                     log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cdValues[j]);
-                                }
                             }
                             catch (Exception err) {
                                 log.debug("getMetadata(): filter[{}] error: ", i, err);
@@ -1482,14 +1484,12 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                                     log.debug("getMetadata(): H5Zget_filter_info failure: ", ex);
                                     flag = -1;
                                 }
-                                if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) {
+                                if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)
                                     compression.append(": H5Z_FILTER_CONFIG_DECODE_ENABLED");
-                                }
                                 else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED)
                                         || (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED
-                                                + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED))) {
+                                                + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)))
                                     compression.append(": H5Z_FILTER_CONFIG_ENCODE_ENABLED");
-                                }
                             }
                             else {
                                 filters.append("USERDEFINED ").append(cdName[0]).append("(").append(filter).append("): ");
@@ -1614,6 +1614,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             finally {
                 close(did);
             }
+        }
+        else {
+            log.debug("removeMetadata(): failed to open compound dataset");
         }
     }
 
@@ -2074,4 +2077,5 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
         else
             return -1;
     }
+
 }

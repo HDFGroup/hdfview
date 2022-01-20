@@ -121,17 +121,21 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         objInfo = new H5O_info_t(-1L, -1L, 0, 0, -1L, 0L, 0L, 0L, 0L, null, null, null);
         objMetadata = new H5MetaDataContainer(theFile, theName, thePath, this);
 
-        if ((oid == null) && (theFile != null)) {
-            // retrieve the object ID
-            try {
-                byte[] refBuf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
-                this.oid = new long[1];
-                this.oid[0] = HDFNativeData.byteToLong(refBuf, 0);
-            }
-            catch (Exception ex) {
-                log.debug("constructor ID {} for {} failed H5Rcreate", theFile.getFID(), this.getFullName());
+        if (theFile != null) {
+            if (oid == null) {
+                // retrieve the object ID
+                try {
+                    byte[] refBuf = H5.H5Rcreate(theFile.getFID(), this.getFullName(), HDF5Constants.H5R_OBJECT, -1);
+                    this.oid = new long[1];
+                    this.oid[0] = HDFNativeData.byteToLong(refBuf, 0);
+                }
+                catch (Exception ex) {
+                    log.debug("constructor ID {} for {} failed H5Rcreate", theFile.getFID(), this.getFullName());
+                }
             }
         }
+        else
+            this.oid = null;
     }
 
     /*
@@ -293,7 +297,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 space_type = H5.H5Sget_simple_extent_type(sid);
                 tid = H5.H5Dget_type(did);
-                log.trace("init(): tid={} sid={} rank={}space_type={} ", tid, sid, rank, space_type);
+                log.trace("init(): tid={} sid={} rank={} space_type={} ", tid, sid, rank, space_type);
 
                 try {
                     datatype = new H5Datatype(getFileFormat(), tid);
@@ -454,54 +458,56 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
                 try {
                     objInfo = H5.H5Oget_info(did);
+
+                    if(objInfo.num_attrs > 0) {
+                        // test if it is an image
+                        // check image
+                        Object avalue = getAttrValue(did, "CLASS");
+                        if (avalue != null) {
+                            try {
+                                isImageDisplay = isImage = "IMAGE".equalsIgnoreCase(new String((byte[]) avalue).trim());
+                                log.trace("hasAttribute(): isImageDisplay dataset: {} with value = {}", isImageDisplay, avalue);
+                            }
+                            catch (Exception err) {
+                                log.debug("hasAttribute(): check image: ", err);
+                            }
+                        }
+
+                        // retrieve the IMAGE_MINMAXRANGE
+                        avalue = getAttrValue(did, "IMAGE_MINMAXRANGE");
+                        if (avalue != null) {
+                            double x0 = 0;
+                            double x1 = 0;
+                            try {
+                                x0 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
+                                x1 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 1).toString());
+                            }
+                            catch (Exception ex2) {
+                                x0 = x1 = 0;
+                            }
+                            if (x1 > x0) {
+                                imageDataRange = new double[2];
+                                imageDataRange[0] = x0;
+                                imageDataRange[1] = x1;
+                            }
+                        }
+
+                        try {
+                            checkCFconvention(did);
+                        }
+                        catch (Exception ex) {
+                            log.debug("hasAttribute(): checkCFconvention(did {}):", did, ex);
+                        }
+                    }
                 }
                 catch (Exception ex) {
                     objInfo.num_attrs = 0;
                     log.debug("hasAttribute(): get object info failure: ", ex);
                 }
-                objMetadata.setObjectAttributeSize((int) objInfo.num_attrs);
-
-                if(objInfo.num_attrs > 0) {
-                    // test if it is an image
-                    // check image
-                    Object avalue = getAttrValue(did, "CLASS");
-                    if (avalue != null) {
-                        try {
-                            isImageDisplay = isImage = "IMAGE".equalsIgnoreCase(new String((byte[]) avalue).trim());
-                            log.trace("hasAttribute(): isImageDisplay dataset: {} with value = {}", isImageDisplay, avalue);
-                        }
-                        catch (Exception err) {
-                            log.debug("hasAttribute(): check image: ", err);
-                        }
-                    }
-
-                    // retrieve the IMAGE_MINMAXRANGE
-                    avalue = getAttrValue(did, "IMAGE_MINMAXRANGE");
-                    if (avalue != null) {
-                        double x0 = 0;
-                        double x1 = 0;
-                        try {
-                            x0 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
-                            x1 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 1).toString());
-                        }
-                        catch (Exception ex2) {
-                            x0 = x1 = 0;
-                        }
-                        if (x1 > x0) {
-                            imageDataRange = new double[2];
-                            imageDataRange[0] = x0;
-                            imageDataRange[1] = x1;
-                        }
-                    }
-
-                    try {
-                        checkCFconvention(did);
-                    }
-                    catch (Exception ex) {
-                        log.debug("hasAttribute(): checkCFconvention(did {}):", did, ex);
-                    }
+                finally {
+                    close(did);
                 }
-                close(did);
+                objMetadata.setObjectAttributeSize((int) objInfo.num_attrs);
             }
             else {
                 log.debug("hasAttribute(): could not open dataset");
@@ -1342,7 +1348,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         }
         catch (Exception ex) {
             log.debug("writeMetadata(): Object not an Attribute");
-            return;
         }
     }
 
@@ -1375,6 +1380,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             finally {
                 close(did);
             }
+        }
+        else {
+            log.debug("removeMetadata(): failed to open scalar dataset");
         }
     }
 
@@ -1584,7 +1592,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         // prepare the dataspace and datatype
         int rank = dims.length;
 
-        if ((tid = type.createNative()) >= 0) {
+        tid = type.createNative();
+        if (tid >= 0) {
             try {
                 sid = H5.H5Screate_simple(rank, dims, maxdims);
 
