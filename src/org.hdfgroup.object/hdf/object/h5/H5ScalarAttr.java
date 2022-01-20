@@ -1118,11 +1118,13 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
                 else {
                     if (dsDatatype.isRef() && tmpData instanceof String) {
                         // reference is a path+name to the object
-                        byte[] refBuf = H5.H5Rcreate_object(getFID(), (String) tmpData, HDF5Constants.H5P_DEFAULT);
                         log.trace("AttributeCommonIO(): Attribute class is CLASS_REFERENCE");
                         log.trace("AttributeCommonIO(): H5Awrite aid={} tid={}", attr_id, tid);
-                        H5.H5Awrite(attr_id, tid, refBuf);
-                        H5.H5Rdestroy(refBuf);
+                        byte[] refBuf = H5.H5Rcreate_object(getFID(), (String) tmpData, HDF5Constants.H5P_DEFAULT);
+                        if (refBuf != null) {
+                            H5.H5Awrite(attr_id, tid, refBuf);
+                            H5.H5Rdestroy(refBuf);
+                        }
                     }
                     else if (Array.get(tmpData, 0) instanceof String) {
                         int len = ((String[]) tmpData).length;

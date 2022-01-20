@@ -205,8 +205,10 @@ public class H5TestFile
         long[] oid = pal.getOID();
         final Vector attrs = (Vector) ((H5ScalarDS)dsets[7]).getMetadata();
         final int n = attrs.size();
+        log.debug("wave palette has {} attributes", n);
         for (int i = 0; i < n; i++) {
             final H5ScalarAttr attr = (H5ScalarAttr) attrs.get(i);
+            log.debug("wave palette attribute[{}] is {}", i, attr.getAttributeName());
             if ("PALETTE".equals(attr.getAttributeName()))
                 attr.writeAttribute(oid);
         }
@@ -250,7 +252,9 @@ public class H5TestFile
         try {
             file.close();
         }
-        catch (final Exception ex) {}
+        catch (final Exception ex) {
+            log.debug("create file close failed:", ex);
+        }
 
         log.debug("create file open to write refs");
         file.setNewLibBounds("Latest", "Latest");
@@ -293,7 +297,9 @@ public class H5TestFile
         try {
             file.close();
         }
-        catch (final Exception ex) {}
+        catch (final Exception ex) {
+            log.debug("create file close failed:", ex);
+        }
 
         log.debug("create file finished");
         return file;

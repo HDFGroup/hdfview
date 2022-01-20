@@ -117,10 +117,12 @@ public class H5FileTest
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+            log.debug("checkObjCount : Number of objects: " + nObjs);
         }
         catch (final Exception ex) {
             fail("H5.H5Fget_obj_count() failed. " + ex);
         }
+        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     @BeforeClass

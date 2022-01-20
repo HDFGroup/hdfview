@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import hdf.hdf5lib.H5;
@@ -32,7 +33,7 @@ public class HObjectTest
 
     private H5File testFile = null;
     private HObject testObj = null;
-    private long testOID;
+    private long[] testOID;
 
     protected void closeFile() {
         if (testFile != null) {
@@ -48,6 +49,7 @@ public class HObjectTest
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+            log.debug("checkObjCount : Number of objects: " + nObjs);
         }
         catch (final Exception ex) {
             fail("H5.H5Fget_obj_count() failed. " + ex);
@@ -106,7 +108,7 @@ public class HObjectTest
         assertNotNull(testFile);
         testObj = testFile.get(GNAME);
         assertNotNull(testObj);
-        testOID = testObj.getOID()[0];
+        testOID = testObj.getOID();
     }
 
     @After
@@ -367,7 +369,7 @@ public class HObjectTest
     public void testEqualsOID() {
         log.debug("testEqualsOID");
         assertNotNull(testObj);
-        assertTrue(testObj.equalsOID(new long[] { testOID }));
+        assertTrue(testObj.equalsOID(testOID));
     }
 
     /**
@@ -399,7 +401,7 @@ public class HObjectTest
     public void testGetOID() {
         log.debug("testGetOID");
         assertNotNull(testObj.getOID());
-        assertEquals(testObj.getOID()[0], testOID);
+        assertTrue(testObj.equalsOID(testOID));
     }
 
     /**

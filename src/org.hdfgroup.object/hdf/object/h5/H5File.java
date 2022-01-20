@@ -1200,51 +1200,58 @@ public class H5File extends FileFormat
         // Close all open objects associated with this file.
         try {
             int type = -1;
-            long[] oids;
+            long[] objids;
             long n = H5.H5Fget_obj_count(fid, HDF5Constants.H5F_OBJ_ALL);
             log.trace("close(): open objects={}", n);
 
             if (n > 0) {
                 if (n < Integer.MIN_VALUE || n > Integer.MAX_VALUE) throw new Exception("Invalid int size");
 
-                oids = new long[(int)n];
-                H5.H5Fget_obj_ids(fid, HDF5Constants.H5F_OBJ_ALL, n, oids);
+                objids = new long[(int)n];
+                H5.H5Fget_obj_ids(fid, HDF5Constants.H5F_OBJ_ALL, n, objids);
 
                 for (int i = 0; i < (int)n; i++) {
-                    log.trace("close(): object[{}] id={}", i, oids[i]);
-                    type = H5.H5Iget_type(oids[i]);
+                    log.trace("close(): object[{}] id={}", i, objids[i]);
+                    type = H5.H5Iget_type(objids[i]);
 
                     if (HDF5Constants.H5I_DATASET == type) {
                         try {
-                            H5.H5Dclose(oids[i]);
+                            H5.H5Dclose(objids[i]);
                         }
                         catch (Exception ex2) {
-                            log.debug("close(): Object[{}] H5Dclose(oids[{}] {}) failure: ", i, i, oids[i], ex2);
+                            log.debug("close(): Object[{}] H5Dclose(objids[{}] {}) failure: ", i, i, objids[i], ex2);
                         }
                     }
                     else if (HDF5Constants.H5I_GROUP == type) {
                         try {
-                            H5.H5Gclose(oids[i]);
+                            H5.H5Gclose(objids[i]);
                         }
                         catch (Exception ex2) {
-                            log.debug("close(): Object[{}] H5Gclose(oids[{}] {}) failure: ", i, i, oids[i], ex2);
+                            log.debug("close(): Object[{}] H5Gclose(objids[{}] {}) failure: ", i, i, objids[i], ex2);
                         }
                     }
                     else if (HDF5Constants.H5I_DATATYPE == type) {
                         try {
-                            H5.H5Tclose(oids[i]);
+                            H5.H5Tclose(objids[i]);
                         }
                         catch (Exception ex2) {
-                            log.debug("close(): Object[{}] H5Tclose(oids[{}] {}) failure: ", i, i, oids[i], ex2);
+                            log.debug("close(): Object[{}] H5Tclose(objids[{}] {}) failure: ", i, i, objids[i], ex2);
                         }
                     }
                     else if (HDF5Constants.H5I_ATTR == type) {
                         try {
-                            H5.H5Aclose(oids[i]);
+                            H5.H5Aclose(objids[i]);
                         }
                         catch (Exception ex2) {
-                            log.debug("close(): Object[{}] H5Aclose(oids[{}] {}) failure: ", i, i, oids[i], ex2);
+                            log.debug("close(): Object[{}] H5Aclose(objids[{}] {}) failure: ", i, i, objids[i], ex2);
                         }
+                    }
+                    else if (HDF5Constants.H5I_FILE == type) {
+                        int file_ref = H5.H5Iget_ref(objids[i]);
+                        log.debug("close(): Object[{}] objids[{}] is type File with ref count of {}", i, i, file_ref);
+                    }
+                    else {
+                        log.debug("close(): Object[{}] objids[{}] is type {}", i, i, type);
                     }
                 } // (int i=0; i<n; i++)
             } // ( n>0)
@@ -2189,6 +2196,8 @@ public class H5File extends FileFormat
         initLibBounds();
 
         if ((fid >= 0) && loadFullHierarchy) {
+            long n = H5.H5Fget_obj_count(fid, HDF5Constants.H5F_OBJ_ALL);
+            log.trace("open(): open objects={}", n);
             // load the hierarchy of the file
             loadIntoMemory();
         }
