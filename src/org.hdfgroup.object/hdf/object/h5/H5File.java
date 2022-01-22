@@ -2817,11 +2817,15 @@ public class H5File extends FileFormat
         }
 
         H5L_info_t link_info = null;
-        try {
-            link_info = H5.H5Lget_info(obj.getFID(), obj.getFullName(), HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Exception err) {
-            log.debug("getLinkTargetName(): H5Lget_info {} failure: ", obj.getFullName(), err);
+        if (obj.getFID() < 0)
+            log.trace("getLinkTargetName(): file id for:{} is invalid", obj.getFullName());
+        else {
+            try {
+                link_info = H5.H5Lget_info(obj.getFID(), obj.getFullName(), HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Exception err) {
+                log.debug("getLinkTargetName(): H5Lget_info {} failure: ", obj.getFullName(), err);
+            }
         }
         if (link_info != null) {
             if ((link_info.type == HDF5Constants.H5L_TYPE_SOFT) || (link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL)) {

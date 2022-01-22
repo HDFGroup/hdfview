@@ -147,13 +147,17 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     public long open() {
         long did = HDF5Constants.H5I_INVALID_HID;
 
-        try {
-            did = H5.H5Dopen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
-            log.trace("open(): did={}", did);
-        }
-        catch (HDF5Exception ex) {
-            log.debug("open(): Failed to open dataset {}", getPath() + getName(), ex);
-            did = HDF5Constants.H5I_INVALID_HID;
+        if (getFID() < 0)
+            log.trace("open(): file id for:{} is invalid", getPath() + getName());
+        else {
+            try {
+                did = H5.H5Dopen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
+                log.trace("open(): did={}", did);
+            }
+            catch (HDF5Exception ex) {
+                log.debug("open(): Failed to open dataset {}", getPath() + getName(), ex);
+                did = HDF5Constants.H5I_INVALID_HID;
+            }
         }
 
         return did;
