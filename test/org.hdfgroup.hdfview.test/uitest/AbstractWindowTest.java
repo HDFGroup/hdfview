@@ -11,15 +11,7 @@
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
 
-package test.uitest;
-
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withRegex;
-import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+package uitest;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -40,6 +32,9 @@ import org.eclipse.swtbot.nebula.nattable.finder.widgets.Position;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withRegex;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot;
@@ -57,11 +52,20 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import hdf.HDFVersions;
 import hdf.view.HDFView;
+import uitest.AbstractWindowTest.FILE_MODE;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public abstract class AbstractWindowTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractWindowTest.class);
+
     protected static String HDF5VERSION = "HDF5 " + HDFVersions.getPropertyVersionHDF5();
     protected static String HDF4VERSION = "HDF " + HDFVersions.getPropertyVersionHDF4();
     // the version of the HDFViewer
@@ -135,14 +139,15 @@ public abstract class AbstractWindowTest {
                 public void run() {
                     try {
                         Vector<File> fList = new Vector<>();
-                        String rootDir = System.getProperty("hdfview.workdir");
+                        String rootDir = System.getProperty("hdfview.rootdir");
                         if (rootDir == null) rootDir = System.getProperty("user.dir");
+                        String startDir = System.getProperty("hdfview.workdir");
 
                         int W = 800, H = 600, X = 0, Y = 0;
 
                         while (true) {
                             // open and layout the shell
-                            HDFView window = new HDFView(rootDir, null);
+                            HDFView window = new HDFView(rootDir, startDir);
 
                             // Set the testing state to handle the problem with testing
                             // of native dialogs
@@ -207,13 +212,16 @@ public abstract class AbstractWindowTest {
         File hdf_file = new File(workDir, name);
 
         try {
+            SWTBotMenu fileMenuItem = bot.menu().menu("File");
+            SWTBotMenu openasMenuItem = fileMenuItem.menu("Open As");
             if (openMode == FILE_MODE.READ_ONLY)
-                bot.menu("Open As").menu("Read-Only").click();
+                openasMenuItem.menu("Read-Only").click();
             else
-                bot.menu("Open As").menu("Read/Write").click();
+                openasMenuItem.menu("Read/Write").click();
 
             fileNameShell = bot.shell("Enter a file name");
             fileNameShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(fileNameShell.getText()));
 
             SWTBotText text = fileNameShell.bot().text();
             text.setText(hdf_file.getName());
@@ -223,7 +231,7 @@ public abstract class AbstractWindowTest {
                     val.equals(hdf_file.getName()));
 
             fileNameShell.bot().button("   &OK   ").click();
-            bot.waitUntil(shellCloses(fileNameShell));
+            bot.waitUntil(Conditions.shellCloses(fileNameShell));
 
             SWTBotTree filetree = bot.tree();
             bot.waitUntil(Conditions.treeHasRows(filetree, open_files + 1));
@@ -266,19 +274,18 @@ public abstract class AbstractWindowTest {
             hdfFile.delete();
 
         try {
-            SWTBotMenu fileMenuItem;
-
+            SWTBotMenu fileMenuItem = bot.menu().menu("File");
+            SWTBotMenu fileNewMenuItem = fileMenuItem.menu("New");
             if (hdf4Type)
-                fileMenuItem = bot.menu("File").menu("New").menu("HDF4");
+                fileNewMenuItem.menu("HDF4").click();
             else if (hdf5Type)
-                fileMenuItem = bot.menu("File").menu("New").menu("HDF5");
+                fileNewMenuItem.menu("HDF5").click();
             else
                 throw new IllegalArgumentException("unknown file type");
 
-            fileMenuItem.click();
-
             SWTBotShell shell = bot.shell("Enter a file name");
             shell.activate();
+            bot.waitUntil(Conditions.shellIsActive(shell.getText()));
 
             SWTBotText text = shell.bot().text();
             text.setText(name);
@@ -287,7 +294,7 @@ public abstract class AbstractWindowTest {
             assertTrue("createFile() wrong file name: expected '" + name + "' but was '" + val + "'", val.equals(name));
 
             shell.bot().button("   &OK   ").click();
-            shell.bot().waitUntil(shellCloses(shell));
+            bot.waitUntil(Conditions.shellCloses(shell));
 
             assertTrue("createFile() File '" + hdfFile + "' not created", hdfFile.exists());
             open_files++;
@@ -306,12 +313,14 @@ public abstract class AbstractWindowTest {
         try {
             SWTBotTree filetree = bot.tree();
 
+            filetree.select(hdfFile.getName());
             filetree.getTreeItem(hdfFile.getName()).click();
 
             bot.shells()[0].activate();
             bot.waitUntil(Conditions.shellIsActive(bot.shells()[0].getText()));
 
-            bot.menu("File").menu("Close").click();
+            SWTBotMenu fileMenuItem = bot.menu().menu("File");
+            fileMenuItem.menu("Close").click();
 
             if (deleteFile) {
                 if (hdfFile.exists()) {
@@ -326,6 +335,7 @@ public abstract class AbstractWindowTest {
 
                 open_files--;
             }
+            bot.waitUntil(Conditions.treeHasRows(filetree, open_files));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -361,7 +371,8 @@ public abstract class AbstractWindowTest {
             final SWTBotCanvas imageCanvas = thisbot.canvas(1);
 
             // Make sure Show Values is selected
-            SWTBotMenu showValuesMenuItem = thisbot.menu("Image").menu("Show Values");
+            SWTBotMenu imageMenuItem = thisbot.menu().menu("Image");
+            SWTBotMenu showValuesMenuItem = imageMenuItem.menu("Show Values");
             if(!showValuesMenuItem.isChecked()) {
                 showValuesMenuItem.click();
             }
@@ -420,7 +431,7 @@ public abstract class AbstractWindowTest {
 
     protected SWTBotShell openAttributeContext(SWTBotTable attrTable, String objectName, int rowIndex) {
         attrTable.click(rowIndex, 0);
-        attrTable.contextMenu("View/Edit Attribute Value").click();
+        attrTable.contextMenu().contextMenu("View/Edit Attribute Value").click();
 
         return openDataObject(objectName);
     }
@@ -430,7 +441,7 @@ public abstract class AbstractWindowTest {
 
         SWTBotTreeItem foundObject = locateItemByPath(fileItem, objectName);
         foundObject.click();
-        foundObject.contextMenu("Open").click();
+        foundObject.contextMenu().contextMenu("Open").click();
 
         return openDataObject(objectName);
     }
@@ -444,6 +455,7 @@ public abstract class AbstractWindowTest {
 
         Matcher<Shell> classMatcher = widgetOfType(Shell.class);
         Matcher<Shell> regexMatcher = withRegex(strippedObjectName + objectShellTitleRegex);
+        @SuppressWarnings("unchecked")
         Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
         bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -514,7 +526,7 @@ public abstract class AbstractWindowTest {
             /*
              * Utility function to offset the table row position for extra header info.
              */
-            public void setContainerHeaderOffset(int containerHeaderOffset) {
+            public void setContainerHeaderOffset(int containerRowHeaderOffset, int containerColHeaderOffset) {
                 throw new UnsupportedOperationException("subclasses must implement setContainerHeaderOffset()");
             }
 
@@ -553,13 +565,16 @@ public abstract class AbstractWindowTest {
         private static class NatTableDataRetriever extends TableDataRetriever {
 
             private final SWTBotNatTable table;
-            private int containerHeaderOffset = 0;
+            private int containerRowHeaderOffset = 0;
+            private int containerColHeaderOffset = 0;
             boolean pagingActive = false;
+            Position lastVisibleCellPos = new Position(1 + containerRowHeaderOffset, 1 + containerColHeaderOffset);
 
             NatTableDataRetriever(SWTBotNatTable tableObj, String funcName) {
                 super(funcName);
 
                 this.table = tableObj;
+                log.trace("lastVisibleCellPos: row is {}, col is {}", lastVisibleCellPos.row, lastVisibleCellPos.column);
             }
 
             @Override
@@ -571,12 +586,14 @@ public abstract class AbstractWindowTest {
                 if (pagingActive) textboxIndex = 2;
 
                 // TODO: temporary workaround until the solution below works.
-                Position cellPos = table.scrollViewport(new Position(1 + containerHeaderOffset, 1), rowIndex, colIndex);
-                table.click(cellPos.row, cellPos.column);
+                log.trace("rowIndex is {}, colIndex is {}", rowIndex, colIndex);
+                lastVisibleCellPos = table.scrollViewport(lastVisibleCellPos, rowIndex, colIndex);
+                log.trace("lastVisibleCellPos: row is {}, col is {}", lastVisibleCellPos.row, lastVisibleCellPos.column);
+                table.click(lastVisibleCellPos.row, lastVisibleCellPos.column);
                 String val = bot.shells()[1].bot().text(textboxIndex).getText();
 
                 // Disabled until Data conversion can be figured out
-                // String val = table.getCellDataValueByPosition(rowPosition, columnPosition);
+                // String val = table.getCellDataValueByPosition(rowIndex, colIndex);
 
                 sb.setLength(0);
                 sb.append("wrong value at table index ").append("(").append(rowIndex).append(", ").append(colIndex).append(")");
@@ -590,8 +607,10 @@ public abstract class AbstractWindowTest {
             }
 
             @Override
-            public void setContainerHeaderOffset(int containerHeaderOffset) {
-                this.containerHeaderOffset = containerHeaderOffset;
+            public void setContainerHeaderOffset(int containerRowHeaderOffset, int containerColHeaderOffset) {
+                this.containerRowHeaderOffset = containerRowHeaderOffset;
+                this.containerColHeaderOffset = containerColHeaderOffset;
+                lastVisibleCellPos = new Position(1 + containerRowHeaderOffset, 1 + containerColHeaderOffset);
             }
 
         }

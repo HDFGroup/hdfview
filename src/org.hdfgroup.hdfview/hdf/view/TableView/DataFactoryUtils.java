@@ -31,20 +31,31 @@ import hdf.object.Datatype;
  * @version 1.0 2/21/2019
  *
  */
-public class DataFactoryUtils {
-
+public class DataFactoryUtils
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataFactoryUtils.class);
 
+    /** the error string value */
     public static final String errStr = "*ERROR*";
+    /** the null sting value */
     public static final String nullStr = "Null";
 
+    /** the COL_TO_BASE_CLASS_MAP_INDEX value */
     public static final int COL_TO_BASE_CLASS_MAP_INDEX = 0;
+    /** the CMPD_START_IDX_MAP_INDEX value */
     public static final int CMPD_START_IDX_MAP_INDEX = 1;
 
-    /*
+    /**
      * Given a CompoundDataFormat, as well as a compound datatype, removes the
      * non-selected datatypes from the List of datatypes inside the compound
      * datatype and returns that as a new List.
+     *
+     * @param dataFormat
+     *        the compound data object
+     * @param compoundType
+     *        the datatype instance of the compound data object
+     *
+     * @return the list of datatypes in the compound data object
      */
     public static List<Datatype> filterNonSelectedMembers(CompoundDataFormat dataFormat, final Datatype compoundType) {
         List<Datatype> allSelectedTypes = Arrays.asList(dataFormat.getSelectedMemberTypes());
@@ -82,8 +93,17 @@ public class DataFactoryUtils {
         return selectedTypes;
     }
 
-    /*
-     * TODO: can potentially merge the two functions.
+    /**
+     * build the index maps compound types.
+     *
+     * @param dataFormat
+     *        the compound data object
+     * @param localSelectedTypes
+     *        the list of datatypes of the compound data object
+     *
+     * @return the map of datatypes in the compound data object
+     *
+     * @throws Exception if a failure occurred
      */
     @SuppressWarnings("unchecked")
     public static HashMap<Integer, Integer>[] buildIndexMaps(CompoundDataFormat dataFormat, List<Datatype> localSelectedTypes) throws Exception {

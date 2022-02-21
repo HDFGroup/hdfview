@@ -23,28 +23,27 @@ import java.util.Map.Entry;
 
 /**
  * Datatype is an abstract class that defines datatype characteristics and APIs for a data type.
- * <p>
+ *
  * A datatype has four basic characteristics: class, size, byte order and sign. These
  * characteristics are defined in the
  * <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>.
- * <p>
+ *
  * These characteristics apply to all the sub-classes. The sub-classes may have different ways to
  * describe a datatype. We here define the <strong> native datatype</strong> to the datatype used by
  * the sub-class. For example, H5Datatype uses a datatype identifier (hid_t) to specify a datatype.
  * NC2Datatype uses ucar.nc2.DataType object to describe its datatype. "Native" here is different
  * from the "native" definition in the HDF5 library.
- * <p>
+ *
  * Two functions, createNative() and fromNative(), are defined to convert the general
  * characteristics to/from the native datatype. Sub-classes must implement these functions so that
  * the conversion will be done correctly. The values of the CLASS member are not identical to HDF5
  * values for a datatype class.
- * <p>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Datatype extends HObject implements MetaDataContainer {
-
+public abstract class Datatype extends HObject implements MetaDataContainer
+{
     private static final long serialVersionUID = -581324710549963177L;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
@@ -154,6 +153,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     public static final int NSGN = 2;
 
+    /**
+     * The description of the datatype.
+     */
     protected String datatypeDescription = null;
 
     /**
@@ -196,6 +198,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * Determines whether this datatype is a variable-length type.
      */
     protected boolean isVLEN = false;
+
+    /**
+     * Determines whether this datatype is a variable-length string type.
+     */
     protected boolean isVariableStr = false;
 
     /**
@@ -252,7 +258,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -285,7 +291,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -322,7 +328,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -357,12 +363,12 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      */
     public Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
         super(theFile, null, null, null);
-        if ((tsize == 0) || (tsize < 0 && tsize != NATIVE))
+        if ((tsize == 0) || (tsize < 0 && tsize != Datatype.NATIVE))
             throw new Exception("invalid datatype size - " + tsize);
-        if ((torder != ORDER_LE) && (torder != ORDER_BE) && (torder != ORDER_VAX)
-                && (torder != ORDER_NONE) && (torder != NATIVE))
+        if ((torder != Datatype.ORDER_LE) && (torder != Datatype.ORDER_BE) && (torder != Datatype.ORDER_VAX)
+                && (torder != Datatype.ORDER_NONE) && (torder != Datatype.NATIVE))
             throw new Exception("invalid datatype order - " + torder);
-        if ((tsign != SIGN_NONE) && (tsign != SIGN_2) && (tsign != NATIVE))
+        if ((tsign != Datatype.SIGN_NONE) && (tsign != Datatype.SIGN_2) && (tsign != Datatype.NATIVE))
             throw new Exception("invalid datatype sign - " + tsign);
 
         datatypeClass = tclass;
@@ -385,7 +391,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with specified class, size, byte order and sign.
-     * <p>
+     *
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
@@ -422,7 +428,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with a given native datatype identifier.
-     * <p>
+     *
      * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
      *
      * <pre>
@@ -447,7 +453,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Constructs a Datatype with a given native datatype identifier.
-     * <p>
+     *
      * For example, if the datatype identifier is a 32-bit unsigned integer created from HDF5,
      *
      * <pre>
@@ -485,7 +491,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Closes a datatype identifier.
-     * <p>
+     *
      * Sub-classes must replace this default implementation.
      *
      * @param id
@@ -553,7 +559,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Returns the base datatype for this datatype.
-     * <p>
+     *
      * For example, in a dataset of type ARRAY of integer, the datatype of the dataset is ARRAY. The
      * datatype of the base type is integer.
      *
@@ -565,7 +571,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Sets the (key, value) pairs of enum members for enum datatype.
-     * <p>
+     *
      * For Example,
      * <dl>
      * <dt>setEnumMembers("-40=lowTemp, 90=highTemp")</dt>
@@ -611,7 +617,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Returns the HashMap pairs of enum members for enum datatype.
-     * <p>
+     *
      * For Example,
      * <dl>
      * <dt>getEnumMembersAsString()</dt>
@@ -651,12 +657,34 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         return arrayDims;
     }
 
+
+    /**
+     * Returns the member names of a Compound Datatype.
+     *
+     * @return member names of a Compound Datatype
+     */
     public final List<String> getCompoundMemberNames() {
         return compoundMemberNames;
     }
 
+
+    /**
+     * Returns member types of a Compound Datatype.
+     *
+     * @return member types of a Compound Datatype
+     */
     public final List<Datatype> getCompoundMemberTypes() {
         return compoundMemberTypes;
+    }
+
+
+    /**
+     * Returns the member offsets of a Compound Datatype.
+     *
+     * @return member offsets of a Compound Datatype
+     */
+    public final List<Long> getCompoundMemberOffsets() {
+        return compoundMemberOffsets;
     }
 
     /**
@@ -664,7 +692,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *
      * Subclasses must implement it so that this datatype will be converted accordingly. Use close() to
      * close the native identifier; otherwise, the datatype will be left open.
-     * <p>
+     *
      * For example, a HDF5 datatype created from<br>
      *
      * <pre>
@@ -684,9 +712,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
 
     /**
      * Set datatype characteristics (class, size, byte order and sign) from a given datatype identifier.
-     * <p>
+     *
      * Sub-classes must implement it so that this datatype will be converted accordingly.
-     * <p>
+     *
      * For example, if the type identifier is a 64-bit unsigned integer created from HDF5,
      *
      * <pre>
@@ -717,10 +745,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return a short text description of this datatype
      */
     public String getDescription() {
-
-        if (datatypeDescription != null) {
+        if (datatypeDescription != null)
             return datatypeDescription;
-        }
 
         StringBuilder description = new StringBuilder();
 
@@ -790,9 +816,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
                 break;
         }
 
-        if (baseType != null) {
+        if (baseType != null)
             description.append(" of " + baseType.getDescription());
-        }
 
         return description.toString();
     }
@@ -831,6 +856,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         }
     }
 
+    /**
+     * Checks if this datatype is a boolean type.
+     *
+     * @return true if the datatype is boolean; false otherwise
+     */
     public abstract boolean isText();
 
     /**
@@ -950,10 +980,25 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         return (datatypeClass == Datatype.CLASS_BITFIELD);
     }
 
-    /*
-     * (non-Javadoc)
+    /* Implement interface MetaDataContainer */
+
+    /**
+     * Removes all of the elements from metadata list.
+     * The list should be empty after this call returns.
+     */
+    @Override
+    public void clear() {
+    }
+
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
      *
-     * @see hdf.object.DataFormat#getMetadata()
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -961,30 +1006,50 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Writes a specific piece of metadata (such as an attribute) into the file.
      *
-     * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
+     * If an HDF(4&amp;5) attribute exists in the file, this method updates its
+     * value. If the attribute does not exist in the file, it creates the
+     * attribute in the file and attaches it to the object. It will fail to
+     * write a new attribute to the object where an attribute with the same name
+     * already exists. To update the value of an existing attribute in the file,
+     * one needs to get the instance of the attribute by getMetadata(), change
+     * its values, then use writeMetadata() to write the value.
+     *
+     * @param info
+     *            the metadata to write.
+     *
+     * @throws Exception
+     *             if the metadata can not be written
      */
     @Override
     public void writeMetadata(Object info) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:writeMetadata.");
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Deletes an existing piece of metadata from this object.
      *
-     * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
+     * @param info
+     *            the metadata to delete.
+     *
+     * @throws Exception
+     *             if the metadata can not be removed
      */
     @Override
     public void removeMetadata(Object info) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:removeMetadata.");
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Updates an existing piece of metadata attached to this object.
      *
-     * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
+     * @param info
+     *            the metadata to update.
+     *
+     * @throws Exception
+     *             if the metadata can not be updated
      */
     @Override
     public void updateMetadata(Object info) throws Exception {

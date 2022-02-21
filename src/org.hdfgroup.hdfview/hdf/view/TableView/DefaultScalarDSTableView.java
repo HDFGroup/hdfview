@@ -68,8 +68,11 @@ import hdf.view.ViewProperties;
 import hdf.view.DataView.DataViewManager;
 import hdf.view.dialog.InputDialog;
 
-public class DefaultScalarDSTableView extends DefaultBaseTableView implements TableView {
-
+/**
+ * A class to construct a ScalarDS TableView.
+ */
+public class DefaultScalarDSTableView extends DefaultBaseTableView implements TableView
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultScalarDSTableView.class);
 
     /**
@@ -169,21 +172,18 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             int n = Array.getLength(dataValue);
             char[] charData = new char[n];
             for (int i = 0; i < n; i++) {
-                if (runtimeTypeClass == 'B') {
+                if (runtimeTypeClass == 'B')
                     charData[i] = (char) Array.getByte(dataValue, i);
-                }
-                else if (runtimeTypeClass == 'S') {
+                else if (runtimeTypeClass == 'S')
                     charData[i] = (char) Array.getShort(dataValue, i);
-                }
             }
 
             dataValue = charData;
         }
         else if ((runtimeTypeClass == 'B') && dataObject.getDatatype().isArray()) {
             Datatype baseType = dataObject.getDatatype().getDatatypeBase();
-            if (baseType.isString()) {
+            if (baseType.isString())
                 dataValue = Dataset.byteToString((byte[]) dataValue, (int) baseType.getDatatypeSize());
-            }
         }
     }
 
@@ -397,10 +397,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (checkScientificNotation.getSelection()) {
-                    if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
-                    if (checkEnum != null) checkEnum.setSelection(false);
-                    if (checkHex != null) checkHex.setSelection(false);
-                    if (checkBin != null) checkBin.setSelection(false);
+                    if (checkCustomNotation != null)
+                        checkCustomNotation.setSelection(false);
+                    if (checkEnum != null)
+                        checkEnum.setSelection(false);
+                    if (checkHex != null)
+                        checkHex.setSelection(false);
+                    if (checkBin != null)
+                        checkBin.setSelection(false);
 
                     numberFormat = scientificFormat;
                     showAsHex = false;
@@ -432,10 +436,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (checkCustomNotation.getSelection()) {
-                    if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
-                    if (checkEnum != null) checkEnum.setSelection(false);
-                    if (checkHex != null) checkHex.setSelection(false);
-                    if (checkBin != null) checkBin.setSelection(false);
+                    if (checkScientificNotation != null)
+                        checkScientificNotation.setSelection(false);
+                    if (checkEnum != null)
+                        checkEnum.setSelection(false);
+                    if (checkHex != null)
+                        checkHex.setSelection(false);
+                    if (checkBin != null)
+                        checkBin.setSelection(false);
 
                     numberFormat = customFormat;
                     showAsHex = false;
@@ -473,12 +481,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                         + "\n\t the normalized scientific notation format is \"#.0###E0##\""
                         + "\n\t to make the digits required \"0.00000E000\"\n\n";
 
-                String str = (new InputDialog(theShell, "Create a custom number format", msg, customFormat.toPattern()))
-                        .open();
+                String str = (new InputDialog(theShell, "Create a custom number format", msg, customFormat.toPattern())).open();
 
-                if ((str == null) || (str.length() < 1)) {
+                if ((str == null) || (str.length() < 1))
                     return;
-                }
 
                 try {
                     customFormat.applyPattern(str);
@@ -502,10 +508,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 public void widgetSelected(SelectionEvent e) {
                     showAsHex = checkHex.getSelection();
                     if (showAsHex) {
-                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
-                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
-                        if (checkEnum != null) checkEnum.setSelection(false);
-                        if (checkBin != null) checkBin.setSelection(false);
+                        if (checkScientificNotation != null)
+                            checkScientificNotation.setSelection(false);
+                        if (checkCustomNotation != null)
+                            checkCustomNotation.setSelection(false);
+                        if (checkEnum != null)
+                            checkEnum.setSelection(false);
+                        if (checkBin != null)
+                            checkBin.setSelection(false);
 
                         showAsBin = false;
                         numberFormat = normalFormat;
@@ -534,10 +544,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 public void widgetSelected(SelectionEvent e) {
                     showAsBin = checkBin.getSelection();
                     if (showAsBin) {
-                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
-                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
-                        if (checkEnum != null) checkEnum.setSelection(false);
-                        if (checkHex != null) checkHex.setSelection(false);
+                        if (checkScientificNotation != null)
+                            checkScientificNotation.setSelection(false);
+                        if (checkCustomNotation != null)
+                            checkCustomNotation.setSelection(false);
+                        if (checkEnum != null)
+                            checkEnum.setSelection(false);
+                        if (checkHex != null)
+                            checkHex.setSelection(false);
 
                         showAsHex = false;
                         numberFormat = normalFormat;
@@ -566,10 +580,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 public void widgetSelected(SelectionEvent e) {
                     isEnumConverted = checkEnum.getSelection();
                     if (isEnumConverted) {
-                        if (checkScientificNotation != null) checkScientificNotation.setSelection(false);
-                        if (checkCustomNotation != null) checkCustomNotation.setSelection(false);
-                        if (checkHex != null) checkHex.setSelection(false);
-                        if (checkBin != null) checkBin.setSelection(false);
+                        if (checkScientificNotation != null)
+                            checkScientificNotation.setSelection(false);
+                        if (checkCustomNotation != null)
+                            checkCustomNotation.setSelection(false);
+                        if (checkHex != null)
+                            checkHex.setSelection(false);
+                        if (checkBin != null)
+                            checkBin.setSelection(false);
 
                         showAsBin = false;
                         showAsHex = false;
@@ -653,9 +671,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         natTable.addLayerListener(new ScalarDSCellSelectionListener());
 
         // Create popup menu for region or object ref.
-        if (isRegRef || isObjRef) {
+        if (isRegRef || isObjRef)
             natTable.addConfiguration(new RefContextMenu(natTable));
-        }
 
         natTable.configure();
 
@@ -674,25 +691,22 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
         Set<Integer> selectedRowPos = new LinkedHashSet<>();
         Iterator<Range> i1 = rowPositions.iterator();
-        while (i1.hasNext()) {
+        while (i1.hasNext())
             selectedRowPos.addAll(i1.next().getMembers());
-        }
 
         Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
         int[] selectedCols = selectionLayer.getSelectedColumnPositions();
 
-        if (selectedRows == null || selectedRows.length <= 0 || selectedCols == null || selectedCols.length <= 0) {
+        if (selectedRows == null || selectedRows.length <= 0 || selectedCols == null || selectedCols.length <= 0)
             return null;
-        }
 
         int size = selectedCols.length * selectedRows.length;
         log.trace("getSelectedData() data size: {}", size);
 
         // the whole table is selected
         if ((dataTable.getPreferredColumnCount() - 1 == selectedCols.length)
-                && (dataTable.getPreferredRowCount() - 1 == selectedRows.length)) {
+                && (dataTable.getPreferredRowCount() - 1 == selectedRows.length))
             return dataValue;
-        }
 
         if (isRegRef) {
             // reg. ref data are stored in strings
@@ -767,7 +781,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     @Override
     protected IEditableRule getDataEditingRule(final DataFormat dataObject) {
-        if (dataObject == null) return null;
+        if (dataObject == null)
+            return null;
 
         // Only Allow editing if not in read-only mode
         return new EditableRule() {
@@ -787,8 +802,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * a separate spreadsheet.
      *
      * @param ref
-     *            the array of strings that contain the object reference
-     *            information.
+     *            the array of strings that contain the object reference information.
      *
      */
     @Override
@@ -825,9 +839,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             data = null;
         }
 
-        if (data == null) {
+        if (data == null)
             return;
-        }
 
         Class<?> theClass = null;
         String viewName = null;
@@ -1110,7 +1123,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     /**
      * Update cell value label and cell value field when a cell is selected
      */
-    private class ScalarDSCellSelectionListener implements ILayerListener {
+    private class ScalarDSCellSelectionListener implements ILayerListener
+    {
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
@@ -1183,6 +1197,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                                     int idx = 0;
                                     while (st.hasMoreTokens()) {
+                                        int space_type = dset.getSpaceType();
                                         int rank = dset.getRank();
                                         long[] start = dset.getStartDims();
                                         long[] count = dset.getSelectedDims();
@@ -1409,10 +1424,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * Custom Column Header data provider to set column indices based on Index Base
      * for Scalar Datasets.
      */
-    private class ScalarDSColumnHeaderDataProvider implements IDataProvider {
+    private class ScalarDSColumnHeaderDataProvider implements IDataProvider
+    {
 
         private final String columnNames[];
 
+        private final int    space_type;
         private final int    rank;
 
         private final long[] startArray;
@@ -1422,6 +1439,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         private final int    ncols;
 
         public ScalarDSColumnHeaderDataProvider(DataFormat theDataObject) {
+            space_type = theDataObject.getSpaceType();
             rank = theDataObject.getRank();
 
             startArray = theDataObject.getStartDims();
@@ -1436,9 +1454,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                 columnNames = new String[ncols];
 
-                for (int i = 0; i < ncols; i++) {
+                for (int i = 0; i < ncols; i++)
                     columnNames[i] = String.valueOf(start + indexBase + i * stride);
-                }
             }
             else {
                 ncols = 1;

@@ -95,6 +95,9 @@ public class NewGroupDialog extends NewDataObjectDialog {
         moreOptionsEnabled = false;
     }
 
+    /**
+     * Open the NewGroupDialog for adding a new group.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

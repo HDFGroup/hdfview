@@ -1,4 +1,4 @@
-package test.object;
+package object;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -14,10 +14,12 @@ import org.junit.Test;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+
 import hdf.object.FileFormat;
 import hdf.object.ScalarDS;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ScalarDS;
 
 /**
  * @author rsinha
@@ -37,6 +39,28 @@ public class ScalarDSTest {
     private ScalarDS imageDset = null;
     private ScalarDS imagePalete = null;
     private ScalarDS ORDset = null;
+
+    protected void closeFile() {
+        if (testFile != null) {
+            try {
+                testFile.close();
+            }
+            catch (final Exception ex) {
+            }
+            testFile = null;
+        }
+    }
+
+    protected void checkObjCount(long fileid) {
+        long nObjs = 0;
+        try {
+            nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+        }
+        catch (final Exception ex) {
+            fail("H5.H5Fget_obj_count() failed. " + ex);
+        }
+        assertEquals(1, nObjs); // file id should be the only one left open
+    }
 
     @BeforeClass
     public static void createFile() throws Exception {
@@ -67,7 +91,6 @@ public class ScalarDSTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     @SuppressWarnings("deprecation")
@@ -115,12 +138,8 @@ public class ScalarDSTest {
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            try {
-                testFile.close();
-            }
-            catch (final Exception ex) {
-            }
-            testFile = null;
+            checkObjCount(testFile.getFID());
+            closeFile();
         }
         try {
             int openID = H5.getOpenIDCount();
@@ -151,7 +170,7 @@ public class ScalarDSTest {
     @Test
     public void testImageFunctionality() {
         log.debug("testImageFunctionality");
-        assertTrue(imageDset.hasAttribute());
+        assertTrue(((H5ScalarDS)imageDset).hasAttribute());
         assertTrue(imageDset.isImage());
         assertTrue(imageDset.isImageDisplay());
 
@@ -177,14 +196,6 @@ public class ScalarDSTest {
         assertTrue(intDset.isImageDisplay());
         intDset.setIsImageDisplay(false);
         assertFalse(intDset.isImageDisplay());
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
@@ -207,13 +218,5 @@ public class ScalarDSTest {
         assertFalse(enumDset.getDatatype().isText());
         assertFalse(ORDset.getDatatype().isText());
         assertFalse(imagePalete.getDatatype().isText());
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 }

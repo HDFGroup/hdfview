@@ -38,10 +38,24 @@ import hdf.object.nc2.NC2Group;
 import hdf.view.ViewProperties;
 import hdf.view.DataView.DataViewManager;
 
+/**
+ *
+ * The metadata view interface for displaying group metadata information
+ */
 public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultGroupMetaDataView.class);
 
+    /**
+     *The metadata view interface for displaying metadata information
+     *
+     * @param parentComposite
+     *        the parent visual object
+     * @param viewer
+     *        the viewr to use
+     * @param theObj
+     *        the object to display the metadata info
+     */
     public DefaultGroupMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
     }
@@ -67,15 +81,15 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
                     ocplID = H5.H5Fget_create_plist(g.getFID());
                 }
                 else {
-                    long oid = -1;
+                    long objid = -1;
                     try {
-                        oid = g.open();
-                        if (oid >= 0) {
-                            ocplID = H5.H5Gget_create_plist(oid);
+                        objid = g.open();
+                        if (objid >= 0) {
+                            ocplID = H5.H5Gget_create_plist(objid);
                         }
                     }
                     finally {
-                        g.close(oid);
+                        g.close(objid);
                     }
                 }
                 if (ocplID >= 0) {

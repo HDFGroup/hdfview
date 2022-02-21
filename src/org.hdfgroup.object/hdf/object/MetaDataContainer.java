@@ -20,7 +20,6 @@ import java.util.List;
  * An interface that provides general I/O operations for object metadata
  * attached to an object. For example, reading metadata content from the file
  * into memory or writing metadata content from memory into the file.
- * <p>
  *
  * @see hdf.object.HObject
  *
@@ -28,10 +27,11 @@ import java.util.List;
  * @author Peter X. Cao, Jordan T. Henderson
  */
 @SuppressWarnings("rawtypes")
-public interface MetaDataContainer {
+public interface MetaDataContainer
+{
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
-     * <p>
+     *
      * Metadata, such as attributes, is stored in a List.
      *
      * @return the list of metadata objects.
@@ -39,7 +39,7 @@ public interface MetaDataContainer {
      * @throws Exception
      *             if the metadata can not be retrieved
      */
-    public abstract List getMetadata() throws Exception;
+    List getMetadata() throws Exception;
 
     /**
      * Writes a specific piece of metadata (such as an attribute) into the file.
@@ -58,7 +58,7 @@ public interface MetaDataContainer {
      * @throws Exception
      *             if the metadata can not be written
      */
-    public abstract void writeMetadata(Object metadata) throws Exception;
+    void writeMetadata(Object metadata) throws Exception;
 
     /**
      * Deletes an existing piece of metadata from this object.
@@ -69,7 +69,7 @@ public interface MetaDataContainer {
      * @throws Exception
      *             if the metadata can not be removed
      */
-    public abstract void removeMetadata(Object metadata) throws Exception;
+    void removeMetadata(Object metadata) throws Exception;
 
     /**
      * Updates an existing piece of metadata attached to this object.
@@ -80,12 +80,18 @@ public interface MetaDataContainer {
      * @throws Exception
      *             if the metadata can not be updated
      */
-    public abstract void updateMetadata(Object metadata) throws Exception;
+    void updateMetadata(Object metadata) throws Exception;
 
     /**
      * Check if the object has any attributes attached.
      *
      * @return true if it has any attributes, false otherwise.
      */
-    public abstract boolean hasAttribute();
+    boolean hasAttribute();
+
+    /**
+     * Removes all of the elements from metadata list.
+     * The list should be empty after this call returns.
+     */
+    void clear();
 }

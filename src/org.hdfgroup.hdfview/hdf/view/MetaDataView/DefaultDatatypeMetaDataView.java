@@ -24,10 +24,24 @@ import hdf.object.Datatype;
 import hdf.object.HObject;
 import hdf.view.DataView.DataViewManager;
 
+/**
+ *
+ *The metadata view interface for displaying datatype metadata information
+ */
 public class DefaultDatatypeMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatatypeMetaDataView.class);
 
+    /**
+     *The metadata view interface for displaying datatype metadata information
+     *
+     * @param parentComposite
+     *        the parent visual object
+     * @param viewer
+     *        the viewr to use
+     * @param theObj
+     *        the object to display the metadata info
+     */
     public DefaultDatatypeMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
     }

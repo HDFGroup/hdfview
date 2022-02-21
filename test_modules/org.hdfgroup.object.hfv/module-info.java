@@ -3,5 +3,5 @@ module org.hdfgroup.object.hfv {
 
     requires jarhdf5;
     requires org.hdfgroup.object;
-    requires slf4j.api;
+    requires org.slf4j;
 }

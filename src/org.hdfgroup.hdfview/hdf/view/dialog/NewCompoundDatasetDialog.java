@@ -52,6 +52,9 @@ import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
+
+import hdf.object.h5.H5CompoundDS;
+
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
@@ -100,7 +103,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
     private Button                checkContiguous, checkChunked;
 
     /**
-     * Constructs a NewDatasetDialog with specified list of possible parent
+     * Constructs a NewCompoundDatasetDialog with specified list of possible parent
      * groups.
      *
      * @param parent
@@ -119,6 +122,9 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         compoundDSList = new Vector<>(objs.size());
     }
 
+    /**
+     * Open the NewCompoundDatasetDialog for adding a new compound dataset.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
@@ -221,7 +227,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 currentSizeField.setText(sizeStr);
 
                 try {
-                    dset.getMetadata();
+                    ((H5CompoundDS)dset).getMetadata();
                 } // get chunking and compression info
                 catch (Exception ex) {
                     log.debug("get chunking and compression info:", ex);

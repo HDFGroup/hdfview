@@ -32,10 +32,13 @@ public abstract class UserOptionsDefaultPage extends PreferencePage {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDefaultPage.class);
 
+    /** The reference to the visual shell */
     protected Shell                 shell;
 
+    /** The setting of the current font */
     protected Font                  curFont;
 
+    /** The setting of the root directory */
     protected String                rootDir = null;
 
     /**

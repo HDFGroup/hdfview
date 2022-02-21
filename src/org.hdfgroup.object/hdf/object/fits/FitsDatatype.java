@@ -22,13 +22,15 @@ import nom.tam.fits.BasicHDU;
 /**
  * Datatype encapsulates information of a datatype.
  * Information includes the class, size, endian of a datatype.
- * <p>
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
 public class FitsDatatype extends Datatype
 {
     private static final long serialVersionUID = 6545936196104493765L;
+
+    /** the native type */
     private long nativeType;
 
     /**
@@ -50,7 +52,7 @@ public class FitsDatatype extends Datatype
      * @param torder the order of the datatype.
      * @param tsign the sign of the datatype.
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public FitsDatatype(int tclass, int tsize, int torder, int tsign) throws Exception {
@@ -63,7 +65,7 @@ public class FitsDatatype extends Datatype
      *
      * @param theType the fits native datatype.
      *
-* @throws Exception
+     * @throws Exception
      *            if there is an error
      */
     public FitsDatatype(long theType) throws Exception {
@@ -72,13 +74,6 @@ public class FitsDatatype extends Datatype
         fromNative(0);
         datatypeDescription = getDescription();
     }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.DataFormat#hasAttribute()
-     */
-    @Override
-    public boolean hasAttribute () { return false; }
 
     /**
      * Allocate an one-dimensional array of byte, short, int, long, float, double,
@@ -89,13 +84,11 @@ public class FitsDatatype extends Datatype
      * @param size the total size of the array.
      * @return the array object if successful and null otherwise.
      */
-    public static Object allocateArray(long dtype, int size) throws OutOfMemoryError
-    {
+    public static Object allocateArray(long dtype, int size) throws OutOfMemoryError {
         Object data = null;
 
-        if (size <= 0 ) {
+        if (size <= 0 )
             return null;
-        }
 
         switch ((int)dtype) {
             case BasicHDU.BITPIX_BYTE:
@@ -136,8 +129,7 @@ public class FitsDatatype extends Datatype
      * @param dtype the fits native datatype.
      */
     @Override
-    public void fromNative(long dtype)
-    {
+    public void fromNative(long dtype) {
         switch ((int)dtype) {
             case BasicHDU.BITPIX_BYTE:
                 datatypeClass = CLASS_INTEGER;
@@ -196,21 +188,16 @@ public class FitsDatatype extends Datatype
                 description = "64-bit float";
                 break;
             default:
-                if (this.isString()) {
+                if (this.isString())
                     description = "String";
-                }
-                else if (this.isChar()) {
+                else if (this.isChar())
                     description = "Char";
-                }
-                else if (this.isInteger()) {
+                else if (this.isInteger())
                     description = "Integer";
-                }
-                else if (this.isFloat()) {
+                else if (this.isFloat())
                     description = "Float";
-                }
-                else {
+                else
                     description = "Unknown data type.";
-                }
                 break;
         }
 
@@ -233,26 +220,20 @@ public class FitsDatatype extends Datatype
     @Override
     public long createNative() {
         if (datatypeClass == CLASS_INTEGER) {
-            if (datatypeSize == 1) {
+            if (datatypeSize == 1)
                 nativeType = BasicHDU.BITPIX_BYTE;
-            }
-            else if (datatypeSize == 2) {
+            else if (datatypeSize == 2)
                 nativeType = BasicHDU.BITPIX_SHORT;
-            }
-            else if (datatypeSize == 4) {
+            else if (datatypeSize == 4)
                 nativeType = BasicHDU.BITPIX_INT;
-            }
-            else if (datatypeSize == 8) {
+            else if (datatypeSize == 8)
                 nativeType = BasicHDU.BITPIX_LONG;
-            }
         }
         else if (datatypeClass == CLASS_FLOAT) {
-            if (datatypeSize == 4) {
+            if (datatypeSize == 4)
                 nativeType = BasicHDU.BITPIX_FLOAT;
-            }
-            else if (datatypeSize == 8) {
+            else if (datatypeSize == 8)
                 nativeType = BasicHDU.BITPIX_DOUBLE;
-            }
         }
 
         return nativeType;
@@ -267,9 +248,31 @@ public class FitsDatatype extends Datatype
         // Nothing to implement
     }
 
-    // Implementing DataFormat
+    // Implementing MetaDataContainer
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     *
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     @SuppressWarnings("rawtypes")
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.MetaDataContainer#hasAttribute()
+     */
+    @Override
+    public boolean hasAttribute () {
+        return false;
     }
 }

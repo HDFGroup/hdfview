@@ -10,11 +10,11 @@ package datatypes;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
+import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ScalarDS;
 
 public class H5ObjectEx_T_ArrayAttribute {
@@ -92,7 +92,7 @@ public class H5ObjectEx_T_ArrayAttribute {
 
         // Create the attribute and write the array data to it.
         try {
-            Attribute dataArray = new Attribute(dset, ATTRIBUTENAME, typeIntArray, dims);
+            H5ScalarAttr dataArray = new H5ScalarAttr(dset, ATTRIBUTENAME, typeIntArray, dims);
             dataArray.write();
         }
         catch (Exception e) {
