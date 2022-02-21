@@ -1117,6 +1117,7 @@
             <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
+            <fileset file="${packagefiles.dir}/simplelogger.properties" />
         </copy>
 
         <copy todir="${release.dir}/extra">
