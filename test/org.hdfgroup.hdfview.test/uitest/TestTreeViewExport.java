@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
@@ -20,7 +20,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestTreeViewExport extends AbstractWindowTest {
     private String filename = "testds.h5";
@@ -39,7 +39,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
             assertTrue("createImportHDF5Dataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
-            items[0].contextMenu("New").menu("Group").click();
+            items[0].contextMenu().contextMenu("New").menu("Group").click();
 
             SWTBotShell groupShell = bot.shell("New Group...");
             groupShell.activate();
@@ -61,7 +61,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
             items[0].getNode(0).click();
 
-            items[0].getNode(0).contextMenu("New").menu("Dataset").click();
+            items[0].getNode(0).contextMenu().contextMenu("New").menu("Dataset").click();
 
             SWTBotShell datasetShell = bot.shell("New Dataset...");
             datasetShell.activate();
@@ -71,7 +71,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
             datasetShell.bot().text(2).setText(datasetdimsize);
 
             // Create 64-bit dataset
-            datasetShell.bot().comboBox(2).setSelection("64");
+            datasetShell.bot().comboBox(3).setSelection("64");
 
             val = datasetShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("createImportHDF5Dataset()", "wrong dataset name", datasetname, val),
@@ -85,7 +85,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(datasetShell));
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
+            items[0].getNode(0).contextMenu().contextMenu("Expand All").click();
 
             assertTrue(constructWrongValueMessage("createImportHDF5Dataset()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==3);
@@ -118,7 +118,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "importHDF5Dataset()");
 
             dataTable.click(1, 1);
-            tableShell.bot().menu("Import/Export Data").menu("Import Data from").menu("Text File").click();
+            tableShell.bot().menu().menu("Import/Export Data").menu("Import Data from").menu("Text File").click();
 
             SWTBotShell importShell = bot.shell("Enter a file name");
             importShell.activate();
@@ -131,10 +131,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
                     val.equals(importfilename));
 
             importShell.bot().button("   &OK   ").click();
-            importShell.bot().waitUntil(Conditions.shellCloses(importShell));
+            bot.waitUntil(Conditions.shellCloses(importShell));
 
             Matcher<Shell> classMatcher = widgetOfType(Shell.class);
             Matcher<Shell> regexMatcher = withRegex(".*Import.*");
+            @SuppressWarnings("unchecked")
             Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -144,11 +145,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive(botShell.getText()));
 
             botShell.bot().button("OK").click();
-            botShell.bot().waitUntil(Conditions.shellCloses(botShell));
+            bot.waitUntil(Conditions.shellCloses(botShell));
 
             retriever.testAllTableLocations(expectedData);
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
 
             regexMatcher = withRegex("Changes Detected");
             shellMatcher = allOf(classMatcher, regexMatcher);
@@ -195,10 +196,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].getNode(3).click();
-            items[0].getNode(3).contextMenu("Export Dataset").menu("Export Data to Text File").click();
+            items[0].getNode(3).contextMenu().contextMenu("Export Dataset").menu("Export Data to Text File").click();
 
             Matcher<Shell> classMatcher = widgetOfType(Shell.class);
             Matcher<Shell> regexMatcher = withRegex("Save Dataset Data To Text File.*");
+            @SuppressWarnings("unchecked")
             Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -260,7 +262,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
+            items[0].getNode(0).contextMenu().contextMenu("Expand All").click();
 
             assertTrue(constructWrongValueMessage("saveHDF5DatasetBinary()", "filetree wrong row count", "10", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==10);
@@ -268,10 +270,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
             assertTrue("saveHDF5DatasetBinary() filetree is missing group '" + groupsetname + "'", items[0].getNode(0).getText().compareTo("DS08BITS")==0);
 
             items[0].getNode(3).click();
-            items[0].getNode(3).contextMenu("Export Dataset").menu("Export Data as Little Endian").click();
+            items[0].getNode(3).contextMenu().contextMenu("Export Dataset").menu("Export Data as Little Endian").click();
 
             Matcher<Shell> classMatcher = widgetOfType(Shell.class);
             Matcher<Shell> regexMatcher = withRegex("Save Current Data To Binary File.*");
+            @SuppressWarnings("unchecked")
             Matcher<Shell> shellMatcher = allOf(classMatcher, regexMatcher);
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -353,8 +356,8 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
         try {
             // switch to ViewProperties.DELIMITER_TAB
-            SWTBotMenu fileMenuItem = bot.menu("Tools").menu("User Options");
-            fileMenuItem.click();
+            SWTBotMenu fileMenuItem = bot.menu().menu("Tools");
+            fileMenuItem.menu("User Options").click();
 
             SWTBotShell botshell = bot.shell("Preferences");
             botshell.activate();
@@ -436,8 +439,8 @@ public class TestTreeViewExport extends AbstractWindowTest {
 
         try {
             //switch to ViewProperties.DELIMITER_COMMA
-            SWTBotMenu fileMenuItem = bot.menu("Tools").menu("User Options");
-            fileMenuItem.click();
+            SWTBotMenu fileMenuItem = bot.menu().menu("Tools");
+            fileMenuItem.menu("User Options").click();
 
             SWTBotShell botshell = bot.shell("Preferences");
             botshell.activate();

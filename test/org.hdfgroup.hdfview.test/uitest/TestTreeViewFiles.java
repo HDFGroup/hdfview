@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.junit.Assert.assertTrue;
@@ -26,9 +26,11 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestTreeViewFiles extends AbstractWindowTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestTreeViewFiles.class);
+
     @Test
     public void openHDF5ScalarGroup() {
         String filename = "tscalarintsize.h5";
@@ -46,7 +48,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5ScalarGroup() filetree is missing dataset '" + dataset_name + "'", items[0].getNode(0).getText().compareTo(dataset_name)==0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -60,7 +62,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5ScalarGroup() data did not match regex '^[-1, .*]'",
                     tableShell.bot().text(0).getText().matches("^\\[-1, .*\\]"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].getNode(7).click();
@@ -88,7 +90,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -172,7 +174,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5ScalarString() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -188,7 +190,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             String expected = "ABCDEFGHBCDEFGHICDEFGHIJDEFGHIJKEFGHIJKLFGHIJKLMGHIJKLMNHIJKLMNO";
             assertTrue(constructWrongValueMessage("openHDF5ScalarString()", "wrong data", expected, val), val.equals(expected));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].click();
@@ -242,7 +244,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openCreateOrderHDF5Group() filetree is missing group '" + group2 + "'", items[0].getNode(1).getText().compareTo(group2)==0);
 
             items[0].click();
-            items[0].contextMenu("Change file indexing").click();
+            items[0].contextMenu().contextMenu("Change file indexing").click();
 
             SWTBotShell indexingShell = bot.shell("Indexing options");
             indexingShell.activate();
@@ -262,7 +264,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openCreateOrderHDF5Group() filetree is missing group '" + group1 + "'", items[0].getNode(1).getText().compareTo(group1)==0);
 
             items[0].click();
-            items[0].contextMenu("Change file indexing").click();
+            items[0].contextMenu().contextMenu("Change file indexing").click();
 
             indexingShell = bot.shell("Indexing options");
             indexingShell.activate();
@@ -462,7 +464,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDS()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedData);
 
@@ -470,13 +472,13 @@ public class TestTreeViewFiles extends AbstractWindowTest {
              * TODO: not supported yet
              */
             /*
-             * tableShell.bot().menu("Show Hexadecimal").click();
+             * tableShell.bot().menu().menu("Data Display").menu("Show Hexadecimal").click();
              * retriever.testAllTableLocations(expectedDataHex);
              *
-             * tableShell.bot().menu("Show Binary").click();
+             * tableShell.bot().menu().menu("Data Display").menu("Show Binary").click();
              * retriever.testAllTableLocations(expectedDataBin);
              *
-             * tableShell.bot().menu("Show Scientific Notation").click();
+             * tableShell.bot().menu().menu("Data Display").menu("Show Scientific Notation").click();
              * retriever.testAllTableLocations(expectedDataSci);
              */
         }
@@ -542,8 +544,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             SWTBotNatTable dataTable = getNatTable(tableShell);
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
+            log.trace("testTableLocations is 0, 0");
             retriever.testTableLocations(0, 0, expectedData);
 
             closeShell(tableShell);
@@ -553,7 +556,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             dataTable = getNatTable(tableShell);
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedDataR);
 
@@ -565,7 +568,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].click();
-            bot.menu("File").menu("Save As").click();
+            bot.menu().menu("File").menu("Save As").click();
 
             SWTBotShell saveShell = bot.shell("Enter a file name");
             saveShell.activate();
@@ -597,7 +600,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             dataTable = getNatTable(tableShell);
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testTableLocations(0, 0, expectedDataR);
 
@@ -615,12 +618,12 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             retriever.testTableLocation(3, 2, "0");
 
-            tableShell.bot().menu("Table").menu("Save Changes to File").click();
+            tableShell.bot().menu().menu("Table").menu("Save Changes to File").click();
 
             closeShell(tableShell);
 
             items[1].click();
-            items[1].contextMenu("Reload File").click();
+            items[1].contextMenu().contextMenu("Reload File").click();
 
             items = filetree.getAllItems();
             filetree.expandNode(items[1].getText(), true);
@@ -629,7 +632,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             dataTable = getNatTable(tableShell);
 
             retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testTableLocation(3, 2, "0");
 
@@ -745,7 +748,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5CompoundArrayImport() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
 
             items[0].click();
-            items[0].contextMenu("Compound DS").click();
+            items[0].contextMenu().contextMenu("Compound DS").click();
 
             SWTBotShell newDatasetShell = bot.shell("New Compound Dataset...");
             newDatasetShell.activate();
@@ -802,7 +805,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(metaDataShell));
 
             items[0].getNode(1).click();
-            items[0].getNode(1).contextMenu("Open").click();
+            items[0].getNode(1).contextMenu().contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(newDatasetName + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -821,7 +824,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
                         val.equals(memberNames[i]));
             }
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -834,7 +837,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -886,7 +889,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
                     filetree.visibleRowCount()==11);
 
             items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname1 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -918,11 +921,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             // "wrong data", "E1", val),
             //                    val.equals("E1"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].getNode(0).getNode(1).click();
-            items[0].getNode(0).getNode(1).contextMenu("Open").click();
+            items[0].getNode(0).getNode(1).contextMenu().contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(datasetname2 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -948,11 +951,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "CF:FF", val), val.equals("CF:FF"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].getNode(0).getNode(2).click();
-            items[0].getNode(0).getNode(2).contextMenu("Open").click();
+            items[0].getNode(0).getNode(2).contextMenu().contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(datasetname3 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -978,11 +981,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "9F:FF:FF:FF", val), val.equals("9F:FF:FF:FF"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].getNode(0).getNode(3).click();
-            items[0].getNode(0).getNode(3).contextMenu("Open").click();
+            items[0].getNode(0).getNode(3).contextMenu().contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(datasetname4 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -1008,11 +1011,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "3F:FF:FF:FF:FF:FF:FF:FF", val), val.equals("3F:FF:FF:FF:FF:FF:FF:FF"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].getNode(2).getNode(0).click();
-            items[0].getNode(2).getNode(0).contextMenu("Open").click();
+            items[0].getNode(2).getNode(0).contextMenu().contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(datasetname5 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -1044,11 +1047,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             // "wrong data", "E1", val),
             // val.equals("E1"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].getNode(2).getNode(1).click();
-            items[0].getNode(2).getNode(1).contextMenu("Open").click();
+            items[0].getNode(2).getNode(1).contextMenu().contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(datasetname6 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -1074,11 +1077,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "CF FF", val), val.equals("CF FF"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].getNode(1).getNode(0).click();
-            items[0].getNode(1).getNode(0).contextMenu("Open").click();
+            items[0].getNode(1).getNode(0).contextMenu().contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(datasetname7 + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -1104,7 +1107,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             val = tableShell.bot().text(0).getText();
             assertTrue(constructWrongValueMessage("openHDF5CompoundBits()", "wrong data", "3F:FF:FF:FF:FF:FF:FF:FF", val), val.equals("3F:FF:FF:FF:FF:FF:FF:FF"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -1117,7 +1120,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -1148,7 +1151,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5ArrayString() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname)==0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -1167,7 +1170,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5ArrayString() data did not match regex '^[abcdefgh12345678abcdefgh12345678, abcdefgh12345678abcdefgh12345678, .*]'",
                     val.matches("^\\[abcdefgh12345678abcdefgh12345678, abcdefgh12345678abcdefgh12345678, .*\\]"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -1180,7 +1183,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
@@ -1211,7 +1214,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue("openHDF5ArrayCompound() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getText().compareTo(datasetname) == 0);
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(datasetname + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -1253,7 +1256,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             val = tableShell.bot().text(0).getText();
             assertTrue("openHDF5ArrayCompound() data did not match regex '7.5'", val.matches("7.5"));
 
-            tableShell.bot().menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -1266,7 +1269,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         }
         finally {
             if (tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 

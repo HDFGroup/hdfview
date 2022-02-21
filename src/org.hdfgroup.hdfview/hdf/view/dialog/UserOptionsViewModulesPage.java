@@ -52,6 +52,9 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     /** A list of palette view implementations. */
     private static ArrayList<String> paletteViews;
 
+    /**
+     * Configuration page for user-implementable modules.
+     */
     public UserOptionsViewModulesPage() {
         super("View Modules Settings");
     }
