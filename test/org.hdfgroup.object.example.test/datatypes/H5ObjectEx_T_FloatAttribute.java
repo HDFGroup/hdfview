@@ -12,11 +12,12 @@ import java.text.DecimalFormat;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Attribute;
+
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
+import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ScalarDS;
 
 public class H5ObjectEx_T_FloatAttribute {
@@ -72,7 +73,7 @@ public class H5ObjectEx_T_FloatAttribute {
 
         // Create the attribute and write the array data to it.
         try {
-            Attribute dataFloat = new Attribute(dset, ATTRIBUTENAME, typeFloat, dims);
+            H5ScalarAttr dataFloat = new H5ScalarAttr(dset, ATTRIBUTENAME, typeFloat, dims);
             dataFloat.write();
         }
         catch (Exception e) {

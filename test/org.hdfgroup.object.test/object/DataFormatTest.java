@@ -1,7 +1,7 @@
 /**
  *
  */
-package test.object;
+package object;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -22,6 +22,7 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.MetaDataContainer;
+import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 
@@ -35,6 +36,28 @@ public class DataFormatTest {
 
     private H5File testFile = null;
     private MetaDataContainer testGroup = null;
+
+    protected void closeFile() {
+        if (testFile != null) {
+            try {
+                testFile.close();
+            }
+            catch (final Exception ex) {
+            }
+            testFile = null;
+        }
+    }
+
+    protected void checkObjCount(long fileid) {
+        long nObjs = 0;
+        try {
+            nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+        }
+        catch (final Exception ex) {
+            fail("H5.H5Fget_obj_count() failed. " + ex);
+        }
+        assertEquals(1, nObjs); // file id should be the only one left open
+    }
 
     @BeforeClass
     public static void createFile() throws Exception {
@@ -65,7 +88,6 @@ public class DataFormatTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     @SuppressWarnings("deprecation")
@@ -79,21 +101,28 @@ public class DataFormatTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+        try {
+            testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         assertNotNull(testFile);
-        testGroup = (MetaDataContainer) testFile.get(H5TestFile.NAME_GROUP_ATTR);
+
+        try {
+            testGroup = (MetaDataContainer) testFile.get(H5TestFile.NAME_GROUP_ATTR);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         assertNotNull(testGroup);
     }
 
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            try {
-                testFile.close();
-            }
-            catch (final Exception ex) {
-            }
-            testFile = null;
+            checkObjCount(testFile.getFID());
+            closeFile();
         }
         try {
             int openID = H5.getOpenIDCount();
@@ -128,15 +157,17 @@ public class DataFormatTest {
         }
         for (int ndx=0; ndx < mdataList.size(); ndx++){
             Attribute attrobj = (Attribute) mdataList.get(ndx);
-            if (attrobj.getDatatype().isString()) {
+            if (attrobj.getAttributeDatatype().isString()) {
                 String[] value = null;
 
                 try {
-                    value = (String[]) attrobj.getData();
-                } catch (Exception ex) {
+                    value = (String[]) attrobj.getAttributeData();
+                }
+                catch (Exception ex) {
                     log.trace("testGetMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
-                } catch (OutOfMemoryError e) {
+                }
+                catch (OutOfMemoryError e) {
                     log.trace("testGetMetadata(): Out of memory");
                     fail("Out of memory");
                 }
@@ -153,11 +184,13 @@ public class DataFormatTest {
         String[] value = null;
 
         try {
-            value = (String[]) strAttr.getData();
-        } catch (Exception ex) {
+            value = (String[]) strAttr.getAttributeData();
+        }
+        catch (Exception ex) {
             log.trace("testGetMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
-        } catch (OutOfMemoryError e) {
+        }
+        catch (OutOfMemoryError e) {
             log.trace("testGetMetadata(): Out of memory");
             fail("Out of memory");
         }
@@ -168,14 +201,16 @@ public class DataFormatTest {
         }
 
         int[] intValue = null;
-        long[] dims = arrayIntAttr.getDims();
+        long[] dims = arrayIntAttr.getAttributeDims();
 
         try {
-            intValue = (int[]) arrayIntAttr.getData();
-        } catch (Exception ex) {
+            intValue = (int[]) arrayIntAttr.getAttributeData();
+        }
+        catch (Exception ex) {
             log.trace("testGetMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
-        } catch (OutOfMemoryError e) {
+        }
+        catch (OutOfMemoryError e) {
             log.trace("testGetMetadata(): Out of memory");
             fail("Out of memory");
         }
@@ -185,14 +220,6 @@ public class DataFormatTest {
                 fail("getValue() failed");
             }
         }
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
@@ -218,11 +245,11 @@ public class DataFormatTest {
             fail("new H5datatype failed. " + ex);
         }
 
-        Attribute attr = new Attribute((Group) testGroup, attrName, attrType, attrDims);
+        H5ScalarAttr attr = new H5ScalarAttr((Group) testGroup, attrName, attrType, attrDims);
         assertNotNull(testGroup);
         assertNotNull(attr);
         try {
-            attr.write(classValue);
+            attr.writeAttribute(classValue);
         }
         catch (Exception ex) {
             fail("writeMetadata() failed " + ex.getMessage());
@@ -244,15 +271,17 @@ public class DataFormatTest {
 
         for (int ndx=0; ndx < mdataList.size(); ndx++){
             Attribute attrobj = (Attribute) mdataList.get(ndx);
-            if (attrobj.getDatatype().isString()) {
+            if (attrobj.getAttributeDatatype().isString()) {
                 String[] value = null;
 
                 try {
-                    value = (String[]) attrobj.getData();
-                } catch (Exception ex) {
+                    value = (String[]) attrobj.getAttributeData();
+                }
+                catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);
                     fail("getData() failure " + ex);
-                } catch (OutOfMemoryError e) {
+                }
+                catch (OutOfMemoryError e) {
                     log.trace("testWriteMetadata(): Out of memory");
                     fail("Out of memory");
                 }
@@ -269,11 +298,13 @@ public class DataFormatTest {
         String[] value = null;
 
         try {
-            value = (String[]) strAttr.getData();
-        } catch (Exception ex) {
+            value = (String[]) strAttr.getAttributeData();
+        }
+        catch (Exception ex) {
             log.trace("testWriteMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
-        } catch (OutOfMemoryError e) {
+        }
+        catch (OutOfMemoryError e) {
             log.trace("testWriteMetadata(): Out of memory");
             fail("Out of memory");
         }
@@ -285,14 +316,16 @@ public class DataFormatTest {
         }
 
         int[] intValue = null;
-        long[] dims = arrayIntAttr.getDims();
+        long[] dims = arrayIntAttr.getAttributeDims();
 
         try {
-            intValue = (int[]) arrayIntAttr.getData();
-        } catch (Exception ex) {
+            intValue = (int[]) arrayIntAttr.getAttributeData();
+        }
+        catch (Exception ex) {
             log.trace("testWriteMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
-        } catch (OutOfMemoryError e) {
+        }
+        catch (OutOfMemoryError e) {
             log.trace("testWriteMetadata(): Out of memory");
             fail("Out of memory");
         }
@@ -304,11 +337,13 @@ public class DataFormatTest {
         }
 
         try {
-            value = (String[]) imgAttr.getData();
-        } catch (Exception ex) {
+            value = (String[]) imgAttr.getAttributeData();
+        }
+        catch (Exception ex) {
             log.trace("testWriteMetadata(): getData() failure:", ex);
             fail("getData() failure " + ex);
-        } catch (OutOfMemoryError e) {
+        }
+        catch (OutOfMemoryError e) {
             log.trace("testWriteMetadata(): Out of memory");
             fail("Out of memory");
         }
@@ -317,14 +352,6 @@ public class DataFormatTest {
         if (!value[0].equals("IMAGE")) {
             fail("writeIMGMetadata() failed.");
         }
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
@@ -353,14 +380,6 @@ public class DataFormatTest {
             fail("removeMetadata() failed " + e.getMessage());
         }
         assertEquals(2, mdataList.size());
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
 }

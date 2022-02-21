@@ -50,22 +50,81 @@ public class InputDialog extends Dialog {
     private String          result;
     private Font            curFont;
 
+    /**
+     * Custom SWT dialog to allow the user to input strings
+     * for a parent object.
+     *
+     * @param parent
+     *        the dialog parent shell
+     */
     public InputDialog(Shell parent) {
         this(parent, "HDFView " + HDFVersions.getPropertyVersionView(), "");
     }
 
+    /**
+     * Custom SWT dialog to allow the user to input strings
+     * for a parent object with a title and message.
+     *
+     * @param parent
+     *        the dialog parent shell
+     * @param title
+     *        the dialog title
+     * @param message
+     *        the dialog message
+     */
     public InputDialog(Shell parent, String title, String message) {
         this(parent, title, message, "");
     }
 
+    /**
+     * Custom SWT dialog to allow the user to input strings
+     * for a parent object with a title, message and style.
+     *
+     * @param parent
+     *        the dialog parent shell
+     * @param title
+     *        the dialog title
+     * @param message
+     *        the dialog message
+     * @param style
+     *        the dialog style
+     */
     public InputDialog(Shell parent, String title, String message, int style) {
         this(parent, title, message, "", style);
     }
 
+    /**
+     * Custom SWT dialog to allow the user to input strings
+     * for a parent object with a title, message and initial text to be displayed.
+     *
+     * @param parent
+     *        the dialog parent shell
+     * @param title
+     *        the dialog title
+     * @param message
+     *        the dialog message
+     * @param initialText
+     *        the dialog initialText
+     */
     public InputDialog(Shell parent, String title, String message, String initialText) {
         this(parent, title, message, initialText, SWT.NONE);
     }
 
+    /**
+     * Custom SWT dialog to allow the user to input strings
+     * for a parent object with a title, message, style and initial text to be displayed.
+     *
+     * @param parent
+     *        the dialog parent shell
+     * @param title
+     *        the dialog title
+     * @param message
+     *        the dialog message
+     * @param initialText
+     *        the dialog initialText
+     * @param style
+     *        the dialog style
+     */
     public InputDialog(Shell parent, String title, String message, String initialText, int style) {
         super(parent, style);
         this.title = title;

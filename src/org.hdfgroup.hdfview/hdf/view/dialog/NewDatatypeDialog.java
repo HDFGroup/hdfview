@@ -75,6 +75,9 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
         super(parent, pGroup, objs);
     }
 
+    /**
+     * Open the NewDatatypeDialog for adding a new datatype.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
@@ -204,6 +207,11 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
                 display.sleep();
     }
 
+    /**
+     * Create the datatype specified by the settings.
+     *
+     * @return the new object created.
+     */
     public Datatype createNewDatatype() {
         String name = null;
         Group pgroup = null;

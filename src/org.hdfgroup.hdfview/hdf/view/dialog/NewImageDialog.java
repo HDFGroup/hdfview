@@ -77,6 +77,9 @@ public class NewImageDialog extends NewDataObjectDialog {
         super(parent, pGroup, objs);
     }
 
+    /**
+     * Open the NewImageDialog for adding a new image.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);

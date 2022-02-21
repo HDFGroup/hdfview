@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -24,7 +24,7 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
         File hdf_file = new File(workDir, HDF4IMAGE);
 
         try {
-            bot.menu("Tools").menu("Convert Image To").menu("HDF4").click();
+            bot.menu().menu("Tools").menu("Convert Image To").menu("HDF4").click();
 
             SWTBotShell convertshell = bot.shell("Convert Image to HDF4 ...");
             convertshell.activate();
@@ -73,11 +73,12 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
                     val.equals("533 x 533"));   // Test dimension sizes
 
             // Test sample pixels
-            items[0].getNode(0).contextMenu("Open As").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open As").click();
 
             SWTBotShell openAsShell = bot.shell("Dataset Selection - /" + JPGFILE);
             openAsShell.bot().radio("&Image").click();
             openAsShell.bot().button("   &OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(openAsShell));
 
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
@@ -90,7 +91,7 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             testSamplePixel(430, 357, "x=430,   y=357,   value=(83, 80, 107)");
             testSamplePixel(197, 239, "x=197,   y=239,   value=(206, 177, 159)");
 
-            bot.activeShell().bot().menu("Close").click();
+            bot.activeShell().bot().menu().menu("Image").menu("Close").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -115,7 +116,7 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
         File hdf_file = new File(workDir, HDF5IMAGE);
 
         try {
-            bot.menu("Tools").menu("Convert Image To").menu("HDF5").click();
+            bot.menu().menu("Tools").menu("Convert Image To").menu("HDF5").click();
 
             SWTBotShell convertshell = bot.shell("Convert Image to HDF5 ...");
             convertshell.activate();
@@ -163,11 +164,12 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
                     val.equals("533 x 533 x 3"));   // Test dimension sizes
 
             // Test sample pixels
-            items[0].getNode(0).contextMenu("Open As").click();
+            items[0].getNode(0).contextMenu().contextMenu("Open As").click();
 
             SWTBotShell openAsShell = bot.shell("Dataset Selection - /" + JPGFILE);
             openAsShell.bot().radio("&Image").click();
             openAsShell.bot().button("   &OK   ").click();
+            bot.waitUntil(Conditions.shellCloses(openAsShell));
 
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
@@ -180,7 +182,7 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             testSamplePixel(430, 357, "x=430,   y=357,   value=(83, 80, 107)");
             testSamplePixel(197, 239, "x=197,   y=239,   value=(206, 177, 159)");
 
-            bot.activeShell().bot().menu("Close").click();
+            bot.activeShell().bot().menu().menu("Image").menu("Close").click();
         }
         catch (Exception ex) {
             ex.printStackTrace();

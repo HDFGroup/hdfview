@@ -113,12 +113,12 @@ import hdf.view.dialog.NewDatasetDialog;
 
 /**
  * ImageView displays an HDF dataset as an image.
- * <p>
+ *
  * A scalar dataset in HDF can be displayed in image or table. By default, an
  * HDF4 GR image and HDF5 image is displayed as an image. Other scalar datasets
  * are display in a two-dimensional table.
- * <p>
- * Users can also choose to display a scalar dataset as image. Currently verion
+ *
+ * Users can also choose to display a scalar dataset as image. Currently this version
  * of the ImageView only supports 8-bit raster image with indexed RGB color
  * model of 256 colors or 24-bit true color raster image. Data of other type
  * will be converted to 8-bit integer. The simple linear conversion is used for
@@ -132,7 +132,7 @@ import hdf.view.dialog.NewDatasetDialog;
  *             max = the maximum of the original data,
  *             min = the minimum of the original data.
  * </pre>
- * <p>
+ *
  * A default color table is provided for images without palette attached to it.
  * Current choice of default palettes include Gray, Rainbow, Nature and Wave.
  * For more infomation on palette,
@@ -141,7 +141,8 @@ import hdf.view.dialog.NewDatasetDialog;
  * @author Jordan T. Henderson
  * @version 2.4 2//2016
  */
-public class DefaultImageView implements ImageView {
+public class DefaultImageView implements ImageView
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
 
     private final Display           display = Display.getDefault();
@@ -325,7 +326,8 @@ public class DefaultImageView implements ImageView {
                     dataset.clearData();
                 }
 
-                if (curFont != null) curFont.dispose();
+                if (curFont != null)
+                    curFont.dispose();
 
                 data = null;
                 image = null;
@@ -521,11 +523,14 @@ public class DefaultImageView implements ImageView {
         if (imageOrigin == Origin.UPPER_LEFT || imageOrigin == Origin.UPPER_RIGHT) {
             imageOriginLabel = new Label(group, SWT.NONE);
             imageOriginLabel.setText(originTag);
-            imageOriginLabel.setLayoutData(new GridData((imageOrigin == Origin.UPPER_LEFT || imageOrigin == Origin.LOWER_LEFT) ? SWT.BEGINNING : SWT.END, SWT.FILL,
-                    true, false, (imagePalette == null) ? 2 : 1, 1));
+            imageOriginLabel.setLayoutData(
+                    new GridData(
+                            (imageOrigin == Origin.UPPER_LEFT || imageOrigin == Origin.LOWER_LEFT) ? SWT.BEGINNING : SWT.END,
+                            SWT.FILL, true, false, (imagePalette == null) ? 2 : 1, 1));
 
             /* Dummy label to fill space in second column */
-            if (imagePalette != null) new Label(group, SWT.NONE);
+            if (imagePalette != null)
+                new Label(group, SWT.NONE);
         }
 
         imageScroller = new ScrolledComposite(group, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -549,7 +554,8 @@ public class DefaultImageView implements ImageView {
         // add palette canvas to show the palette
         if (imagePalette != null) {
             paletteComponent = new PaletteComponent(group, SWT.DOUBLE_BUFFERED, imagePalette, dataRange);
-        } else {
+        }
+        else {
             // Make ImageComponent take entire width
             imageScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
         }
@@ -557,11 +563,14 @@ public class DefaultImageView implements ImageView {
         if (imageOrigin == Origin.LOWER_LEFT || imageOrigin == Origin.LOWER_RIGHT) {
             imageOriginLabel = new Label(group, SWT.NONE);
             imageOriginLabel.setText(originTag);
-            imageOriginLabel.setLayoutData(new GridData((imageOrigin == Origin.UPPER_LEFT || imageOrigin == Origin.LOWER_LEFT) ? SWT.BEGINNING : SWT.END, SWT.FILL,
-                    true, false, (imagePalette == null) ? 2 : 1, 1));
+            imageOriginLabel.setLayoutData(
+                    new GridData(
+                            (imageOrigin == Origin.UPPER_LEFT || imageOrigin == Origin.LOWER_LEFT) ? SWT.BEGINNING : SWT.END,
+                            SWT.FILL, true, false, (imagePalette == null) ? 2 : 1, 1));
 
             /* Dummy label to fill space in second column */
-            if (imagePalette != null) new Label(group, SWT.NONE);
+            if (imagePalette != null)
+                new Label(group, SWT.NONE);
         }
 
         // Add the text field to display pixel data
@@ -713,14 +722,12 @@ public class DefaultImageView implements ImageView {
                 fChooser.setFilterNames(new String[] {"All Files"});
                 fChooser.setFilterIndex(0);
 
-                if(fChooser.open() == null) {
+                if(fChooser.open() == null)
                     return;
-                }
 
                 File chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
-                if(chosenFile == null || !chosenFile.exists() || chosenFile.isDirectory()) {
+                if(chosenFile == null || !chosenFile.exists() || chosenFile.isDirectory())
                     return;
-                }
 
                 ArrayList<String> palList = (ArrayList<String>) ViewProperties.getPaletteList();
                 String palPath = chosenFile.getAbsolutePath();
@@ -735,7 +742,8 @@ public class DefaultImageView implements ImageView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (imagePalette == null) return;
+                if (imagePalette == null)
+                    return;
 
                 String workDir = ViewProperties.getWorkDir() + File.separator;
                 FileDialog fChooser = new FileDialog(shell, SWT.OPEN);
@@ -749,21 +757,20 @@ public class DefaultImageView implements ImageView {
 
                 fChooser.setFileName(pfile.getName());
 
-                if (fChooser.open() == null) {
+                if (fChooser.open() == null)
                     return;
-                }
 
                 File chosenFile = new File(fChooser.getFilterPath() + File.separator + fChooser.getFileName());
-                if (chosenFile == null || chosenFile.isDirectory()) {
+                if (chosenFile == null || chosenFile.isDirectory())
                     return;
-                }
 
                 if (chosenFile.exists()) {
                     int answer = SWT.NO;
                     if(Tools.showConfirm(shell, "Export", "File exists. Do you want to replace it ?"))
                         answer = SWT.YES;
 
-                    if (answer == SWT.NO) return;
+                    if (answer == SWT.NO)
+                        return;
                 }
 
                 PrintWriter out = null;
@@ -775,7 +782,8 @@ public class DefaultImageView implements ImageView {
                     out = null;
                 }
 
-                if (out == null) return;
+                if (out == null)
+                    return;
 
                 int cols = 3;
                 int rows = 256;
@@ -804,7 +812,8 @@ public class DefaultImageView implements ImageView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (originalRange == null || originalRange[0] == originalRange[1]) return;
+                if (originalRange == null || originalRange[0] == originalRange[1])
+                    return;
 
                 // Call only once
                 if (dataDist == null) {
@@ -931,10 +940,8 @@ public class DefaultImageView implements ImageView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (contrastSlider == null) {
+                if (contrastSlider == null)
                     contrastSlider = new ContrastSlider(shell, SWT.NONE, image.getSource());
-                }
-
                 contrastSlider.open();
             }
         });
@@ -1018,9 +1025,8 @@ public class DefaultImageView implements ImageView {
                     Object theData = null;
                     theData = getSelectedData();
 
-                    if (theData == null) {
+                    if (theData == null)
                         theData = data;
-                    }
 
                     Tools.findMinMax(theData, minmax, dataset.getFillValue());
                     if (Tools.computeStatistics(theData, stat, dataset.getFillValue()) > 0) {
@@ -1106,10 +1112,8 @@ public class DefaultImageView implements ImageView {
         item.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (contrastSlider == null) {
+                if (contrastSlider == null)
                     contrastSlider = new ContrastSlider(shell, SWT.NONE, image.getSource());
-                }
-
                 contrastSlider.open();
             }
         });
@@ -1150,7 +1154,8 @@ public class DefaultImageView implements ImageView {
                         shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         firstPage();
-                    } finally {
+                    }
+                    finally {
                         shell.setCursor(null);
                     }
                 }
@@ -1167,7 +1172,8 @@ public class DefaultImageView implements ImageView {
                         shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         previousPage();
-                    } finally {
+                    }
+                    finally {
                         shell.setCursor(null);
                     }
                 }
@@ -1190,12 +1196,14 @@ public class DefaultImageView implements ImageView {
                             try {
                                 page = Integer.parseInt(frameField.getText()
                                         .trim()) - indexBase;
-                            } catch (Exception ex) {
+                            }
+                            catch (Exception ex) {
                                 page = -1;
                             }
 
                             gotoPage(page);
-                        } finally {
+                        }
+                        finally {
                             shell.setCursor(null);
                         }
                     }
@@ -1233,7 +1241,8 @@ public class DefaultImageView implements ImageView {
                         shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         nextPage();
-                    } finally {
+                    }
+                    finally {
                         shell.setCursor(null);
                     }
                 }
@@ -1250,7 +1259,8 @@ public class DefaultImageView implements ImageView {
                         shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         lastPage();
-                    } finally {
+                    }
+                    finally {
                         shell.setCursor(null);
                     }
                 }
@@ -1277,22 +1287,19 @@ public class DefaultImageView implements ImageView {
     private void previousPage() {
         int rank = dataset.getRank();
 
-        if (rank < 3) {
+        if (rank < 3)
             return;
-        }
 
         int[] selectedIndex = dataset.getSelectedIndex();
         long[] selectedDims = dataset.getSelectedDims();
 
-        if (selectedDims[selectedIndex[2]] > 1) {
+        if (selectedDims[selectedIndex[2]] > 1)
             return; // it is a true color image with three color components
-        }
 
         long[] start = dataset.getStartDims();
         long idx = start[selectedIndex[2]];
-        if (idx == 0) {
+        if (idx == 0)
             return; // current page is the first page
-        }
 
         gotoPage(start[selectedIndex[2]] - 1);
     }
@@ -1301,23 +1308,20 @@ public class DefaultImageView implements ImageView {
     private void nextPage() {
         int rank = dataset.getRank();
 
-        if (rank < 3) {
+        if (rank < 3)
             return;
-        }
 
         int[] selectedIndex = dataset.getSelectedIndex();
         long[] selectedDims = dataset.getSelectedDims();
 
-        if (selectedDims[selectedIndex[2]] > 1) {
+        if (selectedDims[selectedIndex[2]] > 1)
             return; // it is a true color image with three color components
-        }
 
         long[] start = dataset.getStartDims();
         long[] dims = dataset.getDims();
         long idx = start[selectedIndex[2]];
-        if (idx == dims[selectedIndex[2]] - 1) {
+        if (idx == dims[selectedIndex[2]] - 1)
             return; // current page is the last page
-        }
 
         gotoPage(start[selectedIndex[2]] + 1);
     }
@@ -1326,22 +1330,19 @@ public class DefaultImageView implements ImageView {
     private void firstPage() {
         int rank = dataset.getRank();
 
-        if (rank < 3) {
+        if (rank < 3)
             return;
-        }
 
         int[] selectedIndex = dataset.getSelectedIndex();
         long[] selectedDims = dataset.getSelectedDims();
 
-        if (selectedDims[selectedIndex[2]] > 1) {
+        if (selectedDims[selectedIndex[2]] > 1)
             return; // it is a true color image with three color components
-        }
 
         long[] start = dataset.getStartDims();
         long idx = start[selectedIndex[2]];
-        if (idx == 0) {
+        if (idx == 0)
             return; // current page is the first page
-        }
 
         gotoPage(0);
     }
@@ -1350,23 +1351,20 @@ public class DefaultImageView implements ImageView {
     private void lastPage() {
         int rank = dataset.getRank();
 
-        if (rank < 3) {
+        if (rank < 3)
             return;
-        }
 
         int[] selectedIndex = dataset.getSelectedIndex();
         long[] selectedDims = dataset.getSelectedDims();
 
-        if (selectedDims[selectedIndex[2]] > 1) {
+        if (selectedDims[selectedIndex[2]] > 1)
             return; // it is a true color image with three color components
-        }
 
         long[] start = dataset.getStartDims();
         long[] dims = dataset.getDims();
         long idx = start[selectedIndex[2]];
-        if (idx == dims[selectedIndex[2]] - 1) {
+        if (idx == dims[selectedIndex[2]] - 1)
             return; // current page is the last page
-        }
 
         gotoPage(dims[selectedIndex[2]] - 1);
     }
@@ -1384,12 +1382,10 @@ public class DefaultImageView implements ImageView {
         is3D = (dataset.getRank() > 2) && !dataset.isTrueColor();
 
         try {
-            if (isTrueColor) {
+            if (isTrueColor)
                 getTrueColorImage();
-            }
-            else {
+            else
                 getIndexedImage();
-            }
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
@@ -1426,14 +1422,12 @@ public class DefaultImageView implements ImageView {
         // Make sure entire dataset is not loaded when looking at 3D
         // datasets using the default display mode (double clicking the
         // data object)
-        if (dataset.getRank() > 2) {
+        if (dataset.getRank() > 2)
             dataset.getSelectedDims()[dataset.getSelectedIndex()[2]] = 1;
-        }
 
         data = dataset.getData();
-        if ((bitmask != null) && Tools.applyBitmask(data, bitmask, bitmaskOP)) {
+        if ((bitmask != null) && Tools.applyBitmask(data, bitmask, bitmaskOP))
             doAutoGainContrast = false;
-        }
 
         if (dataset.getDatatype().isInteger() || dataset.getDatatype().isChar()) {
             data = dataset.convertFromUnsignedC();
@@ -1522,8 +1516,7 @@ public class DefaultImageView implements ImageView {
         autoGainData = Tools.autoContrastApply(data, autoGainData, gb, range, dataset.getDatatype().isUnsigned());
 
         if (autoGainData != null) {
-            if ((imageByteData == null)
-                    || (imageByteData.length != Array.getLength(data))) {
+            if ((imageByteData == null) || (imageByteData.length != Array.getLength(data))) {
                 imageByteData = new byte[Array.getLength(data)];
             }
             retValue = (Tools.autoContrastConvertImageBuffer(autoGainData, imageByteData, true) >= 0);
@@ -1542,22 +1535,18 @@ public class DefaultImageView implements ImageView {
 
     // implementing ImageObserver
     private void zoomIn() {
-        if (zoomFactor >= 1) {
+        if (zoomFactor >= 1)
             zoomTo(zoomFactor + 1.0f);
-        }
-        else {
+        else
             zoomTo(zoomFactor + 0.125f);
-        }
     }
 
     // implementing ImageObserver
     private void zoomOut() {
-        if (zoomFactor > 1) {
+        if (zoomFactor > 1)
             zoomTo(zoomFactor - 1.0f);
-        }
-        else {
+        else
             zoomTo(zoomFactor - 0.125f);
-        }
     }
 
     // implementing ImageObserver
@@ -1580,19 +1569,16 @@ public class DefaultImageView implements ImageView {
         imageComponent.setImageSize(imageSize);
         imageComponent.redraw();
 
-        if ((zoomFactor > 0.99) && (zoomFactor < 1.01)) {
+        if ((zoomFactor > 0.99) && (zoomFactor < 1.01))
             shell.setText(frameTitle);
-        }
-        else {
+        else
             shell.setText(frameTitle + " - " + 100 * zoomFactor + "%");
-        }
     }
 
     // implementing ImageObserver
     private void showColorTable() {
-        if (imagePalette == null) {
+        if (imagePalette == null)
             return;
-        }
 
         DataViewFactory paletteViewFactory = null;
         try {
@@ -1658,9 +1644,8 @@ public class DefaultImageView implements ImageView {
         for (int i = y0; i < y; i++) {
             for (int j = x0; j < x; j++) {
                 arrayIndex = imageByteData[i * w + j];
-                if (arrayIndex < 0) {
+                if (arrayIndex < 0)
                     arrayIndex += 256;
-                }
                 chartData[0][arrayIndex] += 1.0;
             }
         }
@@ -1673,8 +1658,8 @@ public class DefaultImageView implements ImageView {
         }
 
         Chart cv = new Chart(shell, "Histogram - " + dataset.getPath()
-        + dataset.getName() + " - by pixel index", Chart.HISTOGRAM,
-        chartData, xRange, null);
+                + dataset.getName() + " - by pixel index", Chart.HISTOGRAM,
+                chartData, xRange, null);
         cv.open();
     }
 
@@ -1693,12 +1678,10 @@ public class DefaultImageView implements ImageView {
 
         if (applyImageFilter(filter)) {
             // toggle flip flag
-            if (direction == FLIP_HORIZONTAL) {
+            if (direction == FLIP_HORIZONTAL)
                 isHorizontalFlipped = !isHorizontalFlipped;
-            }
-            else {
+            else
                 isVerticalFlipped = !isVerticalFlipped;
-            }
         }
     }
 
@@ -1712,15 +1695,13 @@ public class DefaultImageView implements ImageView {
 
         if (direction == ROTATE_CW_90) {
             rotateCount++;
-            if (rotateCount == 4) {
+            if (rotateCount == 4)
                 rotateCount = 0;
-            }
         }
         else {
             rotateCount--;
-            if (rotateCount == -4) {
+            if (rotateCount == -4)
                 rotateCount = 0;
-            }
         }
     }
 
@@ -1749,12 +1730,10 @@ public class DefaultImageView implements ImageView {
 
         GridData gridData = (GridData) valueField.getLayoutData();
 
-        if(!b) {
+        if(!b)
             gridData.exclude = true;
-        }
-        else {
+        else
             gridData.exclude = false;
-        }
 
         valueField.setLayoutData(gridData);
 
@@ -1780,7 +1759,7 @@ public class DefaultImageView implements ImageView {
 
         alpha = alpha << 24;
         for (Integer i : idx) {
-            if (i<len)
+            if (i < len)
                 pixels[i] = alpha | (pixels[i] & 0x00ffffff);
         }
     }
@@ -2110,13 +2089,11 @@ public class DefaultImageView implements ImageView {
      */
     private org.eclipse.swt.graphics.Image convertBufferedImageToSWTImage(BufferedImage image) {
         if (image.getColorModel() instanceof DirectColorModel) {
-            DirectColorModel colorModel = (DirectColorModel) image
-                    .getColorModel();
+            DirectColorModel colorModel = (DirectColorModel) image.getColorModel();
             PaletteData palette = new PaletteData(colorModel.getRedMask(),
                     colorModel.getGreenMask(), colorModel.getBlueMask());
             ImageData imgData = new ImageData(image.getWidth(),
-                    image.getHeight(), colorModel.getPixelSize(),
-                    palette);
+                    image.getHeight(), colorModel.getPixelSize(), palette);
 
             for (int y = 0; y < imgData.height; y++) {
                 for (int x = 0; x < imgData.width; x++) {
@@ -2132,8 +2109,7 @@ public class DefaultImageView implements ImageView {
             return new org.eclipse.swt.graphics.Image(display, imgData);
         }
         else if (image.getColorModel() instanceof IndexColorModel) {
-            IndexColorModel colorModel = (IndexColorModel) image
-                    .getColorModel();
+            IndexColorModel colorModel = (IndexColorModel) image.getColorModel();
             int size = colorModel.getMapSize();
             byte[] reds = new byte[size];
             byte[] greens = new byte[size];
@@ -2143,13 +2119,11 @@ public class DefaultImageView implements ImageView {
             colorModel.getBlues(blues);
             RGB[] rgbs = new RGB[size];
             for (int i = 0; i < rgbs.length; i++) {
-                rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF,
-                        blues[i] & 0xFF);
+                rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF, blues[i] & 0xFF);
             }
             PaletteData palette = new PaletteData(rgbs);
             ImageData imgData = new ImageData(image.getWidth(),
-                    image.getHeight(), colorModel.getPixelSize(),
-                    palette);
+                    image.getHeight(), colorModel.getPixelSize(), palette);
             imgData.transparentPixel = colorModel.getTransparentPixel();
             WritableRaster raster = image.getRaster();
             int[] pixelArray = new int[1];
@@ -2209,23 +2183,23 @@ public class DefaultImageView implements ImageView {
 
     /**
      * Creates a true color image.
-     * <p>
+     *
      * The data may be arranged in one of two ways: by pixel or by plane. In
      * both cases, the dataset will have a dataspace with three dimensions,
      * height, width, and components.
-     * <p>
+     *
      * For HDF4, the interlace modes specify orders for the dimensions as:
      *
      * <pre>
      * INTERLACE_PIXEL = [width][height][pixel components]
-     *            INTERLACE_PLANE = [pixel components][width][height]
+     * INTERLACE_PLANE = [pixel components][width][height]
      * </pre>
-     * <p>
+     *
      * For HDF5, the interlace modes specify orders for the dimensions as:
      *
      * <pre>
      * INTERLACE_PIXEL = [height][width][pixel components]
-     *            INTERLACE_PLANE = [pixel components][height][width]
+     * INTERLACE_PLANE = [pixel components][height][width]
      * </pre>
      *
      * @param imageData
@@ -2239,8 +2213,7 @@ public class DefaultImageView implements ImageView {
      *
      * @return the image.
      */
-    private Image createTrueColorImage(byte[] imageData, boolean planeInterlace,
-            int w, int h)
+    private Image createTrueColorImage(byte[] imageData, boolean planeInterlace, int w, int h)
     {
         if (bufferedImage == null)
             bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -2299,10 +2272,8 @@ public class DefaultImageView implements ImageView {
             invalidValueIndex.clear(); // data range changed. need to reset
 
             // invalid values
-            imageByteData = Tools.getBytes(data, newRange, w, h,
-                    !dataset.isDefaultImageOrder(),
-                    dataset.getFilteredImageValues(), true, null,
-                    invalidValueIndex);
+            imageByteData = Tools.getBytes(data, newRange, w, h, !dataset.isDefaultImageOrder(),
+                    dataset.getFilteredImageValues(), true, null, invalidValueIndex);
 
             image = createIndexedImage(imageByteData, imagePalette, w, h);
             setImage(image);
@@ -2325,7 +2296,8 @@ public class DefaultImageView implements ImageView {
         Group pGroup = (Group) item.getParentItem().getData();
         HObject root = dataset.getFileFormat().getRootObject();
 
-        if (root == null) return;
+        if (root == null)
+            return;
 
         ArrayList<HObject> list = new ArrayList<>(dataset.getFileFormat().getNumberOfMembers() + 5);
         Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
@@ -2403,8 +2375,7 @@ public class DefaultImageView implements ImageView {
                     for (int i = 0; i < 256; i++) {
                         if ((colors != null) && (colors[i] != null))
                             gc.setBackground(colors[i]);
-                        gc.fillRectangle(0, paintSize.height * i, paintSize.width,
-                                paintSize.height);
+                        gc.fillRectangle(0, paintSize.height * i, paintSize.width, paintSize.height);
                     }
 
                     FontData[] fontData;
@@ -2490,8 +2461,8 @@ public class DefaultImageView implements ImageView {
     }
 
     /** ImageComponent draws the image. */
-    private class ImageComponent extends Canvas implements ImageObserver {
-
+    private class ImageComponent extends Canvas implements ImageObserver
+    {
         /* The BufferedImage is converted to an SWT Image for dislay */
         private org.eclipse.swt.graphics.Image convertedImage;
 
@@ -2536,14 +2507,10 @@ public class DefaultImageView implements ImageView {
                     if((e.stateMask & SWT.BUTTON1) != 0) {
                         // If a drag event has occurred, draw a selection Rectangle
                         if((e.stateMask & SWT.SHIFT) != 0) {
-                            int x0 = Math.max(0, Math.min(startPosition.x,
-                                    currentPosition.x));
-                            int y0 = Math.max(0, Math.min(startPosition.y,
-                                    currentPosition.y));
-                            int x1 = Math.min(imageSize.width, Math.max(startPosition.x,
-                                    currentPosition.x));
-                            int y1 = Math.min(imageSize.height, Math.max(startPosition.y,
-                                    currentPosition.y));
+                            int x0 = Math.max(0, Math.min(startPosition.x, currentPosition.x));
+                            int y0 = Math.max(0, Math.min(startPosition.y, currentPosition.y));
+                            int x1 = Math.min(imageSize.width, Math.max(startPosition.x, currentPosition.x));
+                            int y1 = Math.min(imageSize.height, Math.max(startPosition.y, currentPosition.y));
 
                             int w = x1 - x0;
                             int h = y1 - y0;
@@ -2596,7 +2563,8 @@ public class DefaultImageView implements ImageView {
 
                     if((e.stateMask & SWT.SHIFT) != 0) {
                         shell.setCursor(display.getSystemCursor(SWT.CURSOR_CROSS));
-                    } else {
+                    }
+                    else {
                         shell.setCursor(display.getSystemCursor(SWT.CURSOR_HAND));
                     }
                 }
@@ -2672,8 +2640,7 @@ public class DefaultImageView implements ImageView {
          *
          * @return a scaled version of the original
          */
-        private Image multiBilinear(Image img, int targetWidth, int targetHeight, boolean highquality)
-        {
+        private Image multiBilinear(Image img, int targetWidth, int targetHeight, boolean highquality) {
             Image ret = img;
             int w = img.getWidth(null)/2;
             int h = img.getHeight(null)/2;
@@ -2886,7 +2853,8 @@ public class DefaultImageView implements ImageView {
     /**
      * FlipFilter creates image filter to flip image horizontally or vertically.
      */
-    public static class FlipFilter extends ImageFilter {
+    public static class FlipFilter extends ImageFilter
+    {
         /** flip direction */
         private int direction;
 
@@ -2899,18 +2867,15 @@ public class DefaultImageView implements ImageView {
 
         /**
          * Constructs an image filter to flip horizontally or vertically.
-         * <p>
          *
          * @param d
          *            the flip direction.
          */
         public FlipFilter(int d) {
-            if (d < FLIP_HORIZONTAL) {
+            if (d < FLIP_HORIZONTAL)
                 d = FLIP_HORIZONTAL;
-            }
-            else if (d > FLIP_VERTICAL) {
+            else if (d > FLIP_VERTICAL)
                 d = FLIP_VERTICAL;
-            }
 
             direction = d;
         }
@@ -2921,9 +2886,8 @@ public class DefaultImageView implements ImageView {
             imageHeight = h;
 
             // specify the raster
-            if (raster == null) {
+            if (raster == null)
                 raster = new int[imageWidth * imageHeight];
-            }
 
             consumer.setDimensions(imageWidth, imageHeight);
         }
@@ -2934,9 +2898,8 @@ public class DefaultImageView implements ImageView {
             int srcoff = off;
             int dstoff = y * imageWidth + x;
             for (int yc = 0; yc < h; yc++) {
-                for (int xc = 0; xc < w; xc++) {
+                for (int xc = 0; xc < w; xc++)
                     raster[dstoff++] = model.getRGB(pixels[srcoff++] & 0xff);
-                }
 
                 srcoff += (scansize - w);
                 dstoff += (imageWidth - w);
@@ -2950,9 +2913,8 @@ public class DefaultImageView implements ImageView {
             int dstoff = y * imageWidth + x;
 
             for (int yc = 0; yc < h; yc++) {
-                for (int xc = 0; xc < w; xc++) {
+                for (int xc = 0; xc < w; xc++)
                     raster[dstoff++] = model.getRGB(pixels[srcoff++]);
-                }
                 srcoff += (scansize - w);
                 dstoff += (imageWidth - w);
             }
@@ -2970,15 +2932,13 @@ public class DefaultImageView implements ImageView {
                 if (direction == FLIP_VERTICAL) {
                     // grab pixel values of the target line ...
                     int pos = (imageHeight - 1 - y) * imageWidth;
-                    for (int kk = 0; kk < imageWidth; kk++) {
+                    for (int kk = 0; kk < imageWidth; kk++)
                         pixels[kk] = raster[pos + kk];
-                    }
                 }
                 else {
                     int pos = y * imageWidth;
-                    for (int kk = 0; kk < imageWidth; kk++) {
+                    for (int kk = 0; kk < imageWidth; kk++)
                         pixels[kk] = raster[pos + kk];
-                    }
 
                     // swap the pixel values of the target line
                     int hw = imageWidth / 2;
@@ -3025,7 +2985,8 @@ public class DefaultImageView implements ImageView {
      * [0, 255] New_Value *= 255 //Clamp [0, 255] If(New_Value > 255) New_Value
      * = 255 If(New_Value < 0) New_Value = 0
      */
-    private class BrightnessFilter extends RGBImageFilter {
+    private class BrightnessFilter extends RGBImageFilter
+    {
         // brightness level = [-200, 200]
         int brightLevel = 0;
 
@@ -3033,33 +2994,25 @@ public class DefaultImageView implements ImageView {
         float contrastLevel = 0;
 
         public BrightnessFilter(int blevel, int clevel) {
-            if (blevel < -100) {
+            if (blevel < -100)
                 brightLevel = -100;
-            }
-            else if (blevel > 100) {
+            else if (blevel > 100)
                 brightLevel = 100;
-            }
-            else {
+            else
                 brightLevel = blevel;
-            }
             brightLevel *= 2;
 
-            if (clevel < -100) {
+            if (clevel < -100)
                 clevel = -100;
-            }
-            else if (clevel > 100) {
+            else if (clevel > 100)
                 clevel = 100;
-            }
 
-            if (clevel > 0) {
+            if (clevel > 0)
                 contrastLevel = (clevel / 100f + 1) * 2;
-            }
-            else if (clevel < 0) {
+            else if (clevel < 0)
                 contrastLevel = (clevel / 100f + 1) / 2;
-            }
-            else {
+            else
                 contrastLevel = 0;
-            }
 
             canFilterIndexColorModel = true;
         }
@@ -3071,41 +3024,35 @@ public class DefaultImageView implements ImageView {
 
             if (brightLevel != 0) {
                 int r = (rgb & 0x00ff0000) >> 16;
-            int g = (rgb & 0x0000ff00) >> 8;
-                    int b = (rgb & 0x000000ff);
+                int g = (rgb & 0x0000ff00) >> 8;
+                int b = (rgb & 0x000000ff);
 
-                    r += brightLevel;
-                    g += brightLevel;
-                    b += brightLevel;
+                r += brightLevel;
+                g += brightLevel;
+                b += brightLevel;
 
-                    if (r < 0) {
-                        r = 0;
-                    }
-                    if (r > 255) {
-                        r = 255;
-                    }
-                    if (g < 0) {
-                        g = 0;
-                    }
-                    if (g > 255) {
-                        g = 255;
-                    }
-                    if (b < 0) {
-                        b = 0;
-                    }
-                    if (b > 255) {
-                        b = 255;
-                    }
+                if (r < 0)
+                    r = 0;
+                if (r > 255)
+                    r = 255;
+                if (g < 0)
+                    g = 0;
+                if (g > 255)
+                    g = 255;
+                if (b < 0)
+                    b = 0;
+                if (b > 255)
+                    b = 255;
 
-                    r = (r << 16) & 0x00ff0000;
-                    g = (g << 8) & 0x0000ff00;
-                    b = b & 0x000000ff;
+                r = (r << 16) & 0x00ff0000;
+                g = (g << 8) & 0x0000ff00;
+                b = b & 0x000000ff;
 
-                    rgb = ((rgb & 0xff000000) | r | g | b);
+                rgb = ((rgb & 0xff000000) | r | g | b);
             }
 
-            if (contrastLevel > 0.000001) { // do not compare float using !=0 or
-                // ==0
+            // do not compare float using !=0 or ==0
+            if (contrastLevel > 0.000001) {
                 int r = (rgb & 0x00ff0000) >> 16;
                     int g = (rgb & 0x0000ff00) >> 8;
                     int b = (rgb & 0x000000ff);
@@ -3115,12 +3062,10 @@ public class DefaultImageView implements ImageView {
                     f *= contrastLevel;
                     f += 0.5;
                     f *= 255f;
-                    if (f < 0) {
+                    if (f < 0)
                         f = 0;
-                    }
-                    if (f > 255) {
+                    if (f > 255)
                         f = 255;
-                    }
                     r = (int) f;
 
                     f = g / 255f;
@@ -3128,12 +3073,10 @@ public class DefaultImageView implements ImageView {
                     f *= contrastLevel;
                     f += 0.5;
                     f *= 255f;
-                    if (f < 0) {
+                    if (f < 0)
                         f = 0;
-                    }
-                    if (f > 255) {
+                    if (f > 255)
                         f = 255;
-                    }
                     g = (int) f;
 
                     f = b / 255f;
@@ -3141,12 +3084,10 @@ public class DefaultImageView implements ImageView {
                     f *= contrastLevel;
                     f += 0.5;
                     f *= 255f;
-                    if (f < 0) {
+                    if (f < 0)
                         f = 0;
-                    }
-                    if (f > 255) {
+                    if (f > 255)
                         f = 255;
-                    }
                     b = (int) f;
 
                     r = (r << 16) & 0x00ff0000;
@@ -3163,7 +3104,8 @@ public class DefaultImageView implements ImageView {
     /**
      * Makes an image filter for contour.
      */
-    private class ContourFilter extends ImageFilter {
+    private class ContourFilter extends ImageFilter
+    {
         // default color model
         private ColorModel defaultRGB;
 
@@ -3205,20 +3147,17 @@ public class DefaultImageView implements ImageView {
             levelColors[7] = Color.pink.getRGB();
             levelColors[8] = Color.yellow.getRGB();
 
-            if (theLevel < 1) {
+            if (theLevel < 1)
                 theLevel = 1;
-            }
-            else if (theLevel > 9) {
+            else if (theLevel > 9)
                 theLevel = 9;
-            }
 
             level = theLevel;
             levels = new int[level];
 
             int dx = 128 / level;
-            for (int i = 0; i < level; i++) {
+            for (int i = 0; i < level; i++)
                 levels[i] = (i + 1) * dx;
-            }
         }
 
         @Override
@@ -3227,9 +3166,8 @@ public class DefaultImageView implements ImageView {
             this.imageHeight = height;
 
             // specify the raster
-            if (raster == null) {
+            if (raster == null)
                 raster = new int[imageWidth * imageHeight];
-            }
 
             consumer.setDimensions(width, height);
         }
@@ -3284,18 +3222,15 @@ public class DefaultImageView implements ImageView {
                 int currentLevel = levels[z];
                 int color = levelColors[z];
 
-                setContourLine(raster, pixels, currentLevel, color, imageWidth,
-                        imageHeight);
+                setContourLine(raster, pixels, currentLevel, color, imageWidth, imageHeight);
             }
 
             int[] line = new int[imageWidth];
             for (int y = 0; y < imageHeight; y++) {
-                for (int x = 0; x < imageWidth; x++) {
+                for (int x = 0; x < imageWidth; x++)
                     line[x] = pixels[y * imageWidth + x];
-                }
 
-                consumer.setPixels(0, y, imageWidth, 1, defaultRGB, line, 0,
-                        imageWidth);
+                consumer.setPixels(0, y, imageWidth, 1, defaultRGB, line, 0, imageWidth);
             } // (int y = 0; y < imageHeight; y++)
 
             // complete ?
@@ -3318,8 +3253,7 @@ public class DefaultImageView implements ImageView {
          * @param h
          *            the height of the image.
          */
-        private void setContourLine(int[] raster, int[] pixels, int level,
-                int color, int w, int h) {
+        private void setContourLine(int[] raster, int[] pixels, int level, int color, int w, int h) {
             int p = 0; // entrance point
             int q = p + (w * h - 1); // bottom right point
             int u = 0 + (w - 1); // top right point
@@ -3329,34 +3263,27 @@ public class DefaultImageView implements ImageView {
                 while (p < u) {
                     int rgb = raster[p];
                     if (rgb < level) {
-                        while ((raster[p] < level) && (p < u)) {
+                        while ((raster[p] < level) && (p < u))
                             p++;
-                        }
-                        if (raster[p] >= level) {
+                        if (raster[p] >= level)
                             pixels[p] = color;
-                        }
                     }
                     else if (rgb == level) {
-                        while ((raster[p] == level) && (p < u)) {
+                        while ((raster[p] == level) && (p < u))
                             p++;
-                        }
-                        if ((raster[p] < level) || (raster[p] > level)) {
+                        if ((raster[p] < level) || (raster[p] > level))
                             pixels[p] = color;
-                        }
                     }
                     else {
-                        while ((raster[p] > level) && (p < u)) {
+                        while ((raster[p] > level) && (p < u))
                             p++;
-                        }
-                        if ((raster[p] <= level)) {
+                        if ((raster[p] <= level))
                             pixels[p] = color;
-                        }
                     }
                 }
 
-                if (u == q) {
+                if (u == q)
                     break;
-                }
                 else {
                     u += w;
                     p++;
@@ -3366,7 +3293,12 @@ public class DefaultImageView implements ImageView {
 
     } // private class ContourFilter extends ImageFilter
 
-    public static class Rotate90Filter extends ImageFilter {
+
+    /**
+     * Makes an image filter for rotating image by 90 degrees.
+     */
+    public static class Rotate90Filter extends ImageFilter
+    {
         private ColorModel defaultRGB = ColorModel.getRGBdefault();
 
         private double[] coord = new double[2];
@@ -3380,10 +3312,27 @@ public class DefaultImageView implements ImageView {
         private int dstH;
         private int direction;
 
+        /**
+         * Image filter for rotating image by 90 degrees.
+         *
+         * @param dir
+         *        the direction to rotate the image
+         *        ROTATE_CW_90 or ROTATE_CCW_90
+         */
         public Rotate90Filter(int dir) {
             direction = dir;
         }
 
+        /**
+         * Transform when rotating image by 90 degrees.
+         *
+         * @param x
+         *        the x coordinate to transform
+         * @param y
+         *        the y coordinate to transform
+         * @param retcoord
+         *        the x.y coordinate transformed
+         */
         public void transform(double x, double y, double[] retcoord) {
             if (direction == ROTATE_CW_90) {
                 retcoord[0] = -y;
@@ -3395,6 +3344,16 @@ public class DefaultImageView implements ImageView {
             }
         }
 
+        /**
+         * Transform when rotating image by 90 degrees.
+         *
+         * @param x
+         *        the x coordinate to transform
+         * @param y
+         *        the y coordinate to transform
+         * @param retcoord
+         *        the x.y coordinate transformed
+         */
         public void itransform(double x, double y, double[] retcoord) {
             if (direction == ROTATE_CCW_90) {
                 retcoord[0] = -y;
@@ -3406,6 +3365,12 @@ public class DefaultImageView implements ImageView {
             }
         }
 
+        /**
+         * Transform the image specified by a rectangle.
+         *
+         * @param rect
+         *        the rectangle coordinates transformed
+         */
         public void transformBBox(Rectangle rect) {
             double minx = Double.POSITIVE_INFINITY;
             double miny = Double.POSITIVE_INFINITY;
@@ -3444,12 +3409,10 @@ public class DefaultImageView implements ImageView {
         public void setProperties(Hashtable props) {
             props = (Hashtable) props.clone();
             Object o = props.get("filters");
-            if (o == null) {
+            if (o == null)
                 props.put("filters", toString());
-            }
-            else if (o instanceof String) {
+            else if (o instanceof String)
                 props.put("filters", ((String) o) + toString());
-            }
             consumer.setProperties(props);
         }
 
@@ -3470,9 +3433,8 @@ public class DefaultImageView implements ImageView {
             int srcoff = off;
             int dstoff = y * srcW + x;
             for (int yc = 0; yc < h; yc++) {
-                for (int xc = 0; xc < w; xc++) {
+                for (int xc = 0; xc < w; xc++)
                     raster[dstoff++] = model.getRGB(pixels[srcoff++] & 0xff);
-                }
                 srcoff += (scansize - w);
                 dstoff += (srcW - w);
             }
@@ -3492,9 +3454,8 @@ public class DefaultImageView implements ImageView {
             }
             else {
                 for (int yc = 0; yc < h; yc++) {
-                    for (int xc = 0; xc < w; xc++) {
+                    for (int xc = 0; xc < w; xc++)
                         raster[dstoff++] = model.getRGB(pixels[srcoff++]);
-                    }
                     srcoff += (scansize - w);
                     dstoff += (srcW - w);
                 }
@@ -3520,12 +3481,10 @@ public class DefaultImageView implements ImageView {
                 for (int dx = 0; dx < dstW; dx++) {
                     int sx = (int) Math.round(x1);
                     int sy = (int) Math.round(y1);
-                    if ((sx < 0) || (sy < 0) || (sx >= srcW) || (sy >= srcH)) {
+                    if ((sx < 0) || (sy < 0) || (sx >= srcW) || (sy >= srcH))
                         pixels[dx] = 0;
-                    }
-                    else {
+                    else
                         pixels[dx] = raster[sy * srcW + sx];
-                    }
                     x1 += xinc;
                     y1 += yinc;
                 }
@@ -3538,8 +3497,8 @@ public class DefaultImageView implements ImageView {
     /**
      * Makes animation for 3D images.
      */
-    private class Animation extends Dialog {
-
+    private class Animation extends Dialog
+    {
         private static final int MAX_ANIMATION_IMAGE_SIZE = 300;
 
         /* A list of frames to display for animation */
@@ -3560,9 +3519,8 @@ public class DefaultImageView implements ImageView {
             long[] selected = dataset.getSelectedDims();
             int[] selectedIndex = dataset.getSelectedIndex();
             int rank = dataset.getRank();
-            if (animationSpeed != 0) {
+            if (animationSpeed != 0)
                 sleepTime = 1000 / animationSpeed;
-            }
 
             // back up the start and selected size
             long[] tstart = new long[rank];
@@ -3573,11 +3531,9 @@ public class DefaultImageView implements ImageView {
             System.arraycopy(stride, 0, tstride, 0, rank);
 
             int strideN = 1;
-            int maxSize = (int) Math.max(selected[selectedIndex[0]],
-                    selected[selectedIndex[1]]);
-            if (maxSize > MAX_ANIMATION_IMAGE_SIZE) {
+            int maxSize = (int) Math.max(selected[selectedIndex[0]], selected[selectedIndex[1]]);
+            if (maxSize > MAX_ANIMATION_IMAGE_SIZE)
                 strideN = (int) ((double) maxSize / (double) MAX_ANIMATION_IMAGE_SIZE + 0.5);
-            }
 
             start[selectedIndex[0]] = 0;
             start[selectedIndex[1]] = 0;
@@ -3643,7 +3599,8 @@ public class DefaultImageView implements ImageView {
                 public void paintControl(PaintEvent e) {
                     GC gc = e.gc;
 
-                    if (frames == null) return;
+                    if (frames == null)
+                        return;
 
                     org.eclipse.swt.graphics.Rectangle canvasBounds = canvas.getBounds();
                     int x = ((canvasBounds.width / 2) - (frames[currentFrame].getBounds().width / 2));
@@ -3705,12 +3662,12 @@ public class DefaultImageView implements ImageView {
             openDisplay.timerExec(-1, runnable);
         }
 
-        private class AnimationThread implements Runnable {
+        private class AnimationThread implements Runnable
+        {
             @Override
             public void run() {
-                if ((frames == null) || (canvas == null)) {
+                if ((frames == null) || (canvas == null))
                     return;
-                }
 
                 if (++currentFrame >= numberOfImages)
                     currentFrame = 0;
@@ -3722,8 +3679,8 @@ public class DefaultImageView implements ImageView {
         }
     }
 
-    private class DataRangeDialog extends Dialog {
-
+    private class DataRangeDialog extends Dialog
+    {
         private Shell shell;
         private Slider minSlider;
         private Slider maxSlider;
@@ -3755,9 +3712,8 @@ public class DefaultImageView implements ImageView {
                 minmaxCurrent[1] = 255;
             }
             else {
-                if (minmaxOriginal[0] == minmaxOriginal[1]) {
+                if (minmaxOriginal[0] == minmaxOriginal[1])
                     Tools.findMinMax(data, minmaxOriginal, dataset.getFillValue());
-                }
 
                 minmaxCurrent[0] = minmaxOriginal[0];
                 minmaxCurrent[1] = minmaxOriginal[1];
@@ -3827,9 +3783,8 @@ public class DefaultImageView implements ImageView {
                     xp = xgap;
 
                     int barWidth = w / numberOfPoints;
-                    if (barWidth <= 0) {
+                    if (barWidth <= 0)
                         barWidth = 1;
-                    }
                     dw = (double) w / (double) numberOfPoints;
 
                     gc.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
@@ -3891,7 +3846,6 @@ public class DefaultImageView implements ImageView {
                     minField.setText(String.valueOf(value * tickRatio + minOrg));
                 }
             });
-
 
             org.eclipse.swt.widgets.Group upperBoundGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
             upperBoundGroup.setFont(curFont);
@@ -4023,8 +3977,8 @@ public class DefaultImageView implements ImageView {
         }
     }
 
-    private class ContrastSlider extends Dialog {
-
+    private class ContrastSlider extends Dialog
+    {
         private Shell shell;
         private Scale brightSlider;
         private Scale cntrastSlider;
@@ -4075,12 +4029,10 @@ public class DefaultImageView implements ImageView {
                         if (brightSlider != null) {
                             double value = Double.parseDouble(((Text) e.widget).getText());
 
-                            if (value > 100) {
+                            if (value > 100)
                                 value = 100;
-                            }
-                            else if (value < -100) {
+                            else if (value < -100)
                                 value = -100;
-                            }
 
                             brightSlider.setSelection((int) value + 100);
                         }
@@ -4121,12 +4073,10 @@ public class DefaultImageView implements ImageView {
                         if (cntrastSlider != null) {
                             double value = Double.parseDouble(((Text) e.widget).getText());
 
-                            if (value > 100) {
+                            if (value > 100)
                                 value = 100;
-                            }
-                            else if (value < -100) {
+                            else if (value < -100)
                                 value = -100;
-                            }
 
                             cntrastSlider.setSelection((int) value + 100);
                         }
