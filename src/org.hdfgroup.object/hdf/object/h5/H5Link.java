@@ -20,9 +20,11 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFArray;
 import hdf.hdf5lib.HDFNativeData;
+import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.hdf5lib.structs.H5O_token_t;
 
+import hdf.object.Attribute;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
@@ -46,7 +48,6 @@ public class H5Link extends HObject implements MetaDataContainer
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Link.class);
 
     /** the object properties */
-    @SuppressWarnings("unused")
     private H5O_info_t objInfo;
 
     /**
@@ -54,13 +55,13 @@ public class H5Link extends HObject implements MetaDataContainer
      *
      * @param theFile
      *            the file which containing the link.
-     * @param name
+     * @param theName
      *            the name of this link, e.g. "link1".
-     * @param path
+     * @param thePath
      *            the full path of this link, e.g. "/groups/".
      */
-    public H5Link(FileFormat theFile, String name, String path) {
-        this (theFile, name, path, null);
+    public H5Link(FileFormat theFile, String theName, String thePath) {
+        this(theFile, theName, thePath, null);
     }
 
     /**
@@ -79,19 +80,24 @@ public class H5Link extends HObject implements MetaDataContainer
     public H5Link(FileFormat theFile, String theName, String thePath, long[] oid) {
         super(theFile, theName, thePath, oid);
 
-        if ((oid == null) && (theFile != null)) {
-            // retrieve the object ID
-            try {
-                byte[] refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
-                this.oid = HDFNativeData.byteToLong(refBuf);
-                log.trace("constructor REF {} to OID {}", refBuf, this.oid);
-            }
-            catch (Exception ex) {
-                log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(), this.getFullName());
-            }
-        }
-        log.trace("constructor OID {}", this.oid);
         if (theFile != null) {
+            if (oid == null) {
+                // retrieve the object ID
+                byte[] refBuf = null;
+                try {
+                    refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
+                    this.oid = HDFNativeData.byteToLong(refBuf);
+                    log.trace("constructor REF {} to OID {}", refBuf, this.oid);
+                }
+                catch (Exception ex) {
+                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(), this.getFullName());
+                }
+                finally {
+                    if (refBuf != null)
+                        H5.H5Rdestroy(refBuf);
+                }
+            }
+            log.trace("constructor OID {}", this.oid);
             try {
                 objInfo = H5.H5Oget_info_by_name(theFile.getFID(), this.getFullName(), HDF5Constants.H5O_INFO_BASIC, HDF5Constants.H5P_DEFAULT);
             }
@@ -99,31 +105,29 @@ public class H5Link extends HObject implements MetaDataContainer
                 objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
             }
         }
-        else
+        else {
+            this.oid = null;
             objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
-    }
-
-    protected void finalize() throws Throwable {
-        // Invoke the finalizer of our superclass
-        super.finalize();
-        // Destroy the object reference we were using
-        // If the file doesn't exist or tempfile is null, this can throw
-        // an exception, but that exception is ignored.
-        if (oid != null) {
-            HDFArray theArray = new HDFArray(oid);
-            byte[] refBuf = theArray.byteify();
-            H5.H5Rdestroy(refBuf);
-            oid = null;
         }
     }
 
-    @Override
-    public void close(long id) {
-    }
-
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.HObject#open()
+     */
     @Override
     public long open() {
         return 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.HObject#close(int)
+     */
+    @Override
+    public void close(long id) {
     }
 
     /**
@@ -137,32 +141,11 @@ public class H5Link extends HObject implements MetaDataContainer
     }
 
     /**
-     * Retrieves the object's metadata, such as attributes, from the file.
-     *
-     * Metadata, such as attributes, is stored in a List.
-     *
-     * @return the list of metadata objects.
-     *
-     * @throws Exception
-     *             if the metadata can not be retrieved
-     */
-    @SuppressWarnings("rawtypes")
-    public List getMetadata() throws Exception {
-
-        try{
-            this.linkTargetObjName = H5File.getLinkTargetName(this);
-        }
-        catch(Exception ex){
-        }
-
-        return null;
-    }
-
-    /**
      * Check if the object has any attributes attached.
      *
      * @return true if it has any attributes, false otherwise.
      */
+    @Override
     public boolean hasAttribute() {
         return false;
     }
@@ -173,6 +156,52 @@ public class H5Link extends HObject implements MetaDataContainer
      */
     @Override
     public void clear() {
+    }
+
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     *
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws HDF5Exception
+     *             if the metadata can not be retrieved
+     */
+    @Override
+    public List<Attribute> getMetadata() throws HDF5Exception {
+        try {
+            this.linkTargetObjName = H5File.getLinkTargetName(this);
+        }
+        catch (Exception ex) {
+            log.debug("getMetadata(): getLinkTargetName failed: ", ex);
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     *
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws HDF5Exception
+     *             if the metadata can not be retrieved
+     */
+    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
+        try {
+            this.linkTargetObjName = H5File.getLinkTargetName(this);
+        }
+        catch (Exception ex) {
+            log.debug("getMetadata(): getLinkTargetName failed: ", ex);
+        }
+
+        return null;
     }
 
     /**
@@ -192,6 +221,7 @@ public class H5Link extends HObject implements MetaDataContainer
      * @throws Exception
      *             if the metadata can not be written
      */
+    @Override
     public void writeMetadata(Object info) throws Exception {
     }
 
@@ -201,10 +231,11 @@ public class H5Link extends HObject implements MetaDataContainer
      * @param info
      *            the metadata to delete.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be removed
      */
-    public void removeMetadata(Object info) throws Exception {
+    @Override
+    public void removeMetadata(Object info) throws HDF5Exception {
     }
 
     /**
@@ -213,28 +244,11 @@ public class H5Link extends HObject implements MetaDataContainer
      * @param info
      *            the metadata to update.
      *
-     * @throws Exception
+     * @throws HDF5Exception
      *             if the metadata can not be updated
      */
-    public void updateMetadata(Object info) throws Exception {
-    }
-
-    /**
-     * Retrieves the object's metadata, such as attributes, from the file.
-     *
-     * Metadata, such as attributes, is stored in a List.
-     *
-     * @param attrPropList
-     *             the list of properties to get
-     *
-     * @return the list of metadata objects.
-     *
-     * @throws Exception
-     *             if the metadata can not be retrieved
-     */
-    @SuppressWarnings("rawtypes")
-    public List getMetadata(int... attrPropList) throws Exception {
-        return null;
+    @Override
+    public void updateMetadata(Object info) throws HDF5Exception {
     }
 
     /*

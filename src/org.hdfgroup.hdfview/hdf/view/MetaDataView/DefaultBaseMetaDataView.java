@@ -168,7 +168,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         /* Get the metadata information before adding GUI components */
         try {
             attrList = ((MetaDataContainer) dataObject).getMetadata();
-            if (attrList != null) numAttributes = attrList.size();
+            if (attrList != null)
+                numAttributes = attrList.size();
         }
         catch (Exception ex) {
             attrList = null;

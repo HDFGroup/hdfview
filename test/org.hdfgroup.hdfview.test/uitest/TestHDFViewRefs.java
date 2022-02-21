@@ -20,11 +20,11 @@ import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 public class TestHDFViewRefs extends AbstractWindowTest {
     @Test
     public void openTAttributeRegionReference() {
-        String[][] expectedAttrData = { { "Attribute1", "Dataset region reference", "4",
-                "/Dataset2 REGION_TYPE BLOCK \\{ \\(2,2\\)\\-\\(7,7\\)  \\}, /Dataset2 REGION_TYPE POINT \\{ \\(6,9\\)  \\(2,2\\)  \\(8,4\\) , NULL, NULL" } };
+        String[][] expectedAttrData = { { "Attribute1", "Reference", "4",
+                "/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,7) }, /Dataset2 REGION_TYPE POINT { (6,9) (2,2) (8,4) (1, NULL, NULL" } };
         String[][] expectedData = {
-                { "/Dataset2 REGION_TYPE BLOCK \\{ \\(2,2\\)\\-\\(7,7\\)  \\}" },
-                { "/Dataset2 REGION_TYPE POINT \\{ \\(6,9\\)  \\(2,2\\)  \\(8,4\\)  \\(1,6\\)  \\(2,8\\)  \\(3,2\\)  \\(0,4\\)  \\(9,0\\)  \\(7,1\\)  \\(3,3\\)  \\}" },
+                { "/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,7) }" },
+                { "/Dataset2 REGION_TYPE POINT { (6,9) (2,2) (8,4) (1,6) (2,8) (3,2) (0,4) (9,0) (7,1) (3,3) }" },
                 { "NULL" }, { "NULL" } };
         SWTBotShell tableShell = null;
         String filename = "tattrreg.h5";
@@ -39,14 +39,14 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             // Open dataset 'Dataset1' Attribute Table
             SWTBotTable attrTable = openAttributeTable(filetree, filename, datasetName);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(attrTable, "openTAttributeRegionReference()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(attrTable, "openTAttributeRegionReference()", true);
 
             retriever.testAllTableLocations(expectedAttrData);
 
             tableShell = openAttributeObject(attrTable, "Attribute1", 0);
             final SWTBotNatTable dataTable = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTAttributeRegionReference()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTAttributeRegionReference()", true);
 
             retriever.testAllTableLocations(expectedData);
         }
@@ -75,8 +75,8 @@ public class TestHDFViewRefs extends AbstractWindowTest {
 
     @Test
     public void openTDataRegionReference() {
-        String[][] expectedData = { { "/Dataset2 REGION_TYPE BLOCK \\{ \\(2,2\\)\\-\\(7,7\\)  \\}" },
-                { "/Dataset2 REGION_TYPE POINT \\{ \\(6,9\\)  \\(2,2\\)  \\(8,4\\)  \\(1,6\\)  \\(2,8\\)  \\(3,2\\)  \\(0,4\\)  \\(9,0\\)  \\(7,1\\)  \\(3,3\\)  \\}" },
+        String[][] expectedData = { { "/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,7) }" },
+                { "/Dataset2 REGION_TYPE POINT { (6,9) (2,2) (8,4) (1,6) (2,8) (3,2) (0,4) (9,0) (7,1) (3,3) }" },
                 { "NULL" }, { "NULL" } };
         SWTBotShell tableShell = null;
         String filename = "tdatareg.h5";
@@ -100,15 +100,15 @@ public class TestHDFViewRefs extends AbstractWindowTest {
                     val.equals("1"));           // Test rank
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 3).getText();
-            assertTrue(constructWrongValueMessage("openTDataRegionReference()", "wrong data type", "Dataset region reference", val),
-                    val.equals("Dataset region reference"));   // Test data type
+            assertTrue(constructWrongValueMessage("openTDataRegionReference()", "wrong data type", "Reference", val),
+                    val.equals("Reference"));   // Test data type
 
 
             // Open dataset 'DS08BITS'
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTDataRegionReference()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTDataRegionReference()", true);
 
             retriever.testAllTableLocations(expectedData);
         }

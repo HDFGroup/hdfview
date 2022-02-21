@@ -21,6 +21,7 @@ import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ReferenceType;
 import hdf.object.h5.H5ScalarDS;
 
 public class H5ObjectEx_T_ObjectReference {
@@ -82,7 +83,7 @@ public class H5ObjectEx_T_ObjectReference {
         // Create the base datatypes.
         try {
             typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 8, Datatype.ORDER_BE, Datatype.NATIVE);
-            typeRef = new H5Datatype(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+            typeRef = new H5ReferenceType(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

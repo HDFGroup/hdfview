@@ -25,7 +25,7 @@ import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.Utils;
-import hdf.object.h5.H5Datatype;
+import hdf.object.h5.H5ReferenceType;
 import hdf.view.Tools;
 
 /**
@@ -1372,12 +1372,12 @@ public class DataProviderFactory
         private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RefDataProvider.class);
 
         private final long typeSize;
-        private final H5Datatype h5dtype;
+        private final H5ReferenceType h5dtype;
 
         RefDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
 
-            h5dtype = (H5Datatype)dtype;
+            h5dtype = (H5ReferenceType)dtype;
             typeSize = dtype.getDatatypeSize();
         }
 
@@ -1403,18 +1403,18 @@ public class DataProviderFactory
 
         @Override
         public Object getDataValue(Object obj, int index) {
-            log.trace("getDataValue({}, {}): start", obj, index);
+            log.trace("getDataValue(Object:{}, {}): start", obj, index);
 
             try {
                 index *= typeSize;
                 theValue = populateReferenceRegion(obj, index);
             }
             catch (Exception ex) {
-                log.debug("getDataValue({}, {}): ", obj, index, ex);
+                log.debug("getDataValueObject:({}, {}): ", obj, index, ex);
                 theValue = DataFactoryUtils.errStr;
             }
 
-            log.trace("getDataValue({}, {})({}): finish", obj, index, theValue);
+            log.trace("getDataValue(Object:{}, {})({}): finish", obj, index, theValue);
 
             return theValue;
         }
@@ -1428,6 +1428,7 @@ public class DataProviderFactory
             }
             log.trace("populateReferenceRegion byteElements={}:", byteElements);
             regionStr = h5dtype.getReferenceRegion(byteElements, false);
+            log.trace("populateReferenceRegion regionStr={}:", regionStr);
 
             return regionStr;
         }

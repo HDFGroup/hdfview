@@ -41,6 +41,7 @@ import hdf.object.ScalarDS;
 
 import hdf.object.h5.H5Attribute;
 import hdf.object.h5.H5MetaDataContainer;
+import hdf.object.h5.H5ReferenceType;
 
 /**
  * H5ScalarDS describes a multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
@@ -122,19 +123,24 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         paletteRefs = null;
         objMetadata = new H5MetaDataContainer(theFile, theName, thePath, this);
 
-        if ((oid == null) && (theFile != null)) {
-            // retrieve the object ID
-            try {
-                byte[] refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
-                this.oid = HDFNativeData.byteToLong(refBuf);
-                log.trace("constructor REF {} to OID {}", refBuf, this.oid);
-            }
-            catch (Exception ex) {
-                log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(), this.getFullName());
-            }
-        }
-        log.trace("constructor OID {}", this.oid);
         if (theFile != null) {
+            if (oid == null) {
+                // retrieve the object ID
+                byte[] refBuf = null;
+                try {
+                    refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
+                    this.oid = HDFNativeData.byteToLong(refBuf);
+                    log.trace("constructor REF {} to OID {}", refBuf, this.oid);
+                }
+                catch (Exception ex) {
+                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(), this.getFullName());
+                }
+                finally {
+                    if (refBuf != null)
+                        H5.H5Rdestroy(refBuf);
+                }
+            }
+            log.trace("constructor OID {}", this.oid);
             try {
                 objInfo = H5.H5Oget_info_by_name(theFile.getFID(), this.getFullName(), HDF5Constants.H5O_INFO_BASIC, HDF5Constants.H5P_DEFAULT);
             }
@@ -142,21 +148,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
             }
         }
-        else
+        else {
+            this.oid = null;
             objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
-    }
-
-    protected void finalize() throws Throwable {
-        // Invoke the finalizer of our superclass
-        super.finalize();
-        // Destroy the object reference we were using
-        // If the file doesn't exist or tempfile is null, this can throw
-        // an exception, but that exception is ignored.
-        if (oid != null) {
-            HDFArray theArray = new HDFArray(oid);
-            byte[] refBuf = theArray.byteify();
-            H5.H5Rdestroy(refBuf);
-            oid = null;
         }
     }
 
@@ -169,13 +163,17 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     public long open() {
         long did = HDF5Constants.H5I_INVALID_HID;
 
-        try {
-            did = H5.H5Dopen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
-            log.trace("open(): did={}", did);
-        }
-        catch (HDF5Exception ex) {
-            log.debug("open(): Failed to open dataset {}", getPath() + getName(), ex);
-            did = HDF5Constants.H5I_INVALID_HID;
+        if (getFID() < 0)
+            log.trace("open(): file id for:{} is invalid", getPath() + getName());
+        else {
+            try {
+                did = H5.H5Dopen(getFID(), getPath() + getName(), HDF5Constants.H5P_DEFAULT);
+                log.trace("open(): did={}", did);
+            }
+            catch (HDF5Exception ex) {
+                log.debug("open(): Failed to open dataset {}", getPath() + getName(), ex);
+                did = HDF5Constants.H5I_INVALID_HID;
+            }
         }
 
         return did;
@@ -319,10 +317,36 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 space_type = H5.H5Sget_simple_extent_type(sid);
                 tid = H5.H5Dget_type(did);
-                log.trace("init(): tid={} sid={} rank={}space_type={} ", tid, sid, rank, space_type);
+                log.trace("init(): tid={} sid={} rank={} space_type={} ", tid, sid, rank, space_type);
+
+                if (rank == 0) {
+                    // a scalar data point
+                    rank = 1;
+                    dims = new long[1];
+                    dims[0] = 1;
+                    log.trace("init(): rank is a scalar data point");
+                }
+                else {
+                    dims = new long[rank];
+                    maxDims = new long[rank];
+                    H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
+                    log.trace("init(): rank={}, dims={}, maxDims={}", rank, dims, maxDims);
+                }
 
                 try {
-                    datatype = new H5Datatype(getFileFormat(), tid);
+                    int nativeClass = H5.H5Tget_class(tid);
+                    if (nativeClass == HDF5Constants.H5T_REFERENCE) {
+                        long lsize = 1;
+                        if (rank > 0) {
+                            log.trace("init():rank={}, dims={}", rank, dims);
+                            for (int j = 0; j < dims.length; j++) {
+                                lsize *= dims[j];
+                            }
+                        }
+                        datatype = new H5ReferenceType(getFileFormat(), lsize, tid);
+                    }
+                    else
+                        datatype = new H5Datatype(getFileFormat(), tid);
 
                     log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}",
                             tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isNamed(), datatype.isVLEN(),
@@ -393,20 +417,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     catch (Exception ex) {
                         log.debug("init(): H5Pclose(pid {}) failure: ", pid, ex);
                     }
-                }
-
-                if (rank == 0) {
-                    // a scalar data point
-                    rank = 1;
-                    dims = new long[1];
-                    dims[0] = 1;
-                    log.trace("init(): rank is a scalar data point");
-                }
-                else {
-                    dims = new long[rank];
-                    maxDims = new long[rank];
-                    H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
-                    log.trace("init(): rank={}, dims={}, maxDims={}", rank, dims, maxDims);
                 }
 
                 inited = true;
@@ -490,54 +500,56 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
                 try {
                     objInfo = H5.H5Oget_info(did);
+
+                    if(objInfo.num_attrs > 0) {
+                        // test if it is an image
+                        // check image
+                        Object avalue = getAttrValue(did, "CLASS");
+                        if (avalue != null) {
+                            try {
+                                isImageDisplay = isImage = "IMAGE".equalsIgnoreCase(new String((byte[]) avalue).trim());
+                                log.trace("hasAttribute(): isImageDisplay dataset: {} with value = {}", isImageDisplay, avalue);
+                            }
+                            catch (Exception err) {
+                                log.debug("hasAttribute(): check image: ", err);
+                            }
+                        }
+
+                        // retrieve the IMAGE_MINMAXRANGE
+                        avalue = getAttrValue(did, "IMAGE_MINMAXRANGE");
+                        if (avalue != null) {
+                            double x0 = 0;
+                            double x1 = 0;
+                            try {
+                                x0 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
+                                x1 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 1).toString());
+                            }
+                            catch (Exception ex2) {
+                                x0 = x1 = 0;
+                            }
+                            if (x1 > x0) {
+                                imageDataRange = new double[2];
+                                imageDataRange[0] = x0;
+                                imageDataRange[1] = x1;
+                            }
+                        }
+
+                        try {
+                            checkCFconvention(did);
+                        }
+                        catch (Exception ex) {
+                            log.debug("hasAttribute(): checkCFconvention(did {}):", did, ex);
+                        }
+                    }
                 }
                 catch (Exception ex) {
                     objInfo.num_attrs = 0;
                     log.debug("hasAttribute(): get object info failure: ", ex);
                 }
-                objMetadata.setObjectAttributeSize((int) objInfo.num_attrs);
-
-                if(objInfo.num_attrs > 0) {
-                    // test if it is an image
-                    // check image
-                    Object avalue = getAttrValue(did, "CLASS");
-                    if (avalue != null) {
-                        try {
-                            isImageDisplay = isImage = "IMAGE".equalsIgnoreCase(new String((byte[]) avalue).trim());
-                            log.trace("hasAttribute(): isImageDisplay dataset: {} with value = {}", isImageDisplay, avalue);
-                        }
-                        catch (Exception err) {
-                            log.debug("hasAttribute(): check image: ", err);
-                        }
-                    }
-
-                    // retrieve the IMAGE_MINMAXRANGE
-                    avalue = getAttrValue(did, "IMAGE_MINMAXRANGE");
-                    if (avalue != null) {
-                        double x0 = 0;
-                        double x1 = 0;
-                        try {
-                            x0 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
-                            x1 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 1).toString());
-                        }
-                        catch (Exception ex2) {
-                            x0 = x1 = 0;
-                        }
-                        if (x1 > x0) {
-                            imageDataRange = new double[2];
-                            imageDataRange[0] = x0;
-                            imageDataRange[1] = x1;
-                        }
-                    }
-
-                    try {
-                        checkCFconvention(did);
-                    }
-                    catch (Exception ex) {
-                        log.debug("hasAttribute(): checkCFconvention(did {}):", did, ex);
-                    }
+                finally {
+                    close(did);
                 }
-                close(did);
+                objMetadata.setObjectAttributeSize((int) objInfo.num_attrs);
             }
             else {
                 log.debug("hasAttribute(): could not open dataset");
@@ -585,7 +597,19 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                             log.debug("getDatatype(): toNative: ", ex);
                         }
                     }
-                    datatype = new H5Datatype(getFileFormat(), tid);
+                    int nativeClass = H5.H5Tget_class(tid);
+                    if (nativeClass == HDF5Constants.H5T_REFERENCE) {
+                        long lsize = 1;
+                        if (rank > 0) {
+                            log.trace("getDatatype(): rank={}, dims={}", rank, dims);
+                            for (int j = 0; j < dims.length; j++) {
+                                lsize *= dims[j];
+                            }
+                        }
+                        datatype = new H5ReferenceType(getFileFormat(), lsize, tid);
+                    }
+                    else
+                        datatype = new H5Datatype(getFileFormat(), tid);
                 }
                 catch (Exception ex) {
                     log.debug("getDatatype(): ", ex);
@@ -945,7 +969,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                             }
                             theData = ((H5Datatype)dsDatatype.getDatatypeBase()).byteToBigDecimal(0, asize, (byte[]) theData);
                         }
-                        else if (dsDatatype.isRefObj()) {
+                        else if (dsDatatype.isRefObj() && !dsDatatype.isStdRef()) {
                             log.trace("scalarDatasetCommonIO(): isREF: converting byte array to long array");
                             theData = HDFNativeData.byteToLong((byte[]) theData);
                         }
@@ -1383,7 +1407,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         }
         catch (Exception ex) {
             log.debug("writeMetadata(): Object not an Attribute");
-            return;
         }
     }
 
@@ -1416,6 +1439,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             finally {
                 close(did);
             }
+        }
+        else {
+            log.debug("removeMetadata(): failed to open scalar dataset");
         }
     }
 
@@ -1625,7 +1651,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         // prepare the dataspace and datatype
         int rank = dims.length;
 
-        if ((tid = type.createNative()) >= 0) {
+        tid = type.createNative();
+        if (tid >= 0) {
             try {
                 sid = H5.H5Screate_simple(rank, dims, maxdims);
 
@@ -1789,7 +1816,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 catch (Exception ex) {
                     log.debug("getAttrValue(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                 }
-                H5Datatype dsDatatype = new H5Datatype(getFileFormat(), atid);
 
                 asid = H5.H5Aget_space(aid);
                 long adims[] = null;
@@ -1812,6 +1838,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
                 if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE) throw new Exception("Invalid int size");
 
+                H5Datatype dsDatatype = null;
+                int nativeClass = H5.H5Tget_class(atid);
+                if (nativeClass == HDF5Constants.H5T_REFERENCE)
+                    dsDatatype = new H5ReferenceType(getFileFormat(), lsize, atid);
+                else
+                    dsDatatype = new H5Datatype(getFileFormat(), atid);
+
                 try {
                     avalue = H5Datatype.allocateArray(dsDatatype, (int) lsize);
                 }
@@ -1828,6 +1861,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                         log.trace("getAttrValue(): id {} is unsigned", atid);
                         avalue = convertFromUnsignedC(avalue, null);
                     }
+                    if (dsDatatype.isReference())
+                        ((H5ReferenceType)dsDatatype).setData(avalue);
                 }
             }
             catch (Exception ex) {
@@ -2384,6 +2419,69 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             return virtualNameList.size();
         else
             return -1;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see hdf.object.Dataset#toString(String delimiter, int maxItems)
+     */
+    @Override
+    public String toString(String delimiter, int maxItems) {
+        Object theData = originalBuf;
+        if (theData == null) {
+            log.debug("toString: value is null");
+            return null;
+        }
+
+        if (theData instanceof List<?>) {
+            log.trace("toString: value is list");
+            return null;
+        }
+
+        Class<? extends Object> valClass = theData.getClass();
+
+        if (!valClass.isArray()) {
+            log.trace("toString: finish - not array");
+            String strValue = theData.toString();
+            if (maxItems > 0 && strValue.length() > maxItems)
+                // truncate the extra characters
+                strValue = strValue.substring(0, maxItems);
+            return strValue;
+        }
+
+        // value is an array
+        StringBuilder sb = new StringBuilder();
+        long lsize = 1;
+        for (int j = 0; j < dims.length; j++)
+            lsize *= dims[j];
+
+        log.trace("toString: isStdRef={} Array.getLength={}", ((H5Datatype) getDatatype()).isStdRef(), Array.getLength(theData));
+        if (((H5Datatype) getDatatype()).isStdRef()) {
+            String cname = valClass.getName();
+            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+            log.trace("toString: isStdRef with cname={} dname={}", cname, dname);
+            for (int i = 0; i < (int)lsize; i++) {
+                int refIndex = HDF5Constants.H5R_REF_BUF_SIZE * i;
+                byte[] refarr = new byte[(int) HDF5Constants.H5R_REF_BUF_SIZE];
+                System.arraycopy((byte[])theData, refIndex, refarr, 0, (int)HDF5Constants.H5R_REF_BUF_SIZE);
+                String ref_str = ((H5ReferenceType) getDatatype()).getReferenceRegion(refarr, false);
+                log.trace("toString: ref_str[{}]={}", i, ref_str);
+                if (i > 0)
+                    sb.append(", ");
+                sb.append(ref_str);
+
+//                int n = ref_str.length();
+//                if (maxItems > 0) {
+//                    if (n > maxItems)
+//                        break;
+//                    else
+//                        maxItems -= n;
+//                }
+            }
+            return sb.toString();
+        }
+        return super.toString(delimiter, maxItems);
     }
 
 }
