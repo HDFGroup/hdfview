@@ -51,7 +51,7 @@ public class TestHDFTreeView extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, groupname + "/" + datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "testVGLongname()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "testVGLongname()", false);
             retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedData);

@@ -115,7 +115,7 @@ public class TestTreeViewExport extends AbstractWindowTest {
                     "/" + groupname + "/" + datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "importHDF5Dataset()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "importHDF5Dataset()", false);
 
             dataTable.click(1, 1);
             tableShell.bot().menu().menu("Import/Export Data").menu("Import Data from").menu("Text File").click();

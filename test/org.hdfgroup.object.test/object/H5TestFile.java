@@ -252,9 +252,7 @@ public class H5TestFile
         try {
             file.close();
         }
-        catch (final Exception ex) {
-            log.debug("create file close failed:", ex);
-        }
+        catch (final Exception ex) {}
 
         log.debug("create file open to write refs");
         file.setNewLibBounds("Latest", "Latest");
@@ -297,9 +295,7 @@ public class H5TestFile
         try {
             file.close();
         }
-        catch (final Exception ex) {
-            log.debug("create file close failed:", ex);
-        }
+        catch (final Exception ex) {}
 
         log.debug("create file finished");
         return file;

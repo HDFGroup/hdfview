@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -55,6 +56,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
+import hdf.object.Attribute;
 import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -62,7 +64,14 @@ import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
 import hdf.object.Utils;
-import hdf.object.h5.H5Datatype;
+
+import hdf.hdf5lib.HDF5Constants;
+
+import hdf.object.h5.H5File;
+import hdf.object.h5.H5ScalarAttr;
+import hdf.object.h5.H5ReferenceType.H5ReferenceData;
+import hdf.object.h5.H5ReferenceType;
+
 import hdf.view.HDFView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
@@ -923,7 +932,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * </ul>
      *
      * @param reg
-     *            the array of strings that contain the reg. ref information.
+     *            the string that contain the reg. ref information.
      *
      */
     @Override
@@ -1138,38 +1147,290 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     protected void showStdRefData(byte[] refarr) {
         log.trace("showStdRefData(): start: refarr={}", refarr);
 
-        if (refarr == null || H5Datatype.zeroArrayCheck(refarr)) {
+        if (refarr == null || H5ReferenceType.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
             log.debug("showStdRefData(): ref is null or invalid");
             return;
         }
 
-        //long loc_id = HDF5Constants.H5I_INVALID_HID;
-        H5Datatype.getReferenceRegion(refarr, true);
-
-        //if (loc_id >= 0) {
-            /*
-             * try { dsetCopy.getData(); } catch (Exception ex) { log.debug("showStdRefData(): getData failure: ", ex);
-             * Tools.showError(shell, "Select", "Region Reference: " + ex.getMessage()); } Class<?> theClass = null;
-             * String viewName = null; switch (viewType) { case IMAGE: viewName = HDFView.getListOfImageViews().get(0);
-             * break; case TABLE: viewName = (String) HDFView.getListOfTableViews().get(0); break; default: viewName =
-             * null; } try { theClass = Class.forName(viewName); } catch (Exception ex) { try { theClass =
-             * ViewProperties.loadExtClass().loadClass(viewName); } catch (Exception ex2) { theClass = null; } } // Use
-             * default dataview if (theClass == null) { switch (viewType) { case IMAGE: viewName =
-             * ViewProperties.DEFAULT_IMAGEVIEW_NAME; break; case TABLE: viewName =
-             * ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME; break; default: viewName = null; } try { theClass =
-             * Class.forName(viewName); } catch (Exception ex) {
-             * log.debug("showStdRefData(): no suitable display class found"); Tools.showError(shell, "Select",
-             * "Could not show reference data: no suitable display class found"); return; } } HashMap map = new
-             * HashMap(1); map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy); Object[] args = { viewer, map }; try
-             * { Tools.newInstance(theClass, args); } catch (Exception ex) {
-             * log.debug("showStdRefData(): Could not show reference data: ", ex); Tools.showError(shell, "Select",
-             * "Could not show reference data: " + ex.toString());
-             *            }
-             */
-            //try {H5.H5Dclose(loc_id);} catch (Exception ex) {}
-        //}
+        H5ReferenceType refType = ((H5ReferenceType) dataObject.getDatatype());
+        H5ReferenceData refdata = refType.getReferenceData(refarr);
+        /* get the filename associated with the reference */
+        String reffile = refdata.file_name;
+        if ((refdata.ref_type == HDF5Constants.H5R_DATASET_REGION1) ||
+            (refdata.ref_type == HDF5Constants.H5R_DATASET_REGION2)) {
+            String ref_ptr = refType.getReferenceRegion(refarr, false);
+            if (refdata.region_type == "REGION_TYPE UNKNOWN") {
+                String msg = "Reference to " + ref_ptr + " cannot be displayed in a table";
+                Tools.showInformation(shell, "Reference", msg);
+            }
+            else {
+                showRegRefData(ref_ptr);
+            }
+        }
+        if (((refdata.ref_type == HDF5Constants.H5R_OBJECT1) && (refdata.obj_type == HDF5Constants.H5O_TYPE_DATASET)) ||
+            ((refdata.ref_type == HDF5Constants.H5R_OBJECT2) && (refdata.obj_type == HDF5Constants.H5O_TYPE_DATASET))) {
+            String ref_obj = refdata.obj_name;
+            showObjStdRefData(ref_obj);
+                //String ref_ptr = refType.getReferenceRegion(refarr, false);
+                //showObjStdRefData(ref_ptr);
+        }
+        else if (refdata.ref_type == HDF5Constants.H5R_ATTR) {
+            String ref_attr = refdata.attr_name;
+            String ref_obj = refdata.obj_name;
+            showAttrStdRefData(ref_obj, ref_attr);
+        }
+        else if (refdata.region_type == "H5O_TYPE_OBJ_REF") {
+            String msg = "Reference to " + refdata.obj_name + " cannot be displayed in a table";
+            //String ref_ptr = refType.getObjectReferenceName(refarr);
+            Tools.showInformation(shell, "Reference", msg);
+        }
+        else {
+            // Other types
+        }
     } // end of showStdRefData(byte[] refarr)
+
+    /**
+     * Display data pointed to by object references. Data of each object is shown in
+     * a separate spreadsheet.
+     *
+     * @param ref
+     *            the string that contain the object reference information.
+     *
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected void showObjStdRefData(String ref) {
+        log.trace("showObjStdRefData(): start: ref={}", ref);
+
+        if (ref == null || (ref.length() <= 0) || (ref.compareTo("NULL") == 0)) {
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
+            log.debug("showObjStdRefData(): ref is null or invalid");
+            return;
+        }
+
+        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), ref);
+        if (obj == null || !(obj instanceof ScalarDS)) {
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
+            log.debug("showObjStdRefData(): obj is null or not a Scalar Dataset");
+            return;
+        }
+
+        ScalarDS dset = (ScalarDS) obj;
+        ScalarDS dsetCopy = null;
+
+        // create an instance of the dataset constructor
+        Constructor<? extends ScalarDS> constructor = null;
+        Object[] paramObj = null;
+        Object data = null;
+
+        try {
+            Class[] paramClass = { FileFormat.class, String.class, String.class };
+            constructor = dset.getClass().getConstructor(paramClass);
+            paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
+            dsetCopy = constructor.newInstance(paramObj);
+            data = dsetCopy.getData();
+        }
+        catch (Exception ex) {
+            log.debug("showObjStdRefData(): couldn't show data: ", ex);
+            Tools.showError(shell, "Select", "Object Reference: " + ex.getMessage());
+            data = null;
+        }
+
+        if (data == null)
+            return;
+
+        Class<?> theClass = null;
+        String viewName = null;
+
+        switch (viewType) {
+            case IMAGE:
+                viewName = HDFView.getListOfImageViews().get(0);
+                break;
+            case TABLE:
+                viewName = (String) HDFView.getListOfTableViews().get(0);
+                break;
+            default:
+                viewName = null;
+        }
+
+        try {
+            theClass = Class.forName(viewName);
+        }
+        catch (Exception ex) {
+            try {
+                theClass = ViewProperties.loadExtClass().loadClass(viewName);
+            }
+            catch (Exception ex2) {
+                theClass = null;
+            }
+        }
+
+        // Use default dataview
+        if (theClass == null) {
+            switch (viewType) {
+                case IMAGE:
+                    viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                    break;
+                case TABLE:
+                    viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                    break;
+                default:
+                    viewName = null;
+            }
+
+            try {
+                theClass = Class.forName(viewName);
+            }
+            catch (Exception ex) {
+                log.debug("showObjStdRefData(): no suitable display class found");
+                Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
+                return;
+            }
+        }
+
+        HashMap map = new HashMap(1);
+        map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy);
+        Object[] args = { viewer, map };
+
+        try {
+            Tools.newInstance(theClass, args);
+        }
+        catch (Exception ex) {
+            log.debug("showObjStdRefData(): Could not show reference data: ", ex);
+            Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
+        }
+    }
+
+    /**
+     * Display data pointed to by attribute references. Data of each object is shown in
+     * a separate spreadsheet.
+     *
+     * @param ref
+     *            the string that contain the attribute reference information.
+     *
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected void showAttrStdRefData(String ref_obj, String ref_attr) {
+        log.trace("showAttrStdRefData(): start: ref_obj={} ref_attr={}", ref_obj, ref_attr);
+
+        if (ref_obj == null || (ref_obj.length() <= 0) || (ref_obj.compareTo("NULL") == 0)) {
+            log.debug("showAttrStdRefData(): ref_obj is null or invalid");
+            Tools.showError(shell, "Select", "Could not attribute reference data: invalid or null data");
+            return;
+        }
+
+        if (ref_attr == null || (ref_attr.length() <= 0) || (ref_attr.compareTo("NULL") == 0)) {
+            log.debug("showAttrStdRefData(): ref_attr is null or invalid");
+            Tools.showError(shell, "Select", "Could not attribute reference data: invalid or null data");
+            return;
+        }
+
+        // find the parent object first
+        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), ref_obj);
+        if (obj == null) {
+            log.debug("showAttrStdRefData(): obj is null");
+            Tools.showError(shell, "Select", "Could not show attribute reference data: invalid or null data");
+            return;
+        }
+        List<Attribute> attrs = H5File.getAttribute(obj);
+        if ((attrs == null) || (attrs.size() < 1)) {
+            log.debug("showAttrStdRefData(): attrs is null");
+            Tools.showError(shell, "Select", "Could not show attribute reference data: invalid or null data");
+            return;
+        }
+        H5ScalarAttr attr = null;
+        H5ScalarAttr attrCopy = null;
+        int n = attrs.size();
+        for (int i = 0; i < n; i++) {
+            attr = (H5ScalarAttr)attrs.get(i);
+            if (attr.getAttributeName().equals(ref_attr))
+                break;
+            else
+                attr = null;
+        }
+
+        // create an instance of the Attribute constructor
+        Constructor<? extends H5ScalarAttr> constructor = null;
+        Object[] paramObj = null;
+        Object data = null;
+
+        try {
+            Class[] paramClass = { HObject.class, String.class, Datatype.class, long[].class };
+            constructor = attr.getClass().getConstructor(paramClass);
+            paramObj = new Object[] { obj, attr.getName(), attr.getDatatype(), null };
+            attrCopy = constructor.newInstance(paramObj);
+            data = attrCopy.getData();
+        }
+        catch (Exception ex) {
+            log.debug("showAttrStdRefData(): couldn't show data: ", ex);
+            Tools.showError(shell, "Select", "Attribute Reference: " + ex.getMessage());
+            data = null;
+        }
+
+        if (data == null)
+            return;
+
+        Class<?> theClass = null;
+        String viewName = null;
+
+        switch (viewType) {
+            case IMAGE:
+                viewName = HDFView.getListOfImageViews().get(0);
+                break;
+            case TABLE:
+                viewName = (String) HDFView.getListOfTableViews().get(0);
+                break;
+            default:
+                viewName = null;
+        }
+
+        try {
+            theClass = Class.forName(viewName);
+        }
+        catch (Exception ex) {
+            try {
+                theClass = ViewProperties.loadExtClass().loadClass(viewName);
+            }
+            catch (Exception ex2) {
+                theClass = null;
+            }
+        }
+
+        // Use default dataview
+        if (theClass == null) {
+            switch (viewType) {
+                case IMAGE:
+                    viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                    break;
+                case TABLE:
+                    viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                    break;
+                default:
+                    viewName = null;
+            }
+
+            try {
+                theClass = Class.forName(viewName);
+            }
+            catch (Exception ex) {
+                log.debug("showAttrStdRefData(): no suitable display class found");
+                Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
+                return;
+            }
+        }
+
+        HashMap map = new HashMap(1);
+        map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, attrCopy);
+        Object[] args = { viewer, map };
+
+        try {
+            Tools.newInstance(theClass, args);
+        }
+        catch (Exception ex) {
+            log.debug("showAttrStdRefData(): Could not show reference data: ", ex);
+            Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
+        }
+    }
 
     /**
      * Update cell value label and cell value field when a cell is selected
@@ -1200,14 +1461,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 }
 
                 if (isStdRef) {
-                    if (H5Datatype.zeroArrayCheck((byte[])val)) {
-                        strVal = null;
-                    }
                     boolean displayValues = ViewProperties.showRegRefValues();
 
                     log.trace("ScalarDSCellSelectionListener:StdRef CellSelected displayValues={}", displayValues);
                     if (displayValues && val != null) {
-                        strVal = H5Datatype.getReferenceRegion((byte[])val, true);
+                        strVal = ((H5ReferenceType) dataObject.getDatatype()).getReferenceRegion((byte[])val, true);
                     }
                 }
                 else if (isRegRef) {

@@ -65,6 +65,11 @@ public class H5Datatype extends Datatype
      */
     private H5MetaDataContainer objMetadata;
 
+    /**
+     * The dimension sizes of the reference object
+     */
+    protected long[]          refdims;
+
     /** the datatype is an object reference */
     private boolean isRefObj = false;
 
@@ -283,7 +288,7 @@ public class H5Datatype extends Datatype
      * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
      * H5Datatype type = new H5Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
-     * </ol>
+     * </ol>refbuf
      *
      * @param tclass
      *            the class of the datatype, e.g. CLASS_INTEGER, CLASS_FLOAT and etc.
@@ -998,28 +1003,30 @@ public class H5Datatype extends Datatype
             }
             else if (nativeClass == HDF5Constants.H5T_REFERENCE) {
                 datatypeClass = CLASS_REFERENCE;
-                log.trace("fromNative(): reference type");
+                log.trace("fromNative(): reference type, always use H5T_STD_REF");
+                isStdRef = true;
                 try {
-                    isStdRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF);
-                    log.trace("fromNative(): reference type isStdRef");
+                    log.trace("fromNative(): reference type is orig StdRef:{}", H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF));
                 }
                 catch (Exception ex) {
                     log.debug("fromNative(): H5T_STD_REF: ", ex);
                 }
                 try {
                     isRegRef = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
-                    log.trace("fromNative(): reference type isRegRef");
+                    log.trace("fromNative(): reference type isRegRef:{}", isRegRef);
                 }
                 catch (Exception ex) {
                     log.debug("fromNative(): H5T_STD_REF_DSETREG: ", ex);
                 }
                 try {
                     isRefObj = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_OBJ);
-                    log.trace("fromNative(): reference type isRefObj");
+                    log.trace("fromNative(): reference type isRefObj:{}", isRefObj);
                 }
                 catch (Exception ex) {
                     log.debug("fromNative(): H5T_STD_REF_OBJ: ", ex);
                 }
+                //Force references to use new reference size
+                tsize = HDF5Constants.H5R_REF_BUF_SIZE;
             }
             else if (nativeClass == HDF5Constants.H5T_ENUM) {
                 datatypeClass = CLASS_ENUM;
@@ -1430,22 +1437,22 @@ public class H5Datatype extends Datatype
                 break;
             case CLASS_REFERENCE:
                 try {
-                    long objRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ);
-                    long dsetRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_DSETREG);
+                    //long objRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ);
+                    //long dsetRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_DSETREG);
                     // use datatypeSize as which type to copy
-                    log.debug("createNative(): datatypeSize:{} ", datatypeSize);
-                    if (datatypeSize < 0 || datatypeSize > dsetRefTypeSize) {
+                    //log.debug("createNative(): datatypeSize:{} ", datatypeSize);
+                    //if (datatypeSize < 0 || datatypeSize > dsetRefTypeSize) {
                         tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF);
                         log.debug("createNative(): HDF5Constants.H5T_STD_REF");
-                    }
-                    else if (datatypeSize > objRefTypeSize) {
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_DSETREG);
-                        log.debug("createNative(): HDF5Constants.H5T_STD_REF_DSETREG");
-                    }
-                    else {
-                        tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_OBJ);
-                        log.debug("createNative(): HDF5Constants.H5T_STD_REF_OBJ");
-                    }
+                    //}
+                    //else if (datatypeSize > objRefTypeSize) {
+                    //    tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_DSETREG);
+                    //    log.debug("createNative(): HDF5Constants.H5T_STD_REF_DSETREG");
+                    //}
+                    //else {
+                    //    tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_OBJ);
+                    //    log.debug("createNative(): HDF5Constants.H5T_STD_REF_OBJ");
+                    //}
                 }
                 catch (Exception ex) {
                     log.debug("createNative(): native reference datatype creation failed: ", ex);
@@ -1656,7 +1663,7 @@ public class H5Datatype extends Datatype
 
         log.trace("allocateArray(): tclass={} : tsize={}", typeClass, typeSize);
 
-        if (dtype.isVarStr() || dtype.isVLEN() || dtype.isRegRef()) {
+        if (dtype.isVarStr() || dtype.isVLEN()) {// || dtype.isRegRef()) {
             log.trace("allocateArray(): is_variable_str={} || isVL={} || is_reg_ref={}", dtype.isVarStr(), dtype.isVLEN(), dtype.isRegRef());
 
             data = new String[numPoints];
@@ -1924,14 +1931,16 @@ public class H5Datatype extends Datatype
 
                     tid = createNative();
                     if (tid >= 0) {
-                        isRegionType = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
+                        if (!H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF)) {
+                            isRegionType = H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_DSETREG);
 
-                        description.setLength(0);
-                        if (isRegionType) {
-                            description.append("Dataset region reference");
-                        }
-                        else {
-                            description.append("Object reference");
+                            description.setLength(0);
+                            if (isRegionType) {
+                                description.append("Dataset region reference");
+                            }
+                            else {
+                                description.append("Object reference");
+                            }
                         }
                     }
                 }
@@ -2264,185 +2273,6 @@ public class H5Datatype extends Datatype
         if (isStdRef)
             return HDF5Constants.H5T_STD_REF;
         return -1;
-    }
-
-    /**
-     * Checks if a reference datatype is all zero.
-     *
-     * @param refarr
-     *            the reference datatype data to be checked.
-     *
-     * @return true is the reference datatype data is all zero; otherwise returns false.
-     */
-    public static final boolean zeroArrayCheck(final byte[] refarr) {
-        for (byte b : refarr) {
-            if (b != 0)
-                return false;
-        }
-        return true;
-    }
-
-    /**
-     * Get the reference datatype reference name.
-     *
-     * @param refarr
-     *            the reference datatype data to be queried.
-     *
-     * @return the reference datatype name string, null otherwise.
-     */
-    public static final String getReferenceName(byte[] refarr) {
-        String ref_name = H5.H5Rget_file_name(refarr) + H5.H5Rget_obj_name(refarr, HDF5Constants.H5P_DEFAULT);
-
-        if (H5.H5Rget_type(refarr) == HDF5Constants.H5R_ATTR)
-            ref_name += H5.H5Rget_attr_name(refarr);
-
-        return ref_name;
-    }
-
-
-    /**
-     * Get the reference datatype dataset region reference as string.
-     *
-     * @param refarr
-     *            the reference datatype data to be queried.
-     *
-     * @return the reference datatype name string, null otherwise.
-     */
-    public static final String getRegionDataset(byte[] refarr) {
-        String strVal = null;
-        String regStr = getReferenceName(refarr);
-        log.debug("Reference Object Name {}", regStr);
-        long new_obj_id = HDF5Constants.H5I_INVALID_HID;
-        long new_obj_sid = HDF5Constants.H5I_INVALID_HID;
-        try {
-            new_obj_id = H5.H5Ropen_object(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            try {
-                new_obj_sid = H5.H5Ropen_region(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                int region_type = -1;
-                try {
-                    region_type = H5.H5Sget_select_type(new_obj_sid);
-                    log.debug("Reference Region Type {}", region_type);
-                    if (HDF5Constants.H5S_SEL_POINTS == region_type) {
-                        strVal = " REGION_TYPE POINT";
-                        //regStr += " REGION_TYPE POINT";
-                        //strVal = dump_region_points(regStr, new_obj_sid, new_obj_id);
-                    }
-                    else if (HDF5Constants.H5S_SEL_HYPERSLABS == region_type) {
-                        strVal = " REGION_TYPE BLOCK";
-                        //regStr += " REGION_TYPE BLOCK";
-                        //strVal = dump_region_blocks(regStr, new_obj_sid, new_obj_id);
-                    }
-                }
-                catch (Exception ex4) {
-                    log.debug("Reference Region Type", ex4);
-                }
-            }
-            catch (Exception ex3) {
-                log.debug("Reference Object Space Open", ex3);
-            }
-            finally {
-                H5.H5Sclose(new_obj_sid);
-            }
-        }
-        catch (Exception ex2) {
-            log.debug("Reference Object Open", ex2);
-        }
-        finally {
-            H5.H5Dclose(new_obj_id);
-        }
-        return regStr + strVal;
-    }
-
-    /**
-     * Get the reference datatype region reference as string.
-     *
-     * @param refarr
-     *            the reference datatype data to be queried.
-     *
-     * @return the reference datatype name string, null otherwise.
-     */
-    public static final String getReferenceRegion(byte[] refarr, boolean showData) {
-        String strVal = null;
-        try {
-            int ref_type = (int)H5.H5Rget_type(refarr);
-            if (ref_type == HDF5Constants.H5R_OBJECT1) {
-                log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_OBJECT1");
-                try {
-                    int obj_type = H5.H5Rget_obj_type3(refarr, HDF5Constants.H5P_DEFAULT);
-                    if (obj_type == HDF5Constants.H5O_TYPE_DATASET) {
-                        strVal = getRegionDataset(refarr);
-                    } //obj_type == HDF5Constants.H5O_TYPE_DATASET
-                    else {
-                        /* Object references -- show the type and OID of the referenced object. */
-                        strVal = "H5O_TYPE_OBJ_REF";
-//                            H5O_info2_t oi;
-//                            char *      obj_tok_str = NULL;
-//                            H5Oget_info3(new_obj_id, &oi, H5O_INFO_BASIC);
-//                            HDsprintf(this_str, "%u-", (unsigned)oi.type);
-//                            H5Otoken_to_str(new_obj_id, &oi.token, &obj_tok_str);
-//                            /* Print OID */
-//                            {
-//                                char *token_str;
-//
-//                                H5Otoken_to_str(tid, &oi.token, &token_str);
-//
-//                                if (NULL == (this_str = (char *)HDmalloc(64 + strlen(token_str) + 1)))
-//                                    H5_OUT_OF_MEMORY_ERROR(
-//                                        ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-//                                if (HDsprintf(this_str, "%lu:%s", oi.fileno, token_str) < 0)
-//                                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
-//
-//                                H5free_memory(token_str);
-//                            }
-                    }
-                }
-                catch (Exception ex1) {
-                    log.debug("Reference Object Type", ex1);
-                }
-            }
-            else if (ref_type == HDF5Constants.H5R_DATASET_REGION1) {
-                log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_DATASET_REGION1");
-                strVal = getRegionDataset(refarr);
-            }
-            else if (ref_type == HDF5Constants.H5R_OBJECT2) {
-                log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_OBJECT2");
-                try {
-                    int obj_type = H5.H5Rget_obj_type3(refarr, HDF5Constants.H5P_DEFAULT);
-                    if (obj_type == HDF5Constants.H5O_TYPE_DATASET) {
-                        strVal = getRegionDataset(refarr);
-                    }
-                }
-                catch (Exception ex1) {
-                    log.debug("Reference Object Type", ex1);
-                }
-            }
-            else if (ref_type == HDF5Constants.H5R_DATASET_REGION2) {
-                log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_DATASET_REGION2");
-                strVal = getRegionDataset(refarr);
-            }
-            else if (ref_type == HDF5Constants.H5R_ATTR) {
-                log.trace("ScalarDSCellSelectionListener:StdRef CellSelected H5R_ATTR");
-                strVal = "H5R_ATTR";
-//                    if ((new_obj_id = H5Ropen_attr(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-//                        if (h5str_dump_region_attribute(ENVONLY, out_str) < 0)
-//                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-//                        if (H5Aclose(new_obj_id) < 0)
-//                            H5_LIBRARY_ERROR(ENVONLY);
-//                    }
-            }
-            else {
-                log.trace("ScalarDSCellSelectionListener:StdRef CellSelected OTHER");
-                strVal = "UNKNOWN";
-            }
-        }
-        catch (Exception ex2) {
-            log.debug("Reference H5Rget_type", ex2);
-        }
-        finally {
-            H5.H5Rdestroy(refarr);
-        }
-        log.debug("Reference Value {}", strVal);
-        return strVal;
     }
 
     /**
