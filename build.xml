@@ -191,7 +191,7 @@
     <property name="release.dir" value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}" />
     <property name="includeantruntime" value="false" />
     <property name="jre.version" value="${ant.java.version}" />
-    <property name="version.slf4j" value="-1.7.25" />
+    <property name="version.slf4j" value="-1.7.33" />
 
     <!-- Define the SonarQube global properties (the most usual way is to pass these properties via the command line) -->
     <property name="sonar.host.url" value="http://localhost:9000" />
@@ -1117,6 +1117,7 @@
             <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
             <fileset dir="${lib.dir}/ext/swt" includes="*.jar" />
             <fileset file="${lib.dir}/ext/swt/${machine.os}/${machine.arch}/swt.jar" />
+            <fileset file="${packagefiles.dir}/simplelogger.properties" />
         </copy>
 
         <copy todir="${release.dir}/extra">
