@@ -3,6 +3,6 @@ module org.hdfgroup.hdfview.test {
     requires org.eclipse.swtbot;
     requires org.eclipse.swtbot.nebula.nattable.finder;
     requires org.eclipse.swtbot.swt.finder;
-    requires slf4j.api;
+    requires org.slf4j;
     requires swt;
 }

@@ -7,14 +7,19 @@ slf4j 1.7.* package. HDFView by default uses the slf4j-nop-1.7.*.jar.
 This suppresses any logging information. See http://www.slf4j.org/ for
 more information on the slf4j package.
 
-To enable logging in HDFView, you must include the slf4j-simple-1.7.*
-jar (or other slf4j compatible jar file) by overriding the default jar file.
+To enable logging in HDFView, you must use the slf4j-simple-1.7.*.jar
+ (or other slf4j compatible jar file) by overriding the default slf4j-nop-1.7.*.jar file.
 
 HDFView:
-  To enable logging in HDFView requires that HDFView uses an alternate
-  classpath. Currently, this feature has been disabled due to the change
-  to modules. However, logging can be re-enabled by building from source
-  and forcing an alternate logging jar.
+  To enable logging in HDFView requires editing the HDFView.cfg file in the HDFView/app folder.
+  change line 25: app.classpath=$APPDIR/slf4j-nop-1.7.33.jar
+  to: app.classpath=$APPDIR
+
+  Next move the file slf4j-nop-1.7.33.jar in the HDFView/app folder to the  HDFView/app/extra folder.
+  And move the file slf4j-nop-1.7.33.jar in the HDFView/app/mods folder to the  HDFView/app/mods/extra folder.
+
+  The file HDFViewLogger.log file will be written in the folder specified by HDFView root.
+  HDFView root is displayed in the status bar of HDFView.
 
 org.slf4j.simpleLogger.defaultLogLevel is the default log level for all instances of SimpleLogger.
 It must be one of ("trace", "debug", "info", "warn", or "error"). If not specified, defaults to "info".

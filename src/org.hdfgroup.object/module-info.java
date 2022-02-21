@@ -9,5 +9,5 @@ module org.hdfgroup.object {
     requires fits;
     requires jarhdf;
     requires jarhdf5;
-    requires slf4j.api;
+    requires org.slf4j;
 }
