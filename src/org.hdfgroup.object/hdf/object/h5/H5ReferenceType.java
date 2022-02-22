@@ -551,7 +551,7 @@ public class H5ReferenceType extends H5Datatype
                         catch (Exception ex5) {
                             log.debug("initRegionDataset H5.H5Sget_select_elem_pointlist: ", ex5);
                         }
-                        sb.append(" { ");
+                        sb.append("{ ");
                         for (int i = 0; i < (int)reg_npoints; i++) {
                             if (i > 0)
                                 sb.append(" ");
@@ -576,7 +576,7 @@ public class H5ReferenceType extends H5Datatype
                         catch (Exception ex5) {
                             log.debug("initRegionDataset H5.H5Sget_select_hyper_blocklist: ", ex5);
                         }
-                        sb.append(" { ");
+                        sb.append("{ ");
                         for (int i = 0; i < (int)reg_nblocks; i++) {
                             if (i > 0)
                                 sb.append(" ");
@@ -837,7 +837,10 @@ public class H5ReferenceType extends H5Datatype
             sb.append(" ");
             sb.append(regsb);
         }
-        return sb.toString();
+        if (sb.length() > 0)
+            return sb.toString();
+        else
+            return "NULL";
     }
 
     /**

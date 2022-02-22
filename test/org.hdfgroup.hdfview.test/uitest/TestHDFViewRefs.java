@@ -7,7 +7,9 @@ import static org.junit.Assert.fail;
 import java.io.File;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
+import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
@@ -21,10 +23,10 @@ public class TestHDFViewRefs extends AbstractWindowTest {
     @Test
     public void openTAttributeRegionReference() {
         String[][] expectedAttrData = { { "Attribute1", "Reference", "4",
-                "/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,7) }, /Dataset2 REGION_TYPE POINT { (6,9) (2,2) (8,4) (1, NULL, NULL" } };
+                "tattrreg.h5/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,, tattrreg.h5/Dataset2 REGION_TYPE POINT { (6,9) (2,, NULL, NULL" } };
         String[][] expectedData = {
-                { "/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,7) }" },
-                { "/Dataset2 REGION_TYPE POINT { (6,9) (2,2) (8,4) (1,6) (2,8) (3,2) (0,4) (9,0) (7,1) (3,3) }" },
+                { "tattrreg.h5/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,7) }" },
+                { "tattrreg.h5/Dataset2 REGION_TYPE POINT { (6,9) (2,2) (8,4) (1,6) (2,8) (3,2) (0,4) (9,0) (7,1) (3,3) }" },
                 { "NULL" }, { "NULL" } };
         SWTBotShell tableShell = null;
         String filename = "tattrreg.h5";
@@ -75,8 +77,8 @@ public class TestHDFViewRefs extends AbstractWindowTest {
 
     @Test
     public void openTDataRegionReference() {
-        String[][] expectedData = { { "/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,7) }" },
-                { "/Dataset2 REGION_TYPE POINT { (6,9) (2,2) (8,4) (1,6) (2,8) (3,2) (0,4) (9,0) (7,1) (3,3) }" },
+        String[][] expectedData = { { "tdatareg.h5/Dataset2 REGION_TYPE BLOCK { (2,2)-(7,7) }" },
+                { "tdatareg.h5/Dataset2 REGION_TYPE POINT { (6,9) (2,2) (8,4) (1,6) (2,8) (3,2) (0,4) (9,0) (7,1) (3,3) }" },
                 { "NULL" }, { "NULL" } };
         SWTBotShell tableShell = null;
         String filename = "tdatareg.h5";
@@ -103,7 +105,6 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("openTDataRegionReference()", "wrong data type", "Reference", val),
                     val.equals("Reference"));   // Test data type
 
-
             // Open dataset 'DS08BITS'
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
@@ -121,6 +122,99 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu().menu("Table").menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                closeFile(hdfFile, false);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    @Test
+    public void openTAttributeReference() {
+        String[][] expectedData = {
+                { "trefer_attr.h5/Group1/Dataset1/Attr1 H5R_ATTR" },
+                { "trefer_attr.h5/Group1/Dataset2/Attr1 H5R_ATTR" },
+                { "trefer_attr.h5/Group1/Attr2 H5R_ATTR" },
+                { "trefer_attr.h5/Group1/Datatype1/Attr3 H5R_ATTR" } };
+        String[][] expectedAttrData = {{ "0" }, { "3" }, { "6" }, { "9" } };
+        SWTBotShell tableShell = null;
+        SWTBotShell tableAttrShell = null;
+        String filename = "trefer_attr.h5";
+        String datasetName = "Dataset3";
+        String attributeName = "Attr1";
+        File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+
+            checkFileTree(filetree, "openTAttributeReference()", 3, filename);
+
+            // Test metadata
+            SWTBotTabItem tabItem = openMetadataTab(filetree, filename, datasetName, "General Object Info");
+            tabItem.activate();
+
+            String val = bot.textWithLabel("Name: ").getText();
+            assertTrue(constructWrongValueMessage("openTAttributeReference()", "wrong name", datasetName, val), val.equals(datasetName)); // Test dataset name
+
+            val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
+            assertTrue(constructWrongValueMessage("openTAttributeReference()", "wrong rank", "1", val),
+                    val.equals("1"));           // Test rank
+
+            val = bot.textInGroup("Dataset Dataspace and Datatype", 3).getText();
+            assertTrue(constructWrongValueMessage("openTAttributeReference()", "wrong data type", "Reference", val),
+                    val.equals("Reference"));   // Test data type
+
+            // Open dataset 'Dataset3' Table
+            tableShell = openTreeviewObject(filetree, filename, datasetName);
+            final SWTBotNatTable dataTable = getNatTable(tableShell);
+
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTAttributeReference()", true);
+
+            retriever.testAllTableLocations(expectedData);
+
+            // Open attribute 'Attr1' Table
+            dataTable.doubleclick(1, 1);
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(attributeName + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableAttrShell = bot.shells()[2];
+            tableAttrShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableAttrShell.getText()));
+
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu().menu("Table").menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            SWTBotNatTable attributeTable = new SWTBotNatTable(tableAttrShell.bot().widget(widgetOfType(NatTable.class)));
+
+            retriever = DataRetrieverFactory.getTableDataRetriever(attributeTable, "openTAttributeReference()", true);
+
+            retriever.testAllTableLocations(expectedAttrData);
+
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            if(tableAttrShell != null && tableAttrShell.isOpen()) {
+                tableAttrShell.bot().menu().menu("Table").menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableAttrShell));
+            }
             if(tableShell != null && tableShell.isOpen()) {
                 tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
