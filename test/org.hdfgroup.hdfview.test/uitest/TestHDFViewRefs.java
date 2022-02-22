@@ -15,6 +15,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
@@ -143,7 +144,7 @@ public class TestHDFViewRefs extends AbstractWindowTest {
                 { "trefer_attr.h5/Group1/Dataset2/Attr1 H5R_ATTR" },
                 { "trefer_attr.h5/Group1/Attr2 H5R_ATTR" },
                 { "trefer_attr.h5/Group1/Datatype1/Attr3 H5R_ATTR" } };
-        String[][] expectedAttrData = {{ "0" }, { "3" }, { "6" }, { "9" } };
+        String[][] expectedAttrData = { { "0" }, { "3" }, { "6" }, { "9" } };
         SWTBotShell tableShell = null;
         SWTBotShell tableAttrShell = null;
         String filename = "trefer_attr.h5";
@@ -184,10 +185,6 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(attributeName + ".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
-            tableAttrShell = bot.shells()[2];
-            tableAttrShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(tableAttrShell.getText()));
-
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
             if(tableShell != null && tableShell.isOpen()) {
@@ -195,12 +192,31 @@ public class TestHDFViewRefs extends AbstractWindowTest {
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 
-            SWTBotNatTable attributeTable = new SWTBotNatTable(tableAttrShell.bot().widget(widgetOfType(NatTable.class)));
+            try {
+                tableAttrShell = bot.shells()[1];
+                tableAttrShell.activate();
+                bot.waitUntil(Conditions.shellIsActive(tableAttrShell.getText()));
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(attributeTable, "openTAttributeReference()", true);
+                SWTBotNatTable attributeTable = getNatTable(tableAttrShell);
 
-            retriever.testAllTableLocations(expectedAttrData);
+                retriever = DataRetrieverFactory.getTableDataRetriever(attributeTable, "openTAttributeReference()", true);
 
+                retriever.testAllTableLocations(expectedAttrData);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                fail(ex.getMessage());
+            }
+            catch (AssertionError ae) {
+                ae.printStackTrace();
+                fail(ae.getMessage());
+            }
+            finally {
+                if(tableAttrShell != null && tableAttrShell.isOpen()) {
+                    tableAttrShell.bot().menu().menu("Table").menu("Close").click();
+                    bot.waitUntil(Conditions.shellCloses(tableAttrShell));
+                }
+            }
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -211,10 +227,106 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableAttrShell != null && tableAttrShell.isOpen()) {
-                tableAttrShell.bot().menu().menu("Table").menu("Close").click();
-                bot.waitUntil(Conditions.shellCloses(tableAttrShell));
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu().menu("Table").menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
             }
+
+            try {
+                closeFile(hdfFile, false);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    @Test
+    public void openTObjectReference() {
+        String[][] expectedData = { { "trefer_obj.h5/Group1/Dataset1 H5O_TYPE_OBJ_REF" } };
+        String[][] expectedObjData = { { "0" } };
+        SWTBotShell tableShell = null;
+        SWTBotShell tableObjShell = null;
+        String filename = "trefer_obj.h5";
+        String datasetName = "Dataset3";
+        String objectName = "Dataset1";
+        File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+
+            checkFileTree(filetree, "openTObjectReference()", 6, filename);
+
+            // Test metadata
+            SWTBotTabItem tabItem = openMetadataTab(filetree, filename, datasetName, "General Object Info");
+            tabItem.activate();
+
+            String val = bot.textWithLabel("Name: ").getText();
+            assertTrue(constructWrongValueMessage("openTObjectReference()", "wrong name", datasetName, val), val.equals(datasetName)); // Test dataset name
+
+            val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
+            assertTrue(constructWrongValueMessage("openTObjectReference()", "wrong rank", "1", val),
+                    val.equals("1"));           // Test rank
+
+            val = bot.textInGroup("Dataset Dataspace and Datatype", 3).getText();
+            assertTrue(constructWrongValueMessage("openTObjectReference()", "wrong data type", "Reference", val),
+                    val.equals("Reference"));   // Test data type
+
+            // Open dataset 'Dataset3' Table
+            tableShell = openTreeviewObject(filetree, filename, datasetName);
+            final SWTBotNatTable dataTable = getNatTable(tableShell);
+
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openTObjectReference()", true);
+
+            retriever.testAllTableLocations(expectedData);
+
+            // Open object 'Dataset1' Table
+            dataTable.doubleclick(1, 1);
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(objectName + ".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+            if(tableShell != null && tableShell.isOpen()) {
+                tableShell.bot().menu().menu("Table").menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
+            }
+
+            try {
+                tableObjShell = bot.shells()[1];
+                tableObjShell.activate();
+                bot.waitUntil(Conditions.shellIsActive(tableObjShell.getText()));
+
+                SWTBotNatTable objectTable = getNatTable(tableObjShell);
+
+                retriever = DataRetrieverFactory.getTableDataRetriever(objectTable, "openTObjectReference()", true);
+
+                retriever.testAllTableLocations(expectedObjData);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                fail(ex.getMessage());
+            }
+            catch (AssertionError ae) {
+                ae.printStackTrace();
+                fail(ae.getMessage());
+            }
+            finally {
+                if(tableObjShell != null && tableObjShell.isOpen()) {
+                    tableObjShell.bot().menu().menu("Table").menu("Close").click();
+                    bot.waitUntil(Conditions.shellCloses(tableObjShell));
+                }
+            }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
             if(tableShell != null && tableShell.isOpen()) {
                 tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
