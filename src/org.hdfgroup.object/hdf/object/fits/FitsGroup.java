@@ -26,7 +26,7 @@ import hdf.object.Group;
  * structure of a group is similar to that of the UNIX file system in
  * that the group may contain references to other groups or data objects
  * just as the UNIX directory may contain subdirectories or files.
- * <p>
+ *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
@@ -36,7 +36,7 @@ public class FitsGroup extends Group
 
     /**
      * The list of attributes of this data object. Members of the list are
-     * instance of Attribute.
+     * instance of AttributeDatset.
      */
     private List attributeList;
 
@@ -45,7 +45,7 @@ public class FitsGroup extends Group
 
     /**
      * Constructs an HDF5 group with specific name, path, and parent.
-     * <p>
+     *
      * @param fileFormat the file which containing the group.
      * @param name the name of this group.
      * @param path the full path of this group.
@@ -60,26 +60,47 @@ public class FitsGroup extends Group
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
-    public boolean hasAttribute () { return false; }
+    public boolean hasAttribute () {
+        return false;
+    }
 
     // Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     *
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     public List getMetadata() throws Exception {
-        if (!isRoot()) {
+        if (!isRoot())
             return null; // there is only one group in the file: the root
-        }
 
-        if (attributeList != null) {
+        if (attributeList != null)
             return attributeList;
-        }
 
         return attributeList;
     }
 
     /**
-     * Creates a new attribute and attached to this dataset if attribute does
-     * not exist. Otherwise, just update the value of the attribute.
+     * Writes a specific piece of metadata (such as an attribute) into the file.
      *
-     * @param info the atribute to attach
+     * If an HDF(4&amp;5) attribute exists in the file, this method updates its
+     * value. If the attribute does not exist in the file, it creates the
+     * attribute in the file and attaches it to the object. It will fail to
+     * write a new attribute to the object where an attribute with the same name
+     * already exists. To update the value of an existing attribute in the file,
+     * one needs to get the instance of the attribute by getMetadata(), change
+     * its values, then use writeMetadata() to write the value.
+     *
+     * @param info
+     *            the metadata to write.
+     *
+     * @throws Exception
+     *             if the metadata can not be written
      */
     public void writeMetadata(Object info) throws Exception {
         // not supported
@@ -87,18 +108,27 @@ public class FitsGroup extends Group
     }
 
     /**
-     * Deletes an attribute from this dataset.
-     * <p>
-     * @param info the attribute to delete.
+     * Deletes an existing piece of metadata from this object.
+     *
+     * @param info
+     *            the metadata to delete.
+     *
+     * @throws Exception
+     *             if the metadata can not be removed
      */
     public void removeMetadata(Object info) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
+    /**
+     * Updates an existing piece of metadata attached to this object.
+     *
+     * @param info
+     *            the metadata to update.
+     *
+     * @throws Exception
+     *             if the metadata can not be updated
      */
     public void updateMetadata(Object info) throws Exception {
         // not supported
@@ -112,7 +142,12 @@ public class FitsGroup extends Group
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
-    /** close group access */
+    /**
+     *  close group access
+     *
+     * @param gid
+     *        the group identifier
+     */
     @Override
     public void close(long gid) {
         // not supported
@@ -121,21 +156,36 @@ public class FitsGroup extends Group
 
     /**
      * Creates a new group.
-     * @param name the name of the group to create.
-     * @param pgroup the parent group of the new group.
+     *
+     * @param name
+     *        the name of the group to create.
+     * @param pgroup
+     *        the parent group of the new group.
      *
      * @return the new group if successful. Otherwise returns null.
      *
      * @throws Exception
      *            if there is an error
      */
-    public static FitsGroup create(String name, Group pgroup)
-        throws Exception {
+    public static FitsGroup create(String name, Group pgroup) throws Exception {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     //Implementing DataFormat
+    /**
+     * Retrieves the object's metadata, such as attributes, from the file.
+     *
+     * Metadata, such as attributes, is stored in a List.
+     *
+     * @param attrPropList
+     *             the list of properties to get
+     *
+     * @return the list of metadata objects.
+     *
+     * @throws Exception
+     *             if the metadata can not be retrieved
+     */
     public List getMetadata(int... attrPropList) throws Exception {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }

@@ -26,27 +26,88 @@ import hdf.view.PaletteView.PaletteView;
 import hdf.view.TableView.TableView;
 import hdf.view.TreeView.TreeView;
 
+/**
+ * The data view factory interface for displaying data objects
+ */
 public abstract class DataViewFactory {
-    /* Get an instance of TableView given the appropriate constructor parameters */
+    /**
+     * Get an instance of TableView given the appropriate constructor parameters
+     *
+     * @param viewer
+     *             The data view manager
+     * @param dataPropertiesMap
+     *             The properties for the table view
+     *
+     * @throws ClassNotFoundException
+     *             If there is an error getting the class for a table view.
+     *
+     * @return the table view.
+     */
     @SuppressWarnings("rawtypes")
     public abstract TableView    getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException;
 
-    /* Get an instance of ImageView given the appropriate constructor parameters */
+    /**
+     * Get an instance of ImageView given the appropriate constructor parameters
+     *
+     * @param viewer
+     *             The data view manager
+     * @param dataPropertiesMap
+     *             The properties for the image view
+     *
+     * @throws ClassNotFoundException
+     *             If there is an error getting the class for a image view.
+     *
+     * @return the image view.
+     */
     @SuppressWarnings("rawtypes")
     public abstract ImageView    getImageView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException;
 
-    /*
+    /**
      * Get an instance of PaletteView given the appropriate constructor parameters
+     *
+     * @param parent
+     *             The parent shell for the palette view
+     * @param viewer
+     *             The data view manager
+     * @param theImageView
+     *             The image view for the palette view
+     *
+     * @throws ClassNotFoundException
+     *             If there is an error getting the class for a palette view.
+     *
+     * @return the palette view.
      */
     public abstract PaletteView  getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView) throws ClassNotFoundException;
 
-    /*
+    /**
      * Get an instance of MetaDataView given the appropriate constructor parameters
+     *
+     * @param parent
+     *             The parent composite for the maetadata view
+     * @param viewer
+     *             The data view manager
+     * @param theObj
+     *             The object for the metadata view
+     *
+     * @throws ClassNotFoundException
+     *             If there is an error getting the class for a metadata view.
+     *
+     * @return the metadata view.
      */
-    public abstract MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj) throws ClassNotFoundException;
+    public abstract MetaDataView getMetaDataView(Composite parent, DataViewManager viewer, HObject theObj) throws ClassNotFoundException;
 
-    /*
+    /**
      * Get an instance of TreeView given the appropriate constructor parameters
+     *
+     * @param parent
+     *             The parent composite for the tree view
+     * @param viewer
+     *             The data view manager
+     *
+     * @throws ClassNotFoundException
+     *             If there is an error getting the class for a tree view.
+     *
+     * @return the tree view.
      */
-    public abstract TreeView     getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException;
+    public abstract TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException;
 }

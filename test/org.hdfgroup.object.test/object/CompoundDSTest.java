@@ -1,7 +1,4 @@
-/**
- *
- */
-package test.object;
+package object;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -32,6 +29,28 @@ public class CompoundDSTest {
     private H5File testFile = null;
     private CompoundDS testDS = null;
 
+    protected void closeFile() {
+        if (testFile != null) {
+            try {
+                testFile.close();
+            }
+            catch (final Exception ex) {
+            }
+            testFile = null;
+        }
+    }
+
+    protected void checkObjCount(long fileid) {
+        long nObjs = 0;
+        try {
+            nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+        }
+        catch (final Exception ex) {
+            fail("H5.H5Fget_obj_count() failed. " + ex);
+        }
+        assertEquals(1, nObjs); // file id should be the only one left open
+    }
+
     @BeforeClass
     public static void createFile() throws Exception {
         try {
@@ -61,7 +80,6 @@ public class CompoundDSTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     @Before
@@ -74,9 +92,20 @@ public class CompoundDSTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        testFile = (H5File) H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+        try {
+            testFile = (H5File) H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         assertNotNull(testFile);
-        testDS = (CompoundDS) testFile.get(H5TestFile.NAME_DATASET_COMPOUND);
+
+        try {
+            testDS = (CompoundDS) testFile.get(H5TestFile.NAME_DATASET_COMPOUND);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         assertNotNull(testDS);
         testDS.init();
     }
@@ -84,12 +113,8 @@ public class CompoundDSTest {
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            try {
-                testFile.close();
-            }
-            catch (final Exception ex) {
-            }
-            testFile = null;
+            checkObjCount(testFile.getFID());
+            closeFile();
         }
         try {
             int openID = H5.getOpenIDCount();
@@ -140,14 +165,6 @@ public class CompoundDSTest {
         for (int i = 0; i < correctMemberCount; i++) {
             assertNull(testDS.getMemberDims(i)); // all scalar data
         }
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
@@ -191,14 +208,5 @@ public class CompoundDSTest {
                 }
             }
         }
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(),
-                    HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 }

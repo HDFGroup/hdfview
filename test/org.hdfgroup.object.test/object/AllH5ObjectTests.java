@@ -1,7 +1,7 @@
 /**
  * 
  */
-package test.object;
+package object;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

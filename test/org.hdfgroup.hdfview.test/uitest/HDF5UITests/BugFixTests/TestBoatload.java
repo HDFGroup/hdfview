@@ -1,4 +1,4 @@
-package test.uitest.HDF5UITests.BugFixTests;
+package uitest.HDF5UITests.BugFixTests;
 
 import static org.junit.Assert.fail;
 
@@ -9,8 +9,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest;
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestBoatload extends AbstractWindowTest {
 
@@ -47,7 +47,7 @@ public class TestBoatload extends AbstractWindowTest {
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
             TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "testBoatload()");
-            retriever.setContainerHeaderOffset(2);
+            retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedData);
         }

@@ -3,5 +3,5 @@ module org.hdfgroup.object.nc {
 
     requires netcdf;
     requires org.hdfgroup.object;
-    requires slf4j.api;
+    requires org.slf4j;
 }

@@ -38,10 +38,24 @@ import hdf.object.ScalarDS;
 import hdf.view.Tools;
 import hdf.view.DataView.DataViewManager;
 
+/**
+ *
+ * The metadata view interface for displaying dataset metadata information
+ */
 public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatasetMetaDataView.class);
 
+    /**
+     *The metadata view interface for displaying dataset metadata information
+     *
+     * @param parentComposite
+     *        the parent visual object
+     * @param viewer
+     *        the viewr to use
+     * @param theObj
+     *        the object to display the metadata info
+     */
     public DefaultDatasetMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
         super(parentComposite, viewer, theObj);
     }

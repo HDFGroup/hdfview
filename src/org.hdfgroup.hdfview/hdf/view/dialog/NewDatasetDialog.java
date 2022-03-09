@@ -118,6 +118,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         dataView = observer;
     }
 
+    /**
+     * Open the NewDataseteDialog for adding a new dataset.
+     */
     public void open() {
         Shell parent = getParent();
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
@@ -139,6 +142,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         nameField = new Text(fieldComposite, SWT.SINGLE | SWT.BORDER);
         nameField.setFont(curFont);
         GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
+
         data.minimumWidth = 250;
         nameField.setLayoutData(data);
 
@@ -918,7 +922,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             Shell parent = getParent();
             helpShell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
                     SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
-            shell.setFont(curFont);
+            helpShell.setFont(curFont);
             helpShell.setText("Create New Dataset");
             helpShell.setImage(ViewProperties.getHdfIcon());
             helpShell.setLayout(new GridLayout(1, true));
@@ -986,7 +990,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                             browser.setUrl(u.toString());
                         }
                         catch (Exception ex) {
-                            log.debug("URLClassLoader failed:", ex);
+                            log.trace("URLClassLoader failed:", ex);
                         }
                     }
                     catch (Exception e) {

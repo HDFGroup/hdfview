@@ -3,12 +3,12 @@
 
 package intro;
 
-import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ScalarDS;
 
 
@@ -23,7 +23,7 @@ public class H5Object_CreateAttribute {
     private static void CreateDatasetAttribute() {
         H5File file = null;
         H5ScalarDS dset = null;
-        Attribute attr = null;
+        H5ScalarAttr attr = null;
         int[][] dset_data = new int[DIM_X][DIM_Y];
         long[] dims1 = { DIM_X, DIM_Y };
         long[] dims = { 2 };
@@ -60,7 +60,7 @@ public class H5Object_CreateAttribute {
 
         // Create a dataset attribute.
         try {
-            attr = new Attribute(dset, DATASETATTRIBUTE, typeInt, dims, attr_data);
+            attr = new H5ScalarAttr(dset, DATASETATTRIBUTE, typeInt, dims, attr_data);
         }
         catch (Exception e) {
             e.printStackTrace();
