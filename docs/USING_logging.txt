@@ -12,11 +12,11 @@ To enable logging in HDFView, you must use the slf4j-simple-1.7.*.jar
 
 HDFView:
   To enable logging in HDFView requires editing the HDFView.cfg file in the HDFView/app folder.
-  change line 25: app.classpath=$APPDIR/slf4j-nop-1.7.25.jar
+  change line 25: app.classpath=$APPDIR/slf4j-nop-1.7.*.jar
   to: app.classpath=$APPDIR
 
-  Next move the file slf4j-nop-1.7.25.jar in the HDFView/app folder to the  HDFView/app/extra folder.
-  And move the file slf4j-nop-1.7.25.jar in the HDFView/app/mods folder to the  HDFView/app/mods/extra folder.
+  Next move the file slf4j-nop-1.7.*.jar in the HDFView/app folder to the  HDFView/app/extra folder.
+  And move the file slf4j-nop-1.7.*.jar in the HDFView/app/mods folder to the  HDFView/app/mods/extra folder.
 
   The file HDFViewLogger.log file will be written in the folder specified by HDFView root.
   HDFView root is displayed in the status bar of HDFView.
