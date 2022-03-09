@@ -33,7 +33,6 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
 import hdf.object.Utils;
 
 /**

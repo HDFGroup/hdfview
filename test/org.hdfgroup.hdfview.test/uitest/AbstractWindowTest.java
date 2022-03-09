@@ -499,16 +499,16 @@ public abstract class AbstractWindowTest {
      */
     public static class DataRetrieverFactory {
 
-        public static TableDataRetriever getTableDataRetriever(AbstractSWTBot<?> tableObject, String funcName) {
+        public static TableDataRetriever getTableDataRetriever(AbstractSWTBot<?> tableObject, String funcName, boolean noRegex) {
             if (tableObject == null)
                 throw new IllegalArgumentException("AbstractSWTBot parameter is null");
             if (funcName == null)
                 throw new IllegalArgumentException("function name parameter is null");
 
             if (tableObject instanceof SWTBotNatTable)
-                return new NatTableDataRetriever((SWTBotNatTable) tableObject, funcName);
+                return new NatTableDataRetriever((SWTBotNatTable) tableObject, funcName, noRegex);
             else
-                return new SWTTableDataRetriever((SWTBotTable) tableObject, funcName);
+                return new SWTTableDataRetriever((SWTBotTable) tableObject, funcName, noRegex);
         }
 
         public static class TableDataRetriever {
@@ -517,8 +517,11 @@ public abstract class AbstractWindowTest {
 
             protected final String funcName;
 
-            public TableDataRetriever(String funcName) {
+            protected final boolean noRegex;
+
+            public TableDataRetriever(String funcName, boolean noRegex) {
                 this.funcName = funcName;
+                this.noRegex = noRegex;
 
                 this.sb = new StringBuilder();
             }
@@ -570,8 +573,8 @@ public abstract class AbstractWindowTest {
             boolean pagingActive = false;
             Position lastVisibleCellPos = new Position(1 + containerRowHeaderOffset, 1 + containerColHeaderOffset);
 
-            NatTableDataRetriever(SWTBotNatTable tableObj, String funcName) {
-                super(funcName);
+            NatTableDataRetriever(SWTBotNatTable tableObj, String funcName, boolean noRegex) {
+                super(funcName, noRegex);
 
                 this.table = tableObj;
                 log.trace("lastVisibleCellPos: row is {}, col is {}", lastVisibleCellPos.row, lastVisibleCellPos.column);
@@ -598,6 +601,8 @@ public abstract class AbstractWindowTest {
                 sb.setLength(0);
                 sb.append("wrong value at table index ").append("(").append(rowIndex).append(", ").append(colIndex).append(")");
                 String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
+                if (noRegex)
+                    expectedValRegex = "\\Q" + expectedValRegex + "\\E";
                 assertTrue(errMsg, val.matches(expectedValRegex));
             }
 
@@ -619,8 +624,8 @@ public abstract class AbstractWindowTest {
 
             private final SWTBotTable table;
 
-            SWTTableDataRetriever(SWTBotTable tableObj, String funcName) {
-                super(funcName);
+            SWTTableDataRetriever(SWTBotTable tableObj, String funcName, boolean noRegex) {
+                super(funcName, noRegex);
 
                 this.table = tableObj;
             }
@@ -636,6 +641,8 @@ public abstract class AbstractWindowTest {
                 sb.setLength(0);
                 sb.append("wrong value at table index ").append("(").append(rowIndex).append(", ").append(colIndex).append(")");
                 String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
+                if (noRegex)
+                    expectedValRegex = "\\Q" + expectedValRegex + "\\E";
                 assertTrue(errMsg, val.matches(expectedValRegex));
             }
         }

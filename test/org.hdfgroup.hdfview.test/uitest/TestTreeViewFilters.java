@@ -54,7 +54,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
              * tableShell = openTreeviewObject(filetree, testFilename, "all");
              * SWTBotNatTable dataTable = getNatTable(tableShell);
              *
-             * TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+             * TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
              *
              * retriever.testAllTableLocations(filtersExpectedData);
              *
@@ -65,7 +65,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, testFilename, "alloc_time_early");
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
 
             retriever.testAllTableLocations(filtersExpectedData);
 
@@ -75,7 +75,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, testFilename, "alloc_time_incr");
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
 
             retriever.testAllTableLocations(filtersExpectedData);
 
@@ -85,7 +85,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, testFilename, "alloc_time_late");
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
 
             retriever.testAllTableLocations(filtersExpectedData);
 
@@ -95,7 +95,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, testFilename, "chunked");
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
 
             retriever.testAllTableLocations(filtersExpectedData);
 
@@ -105,7 +105,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, testFilename, "compact");
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
 
             retriever.testAllTableLocations(filtersExpectedData);
 
@@ -115,7 +115,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, testFilename, "contiguous");
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
 
             retriever.testAllTableLocations(filtersExpectedData);
 
@@ -125,7 +125,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, testFilename, "deflate");
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
 
             retriever.testAllTableLocations(filtersExpectedData);
 
@@ -135,7 +135,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, testFilename, "fletcher32");
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
 
             retriever.testAllTableLocations(filtersExpectedData);
 
@@ -148,7 +148,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
              * = getNatTable(tableShell);
              *
              * retriever = DataRetrieverFactory.getTableDataRetriever(dataTable,
-             * "openHDF5Filters()");
+             * "openHDF5Filters()", false);
              *
              * retriever.testAllTableLocations(filtersExpectedData);
              *
@@ -161,7 +161,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
              * = getNatTable(tableShell);
              *
              * retriever = DataRetrieverFactory.getTableDataRetriever(dataTable,
-             * "openHDF5Filters()");
+             * "openHDF5Filters()", false);
              *
              * retriever.testAllTableLocations(filtersExpectedData);
              *
@@ -171,7 +171,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, testFilename, "shuffle");
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
 
             retriever.testAllTableLocations(filtersExpectedData);
 
@@ -183,7 +183,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
              * tableShell = openTreeviewObject(filetree, testFilename, "szip");
              * dataTable = getNatTable(tableShell);
              *
-             * retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()");
+             * retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5Filters()", false);
              *
              * retriever.testAllTableLocations(filtersExpectedData);
              *

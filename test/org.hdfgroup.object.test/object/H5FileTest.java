@@ -117,10 +117,12 @@ public class H5FileTest
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+            log.debug("checkObjCount : Number of objects: " + nObjs);
         }
         catch (final Exception ex) {
             fail("H5.H5Fget_obj_count() failed. " + ex);
         }
+        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     @BeforeClass
@@ -213,7 +215,7 @@ public class H5FileTest
      * <li>close the file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testOpen() {
         log.debug("testOpen");
         // Close default testFile
@@ -262,7 +264,7 @@ public class H5FileTest
      * <li>close/delete the file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testCreateString() {
         log.debug("testCreateString");
         final String nameNew = "testH5File.h5";
@@ -300,7 +302,7 @@ public class H5FileTest
      * <li>check the content of the root node
      * </ul>
      */
-    @Ignore
+    @Test
     public void testGetRootObject() {
         log.debug("testGetRootObject");
         final HObject root = testFile.getRootObject();
@@ -311,7 +313,7 @@ public class H5FileTest
     /**
      * Test method for {@link hdf.object.h5.H5File#isReadOnly()}.
      */
-    @Ignore
+    @Test
     public void testIsReadOnly() {
         log.debug("testIsReadOnly");
         assertFalse(testFile.isReadOnly());
@@ -328,7 +330,7 @@ public class H5FileTest
      * <li>close/delete the file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testCreateGroup() {
         log.debug("testCreateGroup");
         final String nameNew = "testH5File.h5";
@@ -392,7 +394,7 @@ public class H5FileTest
      * <li>close/delete the file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testCreateGroupWithGroupplist() {
         log.debug("testCreateGroupWithGroupplist");
         final String nameNew = "testH5File2.h5";
@@ -512,7 +514,7 @@ public class H5FileTest
      * <li>close/delete the file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testcreateGcpl() {
         log.debug("testcreateGcpl");
         final String nameNew = "test8.h5";
@@ -615,7 +617,7 @@ public class H5FileTest
      * <li>close/delete the new file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testCreateObjects() {
         log.debug("testCreateObjects");
         final String nameNew = "testH5File.h5";
@@ -660,7 +662,7 @@ public class H5FileTest
      * <li>Check a non HDF5 file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testIsThisTypeString() {
         log.debug("testIsThisTypeString");
         assertTrue(H5FILE.isThisType(H5TestFile.NAME_FILE_H5));
@@ -678,7 +680,7 @@ public class H5FileTest
      * <li>Check a non HDF5 file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testIsThisTypeFileFormat() {
         log.debug("testIsThisTypeFileFormat");
         assertTrue(H5FILE.isThisType(testFile));
@@ -696,7 +698,7 @@ public class H5FileTest
      * </ul>
      */
     @SuppressWarnings({ "rawtypes", "deprecation" })
-    @Test
+    @Ignore    // depends on HDFFV-9547
     public void testCopyHObjectGroup() {
         log.debug("testCopyHObjectGroup");
         Group root = null;
@@ -778,7 +780,7 @@ public class H5FileTest
             fail("file.close() failed. " + ex);
         }
 
-        //file.delete();
+        file.delete();
     }
 
     /**
@@ -794,7 +796,7 @@ public class H5FileTest
      * </ul>
      */
     @SuppressWarnings("rawtypes")
-    @Ignore
+    @Test
     public void testDeleteHObject() {
         log.debug("testDeleteHObject");
         Group root = null;
@@ -876,7 +878,7 @@ public class H5FileTest
      * <li>close and delete the test file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testGet() {
         log.debug("testGet");
         HObject obj = null;
@@ -939,7 +941,7 @@ public class H5FileTest
      * <li>close and delete the test file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testGetFromOpen() {
         log.debug("testGetFromOpen");
         HObject obj = null;
@@ -1007,7 +1009,7 @@ public class H5FileTest
      * <li>close/delete the new file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testH5FileStringInt() {
         log.debug("testH5FileStringInt");
         Dataset dset = null;
@@ -1138,7 +1140,7 @@ public class H5FileTest
      * <li>close the file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testOpenInt() {
         log.debug("testOpenInt");
         // Close default testFile
@@ -1196,7 +1198,7 @@ public class H5FileTest
      * </ul>
      */
     @SuppressWarnings({ "rawtypes", "deprecation" })
-    @Ignore
+    @Ignore    // depends on HDFFV-9547
     public void testUpdateReferenceDataset() {
         log.debug("testUpdateReferenceDataset");
         Group root = null;
@@ -1324,7 +1326,7 @@ public class H5FileTest
     /**
      * Test method for {@link hdf.object.h5.H5File#createImageAttributes(hdf.object.Dataset, int)} .
      */
-    @Ignore
+    @Test
     public void testCreateImageAttributes() {
         log.debug("testCreateImageAttributes");
         H5ScalarDS img = null;
@@ -1344,7 +1346,7 @@ public class H5FileTest
      * Test method for {@link hdf.object.h5.H5File#setLibBounds(int , int )}
      * {@link hdf.object.h5.H5File#getLibBounds()}
      */
-    @Ignore
+    @Test
     public void testSetLibBounds() {
         log.debug("testSetLibBounds");
         String low = "Latest";
@@ -1401,7 +1403,7 @@ public class H5FileTest
      * <li>close/delete the file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testCreateLink() {
         log.debug("testCreateLink");
         final String nameNew = "testH5FileLinks1.h5";
@@ -1587,7 +1589,7 @@ public class H5FileTest
      * <li>close/delete the files
      * </ul>
      */
-    @Ignore
+    @Test
     public void testCreateLinkExternal() {
         log.debug("testCreateLinkExternal");
         final String nameNew = "TESTFILE1.h5";
@@ -1769,7 +1771,7 @@ public class H5FileTest
      * </ul>
      */
     @SuppressWarnings("rawtypes")
-    @Ignore
+    @Test
     public void testCreateAttribute() {
         log.debug("testCreateAttribute");
         final String nameNew = "TESTFILEAttr1.h5";
@@ -1878,7 +1880,7 @@ public class H5FileTest
      * <li>close/delete the file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testDatatypehasAttribute() {
         log.debug("testDatatypehasAttribute");
         final String nameNew = "testH5FileDatatype.h5";
@@ -1950,7 +1952,7 @@ public class H5FileTest
      * <li>close/delete the file
      * </ul>
      */
-    @Ignore
+    @Test
     public void testrenameAttribute() {
         log.debug("testrenameAttribute");
         final String nameNew = "testAttrName.h5";

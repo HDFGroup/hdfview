@@ -116,6 +116,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import hdf.hdf5lib.HDF5Constants;
+
 import hdf.object.CompoundDS;
 import hdf.object.DataFormat;
 import hdf.object.Dataset;
@@ -124,7 +126,10 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+
 import hdf.object.h5.H5Datatype;
+import hdf.object.h5.H5ReferenceType;
+
 import hdf.view.Chart;
 import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
@@ -514,6 +519,8 @@ public abstract class DefaultBaseTableView implements TableView
         /* Make sure that the Dataset's data value is accessible for conditionally adding GUI components */
         try {
             loadData(dataObject);
+            if (isStdRef)
+                ((H5ReferenceType)dtype).setData(dataValue);
         }
         catch (Exception ex) {
             log.debug("loadData(): data not loaded: ", ex);
@@ -2609,8 +2616,12 @@ public abstract class DefaultBaseTableView implements TableView
                                 }
                                 int len = Array.getLength(selectedRows);
                                 for (int i = 0; i < len; i++) {
-                                    if (isStdRef)
-                                        showStdRefData((byte[]) Array.get(theData, selectedRows[i]));
+                                    if (isStdRef) {
+                                        byte[] refarr = new byte[(int) HDF5Constants.H5R_REF_BUF_SIZE];
+                                        int ref_start = selectedRows[i] * HDF5Constants.H5R_REF_BUF_SIZE;
+                                        System.arraycopy((byte[])theData, ref_start, refarr, 0, (int)HDF5Constants.H5R_REF_BUF_SIZE);
+                                        showStdRefData(refarr);
+                                    }
                                     else if (isRegRef)
                                         showRegRefData((String) Array.get(theData, selectedRows[i]));
                                     else if (isObjRef)
@@ -2856,7 +2867,10 @@ public abstract class DefaultBaseTableView implements TableView
                     for (int i = 0; i < len; i++) {
                         if (isStdRef) {
                             log.trace("show reference data: Show data[{}] as {}: isStdRef={}", i, viewType, isStdRef);
-                            showStdRefData((byte[]) Array.get(theData, i));
+                            byte[] refarr = new byte[(int) HDF5Constants.H5R_REF_BUF_SIZE];
+                            int ref_start = selectedRows[i] * HDF5Constants.H5R_REF_BUF_SIZE;
+                            System.arraycopy((byte[])theData, ref_start, refarr, 0, (int)HDF5Constants.H5R_REF_BUF_SIZE);
+                            showStdRefData(refarr);
                         }
                         else if (isRegRef) {
                             log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i, viewType, isRegRef);
@@ -2909,7 +2923,10 @@ public abstract class DefaultBaseTableView implements TableView
                     for (int i = 0; i < len; i++) {
                         if (isStdRef) {
                             log.trace("show reference data: Show data[{}] as {}: isStdRef={}", i, viewType, isStdRef);
-                            showStdRefData((byte[]) Array.get(theData, i));
+                            byte[] refarr = new byte[(int) HDF5Constants.H5R_REF_BUF_SIZE];
+                            int ref_start = selectedRows[i] * HDF5Constants.H5R_REF_BUF_SIZE;
+                            System.arraycopy((byte[])theData, ref_start, refarr, 0, (int)HDF5Constants.H5R_REF_BUF_SIZE);
+                            showStdRefData(refarr);
                         }
                         else if (isRegRef) {
                             log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i, viewType, isRegRef);
@@ -2962,7 +2979,10 @@ public abstract class DefaultBaseTableView implements TableView
             //             if (isStdRef) {
             //                 log.trace("show reference data: Show data[{}] as {}: isStdRef={}", i,
             //                           viewType, isStdRef);
-            //                 showStdRefData((byte[]) Array.get(theData, i));
+            //                 byte[] refarr = new byte[(int) HDF5Constants.H5R_REF_BUF_SIZE];
+            //                 int ref_start = selectedRows[i] * HDF5Constants.H5R_REF_BUF_SIZE;
+            //                 System.arraycopy((byte[])theData, ref_start, refarr, 0, (int)HDF5Constants.H5R_REF_BUF_SIZE);
+            //                 showStdRefData(refarr);
             //             }
             //             else if (isRegRef) {
             //                 log.trace("show reference data: Show data[{}] as {}: isRegRef={}", i,

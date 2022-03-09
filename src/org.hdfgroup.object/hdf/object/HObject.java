@@ -59,22 +59,20 @@ import java.io.Serializable;
  * shows how to retrieve an object ID from a file:
  *
  * <pre>
- *      // retrieve the object ID
- *      try {
- *           byte[] ref_buf = H5.H5Rcreate_object(h5file.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
- *           oid = HDFNativeData.byteToLong(ref_buf);
- *       }
- *       catch (Exception ex) {
- *       }
- *       // Destroy the object reference we were using
- *       // If the file doesn't exist or tempfile is null, this can throw
- *       // an exception, but that exception is ignored.
- *       if (oid) {
- *           HDFArray theArray = new HDFArray(oid);
- *           byte[] refBuf = theArray.byteify();
- *           H5.H5Rdestroy(refBuf);
- *           oid = null;
- *       }
+ *                // retrieve the object ID
+ *                byte[] refBuf = null;
+ *                try {
+ *                    refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
+ *                    this.oid = HDFNativeData.byteToLong(refBuf);
+ *                    log.trace("constructor REF {} to OID {}", refBuf, this.oid);
+ *                }
+ *                catch (Exception ex) {
+ *                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(), this.getFullName());
+ *                }
+ *                finally {
+ *                    if (refBuf)
+ *                        H5.H5Rdestroy(refBuf);
+ *                }
  * </pre>
  *
  * @version 2.0 4/2/2018
@@ -200,9 +198,6 @@ public abstract class HObject implements Serializable
             log.debug("setFullname failed", e.getMessage());
         }
         log.trace("Fullname={} oid={}", this.fullName, this.oid);
-    }
-
-    protected void finalize() throws Throwable {
     }
 
     /**

@@ -46,6 +46,7 @@ import hdf.object.ScalarDS;
 
 import hdf.object.h5.H5Attribute;
 import hdf.object.h5.H5Datatype;
+import hdf.object.h5.H5ReferenceType;
 
 /**
  * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
@@ -311,28 +312,6 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
                 tid = H5.H5Aget_type(aid);
                 log.trace("init(): tid={} sid={} rank={} space_type={}", tid, sid, rank, space_type);
 
-                try {
-                    datatype = new H5Datatype(getFileFormat(), tid);
-
-                    log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
-                            tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isNamed(), datatype.isVLEN(),
-                            datatype.isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
-                }
-                catch (Exception ex) {
-                    log.debug("init(): failed to create datatype for attribute: ", ex);
-                    datatype = null;
-                }
-
-                // Check if the datatype in the file is the native datatype
-                try {
-                    nativeTID = H5.H5Tget_native_type(tid);
-                    isNativeDatatype = H5.H5Tequal(tid, nativeTID);
-                    log.trace("init(): isNativeDatatype={}", isNativeDatatype);
-                }
-                catch (Exception ex) {
-                    log.debug("init(): check if native type failure: ", ex);
-                }
-
                 if (rank == 0) {
                     // a scalar data point
                     rank = 1;
@@ -345,6 +324,42 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
                     maxDims = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
                     log.trace("init(): rank={}, dims={}, maxDims={}", rank, dims, maxDims);
+                }
+
+                if (datatype == null) {
+                    try {
+                        int nativeClass = H5.H5Tget_class(tid);
+                        if (nativeClass == HDF5Constants.H5T_REFERENCE) {
+                            long lsize = 1;
+                            if (rank > 0) {
+                                log.trace("init(): rank={}, dims={}", rank, dims);
+                                for (int j = 0; j < dims.length; j++) {
+                                    lsize *= dims[j];
+                                }
+                            }
+                            datatype = new H5ReferenceType(getFileFormat(), lsize, tid);
+                        }
+                        else
+                            datatype = new H5Datatype(getFileFormat(), tid);
+
+                        log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
+                                tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isNamed(), datatype.isVLEN(),
+                                datatype.isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isRegRef());
+                    }
+                    catch (Exception ex) {
+                        log.debug("init(): failed to create datatype for attribute: ", ex);
+                        datatype = null;
+                    }
+                }
+
+                // Check if the datatype in the file is the native datatype
+                try {
+                    nativeTID = H5.H5Tget_native_type(tid);
+                    isNativeDatatype = H5.H5Tequal(tid, nativeTID);
+                    log.trace("init(): isNativeDatatype={}", isNativeDatatype);
+                }
+                catch (Exception ex) {
+                    log.debug("init(): check if native type failure: ", ex);
                 }
 
                 inited = true;
@@ -397,6 +412,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
             init();
 
         if (datatype == null) {
+            log.trace("getDatatype(): datatype == null");
             long aid = HDF5Constants.H5I_INVALID_HID;
             long tid = HDF5Constants.H5I_INVALID_HID;
 
@@ -423,7 +439,23 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
                             log.debug("getDatatype(): toNative: ", ex);
                         }
                     }
-                    datatype = new H5Datatype(getFileFormat(), tid);
+                    int nativeClass = H5.H5Tget_class(tid);
+                    if (nativeClass == HDF5Constants.H5T_REFERENCE) {
+                        long lsize = 1;
+                        long sid = H5.H5Aget_space(aid);
+                        int rank = H5.H5Sget_simple_extent_ndims(sid);
+                        if (rank > 0) {
+                            long dims[] = new long[rank];
+                            H5.H5Sget_simple_extent_dims(sid, dims, null);
+                            log.trace("getDatatype(): rank={}, dims={}", rank, dims);
+                            for (int j = 0; j < dims.length; j++) {
+                                lsize *= dims[j];
+                            }
+                        }
+                        datatype = new H5ReferenceType(getFileFormat(), lsize, tid);
+                    }
+                    else
+                        datatype = new H5Datatype(getFileFormat(), tid);
                 }
                 catch (Exception ex) {
                     log.debug("getDatatype(): ", ex);
@@ -926,6 +958,39 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
      * @return the string representation of the data values.
      */
     public String toAttributeString(String delimiter, int maxItems) {
+        Object theData = originalBuf;
+        if (theData == null) {
+            log.debug("toString: value is null");
+            return null;
+        }
+
+        if (theData instanceof List<?>) {
+            log.trace("toString: value is list");
+            return null;
+        }
+
+        Class<? extends Object> valClass = theData.getClass();
+
+        if (!valClass.isArray()) {
+            log.trace("toString: finish - not array");
+            String strValue = theData.toString();
+            if (maxItems > 0 && strValue.length() > maxItems)
+                // truncate the extra characters
+                strValue = strValue.substring(0, maxItems);
+            return strValue;
+        }
+
+        // value is an array
+        StringBuilder sb = new StringBuilder();
+        long lsize = 1;
+        for (int j = 0; j < dims.length; j++)
+            lsize *= dims[j];
+
+        H5Datatype dtype = (H5Datatype)getDatatype();
+        log.trace("toString: lsize={} isStdRef={} Array.getLength={}", lsize, dtype.isStdRef(), Array.getLength(theData));
+        if (dtype.isStdRef()) {
+            return ((H5ReferenceType)dtype).toString(delimiter, maxItems);
+        }
         return toString(delimiter, maxItems);
     }
 
@@ -1118,11 +1183,13 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
                 else {
                     if (dsDatatype.isRef() && tmpData instanceof String) {
                         // reference is a path+name to the object
-                        byte[] refBuf = H5.H5Rcreate_object(getFID(), (String) tmpData, HDF5Constants.H5P_DEFAULT);
                         log.trace("AttributeCommonIO(): Attribute class is CLASS_REFERENCE");
                         log.trace("AttributeCommonIO(): H5Awrite aid={} tid={}", attr_id, tid);
-                        H5.H5Awrite(attr_id, tid, refBuf);
-                        H5.H5Rdestroy(refBuf);
+                        byte[] refBuf = H5.H5Rcreate_object(getFID(), (String) tmpData, HDF5Constants.H5P_DEFAULT);
+                        if (refBuf != null) {
+                            H5.H5Awrite(attr_id, tid, refBuf);
+                            H5.H5Rdestroy(refBuf);
+                        }
                     }
                     else if (Array.get(tmpData, 0) instanceof String) {
                         int len = ((String[]) tmpData).length;

@@ -205,8 +205,10 @@ public class H5TestFile
         long[] oid = pal.getOID();
         final Vector attrs = (Vector) ((H5ScalarDS)dsets[7]).getMetadata();
         final int n = attrs.size();
+        log.debug("wave palette has {} attributes", n);
         for (int i = 0; i < n; i++) {
             final H5ScalarAttr attr = (H5ScalarAttr) attrs.get(i);
+            log.debug("wave palette attribute[{}] is {}", i, attr.getAttributeName());
             if ("PALETTE".equals(attr.getAttributeName()))
                 attr.writeAttribute(oid);
         }

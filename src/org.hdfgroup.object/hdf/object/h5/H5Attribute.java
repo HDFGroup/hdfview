@@ -24,7 +24,7 @@ import hdf.object.h5.H5File;
  *
  * @see hdf.object.HObject
  */
-public interface H5Attribute extends Attribute{
+public interface H5Attribute extends Attribute {
 
     /**
      * The general read and write attribute operations for hdf5 object data.
