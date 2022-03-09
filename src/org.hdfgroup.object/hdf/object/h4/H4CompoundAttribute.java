@@ -104,7 +104,7 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
      * String[] classValue = { &quot;IMAGE&quot; };
      * Datatype attrType = null;
      * try {
-     *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     *     attrType = new H4Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
      * Attribute attr = new Attribute(attrName, attrType, attrDims);
@@ -143,7 +143,7 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
      * String[] classValue = { &quot;IMAGE&quot; };
      * Datatype attrType = null;
      * try {
-     *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     *     attrType = new H4Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
      * Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);

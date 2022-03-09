@@ -42,7 +42,9 @@ import hdf.object.HObject;
 import hdf.object.ScalarDS;
 
 import hdf.object.h5.H5Attribute;
+import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5CompoundAttr;
+import hdf.object.h5.H5ReferenceType;
 import hdf.object.h5.H5ScalarAttr;
 
 /**
@@ -487,7 +489,11 @@ public class H5File extends FileFormat
 
                         H5Datatype attrType = null;
                         try {
-                            attrType = new H5Datatype(obj.getFileFormat(), tid);
+                            int nativeClass = H5.H5Tget_class(tid);
+                            if (nativeClass == HDF5Constants.H5T_REFERENCE)
+                                attrType = new H5ReferenceType(obj.getFileFormat(), lsize, tid);
+                            else
+                                attrType = new H5Datatype(obj.getFileFormat(), tid);
 
                             log.trace("getAttribute(): Attribute[{}] Datatype={}", i, attrType.getDescription());
                             log.trace("getAttribute(): Attribute[{}] has size={} isCompound={} is_variable_str={} isVLEN={}",
@@ -518,7 +524,10 @@ public class H5File extends FileFormat
 
                         try {
                             //attr.AttributeCommonIO(aid, H5File.IO_TYPE.READ, null);
-                            attr.getAttributeData();
+                            Object attrData = attr.getAttributeData();
+                            log.trace("getAttribute(): attrType.isReference()={}", attrType.isReference());
+                            if (attrType.isReference())
+                                ((H5ReferenceType)attrType).setData(attrData);
                         }
                         catch (Exception ex) {
                             log.debug("getAttribute(): failed to read attribute: ", ex);
@@ -727,7 +736,7 @@ public class H5File extends FileFormat
                 if (did >= 0) {
                     try {
                         tid = H5.H5Dget_type(did);
-                        if (H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_OBJ)) {
+                        if (H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF)) {
                             refDatasets.add(sd);
                         }
                     }
@@ -1480,7 +1489,11 @@ public class H5File extends FileFormat
 
                 H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
-                dtype = new H5Datatype(this, name, null);
+                int nativeClass = H5.H5Tget_class(tid);
+                if (nativeClass == HDF5Constants.H5T_REFERENCE)
+                    dtype = new H5ReferenceType(this, name, null);
+                else
+                    dtype = new H5Datatype(this, name, null);
             }
             finally {
                 H5.H5Tclose(tid);
@@ -1755,6 +1768,10 @@ public class H5File extends FileFormat
         if (currentObj instanceof Group) {
             log.trace("createLink(): Link target is type H5Group");
             obj = new H5Group(this, name, parent_path, parentGroup);
+        }
+        else if (currentObj instanceof H5ReferenceType) {
+            log.trace("createLink(): Link target is type H5Datatype");
+            obj = new H5ReferenceType(this, name, parent_path);
         }
         else if (currentObj instanceof H5Datatype) {
             log.trace("createLink(): Link target is type H5Datatype");
@@ -2616,7 +2633,11 @@ public class H5File extends FileFormat
             catch (Exception ex) {
                 log.debug("copyDatatype(): {} H5Ocopy(tid_src {}) failure: ", dstName, tid_src, ex);
             }
-            datatype = new H5Datatype(pgroup.getFileFormat(), dstName, path);
+            int nativeClass = H5.H5Tget_class(tid_src);
+            if (nativeClass == HDF5Constants.H5T_REFERENCE)
+                datatype = new H5ReferenceType(pgroup.getFileFormat(), dstName, path);
+            else
+                datatype = new H5Datatype(pgroup.getFileFormat(), dstName, path);
 
             pgroup.addToMemberList(datatype);
         }
@@ -2837,11 +2858,15 @@ public class H5File extends FileFormat
         }
 
         H5L_info_t link_info = null;
-        try {
-            link_info = H5.H5Lget_info(obj.getFID(), obj.getFullName(), HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Exception err) {
-            log.debug("getLinkTargetName(): H5Lget_info {} failure: ", obj.getFullName(), err);
+        if (obj.getFID() < 0)
+            log.trace("getLinkTargetName(): file id for:{} is invalid", obj.getFullName());
+        else {
+            try {
+                link_info = H5.H5Lget_info(obj.getFID(), obj.getFullName(), HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Exception err) {
+                log.debug("getLinkTargetName(): H5Lget_info {} failure: ", obj.getFullName(), err);
+            }
         }
         if (link_info != null) {
             if ((link_info.type == HDF5Constants.H5L_TYPE_SOFT) || (link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL)) {

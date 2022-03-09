@@ -46,7 +46,7 @@ public class TestBoatload extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "testBoatload()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "testBoatload()", false);
             retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedData);

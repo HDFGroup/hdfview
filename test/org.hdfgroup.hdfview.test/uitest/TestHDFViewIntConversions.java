@@ -78,7 +78,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS08()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS08()", false);
 
             retriever.testAllTableLocations(expectedData);
 
@@ -163,7 +163,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU08()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU08()", false);
 
             retriever.testAllTableLocations(expectedData);
 
@@ -248,7 +248,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS16()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS16()", false);
 
             retriever.testAllTableLocations(expectedData);
 
@@ -333,7 +333,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU16()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU16()", false);
 
             retriever.testAllTableLocations(expectedData);
 
@@ -442,7 +442,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS32()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS32()", false);
 
             retriever.testAllTableLocations(expectedData);
 
@@ -551,7 +551,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU32()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU32()", false);
 
             retriever.testAllTableLocations(expectedData);
 
@@ -860,7 +860,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS64()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDS64()", false);
 
             retriever.testAllTableLocations(expectedData);
 
@@ -1201,7 +1201,7 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU64()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5GroupDU64()", false);
 
             retriever.testAllTableLocations(expectedData);
 

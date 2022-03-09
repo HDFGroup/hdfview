@@ -44,6 +44,7 @@ import hdf.object.MetaDataContainer;
 import hdf.object.Utils;
 
 import hdf.object.h5.H5Datatype;
+import hdf.object.h5.H5ReferenceType;
 
 /**
  * The H5CompoundAttr class defines an HDF5 attribute of compound datatypes.
@@ -471,7 +472,23 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
             if (aid >= 0) {
                 try {
                     tid = H5.H5Aget_type(aid);
-                    datatype = new H5Datatype(getFileFormat(), tid);
+                    int nativeClass = H5.H5Tget_class(tid);
+                    if (nativeClass == HDF5Constants.H5T_REFERENCE) {
+                        long lsize = 1;
+                        long sid = H5.H5Aget_space(aid);
+                        int rank = H5.H5Sget_simple_extent_ndims(sid);
+                        if (rank > 0) {
+                            long dims[] = new long[rank];
+                            H5.H5Sget_simple_extent_dims(sid, dims, null);
+                            log.trace("getDatatype(): rank={}, dims={}", rank, dims);
+                            for (int j = 0; j < dims.length; j++) {
+                                lsize *= dims[j];
+                            }
+                        }
+                        datatype = new H5ReferenceType(getFileFormat(), lsize, tid);
+                    }
+                    else
+                        datatype = new H5Datatype(getFileFormat(), tid);
                 }
                 catch (Exception ex) {
                     log.debug("getDatatype(): ", ex);
@@ -1602,8 +1619,8 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
                     continue;
                 }
 
-                log.trace("toString[{}]: is_enum={} is_unsigned={}", i, cmpdTypes.get(dv).isEnum(),
-                        cmpdTypes.get(dv).isUnsigned());
+                log.trace("toString[{}]: is_enum={} is_unsigned={} isStdRef={}", i, cmpdTypes.get(dv).isEnum(),
+                        cmpdTypes.get(dv).isUnsigned(), ((H5Datatype) getDatatype()).isStdRef());
 
                 if (cmpdTypes.get(dv).isEnum()) {
                     String cname = valClass.getName();
@@ -1710,6 +1727,14 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
                             sb.append(strValue);
                             break;
                     }
+                }
+                else if (((H5Datatype) getDatatype()).isStdRef()) {
+                    String cname = valClass.getName();
+                    char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+                    log.trace("toString: isStdRef with cname={} dname={}", cname, dname);
+                    String ref_str = ((H5ReferenceType) getDatatype()).getObjectReferenceName((byte[])theData);
+                    log.trace("toString: ref_str={}", ref_str);
+                    sb.append(ref_str);
                 }
                 else {
                     log.trace("toString: not enum or unsigned");

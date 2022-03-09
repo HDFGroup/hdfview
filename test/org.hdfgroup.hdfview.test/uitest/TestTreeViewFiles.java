@@ -463,7 +463,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDS()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDS()", false);
             retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedData);
@@ -543,7 +543,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName1);
             SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()", false);
             retriever.setContainerHeaderOffset(2, 0);
 
             log.trace("testTableLocations is 0, 0");
@@ -555,7 +555,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName2);
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()", false);
             retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedDataR);
@@ -599,7 +599,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename2, datasetName2);
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()", false);
             retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testTableLocations(0, 0, expectedDataR);
@@ -631,7 +631,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename2, datasetName2);
             dataTable = getNatTable(tableShell);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
+            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()", false);
             retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testTableLocation(3, 2, "0");
