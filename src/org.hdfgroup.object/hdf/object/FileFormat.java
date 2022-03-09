@@ -94,6 +94,14 @@ public abstract class FileFormat extends File {
      */
     public static final int                      CREATE             = 8;
 
+    /**
+     * File access flag for multi-read-only permission. With this access flag,
+     * modifications to the file will not be allowed.
+     *
+     * @see #createInstance(String, int )
+     */
+    public static final int                      MULTIREAD          = 80;
+
     /***************************************************************************
      * File creation flags used in calls to createFile( String, flag );
      **************************************************************************/
@@ -720,6 +728,7 @@ public abstract class FileFormat extends File {
      * The access parameter values and corresponding behaviors at file open:
      * <ul>
      * <li>READ: Read-only access. Fail if file doesn't exist.
+     * <li>SWMR: Read-only access. Fail if file doesn't exist.
      * <li>WRITE: Read/Write access. Behavior if file doesn't exist or can't be
      * opened for read/write access depends on the implementing class.
      * <li>CREATE: Read/Write access. Create a new file or truncate an existing

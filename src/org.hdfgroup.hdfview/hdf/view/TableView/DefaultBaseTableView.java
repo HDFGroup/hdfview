@@ -58,6 +58,7 @@ import org.eclipse.nebula.widgets.nattable.edit.action.KeyEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.action.MouseEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditConfiguration;
 import org.eclipse.nebula.widgets.nattable.edit.config.DialogErrorHandling;
+import org.eclipse.nebula.widgets.nattable.grid.command.ClientAreaResizeCommand;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
@@ -85,6 +86,9 @@ import org.eclipse.nebula.widgets.nattable.ui.matcher.LetterOrDigitKeyEventMatch
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuAction;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
+import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
+import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -371,10 +375,8 @@ public abstract class DefaultBaseTableView implements TableView
             }
         }
 
-        log.trace("Index base = {} - Is data transposed = {} - Is display type char = {}",
-                indexBase, isDataTransposed, isDisplayTypeChar);
-
-        if (hObject == null) hObject = viewer.getTreeView().getCurrentObject();
+        if (hObject == null)
+            hObject = viewer.getTreeView().getCurrentObject();
 
         /* Only edit objects which actually contain editable data */
         if ((hObject == null) || !(hObject instanceof DataFormat)) {
@@ -964,14 +966,35 @@ public abstract class DefaultBaseTableView implements TableView
             }
         });
 
+        /********************************************************************
+         *                                                                  *
+         * Set up MenuItems for refreshing the TableView                    *
+         *                                                                  *
+         ********************************************************************/
+        item = new MenuItem(tableMenu, SWT.PUSH);
+        item.setText("Start Timer");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                viewer.executeTimer(true);
+            }
+        });
+
+        item = new MenuItem(tableMenu, SWT.PUSH);
+        item.setText("Stop Timer");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                viewer.executeTimer(false);
+            }
+        });
+
 
         /********************************************************************
          *                                                                  *
          * Set up MenuItems for Importing/Exporting Data from the TableView *
          *                                                                  *
          ********************************************************************/
-
-
         MenuItem importExportMenuItem = new MenuItem(menuBar, SWT.CASCADE);
         importExportMenuItem.setText("&Import/Export Data");
 
@@ -1523,6 +1546,27 @@ public abstract class DefaultBaseTableView implements TableView
     /** @return the data layer */
     public DataLayer getDataLayer() {
         return dataLayer;
+    }
+
+    /** refresh the data table */
+    @Override
+    public void refreshDataTable() {
+        log.trace("refreshDataTable()");
+
+        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
+        dataValue = dataObject.refreshData();
+        shell.setCursor(null);
+
+        long[] dims = dataObject.getDims();
+        log.trace("refreshDataTable() dims:{}", dims);
+        dataProvider.updateDataBuffer(dataValue);
+        ((RowHeaderDataProvider)rowHeaderDataProvider).updateRows(dataObject);
+        log.trace("refreshDataTable(): rows={} : cols={}", dataProvider.getRowCount(), dataProvider.getColumnCount());
+
+        dataTable.doCommand(new StructuralRefreshCommand());
+        final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
+        dataTable.doCommand(new ShowRowInViewportCommand(dataProvider.getRowCount()-1));
+        log.trace("refreshDataTable() finish");
     }
 
     // Flip to previous 'frame' of Table data
@@ -2719,19 +2763,19 @@ public abstract class DefaultBaseTableView implements TableView
      */
     protected class RowHeaderDataProvider implements IDataProvider
     {
-        private final int    rank;
-        private final int    space_type;
-        private final long[] dims;
-        private final long[] startArray;
-        private final long[] strideArray;
-        private final int[]  selectedIndex;
+        private int    rank;
+        private int    space_type;
+        private long[] dims;
+        private long[] startArray;
+        private long[] strideArray;
+        private int[]  selectedIndex;
 
         /** the start value. */
-        protected final int  start;
+        protected int  start;
         /** the stride value. */
-        protected final int  stride;
+        protected int  stride;
 
-        private final int    nrows;
+        private int    nrows;
 
         /** Create the Row Header data provider to set row indices based on Index Base for
          *  both Scalar Datasets and Compound Datasets.
@@ -2754,6 +2798,17 @@ public abstract class DefaultBaseTableView implements TableView
 
             start = (int) startArray[selectedIndex[0]];
             stride = (int) strideArray[selectedIndex[0]];
+        }
+
+        public void updateRows(DataFormat theDataObject) {
+            this.rank = theDataObject.getRank();
+            this.dims = theDataObject.getSelectedDims();
+            this.selectedIndex = theDataObject.getSelectedIndex();
+
+            if (rank > 1)
+                this.nrows = (int) theDataObject.getHeight();
+            else
+                this.nrows = (int) dims[0];
         }
 
         @Override

@@ -46,7 +46,7 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
      * @param parentComposite
      *        the parent visual object
      * @param viewer
-     *        the viewr to use
+     *        the viewer to use
      * @param theObj
      *        the object to display the metadata info
      */

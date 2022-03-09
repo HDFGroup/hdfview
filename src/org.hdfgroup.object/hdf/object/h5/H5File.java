@@ -92,8 +92,11 @@ public class H5File extends FileFormat
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5File.class);
 
     /**
-     * the file access flag. Valid values are HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5F_ACC_RDWR and
-     * HDF5Constants.H5F_ACC_CREAT.
+     * the file access flag. Valid values are
+     *   HDF5Constants.H5F_ACC_RDONLY,
+     *   HDF5Constants.H5F_ACC_SWMR_READ (with H5F_ACC_RDONLY)
+     *   HDF5Constants.H5F_ACC_RDWR
+     *   HDF5Constants.H5F_ACC_CREAT
      */
     private int flag;
 
@@ -131,6 +134,12 @@ public class H5File extends FileFormat
     public static final int LIBVER_V110 = HDF5Constants.H5F_LIBVER_V110;
     /** The library v1.12 version value */
     public static final int LIBVER_V112 = HDF5Constants.H5F_LIBVER_V112;
+
+    /** Indicate that this file is open for reading in a
+     * single-writer/multi-reader (SWMR) scenario. Note that
+     * the process(es) opening the file for SWMR reading must
+     * also open the file with the #H5F_ACC_RDONLY flag.  */
+    public static final int SWMR = MULTIREAD;
 
     /**
      * Enum to indicate the type of I/O to perform inside of the common I/O
@@ -174,6 +183,7 @@ public class H5File extends FileFormat
      * The access parameter values and corresponding behaviors:
      * <ul>
      * <li>READ: Read-only access; open() will fail file doesn't exist.</li>
+     * <li>SWMR: Read-only access; open() will fail file doesn't exist.</li>
      * <li>WRITE: Read/Write access; open() will fail if file doesn't exist or if file can't be opened with read/write
      * access.</li>
      * <li>CREATE: Read/Write access; create a new file or truncate an existing one; open() will fail if file can't be
@@ -213,12 +223,14 @@ public class H5File extends FileFormat
         // set metadata for the instance
         rootObject = null;
         this.fid = -1;
-        isReadOnly = (access == READ);
+        isReadOnly = (READ == (access & READ)) || (MULTIREAD == (access & MULTIREAD));
 
         // At this point we just set up the flags for what happens later.
         // We just pass unexpected access values on... subclasses may have
         // their own values.
-        if (access == READ)
+        if (MULTIREAD == (access & MULTIREAD))
+            flag = HDF5Constants.H5F_ACC_RDONLY | HDF5Constants.H5F_ACC_SWMR_READ;
+        else if (READ == (access & READ))
             flag = HDF5Constants.H5F_ACC_RDONLY;
         else if (access == WRITE)
             flag = HDF5Constants.H5F_ACC_RDWR;
@@ -951,7 +963,7 @@ public class H5File extends FileFormat
      */
     @Override
     public FileFormat createInstance(String filename, int access) throws Exception {
-        log.trace("createInstance() for {}", filename);
+        log.trace("createInstance() for {} with {}", filename, access);
         return new H5File(filename, access);
     }
 
@@ -2117,6 +2129,7 @@ public class H5File extends FileFormat
         }
         System.setProperty("user.dir", rootPath);
 
+        log.trace("open(): flag={}", flag);
         // check for valid file access permission
         if (flag < 0) {
             log.debug("open(): Invalid access identifier -- " + flag);
@@ -2148,7 +2161,7 @@ public class H5File extends FileFormat
         }
         catch (Exception ex) {
             try {
-                log.debug("open(): open failed, attempting to open file read-only");
+                log.debug("open(): open failed, attempting to open file read-only", ex);
                 fid = H5.H5Fopen(fullFileName, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
                 isReadOnly = true;
             }

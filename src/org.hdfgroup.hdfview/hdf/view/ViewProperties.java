@@ -173,6 +173,9 @@ public class ViewProperties extends PreferenceStore
     /** a list of srb accounts */
     private static ArrayList<String[]> srbAccountList       = new ArrayList<>(5);
 
+    /** the timer refreshrate in msec */
+    private static int               timerRefresh            = 10000;
+
     /**
      * flag to indicate if auto contrast is used in image processing. Do not use
      * autocontrast by default (2.6 change).
@@ -188,6 +191,11 @@ public class ViewProperties extends PreferenceStore
      * only to prevent accidental modifications to the file.
      */
     private static boolean           isReadOnly             = true;
+
+    /**
+     * flag to indicate if default open file mode is read SWMR.
+     */
+    private static boolean           isReadSWMR             = true;
 
     private static String            EarlyLib               = "Latest";
 
@@ -283,6 +291,7 @@ public class ViewProperties extends PreferenceStore
         setDefault("h5file.indexOrder", "H5_ITER_INC");
         setDefault("h4toh5.converter", "");
         setDefault("file.extension", "hdf, h4, hdf4, h5, hdf5, he2, he5");
+        setDefault("timer.refresh", 1000);
         setDefault("font.size", 12);
         setDefault("font.type", "Serif");
         setDefault("max.members", Integer.MAX_VALUE);
@@ -1350,6 +1359,8 @@ public class ViewProperties extends PreferenceStore
             FileFormat.addFileExtension(fileExt);
         }
 
+        setTimerRefresh(getInt("timer.refresh"));
+
         setFontSize(getInt("font.size"));
 
         propVal = getString("font.type");
@@ -1450,6 +1461,8 @@ public class ViewProperties extends PreferenceStore
 
         if (h4toh5 != null) setValue("h4toh5.converter", h4toh5);
 
+        setValue("timer.refresh", timerRefresh);
+
         setValue("font.size", fontSize);
 
         if (fontType != null) setValue("font.type", fontType);
@@ -1465,6 +1478,8 @@ public class ViewProperties extends PreferenceStore
 
         if (isReadOnly)
             setValue("file.mode", "r");
+        else if (isReadSWMR)
+            setValue("file.mode", "rs");
         else
             setValue("file.mode", "rw");
 
@@ -1609,6 +1624,20 @@ public class ViewProperties extends PreferenceStore
     /** @return the default index order for display */
     public static String getIndexOrder() {
         return indexOrder;
+    }
+
+    /** @return the timer refresh size */
+    public static int getTimerRefresh() {
+        return timerRefresh;
+    }
+
+    /** sets the timer refresh
+     *
+     * @param trefresh
+     *            the timer refresh
+     */
+    public static void setTimerRefresh(int trefresh) {
+        timerRefresh = trefresh;
     }
 
     /** @return the font size */
@@ -1898,6 +1927,26 @@ public class ViewProperties extends PreferenceStore
      */
     public static void setReadOnly(boolean b) {
         isReadOnly = b;
+    }
+
+    /**
+     * Returns true if default file access is read SWMR.
+     *
+     * @return true if default file access is read SWMR; otherwise, returns
+     *         false.
+     */
+    public static boolean isReadSWMR() {
+        return isReadSWMR;
+    }
+
+    /**
+     * Set the flag to indicate if default file access is read SWMR.
+     *
+     * @param b
+     *            the flag to indicate if default file access is read SWMR.
+     */
+    public static void setReadSWMR(boolean b) {
+        isReadSWMR = b;
     }
 
     /**
