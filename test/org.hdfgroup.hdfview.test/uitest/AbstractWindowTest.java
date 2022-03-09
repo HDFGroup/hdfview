@@ -90,7 +90,7 @@ public abstract class AbstractWindowTest {
     @Rule public TestName testName = new TestName();
 
     protected static enum FILE_MODE {
-        READ_ONLY, READ_WRITE
+        READ_ONLY, READ_WRITE, MULTI_READ_ONLY
     }
 
     private static final String objectShellTitleRegex = ".*at.*\\[.*in.*\\]";
@@ -214,7 +214,9 @@ public abstract class AbstractWindowTest {
         try {
             SWTBotMenu fileMenuItem = bot.menu().menu("File");
             SWTBotMenu openasMenuItem = fileMenuItem.menu("Open As");
-            if (openMode == FILE_MODE.READ_ONLY)
+            if (openMode == FILE_MODE.MULTI_READ_ONLY)
+                openasMenuItem.menu("SWMR Read-Only").click();
+            else if (openMode == FILE_MODE.READ_ONLY)
                 openasMenuItem.menu("Read-Only").click();
             else
                 openasMenuItem.menu("Read/Write").click();

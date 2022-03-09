@@ -42,7 +42,7 @@ import hdf.view.ViewProperties;
 public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsGeneralPage.class);
 
-    private Text UGField, workField, maxMemberField, startMemberField;
+    private Text UGField, workField, maxMemberField, startMemberField, timerRefreshField;
 
     private Combo fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
 
@@ -139,6 +139,14 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
                 ViewProperties.setReadOnly(true);
             else
                 ViewProperties.setReadOnly(false);
+        }
+
+        // set timer refresh value (msec)
+        try {
+            int timermsec = Integer.parseInt(timerRefreshField.getText());
+            ViewProperties.setTimerRefresh(timermsec);
+        }
+        catch (Exception ex) {
         }
 
         // set data delimiter
@@ -320,6 +328,8 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         catch (Exception ex) {
             delimiterChoice.select(0);
         }
+
+        timerRefreshField.setText(String.valueOf(ViewProperties.getTimerRefresh()));
 
         int nMax = ViewProperties.getMaxMembers();
         checkReadAll.setSelection((nMax<=0) || (nMax==Integer.MAX_VALUE));
@@ -567,6 +577,14 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         delimiterChoice = new Combo(dataGroup, SWT.SINGLE | SWT.READ_ONLY);
         delimiterChoice.setFont(curFont);
         delimiterChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+        Label timerRefreshLabel = new Label(dataGroup, SWT.RIGHT);
+        timerRefreshLabel.setFont(curFont);
+        timerRefreshLabel.setText("Timer Refresh (ms): ");
+
+        timerRefreshField = new Text(dataGroup, SWT.SINGLE | SWT.BORDER);
+        timerRefreshField.setFont(curFont);
+        timerRefreshField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         org.eclipse.swt.widgets.Group objectsGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         objectsGroup.setLayout(new GridLayout(5, true));
