@@ -14,6 +14,7 @@
 
 package hdf.object;
 
+/** General utility class */
 public final class Utils {
     private Utils() {
         throw new IllegalStateException("Utility class");

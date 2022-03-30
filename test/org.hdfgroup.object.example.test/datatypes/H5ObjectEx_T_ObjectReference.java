@@ -15,6 +15,7 @@ import java.util.Map;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
@@ -133,10 +134,10 @@ public class H5ObjectEx_T_ObjectReference {
     private static void readObjRef() {
         H5File file = null;
         H5ScalarDS dset = null;
-        long dataset_id = -1;
-        long dataspace_id = -1;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         int object_type = -1;
-        long object_id = -1;
+        long object_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         byte[][] dset_data;
 
@@ -209,33 +210,12 @@ public class H5ObjectEx_T_ObjectReference {
                     switch (H5O_TYPE_obj.get(object_type)) {
                     case H5O_TYPE_GROUP:
                         System.out.print("H5O_TYPE_GROUP");
-                        try {
-                            if (object_id >= 0)
-                                H5.H5Gclose(object_id);
-                        }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
                         break;
                     case H5O_TYPE_DATASET:
                         System.out.print("H5O_TYPE_DATASET");
-                        try {
-                            if (object_id >= 0)
-                                H5.H5Dclose(object_id);
-                        }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
                         break;
                     case H5O_TYPE_NAMED_DATATYPE:
                         System.out.print("H5O_TYPE_NAMED_DATATYPE");
-                        try {
-                            if (object_id >= 0)
-                                H5.H5Tclose(object_id);
-                        }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
                         break;
                     default:
                         System.out.print("UNHANDLED");
@@ -246,6 +226,9 @@ public class H5ObjectEx_T_ObjectReference {
             }
             catch (Exception e) {
                 e.printStackTrace();
+            }
+            finally {
+                try {H5.H5Oclose(object_id);} catch (Exception ex) {}
             }
         }
 

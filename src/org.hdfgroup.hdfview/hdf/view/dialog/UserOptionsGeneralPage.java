@@ -58,6 +58,9 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
     private static String fontname;
 
+    /**
+     * Configuration page for general application settings.
+     */
     public UserOptionsGeneralPage() {
         super("General Settings");
         isFontChanged = false;
@@ -181,14 +184,29 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         return true;
     }
 
+    /**
+     * Checks if the Font setting changed.
+     *
+     * @return true if the font changed.
+     */
     public boolean isFontChanged() {
         return isFontChanged;
     }
 
+    /**
+     * Checks if the location for the UserGuide changed.
+     *
+     * @return  true if the location of the UserGuide changed.
+     */
     public boolean isUserGuideChanged() {
         return isUserGuideChanged;
     }
 
+    /**
+     * Checks if the location of the WorkDir changed.
+     *
+     * @return  true if the working directory changed.
+     */
     public boolean isWorkDirChanged() {
         return isWorkDirChanged;
     }
@@ -315,7 +333,9 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
      * Creates and returns the SWT control for the customized body of this
      * preference page under the given parent composite.
      *
-     * @param parent the parent composite
+     * @param parent
+     *         the parent composite
+     *
      * @return the new control
      */
     @Override

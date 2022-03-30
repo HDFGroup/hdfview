@@ -1,4 +1,4 @@
-package test.object;
+package object;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -15,16 +15,18 @@ import org.junit.Test;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+
 import hdf.object.Dataset;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5File;
+import hdf.object.h5.H5ScalarDS;
 
 /**
  * TestCase for bug fixes.
- * <p>
+ *
  * This class tests all the public methods in H5CompoundDS class.
- * <p>
+ *
  * The test file contains the following objects.
  *
  * <pre>
@@ -51,7 +53,8 @@ import hdf.object.h5.H5File;
  *
  * @author Peter Cao, The HDF Group
  */
-public class H5BugFixTest {
+public class H5BugFixTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5BugFixTest.class);
     private static final int NLOOPS = 10;
     private static final H5File H5FILE = new H5File();
@@ -67,6 +70,27 @@ public class H5BugFixTest {
         catch (final Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    protected void closeFile() {
+        if (testFile != null) {
+            try {
+                testFile.close();
+            }
+            catch (final Exception ex) {}
+            testFile = null;
+        }
+    }
+
+    protected void checkObjCount(long fileid) {
+        long nObjs = 0;
+        try {
+            nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+        }
+        catch (final Exception ex) {
+            fail("H5.H5Fget_obj_count() failed. " + ex);
+        }
+        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     @BeforeClass
@@ -119,12 +143,8 @@ public class H5BugFixTest {
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            try {
-                testFile.close();
-            }
-            catch (final Exception ex) {
-            }
-            testFile = null;
+            checkObjCount(testFile.getFID());
+            closeFile();
         }
         try {
             int openID = H5.getOpenIDCount();
@@ -138,7 +158,7 @@ public class H5BugFixTest {
 
     /**
      * The following program fails because dataset.init() does not reset the selection of dataspace.
-     * <p>
+     *
      * The bug appears on hdf-java 2.4 beta04 or earlier version. It is fixed at later version.
      *
      * <pre>
@@ -156,7 +176,7 @@ public class H5BugFixTest {
      *           fails when attempting to change the value of the 1st and 4th rows (however, it
      *           works for the 0th row).
      * </pre>
-     * <p>
+     *
      */
     @SuppressWarnings("rawtypes")
     @Test
@@ -210,9 +230,8 @@ public class H5BugFixTest {
                 dset.init();
 
                 // select one row only
-                for (int j = 0; j < rank; j++) {
+                for (int j = 0; j < rank; j++)
                     count[j] = 1;
-                }
 
                 // select different rows
                 start[0] = i;
@@ -257,23 +276,20 @@ public class H5BugFixTest {
                     case 0:
                         ints = (int[]) data.get(0);
                         assertNotNull(ints);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertEquals(H5TestFile.DATA_INT[j], ints[j]);
-                        }
                         break;
                     case 1:
                         floats = (float[]) data.get(0);
                         assertNotNull(floats);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertEquals(H5TestFile.DATA_FLOAT[j], floats[j], Float.MIN_VALUE);
-                        }
                         break;
                     case 2:
                         strs = (String[]) data.get(0);
                         assertNotNull(strs);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++) {
+                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
                             assertTrue(H5TestFile.DATA_STR[j].equals(strs[j]));
-                        }
                         break;
                 }
             } //  (int i=0; i<nmembers; i++) {
@@ -282,7 +298,7 @@ public class H5BugFixTest {
 
     /**
      * The following operation causes memory leak because a group is left open at file.get().
-     * <p>
+     *
      * The bug appears on hdf-java 2.4 beta05 or earlier version. It is fixed at later version.
      *
      * <pre>
@@ -303,7 +319,6 @@ public class H5BugFixTest {
     @Test
     public void testBug863() throws Exception {
         log.debug("testBug863");
-        long nObjs = 0; // number of object left open
         Dataset dset = null;
         final String dnames[] = { H5TestFile.NAME_DATASET_CHAR, H5TestFile.NAME_DATASET_COMPOUND,
                 H5TestFile.NAME_DATASET_COMPOUND_SUB, H5TestFile.NAME_DATASET_ENUM, H5TestFile.NAME_DATASET_FLOAT,
@@ -313,12 +328,11 @@ public class H5BugFixTest {
         // test two open options: open full tree or open individual object only
         for (int openOption = 0; openOption < 2; openOption++) {
             for (int i = 0; i < NLOOPS; i++) {
-                nObjs = 0;
                 final H5File file = new H5File(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
 
                 if (openOption == 0) {
                     try {
-                        file.open(); // opent the full tree
+                        file.open(); // open the full tree
                     }
                     catch (final Exception ex) {
                         fail("file.open() failed. " + ex);
@@ -332,7 +346,10 @@ public class H5BugFixTest {
                         dset.init();
                         final Object data = dset.getData();
                         dset.write(data);
-                        dset.getMetadata();
+                        if (dset.getDatatype().isCompound())
+                            ((H5CompoundDS)dset).getMetadata();
+                        else
+                            ((H5ScalarDS)dset).getMetadata();
                     }
 
                     // groups
@@ -350,23 +367,15 @@ public class H5BugFixTest {
                     fail("file.get() failed. " + ex);
                 }
 
-                try {
-                    nObjs = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL);
-                }
-                catch (final Exception ex) {
-                    fail("H5.H5Fget_obj_count() failed. " + ex);
-                }
-
+                checkObjCount(file.getFID());
                 try {
                     file.close();
                 }
                 catch (final Exception ex) {
                     fail("file.close() failed. " + ex);
                 }
-
-                assertTrue(nObjs <= 1); // file id should be the only this left
-                // open
             } //  (int i=0; i<NLOOPS; i++)
         } //  (int openOption=0; openOption<2; openOption++)
+        testFile = null;
     }
 }

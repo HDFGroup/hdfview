@@ -54,6 +54,9 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     /** Default index ordering for files */
     private static String indexOrder;
 
+    /**
+     * Configuration page for HDF-specific application settings.
+     */
     public UserOptionsHDFPage() {
         super("HDF Settings");
     }

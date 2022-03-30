@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.junit.Assert.fail;
 
@@ -9,7 +9,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.junit.Test;
 
-import test.uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
+import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 /*
  * Tests the ability of HDFView to display integer values as Hexadecimal
@@ -82,13 +82,13 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedData);
 
-            tableShell.bot().menu("Show Hexadecimal").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Hexadecimal").click();
             retriever.testAllTableLocations(expectedDataHex);
 
-            tableShell.bot().menu("Show Binary").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Binary").click();
             retriever.testAllTableLocations(expectedDataBin);
 
-            tableShell.bot().menu("Show Scientific Notation").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Scientific Notation").click();
             retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
@@ -167,13 +167,13 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedData);
 
-            tableShell.bot().menu("Show Hexadecimal").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Hexadecimal").click();
             retriever.testAllTableLocations(expectedDataHex);
 
-            tableShell.bot().menu("Show Binary").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Binary").click();
             retriever.testAllTableLocations(expectedDataBin);
 
-            tableShell.bot().menu("Show Scientific Notation").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Scientific Notation").click();
             retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
@@ -252,13 +252,13 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedData);
 
-            tableShell.bot().menu("Show Hexadecimal").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Hexadecimal").click();
             retriever.testAllTableLocations(expectedDataHex);
 
-            tableShell.bot().menu("Show Binary").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Binary").click();
             retriever.testAllTableLocations(expectedDataBin);
 
-            tableShell.bot().menu("Show Scientific Notation").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Scientific Notation").click();
             retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
@@ -337,13 +337,13 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedData);
 
-            tableShell.bot().menu("Show Hexadecimal").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Hexadecimal").click();
             retriever.testAllTableLocations(expectedDataHex);
 
-            tableShell.bot().menu("Show Binary").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Binary").click();
             retriever.testAllTableLocations(expectedDataBin);
 
-            tableShell.bot().menu("Show Scientific Notation").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Scientific Notation").click();
             retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
@@ -446,13 +446,13 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedData);
 
-            tableShell.bot().menu("Show Hexadecimal").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Hexadecimal").click();
             retriever.testAllTableLocations(expectedDataHex);
 
-            tableShell.bot().menu("Show Binary").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Binary").click();
             retriever.testAllTableLocations(expectedDataBin);
 
-            tableShell.bot().menu("Show Scientific Notation").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Scientific Notation").click();
             retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
@@ -555,13 +555,13 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedData);
 
-            tableShell.bot().menu("Show Hexadecimal").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Hexadecimal").click();
             retriever.testAllTableLocations(expectedDataHex);
 
-            tableShell.bot().menu("Show Binary").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Binary").click();
             retriever.testAllTableLocations(expectedDataBin);
 
-            tableShell.bot().menu("Show Scientific Notation").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Scientific Notation").click();
             retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
@@ -864,13 +864,13 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedData);
 
-            tableShell.bot().menu("Show Hexadecimal").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Hexadecimal").click();
             retriever.testAllTableLocations(expectedDataHex);
 
-            tableShell.bot().menu("Show Binary").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Binary").click();
             retriever.testAllTableLocations(expectedDataBin);
 
-            tableShell.bot().menu("Show Scientific Notation").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Scientific Notation").click();
             retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {
@@ -1205,13 +1205,13 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
 
             retriever.testAllTableLocations(expectedData);
 
-            tableShell.bot().menu("Show Hexadecimal").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Hexadecimal").click();
             retriever.testAllTableLocations(expectedDataHex);
 
-            tableShell.bot().menu("Show Binary").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Binary").click();
             retriever.testAllTableLocations(expectedDataBin);
 
-            tableShell.bot().menu("Show Scientific Notation").click();
+            tableShell.bot().menu().menu("Data Display").menu("Show Scientific Notation").click();
             retriever.testAllTableLocations(expectedDataSci);
         }
         catch (Exception ex) {

@@ -1,7 +1,4 @@
-/**
- *
- */
-package test.object;
+package object;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -29,11 +26,33 @@ import hdf.object.h5.H5Group;
  * @author Rishi R Sinha
  *
  */
-public class GroupTest {
+public class GroupTest
+{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GroupTest.class);
 
     private H5File testFile = null;
     private Group testGroup = null;
+
+    protected void closeFile() {
+        if (testFile != null) {
+            try {
+                testFile.close();
+            }
+            catch (final Exception ex) {}
+            testFile = null;
+        }
+    }
+
+    protected void checkObjCount(long fileid) {
+        long nObjs = 0;
+        try {
+            nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
+        }
+        catch (final Exception ex) {
+            fail("H5.H5Fget_obj_count() failed. " + ex);
+        }
+        assertEquals(1, nObjs); // file id should be the only one left open
+    }
 
     @BeforeClass
     public static void createFile() throws Exception {
@@ -88,12 +107,8 @@ public class GroupTest {
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            try {
-                testFile.close();
-            }
-            catch (final Exception ex) {
-            }
-            testFile = null;
+            checkObjCount(testFile.getFID());
+            closeFile();
         }
         try {
             int openID = H5.getOpenIDCount();
@@ -107,7 +122,7 @@ public class GroupTest {
 
     /**
      * Test method for {@link hdf.object.Group#clear()}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>For the root group clear the list.
@@ -119,19 +134,11 @@ public class GroupTest {
         log.debug("testClear");
         testGroup.clear();
         assertEquals(testGroup.getMemberList().size(), 0);
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
      * Test method for {@link hdf.object.Group#addToMemberList(hdf.object.HObject)}.
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test for boundary conditions
@@ -160,30 +167,19 @@ public class GroupTest {
         H5.H5error_on();
         testGroup.addToMemberList(testGroup.getMemberList().get(0));
 
-        if (testGroup.getMemberList().size() != previous_size) {
+        if (testGroup.getMemberList().size() != previous_size)
             fail("addToMemberList adds an existing member to the member list.");
-        }
 
         testGroup.addToMemberList(tmp);
-        if (!testGroup.getMemberList().get(previous_size).equals(tmp)) {
+        if (!testGroup.getMemberList().get(previous_size).equals(tmp))
             fail("Add to member list does not add to the end.");
-        }
-        if (testGroup.getMemberList().size() != previous_size + 1) {
+        if (testGroup.getMemberList().size() != previous_size + 1)
             fail("Add to member list not working.");
-        }
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
      * Test method for {@link hdf.object.Group#removeFromMemberList(hdf.object.HObject)} .
-     * <p>
+     *
      * What to test:
      * <ul>
      * <li>Test for boundary conditions
@@ -209,37 +205,26 @@ public class GroupTest {
 
         H5.H5error_off();
         testGroup.removeFromMemberList(null);
-        if (testGroup.getMemberList().size() != previous_size) {
+        if (testGroup.getMemberList().size() != previous_size)
             fail("removeFromMemberList removes a null from the member list.");
-        }
 
         Group tmp = new H5Group(testFile, "tmp", "/grp0/", testGroup);
         testGroup.removeFromMemberList(tmp);
-        if (testGroup.getMemberList().size() != previous_size) {
+        if (testGroup.getMemberList().size() != previous_size)
             fail("removeFromMemberList removes a non existing member from the member list.");
-        }
         H5.H5error_on();
 
         Iterator it = memberList.iterator();
         HObject obj = (HObject) it.next();
         testGroup.removeFromMemberList(obj);
 
-        if (memberList.size() != previous_size - 1) {
+        if (memberList.size() != previous_size - 1)
             fail("The Number of members in list should be " + (previous_size - 1));
-        }
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
      * Test method for {@link hdf.object.Group#getMemberList()}.
-     * <p>
+     *
      * <ul>
      * <li>testing the member list for the root group.
      * <ul>
@@ -257,19 +242,11 @@ public class GroupTest {
             HObject obj = (HObject) it.next();
             assertEquals(objs[position++], obj.getName());
         }
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
      * Test method for {@link hdf.object.Group#getParent()}.
-     * <p>
+     *
      * <ul>
      * <li>Test to get the parent of group g0.
      * </ul>
@@ -278,14 +255,6 @@ public class GroupTest {
     public void testGetParent() {
         log.debug("testGetParent");
         assertEquals(testGroup.getParent().getName(), "/");
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
@@ -299,14 +268,6 @@ public class GroupTest {
     public void testIsRoot() {
         log.debug("testIsRoot");
         assertFalse(testGroup.isRoot());
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
     /**
@@ -320,14 +281,6 @@ public class GroupTest {
     public void testGetNumberOfMembersInFile() {
         log.debug("testGetNumberOfMembersInFile");
         assertEquals(testGroup.getNumberOfMembersInFile(), 8);
-        long nObjs = 0;
-        try {
-            nObjs = H5.H5Fget_obj_count(testFile.getFID(), HDF5Constants.H5F_OBJ_ALL);
-        }
-        catch (final Exception ex) {
-            fail("H5.H5Fget_obj_count() failed. " + ex);
-        }
-        assertEquals(1, nObjs); // file id should be the only one left open
     }
 
 }

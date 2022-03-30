@@ -1,4 +1,4 @@
-package test.uitest;
+package uitest;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -37,7 +37,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
             assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
 
             items[0].click();
-            items[0].contextMenu("New").menu("Group").click();
+            items[0].contextMenu().contextMenu("New").menu("Group").click();
 
             SWTBotShell groupShell = bot.shell("New Group...");
             groupShell.activate();
@@ -59,7 +59,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
 
             items[0].getNode(0).click();
 
-            items[0].getNode(0).contextMenu("New").menu("Dataset").click();
+            items[0].getNode(0).contextMenu().contextMenu("New").menu("Dataset").click();
 
             SWTBotShell datasetShell = bot.shell("New Dataset...");
             datasetShell.activate();
@@ -80,7 +80,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(datasetShell));
 
             items[0].getNode(0).click();
-            items[0].getNode(0).contextMenu("Expand All").click();
+            items[0].getNode(0).contextMenu().contextMenu("Expand All").click();
 
             assertTrue(constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "3", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==3);
@@ -89,7 +89,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
             assertTrue("createNewHDF5Dataset() filetree is missing dataset '" + datasetname + "'", items[0].getNode(0).getNode(0).getText().compareTo(datasetname)==0);
 
             items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
             org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -119,13 +119,13 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Table").menu("Save Changes to File").click();
+            tableShell.bot().menu().menu("Table").menu("Save Changes to File").click();
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             items[0].getNode(0).getNode(0).click();
-            items[0].getNode(0).getNode(0).contextMenu("Open").click();
+            items[0].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
             shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
             bot.waitUntil(Conditions.waitForShell(shellMatcher));
 
@@ -143,7 +143,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
                 }
             }
 
-            tableShell.bot().menu("Table").menu("Close").click();
+            tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
@@ -156,7 +156,7 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
         }
         finally {
             if(tableShell != null && tableShell.isOpen()) {
-                tableShell.bot().menu("Close").click();
+                tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
 

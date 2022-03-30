@@ -4,7 +4,7 @@ The current HDFView products can be downloaded at:
 
 HDF Libraries
 =============================================================================
-This release was built and tested with HDF 4.2.15 and HDF5 1.10.7.
+This release was built and tested with HDF 4.2.15 and HDF5 1.10.8.
 
 Windows ONLY: HDFView built with VS 2015 will require that
 the Visual C++ Redistributable Packages be installed on your machine.
@@ -20,10 +20,17 @@ newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================
-    *
+    * Reworked the object class structure to handle attribute data like
+      the data in datasets. Attribute data is no longer handled as strings.
 
 Major Bug Fixes
 ==============================================================================
+    * HDFVIEW-197 (incorrectly displaying image data) has been fixed. The
+      problem was that the initial starting values for calculation of minimum
+      and maximum data values were invalid. In addition, an option to allow
+      dynamic data ranges has been added. 
+
+    ***** Previous fixes *****
     * Added support to read and display non-standard floating point numbers.
     * Added optional startDir to command line options.
     * Corrected user.home vs user.dir confusion.
