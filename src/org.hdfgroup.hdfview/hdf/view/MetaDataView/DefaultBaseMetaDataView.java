@@ -143,7 +143,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
      * @param parentComposite
      *        the parent visual object
      * @param viewer
-     *        the viewr to use
+     *        the viewer to use
      * @param theObj
      *        the object to display the metadata info
      */
@@ -1474,7 +1474,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 shell.dispose();
 
                 try {
-                    view.openFile(fin, ViewProperties.isReadOnly() ? FileFormat.READ : FileFormat.WRITE);
+                    int access_mode = FileFormat.WRITE;
+                    if (ViewProperties.isReadOnly())
+                        access_mode = FileFormat.READ;
+                    else if (ViewProperties.isReadSWMR())
+                        access_mode = FileFormat.READ | FileFormat.MULTIREAD;
+                    view.openFile(fin, access_mode);
                 }
                 catch (Exception ex) {
                     log.debug("Error opening file {}", fin);
