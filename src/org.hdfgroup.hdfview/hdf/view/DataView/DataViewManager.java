@@ -67,4 +67,13 @@ public abstract interface DataViewManager {
 
     /** @return the current TreeView */
     public abstract TreeView getTreeView();
+
+    /**
+     * Start stop a timer.
+     *
+     * @param toggleTimer
+     *            -- true: start timer, false stop timer.
+     */
+    public abstract void executeTimer(boolean toggleTimer);
+
 }

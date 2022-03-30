@@ -734,6 +734,41 @@ public abstract class Dataset extends HObject implements DataFormat
     }
 
     /**
+     * Refreshes the current object in the file.
+     *
+     * The function read() loads data from file into memory only if the data is not
+     * read. If data is already in memory, read() just returns the memory buffer.
+     * Sometimes we want to force a clear and read to re-read the object from the file.
+     * For example, when the selection is changed, we need to re-read the data.
+     *
+     * @see #getData()
+     * @see #read()
+     */
+    @Override
+    public Object refreshData() {
+        Object dataValue = null;
+
+        clearData();
+        try {
+            dataValue = getData();
+
+            /*
+             * TODO: Converting data from unsigned C integers to Java integers
+             *       is currently unsupported for Compound Datasets.
+             */
+            if (!(this instanceof CompoundDS))
+                convertFromUnsignedC();
+
+            dataValue = getData();
+            log.trace("refresh data");
+        }
+        catch (Exception ex) {
+            log.trace("refresh data failure: ", ex);
+        }
+        return dataValue;
+    }
+
+    /**
      * Returns the dimension size of the vertical axis.
      *
      * This function is used by GUI applications such as HDFView. GUI

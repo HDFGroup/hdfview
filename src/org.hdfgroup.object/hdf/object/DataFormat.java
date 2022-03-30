@@ -71,6 +71,19 @@ public interface DataFormat
     void clearData();
 
     /**
+     * Refreshes the current object in the file.
+     *
+     * The function read() loads data from file into memory only if the data is not
+     * read. If data is already in memory, read() just returns the memory buffer.
+     * Sometimes we want to force a clear and read to re-read the object from the file.
+     * For example, when the dimensions has changed, we need to refresh the object and data.
+     *
+     * @see #getData()
+     * @see #read()
+     */
+    Object refreshData();
+
+    /**
      * Reads the data from file.
      *
      * read() reads the data from file to a memory buffer and returns the memory

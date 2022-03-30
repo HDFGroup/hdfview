@@ -77,6 +77,7 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
+
 import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
 import hdf.view.Tools;
@@ -902,6 +903,21 @@ public class DefaultTreeView implements TreeView {
                 catch (Exception ex) {
                     log.debug("reload file {} as read-only failure: ", selectedFile.getAbsolutePath(), ex);
                     Tools.showError(shell, "File reload error", "Error reloading file " + selectedFile.getAbsolutePath() + " read-only: " + ex.getMessage());
+                }
+            }
+        });
+
+        item = new MenuItem(reloadFileMenu, SWT.PUSH);
+        item.setText("SWMR Read-Only");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                try {
+                    reopenFile(selectedFile, FileFormat.READ | FileFormat.MULTIREAD);
+                }
+                catch (Exception ex) {
+                    log.debug("reload file {} as SWMR read-only failure: ", selectedFile.getAbsolutePath(), ex);
+                    Tools.showError(shell, "File reload error", "Error reloading file " + selectedFile.getAbsolutePath() + " SWMR read-only: " + ex.getMessage());
                 }
             }
         });
@@ -2325,9 +2341,11 @@ public class DefaultTreeView implements TreeView {
     public FileFormat openFile(String filename, int accessID) throws Exception {
         log.trace("openFile: {},{}", filename, accessID);
         FileFormat fileFormat = null;
+        boolean isSWMRFile = (FileFormat.MULTIREAD == (accessID & FileFormat.MULTIREAD));
+        log.trace("openFile: isSWMRFile={}", isSWMRFile);
         boolean isNewFile = (FileFormat.OPEN_NEW == (accessID & FileFormat.OPEN_NEW));
         if (isNewFile)
-            accessID = accessID - FileFormat.OPEN_NEW;
+            accessID = accessID - FileFormat.OPEN_NEW; //strip OPEN_NEW
 
         if (isFileOpen(filename)) {
             viewer.showStatus("File is in use.");
@@ -2338,7 +2356,7 @@ public class DefaultTreeView implements TreeView {
         if (!tmpFile.exists())
             throw new FileNotFoundException("File does not exist.");
 
-        if (!tmpFile.canWrite())
+        if (!tmpFile.canWrite() && !isSWMRFile)
             accessID = FileFormat.READ;
 
         Enumeration<?> keys = FileFormat.getFileFormatKeys();
@@ -2505,6 +2523,8 @@ public class DefaultTreeView implements TreeView {
         if (newFileAccessMode < 0) {
             if (ViewProperties.isReadOnly())
                 return openFile(fileFormatName, FileFormat.READ);
+            else if (ViewProperties.isReadSWMR())
+                return openFile(fileFormatName, FileFormat.READ | FileFormat.MULTIREAD);
             else
                 return openFile(fileFormatName, FileFormat.WRITE);
         }
@@ -2847,58 +2867,6 @@ public class DefaultTreeView implements TreeView {
 
         if (!shell.isDisposed())
             shell.setCursor(null);
-
-        return theView;
-    }
-
-    /**
-     * Displays the meta data of a data object.
-     *
-     * @param dataObject
-     *            the data object
-     *
-     * @return the MetaDataView that displays the MetaData of the data object
-     *
-     * @throws Exception if a failure occurred
-     */
-    @Override
-    public MetaDataView showMetaData(HObject dataObject) throws Exception {
-        if (dataObject == null)
-            return null;
-
-        log.trace("showMetaData({}): start", dataObject.getName());
-
-        DataViewFactory metaDataViewFactory = null;
-        try {
-            metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
-        }
-        catch (Exception ex) {
-            log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
-            viewer.showError("Error occurred while instantiating MetaDataView factory class");
-            return null;
-        }
-
-        if (metaDataViewFactory == null) {
-            log.debug("showMetaData(): MetaDataView factory is null");
-            return null;
-        }
-
-        /* TODO: initargs needs access to MetaDataView parent composite */
-        MetaDataView theView;
-        try {
-            theView = metaDataViewFactory.getMetaDataView(null, viewer, dataObject);
-
-            if (theView == null) {
-                log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
-                viewer.showError("Error occurred while instantiating MetaDataView class");
-                return null;
-            }
-        }
-        catch (ClassNotFoundException ex) {
-            log.debug("showMetaData(): no suitable MetaDataView class found");
-            viewer.showError("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
-            return null;
-        }
 
         return theView;
     }

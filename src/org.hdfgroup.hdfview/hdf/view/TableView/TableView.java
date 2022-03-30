@@ -38,4 +38,7 @@ public abstract interface TableView extends DataView {
 
     /** Write the change of a dataset into file. */
     public abstract void updateValueInFile();
+
+    /** refresh the data table. */
+    public abstract void refreshDataTable();
 }

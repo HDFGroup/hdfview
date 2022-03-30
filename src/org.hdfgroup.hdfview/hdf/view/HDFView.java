@@ -68,6 +68,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import hdf.HDFVersions;
+import hdf.object.DataFormat;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.view.ViewProperties.DataViewType;
@@ -200,6 +201,40 @@ public class HDFView implements DataViewManager
 
     private UserOptionsDialog          userOptionDialog;
 
+    /** State of refresh. */
+    public boolean viewerState = false;
+
+    /** Timer for refresh functions. */
+    private final Runnable timer = new Runnable() {
+        public void run() {
+            // refresh each table displaying data
+            Shell[] shellList = display.getShells();
+            if (shellList != null) {
+                for (int i = 0; i < shellList.length; i++) {
+                    if (shellList[i].equals(mainWindow))
+                        showMetaData(treeView.getCurrentObject());
+                    else {
+                        DataView view = (DataView) shellList[i].getData();
+                        if ((view != null) && (view instanceof TableView)) {
+                            HObject obj = view.getDataObject();
+                            if (obj == null || obj.getFileFormat() == null || !(obj instanceof DataFormat))
+                                continue;
+
+                            FileFormat file = obj.getFileFormat();
+                            if (file.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5)))
+                                ((TableView)view).refreshDataTable();
+                        }
+                    }
+                }
+            }
+            log.trace("viewerState = {}", viewerState);
+            if (viewerState)
+                display.timerExec(ViewProperties.getTimerRefresh(), timer);
+            else
+                display.timerExec(-1, timer);
+        }
+    };
+
     /**
      * Constructs HDFView with a given root directory, where the HDFView is
      * installed, and opens the given files in the viewer.
@@ -319,7 +354,12 @@ public class HDFView implements DataViewManager
                 currentFile = theFile.getAbsolutePath();
 
                 try {
-                    treeView.openFile(currentFile, ViewProperties.isReadOnly() ? FileFormat.READ : FileFormat.WRITE);
+                    int access_mode = FileFormat.WRITE;
+                    if (ViewProperties.isReadOnly())
+                        access_mode = FileFormat.READ;
+                    else if (ViewProperties.isReadSWMR())
+                        access_mode = FileFormat.READ | FileFormat.MULTIREAD;
+                    treeView.openFile(currentFile, access_mode);
 
                     try {
                         urlBar.remove(currentFile);
@@ -494,6 +534,15 @@ public class HDFView implements DataViewManager
             @Override
             public void widgetSelected(SelectionEvent e) {
                 openLocalFile(null, FileFormat.READ);
+            }
+        });
+
+        item = new MenuItem(openAsMenu, SWT.PUSH);
+        item.setText("SWMR Read-Only");
+        item.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                openLocalFile(null, FileFormat.READ | FileFormat.MULTIREAD);
             }
         });
 
@@ -1311,6 +1360,22 @@ public class HDFView implements DataViewManager
     }
 
     /**
+     * Start stop a timer.
+     *
+     * @param toggleTimer
+     *            -- true: start timer, false stop timer.
+     */
+    @Override
+    public final void executeTimer(boolean toggleTimer) {
+        showStatus("toggleTimer: " + toggleTimer);
+        viewerState = toggleTimer;
+        if (viewerState)
+            display.timerExec(ViewProperties.getTimerRefresh(), timer);
+        else
+            display.timerExec(-1, timer);
+    }
+
+    /**
      * Display feedback message.
      *
      * @param msg
@@ -1745,6 +1810,8 @@ public class HDFView implements DataViewManager
         if (accessMode < 0) {
             if (ViewProperties.isReadOnly())
                 accessMode = FileFormat.READ;
+            else if (ViewProperties.isReadSWMR())
+                accessMode = FileFormat.READ | FileFormat.MULTIREAD;
             else
                 accessMode = FileFormat.WRITE;
         }
@@ -1797,7 +1864,13 @@ public class HDFView implements DataViewManager
             if (!isTesting) {
                 log.trace("openLocalFile filename is null");
                 FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN | SWT.MULTI);
-                fChooser.setText(mainWindow.getText() + " - Open File " + ((accessMode == FileFormat.READ) ? "Read-only" : "Read/Write"));
+                String modeStr = "Read/Write";
+                boolean isSWMRFile = (FileFormat.MULTIREAD == (accessMode & FileFormat.MULTIREAD));
+                if (isSWMRFile)
+                    modeStr = "SWMR Read-only";
+                else if (accessMode == FileFormat.READ)
+                    modeStr = "Read-only";
+                fChooser.setText(mainWindow.getText() + " - Open File " + modeStr);
                 fChooser.setFilterPath(currentDir);
 
                 DefaultFileFilter filter = DefaultFileFilter.getFileFilter();
@@ -1837,7 +1910,7 @@ public class HDFView implements DataViewManager
                     urlBar.add(chosenFiles[i].getAbsolutePath(), 1);
                     urlBar.select(1);
 
-                    log.trace("openLocalFile treeView.openFile(chosenFiles[{}]: {}",i,chosenFiles[i].getAbsolutePath());
+                    log.trace("openLocalFile treeView.openFile(accessMode={} chosenFiles[{}]: {}",accessMode,i,chosenFiles[i].getAbsolutePath());
                     try {
                         treeView.openFile(chosenFiles[i].getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                     }

@@ -151,9 +151,9 @@ public class DataProviderFactory
         protected final boolean    isDataTransposed;
 
         /** the column */
-        protected final long       colCount;
+        protected long       colCount;
         /** the row */
-        protected final long       rowCount;
+        protected long       rowCount;
 
         /**
          * Create the HDF extended Data Display Provider for the supplied data object
@@ -500,6 +500,16 @@ public class DataProviderFactory
          */
         public final void updateDataBuffer(Object newBuf) {
             this.dataBuf = newBuf;
+
+            if (rank > 1) {
+                rowCount = dataFormatReference.getHeight();
+                colCount = dataFormatReference.getWidth();
+            }
+            else {
+                rowCount = (int) dataFormatReference.getSelectedDims()[0];
+                colCount = 1;
+            }
+            log.trace("constructor: rowCount={} colCount={}", rowCount, colCount);
         }
     }
 

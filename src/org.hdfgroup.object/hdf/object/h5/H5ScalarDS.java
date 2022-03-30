@@ -82,6 +82,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     private List<String> virtualNameList;
 
     /**
+     * flag to indicate if the dataset buffers should be refreshed.
+     */
+    protected boolean refresh = false;
+
+    /**
      * flag to indicate if the datatype in file is the same as dataype in memory
      */
     protected boolean isNativeDatatype = false;
@@ -263,6 +268,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
         did = open();
         if (did >= 0) {
+            try {
+                H5.H5Drefresh(did);
+            }
+            catch (Exception ex) {
+                log.debug("H5Drefresh(): ", ex);
+            }
             // check if it is an external or virtual dataset
             long pid = HDF5Constants.H5I_INVALID_HID;
             try {
@@ -472,6 +483,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         else {
             log.debug("init(): failed to open dataset");
         }
+        refresh = false;
     }
 
     /**
@@ -642,6 +654,18 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         }
 
         return datatype;
+    }
+
+    /**
+     * Refreshes the dataset before re-read of data.
+     */
+    @Override
+    public Object refreshData() {
+        inited = false;
+        refresh = true;
+
+        init();
+        return super.refreshData();
     }
 
     /**
