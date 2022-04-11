@@ -104,41 +104,38 @@ public class ScalarDSTest {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.READ);
+        try {
+            testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.READ);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         assertNotNull(testFile);
         testGroup = (H5Group) testFile.get(H5TestFile.NAME_GROUP_ATTR);
         assertNotNull(testGroup);
 
         intDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_INT);
         assertNotNull(intDset);
-        intDset.init();
         floatDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_FLOAT);
         assertNotNull(floatDset);
-        floatDset.init();
         charDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_CHAR);
         assertNotNull(charDset);
-        charDset.init();
         strDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_STR);
         assertNotNull(strDset);
-        strDset.init();
         enumDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_ENUM);
         assertNotNull(enumDset);
-        enumDset.init();
         imageDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_IMAGE);
         assertNotNull(imageDset);
-        imageDset.init();
         ORDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_OBJ_REF);
         assertNotNull(ORDset);
-        ORDset.init();
         imagePalete = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_IMAGE_PALETTE);
         assertNotNull(imagePalete);
-        imagePalete.init();
     }
 
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            checkObjCount(testFile.getFID());
+            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {

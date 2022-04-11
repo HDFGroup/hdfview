@@ -192,7 +192,7 @@ public class H5FileTest
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            checkObjCount(testFile.getFID());
+            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {
@@ -242,8 +242,6 @@ public class H5FileTest
             catch (final Exception ex) {
                 fail("file.get() failed. " + ex);
             }
-
-            checkObjCount(file.getFID());
 
             try {
                 file.close();
@@ -641,8 +639,6 @@ public class H5FileTest
             fail("file.get() failed. " + ex);
         }
 
-        checkObjCount(file.getFID());
-
         try {
             file.close();
         }
@@ -917,8 +913,6 @@ public class H5FileTest
             assertNotNull(obj);
         }
 
-        checkObjCount(file.getFID());
-
         try {
             file.close();
         }
@@ -986,8 +980,6 @@ public class H5FileTest
             }
             assertNotNull(obj);
         }
-
-        checkObjCount(file.getFID());
 
         try {
             file.close();
@@ -1174,8 +1166,6 @@ public class H5FileTest
         catch (final Exception ex) {
             fail("file.get() failed. " + ex);
         }
-
-        checkObjCount(file.getFID());
 
         try {
             file.close();

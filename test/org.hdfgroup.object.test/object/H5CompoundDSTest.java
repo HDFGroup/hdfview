@@ -29,6 +29,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
+
 import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -188,7 +189,6 @@ public class H5CompoundDSTest
             testFile.open();
 
             testDataset = (H5CompoundDS) testFile.get(DNAME);
-            testDataset.init();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -199,7 +199,7 @@ public class H5CompoundDSTest
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            checkObjCount(testFile.getFID());
+            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {
@@ -246,8 +246,7 @@ public class H5CompoundDSTest
             testDataset.setName(null);
             H5.H5error_on();
         }
-        // Expected - intentional
-        catch (final Exception ex) {}
+        catch (final Exception ex) {} // Expected - intentional
 
         // set to an existing name
         try {
@@ -255,8 +254,7 @@ public class H5CompoundDSTest
             testDataset.setName(DNAME_SUB);
             H5.H5error_on();
         }
-        // Expected - intentional
-        catch (final Exception ex) {}
+        catch (final Exception ex) {} // Expected - intentional
 
         try {
             testDataset.setName(newName);
@@ -483,14 +481,19 @@ public class H5CompoundDSTest
     @Test
     public void testInit() {
         log.debug("testInit");
-        for (int loop = 0; loop < NLOOPS; loop++) {
-            // Close default testFile
-            closeFile();
 
+        // Close default testFile
+        try {
+            testFile.close();
+            log.trace("testInit close testfile");
+        }
+        catch (final Exception ex) {}
+
+        for (int loop = 0; loop < NLOOPS; loop++) {
             // Reopen default testFile
             try {
                 testFile = (H5File) H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
-                testFile.open();
+                log.trace("testInit createInstance testfile loop={}", loop);
 
                 testDataset = (H5CompoundDS) testFile.get(DNAME);
             }
@@ -499,6 +502,7 @@ public class H5CompoundDSTest
             }
 
             testDataset.init();
+            log.trace("testInit testfile testDataset.init");
 
             // test the rank
             final int rank = testDataset.getRank();
@@ -554,8 +558,17 @@ public class H5CompoundDSTest
             for (int i = 0; i < nmembers; i++)
                 testDataset.setAllMemberSelection(false);
 
-            checkObjCount(testFile.getFID());
+            try {
+                testFile.close();
+                log.trace("testInit close testfile loop={}", loop);
+            }
+            catch (final Exception ex) {
+                System.err.println("testFile.close() failed. " + ex);
+            }
         } //  (int loop=0; loop<NLOOPS; loop++)
+        // clear the testFile handle now
+        if (testFile != null)
+            testFile = null;
     } // public final void testInit() {
 
     /**
@@ -580,7 +593,7 @@ public class H5CompoundDSTest
                 data = (List<?>) testDataset.getData();
             }
             catch (final Exception ex) {
-                fail("getData() failed. " + ex);
+                fail("testDataset.getData() failed. " + ex);
             }
             assertNotNull(data);
             assertTrue(data.size() > 0);
@@ -618,13 +631,15 @@ public class H5CompoundDSTest
         List<?> data = null;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
+            log.trace("testReadByRow testDataset loop={}", loop);
             testDataset.init();
 
             // read data row by row
             final long nrows = testDataset.getHeight();
+            log.trace("testReadByRow testDataset nrows={}", nrows);
             for (int i = 0; i < nrows; i++) {
+                log.trace("testReadByRow testDataset loop={} row={}", loop, i);
                 testDataset.clearData();
-                testDataset.init();
 
                 final int rank = testDataset.getRank();
                 final long[] start = testDataset.getStartDims();
@@ -656,6 +671,7 @@ public class H5CompoundDSTest
                 assertTrue(H5TestFile.DATA_STR[idx].equals(strs[0]));
             } //  (int i=0; i<nrows; i++) {
         } //  (int loop=0; loop<NLOOPS; loop++) {
+        log.trace("testReadByRow testDataset finished");
     }
 
     /**
@@ -884,9 +900,6 @@ public class H5CompoundDSTest
             }
             final long nrows = testDataset.getHeight();
             for (int i = 0; i < nrows; i++) {
-                testDataset.clearData();
-                testDataset.init();
-
                 // select one row only
                 for (int j = 0; j < rank; j++) {
                     count[j] = 1;
@@ -926,6 +939,7 @@ public class H5CompoundDSTest
                 }
 
                 // check if data is correct
+                testDataset.init();
                 testDataset.clearData();
                 try {
                     data = (List<?>) testDataset.getData();
@@ -1427,9 +1441,8 @@ public class H5CompoundDSTest
                 try {
                     final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
-                    for (int j = 0; j < ints.length; j++) {
+                    for (int j = 0; j < ints.length; j++)
                         ints[j] = TEST_VALUE_INT;
-                    }
                 }
                 catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -1503,9 +1516,8 @@ public class H5CompoundDSTest
                     assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getAttributeName()));
                     final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
-                    for (int j = 0; j < ints.length; j++) {
+                    for (int j = 0; j < ints.length; j++)
                         assertEquals(TEST_VALUE_INT, ints[j]);
-                    }
                 }
                 catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -1821,7 +1833,6 @@ public class H5CompoundDSTest
         }
         assertNotNull(dset);
         compData = null;
-        dset.init();
         try {
             compData = (List<Object>) dset.getData();
         }
@@ -1852,7 +1863,6 @@ public class H5CompoundDSTest
         }
         assertNotNull(dset);
         compData = null;
-        dset.init();
         try {
             compData = (List<Object>) dset.getData();
         }
@@ -1882,8 +1892,6 @@ public class H5CompoundDSTest
         }
         assertNotNull(dset);
         compData = null;
-        log.debug("testCreateStringGroupLongArrayStringArrayDatatypeArrayIntArrayObject dset.init() for {}", compStrName);
-        dset.init();
         try {
             compData = (List<Object>) dset.getData();
         }
@@ -1913,7 +1921,6 @@ public class H5CompoundDSTest
         }
         assertNotNull(dset);
         compData = null;
-        dset.init();
         try {
             compData = (List<Object>) dset.getData();
         }
@@ -2023,7 +2030,6 @@ public class H5CompoundDSTest
         }
         assertNotNull(dset);
         compData = null;
-        dset.init();
         try {
             compData = (List<Object>) dset.getData();
         }
@@ -2131,7 +2137,6 @@ public class H5CompoundDSTest
         }
         assertNotNull(dset);
         compData = null;
-        dset.init();
         try {
             compData = (List<Object>) dset.getData();
         }

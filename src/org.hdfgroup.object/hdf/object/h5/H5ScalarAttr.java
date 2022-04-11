@@ -700,8 +700,6 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
         if (!buf.equals(data))
             setData(buf);
 
-        init();
-
         if (parentObject == null) {
             log.debug("write(Object): parent object is null; nowhere to write attribute to");
             return;
@@ -1181,6 +1179,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
                     H5.H5AwriteVL(attr_id, tid, (Object[]) tmpData);
                 }
                 else {
+                    log.trace("AttributeCommonIO(): dsDatatype.isRef()={} data is String={}", dsDatatype.isRef(), tmpData instanceof String);
                     if (dsDatatype.isRef() && tmpData instanceof String) {
                         // reference is a path+name to the object
                         log.trace("AttributeCommonIO(): Attribute class is CLASS_REFERENCE");
@@ -1284,37 +1283,5 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
 
         log.trace("scalarAttributeSelection(): theData={}", theData);
         return theData;
-    }
-
-    /* Implement abstract ScalarDS */
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPalette()
-     */
-    @Override
-    public byte[][] getPalette() {
-        if (palette == null)
-            palette = readPalette(0);
-
-        return palette;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#readPalette(int)
-     */
-    @Override
-    public byte[][] readPalette(int idx) {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPaletteRefs()
-     */
-    @Override
-    public byte[] getPaletteRefs() {
-        return null;
     }
 }

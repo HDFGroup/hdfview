@@ -128,7 +128,7 @@ public class AttributeTest
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            checkObjCount(testFile.getFID());
+            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {

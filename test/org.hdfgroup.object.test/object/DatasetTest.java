@@ -32,9 +32,11 @@ public class DatasetTest {
     private static final H5File H5FILE = new H5File();
 
     private H5File testFile = null;
-    String[] dsetNames = { H5TestFile.NAME_DATASET_INT, H5TestFile.NAME_DATASET_FLOAT, H5TestFile.NAME_DATASET_CHAR,
-            H5TestFile.NAME_DATASET_STR, H5TestFile.NAME_DATASET_ENUM, H5TestFile.NAME_DATASET_IMAGE,
-            H5TestFile.NAME_DATASET_COMPOUND };
+    String[] dsetNames = {
+            H5TestFile.NAME_DATASET_INT, H5TestFile.NAME_DATASET_FLOAT, H5TestFile.NAME_DATASET_CHAR,
+            H5TestFile.NAME_DATASET_STR, H5TestFile.NAME_DATASET_ENUM,
+            H5TestFile.NAME_DATASET_COMPOUND,
+            H5TestFile.NAME_DATASET_IMAGE };
     private Dataset[] dSets = new Dataset[dsetNames.length];
 
     protected void closeFile() {
@@ -42,8 +44,7 @@ public class DatasetTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -109,15 +110,13 @@ public class DatasetTest {
         }
         assertNotNull(testFile);
 
-        try {
-            testFile.open();
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
         for (int i = 0; i < dSets.length; i++) {
-            dSets[i] = (Dataset) testFile.get(dsetNames[i]);
-            dSets[i].init();
+            try {
+                dSets[i] = (Dataset) testFile.get(dsetNames[i]);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
             assertNotNull(dSets[i]);
         }
     }
@@ -125,7 +124,7 @@ public class DatasetTest {
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            checkObjCount(testFile.getFID());
+            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {
@@ -157,8 +156,12 @@ public class DatasetTest {
     @Test
     public void testMetadataAssociatedWithDataset() {
         log.debug("testMetadataAssociatedWithDataset");
+        log.debug("loop: Number of IDs still open: " + H5.getOpenIDCount());
         for (int i = 0; i < dsetNames.length; i++) {
+            dSets[i].init();
+            log.debug("init: Number of IDs still open: " + H5.getOpenIDCount());
             log.debug("testMetadataAssociatedWithDataset current={} is  {}", i, dSets[i].getName());
+            log.debug("name: Number of IDs still open: " + H5.getOpenIDCount());
             assertNull(dSets[i].getChunkSize());
             assertTrue(dSets[i].getCompression().equals("NONE"));
             assertTrue(dSets[i].getConvertByteToString()); // by default, strings are converted

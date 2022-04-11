@@ -190,12 +190,8 @@ public class DataOptionDialog extends Dialog {
         if (!dataObject.isInited())
             dataObject.init();
 
-        if (isH5 && (dataObject instanceof ScalarDS)) {
-            byte[] palRefs = ((ScalarDS) dataObject).getPaletteRefs();
-            if ((palRefs != null) && (palRefs.length > 8)) {
-                numberOfPalettes = palRefs.length / 8;
-            }
-        }
+        if (isH5 && (dataObject instanceof ScalarDS))
+            numberOfPalettes = ((ScalarDS) dataObject).getNumberOfPalettes();
 
         rank = dataObject.getRank();
         dims = dataObject.getDims();
