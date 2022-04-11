@@ -1108,10 +1108,10 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
                         }
                         theData = ((H5Datatype)dsDatatype.getDatatypeBase()).byteToBigDecimal(0, asize, (byte[]) attr_data);
                     }
-                    else if (dsDatatype.isRefObj()) {
-                        log.trace("AttributeCommonIO():read ioType isREF: converting byte array to long array");
-                        theData = HDFNativeData.byteToLong((byte[]) attr_data);
-                    }
+//                    else if (dsDatatype.isRefObj()) {
+//                        log.trace("AttributeCommonIO():read ioType isREF: converting byte array to long array");
+//                        theData = HDFNativeData.byteToLong((byte[]) attr_data);
+//                    }
                     else
                         theData = attr_data;
                 }
