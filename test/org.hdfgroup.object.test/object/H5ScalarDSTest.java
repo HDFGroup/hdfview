@@ -191,7 +191,6 @@ public class H5ScalarDSTest
             testFile.open();
 
             testDataset = (H5ScalarDS) testFile.get(DNAME);
-            testDataset.init();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -202,7 +201,6 @@ public class H5ScalarDSTest
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            checkObjCount(testFile.getFID());
             closeFile();
         }
         try {
@@ -484,22 +482,29 @@ public class H5ScalarDSTest
     @Test
     public void testInit() {
         log.debug("testInit");
-        for (int loop = 0; loop < NLOOPS; loop++) {
-            // Close default testFile
-            closeFile();
 
+        // Close default testFile
+        try {
+            testFile.close();
+            log.trace("testInit close testfile");
+        }
+        catch (final Exception ex) {}
+
+        for (int loop = 0; loop < NLOOPS; loop++) {
             // Reopen default testFile
             try {
                 testFile = (H5File) H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
-                testFile.open();
+                log.trace("testInit createInstance testfile loop={}", loop);
 
                 testDataset = (H5ScalarDS) testFile.get(DNAME);
+                log.trace("testInit get testfile testDataset");
             }
             catch (final Exception ex) {
                 fail("get(DNAME) failed. " + ex);
             }
 
             testDataset.init();
+            log.trace("testInit testfile testDataset.init");
 
             // test the rank
             final int rank = testDataset.getRank();
@@ -508,16 +513,14 @@ public class H5ScalarDSTest
             // test the dimension sizes
             final long[] dims = testDataset.getDims();
             assertNotNull(dims);
-            for (int i = 0; i < rank; i++) {
+            for (int i = 0; i < rank; i++)
                 assertEquals(H5TestFile.DIMs[i], dims[i]);
-            }
 
             // start at 0
             final long[] start = testDataset.getStartDims();
             assertNotNull(start);
-            for (int i = 0; i < rank; i++) {
+            for (int i = 0; i < rank; i++)
                 assertEquals(0, start[i]);
-            }
 
             // test selection
             final long[] selectedDims = testDataset.getSelectedDims();
@@ -541,7 +544,18 @@ public class H5ScalarDSTest
                 assertEquals(dims[rank - 1], selectedDims[rank - 1]);
                 assertEquals(dims[rank - 2], selectedDims[rank - 2]);
             }
+
+            try {
+                testFile.close();
+                log.trace("testInit close testfile loop={}", loop);
+            }
+            catch (final Exception ex) {
+                System.err.println("testFile.close() failed. " + ex);
+            }
         } //  (int loop=0; loop<NLOOPS; loop++)
+        // clear the testFile handle now
+        if (testFile != null)
+            testFile = null;
     } // public final void testInit() {
 
     /**
@@ -600,8 +614,6 @@ public class H5ScalarDSTest
                 fail("file.get() failed. " + ex);
             }
 
-            checkObjCount(file.getFID());
-
             try {
                 file.close();
             }
@@ -609,6 +621,9 @@ public class H5ScalarDSTest
                 fail("file.close() failed. " + ex);
             }
         } //  (int i=0; i<NLOOPS; i++)
+        // clear the testFile handle now
+        if (testFile != null)
+            testFile = null;
     }
 
     /**
@@ -674,13 +689,15 @@ public class H5ScalarDSTest
         int[] data = null;
 
         for (int loop = 0; loop < NLOOPS; loop++) {
+            log.trace("testReadByRow testDataset loop={}", loop);
             testDataset.init();
 
             // read data row by row
             final long nrows = testDataset.getHeight();
+            log.trace("testReadByRow testDataset nrows={}", nrows);
             for (int i = 0; i < nrows; i++) {
+                log.trace("testReadByRow testDataset loop={} row={}", loop, i);
                 testDataset.clearData();
-                testDataset.init();
 
                 final int rank = testDataset.getRank();
                 final long[] start = testDataset.getStartDims();
@@ -695,6 +712,7 @@ public class H5ScalarDSTest
 
                 try {
                     data = (int[]) testDataset.getData();
+                    log.trace("testReadByRow testDataset.getData loop={} row={}", loop, i);
                 }
                 catch (final Exception ex) {
                     fail("getData() failed. " + ex);
@@ -702,9 +720,12 @@ public class H5ScalarDSTest
                 assertNotNull(data);
 
                 final int idx = (int) H5TestFile.DIM2 * i;
+                log.trace("testReadByRow testDataset.DATA_INT[{}]={} loop={} row={}", idx, H5TestFile.DATA_INT[idx], loop, i);
+                log.trace("testReadByRow testDataset.data[0]={} loop={} row={}", data[0], loop, i);
                 assertEquals(H5TestFile.DATA_INT[idx], data[0]);
             } //  (int i=0; i<nrows; i++) {
         } //  (int loop=0; loop<NLOOPS; loop++) {
+        log.trace("testReadByRow testDataset finished");
     }
 
     /**
@@ -919,7 +940,6 @@ public class H5ScalarDSTest
 
         try {
             dset = (H5ScalarDS) testFile.get(H5TestFile.NAME_DATASET_STR);
-            dset.init();
         }
         catch (Exception ex) {
             dset = null;
@@ -951,6 +971,7 @@ public class H5ScalarDSTest
         // read null strings
         try {
             dset.clearData();
+            dset.init();
             nullStrs = (String[]) dset.read();
         }
         catch (Exception ex) {
@@ -966,6 +987,7 @@ public class H5ScalarDSTest
         }
 
         // restore to the original state
+        //dset.init();
         try {
             dset.write(data);
         }
@@ -976,6 +998,7 @@ public class H5ScalarDSTest
         // read data back and check it is to the original state
         try {
             dset.clearData();
+            dset.init();
             nullStrs = (String[]) dset.read();
         }
         catch (Exception ex) {
@@ -1010,19 +1033,23 @@ public class H5ScalarDSTest
 
         try {
             testFile.close();
+            log.trace("testCopy close testfile");
         }
         catch (final Exception ex) {}
 
         for (int loop = 0; loop < NLOOPS; loop++) {
             tmpFile = new H5File("H5ScalarDS_testCopy.h5", FileFormat.CREATE);
+            log.trace("testCopy new H5File loop={}", loop);
 
             try {
                 // test two open options: open full tree or open individual
                 // object only
                 for (int openOption = 0; openOption < 2; openOption++) {
+                    log.trace("testCopy loop={} openOption={}", loop, openOption);
                     if (openOption == 0) {
                         try {
                             testFile.open(); // open the full tree
+                            log.trace("testCopy testFile open loop={} openOption={}", loop, openOption);
                         }
                         catch (final Exception ex) {
                             System.err.println("file.open(). " + ex);
@@ -1031,16 +1058,14 @@ public class H5ScalarDSTest
 
                     try {
                         final Group rootGrp = (Group) tmpFile.get("/");
+                        log.trace("testCopy get tmpFile rootGrp");
 
                         // datasets
                         for (int j = 0; j < DNAMES.length; j++) {
                             dset = (Dataset) testFile.get(DNAMES[j]);
-                            dset.init();
                             final Object data = dset.getData();
-                            dset.write(data);
-                            ((H5ScalarDS)dset).getMetadata();
 
-                            // copy data into a new datast
+                            log.trace("testCopy copy data into a new dataset[{}]={}", j, DNAMES[j]);
                             if (dset instanceof ScalarDS) {
                                 dsetNew = dset.copy(rootGrp, DNAMES[j] + "_copy" + openOption, H5TestFile.DIMs, data);
                                 assertNotNull(dsetNew);
@@ -1048,6 +1073,7 @@ public class H5ScalarDSTest
                                 final int size = Array.getLength(data);
                                 for (int k = 0; k < size; k++)
                                     assertEquals(Array.get(data, k), Array.get(dataCopy, k));
+                                log.trace("testCopy copy data into a new dataset size={}", size);
                             }
                         }
                     }
@@ -1059,20 +1085,21 @@ public class H5ScalarDSTest
                         testFile.close();
                     }
                     catch (final Exception ex) {
-                        System.err.println("file.close() failed. " + ex);
+                        System.err.println("testFile.close() failed. " + ex);
                     }
 
+                    log.trace("testCopy check obj count");
                     checkObjCount(tmpFile.getFID());
-
-                    try {
-                        tmpFile.close();
-                    }
-                    catch (final Exception ex) {
-                        System.err.println("file.close() failed. " + ex);
-                    }
                 } //  (int openOption=0; openOption<2; openOption++)
             }
             finally {
+                try {
+                    tmpFile.close();
+                    log.trace("testCopy close obj tmpFile");
+                }
+                catch (final Exception ex) {
+                    System.err.println("tmpFile.close() failed. " + ex);
+                }
                 // delete the testing file
                 if (tmpFile != null)
                     tmpFile.delete();
@@ -1130,7 +1157,9 @@ public class H5ScalarDSTest
             fail("testFile.get failed. " + ex);
         }
         assertNotNull(img);
+        img.init();
 
+        log.debug("testGetPalette pal");
         final byte[][] pal = img.getPalette();
         assertNotNull(pal);
 
@@ -1163,6 +1192,7 @@ public class H5ScalarDSTest
         }
         assertNotNull(img);
 
+        log.debug("testReadPalette pal");
         final byte[][] pal = img.readPalette(0);
         assertNotNull(pal);
 
@@ -1174,17 +1204,16 @@ public class H5ScalarDSTest
     }
 
     /**
-     * Test method for {@link hdf.object.h5.H5ScalarDS#getPaletteRefs()}.
+     * Test method for {@link hdf.object.h5.H5ScalarDS#getNumberOfPalettes()}.
      *
      * What to test:
      * <ul>
-     * <li>Get an array of palette references from an image
-     * <li>Check the content of the palette references
+     * <li>Check the number of palette references
      * </ul>
      */
     @Test
-    public void testGetPaletteRefs() {
-        log.debug("testGetPaletteRefs");
+    public void testGetNumberOfPalettes() {
+        log.debug("testNumberOfPalettes");
         ScalarDS img = null;
 
         try {
@@ -1194,9 +1223,11 @@ public class H5ScalarDSTest
             fail("testFile.get failed. " + ex);
         }
         assertNotNull(img);
+        img.init();
 
-        final byte[] refs = img.getPaletteRefs();
-        assertNotNull(refs);
+        log.debug("testGetNumberOfPalettes count");
+        final int count = img.getNumberOfPalettes();
+        assertTrue(count > 0);
     }
 
     /**
@@ -1252,7 +1283,6 @@ public class H5ScalarDSTest
         // test a non-existing dataset
         H5.H5error_off();
         final H5ScalarDS dset = new H5ScalarDS(file, "NO_SUCH_DATASET", "NO_SUCH_PATH");
-        dset.init();
         dset.clearData();
         data = null;
         try {
@@ -1731,98 +1761,6 @@ public class H5ScalarDSTest
         }
         catch (final Exception ex) {
             fail("testFile.delete failed. " + ex);
-        }
-    }
-
-    /**
-     * Test method for {@link hdf.object.h5.H5ScalarDS} IsSerializable.
-     */
-    @Test
-    public void testIsSerializable() {
-        log.debug("testIsSerializable");
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ObjectOutputStream oos;
-        try {
-            oos = new ObjectOutputStream(out);
-            oos.writeObject(testDataset);
-            oos.close();
-        }
-        catch (IOException err) {
-            err.printStackTrace();
-            fail("ObjectOutputStream failed: " + err);
-        }
-        assertTrue(out.toByteArray().length > 0);
-    }
-
-    /**
-     * Test method for {@link hdf.object.h5.H5ScalarDS} SerializeToDisk.
-     *
-     * What to test:
-     * <ul>
-     * <li>serialize a dataset identifier
-     * <li>deserialize a dataset identifier
-     * <li>open a dataset identifier
-     * <li>get datatype and dataspace identifier for the dataset
-     * </ul>
-     */
-    @Test
-    public void testSerializeToDisk() {
-        log.debug("testSerializeToDisk");
-        try {
-            FileOutputStream fos = new FileOutputStream("temph5dset.ser");
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(testDataset);
-            oos.close();
-        }
-        catch (Exception ex) {
-            fail("Exception thrown during test: " + ex.toString());
-        }
-
-        H5ScalarDS test = null;
-        try {
-            FileInputStream fis = new FileInputStream("temph5dset.ser");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            test = (hdf.object.h5.H5ScalarDS) ois.readObject();
-            ois.close();
-
-            // Clean up the file
-            new File("temph5dset.ser").delete();
-        }
-        catch (Exception ex) {
-            fail("Exception thrown during test: " + ex.toString());
-        }
-
-        long did = -1, tid = -1, sid = -1;
-
-        for (int loop = 0; loop < NLOOPS; loop++) {
-            did = tid = sid = -1;
-            try {
-                did = test.open();
-                if (did >= 0) {
-                    tid = H5.H5Dget_type(did);
-                    sid = H5.H5Dget_space(did);
-                }
-            }
-            catch (final Exception ex) {
-                fail("open() failed. " + ex);
-            }
-
-            assertTrue(did > 0);
-            assertTrue(tid > 0);
-            assertTrue(sid > 0);
-
-            try {
-                H5.H5Tclose(tid);
-            }
-            catch (final Exception ex) {}
-            try {
-                H5.H5Sclose(sid);
-            }
-            catch (final Exception ex) {}
-            try {
-                H5.H5Dclose(did);
-            }
-            catch (final Exception ex) {}
         }
     }
 

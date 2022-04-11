@@ -284,11 +284,8 @@ public class DefaultPaletteView extends Dialog implements PaletteView
         if (paletteName != null && paletteName.length() > 0)
             choicePalette.add(paletteName);
 
-        if (isH5 && (dataset instanceof ScalarDS)) {
-            byte[] palRefs = dataset.getPaletteRefs();
-            if ((palRefs != null) && (palRefs.length > 8))
-                numberOfPalettes = palRefs.length / 8;
-        }
+        if (isH5 && (dataset instanceof ScalarDS))
+            numberOfPalettes = dataset.getNumberOfPalettes();
         for (int i = 1; i < numberOfPalettes; i++) {
             paletteName = dataset.getPaletteName(i);
             choicePalette.add(paletteName);

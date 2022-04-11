@@ -38,7 +38,7 @@ For example,
      #hdf.lib.dir = ${env.HDFLIBS}/lib
      #hdf5.lib.dir = ${env.HDF5LIBS}/lib
      hdf.lib.dir = /<MYPATH>/HDF_Group/HDF/4.2.15/lib
-     hdf5.lib.dir = /<MYPATH>/HDF_Group/HDF5/1.12.1/lib
+     hdf5.lib.dir = /<MYPATH>/HDF_Group/HDF5/1.12.2/lib
 
 From the top HDFView source code directory run: /<path to ANT executable>/ant run
 

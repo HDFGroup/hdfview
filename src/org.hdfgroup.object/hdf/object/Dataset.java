@@ -282,9 +282,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final int getSpaceType() {
-        if (!inited)
-            init();
-
         return space_type;
     }
 
@@ -295,9 +292,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final int getRank() {
-        if (!inited)
-            init();
-
         return rank;
     }
 
@@ -308,9 +302,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long[] getDims() {
-        if (!inited)
-            init();
-
         return dims;
     }
 
@@ -320,9 +311,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the max dimension sizes of the dataset.
      */
     public final long[] getMaxDims() {
-        if (!inited)
-            init();
-
         if (maxDims == null)
             return dims;
 
@@ -360,8 +348,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long[] getSelectedDims() {
-        if (!inited) init();
-
         return selectedDims;
     }
 
@@ -393,9 +379,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long[] getStartDims() {
-        if (!inited)
-            init();
-
         return startDims;
     }
 
@@ -428,9 +411,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long[] getStride() {
-        if (!inited)
-            init();
-
         if (rank <= 0)
             return null;
 
@@ -799,9 +779,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long getHeight() {
-        if (!inited)
-            init();
-
         if ((selectedDims == null) || (selectedIndex == null))
             return 0;
 
@@ -842,9 +819,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long getWidth() {
-        if (!inited)
-            init();
-
         if ((selectedDims == null) || (selectedIndex == null))
             return 0;
 
@@ -885,9 +859,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final int[] getSelectedIndex() {
-        if (!inited)
-            init();
-
         return selectedIndex;
     }
 
@@ -901,9 +872,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final String getCompression() {
-        if (!inited)
-            init();
-
         return compression.toString();
     }
 
@@ -913,9 +881,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the string representation of filter information.
      */
     public final String getFilters() {
-        if (!inited)
-            init();
-
         return filters.toString();
     }
 
@@ -925,9 +890,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the string representation of storage layout information.
      */
     public final String getStorageLayout() {
-        if (!inited)
-            init();
-
         return storageLayout.toString();
     }
 
@@ -937,9 +899,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the string representation of storage information.
      */
     public final String getStorage() {
-        if (!inited)
-            init();
-
         return storage.toString();
     }
 
@@ -951,9 +910,6 @@ public abstract class Dataset extends HObject implements DataFormat
      *         chunked.
      */
     public final long[] getChunkSize() {
-        if (!inited)
-            init();
-
         return chunkSize;
     }
 
@@ -1320,9 +1276,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the names of dimensions, or null if there is no dimension name.
      */
     public final String[] getDimNames() {
-        if (!inited)
-            init();
-
         return dimNames;
     }
 

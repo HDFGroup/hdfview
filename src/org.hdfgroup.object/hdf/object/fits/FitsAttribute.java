@@ -297,41 +297,6 @@ public class FitsAttribute extends ScalarDS implements Attribute {
         throw new UnsupportedOperationException("write operation unsupported for FITS.");
     }
 
-    /* Implement abstract ScalarDS */
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPalette()
-     */
-    @Override
-    public byte[][] getPalette() {
-        if (palette == null) {
-            palette = readPalette(0);
-        }
-
-        return palette;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#readPalette(int)
-     */
-    @Override
-    public byte[][] readPalette(int idx) {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPaletteRefs()
-     */
-    @Override
-    public byte[] getPaletteRefs() {
-        return null;
-    }
-
-    /* Implement interface Attribute */
-
     /**
      * Returns the HObject to which this Attribute is currently "attached".
      *
