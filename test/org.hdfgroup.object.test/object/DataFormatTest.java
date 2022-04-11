@@ -42,8 +42,7 @@ public class DataFormatTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }
@@ -121,7 +120,6 @@ public class DataFormatTest {
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            checkObjCount(testFile.getFID());
             closeFile();
         }
         try {

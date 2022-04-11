@@ -74,7 +74,7 @@ public class H5TestFile
     public static final long DIMREF = OBJ_NAMES.length - 1;
     public static final long[] DIMREFs = { DIMREF };
     public static final long[] CHUNKREFs = { DIMREF / 2 };
-    public static final int DIMREF_SIZE = (int) (DIMREF);;
+    public static final int DIMREF_SIZE = (int) (DIMREF);
 
     /* testing data */
     public static final int[] DATA_INT = new int[DIM_SIZE];
@@ -120,7 +120,7 @@ public class H5TestFile
         log.debug("createTestFile {}", fileName);
         H5File file = null;
         Group g0, g1, g00;
-        final Dataset[] dsets = new Dataset[11];
+        Dataset[] dsets = new Dataset[11];
 
         if ((fileName == null) || (fileName.length() < 1))
             fileName = NAME_FILE_H5;
@@ -202,15 +202,16 @@ public class H5TestFile
         log.debug("create a wave palette and attach it to the image");
         final Dataset pal = file.createScalarDS(NAME_DATASET_IMAGE_PALETTE, null, typeByte, new long[] { 256, 3 },
                 null, null, -1, DATA_PALETTE);
-        long[] oid = pal.getOID();
         final Vector attrs = (Vector) ((H5ScalarDS)dsets[7]).getMetadata();
         final int n = attrs.size();
         log.debug("wave palette has {} attributes", n);
         for (int i = 0; i < n; i++) {
-            final H5ScalarAttr attr = (H5ScalarAttr) attrs.get(i);
+            H5ScalarAttr attr = (H5ScalarAttr) attrs.get(i);
             log.debug("wave palette attribute[{}] is {}", i, attr.getAttributeName());
-            if ("PALETTE".equals(attr.getAttributeName()))
-                attr.writeAttribute(oid);
+            if ("PALETTE".equals(attr.getAttributeName())) {
+                log.debug("wave palette data = {}", NAME_DATASET_IMAGE_PALETTE);
+                attr.writeAttribute(NAME_DATASET_IMAGE_PALETTE);
+            }
         }
 
         log.debug("create committed");
@@ -252,7 +253,7 @@ public class H5TestFile
         try {
             file.close();
         }
-        catch (final Exception ex) {}
+        catch (Exception ex) {}
 
         log.debug("create file open to write refs");
         file.setNewLibBounds("Latest", "Latest");
@@ -288,14 +289,15 @@ public class H5TestFile
             try {
                 for (int i = 0; i < DIMREF_SIZE; i++)
                     H5.H5Rdestroy(brefs[i]);
-            } catch (Exception ex) {}
+            }
+            catch (Exception ex) {}
         }
 
         log.debug("create file close after refs");
         try {
             file.close();
         }
-        catch (final Exception ex) {}
+        catch (Exception ex) {}
 
         log.debug("create file finished");
         return file;
@@ -311,7 +313,7 @@ public class H5TestFile
      * @return the wave palette in the form of byte[3][256]
      */
     private static final byte[] createWavePalette() {
-        final byte[] p = new byte[768]; // 256*3
+        byte[] p = new byte[768]; // 256*3
 
         for (int i = 1; i < 255; i++) {
             p[3 * i] = (byte) ((Math.sin(((double) i / 40 - 3.2)) + 1) * 128);

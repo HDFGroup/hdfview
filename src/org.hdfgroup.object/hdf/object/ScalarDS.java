@@ -244,7 +244,9 @@ public abstract class ScalarDS extends Dataset
      *
      * @return the 2D palette byte array.
      */
-    public abstract byte[][] getPalette();
+    public byte[][] getPalette() {
+        return palette;
+    }
 
     /**
      * Sets the palette for this dataset.
@@ -267,7 +269,9 @@ public abstract class ScalarDS extends Dataset
      *
      * @return the image palette
      */
-    public abstract byte[][] readPalette(int idx);
+    public byte[][] readPalette(int idx) {
+        return null;
+    }
 
     /**
      * Get the name of a specific image palette from file.
@@ -288,16 +292,14 @@ public abstract class ScalarDS extends Dataset
     }
 
     /**
-     * Returns the byte array of palette refs.
+     * Get the number of pallettes for this object.
      *
-     * A palette reference is an object reference that points to the palette dataset.
-     *
-     * For example, Dataset "Iceberg" has an attribute of object reference "Palette". The arrtibute "Palette" has value
-     * "2538" that is the object reference of the palette data set "Iceberg Palette".
-     *
-     * @return null if there is no palette attribute attached to this dataset.
+     * @return the number of palettes if it has any,
+     *         0 if there is no palette attribute attached to this dataset.
      */
-    public abstract byte[] getPaletteRefs();
+    public int getNumberOfPalettes() {
+        return 0;
+    }
 
     /**
      * Returns true if this dataset is an image.

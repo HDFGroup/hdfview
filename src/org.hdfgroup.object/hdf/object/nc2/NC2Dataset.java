@@ -379,34 +379,6 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
-    /* Implement abstract ScalarDS */
-
-    @Override
-    public byte[][] getPalette() {
-        if (palette == null)
-            palette = readPalette(0);
-
-        return palette;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#readPalette(int)
-     */
-    @Override
-    public byte[][] readPalette(int idx) {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPaletteRefs()
-     */
-    @Override
-    public byte[] getPaletteRefs() {
-        return null;
-    }
-
     // implementing ScalarDS
     /**
      * Returns the datatype of the data object.
