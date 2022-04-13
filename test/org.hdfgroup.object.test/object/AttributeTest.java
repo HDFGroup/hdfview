@@ -217,8 +217,8 @@ public class AttributeTest
             assertEquals(((String[]) strAttr.getAttributeData())[0], "String attribute.");
         }
         catch (Exception ex) {
-            log.trace("testGetData(): getData() failure:", ex);
-            fail("getData() failure " + ex);
+            log.trace("testGetData(): getAttributeData() failure:", ex);
+            fail("getAttributeData() failure " + ex);
         }
         catch (OutOfMemoryError e) {
             log.trace("testGetData(): Out of memory");
@@ -229,8 +229,8 @@ public class AttributeTest
             assertTrue(Arrays.equals((int[]) arrayIntAttr.getAttributeData(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }));
         }
         catch (Exception ex) {
-            log.trace("testGetData(): getData() failure:", ex);
-            fail("getData() failure " + ex);
+            log.trace("testGetData(): getAttributeData() failure:", ex);
+            fail("getAttributeData() failure " + ex);
         }
         catch (OutOfMemoryError e) {
             log.trace("testGetData(): Out of memory");
@@ -257,8 +257,8 @@ public class AttributeTest
             prevValue = (String[]) strAttr.getAttributeData();
         }
         catch (Exception ex) {
-            log.trace("testSetData(): getData() failure:", ex);
-            fail("getData() failure " + ex);
+            log.trace("testSetData(): getAttributeData() failure:", ex);
+            fail("getAttributeData() failure " + ex);
         }
         catch (OutOfMemoryError e) {
             log.trace("testSetData(): Out of memory");
@@ -271,8 +271,8 @@ public class AttributeTest
             assertEquals((strAttr.getAttributeData()), "Temp String Value");
         }
         catch (Exception ex) {
-            log.trace("testSetData(): getData() failure:", ex);
-            fail("getData() failure " + ex);
+            log.trace("testSetData(): getAttributeData() failure:", ex);
+            fail("getAttributeData() failure " + ex);
         }
         catch (OutOfMemoryError e) {
             log.trace("testSetData(): Out of memory");
@@ -287,8 +287,8 @@ public class AttributeTest
             intPrevValue = (int[]) arrayIntAttr.getAttributeData();
         }
         catch (Exception ex) {
-            log.trace("testSetData(): getData() failure:", ex);
-            fail("getData() failure " + ex);
+            log.trace("testSetData(): getAttributeData() failure:", ex);
+            fail("getAttributeData() failure " + ex);
         }
         catch (OutOfMemoryError e) {
             log.trace("testSetData(): Out of memory");
@@ -301,8 +301,8 @@ public class AttributeTest
             assertTrue(Arrays.equals((int[]) arrayIntAttr.getAttributeData(), new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
         }
         catch (Exception ex) {
-            log.trace("testSetData(): getData() failure:", ex);
-            fail("getData() failure " + ex);
+            log.trace("testSetData(): getAttributeData() failure:", ex);
+            fail("getAttributeData() failure " + ex);
         }
         catch (OutOfMemoryError e) {
             log.trace("testSetData(): Out of memory");

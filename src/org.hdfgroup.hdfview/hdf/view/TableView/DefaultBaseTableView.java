@@ -521,8 +521,11 @@ public abstract class DefaultBaseTableView implements TableView
         /* Make sure that the Dataset's data value is accessible for conditionally adding GUI components */
         try {
             loadData(dataObject);
-            if (isStdRef)
+            if (isStdRef) {
+                if (dataObject.getRank() > 2)
+                    ((H5ReferenceType)dtype).setRefSize((int)dataObject.getWidth() * (int)dataObject.getWidth());
                 ((H5ReferenceType)dtype).setData(dataValue);
+            }
         }
         catch (Exception ex) {
             log.debug("loadData(): data not loaded: ", ex);
@@ -1637,6 +1640,7 @@ public abstract class DefaultBaseTableView implements TableView
 
     // Flip to the specified 'frame' of Table data
     private void gotoFrame(long idx) {
+        log.trace("gotoFrame() idx={}", idx);
         // Only valid operation if data object has 3 or more dimensions
         if (dataObject.getRank() < 3 || idx == (curDataFrame - indexBase))
             return;
@@ -1686,6 +1690,7 @@ public abstract class DefaultBaseTableView implements TableView
         finally {
             shell.setCursor(null);
         }
+        log.trace("gotoFrame() dataValue={}", dataValue);
 
         dataProvider.updateDataBuffer(dataValue);
 

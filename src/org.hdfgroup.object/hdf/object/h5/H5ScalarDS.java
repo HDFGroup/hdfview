@@ -891,16 +891,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 log.debug("scalarDatasetCommonIO(): Cannot write non-string variable-length data");
                 throw new HDF5Exception("Writing non-string variable-length data is not supported");
             }
-
-            //if (dsDatatype.isStdRef()) {
-            //    log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
-            //    throw new HDF5Exception("Writing region reference data is not supported");
-            //}
-
-            if (dsDatatype.isRegRef()) {
-                log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
-                throw new HDF5Exception("Writing region reference data is not supported");
-            }
+//
+//            if (dsDatatype.isRegRef()) {
+//                log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
+//                throw new HDF5Exception("Writing region reference data is not supported");
+//            }
         }
 
         long did = open();
@@ -989,10 +984,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                                 asize *= arrayDims[j];
                             }
                             theData = ((H5Datatype)dsDatatype.getDatatypeBase()).byteToBigDecimal(0, asize, (byte[]) theData);
-                        }
-                        else if (dsDatatype.isRefObj() && !dsDatatype.isStdRef()) {
-                            log.trace("scalarDatasetCommonIO(): isREF: converting byte array to long array");
-                            theData = HDFNativeData.byteToLong((byte[]) theData);
                         }
                     }
                 } // H5File.IO_TYPE.READ
