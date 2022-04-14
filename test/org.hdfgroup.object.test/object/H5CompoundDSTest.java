@@ -199,7 +199,6 @@ public class H5CompoundDSTest
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {

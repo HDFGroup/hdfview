@@ -151,8 +151,8 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
 
         if (oneD.getClass().getName().startsWith("[C")) {
             char[] charA = (char[]) oneD;
-            int nCols = (int) selectedDims[selectedIndex[1]];
-            int nRows = (int) selectedDims[selectedIndex[0]];
+            int nCols = (int) getWidth();
+            int nRows = (int) getHeight();
 
             String[] strA = new String[nRows];
             String allStr = new String(charA);

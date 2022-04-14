@@ -1663,8 +1663,8 @@ public class H5Datatype extends Datatype
 
         log.trace("allocateArray(): tclass={} : tsize={}", typeClass, typeSize);
 
-        if (dtype.isVarStr() || dtype.isVLEN()) {// || dtype.isRegRef()) {
-            log.trace("allocateArray(): is_variable_str={} || isVL={} || is_reg_ref={}", dtype.isVarStr(), dtype.isVLEN(), dtype.isRegRef());
+        if (dtype.isVarStr() || dtype.isVLEN()) {
+            log.trace("allocateArray(): is_variable_str={} || isVL={} || is_reg_ref={}", dtype.isVarStr(), dtype.isVLEN());
 
             data = new String[numPoints];
             for (int i = 0; i < numPoints; i++)

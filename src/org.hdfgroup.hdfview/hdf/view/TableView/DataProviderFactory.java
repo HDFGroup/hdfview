@@ -509,7 +509,7 @@ public class DataProviderFactory
                 rowCount = (int) dataFormatReference.getSelectedDims()[0];
                 colCount = 1;
             }
-            log.trace("constructor: rowCount={} colCount={}", rowCount, colCount);
+            log.trace("updateDataBuffer: rowCount={} colCount={}", rowCount, colCount);
         }
     }
 

@@ -143,7 +143,6 @@ public class H5BugFixTest
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {
@@ -369,7 +368,6 @@ public class H5BugFixTest
                     fail("file.get() failed. " + ex);
                 }
 
-                //checkObjCount(file.getFID());
                 try {
                     file.close();
                 }

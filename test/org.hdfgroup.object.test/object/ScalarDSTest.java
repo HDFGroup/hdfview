@@ -135,7 +135,6 @@ public class ScalarDSTest {
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {

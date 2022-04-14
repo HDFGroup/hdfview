@@ -107,7 +107,6 @@ public class GroupTest
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {

@@ -192,7 +192,6 @@ public class H5FileTest
     @After
     public void removeFiles() throws Exception {
         if (testFile != null) {
-            //checkObjCount(testFile.getFID());
             closeFile();
         }
         try {
