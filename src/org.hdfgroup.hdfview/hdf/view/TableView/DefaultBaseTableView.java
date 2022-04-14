@@ -521,8 +521,11 @@ public abstract class DefaultBaseTableView implements TableView
         /* Make sure that the Dataset's data value is accessible for conditionally adding GUI components */
         try {
             loadData(dataObject);
-            if (isStdRef)
+            if (isStdRef) {
+                if (dataObject.getRank() > 2)
+                    ((H5ReferenceType)dtype).setRefSize((int)dataObject.getWidth() * (int)dataObject.getWidth());
                 ((H5ReferenceType)dtype).setData(dataValue);
+            }
         }
         catch (Exception ex) {
             log.debug("loadData(): data not loaded: ", ex);

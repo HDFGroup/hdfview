@@ -136,21 +136,21 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             { "0E", "10", "12" },
             { "14", "16", "18" } };
     String[][] referenceExpectedData = {
-            { "/dset" }, { "/dset" } };
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF" }, { "tattr2.h5/dset H5O_TYPE_OBJ_REF" } };
     String[][] reference2DExpectedData = {
-            { "/dset", "/dset" },
-            { "/dset", "/dset" },
-            { "/dset", "/dset" } };
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" } };
     String[][] reference3DPage1ExpectedData = {
-            { "/dset", "/dset", "/dset" },
-            { "/dset", "/dset", "/dset" },
-            { "/dset", "/dset", "/dset" },
-            { "/dset", "/dset", "/dset" } };
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" } };
     String[][] reference3DPage2ExpectedData = {
-            { "/dset", "/dset", "/dset" },
-            { "/dset", "/dset", "/dset" },
-            { "/dset", "/dset", "/dset" },
-            { "/dset", "/dset", "/dset" } };
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" } };
     String[][] stringExpectedData = {
             { "ab" }, { "de" } };
     String[][] string2DExpectedData = {
@@ -318,7 +318,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/float", floatExpectedData, "/g2/float2D", float2DExpectedData, "/g2/float3D", float3DPage1ExpectedData, float3DPage2ExpectedData);
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/integer", integerExpectedData, "/g2/integer2D", integer2DExpectedData, "/g2/integer3D", integer3DPage1ExpectedData, integer3DPage2ExpectedData);
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/opaque", opaqueExpectedData, "/g2/opaque2D", opaque2DExpectedData, "/g2/opaque3D", opaque3DPage1ExpectedData, opaque3DPage2ExpectedData);
-            //openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/reference", referenceExpectedData, "/g2/reference2D", reference2DExpectedData, "/g2/reference3D", reference3DPage1ExpectedData, reference3DPage2ExpectedData);
+            openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/reference", referenceExpectedData, "/g2/reference2D", reference2DExpectedData, "/g2/reference3D", reference3DPage1ExpectedData, reference3DPage2ExpectedData);
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/string", stringExpectedData, "/g2/string2D", string2DExpectedData, "/g2/string3D", string3DPage1ExpectedData, string3DPage2ExpectedData);
             openTAttr2GroupTest(filetree, "datasetTAttr2GroupTest()", "/g2/vlen", vlenExpectedData, "/g2/vlen2D", vlen2DExpectedData, "/g2/vlen3D", vlen3DPage1ExpectedData, vlen3DPage2ExpectedData);
         }
@@ -484,9 +484,9 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                 { "opaque", "1-byte Opaque, tag = 1-byte opaque type", "2", "1, 2" },
                 { "opaque2D", "1-byte Opaque, tag = 1-byte opaque type", "3 x 2", "1, 2, 3, 4, 5, 6" },
                 { "opaque3D", "1-byte Opaque, tag = 1-byte opaque type", "4 x 3 x 2", "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24" },
-                { "reference", "Object reference", "2", "976, 976" },
-                { "reference2D", "Object reference", "3 x 2", "976, 976, 976, 976, 976, 976" },
-                { "reference3D", "Object reference", "4 x 3 x 2", "976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976, 976" },
+                { "reference", "Reference", "2", "tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+                { "reference2D", "Reference", "3 x 2", "tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+                { "reference3D", "Reference", "4 x 3 x 2", "tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF" },
                 { "string", "String, length = 2, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII", "2", "ab, de" },
                 { "string2D", "String, length = 2, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII", "3 x 2", "ab, cd, ef, gh, ij, kl" },
                 { "string3D", "String, length = 2, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII", "4 x 3 x 2", "ab, cd, ef, gh, ij, kl, mn, pq, rs, tu, vw, xz, AB, CD, EF, GH, IJ, KL, MN, PQ, RS, TU, VW, XZ" },
@@ -517,7 +517,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             openTAttr2AttributeTest(attrTable, 12, "openTAttr2Attribute()", "float", floatExpectedData,  "float2D", float2DExpectedData,  "float3D", float3DPage1ExpectedData, float3DPage2ExpectedData);
             openTAttr2AttributeTest(attrTable, 15, "openTAttr2Attribute()", "integer", integerExpectedData,  "integer2D", integer2DExpectedData,  "integer3D", integer3DPage1ExpectedData, integer3DPage2ExpectedData);
             openTAttr2AttributeTest(attrTable, 18, "openTAttr2Attribute()", "opaque", opaqueExpectedData,  "opaque2D", opaque2DExpectedData,  "opaque3D", opaque3DPage1ExpectedData, opaque3DPage2ExpectedData);
-            //openTAttr2AttributeTest(attrTable, 21, "openTAttr2Attribute()", "reference", referenceExpectedData,  "reference2D", reference2DExpectedData,  "reference3D", reference3DPage1ExpectedData, reference3DPage2ExpectedData);
+            openTAttr2AttributeTest(attrTable, 21, "openTAttr2Attribute()", "reference", referenceExpectedData,  "reference2D", reference2DExpectedData,  "reference3D", reference3DPage1ExpectedData, reference3DPage2ExpectedData);
             openTAttr2AttributeTest(attrTable, 24, "openTAttr2Attribute()", "string", stringExpectedData,  "string2D", string2DExpectedData,  "string3D", string3DPage1ExpectedData, string3DPage2ExpectedData);
             openTAttr2AttributeTest(attrTable, 27, "openTAttr2Attribute()", "vlen", vlenExpectedData,  "vlen2D", vlen2DExpectedData,  "vlen3D", vlen3DPage1ExpectedData, vlen3DPage2ExpectedData);
         }
@@ -575,8 +575,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             table.click(3, 3);
-            assertTrue("openTAttr2GroupReferenceAsTable() data ["+tableShell.bot().text(2).getText()+"] did not match regex '/dset'",
-                    tableShell.bot().text(2).getText().matches("/dset"));
+            assertTrue("openTAttr2GroupReferenceAsTable() data ["+tableShell.bot().text(2).getText()+"] did not match regex 'tattr2.h5/dset H5O_TYPE_OBJ_REF'",
+                    tableShell.bot().text(2).getText().matches("tattr2.h5/dset H5O_TYPE_OBJ_REF"));
 
             table.contextMenu(3, 3).menu("Show As &Table").click();
             org.hamcrest.Matcher<Shell> shell2Matcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");

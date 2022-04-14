@@ -317,8 +317,6 @@ public class H5ReferenceType extends H5Datatype
     public Object getData() throws Exception, OutOfMemoryError {
         log.trace("getData(): isDataLoaded={}", isDataLoaded);
         if (!isDataLoaded) {
-            //refdata = read(); // load the data
-            log.trace("getData(): refdata={}", refdata);
             if (refdata != null) {
                 refsize = refdata.size();
                 originalRefBuf = refdata;
@@ -355,6 +353,14 @@ public class H5ReferenceType extends H5Datatype
             init();
 
         return refsize;
+    }
+
+    /**
+     * Sets the array size of the reference.
+     *
+     */
+    public final void setRefSize(long current_size) {
+        refsize = current_size;
     }
 
     /**

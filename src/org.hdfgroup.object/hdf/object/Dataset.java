@@ -666,11 +666,11 @@ public abstract class Dataset extends HObject implements DataFormat
                 originalBuf = data;
                 isDataLoaded = true;
                 nPoints = 1;
-                log.trace("getData: selectedDims length={}",selectedDims.length);
+                log.trace("getData(): selectedDims length={}",selectedDims.length);
                 for (int j = 0; j < selectedDims.length; j++)
                     nPoints *= selectedDims[j];
             }
-            log.trace("getData: read {}", nPoints);
+            log.trace("getData(): read {}", nPoints);
         }
 
         return data;
@@ -826,6 +826,47 @@ public abstract class Dataset extends HObject implements DataFormat
             return 1;
 
         return selectedDims[selectedIndex[1]];
+    }
+
+    /**
+     * Returns the dimension size of the frame axis.
+     *
+     * This function is used by GUI applications such as HDFView. GUI
+     * applications display a dataset in 2D Table or 2D Image. The display order is
+     * specified by the index array of selectedIndex as follow:
+     * <dl>
+     * <dt>selectedIndex[0] -- height</dt>
+     * <dd>The vertical axis</dd>
+     * <dt>selectedIndex[1] -- width</dt>
+     * <dd>The horizontal axis</dd>
+     * <dt>selectedIndex[2] -- depth</dt>
+     * <dd>The depth axis, which is used for 3 or more dimension datasets.</dd>
+     * </dl>
+     * Applications can use getSelectedIndex() to access and change the display
+     * order. For example, in a 2D dataset of 200x50 (dim0=200, dim1=50), the
+     * following code will set the height=200 and width=100.
+     *
+     * <pre>
+     * int[] selectedIndex = dataset.getSelectedIndex();
+     * selectedIndex[0] = 0;
+     * selectedIndex[1] = 1;
+     * </pre>
+     *
+     * @see #getSelectedIndex()
+     * @see #getHeight()
+     *
+     * @return the size of dimension of the frame axis.
+     */
+    @Override
+    public final long getDepth() {
+        if ((selectedDims == null) || (selectedIndex == null))
+            return 0;
+
+        if ((selectedDims.length < 2) || (selectedIndex.length < 2))
+            return 1;
+
+        log.trace("getDepth {}", selectedDims[selectedIndex[2]]);
+        return selectedDims[selectedIndex[2]];
     }
 
     /**
