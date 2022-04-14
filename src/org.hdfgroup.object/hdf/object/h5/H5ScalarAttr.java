@@ -738,11 +738,6 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
                 log.debug("scalarAttributeCommonIO(): Cannot write non-string variable-length data");
                 throw new HDF5Exception("Writing non-string variable-length data is not supported");
             }
-
-//            if (dsDatatype.isRegRef()) {
-//                log.debug("scalarAttributeCommonIO(): Cannot write region reference data");
-//                throw new HDF5Exception("Writing region reference data is not supported");
-//            }
         }
 
         long aid = open();

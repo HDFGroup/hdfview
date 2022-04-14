@@ -1190,11 +1190,6 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
             else
                 byteData = HDFNativeData.floatToByte(0, 1, (float[])theObj);
         }
-//        else if (dtype.isRef()) {
-//            log.trace("convertMemberByte(): reference type - converting long array to byte array");
-//
-//            byteData = HDFNativeData.longToByte(0, 1, (long[])theObj);
-//        }
         else if (dtype.isArray()) {
             Datatype baseType = dtype.getDatatypeBase();
 

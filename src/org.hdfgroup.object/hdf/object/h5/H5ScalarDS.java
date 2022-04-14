@@ -891,11 +891,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 log.debug("scalarDatasetCommonIO(): Cannot write non-string variable-length data");
                 throw new HDF5Exception("Writing non-string variable-length data is not supported");
             }
-//
-//            if (dsDatatype.isRegRef()) {
-//                log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
-//                throw new HDF5Exception("Writing region reference data is not supported");
-//            }
         }
 
         long did = open();

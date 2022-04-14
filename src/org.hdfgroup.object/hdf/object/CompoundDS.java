@@ -547,11 +547,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
             else
                 theObj = HDFNativeData.byteToFloat(byteData);
         }
-//        else if (dtype.isRef()) {
-//            log.trace("convertByteMember(): reference type - converting byte array to long array");
-//
-//            theObj = HDFNativeData.byteToLong(byteData);
-//        }
         else if (dtype.isArray()) {
             Datatype baseType = dtype.getDatatypeBase();
 
