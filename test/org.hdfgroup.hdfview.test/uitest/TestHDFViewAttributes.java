@@ -982,16 +982,32 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             /* Now repeat the process for the dataset that was created */
             attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
             SWTBotTableItem newItem = addH5ScalarAttributeToObject("testHDF5RenameAttributeDisabledForReadOnly()", attrTable, 0);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            try {
+                closeFile(hdfFile, false);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
-            closeFile(hdfFile, false);
+        hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
 
-            hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
-
-            filetree = bot.tree();
+        try {
+            SWTBotTree filetree = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
             items[0].contextMenu().contextMenu("Expand All").click();
             checkFileTree(filetree, "testHDF5RenameAttributeDisabledForReadOnly()", 3, testFilename);
-            attrTable = openAttributeTable(filetree, testFilename, groupname);
+            SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
 
             assertTrue(
                     constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
