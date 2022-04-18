@@ -2085,16 +2085,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      */
     @Override
     public long getSize(long tid) {
-        long tsize = -1;
-
-        try {
-            tsize = H5.H5Tget_size(tid);
-        }
-        catch (Exception ex) {
-            tsize = -1;
-        }
-
-        return tsize;
+        return H5Datatype.getDatatypeSize(tid);
     }
 
     /*

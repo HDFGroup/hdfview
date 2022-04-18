@@ -196,26 +196,6 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
         return (nAttributes>0);
     }
 
-    /* Implement abstract ScalarDS */
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#readPalette(int)
-     */
-    @Override
-    public byte[][] readPalette(int idx) {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPaletteRefs()
-     */
-    @Override
-    public byte[] getPaletteRefs() {
-        return null;
-    }
-
     // implementing Dataset
     /**
      * Returns the datatype of the data object.
@@ -908,12 +888,6 @@ public class H4SDS extends ScalarDS implements MetaDataContainer
             else
                 selectedDims[1] = dims[1];
         }
-    }
-
-    // Implementing ScalarDS
-    @Override
-    public byte[][] getPalette() {
-        return palette;
     }
 
     /**

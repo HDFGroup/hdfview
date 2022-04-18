@@ -538,8 +538,11 @@ public class H5File extends FileFormat
                             //attr.AttributeCommonIO(aid, H5File.IO_TYPE.READ, null);
                             Object attrData = attr.getAttributeData();
                             log.trace("getAttribute(): attrType.isReference()={}", attrType.isReference());
-                            if (attrType.isReference())
+                            if (attrType.isReference()) {
+                                if (attr.getAttributeRank() > 2)
+                                    ((H5ReferenceType)attrType).setRefSize(attr.getAttributePlane());
                                 ((H5ReferenceType)attrType).setData(attrData);
+                            }
                         }
                         catch (Exception ex) {
                             log.debug("getAttribute(): failed to read attribute: ", ex);
@@ -679,7 +682,7 @@ public class H5File extends FileFormat
         }
         else {
             attrName = "PALETTE";
-            long[] palRef = { 0 }; // set ref to null
+            String palRef = "."; // set ref to null
             attrType = new H5Datatype(Datatype.CLASS_REFERENCE, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
             attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
             attr.writeAttribute(palRef);
@@ -1998,10 +2001,10 @@ public class H5File extends FileFormat
                 }
                 catch (Exception ex) {
                     attrValue = null;
-                    log.trace("writeAttribute(): getData() failure:", ex);
+                    log.trace("writeAttribute(): getAttributeData() failure:", ex);
                 }
 
-                log.trace("writeAttribute(): getValue");
+                //log.trace("writeAttribute(): attrValue={}", attrValue);
                 if (attrValue != null) {
                     try {
                         ((H5Attribute)attr).AttributeCommonIO(aid, H5File.IO_TYPE.WRITE, attrValue);
