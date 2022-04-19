@@ -115,21 +115,54 @@ public class ViewProperties extends PreferenceStore
      * Used to create different DataViews for a given HObject.
      */
     public static enum DataViewType {
-        TABLE, IMAGE, PALETTE, METADATA, TREEVIEW
+        /** */
+        TABLE,
+        /** */
+        IMAGE,
+        /** */
+        PALETTE,
+        /** */
+        METADATA,
+        /** */
+        TREEVIEW
     }
 
     /**
      * Property keys control how the data is displayed.
      */
     public static enum DATA_VIEW_KEY {
-        CHAR, CONVERTBYTE, TRANSPOSED, READONLY, OBJECT, BITMASK, BITMASKOP, BORDER, INFO, INDEXBASE1, VIEW_NAME
+        /** */
+        CHAR,
+        /** */
+        CONVERTBYTE,
+        /** */
+        TRANSPOSED,
+        /** */
+        READONLY,
+        /** */
+        OBJECT,
+        /** */
+        BITMASK,
+        /** */
+        BITMASKOP,
+        /** */
+        BORDER,
+        /** */
+        INFO,
+        /** */
+        INDEXBASE1,
+        /** */
+        VIEW_NAME
     }
 
     /**
      * Property keys control how the data is displayed.
      */
     public static enum BITMASK_OP {
-        AND, EXTRACT
+        /** */
+        AND,
+        /** */
+        EXTRACT
     }
 
     /** the root directory of the HDFView */

@@ -2803,6 +2803,13 @@ public abstract class DefaultBaseTableView implements TableView
             stride = (int) strideArray[selectedIndex[0]];
         }
 
+
+        /** Update the Row Header data provider to set row indices based on Index Base for
+         *  both Scalar Datasets and Compound Datasets.
+         *
+         * @param theDataObject
+         *        the data object
+         */
         public void updateRows(DataFormat theDataObject) {
             this.rank = theDataObject.getRank();
             this.dims = theDataObject.getSelectedDims();
