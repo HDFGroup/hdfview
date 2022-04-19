@@ -1135,10 +1135,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     } // end of showRegRefData(String reg)
 
     /**
-     * Display data pointed to by region references. Data of each region is shown in
+     * Display data pointed to by references. Data of each reference is shown in
      * a separate spreadsheet. The std. ref. information is stored in bytes
      *
-     * @param reg
+     * @param refarr
      *            the array of bytes that contain the std. ref information.
      *
      */
@@ -1176,9 +1176,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 //showObjStdRefData(ref_ptr);
         }
         else if (refdata.ref_type == HDF5Constants.H5R_ATTR) {
-            String ref_attr = refdata.attr_name;
-            String ref_obj = refdata.obj_name;
-            showAttrStdRefData(ref_obj, ref_attr);
+            String ref_attr_name = refdata.attr_name;
+            String ref_obj_name = refdata.obj_name;
+            showAttrStdRefData(ref_obj_name, ref_attr_name);
         }
         else if (refdata.region_type == "H5O_TYPE_OBJ_REF") {
             String msg = "Reference to " + refdata.obj_name + " cannot be displayed in a table";
@@ -1305,28 +1305,30 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * Display data pointed to by attribute references. Data of each object is shown in
      * a separate spreadsheet.
      *
-     * @param ref
+     * @param ref_obj_name
+     *            the string that contain the attribute reference information.
+     * @param ref_attr_name
      *            the string that contain the attribute reference information.
      *
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected void showAttrStdRefData(String ref_obj, String ref_attr) {
-        log.trace("showAttrStdRefData(): start: ref_obj={} ref_attr={}", ref_obj, ref_attr);
+    protected void showAttrStdRefData(String ref_obj_name, String ref_attr_name) {
+        log.trace("showAttrStdRefData(): start: ref_obj_name={} ref_attr_name={}", ref_obj_name, ref_attr_name);
 
-        if (ref_obj == null || (ref_obj.length() <= 0) || (ref_obj.compareTo("NULL") == 0)) {
-            log.debug("showAttrStdRefData(): ref_obj is null or invalid");
-            Tools.showError(shell, "Select", "Could not attribute reference data: invalid or null data");
+        if (ref_obj_name == null || (ref_obj_name.length() <= 0) || (ref_obj_name.compareTo("NULL") == 0)) {
+            log.debug("showAttrStdRefData(): ref_obj_name is null or invalid");
+            Tools.showError(shell, "Select", "Could not show attribute reference data: invalid or null object name");
             return;
         }
 
-        if (ref_attr == null || (ref_attr.length() <= 0) || (ref_attr.compareTo("NULL") == 0)) {
-            log.debug("showAttrStdRefData(): ref_attr is null or invalid");
-            Tools.showError(shell, "Select", "Could not attribute reference data: invalid or null data");
+        if (ref_attr_name == null || (ref_attr_name.length() <= 0) || (ref_attr_name.compareTo("NULL") == 0)) {
+            log.debug("showAttrStdRefData(): ref_attr_name is null or invalid");
+            Tools.showError(shell, "Select", "Could not show attribute reference data: invalid or null attribute name");
             return;
         }
 
         // find the parent object first
-        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), ref_obj);
+        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), ref_obj_name);
         if (obj == null) {
             log.debug("showAttrStdRefData(): obj is null");
             Tools.showError(shell, "Select", "Could not show attribute reference data: invalid or null data");
@@ -1335,7 +1337,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         List<Attribute> attrs = H5File.getAttribute(obj);
         if ((attrs == null) || (attrs.size() < 1)) {
             log.debug("showAttrStdRefData(): attrs is null");
-            Tools.showError(shell, "Select", "Could not show attribute reference data: invalid or null data");
+            Tools.showError(shell, "Select", "Could not show attribute reference data: no attributes found");
             return;
         }
         H5ScalarAttr attr = null;
@@ -1343,7 +1345,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         int n = attrs.size();
         for (int i = 0; i < n; i++) {
             attr = (H5ScalarAttr)attrs.get(i);
-            if (attr.getAttributeName().equals(ref_attr))
+            if (attr.getAttributeName().equals(ref_attr_name))
                 break;
             else
                 attr = null;
