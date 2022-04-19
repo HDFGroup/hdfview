@@ -2273,6 +2273,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
     /**
      * reads references of palettes to count the numberOfPalettes.
+     *
+     * @return the number of palettes referenced.
      */
     public int readNumberOfPalettes() {
         log.trace("readNumberOfPalettes(): isInited={}", isInited());
