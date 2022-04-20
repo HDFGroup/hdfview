@@ -199,7 +199,7 @@ public class H5ReferenceType extends H5Datatype
      *
      * @param theFile
      *            the file that contains the datatype.
-     * @param thesize
+     * @param theSize
      *            the size of the datatype in bytes, e.g. for a 32-bit integer, the
      *            size is 4. Valid values are NATIVE or a positive value. For string
      *            datatypes, -1 is also a valid value (to create a variable-length
@@ -230,6 +230,11 @@ public class H5ReferenceType extends H5Datatype
      *
      * @param theFile
      *            the file that contains the datatype.
+     * @param theSize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the
+     *            size is 4. Valid values are NATIVE or a positive value. For string
+     *            datatypes, -1 is also a valid value (to create a variable-length
+     *            string).
      * @param nativeID
      *            the native datatype identifier.
      * @param pbase
@@ -972,7 +977,12 @@ public class H5ReferenceType extends H5Datatype
         /** The default type of object referenced */
         public int obj_type = HDF5Constants.H5O_TYPE_UNKNOWN;
 
-        /** Copy the individual reference array for further processing */
+        /**
+         *  Copy the individual reference array for further processing
+         *
+         * @param theArray
+         *            the reference datatype data to be copied.
+         */
         H5ReferenceData(byte[] theArray)
         {
             System.arraycopy(theArray, 0, ref_array, 0, (int)HDF5Constants.H5R_REF_BUF_SIZE);
