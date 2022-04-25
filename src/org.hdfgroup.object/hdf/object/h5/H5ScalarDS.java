@@ -2273,8 +2273,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
     /**
      * reads references of palettes to count the numberOfPalettes.
+<<<<<<< HEAD
      *
      * @return the number of palettes referenced.
+=======
+>>>>>>> branch 'hdfview-3-1_12' of https://github.com/HDFGroup/hdfview.git
      */
     public int readNumberOfPalettes() {
         log.trace("readNumberOfPalettes(): isInited={}", isInited());
