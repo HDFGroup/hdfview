@@ -20,7 +20,9 @@ newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================
-    *
+    * Refactored the attribute object classes to use the same object logic as
+      datasets. This allows data objects to display table views using the same
+      logic. This includes the editing and reference handling.
 
 Major Bug Fixes
 ==============================================================================
