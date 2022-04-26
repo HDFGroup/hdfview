@@ -1,3 +1,4 @@
+/** the hdf object hdf5w module */
 module org.hdfgroup.object.hfv {
     exports hdf.object.h5;
 

@@ -23,12 +23,9 @@ Major Enhancements
     * This version supports the new references available in hdf5 1.12 releases.
     * Support for reading a SWMR created file, using a configurable timer to 
       refresh dataset tables.
-<<<<<<< HEAD
     * Refactored the attribute object classes to use the same object logic as
       datasets. This allows data objects to display table views using the same
       logic. This includes the editing and reference handling.
-=======
->>>>>>> branch 'hdfview-3-1_12' of https://github.com/HDFGroup/hdfview.git
 
 Major Bug Fixes
 ==============================================================================

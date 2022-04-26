@@ -1,3 +1,4 @@
+/** the hdf object netcdf module */
 module org.hdfgroup.object.nc {
     exports hdf.object.nc2;
 

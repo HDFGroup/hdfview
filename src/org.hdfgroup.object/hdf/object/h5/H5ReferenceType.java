@@ -369,11 +369,8 @@ public class H5ReferenceType extends H5Datatype
     /**
      * Sets the array size of the reference.
      *
-<<<<<<< HEAD
      * @param current_size
      *        the array size of the current reference.
-=======
->>>>>>> branch 'hdfview-3-1_12' of https://github.com/HDFGroup/hdfview.git
      */
     public final void setRefSize(long current_size) {
         refsize = current_size;
