@@ -16,7 +16,7 @@
 
     <!-- MAC notary: -->
     <property name="notarize.account" value="" />
-    <property name="notarize.keychain_key" value="xdfm-pjev-jiko-appd" />
+    <property name="notarize.keychain_key" value="${env.NOTARY_KEY}" />
 
     <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
     <loadfile property="app.version" srcFile="${basedir}/VERSION">
@@ -912,7 +912,7 @@
             </doctitle>
 
             <bottom>
-                <![CDATA[Copyright © 2021. All Rights Reserved.]]>
+                <![CDATA[Copyright © 2022. All Rights Reserved.]]>
             </bottom>
 
             <group title="object packages" packages="hdf.object.*" />
@@ -1401,7 +1401,7 @@
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
             <arg value="-p" />
-            <arg value="${env.SIGNERPASSWD}" />
+            <arg value="${env.KEYCHAIN_PASSWD}" />
             <arg value="login.keychain" />
         </exec>
 
@@ -1712,7 +1712,7 @@
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
             <arg value="-p" />
-            <arg value="${env.SIGNERPASSWD}" />
+            <arg value="${env.KEYCHAIN_PASSWD}" />
             <arg value="login.keychain" />
         </exec>
 
@@ -1940,7 +1940,7 @@
             <arg value="--primary-bundle-id"/>
             <arg value="app.${ant.project.name}-${app.version}"/>
             <arg value="--username"/>
-            <arg value="thehdfgroup@hdfgroup.org"/>
+            <arg value="${env.NOTARY_USER}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
@@ -1977,7 +1977,7 @@
             <arg value="--notarization-info"/>
             <arg value="${retUUID}"/>
             <arg value="--username"/>
-            <arg value="thehdfgroup@hdfgroup.org"/>
+            <arg value="${env.NOTARY_USER}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
@@ -2002,7 +2002,7 @@
             <arg value="--notarization-info"/>
             <arg value="${retUUID}"/>
             <arg value="--username"/>
-            <arg value="thehdfgroup@hdfgroup.org"/>
+            <arg value="${env.NOTARY_USER}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
@@ -2039,7 +2039,7 @@
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
             <arg value="-p" />
-            <arg value="${env.SIGNERPASSWD}" />
+            <arg value="${env.KEYCHAIN_PASSWD}" />
             <arg value="login.keychain" />
         </exec>
 
