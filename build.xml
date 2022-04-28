@@ -14,8 +14,12 @@
 
     <record name="antoutput.log" action="start" append="${build.antoutput.append}" loglevel="verbose" />
 
+    <!-- MAC signing: -->
+    <property name="sign.account" value="${env.SIGNER}" />
+    <property name="login.keychain_key" value="${env.KEYCHAIN_PASSWD}" />
+
     <!-- MAC notary: -->
-    <property name="notarize.account" value="" />
+    <property name="notarize.account" value="${env.NOTARY_USER}" />
     <property name="notarize.keychain_key" value="${env.NOTARY_KEY}" />
 
     <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
@@ -1401,7 +1405,7 @@
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
             <arg value="-p" />
-            <arg value="${env.KEYCHAIN_PASSWD}" />
+            <arg value="${login.keychain_key}" />
             <arg value="login.keychain" />
         </exec>
 
@@ -1475,7 +1479,7 @@
             <arg value="--mac-package-signing-prefix" />
             <arg value="org.hdfgroup.HDFView" />
             <arg value="--mac-signing-key-user-name" />
-            <arg value="The HDF Group (${env.NOTARY_USER})" />
+            <arg value="The HDF Group (${sign.account})" />
         </exec>
     </target>
 
@@ -1712,7 +1716,7 @@
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
             <arg value="-p" />
-            <arg value="${env.KEYCHAIN_PASSWD}" />
+            <arg value="${login.keychain_key}" />
             <arg value="login.keychain" />
         </exec>
 
@@ -1724,7 +1728,7 @@
             <arg value="runtime" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.NOTARY_USER}" />
+            <arg value="${notarize.account}" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
@@ -1940,7 +1944,7 @@
             <arg value="--primary-bundle-id"/>
             <arg value="app.${ant.project.name}-${app.version}"/>
             <arg value="--username"/>
-            <arg value="${env.NOTARY_USER}"/>
+            <arg value="${notarize.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
@@ -1979,7 +1983,7 @@
                 <arg value="--notarization-info"/>
                 <arg value="${retUUID}"/>
                 <arg value="--username"/>
-                <arg value="${env.NOTARY_USER}"/>
+                <arg value="${notarize.account}"/>
                 <arg value="--password"/>
                 <arg value="${notarize.keychain_key}"/>
                 <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
@@ -2013,7 +2017,7 @@
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
             <arg value="-p" />
-            <arg value="${env.KEYCHAIN_PASSWD}" />
+            <arg value="${login.keychain_key}" />
             <arg value="login.keychain" />
         </exec>
 
@@ -2028,7 +2032,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.NOTARY_USER}" />
+            <arg value="${notarize.account}" />
             <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/app" casesensitive="yes">
                 <include name="**/*.dylib"/>
             </fileset>
@@ -2044,7 +2048,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.NOTARY_USER}" />
+            <arg value="${notarize.account}" />
             <arg value="${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
         </exec>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
@@ -2056,7 +2060,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.NOTARY_USER}" />
+            <arg value="${notarize.account}" />
             <arg value="${ant.project.name}.app/Contents/MacOS/${ant.project.name}" />
         </exec>
 
@@ -2071,7 +2075,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.NOTARY_USER}" />
+            <arg value="${notarize.account}" />
             <arg value="${ant.project.name}.app/" />
         </exec>
 
@@ -2109,7 +2113,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.NOTARY_USER}" />
+            <arg value="${notarize.account}" />
             <arg value="--deep" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
