@@ -1728,7 +1728,7 @@
             <arg value="runtime" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${notarize.account}" />
+            <arg value="${sign.account}" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
@@ -2032,7 +2032,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${notarize.account}" />
+            <arg value="${sign.account}" />
             <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/app" casesensitive="yes">
                 <include name="**/*.dylib"/>
             </fileset>
@@ -2048,7 +2048,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${notarize.account}" />
+            <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
         </exec>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
@@ -2060,7 +2060,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${notarize.account}" />
+            <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/MacOS/${ant.project.name}" />
         </exec>
 
@@ -2075,7 +2075,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${notarize.account}" />
+            <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/" />
         </exec>
 
@@ -2113,7 +2113,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${notarize.account}" />
+            <arg value="${sign.account}" />
             <arg value="--deep" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
