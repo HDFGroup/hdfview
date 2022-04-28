@@ -1475,7 +1475,7 @@
             <arg value="--mac-package-signing-prefix" />
             <arg value="org.hdfgroup.HDFView" />
             <arg value="--mac-signing-key-user-name" />
-            <arg value="The HDF Group (${env.SIGNER})" />
+            <arg value="The HDF Group (${env.NOTARY_USER})" />
         </exec>
     </target>
 
@@ -1724,7 +1724,7 @@
             <arg value="runtime" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.SIGNER}" />
+            <arg value="${env.NOTARY_USER}" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
@@ -2028,7 +2028,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.SIGNER}" />
+            <arg value="${env.NOTARY_USER}" />
             <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/app" casesensitive="yes">
                 <include name="**/*.dylib"/>
             </fileset>
@@ -2044,7 +2044,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.SIGNER}" />
+            <arg value="${env.NOTARY_USER}" />
             <arg value="${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
         </exec>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
@@ -2056,7 +2056,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.SIGNER}" />
+            <arg value="${env.NOTARY_USER}" />
             <arg value="${ant.project.name}.app/Contents/MacOS/${ant.project.name}" />
         </exec>
 
@@ -2071,7 +2071,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.SIGNER}" />
+            <arg value="${env.NOTARY_USER}" />
             <arg value="${ant.project.name}.app/" />
         </exec>
 
@@ -2109,7 +2109,7 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--sign" />
-            <arg value="${env.SIGNER}" />
+            <arg value="${env.NOTARY_USER}" />
             <arg value="--deep" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
