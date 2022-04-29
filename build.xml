@@ -1964,8 +1964,24 @@
         <echo>notarize-app:${retUUID}</echo>
     </target>
 
+    <target name="check-notary-state">
+        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
+            <redirector output="notary.txt" alwayslog="true"/>
+            <arg value="altool"/>
+            <arg value="--notarization-info"/>
+            <arg value="${retUUID}"/>
+            <arg value="--username"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+        </exec>
+        <echo>notarize-info:${logInfo}</echo>
+        <resourcecontains resource="notary.txt" substring="success"/>
+    </target>
+
     <target name="post-notary">
-        <loadfile property="retUUID" srcfile="retUUID.txt">
+        <!-- <loadfile property="retUUID" srcfile="retUUID.txt">
             <filterchain>
                 <tokenfilter>
                     <containsregex
@@ -1974,21 +1990,16 @@
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
-        </loadfile>
+        </loadfile> -->
 
         <waitfor maxwait="10" maxwaitunit="minute" checkevery="5" checkeveryunit="second">
-            <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
-                <redirector output="notary.txt" alwayslog="true"/>
-                <arg value="altool"/>
-                <arg value="--notarization-info"/>
-                <arg value="${retUUID}"/>
-                <arg value="--username"/>
-                <arg value="${notarize.account}"/>
-                <arg value="--password"/>
-                <arg value="${notarize.keychain_key}"/>
-                <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
-            </exec>
-            <resourcecontains resource="notary.txt" substring="success"/>
+            <scriptcondition language="javascript" value="false">
+            <![CDATA[
+                project.getTargets().get( "check-notary-state" ).execute( );
+                if ( project.getProperty( "theurl.matches" ) )
+                    self.setValue( true );
+            ]]>
+            </scriptcondition>
         </waitfor>
         <echo>notarize-info:${logInfo}</echo>
     </target>
