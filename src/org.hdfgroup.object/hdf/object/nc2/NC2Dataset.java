@@ -307,11 +307,12 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
 
         if (rank == 0) {
             // a scalar data point
+            isScalar = true;
             rank = 1;
-            dims = new long[1];
-            dims[0] = 1;
+            dims = new long[] { 1 };
         }
         else {
+            isScalar = false;
             dims = new long[rank];
             for (int i = 0; i < rank; i++)
                 dims[i] = (nativeDataset.getDimension(i).getLength());
