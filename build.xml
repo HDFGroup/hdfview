@@ -1964,7 +1964,18 @@
         <echo>notarize-app:${retUUID}</echo>
     </target>
 
-    <target name="check-notary-state">
+    <target name="post-notary">
+        <loadfile property="retUUID" srcfile="retUUID.txt">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <sleep minutes="10"/>
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
             <arg value="altool"/>
@@ -1976,31 +1987,7 @@
             <arg value="${notarize.keychain_key}"/>
             <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
         </exec>
-        <echo>notarize-info:${logInfo}</echo>
         <resourcecontains resource="notary.txt" substring="success"/>
-    </target>
-
-    <target name="post-notary">
-        <!-- <loadfile property="retUUID" srcfile="retUUID.txt">
-            <filterchain>
-                <tokenfilter>
-                    <containsregex
-                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
-                         replace="\1" />
-                </tokenfilter>
-                <striplinebreaks/>
-            </filterchain>
-        </loadfile> -->
-
-        <waitfor maxwait="10" maxwaitunit="minute" checkevery="5" checkeveryunit="second">
-            <scriptcondition language="javascript" value="false">
-            <![CDATA[
-                project.getTargets().get( "check-notary-state" ).execute( );
-                if ( project.getProperty( "theurl.matches" ) )
-                    self.setValue( true );
-            ]]>
-            </scriptcondition>
-        </waitfor>
         <echo>notarize-info:${logInfo}</echo>
     </target>
 
