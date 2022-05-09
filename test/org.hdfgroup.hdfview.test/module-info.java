@@ -1,3 +1,4 @@
+/** the hdfview test module */
 module org.hdfgroup.hdfview.test {
     requires org.hdfgroup.hdfview;
     requires org.eclipse.swtbot;
