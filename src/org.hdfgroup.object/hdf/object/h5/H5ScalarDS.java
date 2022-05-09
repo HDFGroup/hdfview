@@ -329,12 +329,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
                 if (rank == 0) {
                     // a scalar data point
+                    isScalar = true;
                     rank = 1;
-                    dims = new long[1];
-                    dims[0] = 1;
+                    dims = new long[] { 1 };
                     log.trace("init(): rank is a scalar data point");
                 }
                 else {
+                    isScalar = false;
                     dims = new long[rank];
                     maxDims = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
