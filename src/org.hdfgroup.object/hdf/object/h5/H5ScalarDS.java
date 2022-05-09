@@ -1997,15 +1997,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         return dataset;
     }
 
-    /**
-     * Get the number of pallettes for this object.
-     *
-     * @return the number of palettes if it has any, 0 otherwise.
-     */
-    public int getNumberOfPalettes() {
-        return NumberOfPalettes;
-    }
-
     /*
      * (non-Javadoc)
      *

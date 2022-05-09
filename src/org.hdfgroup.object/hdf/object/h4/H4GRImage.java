@@ -299,6 +299,26 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         return dataset;
     }
 
+    /* Implement abstract ScalarDS */
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.ScalarDS#readPalette(int)
+     */
+    @Override
+    public byte[][] readPalette(int idx) {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.ScalarDS#getPaletteRefs()
+     */
+    @Override
+    public byte[] getPaletteRefs() {
+        return null;
+    }
+
     // implementing ScalarDS
     /**
      * Returns the datatype of the data object.
@@ -778,28 +798,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         }
     }
 
-    // ***** implement from ScalarDS *****
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#readPalette(int)
-     */
-    @Override
-    public byte[][] readPalette(int idx) {
-        return getPalette();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#NumberOfPalettes()
-     */
-    @Override
-    public int getNumberOfPalettes() {
-        if (palette != null)
-            return 1;
-        return 0;
-    }
-
+    // ***** need to implement from ScalarDS *****
     @Override
     public byte[][] getPalette() {
         if (palette != null) {
