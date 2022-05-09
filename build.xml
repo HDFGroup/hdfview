@@ -1974,7 +1974,7 @@
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
-        </loadfile> -->
+        </loadfile>
         <sleep minutes="10"/>
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
