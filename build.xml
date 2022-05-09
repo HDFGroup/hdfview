@@ -1987,7 +1987,9 @@
             <arg value="${notarize.keychain_key}"/>
             <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
         </exec>
-        <resourcecontains resource="notary.txt" substring="success"/>
+        <condition>
+            <resourcecontains resource="notary.txt" substring="success"/>
+        </condition>
         <echo>notarize-info:${logInfo}</echo>
     </target>
 
