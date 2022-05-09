@@ -303,6 +303,21 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 tid = H5.H5Dget_type(did);
                 log.trace("init(): tid={} sid={} rank={} space_type={} ", tid, sid, rank, space_type);
 
+                if (rank == 0) {
+                    // a scalar data point
+                    isScalar = true;
+                    rank = 1;
+                    dims = new long[] { 1 };
+                    log.trace("init(): rank is a scalar data point");
+                }
+                else {
+                    isScalar = false;
+                    dims = new long[rank];
+                    maxDims = new long[rank];
+                    H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
+                    log.trace("init(): rank={}, dims={}, maxDims={}", rank, dims, maxDims);
+                }
+
                 try {
                     datatype = new H5Datatype(getFileFormat(), tid);
 
@@ -375,20 +390,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     catch (Exception ex) {
                         log.debug("init(): H5Pclose(pid {}) failure: ", pid, ex);
                     }
-                }
-
-                if (rank == 0) {
-                    // a scalar data point
-                    rank = 1;
-                    dims = new long[1];
-                    dims[0] = 1;
-                    log.trace("init(): rank is a scalar data point");
-                }
-                else {
-                    dims = new long[rank];
-                    maxDims = new long[rank];
-                    H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
-                    log.trace("init(): rank={}, dims={}, maxDims={}", rank, dims, maxDims);
                 }
 
                 inited = true;

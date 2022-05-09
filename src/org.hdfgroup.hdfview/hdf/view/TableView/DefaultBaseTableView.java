@@ -365,10 +365,8 @@ public abstract class DefaultBaseTableView implements TableView
             }
         }
 
-        log.trace("Index base = {} - Is data transposed = {} - Is display type char = {}",
-                indexBase, isDataTransposed, isDisplayTypeChar);
-
-        if (hObject == null) hObject = viewer.getTreeView().getCurrentObject();
+        if (hObject == null)
+            hObject = viewer.getTreeView().getCurrentObject();
 
         /* Only edit objects which actually contain editable data */
         if ((hObject == null) || !(hObject instanceof DataFormat)) {
@@ -963,8 +961,6 @@ public abstract class DefaultBaseTableView implements TableView
          * Set up MenuItems for Importing/Exporting Data from the TableView *
          *                                                                  *
          ********************************************************************/
-
-
         MenuItem importExportMenuItem = new MenuItem(menuBar, SWT.CASCADE);
         importExportMenuItem.setText("&Import/Export Data");
 
@@ -2698,19 +2694,19 @@ public abstract class DefaultBaseTableView implements TableView
      */
     protected class RowHeaderDataProvider implements IDataProvider
     {
-        private final int    rank;
-        private final int    space_type;
-        private final long[] dims;
-        private final long[] startArray;
-        private final long[] strideArray;
-        private final int[]  selectedIndex;
+        private int    rank;
+        private int    space_type;
+        private long[] dims;
+        private long[] startArray;
+        private long[] strideArray;
+        private int[]  selectedIndex;
 
         /** the start value. */
-        protected final int  start;
+        protected int  start;
         /** the stride value. */
-        protected final int  stride;
+        protected int  stride;
 
-        private final int    nrows;
+        private int    nrows;
 
         /** Create the Row Header data provider to set row indices based on Index Base for
          *  both Scalar Datasets and Compound Datasets.
