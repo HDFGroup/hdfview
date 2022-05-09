@@ -282,9 +282,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final int getSpaceType() {
-        if (!inited)
-            init();
-
         return space_type;
     }
 
@@ -295,9 +292,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final int getRank() {
-        if (!inited)
-            init();
-
         return rank;
     }
 
@@ -308,9 +302,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long[] getDims() {
-        if (!inited)
-            init();
-
         return dims;
     }
 
@@ -320,9 +311,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the max dimension sizes of the dataset.
      */
     public final long[] getMaxDims() {
-        if (!inited)
-            init();
-
         if (maxDims == null)
             return dims;
 
@@ -360,8 +348,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long[] getSelectedDims() {
-        if (!inited) init();
-
         return selectedDims;
     }
 
@@ -393,9 +379,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long[] getStartDims() {
-        if (!inited)
-            init();
-
         return startDims;
     }
 
@@ -428,9 +411,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long[] getStride() {
-        if (!inited)
-            init();
-
         if (rank <= 0)
             return null;
 
@@ -686,11 +666,11 @@ public abstract class Dataset extends HObject implements DataFormat
                 originalBuf = data;
                 isDataLoaded = true;
                 nPoints = 1;
-                log.trace("getData: selectedDims length={}",selectedDims.length);
+                log.trace("getData(): selectedDims length={}",selectedDims.length);
                 for (int j = 0; j < selectedDims.length; j++)
                     nPoints *= selectedDims[j];
             }
-            log.trace("getData: read {}", nPoints);
+            log.trace("getData(): read {}", nPoints);
         }
 
         return data;
@@ -799,9 +779,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long getHeight() {
-        if (!inited)
-            init();
-
         if ((selectedDims == null) || (selectedIndex == null))
             return 0;
 
@@ -842,9 +819,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final long getWidth() {
-        if (!inited)
-            init();
-
         if ((selectedDims == null) || (selectedIndex == null))
             return 0;
 
@@ -852,6 +826,47 @@ public abstract class Dataset extends HObject implements DataFormat
             return 1;
 
         return selectedDims[selectedIndex[1]];
+    }
+
+    /**
+     * Returns the dimension size of the frame axis.
+     *
+     * This function is used by GUI applications such as HDFView. GUI
+     * applications display a dataset in 2D Table or 2D Image. The display order is
+     * specified by the index array of selectedIndex as follow:
+     * <dl>
+     * <dt>selectedIndex[0] -- height</dt>
+     * <dd>The vertical axis</dd>
+     * <dt>selectedIndex[1] -- width</dt>
+     * <dd>The horizontal axis</dd>
+     * <dt>selectedIndex[2] -- depth</dt>
+     * <dd>The depth axis, which is used for 3 or more dimension datasets.</dd>
+     * </dl>
+     * Applications can use getSelectedIndex() to access and change the display
+     * order. For example, in a 2D dataset of 200x50 (dim0=200, dim1=50), the
+     * following code will set the height=200 and width=100.
+     *
+     * <pre>
+     * int[] selectedIndex = dataset.getSelectedIndex();
+     * selectedIndex[0] = 0;
+     * selectedIndex[1] = 1;
+     * </pre>
+     *
+     * @see #getSelectedIndex()
+     * @see #getHeight()
+     *
+     * @return the size of dimension of the frame axis.
+     */
+    @Override
+    public final long getDepth() {
+        if ((selectedDims == null) || (selectedIndex == null))
+            return 0;
+
+        if ((selectedDims.length < 2) || (selectedIndex.length < 2))
+            return 1;
+
+        log.trace("getDepth {}", selectedDims[selectedIndex[2]]);
+        return selectedDims[selectedIndex[2]];
     }
 
     /**
@@ -885,9 +900,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final int[] getSelectedIndex() {
-        if (!inited)
-            init();
-
         return selectedIndex;
     }
 
@@ -901,9 +913,6 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     public final String getCompression() {
-        if (!inited)
-            init();
-
         return compression.toString();
     }
 
@@ -913,9 +922,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the string representation of filter information.
      */
     public final String getFilters() {
-        if (!inited)
-            init();
-
         return filters.toString();
     }
 
@@ -925,9 +931,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the string representation of storage layout information.
      */
     public final String getStorageLayout() {
-        if (!inited)
-            init();
-
         return storageLayout.toString();
     }
 
@@ -937,9 +940,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the string representation of storage information.
      */
     public final String getStorage() {
-        if (!inited)
-            init();
-
         return storage.toString();
     }
 
@@ -951,9 +951,6 @@ public abstract class Dataset extends HObject implements DataFormat
      *         chunked.
      */
     public final long[] getChunkSize() {
-        if (!inited)
-            init();
-
         return chunkSize;
     }
 
@@ -1320,9 +1317,6 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the names of dimensions, or null if there is no dimension name.
      */
     public final String[] getDimNames() {
-        if (!inited)
-            init();
-
         return dimNames;
     }
 

@@ -87,7 +87,7 @@ public class H5ReferenceType extends H5Datatype
 
     /**
      * @deprecated Not for public use in the future. <br>
-     *             Using {@link #H5Datatype(FileFormat, String, String)}
+     *             Using {@link #H5ReferenceType(FileFormat, String, String)}
      *
      * @param theFile
      *            the file that contains the datatype.
@@ -199,6 +199,11 @@ public class H5ReferenceType extends H5Datatype
      *
      * @param theFile
      *            the file that contains the datatype.
+     * @param theSize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the
+     *            size is 4. Valid values are NATIVE or a positive value. For string
+     *            datatypes, -1 is also a valid value (to create a variable-length
+     *            string).
      * @param nativeID
      *            the native datatype identifier.
      *
@@ -225,6 +230,11 @@ public class H5ReferenceType extends H5Datatype
      *
      * @param theFile
      *            the file that contains the datatype.
+     * @param theSize
+     *            the size of the datatype in bytes, e.g. for a 32-bit integer, the
+     *            size is 4. Valid values are NATIVE or a positive value. For string
+     *            datatypes, -1 is also a valid value (to create a variable-length
+     *            string).
      * @param nativeID
      *            the native datatype identifier.
      * @param pbase
@@ -282,7 +292,7 @@ public class H5ReferenceType extends H5Datatype
      * Once the references are destroyed, the refdata can only be used
      * to retrieve existing data.
      *
-     * @param data
+     * @param theData
      *            the data to write.
      */
     public void setData(Object theData) {
@@ -318,7 +328,7 @@ public class H5ReferenceType extends H5Datatype
         log.trace("getData(): isDataLoaded={}", isDataLoaded);
         if (!isDataLoaded) {
             //refdata = read(); // load the data
-            log.trace("getData(): refdata={}", refdata);
+            log.trace("getData(): size={} refdata={}", refdata.size(), refdata);
             if (refdata != null) {
                 refsize = refdata.size();
                 originalRefBuf = refdata;
@@ -339,7 +349,6 @@ public class H5ReferenceType extends H5Datatype
      * example, when the selection is changed, we need to re-read the data.
      *
      * @see #getData()
-     * @see #read()
      */
     public void clearData() {
         isDataLoaded = false;
@@ -355,6 +364,16 @@ public class H5ReferenceType extends H5Datatype
             init();
 
         return refsize;
+    }
+
+    /**
+     * Sets the array size of the reference.
+     *
+     * @param current_size
+     *        the array size of the current reference.
+     */
+    public final void setRefSize(long current_size) {
+        refsize = current_size;
     }
 
     /**
@@ -925,8 +944,7 @@ public class H5ReferenceType extends H5Datatype
     }
 
     /**
-     * The base DataProvider which pulls data from a given Array object using direct
-     * indices.
+     * The individual reference data for a given object.
      */
     public static class H5ReferenceData
     {
@@ -953,9 +971,18 @@ public class H5ReferenceType extends H5Datatype
         /** The point/block description of region referenced */
         public String region_desc;
 
+        /** The default type of region referenced */
         public int ref_type = HDF5Constants.H5R_BADTYPE;
+
+        /** The default type of object referenced */
         public int obj_type = HDF5Constants.H5O_TYPE_UNKNOWN;
 
+        /**
+         *  Copy the individual reference array for further processing
+         *
+         * @param theArray
+         *            the reference datatype data to be copied.
+         */
         H5ReferenceData(byte[] theArray)
         {
             System.arraycopy(theArray, 0, ref_array, 0, (int)HDF5Constants.H5R_REF_BUF_SIZE);

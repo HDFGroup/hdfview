@@ -349,12 +349,13 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
                 if (rank == 0) {
                     // a scalar data point
+                    isScalar = true;
                     rank = 1;
-                    dims = new long[1];
-                    dims[0] = 1;
+                    dims = new long[] { 1 };
                     log.trace("init(): rank is a scalar data point");
                 }
                 else {
+                    isScalar = false;
                     dims = new long[rank];
                     maxDims = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
@@ -2085,16 +2086,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      */
     @Override
     public long getSize(long tid) {
-        long tsize = -1;
-
-        try {
-            tsize = H5.H5Tget_size(tid);
-        }
-        catch (Exception ex) {
-            tsize = -1;
-        }
-
-        return tsize;
+        return H5Datatype.getDatatypeSize(tid);
     }
 
     /*

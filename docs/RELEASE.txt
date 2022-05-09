@@ -4,7 +4,7 @@ The current HDFView products can be downloaded at:
 
 HDF Libraries
 =============================================================================
-This release was built and tested with HDF 4.2.x and HDF5 1.12.x.
+This release was built and tested with HDF 4.2.15 and HDF5 1.12.2.
 
 Windows ONLY: HDFView built with VS 2015 will require that
 the Visual C++ Redistributable Packages be installed on your machine.
@@ -20,7 +20,12 @@ newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================
-    *
+    * This version supports the new references available in hdf5 1.12 releases.
+    * Support for reading a SWMR created file, using a configurable timer to 
+      refresh dataset tables.
+    * Refactored the attribute object classes to use the same object logic as
+      datasets. This allows data objects to display table views using the same
+      logic. This includes the editing and reference handling.
 
 Major Bug Fixes
 ==============================================================================
@@ -38,6 +43,7 @@ Minor Bug Fixes
       the attribute twice.
     * Added an initilize lib version bounds function. Now the change
       lib version dialog correctly preloads the combo box values.
+    * Correct display of dimension for scalar types.
 
 
 Limitations / Known Problems

@@ -67,11 +67,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     /** the object properties */
     private H5O_info_t objInfo;
 
-    /**
-     * The byte array containing references of palettes. Each reference requires eight bytes storage. Therefore, the
-     * array length is 8*numberOfPalettes.
-     */
-    private byte[] paletteRefs;
+    /** the number of palettes */
+    private int NumberOfPalettes;
 
     /** flag to indicate if the dataset is an external dataset */
     private boolean isExternal = false;
@@ -125,7 +122,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     public H5ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid) {
         super(theFile, theName, thePath, oid);
         unsignedConverted = false;
-        paletteRefs = null;
+        NumberOfPalettes = 0;
         objMetadata = new H5MetaDataContainer(theFile, theName, thePath, this);
 
         if (theFile != null) {
@@ -321,7 +318,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 }
             }
 
-            paletteRefs = getPaletteRefs(did);
+            NumberOfPalettes = readNumberOfPalette(did);
 
             try {
                 sid = H5.H5Dget_space(did);
@@ -332,12 +329,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
                 if (rank == 0) {
                     // a scalar data point
+                    isScalar = true;
                     rank = 1;
-                    dims = new long[1];
-                    dims[0] = 1;
+                    dims = new long[] { 1 };
                     log.trace("init(): rank is a scalar data point");
                 }
                 else {
+                    isScalar = false;
                     dims = new long[rank];
                     maxDims = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
@@ -894,16 +892,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 log.debug("scalarDatasetCommonIO(): Cannot write non-string variable-length data");
                 throw new HDF5Exception("Writing non-string variable-length data is not supported");
             }
-
-            //if (dsDatatype.isStdRef()) {
-            //    log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
-            //    throw new HDF5Exception("Writing region reference data is not supported");
-            //}
-
-            if (dsDatatype.isRegRef()) {
-                log.debug("scalarDatasetCommonIO(): Cannot write region reference data");
-                throw new HDF5Exception("Writing region reference data is not supported");
-            }
         }
 
         long did = open();
@@ -992,10 +980,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                                 asize *= arrayDims[j];
                             }
                             theData = ((H5Datatype)dsDatatype.getDatatypeBase()).byteToBigDecimal(0, asize, (byte[]) theData);
-                        }
-                        else if (dsDatatype.isRefObj() && !dsDatatype.isStdRef()) {
-                            log.trace("scalarDatasetCommonIO(): isREF: converting byte array to long array");
-                            theData = HDFNativeData.byteToLong((byte[]) theData);
                         }
                     }
                 } // H5File.IO_TYPE.READ
@@ -2083,6 +2067,15 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         return dataset;
     }
 
+    /**
+     * Get the number of pallettes for this object.
+     *
+     * @return the number of palettes if it has any, 0 otherwise.
+     */
+    public int getNumberOfPalettes() {
+        return NumberOfPalettes;
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -2090,8 +2083,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      */
     @Override
     public byte[][] getPalette() {
-        if (palette == null)
-            palette = readPalette(0);
+        log.trace("getPalette(): NumberOfPalettes={}", NumberOfPalettes);
+        if (NumberOfPalettes > 0)
+            if (palette == null)
+                palette = readPalette(0);
 
         return palette;
     }
@@ -2103,30 +2098,23 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      */
     @Override
     public String getPaletteName(int idx) {
-        byte[] refs = getPaletteRefs();
+        int count = readNumberOfPalettes();
         long did = HDF5Constants.H5I_INVALID_HID;
         long palID = HDF5Constants.H5I_INVALID_HID;
         String paletteName = null;
 
-        if (refs == null) {
-            log.debug("getPaletteName(): refs is null");
+        if (count < 1) {
+            log.debug("getPaletteName(): no palettes are attached");
             return null;
         }
 
-        byte[] refBuf = new byte[8];
-
-        try {
-            System.arraycopy(refs, idx * 8, refBuf, 0, 8);
-        }
-        catch (Exception err) {
-            log.debug("getPaletteName(): arraycopy failure: ", err);
-            return null;
-        }
+        byte[][] refBuf = null;
 
         did = open();
         if (did >= 0) {
             try {
-                palID = H5.H5Rdereference(getFID(), HDF5Constants.H5P_DEFAULT, HDF5Constants.H5R_OBJECT, refBuf);
+                refBuf = getPaletteRefs(did);
+                palID = H5.H5Ropen_object(refBuf[idx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 paletteName = H5.H5Iget_name(palID);
             }
             catch (Exception ex) {
@@ -2134,6 +2122,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             }
             finally {
                 close(palID);
+                for (int i = 0; i < count; i++)
+                    H5.H5Rdestroy(refBuf[i]);
                 close(did);
             }
         }
@@ -2149,32 +2139,26 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     @Override
     public byte[][] readPalette(int idx) {
         byte[][] thePalette = null;
-        byte[] refs = getPaletteRefs();
+        int count = readNumberOfPalettes();
         long did = HDF5Constants.H5I_INVALID_HID;
         long palID = HDF5Constants.H5I_INVALID_HID;
         long tid = HDF5Constants.H5I_INVALID_HID;
+        log.trace("readPalette(): palette count={}", count);
 
-        if (refs == null) {
-            log.debug("readPalette(): refs is null");
+        if (count < 1) {
+            log.debug("readPalette(): no palettes are attached");
             return null;
         }
 
         byte[] p = null;
-        byte[] refBuf = new byte[8];
-
-        try {
-            System.arraycopy(refs, idx * 8, refBuf, 0, 8);
-        }
-        catch (Exception err) {
-            log.debug("readPalette(): arraycopy failure: ", err);
-            return null;
-        }
+        byte[][] refBuf = null;
 
         did = open();
         if (did >= 0) {
             try {
-                palID = H5.H5Rdereference(getFID(), HDF5Constants.H5P_DEFAULT, HDF5Constants.H5R_OBJECT, refBuf);
-                log.trace("readPalette(): H5Rdereference: {}", palID);
+                refBuf = getPaletteRefs(did);
+                palID = H5.H5Ropen_object(refBuf[idx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                log.trace("readPalette(): H5Ropen_object: {}", palID);
                 tid = H5.H5Dget_type(palID);
 
                 // support only 3*256 byte palette data
@@ -2195,6 +2179,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     log.debug("readPalette(): H5Tclose(tid {}) failure: ", tid, ex2);
                 }
                 close(palID);
+                for (int i = 0; i < count; i++)
+                    H5.H5Rdestroy(refBuf[i]);
                 close(did);
             }
         }
@@ -2286,30 +2272,90 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         return data;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * reads references of palettes to count the numberOfPalettes.
      *
-     * @see hdf.object.ScalarDS#getPaletteRefs()
+     * @return the number of palettes referenced.
      */
-    @Override
-    public byte[] getPaletteRefs() {
+    public int readNumberOfPalettes() {
+        log.trace("readNumberOfPalettes(): isInited={}", isInited());
         if (!isInited())
             init(); // init will be called to get refs
 
-        return paletteRefs;
+        return NumberOfPalettes;
     }
 
     /**
-     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore, the array
-     * length is 8*numberOfPalettes.
+     * reads references of palettes to calculate the numberOfPalettes.
      */
-    private byte[] getPaletteRefs(long did) {
+    private int readNumberOfPalette(long did) {
         long aid = HDF5Constants.H5I_INVALID_HID;
         long sid = HDF5Constants.H5I_INVALID_HID;
         long atype = HDF5Constants.H5I_INVALID_HID;
         int size = 0;
         int rank = 0;
         byte[] refbuf = null;
+        log.trace("readNumberOfPalette(): did={}", did);
+
+        try {
+            if(H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT)) {
+                aid = H5.H5Aopen_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                sid = H5.H5Aget_space(aid);
+                rank = H5.H5Sget_simple_extent_ndims(sid);
+                size = 1;
+                if (rank > 0) {
+                    long[] dims = new long[rank];
+                    H5.H5Sget_simple_extent_dims(sid, dims, null);
+                    log.trace("readNumberOfPalette(): rank={}, dims={}", rank, dims);
+                    for (int i = 0; i < rank; i++)
+                        size *= (int) dims[i];
+                }
+                log.trace("readNumberOfPalette(): size={}", size);
+
+                if ((size * HDF5Constants.H5R_REF_BUF_SIZE) < Integer.MIN_VALUE || (size * HDF5Constants.H5R_REF_BUF_SIZE) > Integer.MAX_VALUE)
+                    throw new HDF5Exception("Invalid int size");
+            }
+        }
+        catch (HDF5Exception ex) {
+            log.debug("readNumberOfPalette(): Palette attribute search failed: Expected", ex);
+            refbuf = null;
+        }
+        finally {
+            try {
+                H5.H5Tclose(atype);
+            }
+            catch (HDF5Exception ex2) {
+                log.debug("readNumberOfPalette(): H5Tclose(atype {}) failure: ", atype, ex2);
+            }
+            try {
+                H5.H5Sclose(sid);
+            }
+            catch (HDF5Exception ex2) {
+                log.debug("readNumberOfPalette(): H5Sclose(sid {}) failure: ", sid, ex2);
+            }
+            try {
+                H5.H5Aclose(aid);
+            }
+            catch (HDF5Exception ex2) {
+                log.debug("readNumberOfPalette(): H5Aclose(aid {}) failure: ", aid, ex2);
+            }
+        }
+
+        return size;
+    }
+
+    /**
+     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore, the array
+     * length is 8*numberOfPalettes.
+     */
+    private byte[][] getPaletteRefs(long did) {
+        long aid = HDF5Constants.H5I_INVALID_HID;
+        long sid = HDF5Constants.H5I_INVALID_HID;
+        long atype = HDF5Constants.H5I_INVALID_HID;
+        int size = 0;
+        int rank = 0;
+        byte[][] refBuf = null;
+        log.trace("getPaletteRefs(): did={}", did);
 
         try {
             if(H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT)) {
@@ -2324,27 +2370,20 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     for (int i = 0; i < rank; i++)
                         size *= (int) dims[i];
                 }
+                log.trace("getPaletteRefs(): size={}", size);
 
-                if ((size * 8) < Integer.MIN_VALUE || (size * 8) > Integer.MAX_VALUE)
+                if ((size * HDF5Constants.H5R_REF_BUF_SIZE) < Integer.MIN_VALUE || (size * HDF5Constants.H5R_REF_BUF_SIZE) > Integer.MAX_VALUE)
                     throw new HDF5Exception("Invalid int size");
+                refBuf = new byte[size][HDF5Constants.H5R_REF_BUF_SIZE];
 
-                refbuf = new byte[size * 8];
-                atype = H5.H5Aget_type(aid);
-
-                H5.H5Aread(aid, atype, refbuf);
+                H5.H5Aread(aid, HDF5Constants.H5T_STD_REF, refBuf);
             }
         }
         catch (HDF5Exception ex) {
             log.debug("getPaletteRefs(): Palette attribute search failed: Expected", ex);
-            refbuf = null;
+            refBuf = null;
         }
         finally {
-            try {
-                H5.H5Tclose(atype);
-            }
-            catch (HDF5Exception ex2) {
-                log.debug("getPaletteRefs(): H5Tclose(atype {}) failure: ", atype, ex2);
-            }
             try {
                 H5.H5Sclose(sid);
             }
@@ -2359,7 +2398,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             }
         }
 
-        return refbuf;
+        return refBuf;
     }
 
     /**

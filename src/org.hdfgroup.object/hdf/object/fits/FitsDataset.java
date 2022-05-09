@@ -301,11 +301,12 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
         rank = axes.length;
         if (rank == 0) {
             // a scalar data point
+            isScalar = true;
             rank = 1;
-            dims = new long[1];
-            dims[0] = 1;
+            dims = new long[] { 1 };
         }
         else {
+            isScalar = false;
             dims = new long[rank];
             for (int i=0; i<rank; i++)
                 dims[i] = axes[i];
@@ -343,36 +344,6 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
     }
 
     /* Implement abstart ScalarDS */
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPalette()
-     */
-    @Override
-    public byte[][] getPalette() {
-        if (palette == null)
-            palette = readPalette(0);
-
-        return palette;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#readPalette(int)
-     */
-    @Override
-    public byte[][] readPalette(int idx) {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see hdf.object.ScalarDS#getPaletteRefs()
-     */
-    @Override
-    public byte[] getPaletteRefs() {
-        return null;
-    }
 
     /**
      * Creates a new dataset.
