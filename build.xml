@@ -1975,21 +1975,19 @@
                 <striplinebreaks/>
             </filterchain>
         </loadfile>
-
-        <waitfor maxwait="10" maxwaitunit="minute" checkevery="5" checkeveryunit="second">
-            <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
-                <redirector output="notary.txt" alwayslog="true"/>
-                <arg value="altool"/>
-                <arg value="--notarization-info"/>
-                <arg value="${retUUID}"/>
-                <arg value="--username"/>
-                <arg value="${notarize.account}"/>
-                <arg value="--password"/>
-                <arg value="${notarize.keychain_key}"/>
-                <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
-            </exec>
-            <resourcecontains resource="notary.txt" substring="success"/>
-        </waitfor>
+        <sleep minutes="10"/>
+        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
+            <redirector output="notary.txt" alwayslog="true"/>
+            <arg value="altool"/>
+            <arg value="--notarization-info"/>
+            <arg value="${retUUID}"/>
+            <arg value="--username"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+        </exec>
+        <resourcecontains resource="notary.txt" substring="success"/>
         <echo>notarize-info:${logInfo}</echo>
     </target>
 
