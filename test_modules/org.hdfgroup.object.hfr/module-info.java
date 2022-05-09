@@ -1,3 +1,4 @@
+/** the hdf object hdf4 module */
 module org.hdfgroup.object.hfr {
     exports hdf.object.h4;
 

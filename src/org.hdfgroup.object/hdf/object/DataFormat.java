@@ -78,6 +78,8 @@ public interface DataFormat
      * Sometimes we want to force a clear and read to re-read the object from the file.
      * For example, when the dimensions has changed, we need to refresh the object and data.
      *
+     * @return the updated data
+     *
      * @see #getData()
      * @see #read()
      */

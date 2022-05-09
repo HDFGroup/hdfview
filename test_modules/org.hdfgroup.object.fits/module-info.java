@@ -1,3 +1,4 @@
+/** the hdf object fits module */
 module org.hdfgroup.object.fits {
     exports hdf.object.fits;
 
