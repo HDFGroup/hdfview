@@ -1965,7 +1965,7 @@
     </target>
 
     <target name="post-notary">
-        <!-- <loadfile property="retUUID" srcfile="retUUID.txt">
+        <loadfile property="retUUID" srcfile="retUUID.txt">
             <filterchain>
                 <tokenfilter>
                     <containsregex
@@ -1974,7 +1974,7 @@
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
-             </loadfile> -->
+        </loadfile> -->
         <sleep minutes="10"/>
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
