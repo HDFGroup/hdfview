@@ -104,7 +104,7 @@ public class NC2Attribute extends ScalarDS implements Attribute
      * String[] classValue = { &quot;IMAGE&quot; };
      * Datatype attrType = null;
      * try {
-     *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     *     attrType = new NC2Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
      * Attribute attr = new Attribute(attrName, attrType, attrDims);
@@ -143,7 +143,7 @@ public class NC2Attribute extends ScalarDS implements Attribute
      * String[] classValue = { &quot;IMAGE&quot; };
      * Datatype attrType = null;
      * try {
-     *     attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     *     attrType = new NC2Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
      * NC2Attribute attr = new NC2Attribute(attrName, attrType, attrDims, classValue);
@@ -450,6 +450,7 @@ public class NC2Attribute extends ScalarDS implements Attribute
     public final Object getAttributeData() throws Exception, OutOfMemoryError {
         return getData();
     }
+
     /**
      * Returns the datatype of the attribute.
      *
@@ -458,6 +459,7 @@ public class NC2Attribute extends ScalarDS implements Attribute
     public final Datatype getAttributeDatatype() {
         return getDatatype();
     }
+
     /**
      * Returns the space type for the attribute. It returns a
      * negative number if it failed to retrieve the type information from
@@ -468,6 +470,7 @@ public class NC2Attribute extends ScalarDS implements Attribute
     public final int getAttributeSpaceType() {
         return getSpaceType();
     }
+
     /**
      * Returns the rank (number of dimensions) of the attribute. It returns a
      * negative number if it failed to retrieve the dimension information from

@@ -40,6 +40,7 @@ Minor Bug Fixes
       the attribute twice.
     * Added an initilize lib version bounds function. Now the change
       lib version dialog correctly preloads the combo box values.
+    * Correct display of dimension for scalar types.
 
 
 Limitations / Known Problems

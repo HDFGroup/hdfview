@@ -52,7 +52,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
      * @param parentComposite
      *        the parent visual object
      * @param viewer
-     *        the viewr to use
+     *        the viewer to use
      * @param theObj
      *        the object to display the metadata info
      */
@@ -88,69 +88,76 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
         text.setEditable(false);
         text.setFont(curFont);
-        labelInfo = "" + d.getRank();
+        if (d.isScalar()) {
+            labelInfo = "Scalar";
+        }
+        else {
+            labelInfo = "" + d.getRank();
+        }
         text.setText(labelInfo);
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        /* Dataset dimension size section */
-        label = new Label(datasetInfoGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Dimension Size(s): ");
+        if (!d.isScalar()) {
+            /* Dataset dimension size section */
+            label = new Label(datasetInfoGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Dimension Size(s): ");
 
-        // Set Dimension Size
-        String dimStr = null;
-        String maxDimStr = null;
-        long dims[] = d.getDims();
-        long maxDims[] = d.getMaxDims();
-        if (dims != null) {
-            String[] dimNames = d.getDimNames();
-            boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
-            StringBuilder sb = new StringBuilder();
-            StringBuilder sb2 = new StringBuilder();
+            // Set Dimension Size
+            String dimStr = null;
+            String maxDimStr = null;
+            long dims[] = d.getDims();
+            long maxDims[] = d.getMaxDims();
+            if (dims != null) {
+                String[] dimNames = d.getDimNames();
+                boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
+                StringBuilder sb = new StringBuilder();
+                StringBuilder sb2 = new StringBuilder();
 
-            sb.append(dims[0]);
-            if (hasDimNames) {
-                sb.append(" (").append(dimNames[0]).append(")");
-            }
-
-            if (maxDims[0] < 0)
-                sb2.append("Unlimited");
-            else
-                sb2.append(maxDims[0]);
-
-            for (int i = 1; i < dims.length; i++) {
-                sb.append(" x ");
-                sb.append(dims[i]);
+                sb.append(dims[0]);
                 if (hasDimNames) {
-                    sb.append(" (").append(dimNames[i]).append(")");
+                    sb.append(" (").append(dimNames[0]).append(")");
                 }
 
-                sb2.append(" x ");
-                if (maxDims[i] < 0)
+                if (maxDims[0] < 0)
                     sb2.append("Unlimited");
                 else
-                    sb2.append(maxDims[i]);
+                    sb2.append(maxDims[0]);
 
+                for (int i = 1; i < dims.length; i++) {
+                    sb.append(" x ");
+                    sb.append(dims[i]);
+                    if (hasDimNames) {
+                        sb.append(" (").append(dimNames[i]).append(")");
+                    }
+
+                    sb2.append(" x ");
+                    if (maxDims[i] < 0)
+                        sb2.append("Unlimited");
+                    else
+                        sb2.append(maxDims[i]);
+
+                }
+                dimStr = sb.toString();
+                maxDimStr = sb2.toString();
             }
-            dimStr = sb.toString();
-            maxDimStr = sb2.toString();
+
+            text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(curFont);
+            text.setText((dimStr == null) ? "null" : dimStr);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+            label = new Label(datasetInfoGroup, SWT.LEFT);
+            label.setFont(curFont);
+            label.setText("Max Dimension Size(s): ");
+
+            text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
+            text.setEditable(false);
+            text.setFont(curFont);
+            text.setText((maxDimStr == null) ? "null" : maxDimStr);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         }
-
-        text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
-        text.setEditable(false);
-        text.setFont(curFont);
-        text.setText((dimStr == null) ? "null" : dimStr);
-        text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-        label = new Label(datasetInfoGroup, SWT.LEFT);
-        label.setFont(curFont);
-        label.setText("Max Dimension Size(s): ");
-
-        text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
-        text.setEditable(false);
-        text.setFont(curFont);
-        text.setText((maxDimStr == null) ? "null" : maxDimStr);
-        text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         /* Dataset datatype section */
         label = new Label(datasetInfoGroup, SWT.LEFT);
