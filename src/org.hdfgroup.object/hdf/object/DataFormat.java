@@ -364,6 +364,38 @@ public interface DataFormat
     long getWidth();
 
     /**
+     * Returns the dimension size of the frame axis.
+     *
+     *
+     * This function is used by GUI applications such as HDFView. GUI applications
+     * display a dataset in 2D Table or 2D Image. The display order is specified by
+     * the index array of selectedIndex as follow:
+     * <dl>
+     * <dt>selectedIndex[0] -- height</dt>
+     * <dd>The vertical axis</dd>
+     * <dt>selectedIndex[1] -- width</dt>
+     * <dd>The horizontal axis</dd>
+     * <dt>selectedIndex[2] -- depth</dt>
+     * <dd>The depth axis, which is used for 3 or more dimension datasets.</dd>
+     * </dl>
+     * Applications can use getSelectedIndex() to access and change the display
+     * order. For example, in a 2D dataset of 200x50 (dim0=200, dim1=50), the
+     * following code will set the height=200 and width=100.
+     *
+     * <pre>
+     * int[] selectedIndex = dataset.getSelectedIndex();
+     * selectedIndex[0] = 0;
+     * selectedIndex[1] = 1;
+     * </pre>
+     *
+     * @see #getSelectedIndex()
+     * @see #getHeight()
+     *
+     * @return the size of dimension of the frame axis.
+     */
+    long getDepth();
+
+    /**
      * Returns the string representation of compression information.
      *
      * For example, "SZIP: Pixels per block = 8: H5Z_FILTER_CONFIG_DECODE_ENABLED".

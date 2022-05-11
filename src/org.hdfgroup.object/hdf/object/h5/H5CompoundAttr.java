@@ -394,12 +394,13 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
 
                 if (rank == 0) {
                     // a scalar data point
+                    isScalar = true;
                     rank = 1;
-                    dims = new long[1];
-                    dims[0] = 1;
+                    dims = new long[] { 1 };
                     log.trace("init(): rank is a scalar data point");
                 }
                 else {
+                    isScalar = false;
                     dims = new long[rank];
                     maxDims = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
@@ -1436,6 +1437,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
     public final Object getAttributeData() throws Exception, OutOfMemoryError {
         return getData();
     }
+
     /**
      * Returns the datatype of the attribute.
      *
@@ -1444,6 +1446,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
     public final Datatype getAttributeDatatype() {
         return getDatatype();
     }
+
     /**
      * Returns the space type for the attribute. It returns a
      * negative number if it failed to retrieve the type information from
@@ -1454,6 +1457,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
     public final int getAttributeSpaceType() {
         return getSpaceType();
     }
+
     /**
      * Returns the rank (number of dimensions) of the attribute. It returns a
      * negative number if it failed to retrieve the dimension information from
@@ -1464,6 +1468,18 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
     public final int getAttributeRank() {
         return getRank();
     }
+
+    /**
+     * Returns the selected size of the rows and columns of the attribute. It returns a
+     * negative number if it failed to retrieve the size information from
+     * the file.
+     *
+     * @return the selected size of the rows and colums of the attribute.
+     */
+    public final int getAttributePlane() {
+        return (int)getWidth() * (int)getHeight();
+    }
+
     /**
      * Returns the array that contains the dimension sizes of the data value of
      * the attribute. It returns null if it failed to retrieve the dimension
@@ -1848,21 +1864,21 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
 
         /*
          * Copy the selection from originalBuf to theData Only three dims are involved and selected data is 2 dimensions
-         * selectedDims[selectedIndex[0]] is the row dimension selectedDims[selectedIndex[1]] is the col dimension
-         * selectedDims[selectedIndex[2]] is the frame dimension
+         * getHeight() is the row dimension getWidth() is the col dimension
+         * getDepth() is the frame dimension
          */
 //        long[] start = getStartDims();
 //        long curFrame = start[selectedIndex[2]];
-//        for (int col = 0; col < (int)selectedDims[selectedIndex[1]]; col++) {
-//            for (int row = 0; row < (int)selectedDims[selectedIndex[0]]; row++) {
+//        for (int col = 0; col < (int)getWidth(); col++) {
+//            for (int row = 0; row < (int)getHeight(); row++) {
 
-//                int k = (int)startDims[selectedIndex[2]] * (int)selectedDims[selectedIndex[2]];
-//                int index = row * (int)selectedDims[selectedIndex[1]] + col;
+//                int k = (int)startDims[selectedIndex[2]] * (int)getDepth();
+//                int index = row * (int)getWidth() + col;
 //                log.trace("compoundAttributeSelection(): point{} row:col:k={}:{}:{}", curFrame, row, col, k);
-//                int fromIndex = ((int)curFrame * (int)selectedDims[selectedIndex[1]] * (int)selectedDims[selectedIndex[0]] +
-//                                        col * (int)selectedDims[selectedIndex[0]] +
+//                int fromIndex = ((int)curFrame * (int)getWidth() * (int)getHeight() +
+//                                        col * (int)getHeight() +
 //                                        row);// * (int) dsDatatype.getDatatypeSize();
-//                int toIndex = (col * (int)selectedDims[selectedIndex[0]] +
+//                int toIndex = (col * (int)getHeight() +
 //                        row);// * (int) dsDatatype.getDatatypeSize();
 //                int objSize = 1;
 //                if (dsDatatype.isArray()) {
