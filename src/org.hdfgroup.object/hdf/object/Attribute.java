@@ -115,6 +115,15 @@ public interface Attribute
     long[] getAttributeDims();
 
     /**
+     * Returns the selected size of the rows and columns of the attribute. It returns a
+     * negative number if it failed to retrieve the size information from
+     * the file.
+     *
+     * @return the selected size of the rows and colums of the attribute.
+     */
+    int getAttributePlane();
+
+    /**
      * @return true if the data is a single scalar point; otherwise, returns
      *         false.
      */
