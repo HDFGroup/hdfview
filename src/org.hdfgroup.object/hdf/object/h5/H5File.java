@@ -1959,10 +1959,10 @@ public class H5File extends FileFormat
                 }
                 catch (Exception ex) {
                     attrValue = null;
-                    log.trace("writeAttribute(): getData() failure:", ex);
+                    log.trace("writeAttribute(): getAttributeData() failure:", ex);
                 }
 
-                log.trace("writeAttribute(): getValue");
+                //log.trace("writeAttribute(): attrValue={}", attrValue);
                 if (attrValue != null) {
                     try {
                         ((H5Attribute)attr).AttributeCommonIO(aid, H5File.IO_TYPE.WRITE, attrValue);
