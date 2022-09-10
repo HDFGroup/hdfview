@@ -3105,7 +3105,7 @@ public abstract class DefaultBaseTableView implements TableView
             linePlotOptionShell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
             linePlotOptionShell.setFont(curFont);
             linePlotOptionShell.setText("Line Plot Options -- " + ((HObject) dataObject).getName());
-            linePlotOptionShell.setImage(ViewProperties.getHdfIcon());
+            linePlotOptionShell.setImages(ViewProperties.getHdfIcons());
             linePlotOptionShell.setLayout(new GridLayout(1, true));
 
             Label label = new Label(linePlotOptionShell, SWT.RIGHT);
