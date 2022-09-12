@@ -281,6 +281,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      *
      * @return an array of the names of the selected members of the compound dataset.
      */
+    @Override
     public final String[] getSelectedMemberNames() {
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberNames(): isMemberSelected array is null");
@@ -510,7 +511,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
              */
             theObj = byteData;
         }
-        else if (dtype.isString() && !dtype.isVarStr() && convertByteToString) {
+        else if (dtype.isString() && !dtype.isVarStr() && convertByteToString && (byteData instanceof byte[])) {
             log.trace("convertByteMember(): converting byte array to string array");
 
             theObj = byteToString(byteData, (int) dtype.getDatatypeSize());
@@ -548,11 +549,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
             else
                 theObj = HDFNativeData.byteToFloat(byteData);
         }
-        else if (dtype.isRef()) {
-            log.trace("convertByteMember(): reference type - converting byte array to long array");
-
-            theObj = HDFNativeData.byteToLong(byteData);
-        }
         else if (dtype.isArray()) {
             Datatype baseType = dtype.getDatatypeBase();
 
@@ -566,44 +562,45 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
              * Optimize for the common cases of Arrays.
              */
             switch (baseType.getDatatypeClass()) {
-                case Datatype.CLASS_INTEGER:
-                case Datatype.CLASS_FLOAT:
-                case Datatype.CLASS_CHAR:
-                case Datatype.CLASS_STRING:
-                case Datatype.CLASS_BITFIELD:
-                case Datatype.CLASS_OPAQUE:
-                case Datatype.CLASS_COMPOUND:
-                case Datatype.CLASS_REFERENCE:
-                case Datatype.CLASS_ENUM:
-                case Datatype.CLASS_VLEN:
-                case Datatype.CLASS_TIME:
-                    theObj = convertByteMember(baseType, byteData);
-                    break;
+            case Datatype.CLASS_INTEGER:
+            case Datatype.CLASS_FLOAT:
+            case Datatype.CLASS_CHAR:
+            case Datatype.CLASS_STRING:
+            case Datatype.CLASS_BITFIELD:
+            case Datatype.CLASS_OPAQUE:
+            case Datatype.CLASS_COMPOUND:
+            case Datatype.CLASS_REFERENCE:
+            case Datatype.CLASS_ENUM:
+            case Datatype.CLASS_VLEN:
+            case Datatype.CLASS_TIME:
+                theObj = convertByteMember(baseType, byteData);
+                break;
 
-                case Datatype.CLASS_ARRAY:
-                {
-                    Datatype arrayType = dtype.getDatatypeBase();
+            case Datatype.CLASS_ARRAY:
+            {
+                Datatype arrayType = dtype.getDatatypeBase();
 
-                    long[] arrayDims = dtype.getArrayDims();
-                    int arrSize = 1;
-                    for (int i = 0; i < arrayDims.length; i++)
-                        arrSize *= arrayDims[i];
+                long[] arrayDims = dtype.getArrayDims();
+                int arrSize = 1;
+                for (int i = 0; i < arrayDims.length; i++)
+                    arrSize *= arrayDims[i];
+                log.debug("convertByteMember(): no CLASS_ARRAY arrayType={} arrSize={}", arrayType, arrSize);
 
-                    theObj = new Object[arrSize];
+                theObj = new Object[arrSize];
 
-                    for (int i = 0; i < arrSize; i++) {
-                        byte[] indexedBytes = Arrays.copyOfRange(byteData, (int) (i * arrayType.getDatatypeSize()),
-                                (int) ((i + 1) * arrayType.getDatatypeSize()));
-                        ((Object[]) theObj)[i] = convertByteMember(arrayType, indexedBytes);
-                    }
-
-                    break;
+                for (int i = 0; i < arrSize; i++) {
+                    byte[] indexedBytes = Arrays.copyOfRange(byteData, (int) (i * arrayType.getDatatypeSize()),
+                            (int) ((i + 1) * arrayType.getDatatypeSize()));
+                    ((Object[]) theObj)[i] = convertByteMember(arrayType, indexedBytes);
                 }
 
-                case Datatype.CLASS_NO_CLASS:
-                default:
-                    log.debug("convertByteMember(): invalid datatype class");
-                    theObj = new String("*ERROR*");
+                break;
+            }
+
+            case Datatype.CLASS_NO_CLASS:
+            default:
+                log.debug("convertByteMember(): invalid datatype class");
+                theObj = new String("*ERROR*");
             }
         }
         else if (dtype.isCompound()) {
@@ -613,6 +610,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
             theObj = convertCompoundByteMembers(dtype, byteData);
         }
         else {
+            log.debug("convertByteMember(): no change");
             theObj = byteData;
         }
 

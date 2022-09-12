@@ -15,16 +15,29 @@ package hdf.view.TableView;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.HObject;
 import hdf.object.Utils;
+import hdf.object.h5.H5Datatype;
 import hdf.view.Tools;
 
 /**
@@ -33,7 +46,6 @@ import hdf.view.Tools;
  *
  * @author Jordan T. Henderson
  * @version 1.0 2/9/2019
- *
  */
 public class DataProviderFactory
 {
@@ -127,32 +139,32 @@ public class DataProviderFactory
          * buffer object after flipping through a 'page', this field is not marked as
          * final. However, it is important that subclasses DO NOT override this field.
          */
-        protected Object           dataBuf;
+        protected Object dataBuf;
 
         /** the data value */
-        protected Object           theValue;
+        protected Object theValue;
 
         /** the data format class */
-        protected final Class      originalFormatClass;
+        protected final Class originalFormatClass;
 
         /** if the data value has changed */
-        protected boolean          isValueChanged;
+        protected boolean isValueChanged;
 
-        /** the type of the parent*/
-        protected final boolean    isContainerType;
+        /** the type of the parent */
+        protected final boolean isContainerType;
 
         /** the rank */
-        protected final int        rank;
+        protected final int rank;
 
         /** if the data is in original order */
-        protected final boolean    isNaturalOrder;
+        protected final boolean isNaturalOrder;
         /** if the data is transposed */
-        protected final boolean    isDataTransposed;
+        protected final boolean isDataTransposed;
 
         /** the column */
-        protected long       colCount;
+        protected long colCount;
         /** the row */
-        protected long       rowCount;
+        protected long rowCount;
 
         /**
          * Create the HDF extended Data Display Provider for the supplied data object
@@ -179,7 +191,8 @@ public class DataProviderFactory
 
             rank = dataFormatReference.getRank();
 
-            isNaturalOrder = ((rank == 1) || (dataFormatReference.getSelectedIndex()[0] < dataFormatReference.getSelectedIndex()[1]));
+            isNaturalOrder = ((rank == 1)
+                    || (dataFormatReference.getSelectedIndex()[0] < dataFormatReference.getSelectedIndex()[1]));
             isDataTransposed = dataTransposed;
 
             if (rank > 1) {
@@ -190,14 +203,14 @@ public class DataProviderFactory
                 rowCount = (int) dataFormatReference.getSelectedDims()[0];
                 colCount = 1;
             }
-            log.trace("constructor: rowCount={} colCount={}", rowCount, colCount);
+            log.trace("constructor:class={} rowCount={} colCount={}", runtimeTypeClass, rowCount, colCount);
 
             theValue = null;
             isValueChanged = false;
 
             isContainerType = (this instanceof CompoundDataProvider
-                            || this instanceof ArrayDataProvider
-                            || this instanceof VlenDataProvider);
+                    || this instanceof ArrayDataProvider
+                    || this instanceof VlenDataProvider);
         }
 
         /**
@@ -215,7 +228,8 @@ public class DataProviderFactory
             long index = rowIndex * colCount + columnIndex;
 
             if (rank > 1) {
-                log.trace("physicalLocationToBufIndex({}, {}): rank > 1; adjusting for multi-dimensional dataset", rowIndex, columnIndex);
+                log.trace("physicalLocationToBufIndex({}, {}): rank > 1; adjusting for multi-dimensional dataset",
+                        rowIndex, columnIndex);
 
                 if (isDataTransposed && isNaturalOrder)
                     index = columnIndex * rowCount + rowIndex;
@@ -300,6 +314,7 @@ public class DataProviderFactory
          * @return the data object
          */
         public Object getDataValue(Object obj, int index) {
+            log.trace("getDataValue({})={}: start", index, obj);
             try {
                 theValue = Array.get(obj, index);
             }
@@ -417,46 +432,46 @@ public class DataProviderFactory
             log.trace("updateAtomicValue(): runtimeTypeClass={}", runtimeTypeClass);
 
             switch (runtimeTypeClass) {
-                case 'B':
-                    byte bvalue = 0;
-                    bvalue = Byte.parseByte((String) newValue);
-                    Array.setByte(bufObject, bufIndex, bvalue);
-                    break;
-                case 'S':
-                    short svalue = 0;
-                    svalue = Short.parseShort((String) newValue);
-                    Array.setShort(bufObject, bufIndex, svalue);
-                    break;
-                case 'I':
-                    int ivalue = 0;
-                    ivalue = Integer.parseInt((String) newValue);
-                    Array.setInt(bufObject, bufIndex, ivalue);
-                    break;
-                case 'J':
-                    long lvalue = 0;
-                    String cname = this.originalFormatClass.getName();
-                    char dname = cname.charAt(cname.lastIndexOf('[') + 1);
-                    if (dname == 'J') {
-                        BigInteger big = new BigInteger((String) newValue);
-                        lvalue = big.longValue();
-                    }
-                    else
-                        lvalue = Long.parseLong((String) newValue);
-                    Array.setLong(bufObject, bufIndex, lvalue);
-                    break;
-                case 'F':
-                    float fvalue = 0;
-                    fvalue = Float.parseFloat((String) newValue);
-                    Array.setFloat(bufObject, bufIndex, fvalue);
-                    break;
-                case 'D':
-                    double dvalue = 0;
-                    dvalue = Double.parseDouble((String) newValue);
-                    Array.setDouble(bufObject, bufIndex, dvalue);
-                    break;
-                default:
-                    Array.set(bufObject, bufIndex, newValue);
-                    break;
+            case 'B':
+                byte bvalue = 0;
+                bvalue = Byte.parseByte((String) newValue);
+                Array.setByte(bufObject, bufIndex, bvalue);
+                break;
+            case 'S':
+                short svalue = 0;
+                svalue = Short.parseShort((String) newValue);
+                Array.setShort(bufObject, bufIndex, svalue);
+                break;
+            case 'I':
+                int ivalue = 0;
+                ivalue = Integer.parseInt((String) newValue);
+                Array.setInt(bufObject, bufIndex, ivalue);
+                break;
+            case 'J':
+                long lvalue = 0;
+                String cname = this.originalFormatClass.getName();
+                char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+                if (dname == 'J') {
+                    BigInteger big = new BigInteger((String) newValue);
+                    lvalue = big.longValue();
+                }
+                else
+                    lvalue = Long.parseLong((String) newValue);
+                Array.setLong(bufObject, bufIndex, lvalue);
+                break;
+            case 'F':
+                float fvalue = 0;
+                fvalue = Float.parseFloat((String) newValue);
+                Array.setFloat(bufObject, bufIndex, fvalue);
+                break;
+            case 'D':
+                double dvalue = 0;
+                dvalue = Double.parseDouble((String) newValue);
+                Array.setDouble(bufObject, bufIndex, dvalue);
+                break;
+            default:
+                Array.set(bufObject, bufIndex, newValue);
+                break;
             }
 
             isValueChanged = true;
@@ -523,15 +538,15 @@ public class DataProviderFactory
         private final HashMap<Integer, Integer> baseProviderIndexMap;
         private final HashMap<Integer, Integer> relCmpdStartIndexMap;
 
-        private final HDFDataProvider[]         baseTypeProviders;
+        private final HDFDataProvider[] baseTypeProviders;
 
-        private final Datatype[]                selectedMemberTypes;
+        private final Datatype[] selectedMemberTypes;
 
-        private final int[]                     selectedMemberOrders;
+        private final int[] selectedMemberOrders;
 
-        private final int                       nSubColumns;
-        private final int                       nCols;
-        private final int                       nRows;
+        private final int nSubColumns;
+        private final int nCols;
+        private final int nRows;
 
         CompoundDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
@@ -825,10 +840,10 @@ public class DataProviderFactory
 
         private final HDFDataProvider baseTypeDataProvider;
 
-        private final Object[]        arrayElements;
-        private final long            arraySize;
+        private final Object[] arrayElements;
+        private final long arraySize;
 
-        private final int             nCols;
+        private final int nCols;
 
         ArrayDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
@@ -1040,7 +1055,7 @@ public class DataProviderFactory
 
         private final HDFDataProvider baseTypeDataProvider;
 
-        private final StringBuilder   buffer;
+        private final StringBuilder buffer;
 
         VlenDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
@@ -1061,31 +1076,35 @@ public class DataProviderFactory
 
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
                     /*
-                     * TODO:
+                     * Pass row and column indices down where they will be adjusted.
                      */
-                    /*
-                     * buffer.append(baseTypeDataProvider.getDataValue(dataBuf, columnIndex, (int) index));
-                     */
-                    if (dataBuf instanceof String[])
-                        buffer.append(Array.get(dataBuf, bufIndex));
-                    else
-                        buffer.append("*UNSUPPORTED*");
+                    theValue = retrieveArrayOfCompoundElements(dataBuf, columnIndex, rowIndex);
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
-                    buffer.append(baseTypeDataProvider.getDataValue(dataBuf, columnIndex, bufIndex));
+                    /*
+                     * TODO: assign to global arrayElements.
+                     */
+                    theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
+                }
+                else if (baseTypeDataProvider instanceof RefDataProvider) {
+                    /*
+                     * TODO: assign to global arrayElements.
+                     */
+                    theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else {
-                    buffer.append(baseTypeDataProvider.getDataValue(dataBuf, bufIndex));
+                    /*
+                     * TODO: assign to global arrayElements.
+                     */
+                    theValue = retrieveArrayOfAtomicElements(dataBuf, bufIndex);
                 }
-
-                theValue = buffer.toString();
             }
             catch (Exception ex) {
-                log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
+                log.debug("getDataValue(rowIndex={}, columnIndex={}): failure: ", rowIndex, columnIndex, ex);
                 theValue = DataFactoryUtils.errStr;
             }
 
-            log.trace("getDataValue({}, {})=({}): finish", rowIndex, columnIndex, theValue);
+            log.trace("getDataValue(rowIndex={}, columnIndex={})=({}): finish", rowIndex, columnIndex, theValue);
 
             return theValue;
         }
@@ -1095,59 +1114,183 @@ public class DataProviderFactory
             buffer.setLength(0);
 
             try {
+                long vlSize = Array.getLength(obj);
+                log.debug("getDataValue(): vlSize={} obj={}", vlSize, obj);
+
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
                     /*
-                     * TODO:
+                     * Pass row and column indices down where they will be adjusted.
                      */
-                    /*
-                     * buffer.append(baseTypeDataProvider.getDataValue(obj, columnIndex, rowIndex));
-                     */
-                    if (obj instanceof String[])
-                        buffer.append(Array.get(obj, rowIndex));
-                    else
-                        buffer.append("*UNSUPPORTED*");
+                    theValue = retrieveArrayOfCompoundElements(obj, columnIndex, rowIndex);
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
-                    buffer.append(baseTypeDataProvider.getDataValue(obj, columnIndex, rowIndex));
+                    theValue = retrieveArrayOfArrayElements(obj, columnIndex, rowIndex);
+                }
+                else if (baseTypeDataProvider instanceof RefDataProvider) {
+                    theValue = retrieveArrayOfArrayElements(obj, columnIndex, rowIndex);
                 }
                 else {
-                    buffer.append(baseTypeDataProvider.getDataValue(obj, rowIndex));
+                    theValue = retrieveArrayOfAtomicElements(obj, rowIndex);
                 }
-
-                theValue = buffer.toString();
             }
             catch (Exception ex) {
-                log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
+                log.debug("getDataValue(rowIndex={}, columnIndex={}): failure: ", rowIndex, columnIndex, ex);
                 theValue = DataFactoryUtils.errStr;
             }
 
-            log.trace("getDataValue({}, {}, {})=({}): finish", obj, rowIndex, columnIndex, theValue);
+            log.trace("getDataValue(obj={}, rowIndex={}, columnIndex={})=({}): finish", obj, rowIndex, columnIndex, theValue);
 
             return theValue;
         }
 
-        /* @Override
+        private Object[] retrieveArrayOfCompoundElements(Object objBuf, int columnIndex, int rowIndex) {
+            long vlSize = Array.getLength(objBuf);
+            log.debug("retrieveArrayOfCompoundElements(): vlSize={}", vlSize);
+            long adjustedRowIdx = (rowIndex * vlSize * colCount)
+                    + (columnIndex / ((CompoundDataProvider) baseTypeDataProvider).baseProviderIndexMap.size());
+            long adjustedColIdx = columnIndex % ((CompoundDataProvider) baseTypeDataProvider).baseProviderIndexMap.size();
+
+            /*
+             * Since we flatten array of compound types, we only need to return a single
+             * value.
+             */
+            return new Object[] { baseTypeDataProvider.getDataValue(objBuf, (int) adjustedColIdx, (int) adjustedRowIdx) };
+        }
+
+        private Object[] retrieveArrayOfArrayElements(Object objBuf, int columnIndex, int startRowIndex) {
+            log.debug("retrieveArrayOfArrayElements(): objBuf={}", objBuf);
+            ArrayList<byte[]> vlElements = ((ArrayList[])objBuf)[startRowIndex];
+            log.debug("retrieveArrayOfArrayElements(): vlElements={}", vlElements);
+            long vlSize = vlElements.size();
+            log.debug("retrieveArrayOfArrayElements(): vlSize={} length={}", vlSize, vlElements.size());
+            Object[] tempArray = new Object[(int) vlSize];
+
+            for (int i = 0; i < vlSize; i++) {
+                ArrayList<byte[]> ref_value = vlElements;
+                StringBuilder sb = new StringBuilder();
+                sb.append("{");
+                for (int m = 0; m < ref_value.size(); m++) {
+                    if (m > 0)
+                        sb.append(", ");
+                    byte[] byteElements = ref_value.get(m);
+                    log.trace("retrieveArrayOfArrayElements byteElements={}", byteElements);
+                    sb.append(baseTypeDataProvider.getDataValue(byteElements, columnIndex, i));
+                }
+                sb.append("}");
+                tempArray[i] = sb.toString();
+            }
+
+            return tempArray;
+        }
+
+        private Object[] retrieveArrayOfAtomicElements(Object objBuf, int rowStartIdx) {
+            ArrayList vlElements = ((ArrayList[])objBuf)[rowStartIdx];
+            long vlSize = vlElements.size();
+            log.debug("retrieveArrayOfAtomicElements(): vlSize={}", vlSize);
+            Object[] tempArray = new Object[(int) vlSize];
+
+            for (int i = 0; i < vlSize; i++)
+                tempArray[i] = baseTypeDataProvider.getDataValue(vlElements.toArray(), i);
+
+            return tempArray;
+        }
+
+        @Override
         public Object getDataValue(Object obj, int index) {
             throw new UnsupportedOperationException("getDataValue(Object, int) should not be called for VlenDataProviders");
-        } */
+        }
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-            /*
-             * TODO:
-             */
+            try {
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
+
+                long vlSize = Array.getLength(dataBuf);
+                log.debug("setDataValue(): vlSize={}", vlSize);
+                bufIndex *= vlSize;
+
+                updateArrayElements(dataBuf, newValue, columnIndex, bufIndex);
+            }
+            catch (Exception ex) {
+                log.debug("setDataValue(rowIndex={}, columnIndex={}, {}): cell value update failure: ", rowIndex, columnIndex, newValue, ex);
+            }
+            log.trace("setDataValue(rowIndex={}, columnIndex={})=({}): finish", rowIndex, columnIndex, newValue);
         }
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object bufObject, Object newValue) {
-            /*
-             * TODO:
-             */
+            try {
+                long vlSize = Array.getLength(bufObject);
+                log.debug("setDataValue(): vlSize={}", vlSize);
+                long bufIndex = rowIndex * vlSize;
+
+                updateArrayElements(bufObject, newValue, columnIndex, (int) bufIndex);
+            }
+            catch (Exception ex) {
+                log.debug("setDataValue(rowIndex={}, columnIndex={}, bufObject={}, {}): cell value update failure: ", rowIndex, columnIndex, bufObject, newValue, ex);
+            }
+            log.trace("setDataValue(rowIndex={}, columnIndex={}, bufObject={})=({}): finish", rowIndex, columnIndex, bufObject, newValue);
         }
 
         @Override
         public void setDataValue(int index, Object bufObject, Object newValue) {
             throw new UnsupportedOperationException("setDataValue(int, Object, Object) should not be called for VlenDataProviders");
+        }
+
+        private void updateArrayElements(Object curBuf, Object newValue, int columnIndex, int bufStartIndex) {
+            long vlSize = Array.getLength(curBuf);
+            log.debug("updateArrayElements(): vlSize={}", vlSize);
+            StringTokenizer st = new StringTokenizer((String) newValue, ",[]");
+            if (st.countTokens() < vlSize) {
+                /*
+                 * TODO:
+                 */
+                /* Tools.showError(shell, "Select", "Number of data points < " + morder + "."); */
+                log.debug("updateArrayElements(): number of data points ({}) < array size {}", st.countTokens(), vlSize);
+                log.trace("updateArrayElements(curBuf={}, newValue={}, bufStartIndex={}): finish", curBuf, newValue, bufStartIndex);
+                return;
+            }
+
+            if (baseTypeDataProvider instanceof CompoundDataProvider)
+                updateArrayOfCompoundElements(st, curBuf, columnIndex, bufStartIndex);
+            else if (baseTypeDataProvider instanceof ArrayDataProvider)
+                updateArrayOfArrayElements(st, curBuf, columnIndex, bufStartIndex);
+            else if (baseTypeDataProvider instanceof VlenDataProvider)
+                updateArrayOfArrayElements(st, curBuf, columnIndex, bufStartIndex);
+            else
+                updateArrayOfAtomicElements(st, curBuf, bufStartIndex);
+        }
+
+        private void updateArrayOfCompoundElements(StringTokenizer tokenizer, Object curBuf, int columnIndex, int bufStartIndex) {
+            long vlSize = Array.getLength(curBuf);
+            log.debug("updateArrayOfCompoundElements(): vlSize={}", vlSize);
+            for (int i = 0; i < vlSize; i++) {
+                List<?> cmpdDataList = (List<?>) ((Object[]) curBuf)[i];
+                baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, cmpdDataList,
+                        tokenizer.nextToken().trim());
+                isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
+            }
+        }
+
+        private void updateArrayOfArrayElements(StringTokenizer tokenizer, Object curBuf, int columnIndex, int bufStartIndex) {
+            long vlSize = Array.getLength(curBuf);
+            log.debug("updateArrayOfArrayElements(): vlSize={}", vlSize);
+            for (int i = 0; i < vlSize; i++) {
+                /*
+                 * TODO: not quite right.
+                 */
+                baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, curBuf, tokenizer.nextToken().trim());
+                isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
+            }
+        }
+
+        private void updateArrayOfAtomicElements(StringTokenizer tokenizer, Object curBuf, int bufStartIndex) {
+            long vlSize = Array.getLength(curBuf);
+            log.debug("updateArrayOfAtomicElements(): vlSize={}", vlSize);
+            for (int i = 0; i < vlSize; i++) {
+                baseTypeDataProvider.setDataValue(bufStartIndex + i, curBuf, tokenizer.nextToken().trim());
+                isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
+            }
         }
     }
 
@@ -1380,8 +1523,111 @@ public class DataProviderFactory
     {
         private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RefDataProvider.class);
 
+        private final long typeSize;
+        private final H5Datatype h5dtype;
+
         RefDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
+
+            h5dtype = (H5Datatype)dtype;
+            typeSize = h5dtype.getDatatypeSize();
+        }
+
+        @Override
+        public Object getDataValue(int columnIndex, int rowIndex) {
+            log.trace("getDataValue({}, {}): start", rowIndex, columnIndex);
+
+            try {
+                int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
+                byte[] rElements = null;
+
+                if (dataBuf instanceof ArrayList)
+                    rElements = (byte[]) ((ArrayList) dataBuf).get(bufIndex);
+                else
+                    rElements = (byte[]) dataBuf;
+
+                if (h5dtype.isRegRef())
+                    theValue = populateReferenceRegion(rElements, bufIndex);
+                else if (h5dtype.isRefObj())
+                    theValue = populateReferenceObject(rElements, bufIndex);
+                else
+                    theValue = super.getDataValue(columnIndex, rowIndex);
+            }
+            catch (Exception ex) {
+                log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
+                theValue = DataFactoryUtils.errStr;
+            }
+
+            log.trace("getDataValue({}, {})({}): finish", rowIndex, columnIndex, theValue);
+
+            return theValue;
+        }
+
+        @Override
+        public Object getDataValue(Object obj, int index) {
+            log.trace("getDataValue(Object:{}, {}): start", obj, index);
+            byte[] rElements = null;
+            if (obj instanceof ArrayList)
+                rElements = (byte[]) ((ArrayList) obj).get(index);
+            else
+                rElements = (byte[]) obj;
+
+            try {
+                if (h5dtype.isRegRef())
+                    theValue = populateReferenceRegion(rElements, index);
+                else if (h5dtype.isRefObj())
+                    theValue = populateReferenceObject(rElements, index);
+                else
+                    theValue = super.getDataValue(obj, index);
+            }
+            catch (Exception ex) {
+                log.debug("getDataValueObject:({}, {}): ", obj, index, ex);
+                theValue = DataFactoryUtils.errStr;
+            }
+
+            log.trace("getDataValue(Object:{}, {})({}): finish", obj, index, theValue);
+
+            return theValue;
+        }
+
+        private String populateReferenceRegion(Object byteBuf, int startIndex) {
+            long fid = ((HObject)dataFormatReference).getFileFormat().getFID();
+            log.trace("populateReferenceRegion byteBuf={}", byteBuf);
+            byte[] rElements = new byte[(int)typeSize];
+            try {
+                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+            }
+            catch (Exception err) {
+                log.trace("populateReferenceRegion(): arraycopy failure: ", err);
+            }
+            String regionStr = null;
+            if (H5Datatype.zeroArrayCheck(rElements))
+                regionStr = "NULL";
+            else
+                regionStr = H5Datatype.descRegionDataset(fid, rElements);
+            log.trace("populateReferenceRegion regionStr={}", regionStr);
+
+            return regionStr;
+        }
+
+        private String populateReferenceObject(Object byteBuf, int startIndex) {
+            long fid = ((HObject)dataFormatReference).getFileFormat().getFID();
+            log.trace("populateReferenceObject byteBuf={}", byteBuf);
+            byte[] rElements = new byte[(int)typeSize];
+            try {
+                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+            }
+            catch (Exception err) {
+                log.trace("populateReferenceRegion(): arraycopy failure: ", err);
+            }
+            String objectStr = null;
+            if (H5Datatype.zeroArrayCheck(rElements))
+                objectStr = "NULL";
+            else
+                objectStr = H5Datatype.descReferenceObject(fid, rElements);
+            log.trace("populateReferenceObject objectStr={}", objectStr);
+
+            return objectStr;
         }
     }
 

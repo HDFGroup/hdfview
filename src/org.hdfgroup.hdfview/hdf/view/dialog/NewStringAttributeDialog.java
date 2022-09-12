@@ -365,7 +365,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                 else {
                     arraySize = tsize; // array of characters
                 }
-                log.trace("Attribute CLASS_STRING: isVLen={} and tsize={} and arraySize={}", isVLen, tsize, arraySize);
+                log.trace("Attribute CLASS_STRING: isVlenStr={} and tsize={} and arraySize={}", isVlenStr, tsize, arraySize);
             }
             else if (tclass == Datatype.CLASS_REFERENCE) {
                 arraySize = st.countTokens();

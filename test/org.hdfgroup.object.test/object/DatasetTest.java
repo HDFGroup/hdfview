@@ -42,8 +42,7 @@ public class DatasetTest {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {
-            }
+            catch (final Exception ex) {}
             testFile = null;
         }
     }

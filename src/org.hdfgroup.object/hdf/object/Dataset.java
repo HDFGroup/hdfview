@@ -1427,155 +1427,172 @@ public abstract class Dataset extends HObject implements DataFormat
         }
 
         // value is an array
-        StringBuilder sb = new StringBuilder();
         int n = Array.getLength(theData);
         if ((maxItems > 0) && (n > maxItems))
             n = maxItems;
 
-        log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", getDatatype().isEnum(),
-                getDatatype().isUnsigned(), n);
+        return toString(theData, getDatatype(), delimiter, n);
+    }
 
-        if (getDatatype().isEnum()) {
+    protected String toString(Object theData, Datatype theType, String delimiter, int count) {
+        log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", theType.isEnum(),
+                theType.isUnsigned(), count);
+        StringBuilder sb = new StringBuilder();
+        Class<? extends Object> valClass = theData.getClass();
+
+        if (theType.isEnum()) {
             String cname = valClass.getName();
             char dname = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: is_enum with cname={} dname={}", cname, dname);
 
-            Map<String, String> map = this.getDatatype().getEnumMembers();
+            Map<String, String> map = theType.getEnumMembers();
             String theValue = null;
             switch (dname) {
-                case 'B':
-                    byte[] barray = (byte[]) theData;
-                    short sValue = barray[0];
+            case 'B':
+                byte[] barray = (byte[]) theData;
+                short sValue = barray[0];
+                theValue = String.valueOf(sValue);
+                if (map.containsKey(theValue))
+                    sb.append(map.get(theValue));
+                else
+                    sb.append(sValue);
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    sValue = barray[i];
                     theValue = String.valueOf(sValue);
                     if (map.containsKey(theValue))
                         sb.append(map.get(theValue));
                     else
                         sb.append(sValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sValue = barray[i];
-                        theValue = String.valueOf(sValue);
-                        if (map.containsKey(theValue))
-                            sb.append(map.get(theValue));
-                        else
-                            sb.append(sValue);
-                    }
-                    break;
-                case 'S':
-                    short[] sarray = (short[]) theData;
-                    int iValue = sarray[0];
+                }
+                break;
+            case 'S':
+                short[] sarray = (short[]) theData;
+                int iValue = sarray[0];
+                theValue = String.valueOf(iValue);
+                if (map.containsKey(theValue))
+                    sb.append(map.get(theValue));
+                else
+                    sb.append(iValue);
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    iValue = sarray[i];
                     theValue = String.valueOf(iValue);
                     if (map.containsKey(theValue))
                         sb.append(map.get(theValue));
                     else
                         sb.append(iValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        iValue = sarray[i];
-                        theValue = String.valueOf(iValue);
-                        if (map.containsKey(theValue))
-                            sb.append(map.get(theValue));
-                        else
-                            sb.append(iValue);
-                    }
-                    break;
-                case 'I':
-                    int[] iarray = (int[]) theData;
-                    long lValue = iarray[0];
+                }
+                break;
+            case 'I':
+                int[] iarray = (int[]) theData;
+                long lValue = iarray[0];
+                theValue = String.valueOf(lValue);
+                if (map.containsKey(theValue))
+                    sb.append(map.get(theValue));
+                else
+                    sb.append(lValue);
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    lValue = iarray[i];
                     theValue = String.valueOf(lValue);
                     if (map.containsKey(theValue))
                         sb.append(map.get(theValue));
                     else
                         sb.append(lValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        lValue = iarray[i];
-                        theValue = String.valueOf(lValue);
-                        if (map.containsKey(theValue))
-                            sb.append(map.get(theValue));
-                        else
-                            sb.append(lValue);
-                    }
-                    break;
-                case 'J':
-                    long[] larray = (long[]) theData;
-                    Long l = larray[0];
+                }
+                break;
+            case 'J':
+                long[] larray = (long[]) theData;
+                Long l = larray[0];
+                theValue = Long.toString(l);
+                if (map.containsKey(theValue))
+                    sb.append(map.get(theValue));
+                else
+                    sb.append(theValue);
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    l = larray[i];
                     theValue = Long.toString(l);
                     if (map.containsKey(theValue))
                         sb.append(map.get(theValue));
                     else
                         sb.append(theValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        l = larray[i];
-                        theValue = Long.toString(l);
-                        if (map.containsKey(theValue))
-                            sb.append(map.get(theValue));
-                        else
-                            sb.append(theValue);
-                    }
-                    break;
-                default:
-                    sb.append(Array.get(theData, 0));
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sb.append(Array.get(theData, i));
-                    }
-                    break;
+                }
+                break;
+            default:
+                sb.append(Array.get(theData, 0));
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    sb.append(Array.get(theData, i));
+                }
+                break;
             }
         }
-        else if (getDatatype().isUnsigned()) {
+        else if (theType.isUnsigned()) {
             String cname = valClass.getName();
             char dname = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
 
             switch (dname) {
-                case 'B':
-                    byte[] barray = (byte[]) theData;
-                    short sValue = barray[0];
+            case 'B':
+                byte[] barray = (byte[]) theData;
+                short sValue = barray[0];
+                if (sValue < 0)
+                    sValue += 256;
+                sb.append(sValue);
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    sValue = barray[i];
                     if (sValue < 0)
                         sValue += 256;
                     sb.append(sValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        sValue = barray[i];
-                        if (sValue < 0)
-                            sValue += 256;
-                        sb.append(sValue);
-                    }
-                    break;
-                case 'S':
-                    short[] sarray = (short[]) theData;
-                    int iValue = sarray[0];
+                }
+                break;
+            case 'S':
+                short[] sarray = (short[]) theData;
+                int iValue = sarray[0];
+                if (iValue < 0)
+                    iValue += 65536;
+                sb.append(iValue);
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    iValue = sarray[i];
                     if (iValue < 0)
                         iValue += 65536;
                     sb.append(iValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        iValue = sarray[i];
-                        if (iValue < 0)
-                            iValue += 65536;
-                        sb.append(iValue);
-                    }
-                    break;
-                case 'I':
-                    int[] iarray = (int[]) theData;
-                    long lValue = iarray[0];
+                }
+                break;
+            case 'I':
+                int[] iarray = (int[]) theData;
+                long lValue = iarray[0];
+                if (lValue < 0)
+                    lValue += 4294967296L;
+                sb.append(lValue);
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    lValue = iarray[i];
                     if (lValue < 0)
                         lValue += 4294967296L;
                     sb.append(lValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        lValue = iarray[i];
-                        if (lValue < 0)
-                            lValue += 4294967296L;
-                        sb.append(lValue);
-                    }
-                    break;
-                case 'J':
-                    long[] larray = (long[]) theData;
-                    Long l = larray[0];
-                    String theValue = Long.toString(l);
+                }
+                break;
+            case 'J':
+                long[] larray = (long[]) theData;
+                Long l = larray[0];
+                String theValue = Long.toString(l);
+                if (l < 0) {
+                    l = (l << 1) >>> 1;
+                    BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                    BigInteger big2 = new BigInteger(l.toString());
+                    BigInteger big = big1.add(big2);
+                    theValue = big.toString();
+                }
+                sb.append(theValue);
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    l = larray[i];
+                    theValue = Long.toString(l);
                     if (l < 0) {
                         l = (l << 1) >>> 1;
                         BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
@@ -1584,36 +1601,43 @@ public abstract class Dataset extends HObject implements DataFormat
                         theValue = big.toString();
                     }
                     sb.append(theValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        l = larray[i];
-                        theValue = Long.toString(l);
-                        if (l < 0) {
-                            l = (l << 1) >>> 1;
-                            BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                            BigInteger big2 = new BigInteger(l.toString());
-                            BigInteger big = big1.add(big2);
-                            theValue = big.toString();
-                        }
-                        sb.append(theValue);
-                    }
-                    break;
-                default:
-                    String strValue = Array.get(theData, 0).toString();
-                    if (maxItems > 0 && strValue.length() > maxItems)
+                }
+                break;
+            default:
+                String strValue = Array.get(theData, 0).toString();
+                if (count > 0 && strValue.length() > count)
+                    // truncate the extra characters
+                    strValue = strValue.substring(0, count);
+                sb.append(strValue);
+                for (int i = 1; i < count; i++) {
+                    sb.append(delimiter);
+                    strValue = Array.get(theData, i).toString();
+                    if (count > 0 && strValue.length() > count)
                         // truncate the extra characters
-                        strValue = strValue.substring(0, maxItems);
+                        strValue = strValue.substring(0, count);
                     sb.append(strValue);
-                    for (int i = 1; i < n; i++) {
-                        sb.append(delimiter);
-                        strValue = Array.get(theData, i).toString();
-                        if (maxItems > 0 && strValue.length() > maxItems)
-                            // truncate the extra characters
-                            strValue = strValue.substring(0, maxItems);
-                        sb.append(strValue);
-                    }
-                    break;
+                }
+                break;
             }
+        }
+        else if (theType.isVLEN() && !theType.isVarStr()) {
+            log.trace("toString: vlen");
+            String strValue;
+
+            Object value = Array.get(theData, 0);
+            if (value == null)
+                strValue = "null";
+            else {
+                if (theType.getDatatypeBase().isRef()) {
+                    if (theType.getDatatypeBase().getDatatypeSize() > 8)
+                        strValue = "Region Reference";
+                    else
+                        strValue = "Object Reference";
+                }
+                else
+                    strValue = value.toString();
+            }
+            sb.append(strValue);
         }
         else {
             log.trace("toString: not enum or unsigned");
@@ -1625,12 +1649,12 @@ public abstract class Dataset extends HObject implements DataFormat
             else
                 strValue = value.toString();
 
-            if (maxItems > 0 && strValue.length() > maxItems)
-                // truncate the extra characters
-                strValue = strValue.substring(0, maxItems);
+            //if (count > 0 && strValue.length() > count)
+            // truncate the extra characters
+            //    strValue = strValue.substring(0, count);
             sb.append(strValue);
 
-            for (int i = 1; i < n; i++) {
+            for (int i = 1; i < count; i++) {
                 sb.append(delimiter);
                 value = Array.get(theData, i);
 
@@ -1639,9 +1663,9 @@ public abstract class Dataset extends HObject implements DataFormat
                 else
                     strValue = value.toString();
 
-                if (maxItems > 0 && strValue.length() > maxItems)
+                if (count > 0 && strValue.length() > count)
                     // truncate the extra characters
-                    strValue = strValue.substring(0, maxItems);
+                    strValue = strValue.substring(0, count);
                 sb.append(strValue);
             }
         }

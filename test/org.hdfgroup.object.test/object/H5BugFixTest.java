@@ -58,13 +58,12 @@ public class H5BugFixTest
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5BugFixTest.class);
     private static final int NLOOPS = 10;
     private static final H5File H5FILE = new H5File();
+
     private H5File testFile = null;
 
     private static void collectGarbage() {
         try {
             System.gc();
-            Thread.sleep(100);
-            System.runFinalization();
             Thread.sleep(100);
         }
         catch (final Exception ex) {
@@ -122,7 +121,6 @@ public class H5BugFixTest
         catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     @SuppressWarnings("deprecation")

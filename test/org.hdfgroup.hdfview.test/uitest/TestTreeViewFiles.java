@@ -204,7 +204,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("openHDF5ScalarString()", "wrong attribute name", attr_name, val), val.equals(attr_name));
 
             val = attrTable.cell(0, 3);
-            expected = "ABCDEFGHBCDEFGHICDEFGHIJDEFGHIJKEFGHIJKLFGHIJKLMGH";
+            expected = "ABCDEFGHBCDEFGHICDEFGHIJDEFGHIJKEFGHIJKLFGHIJKLMGHIJKLMNHIJKLMNO";
             assertTrue(constructWrongValueMessage("openHDF5ScalarString()", "wrong attribute value", expected, val), val.equals(expected));
         }
         catch (Exception ex) {
@@ -463,7 +463,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             tableShell = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDS()");
+            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDS()", false);
             retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedData);
@@ -539,116 +539,152 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             checkFileTree(filetree, "openHDF5CompoundDSints()", 3, filename);
 
-            // Open dataset 'CompoundInts'
-            tableShell = openTreeviewObject(filetree, filename, datasetName1);
-            SWTBotNatTable dataTable = getNatTable(tableShell);
+            try {
+                // Open dataset 'CompoundInts'
+                tableShell = openTreeviewObject(filetree, filename, datasetName1);
+                SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2, 0);
+                TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()", false);
+                retriever.setContainerHeaderOffset(2, 0);
 
-            log.trace("testTableLocations is 0, 0");
-            retriever.testTableLocations(0, 0, expectedData);
+                log.trace("testTableLocations is 0, 0");
+                retriever.testTableLocations(0, 0, expectedData);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                fail(ex.getMessage());
+            }
+            catch (AssertionError ae) {
+                ae.printStackTrace();
+                fail(ae.getMessage());
+            }
+            finally {
+                closeShell(tableShell);
+            }
 
-            closeShell(tableShell);
+            try {
+                // Open dataset 'CompoundRInts'
+                tableShell = openTreeviewObject(filetree, filename, datasetName2);
+                SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            // Open dataset 'CompoundRInts'
-            tableShell = openTreeviewObject(filetree, filename, datasetName2);
-            dataTable = getNatTable(tableShell);
+                TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()", false);
+                retriever.setContainerHeaderOffset(2, 0);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2, 0);
+                retriever.testAllTableLocations(expectedDataR);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                fail(ex.getMessage());
+            }
+            catch (AssertionError ae) {
+                ae.printStackTrace();
+                fail(ae.getMessage());
+            }
+            finally {
+                closeShell(tableShell);
+            }
 
-            retriever.testAllTableLocations(expectedDataR);
+            try {
+                if (hdfSaveFile.exists())
+                    hdfSaveFile.delete();
 
-            closeShell(tableShell);
+                SWTBotTreeItem[] items = filetree.getAllItems();
 
-            if (hdfSaveFile.exists())
-                hdfSaveFile.delete();
+                items[0].click();
+                bot.menu().menu("File").menu("Save As").click();
 
-            SWTBotTreeItem[] items = filetree.getAllItems();
+                SWTBotShell saveShell = bot.shell("Enter a file name");
+                saveShell.activate();
+                bot.waitUntil(Conditions.shellIsActive(saveShell.getText()));
 
-            items[0].click();
-            bot.menu().menu("File").menu("Save As").click();
+                saveShell.bot().text().setText(filename2);
 
-            SWTBotShell saveShell = bot.shell("Enter a file name");
-            saveShell.activate();
-            bot.waitUntil(Conditions.shellIsActive(saveShell.getText()));
+                String val = saveShell.bot().text().getText();
+                assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong file name", filename2, val),
+                        val.equals(filename2));
 
-            saveShell.bot().text().setText(filename2);
+                saveShell.bot().button("   &OK   ").click();
+                bot.waitUntil(Conditions.shellCloses(saveShell));
 
-            String val = saveShell.bot().text().getText();
-            assertTrue(constructWrongValueMessage("openHDF5CompoundDSints()", "wrong file name", filename2, val),
-                    val.equals(filename2));
+                refreshOpenFileCount();
 
-            saveShell.bot().button("   &OK   ").click();
-            bot.waitUntil(Conditions.shellCloses(saveShell));
+                items = filetree.getAllItems();
 
-            refreshOpenFileCount();
+                checkFileTree(filetree, "openHDF5CompoundDSints()", 6, filename);
 
-            items = filetree.getAllItems();
+                // TODO:
+                // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName1 + "'", items[0].getNode(0).getText().compareTo(datasetname1)==0);
+                // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName2 + "'", items[0].getNode(1).getText().compareTo(datasetname2)==0);
+                // assertTrue("openHDF5CompoundDSints() filetree is missing file '" + filename2 + "'", items[1].getText().compareTo(filename2)==0);
+                // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName1 + "'", items[1].getNode(0).getText().compareTo(datasetname1)==0);
+                // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName2 + "'", items[1].getNode(1).getText().compareTo(datasetname2)==0);
 
-            checkFileTree(filetree, "openHDF5CompoundDSints()", 6, filename);
+                tableShell = openTreeviewObject(filetree, filename2, datasetName2);
+                SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            // TODO:
-            // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName1 + "'", items[0].getNode(0).getText().compareTo(datasetname1)==0);
-            // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName2 + "'", items[0].getNode(1).getText().compareTo(datasetname2)==0);
-            // assertTrue("openHDF5CompoundDSints() filetree is missing file '" + filename2 + "'", items[1].getText().compareTo(filename2)==0);
-            // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName1 + "'", items[1].getNode(0).getText().compareTo(datasetname1)==0);
-            // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName2 + "'", items[1].getNode(1).getText().compareTo(datasetname2)==0);
+                TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()", false);
+                retriever.setContainerHeaderOffset(2, 0);
 
-            tableShell = openTreeviewObject(filetree, filename2, datasetName2);
-            dataTable = getNatTable(tableShell);
+                retriever.testTableLocations(0, 0, expectedDataR);
 
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2, 0);
+                final Position p = dataTable.scrollViewport(new Position(3, 1), 3, 2);
 
-            retriever.testTableLocations(0, 0, expectedDataR);
+                final SWTBotNatTable edittable = dataTable;
+                Display.getDefault().syncExec(new Runnable() {
+                    @Override
+                    public void run() {
+                        edittable.doubleclick(p.row, p.column);
+                        edittable.widget.getActiveCellEditor().setEditorValue("0");
+                        edittable.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT, true, true);
+                    }
+                });
 
-            final Position p = dataTable.scrollViewport(new Position(3, 1), 3, 2);
+                retriever.testTableLocation(3, 2, "0");
 
-            final SWTBotNatTable edittable = dataTable;
-            Display.getDefault().syncExec(new Runnable() {
-                @Override
-                public void run() {
-                    edittable.doubleclick(p.row, p.column);
-                    edittable.widget.getActiveCellEditor().setEditorValue("0");
-                    edittable.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT, true, true);
-                }
-            });
+                tableShell.bot().menu().menu("Table").menu("Save Changes to File").click();
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                fail(ex.getMessage());
+            }
+            catch (AssertionError ae) {
+                ae.printStackTrace();
+                fail(ae.getMessage());
+            }
+            finally {
+                closeShell(tableShell);
+            }
 
-            retriever.testTableLocation(3, 2, "0");
+            try {
+                SWTBotTreeItem[] items = filetree.getAllItems();
 
-            tableShell.bot().menu().menu("Table").menu("Save Changes to File").click();
+                items[1].click();
+                items[1].contextMenu().contextMenu("Reload File").click();
 
-            closeShell(tableShell);
+                items = filetree.getAllItems();
+                filetree.expandNode(items[1].getText(), true);
 
-            items[1].click();
-            items[1].contextMenu().contextMenu("Reload File").click();
+                tableShell = openTreeviewObject(filetree, filename2, datasetName2);
+                SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            items = filetree.getAllItems();
-            filetree.expandNode(items[1].getText(), true);
+                TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()", false);
+                retriever.setContainerHeaderOffset(2, 0);
 
-            tableShell = openTreeviewObject(filetree, filename2, datasetName2);
-            dataTable = getNatTable(tableShell);
-
-            retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "openHDF5CompoundDSints()");
-            retriever.setContainerHeaderOffset(2, 0);
-
-            retriever.testTableLocation(3, 2, "0");
-
-            closeShell(tableShell);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            fail(ex.getMessage());
-        }
-        catch (AssertionError ae) {
-            ae.printStackTrace();
-            fail(ae.getMessage());
+                retriever.testTableLocation(3, 2, "0");
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                fail(ex.getMessage());
+            }
+            catch (AssertionError ae) {
+                ae.printStackTrace();
+                fail(ae.getMessage());
+            }
+            finally {
+                closeShell(tableShell);
+            }
         }
         finally {
-            closeShell(tableShell);
-
             try {
                 closeFile(hdfFile, false);
             }
