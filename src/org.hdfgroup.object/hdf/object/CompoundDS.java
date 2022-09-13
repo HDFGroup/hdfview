@@ -609,7 +609,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
             theObj = convertCompoundByteMembers(dtype, byteData);
         }
         else {
-            log.debug("convertByteMember(): no change");
             theObj = byteData;
         }
 

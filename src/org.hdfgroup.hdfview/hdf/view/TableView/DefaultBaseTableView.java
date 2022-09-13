@@ -2283,7 +2283,6 @@ public abstract class DefaultBaseTableView implements TableView
 
                     // Add data display conversion capability
                     try {
-                        log.debug("EditingGridLayer: configureRegistry DataDisplayConverter: for {}", dataObject);
                         dataDisplayConverter = DataDisplayConverterFactory.getDataDisplayConverter(dataObject);
 
                         configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER,

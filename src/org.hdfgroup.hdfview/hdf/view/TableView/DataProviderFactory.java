@@ -315,7 +315,6 @@ public class DataProviderFactory
          * @return the data object
          */
         public Object getDataValue(Object obj, int index) {
-            log.trace("getDataValue({})={}: start", index, obj);
             try {
                 theValue = Array.get(obj, index);
             }
