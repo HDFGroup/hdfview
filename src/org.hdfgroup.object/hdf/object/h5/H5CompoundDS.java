@@ -804,6 +804,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * Routine to convert datatypes that are read in as byte arrays to
      * regular types.
      */
+    @Override
     protected Object convertByteMember(final Datatype dtype, byte[] byteData) {
         Object theObj = null;
 
@@ -842,7 +843,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                 throw new HDF5Exception("Unsupported dataset of type ARRAY of COMPOUND");
             }
 
-            if (dsDatatype.isVLEN() && dsDatatype.getDatatypeBase().isCompound()) {
+            if (dsDatatype.isVLEN() && !dsDatatype.isVarStr() && dsDatatype.getDatatypeBase().isCompound()) {
                 log.debug("compoundDatasetCommonIO(): cannot write dataset of type VLEN of COMPOUND");
                 throw new HDF5Exception("Unsupported dataset of type VLEN of COMPOUND");
             }
@@ -1128,17 +1129,24 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
              * Actually read the data for this member now that everything has been setup.
              */
             try {
-                if (memberType.isVLEN() || (memberType.isArray() && memberType.getDatatypeBase().isVLEN())) {
+                if (memberType.isVarStr()) {
                     log.trace("readSingleCompoundMember(): H5DreadVL did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
                             dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                            (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+
+                    H5.H5Dread_VLStrings(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) memberData);
+                }
+                else if (memberType.isVLEN() || (memberType.isArray() && memberType.getDatatypeBase().isVLEN())) {
+                    log.trace("readSingleCompoundMember(): H5DreadVL did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                            dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
                     H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) memberData);
                 }
                 else {
                     log.trace("readSingleCompoundMember(): H5Dread did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
                             dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                            (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
                     H5.H5Dread(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, memberData);
                 }
@@ -1252,14 +1260,14 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             if (memberType.isVarStr()) {
                 log.trace("writeSingleCompoundMember(): H5Dwrite_string did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
                         dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                        (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
                 H5.H5Dwrite_string(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (String[]) tmpData);
             }
             else {
                 log.trace("writeSingleCompoundMember(): H5Dwrite did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
                         dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                        (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
                 // BUG!!! does not write nested compound data and no
                 // exception was caught. Need to check if it is a java

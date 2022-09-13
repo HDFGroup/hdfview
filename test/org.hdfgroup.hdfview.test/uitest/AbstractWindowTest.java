@@ -448,7 +448,7 @@ public abstract class AbstractWindowTest {
         return openDataObject(objectName);
     }
 
-    private SWTBotShell openDataObject(String objectName) {
+    protected SWTBotShell openDataObject(String objectName) {
         String strippedObjectName = objectName;
         int slashLoc = objectName.lastIndexOf('/');
         if (slashLoc >= 0) {

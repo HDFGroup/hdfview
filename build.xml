@@ -458,6 +458,7 @@
             </fileset>
             <fileset dir="${classes.dir}/${hdfview.dir}">
                   <include name="**/*.gif"/>
+                  <include name="**/*.png"/>
             </fileset>
             <fileset dir="${classes.dir}/hdf">
                   <include name="versions.properties"/>

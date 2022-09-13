@@ -17,6 +17,7 @@ package hdf.view.MetaDataView;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -63,6 +64,9 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
+import hdf.object.h5.H5ReferenceType;
+import hdf.object.h5.H5ReferenceType.H5ReferenceData;
+
 import hdf.view.DefaultFileFilter;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
@@ -174,6 +178,23 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         catch (Exception ex) {
             attrList = null;
             log.debug("Error retrieving metadata of object '" + dataObject.getName() + "':", ex);
+        }
+        for (int i = 0; i < numAttributes; i++) {
+            Attribute attr = (Attribute) attrList.get(i);
+            Datatype atype = attr.getAttributeDatatype();
+            if (isH5 && atype.isRef()) {
+                H5ReferenceType rtype = (H5ReferenceType)atype;
+                try {
+                    List<H5ReferenceData> refdata = (List)rtype.getData();
+                    for (int r = 0; r < (int)rtype.getRefSize(); r++) {
+                        H5ReferenceData rf = refdata.get(r);
+                        log.trace("constructor: refdata {}", rf.ref_array);
+                    }
+                }
+                catch (Exception ex) {
+                    log.trace("Error retrieving H5ReferenceData of object ", ex);
+                }
+            }
         }
 
         log.trace("dataObject={} isN3={} isH4={} isH5={} numAttributes={}", dataObject, isN3, isH4, isH5, numAttributes);

@@ -2872,6 +2872,58 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
+     * Displays the meta data of a data object.
+     *
+     * @param dataObject
+     *            the data object
+     *
+     * @return the MetaDataView that displays the MetaData of the data object
+     *
+     * @throws Exception if a failure occurred
+     */
+    @Override
+    public MetaDataView showMetaData(HObject dataObject) throws Exception {
+        if (dataObject == null)
+            return null;
+
+        log.trace("showMetaData({}): start", dataObject.getName());
+
+        DataViewFactory metaDataViewFactory = null;
+        try {
+            metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
+        }
+        catch (Exception ex) {
+            log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
+            viewer.showError("Error occurred while instantiating MetaDataView factory class");
+            return null;
+        }
+
+        if (metaDataViewFactory == null) {
+            log.debug("showMetaData(): MetaDataView factory is null");
+            return null;
+        }
+
+        /* TODO: initargs needs access to MetaDataView parent composite */
+        MetaDataView theView;
+        try {
+            theView = metaDataViewFactory.getMetaDataView(null, viewer, dataObject);
+
+            if (theView == null) {
+                log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
+                viewer.showError("Error occurred while instantiating MetaDataView class");
+                return null;
+            }
+        }
+        catch (ClassNotFoundException ex) {
+            log.debug("showMetaData(): no suitable MetaDataView class found");
+            viewer.showError("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
+            return null;
+        }
+
+        return theView;
+    }
+
+    /**
      * Updates the current font.
      *
      * @param font
@@ -3007,7 +3059,7 @@ public class DefaultTreeView implements TreeView {
             final Shell openShell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
             openShell.setFont(curFont);
             openShell.setText("Indexing options");
-            openShell.setImage(ViewProperties.getHdfIcon());
+            openShell.setImages(ViewProperties.getHdfIcons());
             openShell.setLayout(new GridLayout(1, true));
 
             // Create main content region
@@ -3150,7 +3202,7 @@ public class DefaultTreeView implements TreeView {
             final Shell openShell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
             openShell.setFont(curFont);
             openShell.setText("Set the library version bounds: ");
-            openShell.setImage(ViewProperties.getHdfIcon());
+            openShell.setImages(ViewProperties.getHdfIcons());
             openShell.setLayout(new GridLayout(1, true));
 
             String[] lowValues = { "Earliest", "V18", "V110", "V112", "Latest" };

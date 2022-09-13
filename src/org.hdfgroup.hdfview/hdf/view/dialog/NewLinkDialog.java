@@ -138,7 +138,7 @@ public class NewLinkDialog extends Dialog {
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Link...");
-        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
 
         // Create the main content region

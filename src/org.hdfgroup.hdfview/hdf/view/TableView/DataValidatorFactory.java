@@ -26,6 +26,7 @@ import org.eclipse.nebula.widgets.nattable.data.validate.ValidationFailedExcepti
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 
 import hdf.hdf5lib.HDF5Constants;
+
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
@@ -426,7 +427,7 @@ public class DataValidatorFactory
 
                 baseValidator.cellColIdx = cellColIdx;
 
-                StringTokenizer elementReader = new StringTokenizer((String) newValue, " \t\n\r\f,()");
+                StringTokenizer elementReader = new StringTokenizer((String) newValue, " \t\n\r\f,[]");
                 while (elementReader.hasMoreTokens()) {
                     String nextToken = elementReader.nextToken();
                     baseValidator.validate(colIndex, rowIndex, nextToken);
@@ -486,7 +487,7 @@ public class DataValidatorFactory
 
                     if (lenDiff > 0)
                         throw new Exception("string size larger than datatype size by " + lenDiff
-                            + ((lenDiff > 1) ? " bytes." : " byte."));
+                                + ((lenDiff > 1) ? " bytes." : " byte."));
 
                     /*
                      * TODO: Add Warning about overwriting NULL-terminator character.
