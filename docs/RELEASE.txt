@@ -29,6 +29,21 @@ Major Enhancements
 
 Major Bug Fixes
 ==============================================================================
+    * HDFVIEW-284 (crashes on NETCDF-4 grids) has been fixed. The problem was
+      that references in variable-length containers were trying to be handled
+      like strings. Upon investigation, the problem was found to extend to 
+      references in any container. The table display code for vlen references
+      also changed to account for the hdf5 Java API fixes.
+      The fix required that variable-length types in the Java wrappers in the
+      hdf5 library for read and write also be fixed.
+      HDFView 3.2.1+ now requires hdf5-1.12.3 as a minimum.
+      
+    ***** Previous fixes *****
+    * HDFVIEW-197 (incorrectly displaying image data) has been fixed. The
+      problem was that the initial starting values for calculation of minimum
+      and maximum data values were invalid. In addition, an option to allow
+      dynamic data ranges has been added. 
+
     * Added support to read and display non-standard floating point numbers.
     * Added optional startDir to command line options.
     * Corrected user.home vs user.dir confusion.

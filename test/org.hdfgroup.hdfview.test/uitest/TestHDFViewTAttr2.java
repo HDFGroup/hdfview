@@ -136,21 +136,21 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             { "0E", "10", "12" },
             { "14", "16", "18" } };
     String[][] referenceExpectedData = {
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF" }, { "tattr2.h5/dset H5O_TYPE_OBJ_REF" } };
+            { "/dset H5O_TYPE_OBJ_REF" }, { "/dset H5O_TYPE_OBJ_REF" } };
     String[][] reference2DExpectedData = {
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" } };
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" },
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" },
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" } };
     String[][] reference3DPage1ExpectedData = {
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" } };
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" },
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" },
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" },
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" } };
     String[][] reference3DPage2ExpectedData = {
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-            { "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF", "tattr2.h5/dset H5O_TYPE_OBJ_REF" } };
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" },
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" },
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" },
+            { "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF" } };
     String[][] stringExpectedData = {
             { "ab" }, { "de" } };
     String[][] string2DExpectedData = {
@@ -168,21 +168,21 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             { "CD", "GH", "KL" },
             { "PQ", "TU", "XZ" } };
     String[][] vlenExpectedData = {
-            { "\\(1\\)" }, { "\\(2, 3\\)" } };
+            { "\\[1\\]" }, { "\\[2, 3\\]" } };
     String[][] vlen2DExpectedData = {
-            { "\\(0\\)", "\\(1\\)" },
-            { "\\(2, 3\\)", "\\(4, 5\\)" },
-            { "\\(6, 7, 8\\)", "\\(9, 10, 11\\)" } };
+            { "\\[0\\]", "\\[1\\]" },
+            { "\\[2, 3\\]", "\\[4, 5\\]" },
+            { "\\[6, 7, 8\\]", "\\[9, 10, 11\\]" } };
     String[][] vlen3DPage1ExpectedData = {
-            { "\\(0\\)", "\\(2\\)", "\\(4\\)" },
-            { "\\(6, 7\\)", "\\(10, 11\\)", "\\(14, 15\\)" },
-            { "\\(18, 19, 20\\)", "\\(24, 25, 26\\)", "\\(30, 31, 32\\)" },
-            { "\\(36, 37, 38, 39\\)", "\\(44, 45, 46, 47\\)", "\\(52, 53, 54, 55\\)" } };
+            { "\\[0\\]", "\\[2\\]", "\\[4\\]" },
+            { "\\[6, 7\\]", "\\[10, 11\\]", "\\[14, 15\\]" },
+            { "\\[18, 19, 20\\]", "\\[24, 25, 26\\]", "\\[30, 31, 32\\]" },
+            { "\\[36, 37, 38, 39\\]", "\\[44, 45, 46, 47\\]", "\\[52, 53, 54, 55\\]" } };
     String[][] vlen3DPage2ExpectedData = {
-            { "\\(1\\)", "\\(3\\)", "\\(5\\)" },
-            { "\\(8, 9\\)", "\\(12, 13\\)", "\\(16, 17\\)" },
-            { "\\(21, 22, 23\\)", "\\(27, 28, 29\\)", "\\(33, 34, 35\\)" },
-            { "\\(40, 41, 42, 43\\)", "\\(48, 49, 50, 51\\)", "\\(56, 57, 58, 59\\)" } };
+            { "\\[1\\]", "\\[3\\]", "\\[5\\]" },
+            { "\\[8, 9\\]", "\\[12, 13\\]", "\\[16, 17\\]" },
+            { "\\[21, 22, 23\\]", "\\[27, 28, 29\\]", "\\[33, 34, 35\\]" },
+            { "\\[40, 41, 42, 43\\]", "\\[48, 49, 50, 51\\]", "\\[56, 57, 58, 59\\]" } };
 
     private void openTAttr2GroupTest(SWTBotTree filetree, String testname, String datasetName, String[][] testExpectedData, String datasetName2, String[][] test2DExpectedData, String datasetName3,
             String[][] test3DPage1ExpectedData, String[][] test3DPage2ExpectedData)
@@ -469,13 +469,13 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                 { "bitfield", "8-bit bitfield", "2", "1, 2" },
                 { "bitfield2D", "8-bit bitfield", "3 x 2", "1, 2, 3, 4, 5, 6" },
                 { "bitfield3D", "8-bit bitfield", "4 x 3 x 2", "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24" },
-                { "compound", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "2", "\\{1, 2.0\\}, \\{3, 4.0\\}" },
-                { "compound2D", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "3 x 2", "\\{1, 2.0\\}, \\{3, 4.0\\}, \\{5, 6.0\\}, \\{7, 8.0\\}, \\{9, 10.0\\}, \\{11, 12.0\\}" },
-                { "compound3D", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "4 x 3 x 2", "\\{1, 2.0\\}, \\{3, 4.0\\}, \\{5, 6.0\\}, \\{7, 8.0\\}, \\{9, 10.0\\}, \\{11, 12.0\\}, \\{13, 14.0\\}, \\{15, 16.0\\}, \\{17, 18.0\\}, \\{19, 20.0\\}, \\{21, 22.0\\}, \\{23, 24.0\\}, \\{25, 26.0\\}, \\{27, 28.0\\}, \\{29, 30.0\\}, \\{31, 32.0\\}, \\{33, 34.0\\}, \\{35, 36.0\\}, \\{37, 38.0\\}, \\{39, 40.0\\}, \\{41, 42.0\\}, \\{43, 44.0\\}, \\{45, 46.0\\}, \\{47, 48.0\\}" },
+                { "compound", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "2", "\\{1, 3, 2.0, 4.\\}" },
+                { "compound2D", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "3 x 2", "\\{1, 3, 5, 7, 9, 11, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0\\}" },
+                { "compound3D", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "4 x 3 x 2", "\\{1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0, 28.0, 30.0, 32.0, 34.0, 36.0, 38.0, 40.0, 42.0, 44.0, 46.0, 48.0\\}" },
                 { "enum", "32-bit enum \\(0=RED, 1=GREEN\\)", "2", "RED, RED" },
                 { "enum2D", "32-bit enum \\(0=RED, 1=GREEN\\)", "3 x 2", "RED, RED, RED, RED, RED, RED" },
                 { "enum3D", "32-bit enum \\(0=RED, 1=GREEN\\)", "4 x 3 x 2", "RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED" },
-                { "float", "32-bit floating-point", "2", "1.0, 2.0" },
+                { "float", "32-bit floating-point", "2", "1.0, 2." },
                 { "float2D", "32-bit floating-point", "3 x 2", "1.0, 2.0, 3.0, 4.0, 5.0, 6.0" },
                 { "float3D", "32-bit floating-point", "4 x 3 x 2", "1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0" },
                 { "integer", "32-bit integer", "2", "1, 2" },
@@ -484,15 +484,15 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                 { "opaque", "1-byte Opaque, tag = 1-byte opaque type", "2", "1, 2" },
                 { "opaque2D", "1-byte Opaque, tag = 1-byte opaque type", "3 x 2", "1, 2, 3, 4, 5, 6" },
                 { "opaque3D", "1-byte Opaque, tag = 1-byte opaque type", "4 x 3 x 2", "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24" },
-                { "reference", "Reference", "2", "tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-                { "reference2D", "Reference", "3 x 2", "tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF" },
-                { "reference3D", "Reference", "4 x 3 x 2", "tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF, tattr2.h5/dset H5O_TYPE_OBJ_REF" },
+                { "reference", "Object reference", "2", "/dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF" },
+                { "reference2D", "Object reference", "3 x 2", "/dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF" },
+                { "reference3D", "Object reference", "4 x 3 x 2", "/dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF, /dset H5O_TYPE_OBJ_REF" },
                 { "string", "String, length = 2, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII", "2", "ab, de" },
                 { "string2D", "String, length = 2, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII", "3 x 2", "ab, cd, ef, gh, ij, kl" },
                 { "string3D", "String, length = 2, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII", "4 x 3 x 2", "ab, cd, ef, gh, ij, kl, mn, pq, rs, tu, vw, xz, AB, CD, EF, GH, IJ, KL, MN, PQ, RS, TU, VW, XZ" },
-                { "vlen", "Variable-length of 32-bit integer", "2", "\\(1\\), \\(2, 3\\)" },
-                { "vlen2D", "Variable-length of 32-bit integer", "3 x 2", "\\(0\\), \\(1\\), \\(2, 3\\), \\(4, 5\\), \\(6, 7, 8\\), \\(9, 10, 11\\)" },
-                { "vlen3D", "Variable-length of 32-bit integer", "4 x 3 x 2", "\\(0\\), \\(1\\), \\(2\\), \\(3\\), \\(4\\), \\(5\\), \\(6, 7\\), \\(8, 9\\), \\(10, 11\\), \\(12, 13\\), \\(14, 15\\), \\(16, 17\\), \\(18, 19, 20\\), \\(21, 22, 23\\), \\(24, 25, 26\\), \\(27, 28, 29\\), \\(30, 31, 32\\), \\(33, 34, 35\\), \\(36, 37, 38, 39\\), \\(40, 41, 42, 43\\), \\(44, 45, 46, 47\\), \\(48, 49, 50, 51\\), \\(52, 53, 54, 55\\), \\(56, 57, 58, 59\\)" },
+                { "vlen", "Variable-length of 32-bit integer", "2", "\\[1\\], \\[2, 3\\]" },
+                { "vlen2D", "Variable-length of 32-bit integer", "3 x 2", "\\[0\\], \\[1\\], \\[2, 3\\], \\[4, 5\\], \\[6, 7, 8\\], \\[9, 10, 11\\]" },
+                { "vlen3D", "Variable-length of 32-bit integer", "4 x 3 x 2", "\\[0\\], \\[1\\], \\[2\\], \\[3\\], \\[4\\], \\[5\\], \\[6, 7\\], \\[8, 9\\], \\[10, 11\\], \\[12, 13\\], \\[14, 15\\], \\[16, 17\\], \\[18, 19, 20\\], \\[21, 22, 23\\], \\[24, 25, 26\\], \\[27, 28, 29\\], \\[30, 31, 32\\], \\[33, 34, 35\\], \\[36, 37, 38, 39\\], \\[40, 41, 42, 43\\], \\[44, 45, 46, 47\\], \\[48, 49, 50, 51\\], \\[52, 53, 54, 55\\], \\[56, 57, 58, 59\\]" },
                 };
         String datasetName = "dset";
         File hdfFile = openFile(testFilename, FILE_MODE.READ_ONLY);
@@ -575,8 +575,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             table.click(3, 3);
-            assertTrue("openTAttr2GroupReferenceAsTable() data ["+tableShell.bot().text(2).getText()+"] did not match regex 'tattr2.h5/dset H5O_TYPE_OBJ_REF'",
-                    tableShell.bot().text(2).getText().matches("tattr2.h5/dset H5O_TYPE_OBJ_REF"));
+            assertTrue("openTAttr2GroupReferenceAsTable() data ["+tableShell.bot().text(2).getText()+"] did not match regex '/dset H5O_TYPE_OBJ_REF'",
+                    tableShell.bot().text(2).getText().matches("/dset H5O_TYPE_OBJ_REF"));
 
             table.contextMenu(3, 3).menu("Show As &Table").click();
             org.hamcrest.Matcher<Shell> shell2Matcher = WithRegex.withRegex(dataset_name + ".*at.*\\[.*in.*\\]");

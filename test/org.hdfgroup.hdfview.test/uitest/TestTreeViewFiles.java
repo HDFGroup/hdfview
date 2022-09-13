@@ -204,7 +204,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("openHDF5ScalarString()", "wrong attribute name", attr_name, val), val.equals(attr_name));
 
             val = attrTable.cell(0, 3);
-            expected = "ABCDEFGHBCDEFGHICDEFGHIJDEFGHIJKEFGHIJKLFGHIJKLMGH";
+            expected = "ABCDEFGHBCDEFGHICDEFGHIJDEFGHIJKEFGHIJKLFGHIJKLMGHIJKLMNHIJKLMNO";
             assertTrue(constructWrongValueMessage("openHDF5ScalarString()", "wrong attribute value", expected, val), val.equals(expected));
         }
         catch (Exception ex) {

@@ -17,6 +17,7 @@ package hdf.view.TableView;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -67,6 +68,7 @@ import hdf.object.Utils;
 
 import hdf.hdf5lib.HDF5Constants;
 
+import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ReferenceType.H5ReferenceData;
@@ -115,7 +117,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         if (!shell.isDisposed()) {
             if (System.getProperty("os.name").toLowerCase().contains("mac")) {
                 shell.setImages(ViewProperties.getHdfIcons());
-            } 
+            }
             else {
                 shell.setImage(dataObject.getDatatype().isText() ? ViewProperties.getTextIcon() : ViewProperties.getDatasetIcon());
             }
@@ -704,6 +706,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         // Since NatTable returns the selected row positions as a Set<Range>, convert
         // this to an Integer[]
         Set<Range> rowPositions = selectionLayer.getSelectedRowPositions();
+        log.trace("getSelectedData() rowPositions: {}", rowPositions);
         Set<Integer> selectedRowPos = new LinkedHashSet<>();
         Iterator<Range> i1 = rowPositions.iterator();
         while (i1.hasNext())
@@ -712,8 +715,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         Integer[] selectedRows = selectedRowPos.toArray(new Integer[0]);
         int[] selectedCols = selectionLayer.getSelectedColumnPositions();
 
-        if (selectedRows == null || selectedRows.length <= 0 || selectedCols == null || selectedCols.length <= 0)
+        if (selectedRows == null || selectedRows.length <= 0 || selectedCols == null || selectedCols.length <= 0) {
+            shell.getDisplay().beep();
+            Tools.showError(shell, "Select", "No data is selected.");
             return null;
+        }
 
         int size = selectedCols.length * selectedRows.length;
         log.trace("getSelectedData() data size: {}", size);
@@ -723,37 +729,33 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 && (dataTable.getPreferredRowCount() - 1 == selectedRows.length))
             return dataValue;
 
-        if (isStdRef) {
-            // std. ref data are stored in bytes
-            selectedData = new byte[size];
-        }
-        else if (isRegRef) {
-            // reg. ref data are stored in strings
-            selectedData = new String[size];
+        if (dataObject.getDatatype().isRef()) {
+            // ref data are stored in bytes
+            selectedData = new byte[size * (int)dataObject.getDatatype().getDatatypeSize()];
         }
         else {
             switch (Utils.getJavaObjectRuntimeClass(dataValue)) {
-                case 'B':
-                    selectedData = new byte[size];
-                    break;
-                case 'S':
-                    selectedData = new short[size];
-                    break;
-                case 'I':
-                    selectedData = new int[size];
-                    break;
-                case 'J':
-                    selectedData = new long[size];
-                    break;
-                case 'F':
-                    selectedData = new float[size];
-                    break;
-                case 'D':
-                    selectedData = new double[size];
-                    break;
-                default:
-                    selectedData = null;
-                    break;
+            case 'B':
+                selectedData = new byte[size];
+                break;
+            case 'S':
+                selectedData = new short[size];
+                break;
+            case 'I':
+                selectedData = new int[size];
+                break;
+            case 'J':
+                selectedData = new long[size];
+                break;
+            case 'F':
+                selectedData = new float[size];
+                break;
+            case 'D':
+                selectedData = new double[size];
+                break;
+            default:
+                selectedData = null;
+                break;
             }
         }
 
@@ -774,11 +776,17 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         for (int i = 0; i < selectedRows.length; i++) {
             for (int j = 0; j < selectedCols.length; j++) {
                 idxSrc = selectedRows[i] * w + selectedCols[j];
+                Object dataArrayValue = null;
+                if (dataValue instanceof ArrayList) {
+                    dataArrayValue = ((ArrayList)dataValue).get(idxSrc);
+                    System.arraycopy(dataArrayValue, 0, selectedData, idxDst, (int)dataObject.getDatatype().getDatatypeSize());
+                }
+                else {
+                    dataArrayValue = Array.get(dataValue, idxSrc);
+                    Array.set(selectedData, idxDst, dataArrayValue);
+                }
                 log.trace("getSelectedData()[{},{}]: dataValue[{}]={} from r{} and c{}", i, j,
-                        idxSrc, Array.get(dataValue, idxSrc), selectedRows[i], selectedCols[j]);
-                Array.set(selectedData, idxDst, Array.get(dataValue, idxSrc));
-                log.trace("getSelectedData()[{},{}]: selectedData[{}]={}", i, j, idxDst,
-                        Array.get(selectedData, idxDst));
+                        idxSrc, dataArrayValue, selectedRows[i], selectedCols[j]);
                 idxDst++;
             }
         }
@@ -820,17 +828,27 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * Display data pointed to by object references. Data of each object is shown in
      * a separate spreadsheet.
      *
-     * @param ref
-     *            the array of strings that contain the object reference information.
+     * @param refarr
+     *            the array of bytes that contain the object reference information.
      *
      */
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected void showObjRefData(long[] ref) {
-        long[] oid = ref;
-        log.trace("showObjRefData(): start: ref={}", ref);
+    protected void showObjRefData(byte[] refarr) {
+        log.trace("showObjRefData(): start: refarr={}", refarr);
 
-        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oid);
+        if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
+            log.debug("showObjRefData(): refarr is null or invalid");
+            return;
+        }
+
+        String objref = H5Datatype.descReferenceObject(((HObject) dataObject).getFileFormat().getFID(), refarr);
+        log.trace("showObjRefData(): start: objref={}", objref);
+
+        // find the object location
+        String oidStr = objref.substring(objref.indexOf('/'), objref.indexOf("H5O_TYPE_OBJ_REF")-1);
+        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
         if (obj == null || !(obj instanceof ScalarDS)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showObjRefData(): obj is null or not a Scalar Dataset");
@@ -865,14 +883,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         String viewName = null;
 
         switch (viewType) {
-            case IMAGE:
-                viewName = HDFView.getListOfImageViews().get(0);
-                break;
-            case TABLE:
-                viewName = (String) HDFView.getListOfTableViews().get(0);
-                break;
-            default:
-                viewName = null;
+        case IMAGE:
+            viewName = HDFView.getListOfImageViews().get(0);
+            break;
+        case TABLE:
+            viewName = (String) HDFView.getListOfTableViews().get(0);
+            break;
+        default:
+            viewName = null;
         }
 
         try {
@@ -890,14 +908,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         // Use default dataview
         if (theClass == null) {
             switch (viewType) {
-                case IMAGE:
-                    viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
-                    break;
-                case TABLE:
-                    viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
-                    break;
-                default:
-                    viewName = null;
+            case IMAGE:
+                viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                break;
+            case TABLE:
+                viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                break;
+            default:
+                viewName = null;
             }
 
             try {
@@ -925,31 +943,29 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
     /**
      * Display data pointed to by region references. Data of each region is shown in
-     * a separate spreadsheet. The reg. ref. information is stored in strings of the
-     * format below:
-     * <ul>
-     * <li>For point selections: "<code>file_id:obj_id { [point1] [point2] ...) }</code>", where
-     * <code>[point1]</code> is in the form of (location_of_dim0, location_of_dim1, ...). For
-     * example, <code>0:800 { (0,1) (2,11) (1,0) (2,4) }</code></li>
-     * <li>For rectangle selections: "<code>file_id:obj_id { [corner coordinates1] [corner coordinates2] ... }</code>",
-     * where [corner coordinates1] is in the form of
-     * (start_corner)-(oposite_corner). For example, <code>0:800 { (0,0)-(0,2) (0,11)-(0,13) (2,0)-(2,2) (2,11)-(2,13) }</code></li>
-     * </ul>
+     * a separate spreadsheet.
      *
-     * @param reg
-     *            the string that contain the reg. ref information.
+     * @param refarr
+     *            the array of bytes that contain the reg. ref information.
      *
      */
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected void showRegRefData(String reg) {
-        log.trace("showRegRefData(): start: reg={}", reg);
+    protected void showRegRefData(byte[] refarr) {
+        log.trace("showRegRefData(): start: refarr={} of {}", refarr, refarr.length);
 
-        if (reg == null || (reg.length() <= 0) || (reg.compareTo("NULL") == 0)) {
+        if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
-            log.debug("showRegRefData(): ref is null or invalid");
+            log.debug("showRegRefData(): refarr is null or invalid");
             return;
         }
+
+        String reg = null;
+        if (refarr.length == HDF5Constants.H5R_DSET_REG_REF_BUF_SIZE)
+            reg = H5Datatype.descRegionDataset(((HObject) dataObject).getFileFormat().getFID(), refarr);
+        else
+            reg = ((H5ReferenceType)dataObject.getDatatype()).getReferenceRegion(refarr, false);
+        log.trace("showRegRefData(): start: reg={}", reg);
 
         boolean isPointSelection = (reg.indexOf('-') <= 0);
 
@@ -1080,14 +1096,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             String viewName = null;
 
             switch (viewType) {
-                case IMAGE:
-                    viewName = HDFView.getListOfImageViews().get(0);
-                    break;
-                case TABLE:
-                    viewName = (String) HDFView.getListOfTableViews().get(0);
-                    break;
-                default:
-                    viewName = null;
+            case IMAGE:
+                viewName = HDFView.getListOfImageViews().get(0);
+                break;
+            case TABLE:
+                viewName = (String) HDFView.getListOfTableViews().get(0);
+                break;
+            default:
+                viewName = null;
             }
 
             try {
@@ -1105,14 +1121,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             // Use default dataview
             if (theClass == null) {
                 switch (viewType) {
-                    case IMAGE:
-                        viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
-                        break;
-                    case TABLE:
-                        viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
-                        break;
-                    default:
-                        viewName = null;
+                case IMAGE:
+                    viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                    break;
+                case TABLE:
+                    viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                    break;
+                default:
+                    viewName = null;
                 }
 
                 try {
@@ -1137,7 +1153,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
             }
         } // (st.hasMoreTokens())
-    } // end of showRegRefData(String reg)
+    } // end of showRegRefData()
 
     /**
      * Display data pointed to by references. Data of each reference is shown in
@@ -1163,29 +1179,27 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         /* get the filename associated with the reference */
         String reffile = refdata.file_name;
         if ((refdata.ref_type == HDF5Constants.H5R_DATASET_REGION1) ||
-            (refdata.ref_type == HDF5Constants.H5R_DATASET_REGION2)) {
+                (refdata.ref_type == HDF5Constants.H5R_DATASET_REGION2)) {
             String ref_ptr = refType.getReferenceRegion(refarr, false);
-            if (refdata.region_type == "REGION_TYPE UNKNOWN") {
+            if ("REGION_TYPE UNKNOWN".equals(refdata.region_type)) {
                 String msg = "Reference to " + ref_ptr + " cannot be displayed in a table";
                 Tools.showInformation(shell, "Reference", msg);
             }
             else {
-                showRegRefData(ref_ptr);
+                showRegRefData(refarr);
             }
         }
         if (((refdata.ref_type == HDF5Constants.H5R_OBJECT1) && (refdata.obj_type == HDF5Constants.H5O_TYPE_DATASET)) ||
-            ((refdata.ref_type == HDF5Constants.H5R_OBJECT2) && (refdata.obj_type == HDF5Constants.H5O_TYPE_DATASET))) {
+                ((refdata.ref_type == HDF5Constants.H5R_OBJECT2) && (refdata.obj_type == HDF5Constants.H5O_TYPE_DATASET))) {
             String ref_obj = refdata.obj_name;
             showObjStdRefData(ref_obj);
-                //String ref_ptr = refType.getReferenceRegion(refarr, false);
-                //showObjStdRefData(ref_ptr);
         }
         else if (refdata.ref_type == HDF5Constants.H5R_ATTR) {
             String ref_attr_name = refdata.attr_name;
             String ref_obj_name = refdata.obj_name;
             showAttrStdRefData(ref_obj_name, ref_attr_name);
         }
-        else if (refdata.region_type == "H5O_TYPE_OBJ_REF") {
+        else if ("H5O_TYPE_OBJ_REF".equals(refdata.region_type)) {
             String msg = "Reference to " + refdata.obj_name + " cannot be displayed in a table";
             //String ref_ptr = refType.getObjectReferenceName(refarr);
             Tools.showInformation(shell, "Reference", msg);
@@ -1248,14 +1262,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         String viewName = null;
 
         switch (viewType) {
-            case IMAGE:
-                viewName = HDFView.getListOfImageViews().get(0);
-                break;
-            case TABLE:
-                viewName = (String) HDFView.getListOfTableViews().get(0);
-                break;
-            default:
-                viewName = null;
+        case IMAGE:
+            viewName = HDFView.getListOfImageViews().get(0);
+            break;
+        case TABLE:
+            viewName = (String) HDFView.getListOfTableViews().get(0);
+            break;
+        default:
+            viewName = null;
         }
 
         try {
@@ -1273,14 +1287,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         // Use default dataview
         if (theClass == null) {
             switch (viewType) {
-                case IMAGE:
-                    viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
-                    break;
-                case TABLE:
-                    viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
-                    break;
-                default:
-                    viewName = null;
+            case IMAGE:
+                viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                break;
+            case TABLE:
+                viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                break;
+            default:
+                viewName = null;
             }
 
             try {
@@ -1381,14 +1395,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         String viewName = null;
 
         switch (viewType) {
-            case IMAGE:
-                viewName = HDFView.getListOfImageViews().get(0);
-                break;
-            case TABLE:
-                viewName = (String) HDFView.getListOfTableViews().get(0);
-                break;
-            default:
-                viewName = null;
+        case IMAGE:
+            viewName = HDFView.getListOfImageViews().get(0);
+            break;
+        case TABLE:
+            viewName = (String) HDFView.getListOfTableViews().get(0);
+            break;
+        default:
+            viewName = null;
         }
 
         try {
@@ -1406,14 +1420,14 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         // Use default dataview
         if (theClass == null) {
             switch (viewType) {
-                case IMAGE:
-                    viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
-                    break;
-                case TABLE:
-                    viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
-                    break;
-                default:
-                    viewName = null;
+            case IMAGE:
+                viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                break;
+            case TABLE:
+                viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                break;
+            default:
+                viewName = null;
             }
 
             try {
@@ -1447,7 +1461,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
-                log.trace("ScalarDSCellSelectionListener: CellSelected isRegRef={} isObjRef={}", isRegRef, isObjRef);
+                log.trace("ScalarDSCellSelectionListener: CellSelected isStdRef={} isRegRef={} isObjRef={}", isStdRef, isRegRef, isObjRef);
 
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
@@ -1471,7 +1485,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     boolean displayValues = ViewProperties.showRegRefValues();
 
                     log.trace("ScalarDSCellSelectionListener:StdRef CellSelected displayValues={}", displayValues);
-                    if (displayValues && val != null) {
+                    if (displayValues && val != null && !(val instanceof String)) {//((String) val).compareTo("NULL") != 0) {
                         strVal = ((H5ReferenceType) dataObject.getDatatype()).getReferenceRegion((byte[])val, true);
                     }
                 }
@@ -1621,58 +1635,70 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                             int n = Array.getLength(dbuf);
                                             if (isUnsigned) {
                                                 switch (runtimeTypeClass) {
-                                                    case 'B':
-                                                        byte[] barray = (byte[]) dbuf;
-                                                        short sValue = barray[0];
+                                                case 'B':
+                                                    byte[] barray = (byte[]) dbuf;
+                                                    short sValue = barray[0];
+                                                    if (sValue < 0) {
+                                                        sValue += 256;
+                                                    }
+                                                    strvalSB.append(sValue);
+                                                    for (int i = 1; i < n; i++) {
+                                                        strvalSB.append(',');
+                                                        sValue = barray[i];
                                                         if (sValue < 0) {
                                                             sValue += 256;
                                                         }
                                                         strvalSB.append(sValue);
-                                                        for (int i = 1; i < n; i++) {
-                                                            strvalSB.append(',');
-                                                            sValue = barray[i];
-                                                            if (sValue < 0) {
-                                                                sValue += 256;
-                                                            }
-                                                            strvalSB.append(sValue);
-                                                        }
-                                                        break;
-                                                    case 'S':
-                                                        short[] sarray = (short[]) dbuf;
-                                                        int iValue = sarray[0];
+                                                    }
+                                                    break;
+                                                case 'S':
+                                                    short[] sarray = (short[]) dbuf;
+                                                    int iValue = sarray[0];
+                                                    if (iValue < 0) {
+                                                        iValue += 65536;
+                                                    }
+                                                    strvalSB.append(iValue);
+                                                    for (int i = 1; i < n; i++) {
+                                                        strvalSB.append(',');
+                                                        iValue = sarray[i];
                                                         if (iValue < 0) {
                                                             iValue += 65536;
                                                         }
                                                         strvalSB.append(iValue);
-                                                        for (int i = 1; i < n; i++) {
-                                                            strvalSB.append(',');
-                                                            iValue = sarray[i];
-                                                            if (iValue < 0) {
-                                                                iValue += 65536;
-                                                            }
-                                                            strvalSB.append(iValue);
-                                                        }
-                                                        break;
-                                                    case 'I':
-                                                        int[] iarray = (int[]) dbuf;
-                                                        long lValue = iarray[0];
+                                                    }
+                                                    break;
+                                                case 'I':
+                                                    int[] iarray = (int[]) dbuf;
+                                                    long lValue = iarray[0];
+                                                    if (lValue < 0) {
+                                                        lValue += 4294967296L;
+                                                    }
+                                                    strvalSB.append(lValue);
+                                                    for (int i = 1; i < n; i++) {
+                                                        strvalSB.append(',');
+                                                        lValue = iarray[i];
                                                         if (lValue < 0) {
                                                             lValue += 4294967296L;
                                                         }
                                                         strvalSB.append(lValue);
-                                                        for (int i = 1; i < n; i++) {
-                                                            strvalSB.append(',');
-                                                            lValue = iarray[i];
-                                                            if (lValue < 0) {
-                                                                lValue += 4294967296L;
-                                                            }
-                                                            strvalSB.append(lValue);
-                                                        }
-                                                        break;
-                                                    case 'J':
-                                                        long[] larray = (long[]) dbuf;
-                                                        Long l = larray[0];
-                                                        String theValue = Long.toString(l);
+                                                    }
+                                                    break;
+                                                case 'J':
+                                                    long[] larray = (long[]) dbuf;
+                                                    Long l = larray[0];
+                                                    String theValue = Long.toString(l);
+                                                    if (l < 0) {
+                                                        l = (l << 1) >>> 1;
+                                                        BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
+                                                        BigInteger big2 = new BigInteger(l.toString());
+                                                        BigInteger big = big1.add(big2);
+                                                        theValue = big.toString();
+                                                    }
+                                                    strvalSB.append(theValue);
+                                                    for (int i = 1; i < n; i++) {
+                                                        strvalSB.append(',');
+                                                        l = larray[i];
+                                                        theValue = Long.toString(l);
                                                         if (l < 0) {
                                                             l = (l << 1) >>> 1;
                                                             BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
@@ -1681,27 +1707,15 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                                             theValue = big.toString();
                                                         }
                                                         strvalSB.append(theValue);
-                                                        for (int i = 1; i < n; i++) {
-                                                            strvalSB.append(',');
-                                                            l = larray[i];
-                                                            theValue = Long.toString(l);
-                                                            if (l < 0) {
-                                                                l = (l << 1) >>> 1;
-                                                                BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
-                                                                BigInteger big2 = new BigInteger(l.toString());
-                                                                BigInteger big = big1.add(big2);
-                                                                theValue = big.toString();
-                                                            }
-                                                            strvalSB.append(theValue);
-                                                        }
-                                                        break;
-                                                    default:
-                                                        strvalSB.append(Array.get(dbuf, 0));
-                                                        for (int i = 1; i < n; i++) {
-                                                            strvalSB.append(',');
-                                                            strvalSB.append(Array.get(dbuf, i));
-                                                        }
-                                                        break;
+                                                    }
+                                                    break;
+                                                default:
+                                                    strvalSB.append(Array.get(dbuf, 0));
+                                                    for (int i = 1; i < n; i++) {
+                                                        strvalSB.append(',');
+                                                        strvalSB.append(Array.get(dbuf, i));
+                                                    }
+                                                    break;
                                                 }
                                             }
                                             else {
@@ -1725,15 +1739,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     }
                 }
                 else if (isObjRef) {
-                    Long ref = (Long) val;
-                    long[] oid = { ref.longValue() };
-
-                    // decode object ID
-                    try {
-                        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oid);
-                        strVal = obj.getFullName();
+                    log.trace("ScalarDSCellSelectionListener:RegRef CellSelected val={}", val);
+                    if (val != null && ((String) val).compareTo("NULL") != 0) {
+                        strVal = (String) val;
                     }
-                    catch (Exception ex) {
+                    else {
                         strVal = null;
                     }
                 }
@@ -1741,6 +1751,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 if (strVal == null && val != null)
                     strVal = dataDisplayConverter.canonicalToDisplayValue(val).toString();
 
+                log.trace("ScalarDSCellSelectionListener: CellSelected setText to {}", strVal);
                 cellValueField.setText(strVal);
                 ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
             }
