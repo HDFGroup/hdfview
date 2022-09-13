@@ -3007,7 +3007,7 @@ public class DefaultTreeView implements TreeView {
             final Shell openShell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
             openShell.setFont(curFont);
             openShell.setText("Indexing options");
-            openShell.setImage(ViewProperties.getHdfIcon());
+            openShell.setImages(ViewProperties.getHdfIcons());
             openShell.setLayout(new GridLayout(1, true));
 
             // Create main content region
@@ -3150,7 +3150,7 @@ public class DefaultTreeView implements TreeView {
             final Shell openShell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
             openShell.setFont(curFont);
             openShell.setText("Set the library version bounds: ");
-            openShell.setImage(ViewProperties.getHdfIcon());
+            openShell.setImages(ViewProperties.getHdfIcons());
             openShell.setLayout(new GridLayout(1, true));
 
             String[] lowValues = { "Earliest", "V18", "V110", "V112", "V114", "Latest" };
