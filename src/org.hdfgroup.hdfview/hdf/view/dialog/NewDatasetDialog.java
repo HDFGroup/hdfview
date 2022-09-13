@@ -126,7 +126,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Dataset...");
-        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
 
 
@@ -924,7 +924,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                     SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
             helpShell.setFont(curFont);
             helpShell.setText("Create New Dataset");
-            helpShell.setImage(ViewProperties.getHdfIcon());
+            helpShell.setImages(ViewProperties.getHdfIcons());
             helpShell.setLayout(new GridLayout(1, true));
 
             // Try to create a Browser on platforms that support it

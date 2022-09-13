@@ -206,7 +206,7 @@ public class Chart extends Dialog
         shell = new Shell(parent, SWT.SHELL_TRIM);
         shell.setFont(curFont);
         shell.setText(windowTitle);
-        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
 
         if (chartStyle == HISTOGRAM)
