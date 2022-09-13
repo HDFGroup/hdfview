@@ -116,7 +116,7 @@ public class ImageConversionDialog extends Dialog {
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText(parent.getText());
-        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
 
         if (fileTypeTo.equals(FileFormat.FILE_TYPE_HDF5)) {

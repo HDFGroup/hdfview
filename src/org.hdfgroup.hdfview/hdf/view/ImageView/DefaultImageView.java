@@ -3594,7 +3594,7 @@ public class DefaultImageView implements ImageView
             shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
             shell.setFont(curFont);
             shell.setText("Animation - " + dataset.getName());
-            shell.setImage(ViewProperties.getHdfIcon());
+            shell.setImages(ViewProperties.getHdfIcons());
             shell.setLayout(new GridLayout(1, true));
 
             canvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
@@ -3737,7 +3737,7 @@ public class DefaultImageView implements ImageView
             shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
             shell.setFont(curFont);
             shell.setText("Image Value Range");
-            shell.setImage(ViewProperties.getHdfIcon());
+            shell.setImages(ViewProperties.getHdfIcons());
             shell.setLayout(new GridLayout(1, true));
 
             Canvas chartCanvas = new Canvas(shell, SWT.DOUBLE_BUFFERED);
@@ -4008,7 +4008,7 @@ public class DefaultImageView implements ImageView
             shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
             shell.setFont(curFont);
             shell.setText("Brightness/Contrast");
-            shell.setImage(ViewProperties.getHdfIcon());
+            shell.setImages(ViewProperties.getHdfIcons());
             shell.setLayout(new GridLayout(1, true));
 
             if (doAutoGainContrast && gainBias!= null) {

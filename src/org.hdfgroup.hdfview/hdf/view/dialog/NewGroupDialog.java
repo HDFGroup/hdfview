@@ -103,7 +103,7 @@ public class NewGroupDialog extends NewDataObjectDialog {
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Group...");
-        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setImages(ViewProperties.getHdfIcons());
         GridLayout layout = new GridLayout(1, false);
         layout.verticalSpacing = 0;
         shell.setLayout(layout);
