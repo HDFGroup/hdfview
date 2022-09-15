@@ -70,7 +70,6 @@ public class DataDisplayConverterFactory
 
         dataFormatReference = dataObject;
 
-        log.debug("getDataDisplayConverter(DataFormat) type: {}", dataObject.getDatatype());
         HDFDisplayConverter converter = getDataDisplayConverter(dataObject.getDatatype());
 
         return converter;
@@ -80,7 +79,6 @@ public class DataDisplayConverterFactory
         HDFDisplayConverter converter = null;
 
         try {
-            log.debug("getDataDisplayConverter(Datatype): {}", dtype);
             if (dtype.isCompound())
                 converter = new CompoundDataDisplayConverter(dtype);
             else if (dtype.isArray())
@@ -536,7 +534,6 @@ public class DataDisplayConverterFactory
 
             try {
                 baseTypeConverter = getDataDisplayConverter(baseType);
-                log.debug("baseTypeConverter for baseType={}", baseType);
 
                 /*
                  * Make base datatype converter inherit the data conversion settings.
@@ -740,7 +737,6 @@ public class DataDisplayConverterFactory
                 buffer.append(DataFactoryUtils.errStr);
             }
 
-            log.trace("canonicalToDisplayValue({}): finish", buffer);
             return buffer;
         }
     }

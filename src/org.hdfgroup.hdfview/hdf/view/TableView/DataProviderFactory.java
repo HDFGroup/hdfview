@@ -209,8 +209,8 @@ public class DataProviderFactory
             isValueChanged = false;
 
             isContainerType = (this instanceof CompoundDataProvider
-                    || this instanceof ArrayDataProvider
-                    || this instanceof VlenDataProvider);
+                            || this instanceof ArrayDataProvider
+                            || this instanceof VlenDataProvider);
         }
 
         /**
@@ -229,7 +229,7 @@ public class DataProviderFactory
 
             if (rank > 1) {
                 log.trace("physicalLocationToBufIndex({}, {}): rank > 1; adjusting for multi-dimensional dataset",
-                        rowIndex, columnIndex);
+                          rowIndex, columnIndex);
 
                 if (isDataTransposed && isNaturalOrder)
                     index = columnIndex * rowCount + rowIndex;
@@ -314,7 +314,6 @@ public class DataProviderFactory
          * @return the data object
          */
         public Object getDataValue(Object obj, int index) {
-            log.trace("getDataValue({})={}: start", index, obj);
             try {
                 theValue = Array.get(obj, index);
             }
@@ -1592,7 +1591,6 @@ public class DataProviderFactory
 
         private String populateReferenceRegion(Object byteBuf, int startIndex) {
             long fid = ((HObject)dataFormatReference).getFileFormat().getFID();
-            log.trace("populateReferenceRegion byteBuf={}", byteBuf);
             byte[] rElements = new byte[(int)typeSize];
             try {
                 System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);

@@ -454,7 +454,6 @@ public abstract class DefaultBaseTableView implements TableView
                 isObjRef = true;
         }
 
-        log.trace("Data object isRegRef={} isObjRef={} showAsHex={}", isRegRef, isObjRef, showAsHex);
 
         // Setup subset information
         int space_type = dataObject.getSpaceType();
@@ -2220,7 +2219,6 @@ public abstract class DefaultBaseTableView implements TableView
 
                     // Add data display conversion capability
                     try {
-                        log.debug("EditingGridLayer: configureRegistry DataDisplayConverter: for {}", dataObject);
                         dataDisplayConverter = DataDisplayConverterFactory.getDataDisplayConverter(dataObject);
 
                         configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER,
@@ -2538,11 +2536,9 @@ public abstract class DefaultBaseTableView implements TableView
                     rElements = (byte[]) theData;
 
                 if (rElements.length == HDF5Constants.H5R_DSET_REG_REF_BUF_SIZE) {
-                    log.trace("show reference data: Show data[{}] as {} isRegRef", i, viewType);
                     showRegRefData(rElements);
                 }
                 else if (rElements.length == HDF5Constants.H5R_OBJ_REF_BUF_SIZE) {
-                    log.trace("show reference data: Show data[{}] as {} isObjRef", i, viewType);
                     showObjRefData(rElements);
                 }
             }
