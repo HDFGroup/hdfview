@@ -600,102 +600,102 @@ public class DataValidatorFactory
                 super.checkValidValue(newValue);
 
                 switch ((int) datasetDatatype.getDatatypeSize()) {
-                    case 1:
+                case 1:
+                    if (datasetDatatype.isUnsigned()) {
+                        /*
+                         * First try to parse as a larger type in order to catch a NumberFormatException
+                         */
+                        Short shortValue = Short.parseShort((String) newValue);
+                        if (shortValue < 0)
+                            throw new NumberFormatException("Invalid negative value for unsigned datatype");
+
+                        if (shortValue > (Byte.MAX_VALUE * 2) + 1)
+                            throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
+                    }
+                    else {
+                        Byte.parseByte((String) newValue);
+                    }
+                    break;
+
+                case 2:
+                    if (datasetDatatype.isUnsigned()) {
+                        /*
+                         * First try to parse as a larger type in order to catch a NumberFormatException
+                         */
+                        Integer intValue = Integer.parseInt((String) newValue);
+                        if (intValue < 0)
+                            throw new NumberFormatException("Invalid negative value for unsigned datatype");
+
+                        if (intValue > (Short.MAX_VALUE * 2) + 1)
+                            throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
+                    }
+                    else {
+                        Short.parseShort((String) newValue);
+                    }
+                    break;
+
+                case 4:
+                    if (datasetDatatype.isInteger()) {
                         if (datasetDatatype.isUnsigned()) {
                             /*
                              * First try to parse as a larger type in order to catch a NumberFormatException
                              */
-                            Short shortValue = Short.parseShort((String) newValue);
-                            if (shortValue < 0)
+                            Long longValue = Long.parseLong((String) newValue);
+                            if (longValue < 0)
                                 throw new NumberFormatException("Invalid negative value for unsigned datatype");
 
-                            if (shortValue > (Byte.MAX_VALUE * 2) + 1)
+                            if (longValue > ((long) Integer.MAX_VALUE * 2) + 1)
                                 throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
                         }
                         else {
-                            Byte.parseByte((String) newValue);
+                            Integer.parseInt((String) newValue);
                         }
-                        break;
+                    }
+                    else {
+                        /* Floating-point type */
+                        Float.parseFloat((String) newValue);
+                    }
+                    break;
 
-                    case 2:
+                case 8:
+                    if (datasetDatatype.isInteger()) {
                         if (datasetDatatype.isUnsigned()) {
                             /*
                              * First try to parse as a larger type in order to catch a NumberFormatException
                              */
-                            Integer intValue = Integer.parseInt((String) newValue);
-                            if (intValue < 0)
+                            BigInteger bigValue = new BigInteger((String) newValue);
+                            if (bigValue.compareTo(BigInteger.ZERO) < 0)
                                 throw new NumberFormatException("Invalid negative value for unsigned datatype");
 
-                            if (intValue > (Short.MAX_VALUE * 2) + 1)
+                            BigInteger maxRange = BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(2)).add(BigInteger.valueOf(1));
+                            if (bigValue.compareTo(maxRange) > 0)
                                 throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
                         }
                         else {
-                            Short.parseShort((String) newValue);
+                            Long.parseLong((String) newValue);
                         }
-                        break;
-
-                    case 4:
-                        if (datasetDatatype.isInteger()) {
-                            if (datasetDatatype.isUnsigned()) {
-                                /*
-                                 * First try to parse as a larger type in order to catch a NumberFormatException
-                                 */
-                                Long longValue = Long.parseLong((String) newValue);
-                                if (longValue < 0)
-                                    throw new NumberFormatException("Invalid negative value for unsigned datatype");
-
-                                if (longValue > ((long) Integer.MAX_VALUE * 2) + 1)
-                                    throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
-                            }
-                            else {
-                                Integer.parseInt((String) newValue);
-                            }
-                        }
-                        else {
-                            /* Floating-point type */
-                            Float.parseFloat((String) newValue);
-                        }
-                        break;
-
-                    case 8:
-                        if (datasetDatatype.isInteger()) {
-                            if (datasetDatatype.isUnsigned()) {
-                                /*
-                                 * First try to parse as a larger type in order to catch a NumberFormatException
-                                 */
-                                BigInteger bigValue = new BigInteger((String) newValue);
-                                if (bigValue.compareTo(BigInteger.ZERO) < 0)
-                                    throw new NumberFormatException("Invalid negative value for unsigned datatype");
-
-                                BigInteger maxRange = BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(2)).add(BigInteger.valueOf(1));
-                                if (bigValue.compareTo(maxRange) > 0)
-                                    throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
-                            }
-                            else {
-                                Long.parseLong((String) newValue);
-                            }
-                        }
-                        else {
-                            /* Floating-point type */
-                            Double.parseDouble((String) newValue);
-                        }
-                        break;
+                    }
+                    else {
+                        /* Floating-point type */
+                        Double.parseDouble((String) newValue);
+                    }
+                    break;
 
 
-                    case 16:
-                        if (datasetDatatype.isFloat()) {
-                            BigDecimal bigValue = new BigDecimal((String) newValue);
+                case 16:
+                    if (datasetDatatype.isFloat()) {
+                        BigDecimal bigValue = new BigDecimal((String) newValue);
 
-                            /*
-                             * BigDecimal maxRange =
-                             * BigDecimal.valueOf(Long.MAX_VALUE).multiply(BigDecimal.valueOf(2)).add(BigDecimal.valueOf
-                             * (1)); if (bigValue.compareTo(maxRange) > 0) throw new
-                             * NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
-                             */                        }
-                        break;
+                        /*
+                         * BigDecimal maxRange =
+                         * BigDecimal.valueOf(Long.MAX_VALUE).multiply(BigDecimal.valueOf(2)).add(BigDecimal.valueOf
+                         * (1)); if (bigValue.compareTo(maxRange) > 0) throw new
+                         * NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
+                         */                        }
+                    break;
 
-                    default:
-                        throw new ValidationFailedException("No validation logic for numerical data of size " + datasetDatatype.getDatatypeSize());
+                default:
+                    throw new ValidationFailedException("No validation logic for numerical data of size " + datasetDatatype.getDatatypeSize());
                 }
             }
             catch (Exception ex) {

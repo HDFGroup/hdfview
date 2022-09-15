@@ -460,7 +460,6 @@ public abstract class DefaultBaseTableView implements TableView
             }
         }
 
-        log.trace("Data object isStdRef={} isRegRef={} isObjRef={} showAsHex={}", isStdRef, isRegRef, isObjRef, showAsHex);
 
         // Setup subset information
         int space_type = dataObject.getSpaceType();
@@ -2620,15 +2619,12 @@ public abstract class DefaultBaseTableView implements TableView
                     rElements = (byte[]) theData;
 
                 if (rElements.length == HDF5Constants.H5R_DSET_REG_REF_BUF_SIZE) {
-                    log.trace("show reference data: Show data[{}] as {} isRegRef", i, viewType);
                     showRegRefData(rElements);
                 }
                 else if (rElements.length == HDF5Constants.H5R_OBJ_REF_BUF_SIZE) {
-                    log.trace("show reference data: Show data[{}] as {} isObjRef", i, viewType);
                     showObjRefData(rElements);
                 }
                 else {
-                    log.trace("show reference data: Show data[{}] as {}: isStdRef", i, viewType);
                     showStdRefData(rElements);
                 }
             }

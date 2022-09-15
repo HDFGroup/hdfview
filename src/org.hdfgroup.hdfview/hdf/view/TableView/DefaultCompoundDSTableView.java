@@ -196,8 +196,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         natTable.addLayerListener(new CompoundDSCellSelectionListener());
 
         // Create popup menu for region or object ref.
-        //if (isStdRef || isRegRef || isObjRef)
-            natTable.addConfiguration(new RefContextMenu(natTable));
+        natTable.addConfiguration(new RefContextMenu(natTable));
 
         natTable.configure();
 
@@ -326,7 +325,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
     @Override
     protected void showStdRefData(byte[] refarr) {
-        log.trace("showStdRefData(): start: refarr={}", refarr);
 
         if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show reference data: invalid or null data");
@@ -347,8 +345,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      */
     @Override
     protected void showObjRefData(byte[] refarr) {
-        log.trace("showObjRefData(): start: refarr={}", refarr);
-
         if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showObjRefData(): refarr is null or invalid");
@@ -356,7 +352,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
 
         String objref = H5Datatype.descReferenceObject(((HObject) dataObject).getFileFormat().getFID(), refarr);
-        log.trace("showObjRefData(): start: objref={}", objref);
 
         // find the object location
         String oidStr = objref.substring(objref.indexOf('/'), objref.indexOf("H5O_TYPE_OBJ_REF")-1);
@@ -463,8 +458,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      */
     @Override
     protected void showRegRefData(byte[] refarr) {
-        log.trace("showRegRefData(): start: refarr={}", refarr);
-
         if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
             log.debug("showRegRefData(): refarr is null or invalid");
@@ -472,14 +465,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
 
         String reg = H5Datatype.descRegionDataset(((HObject) dataObject).getFileFormat().getFID(), refarr);
-        log.trace("showRegRefData(): start: reg={}", reg);
 
         boolean isPointSelection = (reg.indexOf('-') <= 0);
 
         // find the object location
         String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf("REGION_TYPE")-1);
-        log.trace("showRegRefData(): isPointSelection={} oidStr={}", isPointSelection,
-                oidStr);
 
         // decode the region selection
         String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
@@ -499,7 +489,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             log.debug("showRegRefData(): no region selection made");
             return; // no selection
         }
-        log.trace("showRegRefData(): nSelections={}", nSelections);
 
         HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
         if (obj == null || !(obj instanceof ScalarDS)) {
@@ -674,14 +663,43 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 boolean valIsRegRef = false;
                 boolean valIsObjRef = false;
 
-                log.trace("CompoundDSCellSelectionListener: CellSelected");
+                HashMap<Integer, Integer> baseIndexMap;
+                HashMap<Integer, Integer> relCmpdStartIndexMap;
+
                 CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
-                int nSubColumns = (int) dataFormat.getWidth();
-                Datatype[] selectedMemberTypes = dataFormat.getSelectedMemberTypes();
                 Datatype cmpdType = dataObject.getDatatype();
+                Datatype[] selectedMemberTypes = dataFormat.getSelectedMemberTypes();
+                List<Datatype> localSelectedTypes = Arrays.asList(selectedMemberTypes);
+
+                HashMap<Integer, Integer>[] maps = null;
+                try {
+                    maps = DataFactoryUtils.buildIndexMaps(dataFormat, localSelectedTypes);
+                }
+                catch (Exception ex) {
+                    log.debug("CompoundDSCellSelectionListener: buildIndexMaps", ex);
+                }
+                baseIndexMap = maps[DataFactoryUtils.COL_TO_BASE_CLASS_MAP_INDEX];
+                relCmpdStartIndexMap = maps[DataFactoryUtils.CMPD_START_IDX_MAP_INDEX];
+
+                if (baseIndexMap.size() == 0) {
+                    log.debug("base index mapping is invalid - size 0");
+                }
+
+                if (relCmpdStartIndexMap.size() == 0) {
+                    log.debug("compound field start index mapping is invalid - size 0");
+                }
+
+                /*
+                 * nCols should represent the number of columns covered by this CompoundData
+                 * only. For top-level CompoundData, this should be the entire width of the
+                 * dataset. For nested CompoundData, nCols will be a subset of these columns.
+                 */
+                int nCols = (int) dataFormat.getWidth() * baseIndexMap.size();
+                int nRows = (int) dataFormat.getHeight();
+
+                int nSubColumns = (int) dataFormat.getWidth();
                 int fieldIndex = event.getColumnPosition();
                 int rowIdx = event.getRowPosition();
-                log.trace("CompoundDSCellSelectionListener: CellSelected cmpdType={} nSubColumns={} {}:{}", cmpdType, nSubColumns, rowIdx, fieldIndex);
 
                 if (nSubColumns > 1) { // multi-dimension compound dataset
                     /*
@@ -690,20 +708,24 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                      * members in a single compound type.
                      */
                     fieldIndex %= selectedMemberTypes.length;
+                    if (fieldIndex == 0)
+                        fieldIndex = selectedMemberTypes.length;
 
                     int realColIdx = event.getColumnPosition() / selectedMemberTypes.length;
                     rowIdx = event.getRowPosition() * nSubColumns + realColIdx;
-                    log.trace("CompoundDSCellSelectionListener: CellSelected-multi fieldIndex={} {}:{}", fieldIndex, rowIdx, realColIdx);
                 }
                 log.trace("CompoundDSCellSelectionListener: CellSelected fieldIndex={}:{}", rowIdx, fieldIndex);
 
-                Datatype selectedType = cmpdType.getCompoundMemberTypes().get(fieldIndex-1);
-                log.trace("CompoundDSCellSelectionListener: selectedType={} CellEvent {} isref={}", selectedType, fieldIndex-1, selectedType.isRef());
+                int bIndex = baseIndexMap.get(fieldIndex-1);
+                Object colValue = ((List<?>) dataValue).get(bIndex);
+                if (colValue == null)
+                    log.debug("CompoundDSCellSelectionListener: CellSelected colValue is null for Idx={}", bIndex);
+
+                Datatype selectedType = selectedMemberTypes[bIndex];
 
                 if (selectedType.isRef()) {
                     valIsRegRef = (selectedType.getDatatypeSize() == HDF5Constants.H5R_DSET_REG_REF_BUF_SIZE);
                     valIsObjRef = (selectedType.getDatatypeSize() == HDF5Constants.H5R_OBJ_REF_BUF_SIZE);
-                    log.trace("CompoundDSCellSelectionListener: CellSelected valIsRegRef={} valIsObjRef={}", valIsRegRef, valIsObjRef);
                 }
 
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
@@ -718,7 +740,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     colIndex = "[" + String.valueOf((dataTable.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
                 }
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
-                log.trace("CompoundDSCellSelectionListener: val={} CellSelected {}:{}", val, rowIndex, colIndex);
 
                 cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
 
@@ -731,7 +752,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 if (valIsRegRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
 
-                    log.trace("CompoundDSCellSelectionListener CellSelected reg displayValues={}", displayValues);
                     if (val != null && ((String) val).compareTo("NULL") != 0) {
                         strVal = (String) val;
                     }
@@ -740,7 +760,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     }
                 }
                 else if (valIsObjRef) {
-                    log.trace("CompoundDSCellSelectionListener CellSelected ref val={}", val);
                     if (val != null && ((String) val).compareTo("NULL") != 0) {
                         strVal = (String) val;
                     }
@@ -752,7 +771,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 ILayerCell cell = dataTable.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(), ((CellSelectionEvent) e).getRowPosition());
                 strVal = dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val).toString();
 
-                log.trace("CompoundDSCellSelectionListener: CellSelected setText to {}", strVal);
                 cellValueField.setText(strVal);
                 ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
             }
@@ -806,7 +824,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             groupSize = columnNames.size();
 
             ncols = columnNames.size() * (int) dataFormat.getWidth();
-            log.trace("CompoundDSColumnHeaderDataProvider: ncols={}", ncols);
         }
 
         private void recursiveColumnHeaderSetup(List<String> outColNames, CompoundDataFormat dataFormat,
@@ -871,6 +888,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 recursiveColumnHeaderSetup(outColNames, dataFormat, nestedCompoundType, nestedMemberNames, memberTypes);
             }
             else if (curDtype.isVLEN() && !curDtype.isVarStr()) {
+                log.debug("recursiveColumnHeaderSetup: curDtype={} size={}", curDtype, curDtype.getDatatypeSize());
                 /*
                  * TODO: empty until we have true variable-length support.
                  */
@@ -888,7 +906,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                      * Recursively detect any nested array/vlen of compound types and deal with them
                      * by creating multiple copies of the member names.
                      */
-                    if (curType.isArray() /* || (curType.isVLEN() && !curType.isVarStr()) */ /* TODO: true variable-length support */) {
+                    if (curType.isArray() || curType.isVLEN()) {
                         Datatype base = curType.getDatatypeBase();
                         while (base != null) {
                             if (base.isCompound()) {
@@ -937,6 +955,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     count += calcArrayOfCompoundLen(curType.getCompoundMemberTypes());
                 }
                 else if (curType.isArray()) {
+                    log.debug("calcArrayOfCompoundLen: curType={} dims={}", curType, curType.getArrayDims());
                     /*
                      * TODO: nested array of compound length calculation
                      */
