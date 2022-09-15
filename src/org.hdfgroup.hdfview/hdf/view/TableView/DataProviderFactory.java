@@ -1595,7 +1595,6 @@ public class DataProviderFactory
         }
 
         private String populateReference(Object byteBuf, int startIndex) {
-            log.trace("populateReference byteElements={}", byteBuf);
             byte[] rElements = new byte[(int)typeSize];
             try {
                 System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
@@ -1615,7 +1614,6 @@ public class DataProviderFactory
 
         private String populateReferenceRegion(Object byteBuf, int startIndex) {
             long fid = ((HObject)dataFormatReference).getFileFormat().getFID();
-            log.trace("populateReferenceRegion byteBuf={}", byteBuf);
             byte[] rElements = new byte[(int)typeSize];
             try {
                 System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);

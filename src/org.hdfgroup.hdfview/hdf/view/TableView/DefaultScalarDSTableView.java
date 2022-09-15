@@ -952,8 +952,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void showRegRefData(byte[] refarr) {
-        log.trace("showRegRefData(): start: refarr={} of {}", refarr, refarr.length);
-
         if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
             log.debug("showRegRefData(): refarr is null or invalid");
@@ -965,14 +963,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             reg = H5Datatype.descRegionDataset(((HObject) dataObject).getFileFormat().getFID(), refarr);
         else
             reg = ((H5ReferenceType)dataObject.getDatatype()).getReferenceRegion(refarr, false);
-        log.trace("showRegRefData(): start: reg={}", reg);
 
         boolean isPointSelection = (reg.indexOf('-') <= 0);
 
         // find the object location
         String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf("REGION_TYPE")-1);
-        log.trace("showRegRefData(): isPointSelection={} oidStr={}", isPointSelection,
-                oidStr);
 
         // decode the region selection
         String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
@@ -992,7 +987,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             log.debug("showRegRefData(): no region selection made");
             return; // no selection
         }
-        log.trace("showRegRefData(): nSelections={}", nSelections);
 
         HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
         if (obj == null || !(obj instanceof ScalarDS)) {
@@ -1166,8 +1160,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void showStdRefData(byte[] refarr) {
-        log.trace("showStdRefData(): start: refarr={}", refarr);
-
         if (refarr == null || H5ReferenceType.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
             log.debug("showStdRefData(): ref is null or invalid");
@@ -1219,8 +1211,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void showObjStdRefData(String ref) {
-        log.trace("showObjStdRefData(): start: ref={}", ref);
-
         if (ref == null || (ref.length() <= 0) || (ref.compareTo("NULL") == 0)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showObjStdRefData(): ref is null or invalid");
@@ -1332,8 +1322,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void showAttrStdRefData(String ref_obj_name, String ref_attr_name) {
-        log.trace("showAttrStdRefData(): start: ref_obj_name={} ref_attr_name={}", ref_obj_name, ref_attr_name);
-
         if (ref_obj_name == null || (ref_obj_name.length() <= 0) || (ref_obj_name.compareTo("NULL") == 0)) {
             log.debug("showAttrStdRefData(): ref_obj_name is null or invalid");
             Tools.showError(shell, "Select", "Could not show attribute reference data: invalid or null object name");
@@ -1461,8 +1449,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
-                log.trace("ScalarDSCellSelectionListener: CellSelected isStdRef={} isRegRef={} isObjRef={}", isStdRef, isRegRef, isObjRef);
-
                 CellSelectionEvent event = (CellSelectionEvent) e;
                 Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
                 String strVal = null;
@@ -1484,7 +1470,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 if (isStdRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
 
-                    log.trace("ScalarDSCellSelectionListener:StdRef CellSelected displayValues={}", displayValues);
                     if (displayValues && val != null && !(val instanceof String)) {//((String) val).compareTo("NULL") != 0) {
                         strVal = ((H5ReferenceType) dataObject.getDatatype()).getReferenceRegion((byte[])val, true);
                     }
@@ -1492,15 +1477,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 else if (isRegRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
 
-                    log.trace("ScalarDSCellSelectionListener:RegRef CellSelected displayValues={}", displayValues);
                     if (displayValues && val != null && ((String) val).compareTo("NULL") != 0) {
                         String reg = (String) val;
                         boolean isPointSelection = (reg.indexOf('-') <= 0);
 
                         // find the object location
                         String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf(' '));
-                        log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: isPointSelection={} oidStr={}",
-                                isPointSelection, oidStr);
 
                         // decode the region selection
                         String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
@@ -1520,8 +1502,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                 strVal = null;
                             }
                             else {
-                                log.trace("ScalarDSCellSelectionListener:RegRef CellSelected: nSelections={}", nSelections);
-
                                 HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
                                 if (obj == null || !(obj instanceof ScalarDS)) { // no selection
                                     strVal = null;
@@ -1739,7 +1719,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                     }
                 }
                 else if (isObjRef) {
-                    log.trace("ScalarDSCellSelectionListener:RegRef CellSelected val={}", val);
                     if (val != null && ((String) val).compareTo("NULL") != 0) {
                         strVal = (String) val;
                     }
@@ -1751,7 +1730,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                 if (strVal == null && val != null)
                     strVal = dataDisplayConverter.canonicalToDisplayValue(val).toString();
 
-                log.trace("ScalarDSCellSelectionListener: CellSelected setText to {}", strVal);
                 cellValueField.setText(strVal);
                 ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
             }
@@ -1764,7 +1742,6 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      */
     private class ScalarDSColumnHeaderDataProvider implements IDataProvider
     {
-
         private final String columnNames[];
 
         private final int    space_type;
