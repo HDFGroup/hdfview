@@ -123,7 +123,10 @@ public class DefaultFileFilter {
         String extString = "";
 
         while (extensions.hasMoreElements()) {
-            extString += "*." + extensions.nextElement() + ";";
+            extString += "*." + extensions.nextElement();
+            if (extensions.hasMoreElements()) {
+                extString += ";";
+            }
         }
 
         return extString;
