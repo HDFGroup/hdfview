@@ -2287,16 +2287,6 @@ public class H5Datatype extends Datatype
         return isStdRef;
     }
 
-    /**
-     * Checks if this datatype is a reference type.
-     *
-     * @return true if the datatype is reference; false otherwise
-     */
-    public boolean isReference() {
-        log.trace("isReference():{}", datatypeClass);
-        return (datatypeClass == Datatype.CLASS_REFERENCE);
-    }
-
     /*
      * (non-Javadoc)
      * @see hdf.object.Datatype#getReferenceType()
@@ -2748,7 +2738,7 @@ public class H5Datatype extends Datatype
 
     private boolean datatypeIsAtomic(long tid) {
         boolean retVal = !(datatypeIsComplex(tid)
-                | datatypeIsReference(tid) | isReference());
+                | datatypeIsReference(tid) | isRef());
         retVal |= isOpaque();
         retVal |= isBitField();
 
