@@ -541,8 +541,8 @@ public class H5File extends FileFormat
                         try {
                             //attr.AttributeCommonIO(aid, H5File.IO_TYPE.READ, null);
                             Object attrData = attr.getAttributeData();
-                            log.trace("getAttribute(): attrType.isReference()={}", attrType.isReference());
-                            if (attrType.isReference()) {
+                            log.trace("getAttribute(): attrType.isRef()={}", attrType.isRef());
+                            if (attrType.isRef()) {
                                 if (attr.getAttributeRank() > 2)
                                     ((H5ReferenceType)attrType).setRefSize(attr.getAttributePlane());
                                 ((H5ReferenceType)attrType).setData(attrData);
