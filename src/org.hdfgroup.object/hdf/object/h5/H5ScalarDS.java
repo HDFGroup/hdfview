@@ -1912,7 +1912,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     }
                     if (dsDatatype.isRef() && (avalue instanceof byte[]))
                         ((H5ReferenceType)dsDatatype).setData((ArrayList<byte[]>)avalue);
-                    else if (dsDatatype.isReference())
+                    else if (dsDatatype.isRef())
                         ((H5ReferenceType)dsDatatype).setData(avalue);
                 }
             }

@@ -1029,7 +1029,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
                 if (value == null)
                     strValue = "null";
                 else {
-                    if (((H5Datatype)dtype.getDatatypeBase()).isReference()) {
+                    if (dtype.getDatatypeBase().isRef()) {
                         ArrayList<byte[]> ref_value = (ArrayList<byte[]>)value;
                         log.trace("toString: vlen value={}", ref_value);
                         strValue = "{";
