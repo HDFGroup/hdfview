@@ -141,19 +141,6 @@ public abstract interface TreeView {
             throws Exception;
 
     /**
-     * Displays the meta data of a data object.
-     *
-     * @param dataObject
-     *            the data object
-     *
-     * @return the MetaDataView that displays the MetaData of the data object
-     *
-     * @throws Exception if a failure occurred
-     */
-    public abstract MetaDataView showMetaData(HObject dataObject)
-            throws Exception;
-
-    /**
      * Adds an already created HObject to the tree under the
      * TreeItem containing the specified parent group.
      *
