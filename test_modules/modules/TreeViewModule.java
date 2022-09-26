@@ -73,11 +73,6 @@ public class TreeViewModule implements TreeView {
     }
 
     @Override
-    public MetaDataView showMetaData(HObject dataObject) throws Exception {
-        return null;
-    }
-
-    @Override
     public TreeItem addObject(HObject newObject, Group parentGroup) {
         return null;
     }

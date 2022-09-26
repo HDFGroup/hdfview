@@ -256,20 +256,6 @@ public class H5ReferenceType extends H5Datatype
         return inited;
     }
 
-    //    /**
-//     * Returns the size of the datatype in bytes. For example, for a 32-bit
-//     * integer, the size is 4 (bytes).
-//     *
-//     * @return the size of the datatype.
-//     */
-//    @Override
-//    public long getDatatypeSize() {
-//        if (isRegRef() || isRefObj())
-//            return HDF5Constants.H5R_REF_BUF_SIZE;
-//        else
-//            return datatypeSize;
-//    }
-
     /**
      * setData() loads the reference raw data into the buffer. This
      * buffer will be accessed to get the reference strings and data.
