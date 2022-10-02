@@ -344,7 +344,6 @@ public class DefaultImageView implements ImageView
 
                 viewer.removeDataView(DefaultImageView.this);
 
-                System.runFinalization();
                 System.gc();
             }
         });

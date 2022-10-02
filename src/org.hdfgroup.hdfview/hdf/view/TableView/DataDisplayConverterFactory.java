@@ -515,6 +515,7 @@ public class DataDisplayConverterFactory
         private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VlenDataDisplayConverter.class);
 
         private final HDFDisplayConverter baseTypeConverter;
+        private final StringBuilder       buffer;
 
         VlenDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
@@ -546,6 +547,69 @@ public class DataDisplayConverterFactory
                 log.debug("couldn't get DataDisplayConverter for base datatype: ", ex);
                 throw new Exception("VlenDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: " + ex.getMessage());
             }
+
+            buffer = new StringBuilder();
+        }
+
+        @Override
+        public Object canonicalToDisplayValue(ILayerCell cell, IConfigRegistry configRegistry, Object value) {
+            cellRowIdx = cell.getRowIndex();
+            cellColIdx = cell.getColumnIndex();
+            return canonicalToDisplayValue(value);
+        }
+
+        @Override
+        public Object canonicalToDisplayValue(Object value) {
+            log.trace("canonicalToDisplayValue({}): start", value);
+
+            if (value instanceof String)
+                return value;
+
+            if (value == null) {
+                log.debug("canonicalToDisplayValue({}): value is null", value);
+                return DataFactoryUtils.nullStr;
+            }
+
+            buffer.setLength(0); // clear the old string
+
+            /*
+             * Pass the cell's row and column index down in case there is a
+             * CompoundDataDisplayConverter at the bottom of the chain.
+             */
+            baseTypeConverter.cellRowIdx = cellRowIdx;
+            baseTypeConverter.cellColIdx = cellColIdx;
+
+            try {
+                Object obj;
+                Object convertedValue;
+                int arrLen = Array.getLength(value);
+
+                log.trace("canonicalToDisplayValue({}): array length={}", value, arrLen);
+
+                if (!(baseTypeConverter instanceof RefDataDisplayConverter))
+                    buffer.append("[");
+
+                for (int i = 0; i < arrLen; i++) {
+                    if (i > 0)
+                        buffer.append(", ");
+
+                    obj = Array.get(value, i);
+
+                    convertedValue = baseTypeConverter.canonicalToDisplayValue(obj);
+
+                    buffer.append(convertedValue);
+                }
+
+                if (!(baseTypeConverter instanceof RefDataDisplayConverter))
+                    buffer.append("]");
+            }
+            catch (Exception ex) {
+                log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
+                buffer.setLength(0);
+                buffer.append(DataFactoryUtils.errStr);
+            }
+
+            return buffer;
         }
 
         @Override
@@ -797,6 +861,8 @@ public class DataDisplayConverterFactory
     {
         private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RefDataDisplayConverter.class);
 
+        private final StringBuilder buffer;
+
         RefDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
 
@@ -804,6 +870,55 @@ public class DataDisplayConverterFactory
                 log.debug("datatype is not a reference type");
                 throw new Exception("RefDataDisplayConverter: datatype is not a reference type");
             }
+
+            buffer = new StringBuilder();
+        }
+
+        @Override
+        public Object canonicalToDisplayValue(ILayerCell cell, IConfigRegistry configRegistry, Object value) {
+            cellRowIdx = cell.getRowIndex();
+            cellColIdx = cell.getColumnIndex();
+            log.trace("canonicalToDisplayValue({}) cellRowIdx={} cellColIdx={}: start", value, cellRowIdx, cellColIdx);
+            return canonicalToDisplayValue(value);
+        }
+
+        @Override
+        public Object canonicalToDisplayValue(Object value) {
+            log.trace("canonicalToDisplayValue({}): start", value);
+
+            if (value instanceof String)
+                return value;
+
+            if (value == null) {
+                log.debug("canonicalToDisplayValue({}): value is null", value);
+                return DataFactoryUtils.nullStr;
+            }
+
+            buffer.setLength(0); // clear the old string
+
+            try {
+                Object obj;
+                Object convertedValue;
+                int arrLen = Array.getLength(value);
+
+                log.trace("canonicalToDisplayValue({}): array length={}", value, arrLen);
+
+                for (int i = 0; i < arrLen; i++) {
+                    if (i > 0)
+                        buffer.append(", ");
+
+                    obj = Array.get(value, i);
+
+                    buffer.append(obj);
+                }
+            }
+            catch (Exception ex) {
+                log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
+                buffer.setLength(0);
+                buffer.append(DataFactoryUtils.errStr);
+            }
+
+            return buffer;
         }
     }
 

@@ -17,6 +17,7 @@ package hdf.object.h5;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -46,6 +47,7 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5CompoundAttr;
 import hdf.object.h5.H5ReferenceType;
 import hdf.object.h5.H5ScalarAttr;
+import hdf.object.h5.H5ReferenceType.H5ReferenceData;
 
 /**
  * H5File is an implementation of the FileFormat class for HDF5 files.
@@ -539,8 +541,8 @@ public class H5File extends FileFormat
                         try {
                             //attr.AttributeCommonIO(aid, H5File.IO_TYPE.READ, null);
                             Object attrData = attr.getAttributeData();
-                            log.trace("getAttribute(): attrType.isReference()={}", attrType.isReference());
-                            if (attrType.isReference()) {
+                            log.trace("getAttribute(): attrType.isRef()={}", attrType.isRef());
+                            if (attrType.isRef()) {
                                 if (attr.getAttributeRank() > 2)
                                     ((H5ReferenceType)attrType).setRefSize(attr.getAttributePlane());
                                 ((H5ReferenceType)attrType).setData(attrData);
@@ -574,6 +576,31 @@ public class H5File extends FileFormat
                         }
                     }
                 } // (int i=0; i<obj_info.num_attrs; i++)
+                for (int i = 0; i < n; i++) {
+                    Attribute attr = (Attribute) attributeList.get(i);
+                    H5Datatype atype = (H5Datatype)attr.getAttributeDatatype();
+                    H5Datatype aBasetype = (H5Datatype)atype.getDatatypeBase();
+                    boolean BDTisRef = false;
+                    if (aBasetype != null)
+                        BDTisRef = aBasetype.isRef();
+                    if (atype.isRef() || BDTisRef) {
+                        H5ReferenceType rtype = null;
+                        if (BDTisRef)
+                            rtype = (H5ReferenceType)aBasetype;
+                        else
+                            rtype = (H5ReferenceType)atype;
+                        try {
+                            List<H5ReferenceData> refdata = (List)rtype.getData();
+                            for (int r = 0; r < (int)rtype.getRefSize(); r++) {
+                                H5ReferenceData rf = refdata.get(r);
+                                log.trace("getAttribute(): refdata {}", rf.ref_array);
+                            }
+                        }
+                        catch (Exception ex) {
+                            log.trace("Error retrieving H5ReferenceData of object ", ex);
+                        }
+                    }
+                }
             }
             finally {
                 obj.close(objID);
