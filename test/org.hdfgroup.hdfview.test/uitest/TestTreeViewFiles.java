@@ -642,6 +642,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
                 retriever.testTableLocation(3, 2, "0");
 
                 tableShell.bot().menu().menu("Table").menu("Save Changes to File").click();
+
+                tableShell.bot().menu().menu("Table").menu("Close").click();
+                bot.waitUntil(Conditions.shellCloses(tableShell));
             }
             catch (Exception ex) {
                 ex.printStackTrace();
