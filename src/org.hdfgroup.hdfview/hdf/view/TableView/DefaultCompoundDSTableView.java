@@ -15,6 +15,7 @@
 package hdf.view.TableView;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +24,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
@@ -51,10 +54,20 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
 
+import hdf.hdf5lib.HDF5Constants;
+
 import hdf.object.CompoundDS;
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
+import hdf.object.Dataset;
 import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.HObject;
+import hdf.object.ScalarDS;
+import hdf.object.Utils;
+import hdf.object.h5.H5Datatype;
+
+import hdf.view.HDFView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 import hdf.view.DataView.DataViewManager;
@@ -183,15 +196,16 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         natTable.addLayerListener(new CompoundDSCellSelectionListener());
 
         // Create popup menu for region or object ref.
-        //if (isStdRef || isRegRef || isObjRef) {
-        //    natTable.addConfiguration(new RefContextMenu(natTable));
-        //}
+        natTable.addConfiguration(new RefContextMenu(natTable));
 
         natTable.configure();
 
         return natTable;
     }
 
+    /**
+     * Returns the selected data values of the ScalarDS
+     */
     @Override
     public Object getSelectedData() {
         Object selectedData = null;
@@ -223,37 +237,33 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
         log.trace("getSelectedData(): size={} cName={} nt={}", size, cName, nt);
 
-        if (isStdRef) {
-            // std. ref data are stored in bytess
+        if (dataObject.getDatatype().isRef()) {
+            // ref data are stored in bytes
             selectedData = new byte[size];
-        }
-        else if (isRegRef) {
-            // reg. ref data are stored in strings
-            selectedData = new String[size];
         }
         else {
             switch (nt) {
-                case 'B':
-                    selectedData = new byte[size];
-                    break;
-                case 'S':
-                    selectedData = new short[size];
-                    break;
-                case 'I':
-                    selectedData = new int[size];
-                    break;
-                case 'J':
-                    selectedData = new long[size];
-                    break;
-                case 'F':
-                    selectedData = new float[size];
-                    break;
-                case 'D':
-                    selectedData = new double[size];
-                    break;
-                default:
-                    selectedData = null;
-                    break;
+            case 'B':
+                selectedData = new byte[size];
+                break;
+            case 'S':
+                selectedData = new short[size];
+                break;
+            case 'I':
+                selectedData = new int[size];
+                break;
+            case 'J':
+                selectedData = new long[size];
+                break;
+            case 'F':
+                selectedData = new float[size];
+                break;
+            case 'D':
+                selectedData = new double[size];
+                break;
+            default:
+                selectedData = null;
+                break;
             }
         }
 
@@ -265,25 +275,21 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         log.trace("getSelectedData(): selectedData is type {}", nt);
 
-        System.arraycopy(colData, 0, selectedData, 0, size);
+        Object dataArrayValue = null;
+        if (colData instanceof ArrayList) {
+            dataArrayValue = ((ArrayList)colData).get(0);
+            System.arraycopy(dataArrayValue, 0, selectedData, 0, size);
+            log.trace("getSelectedData(): colData={}", dataArrayValue);
+        }
+        else {
+            //dataArrayValue = Array.get(colData, 0);
+            //Array.set(selectedData, 0, dataArrayValue);
+            System.arraycopy(colData, 0, selectedData, 0, size);
+            log.trace("getSelectedData(): colData={}", colData);
+        }
+        log.trace("getSelectedData(): selectedData={}", Array.get(selectedData, 0));
 
         return selectedData;
-    }
-
-
-    @Override
-    protected void showObjRefData(long[] ref) {
-        // Currently no support for showing Obj. Ref. Data in Compound Datasets
-    }
-
-    @Override
-    protected void showRegRefData(String reg) {
-        // Currently no support for show Reg. Ref. Data in Compound Datasets
-    }
-
-    @Override
-    protected void showStdRefData(byte[] reg) {
-        // Currently no support for show Std. Ref. Data in Compound Datasets
     }
 
     /**
@@ -300,7 +306,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      */
     @Override
     protected IEditableRule getDataEditingRule(DataFormat dataObject) {
-        if (dataObject == null) return null;
+        if (dataObject == null)
+            return null;
 
         // Only Allow editing if not in read-only mode
         return new EditableRule() {
@@ -316,17 +323,410 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         };
     }
 
+    @Override
+    protected void showStdRefData(byte[] refarr) {
+
+        if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
+            Tools.showError(shell, "Select", "Could not show reference data: invalid or null data");
+            log.debug("showObjRefData(): refarr is null or invalid");
+            return;
+        }
+
+        log.trace("showRegRefData: refarr={}; Currently no support for show Std. Ref. Data in Compound Datasets", refarr);
+    }
+
+    /**
+     * Display data pointed to by object references. Data of each object is shown in
+     * a separate spreadsheet.
+     *
+     * @param refarr
+     *            the array of bytes that contain the object reference information.
+     *
+     */
+    @Override
+    protected void showObjRefData(byte[] refarr) {
+        if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
+            log.debug("showObjRefData(): refarr is null or invalid");
+            return;
+        }
+
+        String objref = H5Datatype.descReferenceObject(((HObject) dataObject).getFileFormat().getFID(), refarr);
+
+        // find the object location
+        String oidStr = objref.substring(objref.indexOf('/'), objref.indexOf("H5O_TYPE_OBJ_REF")-1);
+        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
+        if (obj == null || !(obj instanceof ScalarDS)) {
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
+            log.debug("showObjRefData(): obj is null or not a Scalar Dataset");
+            return;
+        }
+
+        ScalarDS dset = (ScalarDS) obj;
+        ScalarDS dsetCopy = null;
+
+        // create an instance of the dataset constructor
+        Constructor<? extends ScalarDS> constructor = null;
+        Object[] paramObj = null;
+        Object data = null;
+
+        try {
+            Class[] paramClass = { FileFormat.class, String.class, String.class };
+            constructor = dset.getClass().getConstructor(paramClass);
+            paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
+            dsetCopy = constructor.newInstance(paramObj);
+            data = dsetCopy.getData();
+        }
+        catch (Exception ex) {
+            log.debug("showObjRefData(): couldn't show data: ", ex);
+            Tools.showError(shell, "Select", "Object Reference: " + ex.getMessage());
+            data = null;
+        }
+
+        if (data == null)
+            return;
+
+        Class<?> theClass = null;
+        String viewName = null;
+
+        switch (viewType) {
+        case IMAGE:
+            viewName = HDFView.getListOfImageViews().get(0);
+            break;
+        case TABLE:
+            viewName = (String) HDFView.getListOfTableViews().get(0);
+            break;
+        default:
+            viewName = null;
+        }
+
+        try {
+            theClass = Class.forName(viewName);
+        }
+        catch (Exception ex) {
+            try {
+                theClass = ViewProperties.loadExtClass().loadClass(viewName);
+            }
+            catch (Exception ex2) {
+                theClass = null;
+            }
+        }
+
+        // Use default dataview
+        if (theClass == null) {
+            switch (viewType) {
+            case IMAGE:
+                viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                break;
+            case TABLE:
+                viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                break;
+            default:
+                viewName = null;
+            }
+
+            try {
+                theClass = Class.forName(viewName);
+            }
+            catch (Exception ex) {
+                log.debug("showObjRefData(): no suitable display class found");
+                Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
+                return;
+            }
+        }
+
+        HashMap map = new HashMap(1);
+        map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy);
+        Object[] args = { viewer, map };
+
+        try {
+            Tools.newInstance(theClass, args);
+        }
+        catch (Exception ex) {
+            log.debug("showObjRefData(): Could not show reference data: ", ex);
+            Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
+        }
+    }
+
+    /**
+     * Display data pointed to by region references. Data of each region is shown in
+     * a separate spreadsheet.
+     *
+     * @param refarr
+     *            the array of bytes that contain the reg. ref information.
+     *
+     */
+    @Override
+    protected void showRegRefData(byte[] refarr) {
+        if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
+            Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
+            log.debug("showRegRefData(): refarr is null or invalid");
+            return;
+        }
+
+        String reg = H5Datatype.descRegionDataset(((HObject) dataObject).getFileFormat().getFID(), refarr);
+
+        boolean isPointSelection = (reg.indexOf('-') <= 0);
+
+        // find the object location
+        String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf("REGION_TYPE")-1);
+
+        // decode the region selection
+        String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
+        if (regStr == null || regStr.length() <= 0) {
+            Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
+            log.debug("showRegRefData(): no region selection made");
+            return; // no selection
+        }
+
+        // TODO: do we need to do something with what's past the closing bracket
+        // regStr = reg.substring(reg.indexOf('}') + 1);
+
+        StringTokenizer st = new StringTokenizer(regStr);
+        int nSelections = st.countTokens();
+        if (nSelections <= 0) {
+            Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
+            log.debug("showRegRefData(): no region selection made");
+            return; // no selection
+        }
+
+        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
+        if (obj == null || !(obj instanceof ScalarDS)) {
+            Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
+            log.debug("showRegRefData(): obj is null or not a Scalar Dataset");
+            return;
+        }
+
+        ScalarDS dset = (ScalarDS) obj;
+        ScalarDS dsetCopy = null;
+
+        // create an instance of the dataset constructor
+        Constructor<? extends ScalarDS> constructor = null;
+        Object[] paramObj = null;
+        try {
+            Class[] paramClass = { FileFormat.class, String.class, String.class };
+            constructor = dset.getClass().getConstructor(paramClass);
+            paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
+        }
+        catch (Exception ex) {
+            log.debug("showRegRefData(): constructor failure: ", ex);
+            constructor = null;
+        }
+
+        // load each selection into a separate dataset and display it in
+        // a separate spreadsheet
+
+        while (st.hasMoreTokens()) {
+            try {
+                dsetCopy = constructor.newInstance(paramObj);
+            }
+            catch (Exception ex) {
+                log.debug("showRegRefData(): constructor newInstance failure: ", ex);
+                continue;
+            }
+
+            if (dsetCopy == null) {
+                log.debug("showRegRefData(): continue after null dataset copy");
+                continue;
+            }
+
+            try {
+                dsetCopy.init();
+            }
+            catch (Exception ex) {
+                log.debug("showRegRefData(): continue after copied dataset init failure: ", ex);
+                continue;
+            }
+
+            dsetCopy.getRank();
+            long[] start = dsetCopy.getStartDims();
+            long[] count = dsetCopy.getSelectedDims();
+
+            // set the selected dimension sizes based on the region selection
+            // info.
+            int idx = 0;
+            String sizeStr = null;
+            String token = st.nextToken();
+
+            token = token.replace('(', ' ');
+            token = token.replace(')', ' ');
+            if (isPointSelection) {
+                // point selection
+                StringTokenizer tmp = new StringTokenizer(token, ",");
+                while (tmp.hasMoreTokens()) {
+                    count[idx] = 1;
+                    sizeStr = tmp.nextToken().trim();
+                    start[idx] = Long.valueOf(sizeStr);
+                    idx++;
+                }
+            }
+            else {
+                // rectangle selection
+                String startStr = token.substring(0, token.indexOf('-'));
+                String endStr = token.substring(token.indexOf('-') + 1);
+                StringTokenizer tmp = new StringTokenizer(startStr, ",");
+                while (tmp.hasMoreTokens()) {
+                    sizeStr = tmp.nextToken().trim();
+                    start[idx] = Long.valueOf(sizeStr);
+                    idx++;
+                }
+
+                idx = 0;
+                tmp = new StringTokenizer(endStr, ",");
+                while (tmp.hasMoreTokens()) {
+                    sizeStr = tmp.nextToken().trim();
+                    count[idx] = Long.valueOf(sizeStr) - start[idx] + 1;
+                    idx++;
+                }
+            }
+
+            try {
+                dsetCopy.getData();
+            }
+            catch (Exception ex) {
+                log.debug("showRegRefData(): getData failure: ", ex);
+                Tools.showError(shell, "Select", "Region Reference: " + ex.getMessage());
+            }
+
+            Class<?> theClass = null;
+            String viewName = null;
+
+            switch (viewType) {
+            case IMAGE:
+                viewName = HDFView.getListOfImageViews().get(0);
+                break;
+            case TABLE:
+                viewName = (String) HDFView.getListOfTableViews().get(0);
+                break;
+            default:
+                viewName = null;
+            }
+
+            try {
+                theClass = Class.forName(viewName);
+            }
+            catch (Exception ex) {
+                try {
+                    theClass = ViewProperties.loadExtClass().loadClass(viewName);
+                }
+                catch (Exception ex2) {
+                    theClass = null;
+                }
+            }
+
+            // Use default dataview
+            if (theClass == null) {
+                switch (viewType) {
+                case IMAGE:
+                    viewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
+                    break;
+                case TABLE:
+                    viewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
+                    break;
+                default:
+                    viewName = null;
+                }
+
+                try {
+                    theClass = Class.forName(viewName);
+                }
+                catch (Exception ex) {
+                    log.debug("showRegRefData(): no suitable display class found");
+                    Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
+                    return;
+                }
+            }
+
+            HashMap map = new HashMap(1);
+            map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy);
+            Object[] args = { viewer, map };
+
+            try {
+                Tools.newInstance(theClass, args);
+            }
+            catch (Exception ex) {
+                log.debug("showRegRefData(): Could not show reference data: ", ex);
+                Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
+            }
+        } // (st.hasMoreTokens())
+    } // end of showRegRefData()
+
     /**
      * Update cell value label and cell value field when a cell is selected
      */
-    private class CompoundDSCellSelectionListener implements ILayerListener {
+    private class CompoundDSCellSelectionListener implements ILayerListener
+    {
         @Override
         public void handleLayerEvent(ILayerEvent e) {
             if (e instanceof CellSelectionEvent) {
-                log.trace("ScalarDSCellSelectionListener: CellSelected isStdRef={} isRegRef={} isObjRef={}", isStdRef, isRegRef, isObjRef);
-
                 CellSelectionEvent event = (CellSelectionEvent) e;
-                Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                boolean valIsRegRef = false;
+                boolean valIsObjRef = false;
+
+                HashMap<Integer, Integer> baseIndexMap;
+                HashMap<Integer, Integer> relCmpdStartIndexMap;
+
+                CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
+                Datatype cmpdType = dataObject.getDatatype();
+                Datatype[] selectedMemberTypes = dataFormat.getSelectedMemberTypes();
+                List<Datatype> localSelectedTypes = Arrays.asList(selectedMemberTypes);
+
+                HashMap<Integer, Integer>[] maps = null;
+                try {
+                    maps = DataFactoryUtils.buildIndexMaps(dataFormat, localSelectedTypes);
+                }
+                catch (Exception ex) {
+                    log.debug("CompoundDSCellSelectionListener: buildIndexMaps", ex);
+                }
+                baseIndexMap = maps[DataFactoryUtils.COL_TO_BASE_CLASS_MAP_INDEX];
+                relCmpdStartIndexMap = maps[DataFactoryUtils.CMPD_START_IDX_MAP_INDEX];
+
+                if (baseIndexMap.size() == 0) {
+                    log.debug("base index mapping is invalid - size 0");
+                }
+
+                if (relCmpdStartIndexMap.size() == 0) {
+                    log.debug("compound field start index mapping is invalid - size 0");
+                }
+
+                /*
+                 * nCols should represent the number of columns covered by this CompoundData
+                 * only. For top-level CompoundData, this should be the entire width of the
+                 * dataset. For nested CompoundData, nCols will be a subset of these columns.
+                 */
+                int nCols = (int) dataFormat.getWidth() * baseIndexMap.size();
+                int nRows = (int) dataFormat.getHeight();
+
+                int nSubColumns = (int) dataFormat.getWidth();
+                int fieldIndex = event.getColumnPosition();
+                int rowIdx = event.getRowPosition();
+
+                if (nSubColumns > 1) { // multi-dimension compound dataset
+                    /*
+                     * Make sure fieldIdx is within a valid range, since even for multi-dimensional
+                     * compound datasets there will only be as many lists of data as there are
+                     * members in a single compound type.
+                     */
+                    fieldIndex %= selectedMemberTypes.length;
+                    if (fieldIndex == 0)
+                        fieldIndex = selectedMemberTypes.length;
+
+                    int realColIdx = event.getColumnPosition() / selectedMemberTypes.length;
+                    rowIdx = event.getRowPosition() * nSubColumns + realColIdx;
+                }
+                log.trace("CompoundDSCellSelectionListener: CellSelected fieldIndex={}:{}", rowIdx, fieldIndex);
+
+                int bIndex = baseIndexMap.get(fieldIndex-1);
+                Object colValue = ((List<?>) dataValue).get(bIndex);
+                if (colValue == null)
+                    log.debug("CompoundDSCellSelectionListener: CellSelected colValue is null for Idx={}", bIndex);
+
+                Datatype selectedType = selectedMemberTypes[bIndex];
+
+                if (selectedType.isRef()) {
+                    valIsRegRef = (selectedType.getDatatypeSize() == HDF5Constants.H5R_DSET_REG_REF_BUF_SIZE);
+                    valIsObjRef = (selectedType.getDatatypeSize() == HDF5Constants.H5R_OBJ_REF_BUF_SIZE);
+                }
 
                 int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
                 int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
@@ -339,6 +739,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     int groupSize = ((CompoundDataFormat) dataObject).getSelectedMemberCount();
                     colIndex = "[" + String.valueOf((dataTable.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
                 }
+                Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
 
                 cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
 
@@ -347,8 +748,30 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     return;
                 }
 
+                String strVal = null;
+                if (valIsRegRef) {
+                    boolean displayValues = ViewProperties.showRegRefValues();
+
+                    if (val != null && ((String) val).compareTo("NULL") != 0) {
+                        strVal = (String) val;
+                    }
+                    else {
+                        strVal = null;
+                    }
+                }
+                else if (valIsObjRef) {
+                    if (val != null && ((String) val).compareTo("NULL") != 0) {
+                        strVal = (String) val;
+                    }
+                    else {
+                        strVal = null;
+                    }
+                }
+
                 ILayerCell cell = dataTable.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(), ((CellSelectionEvent) e).getRowPosition());
-                cellValueField.setText(dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val).toString());
+                strVal = dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val).toString();
+
+                cellValueField.setText(strVal);
                 ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
             }
         }
@@ -401,7 +824,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             groupSize = columnNames.size();
 
             ncols = columnNames.size() * (int) dataFormat.getWidth();
-            log.trace("CompoundDSColumnHeaderDataProvider: ncols={}", ncols);
         }
 
         private void recursiveColumnHeaderSetup(List<String> outColNames, CompoundDataFormat dataFormat,
@@ -466,6 +888,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 recursiveColumnHeaderSetup(outColNames, dataFormat, nestedCompoundType, nestedMemberNames, memberTypes);
             }
             else if (curDtype.isVLEN() && !curDtype.isVarStr()) {
+                log.debug("recursiveColumnHeaderSetup: curDtype={} size={}", curDtype, curDtype.getDatatypeSize());
                 /*
                  * TODO: empty until we have true variable-length support.
                  */
@@ -483,7 +906,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                      * Recursively detect any nested array/vlen of compound types and deal with them
                      * by creating multiple copies of the member names.
                      */
-                    if (curType.isArray() /* || (curType.isVLEN() && !curType.isVarStr()) */ /* TODO: true variable-length support */) {
+                    if (curType.isArray() || curType.isVLEN()) {
                         Datatype base = curType.getDatatypeBase();
                         while (base != null) {
                             if (base.isCompound()) {
@@ -532,6 +955,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     count += calcArrayOfCompoundLen(curType.getCompoundMemberTypes());
                 }
                 else if (curType.isArray()) {
+                    log.debug("calcArrayOfCompoundLen: curType={} dims={}", curType, curType.getArrayDims());
                     /*
                      * TODO: nested array of compound length calculation
                      */

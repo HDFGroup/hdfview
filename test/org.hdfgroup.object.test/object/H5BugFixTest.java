@@ -65,8 +65,6 @@ public class H5BugFixTest
         try {
             System.gc();
             Thread.sleep(100);
-            System.runFinalization();
-            Thread.sleep(100);
         }
         catch (final Exception ex) {
             ex.printStackTrace();

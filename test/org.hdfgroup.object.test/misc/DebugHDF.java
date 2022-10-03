@@ -95,12 +95,6 @@ public class DebugHDF {
         //      try { TestMemoryLeak("D:\\hdf-files\\debug_memory_leak.h5"); } catch(Exception ex) {ex.printStackTrace();}
         //      try { TestBEAttr("G:\\temp\\TestBEAttr.h5"); } catch(Exception ex) {ex.printStackTrace();}
         //      try { TestVlenRead("d:\\hdf-files\\test_vlen.h5"); } catch(Exception ex) {ex.printStackTrace();}
-        //        try { launchBrowser("http://www.armchairgeneral.com/tactics-101-021-intelligence-preparation-of-the-battlefield-in-urban-operations.htm"); } catch(Exception ex) {ex.printStackTrace();}
-        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Events_Intel-Report.pdf"); } catch(Exception ex) {ex.printStackTrace();}
-        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\IPB_URL-Reference.txt"); } catch(Exception ex) {ex.printStackTrace();}
-        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Recon_Immersive-Video.avi"); } catch(Exception ex) {ex.printStackTrace();}
-        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Situation_Weather-XLS.xls"); } catch(Exception ex) {ex.printStackTrace();}
-        //        try { launchBrowser("G:\\Projects\\ERDC\\Data\\Hetereogenous_Objects\\Software_External-Link.txt"); } catch(Exception ex) {ex.printStackTrace();}
         //      try { TestVlen("d:\\hdf-files\\test_vlen.h5"); } catch(Exception ex) {ex.printStackTrace();}
         //      try { TestPinning("G:\\Projects\\Rosetta\\debug\\test_pinning.h5"); } catch(Exception ex) {ex.printStackTrace();}
         //      try { createDataset("g:\\temp\\testDataset.h5"); } catch(Exception ex) {ex.printStackTrace();}
@@ -1327,41 +1321,6 @@ public class DebugHDF {
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static void launchBrowser(String url) throws Exception {
-        String os = System.getProperty("os.name");
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            // Block for Windows Platform
-            if (os.startsWith("Windows")) {
-                String cmd = "rundll32 url.dll,FileProtocolHandler " + url;
-                runtime.exec(cmd);
-            }
-            // Block for Mac OS
-            else if (os.startsWith("Mac OS")) {
-                Class fileMgr = Class.forName("com.apple.eio.FileManager");
-                Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] { String.class });
-                openURL.invoke(null, new Object[] { url });
-            }
-            // Block for UNIX Platform
-            else {
-                String[] browsers = { "firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
-                String browser = null;
-                for (int count = 0; count < browsers.length && browser == null; count++)
-                    if (runtime.exec(new String[] { "which", browsers[count] }).waitFor() == 0)
-                        browser = browsers[count];
-                if (browser == null)
-                    throw new Exception("Could not find web browser");
-                else
-                    runtime.exec(new String[] { browser, url });
-            }
-        }
-        catch (Exception x) {
-            System.err.println("Exception occurd while invoking Browser!");
-            x.printStackTrace();
-        }
-    }
-
     private static void testVlenRead(String fname) throws Exception {
 
         boolean useBufferedReads = false; // true = break up reads into smaller chunks, false = get data at once
@@ -2256,8 +2215,6 @@ public class DebugHDF {
         try {
             System.gc();
             Thread.sleep(15);
-            System.runFinalization();
-            Thread.sleep(15);
         }
         catch (final Exception ex){
             ex.printStackTrace();
@@ -2783,7 +2740,6 @@ public class DebugHDF {
 
         for (int i = 0; (usedMem1 < usedMem2) && (i < 500); ++ i)
         {
-            s_runtime.runFinalization ();
             s_runtime.gc ();
             Thread.yield ();
 
@@ -3768,8 +3724,6 @@ public class DebugHDF {
         H5File file = new H5File(filename, H5File.WRITE);
         file.open();
 
-        System.runFinalization();
-
         Dataset dataset = (Dataset)file.get(dname);
 
         int[] buf = (int[])dataset.read();
@@ -3795,8 +3749,6 @@ public class DebugHDF {
 
         H5File file = new H5File(filename, H5File.WRITE);
         //    file.open();
-
-        System.runFinalization();
 
         Dataset dataset = (Dataset)file.get(dname);
 
