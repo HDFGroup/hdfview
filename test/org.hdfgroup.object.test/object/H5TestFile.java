@@ -113,7 +113,7 @@ public class H5TestFile
         log.debug("createTestFile {}", fileName);
         H5File file = null;
         Group g0, g1, g00;
-        final Dataset[] dsets = new Dataset[11];
+        Dataset[] dsets = new Dataset[11];
 
         if ((fileName == null) || (fileName.length() < 1))
             fileName = NAME_FILE_H5;
@@ -199,7 +199,7 @@ public class H5TestFile
         final Vector attrs = (Vector) ((H5ScalarDS)dsets[7]).getMetadata();
         final int n = attrs.size();
         for (int i = 0; i < n; i++) {
-            final H5ScalarAttr attr = (H5ScalarAttr) attrs.get(i);
+            H5ScalarAttr attr = (H5ScalarAttr) attrs.get(i);
             if ("PALETTE".equals(attr.getAttributeName()))
                 attr.writeAttribute(oid);
         }
@@ -243,12 +243,12 @@ public class H5TestFile
         try {
             file.close();
         }
-        catch (final Exception ex) {}
+        catch (Exception ex) {}
 
         log.debug("create file open to write refs");
         file.open();
         log.debug("create file opened");
-        final long[] refs = new long[DIM_SIZE];
+        long[] refs = new long[DIM_SIZE];
         //  (int i = 0; i < OBJ_NAMES.length; i++) { --//This gives CORE DUMP when OBJ_NAMES = NAME_DATASET_OBJ_REF,
         // as it enters an infinite loop.
         for (int i = 0; i < OBJ_NAMES.length - 1; i++) {
@@ -264,7 +264,7 @@ public class H5TestFile
         try {
             file.close();
         }
-        catch (final Exception ex) {}
+        catch (Exception ex) {}
 
         log.debug("create file finished");
         return file;
@@ -280,7 +280,7 @@ public class H5TestFile
      * @return the wave palette in the form of byte[3][256]
      */
     private static final byte[] createWavePalette() {
-        final byte[] p = new byte[768]; // 256*3
+        byte[] p = new byte[768]; // 256*3
 
         for (int i = 1; i < 255; i++) {
             p[3 * i] = (byte) ((Math.sin(((double) i / 40 - 3.2)) + 1) * 128);

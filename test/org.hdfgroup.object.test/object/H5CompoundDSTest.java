@@ -29,6 +29,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
+
 import hdf.object.Attribute;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -580,7 +581,7 @@ public class H5CompoundDSTest
                 data = (List<?>) testDataset.getData();
             }
             catch (final Exception ex) {
-                fail("getData() failed. " + ex);
+                fail("testDataset.getData() failed. " + ex);
             }
             assertNotNull(data);
             assertTrue(data.size() > 0);
@@ -1440,9 +1441,8 @@ public class H5CompoundDSTest
                 try {
                     final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
-                    for (int j = 0; j < ints.length; j++) {
+                    for (int j = 0; j < ints.length; j++)
                         ints[j] = TEST_VALUE_INT;
-                    }
                 }
                 catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);
@@ -1516,9 +1516,8 @@ public class H5CompoundDSTest
                     assertTrue(ATTRIBUTE_INT_ARRAY_NAME.equals(attr.getAttributeName()));
                     final int[] ints = (int[]) attr.getAttributeData();
                     assertNotNull(ints);
-                    for (int j = 0; j < ints.length; j++) {
+                    for (int j = 0; j < ints.length; j++)
                         assertEquals(TEST_VALUE_INT, ints[j]);
-                    }
                 }
                 catch (Exception ex) {
                     log.trace("testWriteMetadata(): getData() failure:", ex);

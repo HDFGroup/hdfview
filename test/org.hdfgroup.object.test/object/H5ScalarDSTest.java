@@ -508,16 +508,14 @@ public class H5ScalarDSTest
             // test the dimension sizes
             final long[] dims = testDataset.getDims();
             assertNotNull(dims);
-            for (int i = 0; i < rank; i++) {
+            for (int i = 0; i < rank; i++)
                 assertEquals(H5TestFile.DIMs[i], dims[i]);
-            }
 
             // start at 0
             final long[] start = testDataset.getStartDims();
             assertNotNull(start);
-            for (int i = 0; i < rank; i++) {
+            for (int i = 0; i < rank; i++)
                 assertEquals(0, start[i]);
-            }
 
             // test selection
             final long[] selectedDims = testDataset.getSelectedDims();

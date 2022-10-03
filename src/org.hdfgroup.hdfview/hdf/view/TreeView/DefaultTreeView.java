@@ -1191,43 +1191,43 @@ public class DefaultTreeView implements TreeView {
         HObject obj = null;
 
         switch(type) {
-            case GROUP:
-                NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
-                        breadthFirstUserObjects(rootItem));
-                groupDialog.open();
-                obj = groupDialog.getObject();
-                parentItem = findTreeItem(groupDialog.getParentGroup());
-                break;
-            case DATASET:
-                NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                datasetDialog.open();
-                obj = datasetDialog.getObject();
-                parentItem = findTreeItem(datasetDialog.getParentGroup());
-                break;
-            case IMAGE:
-                NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                imageDialog.open();
-                obj = imageDialog.getObject();
-                parentItem = findTreeItem(imageDialog.getParentGroup());
-                break;
-            case TABLE:
-                NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                tableDialog.open();
-                obj = tableDialog.getObject();
-                parentItem = findTreeItem(tableDialog.getParentGroup());
-                break;
-            case DATATYPE:
-                NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                datatypeDialog.open();
-                obj = datatypeDialog.getObject();
-                parentItem = findTreeItem(datatypeDialog.getParentGroup());
-                break;
-            case LINK:
-                NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
-                linkDialog.open();
-                obj = linkDialog.getObject();
-                parentItem = findTreeItem(linkDialog.getParentGroup());
-                break;
+        case GROUP:
+            NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
+                    breadthFirstUserObjects(rootItem));
+            groupDialog.open();
+            obj = groupDialog.getObject();
+            parentItem = findTreeItem(groupDialog.getParentGroup());
+            break;
+        case DATASET:
+            NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            datasetDialog.open();
+            obj = datasetDialog.getObject();
+            parentItem = findTreeItem(datasetDialog.getParentGroup());
+            break;
+        case IMAGE:
+            NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            imageDialog.open();
+            obj = imageDialog.getObject();
+            parentItem = findTreeItem(imageDialog.getParentGroup());
+            break;
+        case TABLE:
+            NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            tableDialog.open();
+            obj = tableDialog.getObject();
+            parentItem = findTreeItem(tableDialog.getParentGroup());
+            break;
+        case DATATYPE:
+            NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            datatypeDialog.open();
+            obj = datatypeDialog.getObject();
+            parentItem = findTreeItem(datatypeDialog.getParentGroup());
+            break;
+        case LINK:
+            NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
+            linkDialog.open();
+            obj = linkDialog.getObject();
+            parentItem = findTreeItem(linkDialog.getParentGroup());
+            break;
         }
 
         if (obj == null)
@@ -2853,58 +2853,6 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Displays the meta data of a data object.
-     *
-     * @param dataObject
-     *            the data object
-     *
-     * @return the MetaDataView that displays the MetaData of the data object
-     *
-     * @throws Exception if a failure occurred
-     */
-    @Override
-    public MetaDataView showMetaData(HObject dataObject) throws Exception {
-        if (dataObject == null)
-            return null;
-
-        log.trace("showMetaData({}): start", dataObject.getName());
-
-        DataViewFactory metaDataViewFactory = null;
-        try {
-            metaDataViewFactory = DataViewFactoryProducer.getFactory(DataViewType.METADATA);
-        }
-        catch (Exception ex) {
-            log.debug("showMetaData(): error occurred while instantiating MetaDataView factory class", ex);
-            viewer.showError("Error occurred while instantiating MetaDataView factory class");
-            return null;
-        }
-
-        if (metaDataViewFactory == null) {
-            log.debug("showMetaData(): MetaDataView factory is null");
-            return null;
-        }
-
-        /* TODO: initargs needs access to MetaDataView parent composite */
-        MetaDataView theView;
-        try {
-            theView = metaDataViewFactory.getMetaDataView(null, viewer, dataObject);
-
-            if (theView == null) {
-                log.debug("showMetaData(): error occurred while instantiating MetaDataView class");
-                viewer.showError("Error occurred while instantiating MetaDataView class");
-                return null;
-            }
-        }
-        catch (ClassNotFoundException ex) {
-            log.debug("showMetaData(): no suitable MetaDataView class found");
-            viewer.showError("Unable to find suitable MetaDataView class for object '" + dataObject.getName() + "'");
-            return null;
-        }
-
-        return theView;
-    }
-
-    /**
      * Updates the current font.
      *
      * @param font
@@ -3040,7 +2988,7 @@ public class DefaultTreeView implements TreeView {
             final Shell openShell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
             openShell.setFont(curFont);
             openShell.setText("Indexing options");
-            openShell.setImage(ViewProperties.getHdfIcon());
+            openShell.setImages(ViewProperties.getHdfIcons());
             openShell.setLayout(new GridLayout(1, true));
 
             // Create main content region
@@ -3183,7 +3131,7 @@ public class DefaultTreeView implements TreeView {
             final Shell openShell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
             openShell.setFont(curFont);
             openShell.setText("Set the library version bounds: ");
-            openShell.setImage(ViewProperties.getHdfIcon());
+            openShell.setImages(ViewProperties.getHdfIcons());
             openShell.setLayout(new GridLayout(1, true));
 
             String[] lowValues = { "Earliest", "V18", "V110", "Latest" };

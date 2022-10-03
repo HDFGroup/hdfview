@@ -496,10 +496,11 @@ public class H5File extends FileFormat
 
                         Attribute attr = null;
                         if (attrType.isCompound())
-                            attr = (Attribute)new H5CompoundAttr(obj, nameA, attrType, dims);
+                            attr = new H5CompoundAttr(obj, nameA, attrType, dims);
                         else
-                            attr = (Attribute)new H5ScalarAttr(obj, nameA, attrType, dims);
+                            attr = new H5ScalarAttr(obj, nameA, attrType, dims);
                         attributeList.add(attr);
+                        log.trace("getAttribute(): Attribute[{}] attributeList.add={}", i, attr);
 
                         // retrieve the attribute value
                         if (lsize <= 0) {
@@ -623,40 +624,40 @@ public class H5File extends FileFormat
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-        Attribute attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+        Attribute attr = new H5ScalarAttr(dataset, attrName, attrType, null);
         attr.writeAttribute(classValue);
 
         attrName = "IMAGE_VERSION";
         String[] versionValue = { "1.2" };
         attrType = new H5Datatype(Datatype.CLASS_STRING, versionValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-        attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+        attr = new H5ScalarAttr(dataset, attrName, attrType, null);
         attr.writeAttribute(versionValue);
 
         long[] attrDims = { 2 };
         attrName = "IMAGE_MINMAXRANGE";
         byte[] attrValueInt = { 0, (byte) 255 };
         attrType = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-        attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, attrDims);
+        attr = new H5ScalarAttr(dataset, attrName, attrType, attrDims);
         attr.writeAttribute(attrValueInt);
 
         attrName = "IMAGE_SUBCLASS";
         String[] subclassValue = { subclass };
         attrType = new H5Datatype(Datatype.CLASS_STRING, subclassValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-        attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+        attr = new H5ScalarAttr(dataset, attrName, attrType, null);
         attr.writeAttribute(subclassValue);
 
         if ((selectionFlag == ScalarDS.INTERLACE_PIXEL) || (selectionFlag == ScalarDS.INTERLACE_PLANE)) {
             attrName = "INTERLACE_MODE";
             String[] interlaceValue = { interlaceMode };
             attrType = new H5Datatype(Datatype.CLASS_STRING, interlaceValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-            attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+            attr = new H5ScalarAttr(dataset, attrName, attrType, null);
             attr.writeAttribute(interlaceValue);
         }
         else {
             attrName = "PALETTE";
             long[] palRef = { 0 }; // set ref to null
             attrType = new H5Datatype(Datatype.CLASS_REFERENCE, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-            attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+            attr = new H5ScalarAttr(dataset, attrName, attrType, null);
             attr.writeAttribute(palRef);
         }
     }
@@ -1441,6 +1442,7 @@ public class H5File extends FileFormat
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
+    @Override
     public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception {
         log.trace("createNamedDatatype(): start: name={}", name);
 
@@ -2121,7 +2123,7 @@ public class H5File extends FileFormat
         }
         catch (Exception ex) {
             try {
-                log.debug("open(): open failed, attempting to open file read-only");
+                log.debug("open(): open failed, attempting to open file read-only", ex);
                 fid = H5.H5Fopen(fullFileName, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
                 isReadOnly = true;
             }
@@ -2858,6 +2860,7 @@ public class H5File extends FileFormat
      * @throws Exception
      *            If there is a failure.
      */
+    @Override
     public void exportDataset(String file_export_name, Dataset object, int binary_order) throws Exception {
         long did = object.open();
         H5.H5export_dataset(file_export_name, did, object.getFullName(), binary_order);

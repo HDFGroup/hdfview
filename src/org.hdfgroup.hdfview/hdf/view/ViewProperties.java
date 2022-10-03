@@ -206,6 +206,8 @@ public class ViewProperties extends PreferenceStore
     /** a list of srb accounts */
     private static ArrayList<String[]> srbAccountList       = new ArrayList<>(5);
 
+    private static boolean           isMac                  = System.getProperty("os.name").toLowerCase().contains("mac");
+
     /**
      * flag to indicate if auto contrast is used in image processing. Do not use
      * autocontrast by default (2.6 change).
@@ -249,13 +251,17 @@ public class ViewProperties extends PreferenceStore
     private static int               startMembers          = 0;
 
     private static Image
-    hdfIcon, h4Icon, h4IconR, h5Icon, h5IconR, ncIcon, ncIconR,
-    largeHdfIcon, blankIcon, helpIcon, fileopenIcon, filesaveIcon, filenewIcon, filecloseIcon, foldercloseIcon,
+    h4Icon, h4IconR, h5Icon, h5IconR, ncIcon, ncIconR,
+    blankIcon, helpIcon, fileopenIcon, filesaveIcon, filenewIcon, filecloseIcon, foldercloseIcon,
     folderopenIcon, foldercloseIconA, folderopenIconA, datasetIcon, imageIcon, tableIcon, textIcon, datasetIconA,
     imageIconA, tableIconA, textIconA, zoominIcon, zoomoutIcon, paletteIcon, chartIcon, brightIcon, autocontrastIcon,
     copyIcon, cutIcon, pasteIcon, previousIcon, nextIcon, firstIcon, lastIcon, animationIcon, datatypeIcon,
     datatypeIconA, linkIcon, iconAPPS, iconURL, iconVIDEO, iconXLS, iconPDF, iconAUDIO, questionIcon;
 
+    private static Image[] hdfIcons = new Image[6];
+
+    private static Image[] hdfMacIcons = new Image[6];
+    
     private static String            propertyFile;
 
     /** a list of treeview modules */
@@ -543,7 +549,12 @@ public class ViewProperties extends PreferenceStore
 
     /** @return the HDF Icon */
     public static Image getHdfIcon() {
-        return hdfIcon;
+        return isMac ? hdfMacIcons[1] : hdfIcons[1];
+    }
+
+    /** @return the HDF Icons */
+    public static Image[] getHdfIcons() {
+        return isMac ? hdfMacIcons: hdfIcons;
     }
 
     /** @return the HDF4 Icon */
@@ -703,7 +714,7 @@ public class ViewProperties extends PreferenceStore
 
     /** @return the Large HDF Icon */
     public static Image getLargeHdfIcon() {
-        return largeHdfIcon;
+        return isMac ? hdfMacIcons[2] : hdfIcons[2];
     }
 
     /** @return the Previous Icon */
@@ -776,12 +787,111 @@ public class ViewProperties extends PreferenceStore
         InputStream s = null;
         // load icon images
         try {
-            s = ViewProperties.class.getResourceAsStream("icons/hdf.gif");
-            hdfIcon = new Image(null, s);
+            s = ViewProperties.class.getResourceAsStream("icons/hdf16.png");
+            hdfIcons[0] = new Image(null, s);            
         }
         catch (Exception ex) {
-            hdfIcon = null;
-            log.trace("hdfIcon: null");
+            hdfIcons[0] = null;
+            log.trace("hdfIcons[0]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf32.png");
+            hdfIcons[1] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfIcons[1] = null;
+            log.trace("hdfIcons[1]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf64.png");
+            hdfIcons[2] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfIcons[2] = null;
+            log.trace("hdfIcons[3]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf128.png");
+            hdfIcons[3] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfIcons[3] = null;
+            log.trace("hdfIcons[3]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf512.png");
+            hdfIcons[4] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfIcons[4] = null;
+            log.trace("hdfIcons[4]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf1024.png");
+            hdfIcons[5] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfIcons[5] = null;
+            log.trace("hdfIcons[5]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf_mac16.png");
+            hdfMacIcons[0] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfMacIcons[0] = null;
+            log.trace("hdfMacIcons[0]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf_mac32.png");
+            hdfMacIcons[1] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfMacIcons[1] = null;
+            log.trace("hdfMacIcons[1]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf_mac64.png");
+            hdfMacIcons[2] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfMacIcons[2] = null;
+            log.trace("hdfMacIcons[2]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf_mac128.png");
+            hdfMacIcons[3] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfMacIcons[3] = null;
+            log.trace("hdfMacIcons[3]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf_mac512.png");
+            hdfMacIcons[4] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfMacIcons[4] = null;
+            log.trace("hdfMacIcons[4]: null");
+        }
+
+        try {
+            s = ViewProperties.class.getResourceAsStream("icons/hdf_mac1024.png");
+            hdfMacIcons[5] = new Image(null, s);
+        }
+        catch (Exception ex) {
+            hdfMacIcons[5] = null;
+            log.trace("hdfMacIcons[5]: null");
         }
 
         try {
@@ -1099,14 +1209,6 @@ public class ViewProperties extends PreferenceStore
             log.trace("pasteIcon: null");
         }
 
-        try {
-            s = ViewProperties.class.getResourceAsStream("icons/hdf_large.gif");
-            largeHdfIcon = new Image(null, s);
-        }
-        catch (Exception ex) {
-            largeHdfIcon = null;
-            log.trace("largeHdfIcon: null");
-        }
 
         try {
             s = ViewProperties.class.getResourceAsStream("icons/previous.gif");

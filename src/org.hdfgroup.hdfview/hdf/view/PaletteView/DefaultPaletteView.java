@@ -176,7 +176,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView
         shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("Image Palette for - " + dataset.getPath() + dataset.getName());
-        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
 
         shell.setData(this);
@@ -646,7 +646,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView
             tableShell = new Shell(parent, SWT.SHELL_TRIM);
             tableShell.setFont(curFont);
             tableShell.setText("");
-            tableShell.setImage(ViewProperties.getHdfIcon());
+            tableShell.setImages(ViewProperties.getHdfIcons());
             tableShell.setLayout(new GridLayout(1, true));
 
             Composite content = new Composite(tableShell, SWT.NONE);

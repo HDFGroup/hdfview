@@ -1322,7 +1322,7 @@ public class DebugHDF {
             // Block for Windows Platform
             if (os.startsWith("Windows")) {
                 String cmd = "rundll32 url.dll,FileProtocolHandler " + url;
-                runtime.exec(cmd);
+                //runtime.exec(cmd);
             }
             // Block for Mac OS
             else if (os.startsWith("Mac OS")) {
@@ -2243,8 +2243,6 @@ public class DebugHDF {
         try {
             System.gc();
             Thread.sleep(15);
-            System.runFinalization();
-            Thread.sleep(15);
         }
         catch (final Exception ex){
             ex.printStackTrace();
@@ -2770,7 +2768,6 @@ public class DebugHDF {
 
         for (int i = 0; (usedMem1 < usedMem2) && (i < 500); ++ i)
         {
-            s_runtime.runFinalization ();
             s_runtime.gc ();
             Thread.yield ();
 
@@ -3755,8 +3752,6 @@ public class DebugHDF {
         H5File file = new H5File(filename, H5File.WRITE);
         file.open();
 
-        System.runFinalization();
-
         Dataset dataset = (Dataset)file.get(dname);
 
         int[] buf = (int[])dataset.read();
@@ -3782,8 +3777,6 @@ public class DebugHDF {
 
         H5File file = new H5File(filename, H5File.WRITE);
         //    file.open();
-
-        System.runFinalization();
 
         Dataset dataset = (Dataset)file.get(dname);
 

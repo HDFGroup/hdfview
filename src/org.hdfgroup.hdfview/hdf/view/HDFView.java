@@ -412,7 +412,7 @@ public class HDFView implements DataViewManager
     private Shell createMainWindow() {
         // Create a new display window
         final Shell shell = new Shell(display);
-        shell.setImage(ViewProperties.getHdfIcon());
+        shell.setImages(ViewProperties.getHdfIcons());
         shell.setFont(currentFont);
         shell.setText("HDFView " + HDFVIEW_VERSION);
         shell.setLayout(new GridLayout(3, false));
