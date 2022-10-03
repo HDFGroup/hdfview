@@ -159,6 +159,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer
     protected String datatypeDescription = null;
 
     /**
+     * The description of the datatype.
+     */
+    protected boolean datatypeNATIVE = false;
+
+    /**
      * The class of the datatype.
      */
     protected int datatypeClass;
@@ -372,6 +377,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
             throw new Exception("invalid datatype sign - " + tsign);
 
         datatypeClass = tclass;
+        if (datatypeSize == NATIVE)
+            datatypeNATIVE = true;
         datatypeSize = tsize;
         datatypeOrder = torder;
         datatypeSign = tsign;
@@ -636,8 +643,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
             while (entries.hasNext()) {
                 Entry thisEntry = entries.next();
                 enumStr.append((String) thisEntry.getKey())
-                       .append("=")
-                       .append((String) thisEntry.getValue());
+                .append("=")
+                .append((String) thisEntry.getValue());
 
                 i--;
                 if (i > 0)
@@ -751,69 +758,69 @@ public abstract class Datatype extends HObject implements MetaDataContainer
         StringBuilder description = new StringBuilder();
 
         switch (datatypeClass) {
-            case CLASS_CHAR:
-                description.append("8-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
-                break;
-            case CLASS_INTEGER:
-                if (datatypeSize == NATIVE)
-                    description.append("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
-                else
-                    description.append(String.valueOf(datatypeSize * 8)).append("-bit ")
-                            .append((isUnsigned() ? "unsigned " : "")).append("integer");
-                break;
-            case CLASS_FLOAT:
-                if (datatypeSize == NATIVE)
-                    description.append("native floating-point");
-                else
-                    description.append(String.valueOf(datatypeSize * 8)).append("-bit floating-point");
-                break;
-            case CLASS_STRING:
-                description.append("String");
-                break;
-            case CLASS_REFERENCE:
-                description.append("Object reference");
-                break;
-            case CLASS_OPAQUE:
-                if (datatypeSize == NATIVE)
-                    description.append("native opaque");
-                else
-                    description.append(String.valueOf(datatypeSize * 8)).append("-bit opaque");
-                break;
-            case CLASS_BITFIELD:
-                if (datatypeSize == NATIVE)
-                    description.append("native bitfield");
-                else
-                    description.append(String.valueOf(datatypeSize * 8)).append("-bit bitfield");
-                break;
-            case CLASS_ENUM:
-                if (datatypeSize == NATIVE)
-                    description.append("native enum");
-                else
-                    description.append(String.valueOf(datatypeSize * 8)).append("-bit enum");
-                break;
-            case CLASS_ARRAY:
-                description.append("Array");
+        case CLASS_CHAR:
+            description.append("8-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
+            break;
+        case CLASS_INTEGER:
+            if (datatypeNATIVE)
+                description.append("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
+            else
+                description.append(String.valueOf(datatypeSize * 8)).append("-bit ")
+                .append((isUnsigned() ? "unsigned " : "")).append("integer");
+            break;
+        case CLASS_FLOAT:
+            if (datatypeNATIVE)
+                description.append("native floating-point");
+            else
+                description.append(String.valueOf(datatypeSize * 8)).append("-bit floating-point");
+            break;
+        case CLASS_STRING:
+            description.append("String");
+            break;
+        case CLASS_REFERENCE:
+            description.append("Object reference");
+            break;
+        case CLASS_OPAQUE:
+            if (datatypeNATIVE)
+                description.append("native opaque");
+            else
+                description.append(String.valueOf(datatypeSize * 8)).append("-bit opaque");
+            break;
+        case CLASS_BITFIELD:
+            if (datatypeNATIVE)
+                description.append("native bitfield");
+            else
+                description.append(String.valueOf(datatypeSize * 8)).append("-bit bitfield");
+            break;
+        case CLASS_ENUM:
+            if (datatypeNATIVE)
+                description.append("native enum");
+            else
+                description.append(String.valueOf(datatypeSize * 8)).append("-bit enum");
+            break;
+        case CLASS_ARRAY:
+            description.append("Array");
 
-                if (arrayDims != null) {
-                    description.append(" [");
-                    for (int i = 0; i < arrayDims.length; i++) {
-                        description.append(arrayDims[i]);
-                        if (i < arrayDims.length - 1)
-                            description.append(" x ");
-                    }
-                    description.append("]");
+            if (arrayDims != null) {
+                description.append(" [");
+                for (int i = 0; i < arrayDims.length; i++) {
+                    description.append(arrayDims[i]);
+                    if (i < arrayDims.length - 1)
+                        description.append(" x ");
                 }
+                description.append("]");
+            }
 
-                break;
-            case CLASS_COMPOUND:
-                description.append("Compound");
-                break;
-            case CLASS_VLEN:
-                description.append("Variable-length");
-                break;
-            default:
-                description.append("Unknown");
-                break;
+            break;
+        case CLASS_COMPOUND:
+            description.append("Compound");
+            break;
+        case CLASS_VLEN:
+            description.append("Variable-length");
+            break;
+        default:
+            description.append("Unknown");
+            break;
         }
 
         if (baseType != null)

@@ -1262,8 +1262,10 @@ public class H5Datatype extends Datatype
                     break;
                 default:
                     if (datatypeSize == NATIVE) {
+                        datatypeNATIVE = true;
                         log.trace("createNative(): CLASS_INT is H5T_NATIVE_INT");
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT);
+                        datatypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
                     }
                     else {
                         /* Custom sized integer */
@@ -1308,8 +1310,10 @@ public class H5Datatype extends Datatype
                     tid = H5.H5Tenum_create(tmptid);
                 }
                 else {
-                    if (datatypeSize == NATIVE)
+                    if (datatypeSize == NATIVE) {
+                        datatypeNATIVE = true;
                         datatypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
+                    }
 
                     tid = H5.H5Tcreate(HDF5Constants.H5T_ENUM, datatypeSize);
                 }
@@ -1486,8 +1490,10 @@ public class H5Datatype extends Datatype
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B64);
                     break;
                 default:
-                    if (datatypeSize == NATIVE)
+                    if (datatypeSize == NATIVE) {
+                        datatypeNATIVE = true;
                         datatypeSize = 1;
+                    }
 
                     /* Custom sized bitfield */
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B8);
@@ -1518,8 +1524,11 @@ public class H5Datatype extends Datatype
             log.trace("createNative(): CLASS_OPAQUE is {}-byte H5T_OPAQUE", datatypeSize);
 
             try {
-                if (datatypeSize == NATIVE)
+                if (datatypeSize == NATIVE) {
+                    datatypeNATIVE = true;
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_OPAQUE);
+                    datatypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_OPAQUE);
+                }
                 else
                     tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, datatypeSize);
 
@@ -1714,9 +1723,11 @@ public class H5Datatype extends Datatype
         else if (dtype.isVLEN()) {
             log.trace("allocateArray(): isVLEN");
 
-            data = new ArrayList<>(numPoints);
-            // if (baseType != null)
-            // ((ArrayList<>)data).add(H5Datatype.allocateArray(baseType, numPoints));
+            data = new ArrayList[numPoints];
+            for (int j = 0; j < numPoints; j++)
+                ((ArrayList[])data)[j] = new ArrayList<byte[]>();
+                // if (baseType != null)
+                // ((ArrayList<>)data).add(H5Datatype.allocateArray(baseType, numPoints));
         }
         else if (typeClass == HDF5Constants.H5T_ARRAY) {
             log.trace("allocateArray(): class H5T_ARRAY");
@@ -1800,7 +1811,7 @@ public class H5Datatype extends Datatype
             break;
         case CLASS_INTEGER:
             log.trace("getDescription(): Int");
-            if (datatypeSize == NATIVE)
+            if (datatypeNATIVE)
                 description.append("native ").append(isUnsigned() ? "unsigned " : "").append("integer");
             else
                 description.append(String.valueOf(datatypeSize * 8)).append("-bit ")
@@ -1808,7 +1819,7 @@ public class H5Datatype extends Datatype
             break;
         case CLASS_FLOAT:
             log.trace("getDescription(): Float");
-            if (datatypeSize == NATIVE)
+            if (datatypeNATIVE)
                 description.append("native floating-point");
             else
                 description.append(String.valueOf(datatypeSize * 8)).append("-bit floating-point");
@@ -1860,14 +1871,14 @@ public class H5Datatype extends Datatype
             break;
         case CLASS_BITFIELD:
             log.trace("getDescription(): Bit");
-            if (datatypeSize == NATIVE)
+            if (datatypeNATIVE)
                 description.append("native bitfield");
             else
                 description.append(String.valueOf(datatypeSize * 8)).append("-bit bitfield");
             break;
         case CLASS_OPAQUE:
             log.trace("getDescription(): Opaque");
-            if (datatypeSize == NATIVE)
+            if (datatypeNATIVE)
                 description.append("native Opaque");
             else
                 description.append(String.valueOf(datatypeSize)).append("-byte Opaque");
@@ -1937,7 +1948,7 @@ public class H5Datatype extends Datatype
             break;
         case CLASS_ENUM:
             log.trace("getDescription(): Enum");
-            if (datatypeSize == NATIVE)
+            if (datatypeNATIVE)
                 description.append("native enum");
             else
                 description.append(String.valueOf(datatypeSize * 8)).append("-bit enum");

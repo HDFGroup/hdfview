@@ -236,9 +236,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     @Override
     public void init() {
         if (inited) {
+            // already called. Initialize only once
             resetSelection();
-            log.trace("init(): Dataset already initialized");
-            return; // already called. Initialize only once
+            log.trace("init(): H5ScalarDS already initialized");
+            return;
         }
 
         long did = HDF5Constants.H5I_INVALID_HID;
@@ -816,7 +817,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 log.debug("scalarDatasetCommonIO(): writeBuf is null");
                 throw new Exception("write buffer is null");
             }
-            log.trace("scalarDatasetCommonIO(): check write unsupported datatype data");
         }
 
         long did = open();
@@ -953,6 +953,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                      * conversion request type.
                      */
                     Object tmpData = writeBuf;
+                    log.trace("scalarDatasetCommonIO(): writeBuf={}", writeBuf);
                     try {
                         // Check if we need to convert integer data
                         int tsize = (int) dsDatatype.getDatatypeSize();
@@ -2391,5 +2392,4 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         else
             return -1;
     }
-
 }
