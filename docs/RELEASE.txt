@@ -38,6 +38,15 @@ Major Bug Fixes
       hdf5 library for read and write also be fixed.
       HDFView 3.2.1+ now requires hdf5-1.12.3 as a minimum.
       
+      HDFView-221 Add support for true Variable-length types in Java
+      Sub-issue HDFView-222 fixed the read/write support for variable-length
+      in the Java wrappers. This fix involved handling the data object as
+      a list of lists and using the datatype of the list.
+      Sub-issue HDFView-222 fixed the object library to handle the List of Lists
+      concept.
+      Sub-issue HDFView-223 updated the DataProviders, DataDisplayConverters
+      and DataValidators to work with variable-length List of Lists.
+
     ***** Previous fixes *****
     * HDFVIEW-197 (incorrectly displaying image data) has been fixed. The
       problem was that the initial starting values for calculation of minimum
