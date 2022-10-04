@@ -656,7 +656,7 @@ public class H5File extends FileFormat
             attrName = "PALETTE";
             long[] palRef = { 0 }; // set ref to null
             attrType = new H5Datatype(Datatype.CLASS_REFERENCE, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-            attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
+            attr = new H5ScalarAttr(dataset, attrName, attrType, null);
             attr.writeAttribute(palRef);
         }
     }

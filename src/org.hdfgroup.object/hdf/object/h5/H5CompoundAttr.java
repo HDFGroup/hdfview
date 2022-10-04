@@ -466,7 +466,6 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
             init();
 
         if (datatype == null) {
-            log.trace("getDatatype(): datatype == null");
             long aid = HDF5Constants.H5I_INVALID_HID;
             long tid = HDF5Constants.H5I_INVALID_HID;
 

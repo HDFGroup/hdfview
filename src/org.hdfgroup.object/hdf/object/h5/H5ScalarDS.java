@@ -2391,5 +2391,4 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         else
             return -1;
     }
-
 }
