@@ -252,8 +252,10 @@ public class DataProviderFactory
         public Object getDataValue(int columnIndex, int rowIndex) {
             try {
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
-
-                theValue = Array.get(dataBuf, bufIndex);
+                if (dataBuf instanceof ArrayList)
+                    theValue = ((ArrayList)dataBuf).get(bufIndex);
+                else
+                    theValue = Array.get(dataBuf, bufIndex);
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
@@ -315,7 +317,10 @@ public class DataProviderFactory
          */
         public Object getDataValue(Object obj, int index) {
             try {
-                theValue = Array.get(obj, index);
+                if (obj instanceof ArrayList)
+                    theValue = ((ArrayList)obj).get(index);
+                else
+                    theValue = Array.get(obj, index);
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}): failure: ", index, ex);
@@ -420,14 +425,20 @@ public class DataProviderFactory
             }
 
             // No need to update if values are the same
-            Object oldVal = this.getDataValue(bufObject, bufIndex);
-            if ((oldVal != null) && newValue.equals(oldVal.toString())) {
-                log.debug("updateAtomicValue(): cell value not updated; new value same as old value");
-                return;
+            int buf_size = Array.getLength(bufObject);
+            log.trace("updateAtomicValue(): bufObject size is {}", buf_size);
+            if (buf_size > 0) {
+                Object oldVal = this.getDataValue(bufObject, bufIndex);
+                if ((oldVal != null) && newValue.equals(oldVal.toString())) {
+                    log.debug("updateAtomicValue(): cell value not updated; new value same as old value");
+                    return;
+                }
             }
 
+            String bname = bufObject.getClass().getName();
+            String nname = newValue.getClass().getName();
+            log.trace("updateArrayOfAtomicElements(): bufObject cname={} of data newValue={}", bname, nname);
             char runtimeTypeClass = Utils.getJavaObjectRuntimeClass(bufObject);
-
             log.trace("updateAtomicValue(): runtimeTypeClass={}", runtimeTypeClass);
 
             switch (runtimeTypeClass) {
@@ -469,7 +480,46 @@ public class DataProviderFactory
                 Array.setDouble(bufObject, bufIndex, dvalue);
                 break;
             default:
-                Array.set(bufObject, bufIndex, newValue);
+                String rname = bufObject.getClass().getSimpleName();
+                log.trace("updateAtomicValue(): getSimpleName={}", rname);
+                switch (rname.charAt(0)) {
+                case 'B':
+                    Byte bValue = Byte.valueOf((String) newValue);
+                    Array.set(bufObject, bufIndex, bValue);
+                    break;
+                case 'S':
+                    Short sValue = Short.valueOf((String) newValue);
+                    Array.set(bufObject, bufIndex, sValue);
+                    break;
+                case 'I':
+                    Integer iValue = Integer.valueOf((String) newValue);
+                    Array.set(bufObject, bufIndex, iValue);
+                    break;
+                case 'J':
+                    Long lValue = 0L;
+                    String cAname = this.originalFormatClass.getName();
+                    char dAname = cAname.charAt(cAname.lastIndexOf('[') + 1);
+                    if (dAname == 'J') {
+                        BigInteger big = new BigInteger((String) newValue);
+                        lValue = big.longValue();
+                    }
+                    else
+                        lValue = Long.valueOf((String) newValue);
+                    Array.set(bufObject, bufIndex, lValue);
+                    break;
+                case 'F':
+                    Float fValue = Float.valueOf((String) newValue);
+                    Array.set(bufObject, bufIndex, fValue);
+                    break;
+                case 'D':
+                    Double dValue = Double.valueOf((String) newValue);
+                    Array.set(bufObject, bufIndex, dValue);
+                    break;
+                default:
+                    log.trace("updateAtomicValue(): bufObject={} bufIndex={} newValue={}", bufObject, bufIndex, newValue);
+                    Array.set(bufObject, bufIndex, newValue);
+                    break;
+                }
                 break;
             }
 
@@ -1056,10 +1106,13 @@ public class DataProviderFactory
 
         private final StringBuilder buffer;
 
+        private final int baseTypeClass;
+
         VlenDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
 
             Datatype baseType = dtype.getDatatypeBase();
+            baseTypeClass = baseType.getDatatypeClass();
 
             baseTypeDataProvider = getDataProvider(baseType, dataBuf, dataTransposed);
 
@@ -1206,9 +1259,8 @@ public class DataProviderFactory
 
                 long vlSize = Array.getLength(dataBuf);
                 log.debug("setDataValue(): vlSize={}", vlSize);
-                bufIndex *= vlSize;
 
-                updateArrayElements(dataBuf, newValue, columnIndex, bufIndex);
+                updateArrayElements(dataBuf, newValue, columnIndex, rowIndex);
             }
             catch (Exception ex) {
                 log.debug("setDataValue(rowIndex={}, columnIndex={}, {}): cell value update failure: ", rowIndex, columnIndex, newValue, ex);
@@ -1220,10 +1272,9 @@ public class DataProviderFactory
         public void setDataValue(int columnIndex, int rowIndex, Object bufObject, Object newValue) {
             try {
                 long vlSize = Array.getLength(bufObject);
-                log.debug("setDataValue(): vlSize={}", vlSize);
-                long bufIndex = rowIndex * vlSize;
+                log.debug("setDataValue(): vlSize={} for [c{}, r{}]", vlSize, columnIndex, rowIndex);
 
-                updateArrayElements(bufObject, newValue, columnIndex, (int) bufIndex);
+                updateArrayElements(bufObject, newValue, columnIndex, rowIndex);
             }
             catch (Exception ex) {
                 log.debug("setDataValue(rowIndex={}, columnIndex={}, bufObject={}, {}): cell value update failure: ", rowIndex, columnIndex, bufObject, newValue, ex);
@@ -1236,60 +1287,119 @@ public class DataProviderFactory
             throw new UnsupportedOperationException("setDataValue(int, Object, Object) should not be called for VlenDataProviders");
         }
 
-        private void updateArrayElements(Object curBuf, Object newValue, int columnIndex, int bufStartIndex) {
+        private void updateArrayElements(Object curBuf, Object newValue, int columnIndex, int rowStartIndex) {
             long vlSize = Array.getLength(curBuf);
             log.debug("updateArrayElements(): vlSize={}", vlSize);
-            StringTokenizer st = new StringTokenizer((String) newValue, ",[]");
-            if (st.countTokens() < vlSize) {
-                /*
-                 * TODO:
-                 */
-                /* Tools.showError(shell, "Select", "Number of data points < " + morder + "."); */
-                log.debug("updateArrayElements(): number of data points ({}) < array size {}", st.countTokens(), vlSize);
-                log.trace("updateArrayElements(curBuf={}, newValue={}, bufStartIndex={}): finish", curBuf, newValue, bufStartIndex);
-                return;
-            }
 
             if (baseTypeDataProvider instanceof CompoundDataProvider)
-                updateArrayOfCompoundElements(st, curBuf, columnIndex, bufStartIndex);
+                updateArrayOfCompoundElements(newValue, curBuf, columnIndex, rowStartIndex);
             else if (baseTypeDataProvider instanceof ArrayDataProvider)
-                updateArrayOfArrayElements(st, curBuf, columnIndex, bufStartIndex);
+                updateArrayOfArrayElements(newValue, curBuf, columnIndex, rowStartIndex);
             else if (baseTypeDataProvider instanceof VlenDataProvider)
-                updateArrayOfArrayElements(st, curBuf, columnIndex, bufStartIndex);
+                updateArrayOfArrayElements(newValue, curBuf, columnIndex, rowStartIndex);
             else
-                updateArrayOfAtomicElements(st, curBuf, bufStartIndex);
+                updateArrayOfAtomicElements(newValue, curBuf, rowStartIndex);
         }
 
-        private void updateArrayOfCompoundElements(StringTokenizer tokenizer, Object curBuf, int columnIndex, int bufStartIndex) {
+        private void updateArrayOfCompoundElements(Object newValue, Object curBuf, int columnIndex, int rowIndex) {
             long vlSize = Array.getLength(curBuf);
             log.debug("updateArrayOfCompoundElements(): vlSize={}", vlSize);
-            for (int i = 0; i < vlSize; i++) {
-                List<?> cmpdDataList = (List<?>) ((Object[]) curBuf)[i];
-                baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, cmpdDataList,
-                        tokenizer.nextToken().trim());
-                isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
-            }
+            long adjustedRowIdx = (rowIndex * vlSize * colCount)
+                    + (columnIndex / ((CompoundDataProvider) baseTypeDataProvider).baseProviderIndexMap.size());
+            long adjustedColIdx = columnIndex % ((CompoundDataProvider) baseTypeDataProvider).baseProviderIndexMap.size();
+
+            /*
+             * Since we flatten array of compound types, we only need to update a single value.
+             */
+            baseTypeDataProvider.setDataValue((int) adjustedColIdx, (int) adjustedRowIdx, curBuf, newValue);
+            isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
         }
 
-        private void updateArrayOfArrayElements(StringTokenizer tokenizer, Object curBuf, int columnIndex, int bufStartIndex) {
-            long vlSize = Array.getLength(curBuf);
+        private void updateArrayOfArrayElements(Object newValue, Object curBuf, int columnIndex, int rowIndex) {
+            ArrayList vlElements = ((ArrayList[])curBuf)[rowIndex];
+            log.debug("updateArrayOfArrayElements(): vlElements={}", vlElements);
+            long vlSize = vlElements.size();
             log.debug("updateArrayOfArrayElements(): vlSize={}", vlSize);
-            for (int i = 0; i < vlSize; i++) {
-                /*
-                 * TODO: not quite right.
-                 */
-                baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, curBuf, tokenizer.nextToken().trim());
+
+            StringTokenizer st = new StringTokenizer((String) newValue, ",[]");
+            int newcnt = st.countTokens();
+
+            Object[] buffer = null;
+            switch (baseTypeClass) {
+            case Datatype.CLASS_CHAR:
+                buffer = new Byte[newcnt];
+                break;
+            case Datatype.CLASS_INTEGER:
+                buffer = new Integer[newcnt];
+                break;
+            case Datatype.CLASS_FLOAT:
+                buffer = new Double[newcnt];
+                break;
+            case Datatype.CLASS_STRING:
+                buffer = new String[newcnt];
+                break;
+            case Datatype.CLASS_REFERENCE:
+            case Datatype.CLASS_OPAQUE:
+            case Datatype.CLASS_BITFIELD:
+            case Datatype.CLASS_ENUM:
+            case Datatype.CLASS_ARRAY:
+            case Datatype.CLASS_COMPOUND:
+            case Datatype.CLASS_VLEN:
+            default:
+                buffer = new Object[newcnt];
+                break;
+            }
+            for (int i = 0; i < newcnt; i++) {
+                baseTypeDataProvider.setDataValue(columnIndex, i, buffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
+            vlElements = new ArrayList<>(Arrays.asList(buffer));
+            ((ArrayList[])curBuf)[rowIndex] = vlElements;
         }
 
-        private void updateArrayOfAtomicElements(StringTokenizer tokenizer, Object curBuf, int bufStartIndex) {
-            long vlSize = Array.getLength(curBuf);
+        private void updateArrayOfAtomicElements(Object newValue, Object curBuf, int rowStartIdx) {
+            ArrayList vlElements = ((ArrayList[])curBuf)[rowStartIdx];
+            long vlSize = vlElements.size();
             log.debug("updateArrayOfAtomicElements(): vlSize={}", vlSize);
-            for (int i = 0; i < vlSize; i++) {
-                baseTypeDataProvider.setDataValue(bufStartIndex + i, curBuf, tokenizer.nextToken().trim());
+
+            StringTokenizer st = new StringTokenizer((String) newValue, ",[]");
+            int newcnt = st.countTokens();
+            log.debug("updateArrayOfAtomicElements(): count={}", newcnt);
+            Object[] buffer = null;
+            switch (baseTypeClass) {
+            case Datatype.CLASS_CHAR:
+                buffer = new Byte[newcnt];
+                break;
+            case Datatype.CLASS_INTEGER:
+                buffer = new Integer[newcnt];
+                break;
+            case Datatype.CLASS_FLOAT:
+                buffer = new Double[newcnt];
+                break;
+            case Datatype.CLASS_STRING:
+                buffer = new String[newcnt];
+                break;
+            case Datatype.CLASS_REFERENCE:
+            case Datatype.CLASS_OPAQUE:
+            case Datatype.CLASS_BITFIELD:
+            case Datatype.CLASS_ENUM:
+            case Datatype.CLASS_ARRAY:
+            case Datatype.CLASS_COMPOUND:
+            case Datatype.CLASS_VLEN:
+            default:
+                buffer = new Object[newcnt];
+                break;
+            }
+            for (int i = 0; i < newcnt; i++) {
+                baseTypeDataProvider.setDataValue(i, buffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
+            String bname = buffer.getClass().getName();
+            String cname = curBuf.getClass().getName();
+            log.trace("updateArrayOfAtomicElements(): buffer cname={} of data cname={}", bname, cname);
+            vlElements = new ArrayList<>(Arrays.asList(buffer));
+            log.debug("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
+            ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
         }
     }
 

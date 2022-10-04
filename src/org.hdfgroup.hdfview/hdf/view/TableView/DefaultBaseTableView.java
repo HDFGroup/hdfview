@@ -2495,7 +2495,7 @@ public abstract class DefaultBaseTableView implements TableView
                 Tools.showError(shell, "Select", "No data selected.");
                 return;
             }
-            if (!(theData instanceof byte[])) {
+            if (!(theData instanceof byte[]) && !(theData instanceof ArrayList)) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Select", "Data selected is not a reference.");
                 return;
