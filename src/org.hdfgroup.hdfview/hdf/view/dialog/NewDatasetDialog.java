@@ -227,6 +227,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
 
                     String currentStr = currentSizeField.getText();
                     int idx = currentStr.lastIndexOf('x');
+
                     StringBuilder chunkStr = new StringBuilder();
 
                     if (rank <= 1) {

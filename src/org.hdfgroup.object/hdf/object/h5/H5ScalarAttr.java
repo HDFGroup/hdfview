@@ -281,7 +281,6 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
         }
     }
 
-
     /**
      * Retrieves datatype and dataspace information from file and sets the attribute
      * in memory.
@@ -295,8 +294,9 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
     @Override
     public void init() {
         if (inited) {
+            // already called. Initialize only once
             resetSelection();
-            log.trace("init(): H5ScalarAttr already inited");
+            log.trace("init(): H5ScalarAttr already initialized");
             return;
         }
 
@@ -305,7 +305,6 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
         long sid = HDF5Constants.H5I_INVALID_HID;
         long nativeTID = HDF5Constants.H5I_INVALID_HID;
 
-        log.trace("init(): FILE_TYPE_HDF5");
         aid = open();
         if (aid >= 0) {
             try {
@@ -416,7 +415,6 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
             init();
 
         if (datatype == null) {
-            log.trace("getDatatype(): datatype == null");
             long aid = HDF5Constants.H5I_INVALID_HID;
             long tid = HDF5Constants.H5I_INVALID_HID;
 
@@ -617,7 +615,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute
 
                 tid = H5.H5Aget_type(aid);
                 long size = H5.H5Tget_size(tid) * lsize[0];
-                log.trace("readBytes(): size={}", size);
+                log.trace("readBytes(): size = {}", size);
 
                 if (size < Integer.MIN_VALUE || size > Integer.MAX_VALUE)
                     throw new Exception("Invalid int size");

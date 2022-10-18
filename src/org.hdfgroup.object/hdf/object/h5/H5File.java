@@ -1522,6 +1522,7 @@ public class H5File extends FileFormat
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
+    @Override
     public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception {
         log.trace("createNamedDatatype(): start: name={}", name);
 
@@ -2956,6 +2957,7 @@ public class H5File extends FileFormat
      * @throws Exception
      *            If there is a failure.
      */
+    @Override
     public void exportDataset(String file_export_name, Dataset object, int binary_order) throws Exception {
         long did = object.open();
         H5.H5export_dataset(file_export_name, did, object.getFullName(), binary_order);

@@ -23,7 +23,7 @@ import org.junit.Test;
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestTreeViewExport extends AbstractWindowTest {
-    private String filename = "testds.h5";
+    private String filename = "testdsimp.h5";
     private String groupname = "testgroupname";
 
     private File createImportHDF5Dataset(String datasetname) {

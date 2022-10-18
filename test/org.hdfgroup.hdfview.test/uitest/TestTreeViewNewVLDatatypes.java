@@ -5,9 +5,17 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
+import org.eclipse.swtbot.swt.finder.matchers.WidgetOfType;
+import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Test;
@@ -107,6 +115,63 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
                     filetree.visibleRowCount()==2);
             assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
             assertTrue("createNewHDF5VLDataset() filetree is missing dataset '" + dsname + "'", items[0].getNode(0).getText().compareTo(dsname)==0);
+
+            items[0].getNode(0).click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
+            org.hamcrest.Matcher<Shell> shellMatcher = WithRegex.withRegex(dsname + ".*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+
+            table.click(1, 1);
+            String initval = tableShell.bot().text(0).getText();
+
+            String expected = "[]";
+            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "wrong data", expected, initval), initval.equals(expected));
+
+            final SWTBotNatTable edittable = table;
+            final SWTBotShell editShell = tableShell;
+            Display.getDefault().syncExec(new Runnable() {
+                @Override
+                public void run() {
+                    String val = "[1.0, 2.1, 3.2]";
+                    edittable.doubleclick(1, 1);
+                    edittable.widget.getActiveCellEditor().setEditorValue(val);
+                    edittable.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT, true, true);
+                    edittable.click(1, 1);
+                    String newval = editShell.bot().text(0).getText();
+                    assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "wrong value",
+                            val, newval), newval.equals(val));
+                }
+            });
+
+            tableShell.bot().menu().menu("Table").menu("Save Changes to File").click();
+
+            tableShell.bot().menu().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            items[0].getNode(0).click();
+            items[0].getNode(0).contextMenu().contextMenu("Open").click();
+            shellMatcher = WithRegex.withRegex(".*at.*\\[.*in.*\\]");
+            bot.waitUntil(Conditions.waitForShell(shellMatcher));
+
+            tableShell = bot.shells()[1];
+            tableShell.activate();
+            bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
+
+            SWTBotNatTable table2 = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+
+            String expected2 = "[1.0, 2.1, 3.2]";
+            table2.click(1, 1);
+            String updateval = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "wrong data", expected2, updateval), updateval.equals(expected2));
+
+            tableShell.bot().menu().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -157,7 +222,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             daShell.bot().text(0).setText(daname);
 
-            daShell.bot().comboBox(1).setSelection("VLEN_STRING");
+            daShell.bot().comboBox(1).setSelection("VLEN_INTEGER");
 
             daShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(daShell));
@@ -167,6 +232,55 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
                     filetree.visibleRowCount()==1);
             assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
+
+            // Open dataset Attribute Table
+            SWTBotTable attrTable = openAttributeTable(filetree, filename, "/");
+            tableShell = openAttributeObject(attrTable, daname, 0);
+
+            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+
+            table.click(1, 1);
+            String initval = tableShell.bot().text(0).getText();
+
+            String expected = "[]";
+            assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "wrong data", expected, initval), initval.equals(expected));
+
+            final SWTBotNatTable edittable = table;
+            final SWTBotShell editShell = tableShell;
+            Display.getDefault().syncExec(new Runnable() {
+                @Override
+                public void run() {
+                    String val = "[1, 2, 3]";
+                    edittable.doubleclick(1, 1);
+                    edittable.widget.getActiveCellEditor().setEditorValue(val);
+                    edittable.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT, true, true);
+                    edittable.click(1, 1);
+                    String newval = editShell.bot().text(0).getText();
+                    assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "wrong value",
+                            val, newval), newval.equals(val));
+                }
+            });
+
+            tableShell.bot().menu().menu("Table").menu("Save Changes to File").click();
+
+            tableShell.bot().menu().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+
+            items[0].click();
+
+            // Open dataset Attribute Table
+            attrTable = openAttributeTable(filetree, filename, "/");
+            tableShell = openAttributeObject(attrTable, daname, 0);
+
+            SWTBotNatTable table2 = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+
+            String expected2 = "[1, 2, 3]";
+            table2.click(1, 1);
+            String updateval = tableShell.bot().text(0).getText();
+            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "wrong data", expected2, updateval), updateval.equals(expected2));
+
+            tableShell.bot().menu().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
         }
         catch (Exception ex) {
             ex.printStackTrace();
