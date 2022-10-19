@@ -33,7 +33,6 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
 import hdf.object.Utils;
 
 /**
@@ -610,7 +609,6 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
             theObj = convertCompoundByteMembers(dtype, byteData);
         }
         else {
-            log.debug("convertByteMember(): no change");
             theObj = byteData;
         }
 

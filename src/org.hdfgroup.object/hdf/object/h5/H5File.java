@@ -496,11 +496,10 @@ public class H5File extends FileFormat
 
                         Attribute attr = null;
                         if (attrType.isCompound())
-                            attr = new H5CompoundAttr(obj, nameA, attrType, dims);
+                            attr = (Attribute)new H5CompoundAttr(obj, nameA, attrType, dims);
                         else
-                            attr = new H5ScalarAttr(obj, nameA, attrType, dims);
+                            attr = (Attribute)new H5ScalarAttr(obj, nameA, attrType, dims);
                         attributeList.add(attr);
-                        log.trace("getAttribute(): Attribute[{}] attributeList.add={}", i, attr);
 
                         // retrieve the attribute value
                         if (lsize <= 0) {
@@ -624,33 +623,33 @@ public class H5File extends FileFormat
         String attrName = "CLASS";
         String[] classValue = { "IMAGE" };
         Datatype attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-        Attribute attr = new H5ScalarAttr(dataset, attrName, attrType, null);
+        Attribute attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
         attr.writeAttribute(classValue);
 
         attrName = "IMAGE_VERSION";
         String[] versionValue = { "1.2" };
         attrType = new H5Datatype(Datatype.CLASS_STRING, versionValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-        attr = new H5ScalarAttr(dataset, attrName, attrType, null);
+        attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
         attr.writeAttribute(versionValue);
 
         long[] attrDims = { 2 };
         attrName = "IMAGE_MINMAXRANGE";
         byte[] attrValueInt = { 0, (byte) 255 };
         attrType = new H5Datatype(Datatype.CLASS_CHAR, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-        attr = new H5ScalarAttr(dataset, attrName, attrType, attrDims);
+        attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, attrDims);
         attr.writeAttribute(attrValueInt);
 
         attrName = "IMAGE_SUBCLASS";
         String[] subclassValue = { subclass };
         attrType = new H5Datatype(Datatype.CLASS_STRING, subclassValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-        attr = new H5ScalarAttr(dataset, attrName, attrType, null);
+        attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
         attr.writeAttribute(subclassValue);
 
         if ((selectionFlag == ScalarDS.INTERLACE_PIXEL) || (selectionFlag == ScalarDS.INTERLACE_PLANE)) {
             attrName = "INTERLACE_MODE";
             String[] interlaceValue = { interlaceMode };
             attrType = new H5Datatype(Datatype.CLASS_STRING, interlaceValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
-            attr = new H5ScalarAttr(dataset, attrName, attrType, null);
+            attr = (Attribute)new H5ScalarAttr(dataset, attrName, attrType, null);
             attr.writeAttribute(interlaceValue);
         }
         else {
