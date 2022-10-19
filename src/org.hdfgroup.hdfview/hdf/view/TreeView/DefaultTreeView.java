@@ -1206,43 +1206,43 @@ public class DefaultTreeView implements TreeView {
         HObject obj = null;
 
         switch(type) {
-            case GROUP:
-                NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
-                        breadthFirstUserObjects(rootItem));
-                groupDialog.open();
-                obj = groupDialog.getObject();
-                parentItem = findTreeItem(groupDialog.getParentGroup());
-                break;
-            case DATASET:
-                NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                datasetDialog.open();
-                obj = datasetDialog.getObject();
-                parentItem = findTreeItem(datasetDialog.getParentGroup());
-                break;
-            case IMAGE:
-                NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                imageDialog.open();
-                obj = imageDialog.getObject();
-                parentItem = findTreeItem(imageDialog.getParentGroup());
-                break;
-            case TABLE:
-                NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                tableDialog.open();
-                obj = tableDialog.getObject();
-                parentItem = findTreeItem(tableDialog.getParentGroup());
-                break;
-            case DATATYPE:
-                NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
-                datatypeDialog.open();
-                obj = datatypeDialog.getObject();
-                parentItem = findTreeItem(datatypeDialog.getParentGroup());
-                break;
-            case LINK:
-                NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
-                linkDialog.open();
-                obj = linkDialog.getObject();
-                parentItem = findTreeItem(linkDialog.getParentGroup());
-                break;
+        case GROUP:
+            NewGroupDialog groupDialog = new NewGroupDialog(shell, (Group) parentItem.getData(),
+                    breadthFirstUserObjects(rootItem));
+            groupDialog.open();
+            obj = groupDialog.getObject();
+            parentItem = findTreeItem(groupDialog.getParentGroup());
+            break;
+        case DATASET:
+            NewDatasetDialog datasetDialog = new NewDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            datasetDialog.open();
+            obj = datasetDialog.getObject();
+            parentItem = findTreeItem(datasetDialog.getParentGroup());
+            break;
+        case IMAGE:
+            NewImageDialog imageDialog = new NewImageDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            imageDialog.open();
+            obj = imageDialog.getObject();
+            parentItem = findTreeItem(imageDialog.getParentGroup());
+            break;
+        case TABLE:
+            NewCompoundDatasetDialog tableDialog = new NewCompoundDatasetDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            tableDialog.open();
+            obj = tableDialog.getObject();
+            parentItem = findTreeItem(tableDialog.getParentGroup());
+            break;
+        case DATATYPE:
+            NewDatatypeDialog datatypeDialog = new NewDatatypeDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem));
+            datatypeDialog.open();
+            obj = datatypeDialog.getObject();
+            parentItem = findTreeItem(datatypeDialog.getParentGroup());
+            break;
+        case LINK:
+            NewLinkDialog linkDialog = new NewLinkDialog(shell, (Group) parentItem.getData(), breadthFirstUserObjects(rootItem), getCurrentFiles());
+            linkDialog.open();
+            obj = linkDialog.getObject();
+            parentItem = findTreeItem(linkDialog.getParentGroup());
+            break;
         }
 
         if (obj == null)

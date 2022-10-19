@@ -197,7 +197,6 @@ public abstract class HObject implements Serializable
         catch (Exception e) {
             log.debug("setFullname failed", e.getMessage());
         }
-        log.trace("Fullname={} oid={}", this.fullName, this.oid);
     }
 
     /**
