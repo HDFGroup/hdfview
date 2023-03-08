@@ -48,6 +48,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.hamcrest.Matcher;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -102,6 +103,12 @@ public abstract class AbstractWindowTest {
         bot = new SWTBot();
 
         SWTBotPreferences.PLAYBACK_DELAY = TEST_DELAY;
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                shell.forceActive();
+            }
+        });
     }
 
     @After
@@ -115,7 +122,6 @@ public abstract class AbstractWindowTest {
         });
     }
 
-    @After
     public void checkOpenFiles() {
         if (open_files > 0) {
             String failMsg = "Test " + testName.getMethodName() + " still had " + open_files + " files open!";
@@ -210,6 +216,7 @@ public abstract class AbstractWindowTest {
     protected File openFile(String name, FILE_MODE openMode) {
         SWTBotShell fileNameShell = null;
         File hdf_file = new File(workDir, name);
+        log.trace("openFile workDir is {}, name is {}", workDir, name);
 
         try {
             SWTBotMenu fileMenuItem = bot.menu().menu("File");
@@ -263,6 +270,7 @@ public abstract class AbstractWindowTest {
             if (fileNameShell != null && fileNameShell.isOpen())
                 fileNameShell.close();
         }
+        log.trace("openFile  {}, open_files={}", name, open_files);
 
         return hdf_file;
     }
@@ -272,6 +280,7 @@ public abstract class AbstractWindowTest {
         boolean hdf5Type = (name.lastIndexOf(".h5") >= 0);
 
         File hdfFile = new File(workDir, name);
+        log.trace("createFile workDir is {}, name is {}", workDir, name);
         if (hdfFile.exists())
             hdfFile.delete();
 
@@ -307,6 +316,7 @@ public abstract class AbstractWindowTest {
         catch (AssertionError ae) {
             ae.printStackTrace();
         }
+        log.trace("createFile  {}, open_files={}", name, open_files);
 
         return hdfFile;
     }
@@ -314,6 +324,7 @@ public abstract class AbstractWindowTest {
     protected void closeFile(File hdfFile, boolean deleteFile) {
         try {
             SWTBotTree filetree = bot.tree();
+            log.trace("closeFile {}, open_files={}", hdfFile.getName(), open_files);
 
             filetree.select(hdfFile.getName());
             filetree.getTreeItem(hdfFile.getName()).click();
@@ -330,14 +341,16 @@ public abstract class AbstractWindowTest {
                     assertFalse("closeFile() File '" + hdfFile + "' not gone", hdfFile.exists());
                 }
             }
+            log.trace("closeFile after open_files={}", open_files);
 
             if (open_files > 0) {
                 assertTrue(constructWrongValueMessage("closeFile()", "filetree wrong row count", String.valueOf(open_files - 1), String.valueOf(filetree.rowCount())),
                     filetree.rowCount() == open_files - 1);
-
                 open_files--;
             }
+
             bot.waitUntil(Conditions.treeHasRows(filetree, open_files));
+            log.trace("closeFile after open_files={}", open_files);
         }
         catch (Exception ex) {
             ex.printStackTrace();

@@ -30,8 +30,8 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             tabItem.activate();
 
             String val = bot.textWithLabel("Library version bounds: ").getText();
-            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and V114", val),
-                    val.equals("Earliest and V114"));
+            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and V116", val),
+                    val.equals("Earliest and V116"));
 
             SWTBotTreeItem[] items = filetree.getAllItems();
             items[0].click();
@@ -46,8 +46,8 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             bot.waitUntil(shellCloses(libVersionShell));
 
             val = bot.textWithLabel("Library version bounds: ").getText();
-            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "V18 and V114", val),
-                    val.equals("V18 and V114"));
+            assertTrue(constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "V18 and V116", val),
+                    val.equals("V18 and V116"));
 
             items[0].contextMenu().contextMenu("Set Lib version bounds").click();
 

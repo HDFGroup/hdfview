@@ -377,9 +377,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer
             throw new Exception("invalid datatype sign - " + tsign);
 
         datatypeClass = tclass;
+        datatypeSize = tsize;
         if (datatypeSize == NATIVE)
             datatypeNATIVE = true;
-        datatypeSize = tsize;
+        else
+            datatypeNATIVE = false;
         datatypeOrder = torder;
         datatypeSign = tsign;
         enumMembers = null;
@@ -762,6 +764,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer
             description.append("8-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
             break;
         case CLASS_INTEGER:
+            log.trace("getDescription(): Int [{}]", datatypeNATIVE);
             if (datatypeNATIVE)
                 description.append("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
             else

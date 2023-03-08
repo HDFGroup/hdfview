@@ -583,7 +583,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
                 int arrSize = 1;
                 for (int i = 0; i < arrayDims.length; i++)
                     arrSize *= arrayDims[i];
-                log.debug("convertByteMember(): no CLASS_ARRAY arrayType={} arrSize={}", arrayType, arrSize);
+                log.trace("convertByteMember(): no CLASS_ARRAY arrayType={} arrSize={}", arrayType, arrSize);
 
                 theObj = new Object[arrSize];
 
