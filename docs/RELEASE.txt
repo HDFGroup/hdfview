@@ -4,7 +4,7 @@ The current HDFView products can be downloaded at:
 
 HDF Libraries
 =============================================================================
-This release was built and tested with HDF 4.2.x and HDF5 1.13.x.
+This release was built and tested with HDF 4.2.x and HDF5 1.14.x.
 
 Windows ONLY: HDFView built with VS 2015 will require that
 the Visual C++ Redistributable Packages be installed on your machine.
@@ -36,8 +36,7 @@ Major Bug Fixes
       also changed to account for the hdf5 Java API fixes.
       The fix required that variable-length types in the Java wrappers in the
       hdf5 library for read and write also be fixed.
-      HDFView 3.2.1+ now requires hdf5-1.12.3 as a minimum.
-      
+
       HDFView-221 Add support for true Variable-length types in Java
       Sub-issue HDFView-222 fixed the read/write support for variable-length
       in the Java wrappers. This fix involved handling the data object as
@@ -80,9 +79,6 @@ Limitations / Known Problems
 
     * HDFView also cannot nicely handle large numbers of objects, because of
       a design issue that requires HDFView to visit all the objects in a file.
-
-    * Writing of variable-length types other than variable-length strings is
-      currently unsupported.
 
     * Object/region references can't be opened by a double-click or by
       right-clicking and choosing "Show As Table/Image" when inside a compound

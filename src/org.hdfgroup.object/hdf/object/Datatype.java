@@ -377,9 +377,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer
             throw new Exception("invalid datatype sign - " + tsign);
 
         datatypeClass = tclass;
+        datatypeSize = tsize;
         if (datatypeSize == NATIVE)
             datatypeNATIVE = true;
-        datatypeSize = tsize;
+        else
+            datatypeNATIVE = false;
         datatypeOrder = torder;
         datatypeSign = tsign;
         enumMembers = null;
