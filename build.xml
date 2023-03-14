@@ -195,7 +195,7 @@
     <property name="release.dir" value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}" />
     <property name="includeantruntime" value="false" />
     <property name="jre.version" value="${ant.java.version}" />
-    <property name="version.slf4j" value="-1.7.33" />
+    <property name="version.slf4j" value="-2.0.6" />
 
     <!-- Define the SonarQube global properties (the most usual way is to pass these properties via the command line) -->
     <property name="sonar.host.url" value="http://localhost:9000" />
@@ -1460,6 +1460,8 @@
             <arg value="--java-options" />
             <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
+            <arg value="--resource-dir" />
+            <arg value="${basedir}/package_files/macosx" />
 
             <!-- Runtime images -->
             <arg value="--runtime-image" />
@@ -1470,7 +1472,7 @@
             <arg value="--type" />
             <arg value="dmg" />
             <arg value="--icon" />
-            <arg value="${basedir}/lib/macosx/HDFView.icns" />
+            <arg value="${basedir}/package_files/macosx/HDFView.icns" />
             <arg value="--mac-sign" />
             <arg value="--mac-package-identifier" />
             <arg value="HDFView.hdfgroup.org" />
@@ -1800,6 +1802,8 @@
             <arg value="--java-options" />
             <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
+            <arg value="--resource-dir" />
+            <arg value="${basedir}/package_files/macosx" />
 
             <!-- Runtime images -->
             <!-- <arg value="- -install-dir" />
