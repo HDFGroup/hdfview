@@ -1460,6 +1460,8 @@
             <arg value="--java-options" />
             <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
+            <arg value="--resources-dir" />
+            <arg value="${basedir}/package_files/macosx" />
 
             <!-- Runtime images -->
             <arg value="--runtime-image" />
@@ -1470,7 +1472,7 @@
             <arg value="--type" />
             <arg value="dmg" />
             <arg value="--icon" />
-            <arg value="${basedir}/lib/macosx/HDFView.icns" />
+            <arg value="${basedir}/package_files/macosx/HDFView.icns" />
             <arg value="--mac-sign" />
             <arg value="--mac-package-identifier" />
             <arg value="HDFView.hdfgroup.org" />
