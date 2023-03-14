@@ -1460,7 +1460,7 @@
             <arg value="--java-options" />
             <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
-            <arg value="--resources-dir" />
+            <arg value="--resource-dir" />
             <arg value="${basedir}/package_files/macosx" />
 
             <!-- Runtime images -->
