@@ -17,6 +17,9 @@ package hdf.object.h5;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFArray;
@@ -53,7 +56,7 @@ public class H5Group extends Group
 {
     private static final long serialVersionUID = -951164512330444150L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Group.class);
+    private static final Logger log = LoggerFactory.getLogger(H5Group.class);
 
     /**
      * The metadata object for this data object. Members of the metadata are instances of Attribute.

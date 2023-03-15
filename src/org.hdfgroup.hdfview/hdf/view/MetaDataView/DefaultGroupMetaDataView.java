@@ -16,6 +16,9 @@ package hdf.view.MetaDataView;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
@@ -44,7 +47,7 @@ import hdf.view.DataView.DataViewManager;
  */
 public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultGroupMetaDataView.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultGroupMetaDataView.class);
 
     /**
      *The metadata view interface for displaying metadata information

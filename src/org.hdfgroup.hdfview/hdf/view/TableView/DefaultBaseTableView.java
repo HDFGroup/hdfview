@@ -42,6 +42,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
@@ -160,7 +163,7 @@ import hdf.view.dialog.NewDatasetDialog;
 public abstract class DefaultBaseTableView implements TableView
 {
 
-    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(DefaultBaseTableView.class);
+    private static final Logger   log = LoggerFactory.getLogger(DefaultBaseTableView.class);
 
     private final Display                   display = Display.getDefault();
     /** The reference to the display shell used */

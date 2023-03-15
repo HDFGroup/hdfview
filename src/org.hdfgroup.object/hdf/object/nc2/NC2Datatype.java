@@ -16,7 +16,11 @@ package hdf.object.nc2;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.object.Datatype;
+
 import ucar.ma2.DataType;
 
 /**
@@ -30,7 +34,7 @@ public class NC2Datatype extends Datatype
 {
     private static final long serialVersionUID = 5399364372073889764L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2Datatype.class);
+    private static final Logger log = LoggerFactory.getLogger(NC2Datatype.class);
 
     /** the native datatype */
     private DataType nativeType = null;

@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
@@ -96,7 +99,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
 {
     private static final long serialVersionUID = 2072473407027648309L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundAttr.class);
+    private static final Logger log = LoggerFactory.getLogger(H5CompoundAttr.class);
 
     /** The HObject to which this NC2Attribute is attached, Attribute interface */
     protected HObject         parentObject;

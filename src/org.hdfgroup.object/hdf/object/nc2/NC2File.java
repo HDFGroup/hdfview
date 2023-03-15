@@ -22,9 +22,13 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.iosp.netcdf3.N3header;
+
 import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -42,7 +46,7 @@ import hdf.object.HObject;
 public class NC2File extends FileFormat {
     private static final long serialVersionUID = 6941235662108358451L;
 
-    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(NC2File.class);
+    private static final Logger   log = LoggerFactory.getLogger(NC2File.class);
 
     /**
      * The root object of this file.

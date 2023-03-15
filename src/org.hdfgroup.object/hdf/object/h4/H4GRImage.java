@@ -17,6 +17,9 @@ package hdf.object.h4;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdflib.HDFChunkInfo;
 import hdf.hdflib.HDFCompInfo;
 import hdf.hdflib.HDFConstants;
@@ -106,7 +109,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
 {
     private static final long serialVersionUID = 1029672744963360976L;
 
-    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4GRImage.class);
+    private static final Logger   log = LoggerFactory.getLogger(H4GRImage.class);
 
     /**
      * The list of attributes of this data object. Members of the list are

@@ -20,6 +20,9 @@ import java.util.Vector;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
@@ -64,7 +67,7 @@ import uitest.AbstractWindowTest.FILE_MODE;
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public abstract class AbstractWindowTest {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractWindowTest.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractWindowTest.class);
 
     protected static String HDF5VERSION = "HDF5 " + HDFVersions.getPropertyVersionHDF5();
     protected static String HDF4VERSION = "HDF " + HDFVersions.getPropertyVersionHDF4();

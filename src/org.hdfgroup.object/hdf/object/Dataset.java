@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The abstract class provides general APIs to create and manipulate dataset/attribute
  * objects, and retrieve dataset/attribute properties, datatype and dimension sizes.
@@ -49,7 +52,7 @@ public abstract class Dataset extends HObject implements DataFormat
 {
     private static final long serialVersionUID    = -3360885430038261178L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
+    private static final Logger log = LoggerFactory.getLogger(Dataset.class);
 
     /**
      * The memory buffer that holds the raw data array of the dataset.

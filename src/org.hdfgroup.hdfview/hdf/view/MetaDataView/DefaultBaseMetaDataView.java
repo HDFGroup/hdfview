@@ -22,6 +22,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -95,7 +98,7 @@ import hdf.view.dialog.NewScalarAttributeDialog;
  */
 public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultBaseMetaDataView.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultBaseMetaDataView.class);
 
     /** The default display */
     protected final Display               display = Display.getDefault();

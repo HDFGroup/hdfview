@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * FileFormat defines general interfaces for working with files whose data is
@@ -52,7 +54,7 @@ import java.util.Vector;
 public abstract class FileFormat extends File {
     private static final long                    serialVersionUID   = -4700692313888420796L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormat.class);
+    private static final Logger log = LoggerFactory.getLogger(FileFormat.class);
 
     /***************************************************************************
      * File access flags used in calls to createInstance( String, flag );

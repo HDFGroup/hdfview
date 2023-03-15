@@ -14,6 +14,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.FileFormat;
@@ -27,7 +30,7 @@ import hdf.object.h5.H5File;
  */
 public class HObjectTest
 {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HObjectTest.class);
+    private static final Logger log = LoggerFactory.getLogger(HObjectTest.class);
     private static final H5File H5FILE = new H5File();
     private static final String GNAME = H5TestFile.NAME_GROUP;
 

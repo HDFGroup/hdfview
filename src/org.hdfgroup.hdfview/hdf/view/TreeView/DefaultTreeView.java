@@ -32,6 +32,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -114,7 +117,7 @@ import hdf.view.dialog.NewLinkDialog;
  */
 public class DefaultTreeView implements TreeView {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultTreeView.class);
 
     private Shell                         shell;
 

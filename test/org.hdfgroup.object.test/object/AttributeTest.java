@@ -15,6 +15,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Attribute;
@@ -31,7 +34,7 @@ import hdf.object.h5.H5ScalarAttr;
  */
 public class AttributeTest
 {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AttributeTest.class);
+    private static final Logger log = LoggerFactory.getLogger(AttributeTest.class);
     private static final H5File H5FILE = new H5File();
 
     private H5File testFile = null;

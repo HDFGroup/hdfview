@@ -24,6 +24,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFArray;
@@ -96,7 +99,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 {
     private static final long serialVersionUID = -5968625125574032736L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5CompoundDS.class);
+    private static final Logger log = LoggerFactory.getLogger(H5CompoundDS.class);
 
     /**
      * The metadata object for this data object. Members of the metadata are instances of Attribute.

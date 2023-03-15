@@ -53,6 +53,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
@@ -149,7 +152,7 @@ import hdf.view.dialog.NewDatasetDialog;
  */
 public class DefaultImageView implements ImageView
 {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultImageView.class);
 
     private final Display           display = Display.getDefault();
     private final Shell             shell;

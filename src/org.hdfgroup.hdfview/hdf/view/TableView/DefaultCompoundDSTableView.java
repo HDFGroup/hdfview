@@ -27,6 +27,9 @@ import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.EditableRule;
@@ -77,7 +80,7 @@ import hdf.view.DataView.DataViewManager;
  */
 public class DefaultCompoundDSTableView extends DefaultBaseTableView implements TableView {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultCompoundDSTableView.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultCompoundDSTableView.class);
 
     /**
      * Constructs a CompoundDS TableView with no additional data properties.
