@@ -152,8 +152,21 @@
     <!-- Build 64-bit binary.
        Note: os.arch gives the architecture of the JVM, NOT the OS;
        It is assumed that a ppc JVM is used for building on a powerpc system. -->
-    <condition property="machine.arch" value="ppc64le" else="x86_64">
-        <matches pattern="ppc64le" string="${os.arch}" />
+    <condition property="machine.arch" value="ppc64le">
+        <and>
+            <matches pattern="ppc64le" string="${os.arch}" />
+            <equals arg1="${isUnix}" arg2="true" />
+            <not>
+                <equals arg1="${isWindows}" arg2="true" />
+            </not>
+            <not>
+                <equals arg1="${isMac}" arg2="true" />
+            </not>
+        </and>
+    </condition>
+
+    <condition property="machine.arch" value="aarch64" else="x86_64">
+        <matches pattern="aarch64" string="${os.arch}" />
     </condition>
 
     <condition property="machine.wix.arch" value="x64">
