@@ -14,6 +14,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.object.FileFormat;
@@ -28,7 +31,7 @@ import hdf.object.h5.H5Group;
  */
 public class GroupTest
 {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GroupTest.class);
+    private static final Logger log = LoggerFactory.getLogger(GroupTest.class);
 
     private H5File testFile = null;
     private Group testGroup = null;

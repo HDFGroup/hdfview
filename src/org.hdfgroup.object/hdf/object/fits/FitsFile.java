@@ -19,12 +19,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+
 import nom.tam.fits.AsciiTableHDU;
 import nom.tam.fits.BasicHDU;
 import nom.tam.fits.BinaryTableHDU;
@@ -44,7 +48,7 @@ public class FitsFile extends FileFormat
 {
     private static final long serialVersionUID = -1965689032980605791L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FitsFile.class);
+    private static final Logger log = LoggerFactory.getLogger(FitsFile.class);
 
     /**
      * The root object of the file hierarchy.

@@ -18,6 +18,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A scalar dataset is a multiple dimension array of scalar points. The Datatype of a scalar dataset must be an atomic
  * datatype. Common datatypes of scalar datasets include char, byte, short, int, long, float, double and string.
@@ -34,7 +37,7 @@ public abstract class ScalarDS extends Dataset
 {
     private static final long serialVersionUID = 8925371455928203981L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDS.class);
+    private static final Logger log = LoggerFactory.getLogger(ScalarDS.class);
 
     /************************************************************
      * The following constant strings are copied from           *

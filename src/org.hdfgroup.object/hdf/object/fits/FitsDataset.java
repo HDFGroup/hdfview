@@ -19,6 +19,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -49,7 +52,7 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer
 {
     private static final long serialVersionUID = 3944770379558335171L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FitsDataset.class);
+    private static final Logger log = LoggerFactory.getLogger(FitsDataset.class);
 
     /**
      * The list of attributes of this data object. Members of the list are

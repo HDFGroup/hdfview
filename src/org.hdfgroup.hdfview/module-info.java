@@ -19,6 +19,7 @@ module org.hdfgroup.hdfview {
     requires java.sql;
     requires java.logging;
     requires java.xml;
+    requires org.slf4j;
     requires org.eclipse.core.commands;
     requires org.eclipse.jface;
     requires org.eclipse.nebula.widgets.nattable.core;

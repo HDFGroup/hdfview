@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.structs.H5O_info_t;
@@ -42,7 +45,7 @@ public class H5ReferenceType extends H5Datatype
 {
     private static final long serialVersionUID    = -3360885430038261178L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5ReferenceType.class);
+    private static final Logger log = LoggerFactory.getLogger(H5ReferenceType.class);
 
     /**
      * The memory buffer that holds the raw data array of the reference.
@@ -1005,7 +1008,7 @@ public class H5ReferenceType extends H5Datatype
      */
     public static class H5ReferenceData
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5ReferenceData.class);
+        private static final Logger log = LoggerFactory.getLogger(H5ReferenceData.class);
 
         /** The reference array raw data */
         public byte[] ref_array = null;

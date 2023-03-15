@@ -2,6 +2,9 @@ package object;
 
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFArray;
@@ -25,7 +28,7 @@ import hdf.object.h5.H5ScalarDS;
  */
 public class H5TestFile
 {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5TestFile.class);
+    private static final Logger log = LoggerFactory.getLogger(H5TestFile.class);
     public static final String NAME_FILE_H5 = "TestHDF5.h5";
     public static final String NAME_GROUP = "/g0";
     public static final String NAME_GROUP_ATTR = "/g0_attr";

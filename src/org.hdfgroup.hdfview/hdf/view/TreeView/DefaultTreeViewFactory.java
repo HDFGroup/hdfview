@@ -14,6 +14,9 @@
 
 package hdf.view.TreeView;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.swt.widgets.Composite;
 
 import hdf.view.Tools;
@@ -29,7 +32,7 @@ import hdf.view.DataView.DataViewManager;
  */
 public class DefaultTreeViewFactory extends TreeViewFactory {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeViewFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultTreeViewFactory.class);
 
     @Override
     public TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException {

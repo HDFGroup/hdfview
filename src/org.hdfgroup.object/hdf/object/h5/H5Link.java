@@ -16,6 +16,9 @@ package hdf.object.h5;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFArray;
@@ -45,7 +48,7 @@ public class H5Link extends HObject implements MetaDataContainer
 {
     private static final long serialVersionUID = -8137277460521594367L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Link.class);
+    private static final Logger log = LoggerFactory.getLogger(H5Link.class);
 
     /** the object properties */
     private H5O_info_t objInfo;

@@ -17,6 +17,9 @@ package hdf.object.h4;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
@@ -43,7 +46,7 @@ public class H4Group extends Group
 {
     private static final long               serialVersionUID = 3785240955078867900L;
 
-    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4Group.class);
+    private static final Logger   log = LoggerFactory.getLogger(H4Group.class);
 
     /**
      * The list of attributes of this data object. Members of the list are

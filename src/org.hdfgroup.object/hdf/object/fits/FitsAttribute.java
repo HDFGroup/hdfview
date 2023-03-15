@@ -22,6 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.object.Attribute;
 import hdf.object.DataFormat;
 import hdf.object.Dataset;
@@ -79,7 +82,7 @@ public class FitsAttribute extends ScalarDS implements Attribute {
 
     private static final long serialVersionUID = 2072473407027648309L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FitsAttribute.class);
+    private static final Logger log = LoggerFactory.getLogger(FitsAttribute.class);
 
     /** The HObject to which this NC2Attribute is attached, Attribute interface */
     protected HObject         parentObject;
