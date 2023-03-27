@@ -1425,6 +1425,7 @@
         <echo> Package the mac application</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
+            <arg value="--verbose" />
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
@@ -1778,6 +1779,7 @@
         <echo> Create the mac package</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
+            <arg value="--verbose" />
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
@@ -2083,7 +2085,7 @@
             <arg value="--strict" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
-            <arg value="${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
+            <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/bin/java" />
         </exec>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -2094,6 +2096,30 @@
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
             <arg value="--strict" />
+            <arg value="--sign" />
+            <arg value="${sign.account}" />
+            <arg value="${dist.dir}/${ant.project.name}.app/Contents/runtime/Contents/Home/bin/keytool" />
+        </exec>
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
+            <arg value="--sign" />
+            <arg value="${sign.account}" />
+            <arg value="${dist.dir}/${ant.project.name}.app/Contents/runtime/Contents/Home/lib/jspawnhelper" />
+        </exec>
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/MacOS/${ant.project.name}" />
