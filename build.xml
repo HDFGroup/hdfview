@@ -2048,6 +2048,7 @@
             <arg value="--entitlements" />
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
+            <arg value="--strict" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
             <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/app" casesensitive="yes">
@@ -2056,6 +2057,21 @@
         </apply>
 
         <echo> Sign APP's runtime</echo>
+        <apply executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
+            <arg value="--strict" />
+            <arg value="--sign" />
+            <arg value="${sign.account}" />
+            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/runtime" casesensitive="yes">
+                <include name="**/*.dylib"/>
+            </fileset>
+        </apply>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
             <arg value="--timestamp" />
@@ -2064,6 +2080,7 @@
             <arg value="--entitlements" />
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
+            <arg value="--strict" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
@@ -2076,6 +2093,7 @@
             <arg value="--entitlements" />
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
+            <arg value="--strict" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/MacOS/${ant.project.name}" />
@@ -2091,6 +2109,7 @@
             <arg value="--entitlements" />
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
+            <arg value="--strict" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/" />
@@ -2129,9 +2148,17 @@
             <arg value="--entitlements" />
             <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
             <arg value="--verbose=4" />
+            <arg value="--strict" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
             <arg value="--deep" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <echo> Check for secure timestamp</echo>
+        <!-- Code signing the application image -->
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="-dvv" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
