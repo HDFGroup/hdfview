@@ -2098,7 +2098,7 @@
             <arg value="--strict" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
-            <arg value="${dist.dir}/${ant.project.name}.app/Contents/runtime/Contents/Home/bin/keytool" />
+            <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/bin/keytool" />
         </exec>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -2110,7 +2110,7 @@
             <arg value="--verbose=4" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
-            <arg value="${dist.dir}/${ant.project.name}.app/Contents/runtime/Contents/Home/lib/jspawnhelper" />
+            <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/lib/jspawnhelper" />
         </exec>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
