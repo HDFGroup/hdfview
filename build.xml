@@ -1481,8 +1481,8 @@
             <arg value="--runtime-image" />
             <arg value="${jar.dir}/jre" />
             <!-- Platform-specific details -->
-            <arg value="--install-dir" />
-            <arg value="/Applications/HDF_Group/${ant.project.name}" />
+            <!-- <arg value="- -install-dir" /> -->
+            <!-- <arg value="/Applications/HDF_Group/${ant.project.name}" /> -->
             <arg value="--type" />
             <arg value="dmg" />
             <arg value="--icon" />
@@ -1718,6 +1718,23 @@
             <arg value="-p" />
             <arg value="${login.keychain_key}" />
             <arg value="login.keychain" />
+        </exec>
+
+        <echo message="Code sign the mac dmg"/>
+        <!-- Code signing the dmg -->
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
+            <arg value="--strict" />
+            <arg value="--sign" />
+            <arg value="${sign.account}" />
+            <arg value="--deep" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
         <echo message="Check for secure timestamp"/>
