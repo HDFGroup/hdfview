@@ -2085,6 +2085,19 @@
             <arg value="--strict" />
             <arg value="--sign" />
             <arg value="${sign.account}" />
+            <arg value="${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
+        </exec>
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
+            <arg value="--strict" />
+            <arg value="--sign" />
+            <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/bin/java" />
         </exec>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
