@@ -1992,7 +1992,7 @@
           INSTALL FOR JPACKAGE APP-IMAGE
           ================================================================= -->
 
-    <target name="createInstaller" depends="clean-package, createWindowsInstaller, createUnixInstaller, createMacInstaller"
+    <target name="createInstaller" depends="clean-package, createWindowsInstaller, createUnixInstaller"
               description="Creates a binary installer to install the application on the machine" unless="XPackage" />
 
     <target name="createWindowsInstaller" depends="createJPackageWindows" if="${isAppWindows}">
