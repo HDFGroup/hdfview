@@ -1412,7 +1412,7 @@
     <target name="createJXPackage" depends="createJXPackageWindows, createJXPackageUnix, createJXPackageMac"
             description="Create the final package for distribution" />
 
-    <!-- package args for fixed jpackage in OpenJDK15 -->
+    <!-- package args for fixed jpackage -->
     <target name="createJXPackageMac" depends="createJPackageBase" if="${isXMac}">
         <!-- unlock keychain -->
         <exec executable="security" dir="${dist.dir}" failonerror="true">
@@ -1711,14 +1711,33 @@
         <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
     </target>
 
-    <target name="binaryPackXMac" depends="createJXPackage, createMacREADME" if="${isXMac}">
-        <mkdir dir="${dist.dir}" />
+    <target name="binaryPackXMac" depends="createJXPackageMac, createMacREADME" if="${isXMac}">
+        <!-- unlock keychain -->
+        <exec executable="security" dir="${dist.dir}" failonerror="true">
+            <arg value="unlock-keychain" />
+            <arg value="-p" />
+            <arg value="${login.keychain_key}" />
+            <arg value="login.keychain" />
+        </exec>
 
-        <echo> Package the mac binary</echo>
-        <!-- Copy over license file -->
-        <copy tofile="${dist.dir}/COPYING.txt">
-            <fileset dir="${basedir}" includes="COPYING" />
-        </copy>
+        <echo message="Check for secure timestamp"/>
+        <!-- Code signing the application image -->
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="-dvv" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <echo message="Verify dmg"/>
+        <exec dir="${dist.dir}" executable="hdiutil">
+            <arg value="verify" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <antcall target="submit-notary" />
+
+        <antcall target="post-notary" />
+
+        <antcall target="staple-notary" />
 
         <exec executable="uname" outputproperty="uname.os">
             <arg value="-s" />
@@ -1728,34 +1747,26 @@
             <arg value="-r" />
         </exec>
 
-        <!-- unlock keychain -->
-        <exec executable="security" dir="${dist.dir}" failonerror="true">
-            <arg value="unlock-keychain" />
-            <arg value="-p" />
-            <arg value="${login.keychain_key}" />
-            <arg value="login.keychain" />
-        </exec>
-
-        <!-- sign .dmg file on 10.11.5 or higher -->
-        <exec executable="codesign" dir="${dist.dir}">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--verbose=4" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
+        <exec dir="${dist.dir}" executable="hdiutil">
+            <arg value="verify" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
         <!-- verify gatekeeper -->
+        <echo message="Verify gatekeeper"/>
         <exec executable="spctl" dir="${dist.dir}" failonerror="true">
             <arg value="-vvvv" />
             <arg value="--assess" />
             <arg value="--type" />
-            <arg value="install" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
+            <arg value="execute" />
+            <arg value="${ant.project.name}.app" />
         </exec>
+
+        <echo> Package the mac binary</echo>
+        <!-- Copy over license file -->
+        <copy tofile="${dist.dir}/COPYING.txt">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
 
         <!-- Compress everything into one tar.gz file -->
         <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${uname.version}.tar.gz" compression="gzip">
@@ -2058,7 +2069,7 @@
             </fileset>
         </apply>
 
-        <echo> Sign APP's runtime</echo>
+        <echo message="Sign APP's runtime"/>
         <apply executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
             <arg value="--timestamp" />
@@ -2074,6 +2085,8 @@
                 <include name="**/*.dylib"/>
             </fileset>
         </apply>
+
+        <echo message="Sign APP's runtime libjli.dylib"/>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
             <arg value="--timestamp" />
@@ -2087,6 +2100,8 @@
             <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
         </exec>
+
+        <echo message="Sign APP's runtime bin/java"/>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
             <arg value="--timestamp" />
@@ -2100,6 +2115,8 @@
             <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/bin/java" />
         </exec>
+
+        <echo message="Sign APP's runtime bin/keytool"/>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
             <arg value="--timestamp" />
@@ -2113,6 +2130,8 @@
             <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/bin/keytool" />
         </exec>
+
+        <echo message="Sign APP's runtime lib/jspawnhelper"/>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
             <arg value="--timestamp" />
@@ -2125,6 +2144,8 @@
             <arg value="${sign.account}" />
             <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/lib/jspawnhelper" />
         </exec>
+
+        <echo message="Sign APP's ${ant.project.name}"/>
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
             <arg value="--timestamp" />
@@ -2138,7 +2159,7 @@
             <arg value="${ant.project.name}.app/Contents/MacOS/${ant.project.name}" />
         </exec>
 
-        <echo> Create the mac installer</echo>
+        <echo message="Create the mac installer"/>
         <!-- Code signing the application image -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -2154,9 +2175,11 @@
             <arg value="${ant.project.name}.app/" />
         </exec>
 
+        <echo message="Create the mac dmg"/>
         <!-- create dmg -->
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
+            <arg value="--verbose" />
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--dest" />
@@ -2178,6 +2201,7 @@
             <arg value="${dist.dir}/${ant.project.name}.app" />
         </exec>
 
+        <echo message="Code sign the mac dmg"/>
         <!-- Code signing the dmg -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -2194,13 +2218,14 @@
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
-        <echo> Check for secure timestamp</echo>
+        <echo message="Check for secure timestamp"/>
         <!-- Code signing the application image -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="-dvv" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
+        <echo message="Verify dmg"/>
         <exec dir="${dist.dir}" executable="hdiutil">
             <arg value="verify" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
@@ -2213,12 +2238,15 @@
         <antcall target="staple-notary" />
 
         <!-- verify codesign -->
+        <echo message="Verify codesign"/>
         <exec executable="codesign" dir="${dist.dir}">
             <arg value="-vvvv" />
+            <arg value="--strict" />
             <arg value="${ant.project.name}.app" />
         </exec>
 
         <!-- verify gatekeeper -->
+        <echo message="Verify gatekeeper"/>
         <exec executable="spctl" dir="${dist.dir}" failonerror="true">
             <arg value="-vvvv" />
             <arg value="--assess" />
