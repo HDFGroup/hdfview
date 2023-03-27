@@ -1770,14 +1770,14 @@
         </exec>
 
         <!-- verify gatekeeper -->
-        <echo message="Verify gatekeeper"/>
-        <exec executable="spctl" dir="${dist.dir}" failonerror="true">
-            <arg value="-vvvv" />
-            <arg value="--assess" />
-            <arg value="--type" />
-            <arg value="execute" />
-            <arg value="${ant.project.name}.app" />
-        </exec>
+        <!-- <echo message="Verify gatekeeper"/> -->
+        <!-- <exec executable="spctl" dir="${dist.dir}" failonerror="true"> -->
+        <!-- <arg value="-vvvv" /> -->
+        <!-- <arg value="--assess" /> -->
+        <!-- <arg value="--type" /> -->
+        <!-- <arg value="execute" /> -->
+        <!-- <arg value="${ant.project.name}.app" /> -->
+        <!-- </exec> -->
 
         <echo> Package the mac binary</echo>
         <!-- Copy over license file -->
@@ -2059,6 +2059,56 @@
         </exec>
     </target>
 
+        <target name="zip-submit-notary">
+            <exec executable="/usr/bin/xcrun" failonerror="true">
+                <redirector output="retUUID.txt" alwayslog="true"/>
+                <arg value="altool"/>
+                <arg value="--notarize-app"/>
+                <arg value="--type"/>
+                <arg value="osx"/>
+                <arg value="--primary-bundle-id"/>
+                <arg value="app.${ant.project.name}-${app.version}"/>
+                <arg value="--username"/>
+                <arg value="${notarize.account}"/>
+                <arg value="--password"/>
+                <arg value="${notarize.keychain_key}"/>
+                <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+                <arg value="--file"/>
+                <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
+            </exec>
+            <loadfile property="retUUID" srcfile="retUUID.txt">
+                <filterchain>
+                    <tokenfilter>
+                        <containsregex
+                             pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                             replace="\1" />
+                    </tokenfilter>
+                    <striplinebreaks/>
+                </filterchain>
+            </loadfile>
+            <echo>notarize-app:${retUUID}</echo>
+        </target>
+
+    <!-- Staple the received notarization to the app -->
+    <!-- run this after notarization is completed -->
+    <target name="zip-staple-notary">
+        <echo message="--- Stapling notarization to Mac Build ---"/>
+        <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
+            <arg value="stapler"/>
+            <arg value="staple"/>
+            <arg value="${ant.project.name}-${app.version}.app"/>
+        </exec>
+
+        <!-- verify staple -->
+        <exec executable="/usr/bin/xcrun" dir="${dist.dir}">
+            <arg value="stapler"/>
+            <arg value="validate"/>
+            <arg value="-v" />
+            <arg value="${ant.project.name}-${app.version}.app"/>
+        </exec>
+    </target>
+
+
     <target name="createMacInstaller" depends="createJPackageMac" if="${isAppMac}">
         <!-- unlock keychain -->
         <exec executable="security" dir="${dist.dir}" failonerror="true">
@@ -2176,7 +2226,7 @@
             <arg value="${ant.project.name}.app/Contents/MacOS/${ant.project.name}" />
         </exec>
 
-        <echo message="Create the mac installer"/>
+        <echo message="Create the mac compressed package"/>
         <!-- Code signing the application image -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -2192,33 +2242,18 @@
             <arg value="${ant.project.name}.app/" />
         </exec>
 
-        <echo message="Create the mac dmg"/>
-        <!-- create dmg -->
-        <exec executable="${java.home}/bin/jpackage">
-            <!-- Basic usage -->
-            <arg value="--verbose" />
-            <arg value="--name" />
-            <arg value="${ant.project.name}" />
-            <arg value="--dest" />
-            <arg value="${dist.dir}" />
-            <!-- Package metadata -->
-            <arg value="--app-version" />
-            <arg value="${app.version}" />
-            <arg value="--copyright" />
-            <arg value="&quot;Copyright 2006 by The HDF Group&quot;" />
-            <arg value="--description" />
-            <arg value="&quot;A visual tool for browsing and editing HDF files&quot;" />
-            <arg value="--vendor" />
-            <arg value="&quot;The HDF Group&quot;" />
-            <!-- <arg value="- -license-file" />
-            <arg value="${basedir}/COPYING" /> -->
-            <arg value="--type" />
-            <arg value="dmg" />
-            <arg value="--app-image" />
+        <echo message="Create the mac zip"/>
+        <!-- create zip -->
+        <exec executable="ditto" dir="${dist.dir}" failonerror="true">
+            <arg value="-c" />
+            <arg value="-k" />
+            <arg value="--sequesterRsrc" />
+            <arg value="--keepParent" />
             <arg value="${dist.dir}/${ant.project.name}.app" />
+            <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
-        <echo message="Code sign the mac dmg"/>
+        <echo message="Code sign the mac zip"/>
         <!-- Code signing the dmg -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -2232,27 +2267,21 @@
             <arg value="--sign" />
             <arg value="${sign.account}" />
             <arg value="--deep" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
+            <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
         <echo message="Check for secure timestamp"/>
         <!-- Code signing the application image -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="-dvv" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
+            <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
-        <echo message="Verify dmg"/>
-        <exec dir="${dist.dir}" executable="hdiutil">
-            <arg value="verify" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
-        </exec>
-
-        <antcall target="submit-notary" />
+        <antcall target="zip-submit-notary" />
 
         <antcall target="post-notary" />
 
-        <antcall target="staple-notary" />
+        <antcall target="zip-staple-notary" />
 
         <!-- verify codesign -->
         <echo message="Verify codesign"/>
@@ -2331,18 +2360,13 @@
             <arg value="-r" />
         </exec>
 
-        <exec dir="${dist.dir}" executable="hdiutil">
-            <arg value="verify" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
-        </exec>
-
         <!-- verify gatekeeper -->
         <exec executable="spctl" dir="${dist.dir}" failonerror="true">
             <arg value="-vvvv" />
             <arg value="--assess" />
             <arg value="--type" />
             <arg value="install" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
+            <arg value="${ant.project.name}-${app.version}.app" />
         </exec>
 
         <!-- Compress everything into one tar.gz file -->
@@ -2350,7 +2374,7 @@
             <tarfileset dir="${dist.dir}" filemode="755">
                 <include name="COPYING.txt" />
                 <include name="README.txt" />
-                <include name="${ant.project.name}-${app.version}.dmg" />
+                <include name="${ant.project.name}-${app.version}.app" />
             </tarfileset>
         </tar>
     </target>
