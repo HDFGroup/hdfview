@@ -1773,8 +1773,8 @@
         <!-- <echo message="Verify gatekeeper"/> -->
         <!-- <exec executable="spctl" dir="${dist.dir}" failonerror="true"> -->
         <!-- <arg value="-vvvv" /> -->
-        <!-- <arg value="--assess" /> -->
-        <!-- <arg value="--type" /> -->
+        <!-- <arg value="- -assess" /> -->
+        <!-- <arg value="- -type" /> -->
         <!-- <arg value="execute" /> -->
         <!-- <arg value="${ant.project.name}.app" /> -->
         <!-- </exec> -->
