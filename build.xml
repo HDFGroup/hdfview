@@ -1989,22 +1989,8 @@
     </target>
 
     <!-- =================================================================
-          INSTALL FOR JPACKAGE APP-IMAGE
+          MAC NOTARY FOR JPACKAGE
           ================================================================= -->
-
-    <target name="createInstaller" depends="clean-package, createWindowsInstaller, createUnixInstaller"
-              description="Creates a binary installer to install the application on the machine" unless="XPackage" />
-
-    <target name="createWindowsInstaller" depends="createJPackageWindows" if="${isAppWindows}">
-        <mkdir dir="${dist.dir}" />
-        <echo> Create the windows installer</echo>
-    </target>
-
-    <target name="createUnixInstaller" depends="createJPackageUnix" if="${isAppUnix}">
-        <mkdir dir="${dist.dir}" />
-
-        <echo> Create the unix installer</echo>
-    </target>
 
     <target name="submit-notary">
         <exec executable="/usr/bin/xcrun" failonerror="true">
@@ -2133,207 +2119,13 @@
         </exec>
     </target>
 
-
-    <target name="createMacInstaller" depends="createJPackageMac" if="${isAppMac}">
-        <!-- unlock keychain -->
-        <exec executable="security" dir="${dist.dir}" failonerror="true">
-            <arg value="unlock-keychain" />
-            <arg value="-p" />
-            <arg value="${login.keychain_key}" />
-            <arg value="login.keychain" />
-        </exec>
-
-        <!-- sign dylib files -->
-        <echo message="Code sign dylib files"/>
-        <apply executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--strict" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/app" casesensitive="yes">
-                <include name="**/*.dylib"/>
-            </fileset>
-        </apply>
-
-        <echo message="Sign APP's runtime"/>
-        <apply executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--strict" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <fileset dir="${dist.dir}/${ant.project.name}.app/Contents/runtime" casesensitive="yes">
-                <include name="**/*.dylib"/>
-            </fileset>
-        </apply>
-
-        <echo message="Sign APP's runtime libjli.dylib"/>
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--strict" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <arg value="${ant.project.name}.app/Contents/runtime/Contents/MacOS/libjli.dylib" />
-        </exec>
-
-        <echo message="Sign APP's runtime bin/java"/>
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--strict" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/bin/java" />
-        </exec>
-
-        <echo message="Sign APP's runtime bin/keytool"/>
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--strict" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/bin/keytool" />
-        </exec>
-
-        <echo message="Sign APP's runtime lib/jspawnhelper"/>
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <arg value="${ant.project.name}.app/Contents/runtime/Contents/Home/lib/jspawnhelper" />
-        </exec>
-
-        <echo message="Sign APP's ${ant.project.name}"/>
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <arg value="${ant.project.name}.app/Contents/MacOS/${ant.project.name}" />
-        </exec>
-
-        <echo message="Create the mac compressed package"/>
-        <!-- Code signing the application image -->
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--strict" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <arg value="${ant.project.name}.app/" />
-        </exec>
-
-        <echo message="Create the mac zip"/>
-        <!-- create zip -->
-        <exec executable="ditto" dir="${dist.dir}" failonerror="true">
-            <arg value="-c" />
-            <arg value="-k" />
-            <arg value="--sequesterRsrc" />
-            <arg value="--keepParent" />
-            <arg value="${ant.project.name}.app" />
-            <arg value="${ant.project.name}-${app.version}.zip" />
-        </exec>
-
-        <echo message="Code sign the mac zip"/>
-        <!-- Code signing the dmg -->
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--strict" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <arg value="--deep" />
-            <arg value="${ant.project.name}-${app.version}.zip" />
-        </exec>
-
-        <echo message="Check for secure timestamp"/>
-        <!-- Code signing the application image -->
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="-dvv" />
-            <arg value="${ant.project.name}-${app.version}.zip" />
-        </exec>
-
-        <antcall target="zip-submit-notary" />
-
-        <antcall target="post-notary" />
-
-        <antcall target="zip-staple-notary" />
-
-        <!-- verify codesign -->
-        <echo message="Verify codesign"/>
-        <exec executable="codesign" dir="${dist.dir}">
-            <arg value="-vvvv" />
-            <arg value="--strict" />
-            <arg value="${ant.project.name}.app" />
-        </exec>
-
-        <!-- verify gatekeeper -->
-        <echo message="Verify gatekeeper"/>
-        <exec executable="spctl" dir="${dist.dir}" failonerror="true">
-            <arg value="-vvvv" />
-            <arg value="--assess" />
-            <arg value="--type" />
-            <arg value="execute" />
-            <arg value="${ant.project.name}.app" />
-        </exec>
-    </target>
-
     <!-- =================================================================
           BINARY - PACK
           ================================================================= -->
-    <target name="binaryPack" depends="binaryPackWindows, binaryPackUnix, binaryPackMac"
+    <target name="binaryPack" depends="clean-package, binaryPackWindows, binaryPackUnix, binaryPackMac"
         description="Packages up the release directory, the license file and the README file into a distributable form" />
 
-    <target name="binaryPackWindows" depends="createJPackage, createWindowsAppREADME, createInstaller" if="${isAppWindows}">
+    <target name="binaryPackWindows" depends="createJPackage, createWindowsAppREADME" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
 
         <echo> Create the windows installer binary</echo>
@@ -2349,7 +2141,7 @@
         <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-${win.extension}.zip" basedir="${dist.dir}" />
     </target>
 
-    <target name="binaryPackUnix" depends="createJPackage, createUnixREADME, createInstaller" if="${isAppUnix}">
+    <target name="binaryPackUnix" depends="createJPackage, createUnixREADME" if="${isAppUnix}">
         <mkdir dir="${dist.dir}" />
 
         <echo> Create the unix installer binary</echo>
