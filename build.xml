@@ -2121,7 +2121,7 @@
         <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
             <arg value="stapler"/>
             <arg value="staple"/>
-            <arg value="${ant.project.name}-${app.version}.app"/>
+            <arg value="${ant.project.name}.app"/>
         </exec>
 
         <!-- verify staple -->
@@ -2129,7 +2129,7 @@
             <arg value="stapler"/>
             <arg value="validate"/>
             <arg value="-v" />
-            <arg value="${ant.project.name}-${app.version}.app"/>
+            <arg value="${ant.project.name}.app"/>
         </exec>
     </target>
 
