@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
@@ -91,7 +94,7 @@ public class H5File extends FileFormat
 {
     private static final long serialVersionUID = 6247335559471526045L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5File.class);
+    private static final Logger log = LoggerFactory.getLogger(H5File.class);
 
     /**
      * the file access flag. Valid values are
@@ -138,6 +141,8 @@ public class H5File extends FileFormat
     public static final int LIBVER_V112 = HDF5Constants.H5F_LIBVER_V112;
     /** The library v1.14 version value */
     public static final int LIBVER_V114 = HDF5Constants.H5F_LIBVER_V114;
+    /** The library v1.16 version value */
+    public static final int LIBVER_V116 = HDF5Constants.H5F_LIBVER_V116;
 
     /** Indicate that this file is open for reading in a
      * single-writer/multi-reader (SWMR) scenario. Note that
@@ -1055,6 +1060,8 @@ public class H5File extends FileFormat
             low = HDF5Constants.H5F_LIBVER_V112;
         else if(lowStr.equals("V114"))
             low = HDF5Constants.H5F_LIBVER_V114;
+        else if (lowStr.equals("V116"))
+            low = HDF5Constants.H5F_LIBVER_V116;
         else if(lowStr.equals("Latest"))
             low = HDF5Constants.H5F_LIBVER_LATEST;
         else
@@ -1070,6 +1077,8 @@ public class H5File extends FileFormat
             high = HDF5Constants.H5F_LIBVER_V112;
         else if(highStr.equals("V114"))
             high = HDF5Constants.H5F_LIBVER_V114;
+        else if (highStr.equals("V116"))
+            high = HDF5Constants.H5F_LIBVER_V116;
         else if(highStr.equals("Latest"))
             high = HDF5Constants.H5F_LIBVER_LATEST;
         else
@@ -1114,6 +1123,8 @@ public class H5File extends FileFormat
                 low = HDF5Constants.H5F_LIBVER_V112;
             else if(lowStr.equals("V114"))
                 low = HDF5Constants.H5F_LIBVER_V114;
+            else if (lowStr.equals("V116"))
+                low = HDF5Constants.H5F_LIBVER_V116;
             else if(lowStr.equals("Latest"))
                 low = HDF5Constants.H5F_LIBVER_LATEST;
             else
@@ -1129,6 +1140,8 @@ public class H5File extends FileFormat
                 high = HDF5Constants.H5F_LIBVER_V112;
             else if(highStr.equals("V114"))
                 high = HDF5Constants.H5F_LIBVER_V114;
+            else if (highStr.equals("V116"))
+                high = HDF5Constants.H5F_LIBVER_V116;
             else if(highStr.equals("Latest"))
                 high = HDF5Constants.H5F_LIBVER_LATEST;
             else
@@ -1200,6 +1213,8 @@ public class H5File extends FileFormat
             libversion = "V112 and ";
         else if (libver[0] == HDF5Constants.H5F_LIBVER_V114)
             libversion = "V114 and ";
+        else if (libver[0] == HDF5Constants.H5F_LIBVER_V116)
+            libversion = "V116 and ";
         else if (libver[0] == HDF5Constants.H5F_LIBVER_LATEST)
             libversion = "Latest and ";
 
@@ -1213,6 +1228,8 @@ public class H5File extends FileFormat
             libversion += "V112";
         else if (libver[1] == HDF5Constants.H5F_LIBVER_V114)
             libversion += "V114";
+        else if (libver[1] == HDF5Constants.H5F_LIBVER_V116)
+            libversion += "V116";
         else if (libver[1] == HDF5Constants.H5F_LIBVER_LATEST)
             libversion += "Latest";
         return libversion;

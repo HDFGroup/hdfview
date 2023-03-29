@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.graphics.Image;
 
@@ -43,7 +46,7 @@ public class ViewProperties extends PreferenceStore
 {
     private static final long   serialVersionUID     = -6411465283887959066L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ViewProperties.class);
+    private static final Logger log = LoggerFactory.getLogger(ViewProperties.class);
 
     /** the version of the HDFViewer */
     public static final String  VERSION              = HDFVersions.getPropertyVersionView();

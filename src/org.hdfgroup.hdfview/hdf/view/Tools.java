@@ -57,6 +57,9 @@ import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -79,7 +82,7 @@ import hdf.view.ViewProperties.BITMASK_OP;
 public final class Tools {
     private static final Display display = Display.getDefault();
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tools.class);
+    private static final Logger log = LoggerFactory.getLogger(Tools.class);
 
     /**  */
     public static final long       MAX_INT8        = 127;

@@ -17,6 +17,9 @@ package hdf.view.dialog;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -33,7 +36,7 @@ import hdf.view.ViewProperties;
  * modules.
  */
 public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsViewModulesPage.class);
+    private static final Logger log = LoggerFactory.getLogger(UserOptionsViewModulesPage.class);
 
     private Combo                 choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView;
 

@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Datatype is an abstract class that defines datatype characteristics and APIs for a data type.
  *
@@ -46,7 +49,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer
 {
     private static final long serialVersionUID = -581324710549963177L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
+    private static final Logger log = LoggerFactory.getLogger(Datatype.class);
 
     /**
      * The default definition for datatype size, order, and sign.
@@ -377,9 +380,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer
             throw new Exception("invalid datatype sign - " + tsign);
 
         datatypeClass = tclass;
+        datatypeSize = tsize;
         if (datatypeSize == NATIVE)
             datatypeNATIVE = true;
-        datatypeSize = tsize;
+        else
+            datatypeNATIVE = false;
         datatypeOrder = torder;
         datatypeSign = tsign;
         enumMembers = null;
@@ -762,6 +767,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer
             description.append("8-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
             break;
         case CLASS_INTEGER:
+            log.trace("getDescription(): Int [{}]", datatypeNATIVE);
             if (datatypeNATIVE)
                 description.append("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
             else

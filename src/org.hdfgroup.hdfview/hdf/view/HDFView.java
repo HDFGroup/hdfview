@@ -25,6 +25,9 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -106,7 +109,7 @@ import hdf.view.dialog.UserOptionsViewModulesPage;
  */
 public class HDFView implements DataViewManager
 {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
+    private static final Logger log = LoggerFactory.getLogger(HDFView.class);
 
     private static Display             display;
     private static Shell               mainWindow;

@@ -18,6 +18,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -45,7 +48,7 @@ import hdf.view.ViewProperties;
  */
 public class NewDataObjectDialog extends Dialog {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewDataObjectDialog.class);
+    private static final Logger log = LoggerFactory.getLogger(NewDataObjectDialog.class);
 
     /** the visual shell for the dialog */
     protected Shell   shell;

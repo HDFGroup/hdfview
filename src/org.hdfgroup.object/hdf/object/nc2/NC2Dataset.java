@@ -17,6 +17,9 @@ package hdf.object.nc2;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -42,7 +45,7 @@ import ucar.nc2.Variable;
 public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     private static final long serialVersionUID = -6031051694304457461L;
 
-    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(NC2Dataset.class);
+    private static final Logger   log = LoggerFactory.getLogger(NC2Dataset.class);
 
     /** tag for netCDF datasets.
      *  HDF4 library supports netCDF version 2.3.2. It only supports SDS APIs.

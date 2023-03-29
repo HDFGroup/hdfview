@@ -10,6 +10,9 @@ import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.swt.widgets.Display;
@@ -29,7 +32,7 @@ import org.junit.Test;
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
 public class TestTreeViewFiles extends AbstractWindowTest {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestTreeViewFiles.class);
+    private static final Logger log = LoggerFactory.getLogger(TestTreeViewFiles.class);
 
     @Test
     public void openHDF5ScalarGroup() {

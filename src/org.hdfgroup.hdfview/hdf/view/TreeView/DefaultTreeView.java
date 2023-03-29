@@ -32,6 +32,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -114,7 +117,7 @@ import hdf.view.dialog.NewLinkDialog;
  */
 public class DefaultTreeView implements TreeView {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTreeView.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultTreeView.class);
 
     private Shell                         shell;
 
@@ -3153,10 +3156,14 @@ public class DefaultTreeView implements TreeView {
             openShell.setImages(ViewProperties.getHdfIcons());
             openShell.setLayout(new GridLayout(1, true));
 
-            String[] lowValues = { "Earliest", "V18", "V110", "V112", "V114", "Latest" };
-            int[] lowConstants = { HDF5Constants.H5F_LIBVER_EARLIEST, HDF5Constants.H5F_LIBVER_V18, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_V114, HDF5Constants.H5F_LIBVER_LATEST };
-            String[] highValues = { "V18", "V110", "V112", "V114", "Latest" };
-            int[] highConstants = { HDF5Constants.H5F_LIBVER_V18, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_V114, HDF5Constants.H5F_LIBVER_LATEST };
+            String[] lowValues = { "Earliest", "V18", "V110", "V112", "V114", "V116", "Latest" };
+            int[] lowConstants = { HDF5Constants.H5F_LIBVER_EARLIEST, HDF5Constants.H5F_LIBVER_V18,
+                    HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_V114,
+                    HDF5Constants.H5F_LIBVER_V116, HDF5Constants.H5F_LIBVER_LATEST };
+            String[] highValues = { "V18", "V110", "V112", "V114", "V116", "Latest" };
+            int[] highConstants = { HDF5Constants.H5F_LIBVER_V18, HDF5Constants.H5F_LIBVER_V110,
+                    HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_V114, HDF5Constants.H5F_LIBVER_V116,
+                    HDF5Constants.H5F_LIBVER_LATEST };
 
             // Try to retrieve the existing version bounds
             int[] current = null;
