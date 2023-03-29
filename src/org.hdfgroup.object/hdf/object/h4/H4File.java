@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
@@ -46,7 +49,7 @@ import hdf.object.h4.H4ScalarAttribute;
 public class H4File extends FileFormat {
     private static final long serialVersionUID = 8985533001471224030L;
 
-    private static final org.slf4j.Logger   log = org.slf4j.LoggerFactory.getLogger(H4File.class);
+    private static final Logger   log = LoggerFactory.getLogger(H4File.class);
 
     /**
      * the file access flag.

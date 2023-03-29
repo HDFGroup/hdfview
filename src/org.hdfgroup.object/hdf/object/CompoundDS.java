@@ -24,6 +24,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.HDFNativeData;
 
 import hdf.object.Attribute;
@@ -73,7 +76,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
 {
     private static final long serialVersionUID = -4880399929644095662L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDS.class);
+    private static final Logger log = LoggerFactory.getLogger(CompoundDS.class);
 
     /**
      * A single character to separate the names of nested compound fields. An
@@ -583,7 +586,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
                 int arrSize = 1;
                 for (int i = 0; i < arrayDims.length; i++)
                     arrSize *= arrayDims[i];
-                log.debug("convertByteMember(): no CLASS_ARRAY arrayType={} arrSize={}", arrayType, arrSize);
+                log.trace("convertByteMember(): no CLASS_ARRAY arrayType={} arrSize={}", arrayType, arrSize);
 
                 theObj = new Object[arrSize];
 

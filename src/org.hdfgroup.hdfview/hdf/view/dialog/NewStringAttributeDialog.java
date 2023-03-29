@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
@@ -60,7 +63,7 @@ import hdf.view.ViewProperties;
  */
 public class NewStringAttributeDialog extends NewDataObjectDialog {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewStringAttributeDialog.class);
+    private static final Logger log = LoggerFactory.getLogger(NewStringAttributeDialog.class);
 
     /** the default length of a string attribute */
     public static final int   DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;

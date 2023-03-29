@@ -14,6 +14,9 @@
 
 package hdf.object.h5;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
@@ -21,7 +24,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 /** HDF5 utility class */
 public final class H5Utils {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Utils.class);
+    private static final Logger log = LoggerFactory.getLogger(H5Utils.class);
 
     /**
      * Set up a hyperslab selection within a dataset.

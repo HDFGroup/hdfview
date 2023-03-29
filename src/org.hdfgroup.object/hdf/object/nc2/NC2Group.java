@@ -18,8 +18,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.object.FileFormat;
 import hdf.object.Group;
+
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -37,7 +41,7 @@ public class NC2Group extends Group
 {
     private static final long serialVersionUID = -1261533010442193447L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NC2Group.class);
+    private static final Logger log = LoggerFactory.getLogger(NC2Group.class);
 
     /**
      * The corresponding netcdf Group for this group.

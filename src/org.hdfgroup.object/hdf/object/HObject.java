@@ -16,6 +16,9 @@ package hdf.object;
 
 import java.io.Serializable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The HObject class is the root class of all the HDF data objects. Every data
  * class has HObject as a superclass. All objects implement the methods of this
@@ -89,7 +92,7 @@ public abstract class HObject implements Serializable
      */
     private static final long  serialVersionUID = -1723666708199882519L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HObject.class);
+    private static final Logger log = LoggerFactory.getLogger(HObject.class);
 
     /**
      * The separator of object path, i.e. "/".

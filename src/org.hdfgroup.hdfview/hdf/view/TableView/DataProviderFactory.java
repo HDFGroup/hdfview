@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 
 import hdf.hdf5lib.H5;
@@ -50,7 +53,7 @@ import hdf.view.Tools;
  */
 public class DataProviderFactory
 {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataProviderFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(DataProviderFactory.class);
 
     /**
      * To keep things clean from an API perspective, keep a static reference to the last
@@ -133,7 +136,7 @@ public class DataProviderFactory
      */
     public static class HDFDataProvider implements IDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(HDFDataProvider.class);
 
         /**
          * In order to support 3-dimensional datasets, which may need to update the data
@@ -583,7 +586,7 @@ public class DataProviderFactory
      */
     private static class CompoundDataProvider extends HDFDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(CompoundDataProvider.class);
 
         private final HashMap<Integer, Integer> baseProviderIndexMap;
         private final HashMap<Integer, Integer> relCmpdStartIndexMap;
@@ -886,7 +889,7 @@ public class DataProviderFactory
 
     private static class ArrayDataProvider extends HDFDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ArrayDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(ArrayDataProvider.class);
 
         private final HDFDataProvider baseTypeDataProvider;
 
@@ -1101,7 +1104,7 @@ public class DataProviderFactory
 
     private static class VlenDataProvider extends HDFDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VlenDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(VlenDataProvider.class);
 
         private final HDFDataProvider baseTypeDataProvider;
 
@@ -1406,7 +1409,7 @@ public class DataProviderFactory
 
     private static class StringDataProvider extends HDFDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StringDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(StringDataProvider.class);
 
         private final long typeSize;
 
@@ -1491,7 +1494,7 @@ public class DataProviderFactory
 
     private static class CharDataProvider extends HDFDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CharDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(CharDataProvider.class);
 
         CharDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
@@ -1514,7 +1517,7 @@ public class DataProviderFactory
 
     private static class NumericalDataProvider extends HDFDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NumericalDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(NumericalDataProvider.class);
 
         private final boolean isUINT64;
 
@@ -1566,7 +1569,7 @@ public class DataProviderFactory
 
     private static class EnumDataProvider extends HDFDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnumDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(EnumDataProvider.class);
 
         EnumDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed) throws Exception {
             super(dtype, dataBuf, dataTransposed);
@@ -1575,7 +1578,7 @@ public class DataProviderFactory
 
     private static class BitfieldDataProvider extends HDFDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BitfieldDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(BitfieldDataProvider.class);
 
         private final long typeSize;
 
@@ -1631,7 +1634,7 @@ public class DataProviderFactory
 
     private static class RefDataProvider extends HDFDataProvider
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RefDataProvider.class);
+        private static final Logger log = LoggerFactory.getLogger(RefDataProvider.class);
 
         private final long typeSize;
         private final H5Datatype h5dtype;

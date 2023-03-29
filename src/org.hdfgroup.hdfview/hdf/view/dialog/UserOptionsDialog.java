@@ -14,6 +14,9 @@
 
 package hdf.view.dialog;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.swt.SWT;
@@ -28,7 +31,7 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class UserOptionsDialog extends PreferenceDialog {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDialog.class);
+    private static final Logger log = LoggerFactory.getLogger(UserOptionsDialog.class);
 
     private Shell                         shell;
 

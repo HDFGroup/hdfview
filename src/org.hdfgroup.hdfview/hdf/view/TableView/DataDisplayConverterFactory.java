@@ -19,6 +19,9 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
@@ -42,7 +45,7 @@ import hdf.view.Tools;
  */
 public class DataDisplayConverterFactory
 {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataDisplayConverterFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(DataDisplayConverterFactory.class);
 
     /**
      * To keep things clean from an API perspective, keep a static reference to the last
@@ -118,7 +121,7 @@ public class DataDisplayConverterFactory
     /** the HDF extension for data converters */
     public static class HDFDisplayConverter extends DisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(HDFDisplayConverter.class);
 
         /** the number format type */
         protected NumberFormat     numberFormat = null;
@@ -214,7 +217,7 @@ public class DataDisplayConverterFactory
 
     private static class CompoundDataDisplayConverter extends HDFDisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDataDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(CompoundDataDisplayConverter.class);
 
         private final HashMap<Integer, Integer> baseConverterIndexMap;
         private final HashMap<Integer, Integer> relCmpdStartIndexMap;
@@ -381,7 +384,7 @@ public class DataDisplayConverterFactory
 
     private static class ArrayDataDisplayConverter extends HDFDisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ArrayDataDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(ArrayDataDisplayConverter.class);
 
         private final HDFDisplayConverter baseTypeConverter;
         private final StringBuilder       buffer;
@@ -512,7 +515,7 @@ public class DataDisplayConverterFactory
 
     private static class VlenDataDisplayConverter extends HDFDisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VlenDataDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(VlenDataDisplayConverter.class);
 
         private final HDFDisplayConverter baseTypeConverter;
         private final StringBuilder       buffer;
@@ -643,7 +646,7 @@ public class DataDisplayConverterFactory
 
     private static class StringDataDisplayConverter extends HDFDisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StringDataDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(StringDataDisplayConverter.class);
 
         StringDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
@@ -657,7 +660,7 @@ public class DataDisplayConverterFactory
 
     private static class CharDataDisplayConverter extends HDFDisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CharDataDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(CharDataDisplayConverter.class);
 
         CharDataDisplayConverter(final Datatype dtype) throws Exception {
             super(dtype);
@@ -677,7 +680,7 @@ public class DataDisplayConverterFactory
 
     private static class NumericalDataDisplayConverter extends HDFDisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NumericalDataDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(NumericalDataDisplayConverter.class);
 
         private final StringBuilder buffer;
         private final long          typeSize;
@@ -743,7 +746,7 @@ public class DataDisplayConverterFactory
 
     private static class EnumDataDisplayConverter extends HDFDisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnumDataDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(EnumDataDisplayConverter.class);
 
         private final StringBuilder buffer;
         private final H5Datatype    enumType;
@@ -807,7 +810,7 @@ public class DataDisplayConverterFactory
 
     private static class BitfieldDataDisplayConverter extends HDFDisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BitfieldDataDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(BitfieldDataDisplayConverter.class);
 
         private final StringBuilder buffer;
         private final boolean       isOpaque;
@@ -859,7 +862,7 @@ public class DataDisplayConverterFactory
 
     private static class RefDataDisplayConverter extends HDFDisplayConverter
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RefDataDisplayConverter.class);
+        private static final Logger log = LoggerFactory.getLogger(RefDataDisplayConverter.class);
 
         private final StringBuilder buffer;
 

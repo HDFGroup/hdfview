@@ -28,6 +28,9 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFArray;
@@ -57,7 +60,7 @@ public class H5Datatype extends Datatype
 {
     private static final long serialVersionUID = -750546422258749792L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5Datatype.class);
+    private static final Logger log = LoggerFactory.getLogger(H5Datatype.class);
 
     /**
      * The metadata object for this data object. Members of the metadata are instances of Attribute.
@@ -1152,6 +1155,10 @@ public class H5Datatype extends Datatype
             datatypeSize = (isVLEN
                     && !isVariableStr) ? HDF5Constants.H5T_VL_T : tsize;
         }
+        if (datatypeSize == NATIVE)
+            datatypeNATIVE = true;
+        else
+            datatypeNATIVE = false;
         log.trace("fromNative(): datatypeClass={} baseType={} datatypeSize={}", datatypeClass, baseType, datatypeSize);
     }
 
@@ -1323,6 +1330,7 @@ public class H5Datatype extends Datatype
                         datatypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
                     }
                     else {
+                        datatypeNATIVE = false;
                         /* Custom sized integer */
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT8);
                         H5.H5Tset_size(tid, datatypeSize);
@@ -1369,6 +1377,8 @@ public class H5Datatype extends Datatype
                         datatypeNATIVE = true;
                         datatypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
                     }
+                    else
+                        datatypeNATIVE = false;
 
                     tid = H5.H5Tcreate(HDF5Constants.H5T_ENUM, datatypeSize);
                 }
@@ -1554,6 +1564,8 @@ public class H5Datatype extends Datatype
                         datatypeNATIVE = true;
                         datatypeSize = 1;
                     }
+                    else
+                        datatypeNATIVE = false;
 
                     /* Custom sized bitfield */
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_B8);
@@ -1589,8 +1601,10 @@ public class H5Datatype extends Datatype
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_OPAQUE);
                     datatypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_OPAQUE);
                 }
-                else
+                else {
+                    datatypeNATIVE = false;
                     tid = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, datatypeSize);
+                }
 
                 if (opaqueTag != null) {
                     H5.H5Tset_tag(tid, opaqueTag);
@@ -1870,7 +1884,7 @@ public class H5Datatype extends Datatype
             description.append("8-bit ").append(isUnsigned() ? "unsigned " : "").append("integer");
             break;
         case CLASS_INTEGER:
-            log.trace("getDescription(): Int");
+            log.trace("getDescription(): Int [{}]", datatypeNATIVE);
             if (datatypeNATIVE)
                 description.append("native ").append(isUnsigned() ? "unsigned " : "").append("integer");
             else

@@ -16,6 +16,9 @@ package hdf.view.MetaDataView;
 
 import java.lang.reflect.Array;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -44,7 +47,7 @@ import hdf.view.DataView.DataViewManager;
  */
 public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultDatasetMetaDataView.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultDatasetMetaDataView.class);
 
     /**
      *The metadata view interface for displaying dataset metadata information

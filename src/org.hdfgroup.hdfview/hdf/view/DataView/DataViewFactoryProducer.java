@@ -16,6 +16,9 @@ package hdf.view.DataView;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 import hdf.view.ViewProperties.DataViewType;
@@ -35,7 +38,7 @@ import hdf.view.TreeView.DefaultTreeViewFactory;
  */
 public class DataViewFactoryProducer {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataViewFactoryProducer.class);
+    private static final Logger log = LoggerFactory.getLogger(DataViewFactoryProducer.class);
 
     /**
      * get the requested DataViewFactory

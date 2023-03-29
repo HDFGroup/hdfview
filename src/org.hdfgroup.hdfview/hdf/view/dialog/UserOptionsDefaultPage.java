@@ -14,6 +14,9 @@
 
 package hdf.view.dialog;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Font;
@@ -30,7 +33,7 @@ import org.eclipse.swt.widgets.Shell;
  */
 public abstract class UserOptionsDefaultPage extends PreferencePage {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsDefaultPage.class);
+    private static final Logger log = LoggerFactory.getLogger(UserOptionsDefaultPage.class);
 
     /** The reference to the visual shell */
     protected Shell                 shell;

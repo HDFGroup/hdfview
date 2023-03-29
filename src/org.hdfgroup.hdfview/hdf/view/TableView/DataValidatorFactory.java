@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.data.validate.DataValidator;
 import org.eclipse.nebula.widgets.nattable.data.validate.ValidationFailedException;
@@ -42,7 +45,7 @@ import hdf.object.h5.H5Datatype;
  */
 public class DataValidatorFactory
 {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataValidatorFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(DataValidatorFactory.class);
 
     /**
      * To keep things clean from an API perspective, keep a static reference to the
@@ -134,7 +137,7 @@ public class DataValidatorFactory
     /** The HDF extension of the data valicdation */
     public static class HDFDataValidator extends DataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(HDFDataValidator.class);
 
         /**
          * This field is only used for CompoundDataValidator, but when the top-level
@@ -217,7 +220,7 @@ public class DataValidatorFactory
      */
     private static class CompoundDataValidator extends HDFDataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(CompoundDataValidator.class);
 
         private final HashMap<Integer, Integer> baseValidatorIndexMap;
         private final HashMap<Integer, Integer> relCmpdStartIndexMap;
@@ -314,7 +317,7 @@ public class DataValidatorFactory
      */
     private static class ArrayDataValidator extends HDFDataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ArrayDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(ArrayDataValidator.class);
 
         private final HDFDataValidator baseValidator;
 
@@ -383,7 +386,7 @@ public class DataValidatorFactory
      */
     private static class VlenDataValidator extends HDFDataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VlenDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(VlenDataValidator.class);
 
         private final HDFDataValidator baseValidator;
 
@@ -451,7 +454,7 @@ public class DataValidatorFactory
      */
     private static class StringDataValidator extends HDFDataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StringDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(StringDataValidator.class);
 
         private final Datatype datasetDatatype;
         private final boolean isH5String;
@@ -522,7 +525,7 @@ public class DataValidatorFactory
 
     private static class CharDataValidator extends HDFDataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CharDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(CharDataValidator.class);
 
         private final Datatype datasetDatatype;
 
@@ -575,7 +578,7 @@ public class DataValidatorFactory
      */
     private static class NumericalDataValidator extends HDFDataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NumericalDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(NumericalDataValidator.class);
 
         private final Datatype datasetDatatype;
 
@@ -711,7 +714,7 @@ public class DataValidatorFactory
 
     private static class EnumDataValidator extends HDFDataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnumDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(EnumDataValidator.class);
 
         private final HDFDataValidator baseValidator;
 
@@ -766,7 +769,7 @@ public class DataValidatorFactory
 
     private static class BitfieldDataValidator extends HDFDataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BitfieldDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(BitfieldDataValidator.class);
 
         BitfieldDataValidator(final Datatype dtype) {
             super(dtype);
@@ -775,7 +778,7 @@ public class DataValidatorFactory
 
     private static class RefDataValidator extends HDFDataValidator
     {
-        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RefDataValidator.class);
+        private static final Logger log = LoggerFactory.getLogger(RefDataValidator.class);
 
         RefDataValidator(final Datatype dtype) {
             super(dtype);

@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
@@ -91,7 +94,7 @@ public class H5File extends FileFormat
 {
     private static final long serialVersionUID = 6247335559471526045L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5File.class);
+    private static final Logger log = LoggerFactory.getLogger(H5File.class);
 
     /**
      * the file access flag. Valid values are

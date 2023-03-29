@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The abstract class provides general APIs to create and manipulate dataset/attribute
  * objects, and retrieve dataset/attribute properties, datatype and dimension sizes.
@@ -49,7 +52,7 @@ public abstract class Dataset extends HObject implements DataFormat
 {
     private static final long serialVersionUID    = -3360885430038261178L;
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
+    private static final Logger log = LoggerFactory.getLogger(Dataset.class);
 
     /**
      * The memory buffer that holds the raw data array of the dataset.
@@ -1058,7 +1061,7 @@ public abstract class Dataset extends HObject implements DataFormat
         log.trace("convertFromUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'B') {
-            log.debug("convertFromUnsignedC(): Java convert byte to short");
+            log.trace("convertFromUnsignedC(): Java convert byte to short");
             short[] sdata = null;
             if (dataOUT == null)
                 sdata = new short[size];
@@ -1072,7 +1075,7 @@ public abstract class Dataset extends HObject implements DataFormat
             dataOUT = sdata;
         }
         else if (dname == 'S') {
-            log.debug("convertFromUnsignedC(): Java convert short to int");
+            log.trace("convertFromUnsignedC(): Java convert short to int");
             int[] idata = null;
             if (dataOUT == null)
                 idata = new int[size];
@@ -1086,7 +1089,7 @@ public abstract class Dataset extends HObject implements DataFormat
             dataOUT = idata;
         }
         else if (dname == 'I') {
-            log.debug("convertFromUnsignedC(): Java convert int to long");
+            log.trace("convertFromUnsignedC(): Java convert int to long");
             long[] ldata = null;
             if (dataOUT == null)
                 ldata = new long[size];
@@ -1165,7 +1168,7 @@ public abstract class Dataset extends HObject implements DataFormat
         log.trace("convertToUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'S') {
-            log.debug("convertToUnsignedC(): Java convert short to byte");
+            log.trace("convertToUnsignedC(): Java convert short to byte");
             byte[] bdata = null;
             if (dataOUT == null)
                 bdata = new byte[size];
@@ -1177,7 +1180,7 @@ public abstract class Dataset extends HObject implements DataFormat
             dataOUT = bdata;
         }
         else if (dname == 'I') {
-            log.debug("convertToUnsignedC(): Java convert int to short");
+            log.trace("convertToUnsignedC(): Java convert int to short");
             short[] sdata = null;
             if (dataOUT == null)
                 sdata = new short[size];
@@ -1189,7 +1192,7 @@ public abstract class Dataset extends HObject implements DataFormat
             dataOUT = sdata;
         }
         else if (dname == 'J') {
-            log.debug("convertToUnsignedC(): Java convert long to int");
+            log.trace("convertToUnsignedC(): Java convert long to int");
             int[] idata = null;
             if (dataOUT == null)
                 idata = new int[size];
