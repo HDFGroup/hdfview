@@ -1617,9 +1617,11 @@
             <arg value="${basedir}/package_files/hdf.ico" />
             <arg value="--temp" />
             <arg value="${build.dir}/temp" />
+            <arg value="--resource-dir" />
+            <arg value="${basedir}/package_files/wix" />
             <!-- Runtime images -->
             <arg value="--install-dir" />
-            <arg value="HDF_Group/${ant.project.name}" />
+            <arg value="${ant.project.name}" />
             <arg value="--runtime-image" />
             <arg value="${jar.dir}/jre" />
             <!-- Platform-specific details -->
@@ -1982,8 +1984,6 @@
             <arg value="--java-options" />
             <arg value="-Djava.library.path=$APPDIR" />
             <!-- Application images -->
-            <arg value="--resource-dir" />
-            <arg value="${basedir}/package_files/wix" />
 
             <!-- Runtime images -->
             <arg value="--runtime-image" />
