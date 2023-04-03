@@ -1977,6 +1977,8 @@
             <arg value="--java-options" />
             <arg value="-Djava.library.path=$APPDIR" />
             <!-- Application images -->
+            <arg value="--resource-dir" />
+            <arg value="${basedir}/package_files/wix" />
 
             <!-- Runtime images -->
             <arg value="--runtime-image" />
