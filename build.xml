@@ -1615,6 +1615,8 @@
             <!-- Application images -->
             <arg value="--icon" />
             <arg value="${basedir}/package_files/hdf.ico" />
+            <arg value="--temp" />
+            <arg value="${build.dir}/temp" />
             <!-- Runtime images -->
             <arg value="--install-dir" />
             <arg value="HDF_Group/${ant.project.name}" />
