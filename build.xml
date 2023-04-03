@@ -1617,8 +1617,6 @@
             <arg value="${basedir}/package_files/hdf.ico" />
             <arg value="--temp" />
             <arg value="${build.dir}/temp" />
-            <arg value="--resource-dir" />
-            <arg value="${basedir}/package_files/wix" />
             <!-- Runtime images -->
             <arg value="--install-dir" />
             <arg value="${ant.project.name}" />
