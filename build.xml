@@ -1422,7 +1422,7 @@
             <arg value="login.keychain" />
         </exec>
 
-        <echo> Package the mac application</echo>
+        <echo> JXPackage the mac application</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--verbose" />
@@ -1500,10 +1500,10 @@
     </target>
 
     <target name="createJXPackageUnix" depends="createJPackageBase" if="${isXUnix}">
-        <echo> Package the unix application</echo>
+        <echo> JXPackage the unix application</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
-            <!-- <arg value="- -verbose" /> -->
+            <arg value="- -verbose" />
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
@@ -1560,7 +1560,7 @@
     </target>
 
     <target name="createJXPackageWindows" depends="createJPackageBase" if="${isXWindows}">
-        <echo> Package the windows application</echo>
+        <echo> JXPackage the windows application</echo>
 
         <copy todir="${jar.dir}/jre/bin">
             <fileset dir="${release.dir}/bin">
@@ -1570,6 +1570,7 @@
 
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
+            <arg value="--verbose" />
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
@@ -1614,9 +1615,11 @@
             <!-- Application images -->
             <arg value="--icon" />
             <arg value="${basedir}/package_files/hdf.ico" />
+            <arg value="--temp" />
+            <arg value="${build.dir}/temp" />
             <!-- Runtime images -->
             <arg value="--install-dir" />
-            <arg value="HDF_Group/${ant.project.name}" />
+            <arg value="${ant.project.name}" />
             <arg value="--runtime-image" />
             <arg value="${jar.dir}/jre" />
             <!-- Platform-specific details -->
@@ -1655,6 +1658,7 @@
         <mkdir dir="${dist.dir}" />
 
         <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" readonly="false" />
+        <echo message="xxxx Sign the windows binary xxxx"/>
         <!-- Sign the generated exe -->
         <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
             <arg value="sign" />
@@ -1673,7 +1677,7 @@
             <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
         </exec>
 
-        <echo> Package the windows binary</echo>
+        <echo message="xxxx Package the windows binary xxxx"/>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -1687,7 +1691,7 @@
     </target>
 
     <target name="binaryPackXUnix" depends="createJXPackage, createDEBREADME, createRPMREADME" if="${isXUnix}">
-        <echo> Package the unix binary</echo>
+        <echo message="xxxx Package the unix binary xxxx"/>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -1720,7 +1724,7 @@
             <arg value="login.keychain" />
         </exec>
 
-        <echo message="Code sign the mac dmg"/>
+        <echo message="xxxx Code sign the mac dmg xxxx"/>
         <!-- Code signing the dmg -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -1737,14 +1741,14 @@
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
-        <echo message="Check for secure timestamp"/>
+        <echo message="xxxx Check for secure dmg timestamp xxxx"/>
         <!-- Code signing the application image -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="-dvv" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
-        <echo message="Verify dmg"/>
+        <echo message="xxxx Verify dmg xxxx"/>
         <exec dir="${dist.dir}" executable="hdiutil">
             <arg value="verify" />
             <arg value="${ant.project.name}-${app.version}.dmg" />
@@ -1756,7 +1760,7 @@
 
         <antcall target="staple-notary" />
 
-        <echo> Package the mac app binary</echo>
+        <echo message="xxxx Package the mac dmg binary xxxx"/>
         <!-- Copy over license file -->
         <copy tofile="${dist.dir}/COPYING.txt">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -1775,17 +1779,7 @@
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
-        <!-- verify gatekeeper -->
-        <echo message="Verify gatekeeper"/>
-        <exec executable="spctl" dir="${dist.dir}" failonerror="false">
-        <arg value="-vvvv" />
-        <arg value="--assess" />
-        <arg value="--type" />
-        <arg value="execute" />
-        <arg value="${ant.project.name}.app" />
-        </exec>
-
-        <echo> Package the mac binary</echo>
+        <echo message="xxxx Compress the mac dmg binary xxxx"/>
         <!-- Copy over license file -->
         <copy tofile="${dist.dir}/COPYING.txt">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -1818,7 +1812,7 @@
             <arg value="login.keychain" />
         </exec>
 
-        <echo> Create the mac package</echo>
+        <echo> Create the mac jpackage</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
             <arg value="--verbose" />
@@ -1885,9 +1879,10 @@
     </target>
 
     <target name="createJPackageUnix" depends="createJPackageBase" if="${isAppUnix}">
-        <echo> Create the unix package</echo>
+        <echo> Create the unix jpackage</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
+            <arg value="--verbose" />
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
@@ -1938,7 +1933,7 @@
 
     <target name="createJPackageWindows" depends="createJPackageBase" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
-        <echo> Create the windows package</echo>
+        <echo> Create the windows jpackage</echo>
 
         <copy todir="${jar.dir}/jre/bin">
             <fileset dir="${release.dir}/bin">
@@ -1948,6 +1943,7 @@
 
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
+            <arg value="--verbose" />
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
@@ -1977,7 +1973,6 @@
             <arg value="--java-options" />
             <arg value="-Djava.library.path=$APPDIR" />
             <!-- Application images -->
-
             <!-- Runtime images -->
             <arg value="--runtime-image" />
             <arg value="${jar.dir}/jre" />
@@ -2054,7 +2049,7 @@
     <!-- Staple the received notarization to the app -->
     <!-- run this after notarization is completed -->
     <target name="staple-notary">
-        <echo message="--- Stapling notarization to Mac Build ---"/>
+        <echo message="*** Stapling notarization to Mac Build ***"/>
         <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
             <arg value="stapler"/>
             <arg value="staple"/>
@@ -2103,7 +2098,7 @@
     <!-- Staple the received notarization to the app -->
     <!-- run this after notarization is completed -->
     <target name="zip-staple-notary">
-        <echo message="--- Stapling notarization to Mac Build ---"/>
+        <echo message="*** Stapling notarization to Mac Build ***"/>
         <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
             <arg value="stapler"/>
             <arg value="staple"/>
@@ -2128,7 +2123,7 @@
     <target name="binaryPackWindows" depends="createJPackage, createWindowsAppREADME" if="${isAppWindows}">
         <mkdir dir="${dist.dir}" />
 
-        <echo> Create the windows installer binary</echo>
+        <echo message="---- Create the windows installer binary ----"/>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -2144,7 +2139,7 @@
     <target name="binaryPackUnix" depends="createJPackage, createUnixREADME" if="${isAppUnix}">
         <mkdir dir="${dist.dir}" />
 
-        <echo> Create the unix installer binary</echo>
+        <echo message="---- Create the unix installer binary ----"/>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -2169,7 +2164,7 @@
             <arg value="login.keychain" />
         </exec>
 
-        <echo message="Create the mac zip"/>
+        <echo message="---- Create the mac zip ----"/>
         <!-- create zip -->
         <exec executable="ditto" dir="${dist.dir}" failonerror="true">
             <arg value="-c" />
@@ -2180,7 +2175,7 @@
             <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
-        <echo message="Code sign the mac zip"/>
+        <echo message="---- Code sign the mac zip ----"/>
         <!-- Code signing the dmg -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -2197,7 +2192,7 @@
             <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
-        <echo message="Check for secure timestamp"/>
+        <echo message="---- Check for secure timestamp ----"/>
         <!-- Code signing the application image -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="-dvv" />
@@ -2211,7 +2206,7 @@
         <antcall target="zip-staple-notary" />
 
         <!-- verify codesign -->
-        <echo message="Verify codesign"/>
+        <echo message="---- Verify app codesign ----"/>
         <exec executable="codesign" dir="${dist.dir}">
             <arg value="-vvvv" />
             <arg value="--strict" />
@@ -2219,7 +2214,7 @@
         </exec>
 
         <!-- verify gatekeeper -->
-        <echo message="Verify gatekeeper"/>
+        <echo message="---- Verify app gatekeeper ----"/>
         <exec executable="spctl" dir="${dist.dir}" failonerror="true">
             <arg value="-vvvv" />
             <arg value="--assess" />
@@ -2245,7 +2240,7 @@
             <arg value="${ant.project.name}.app" />
         </exec>
 
-        <echo> Package the mac app binary</echo>
+        <echo message="---- Compress the mac app binary ----"/>
         <!-- Copy over license file -->
         <copy tofile="${dist.dir}/COPYING.txt">
             <fileset dir="${basedir}" includes="COPYING" />
