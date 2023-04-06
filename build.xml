@@ -1503,7 +1503,11 @@
         <echo> JXPackage the unix application</echo>
         <exec executable="${java.home}/bin/jpackage">
             <!-- Basic usage -->
+<<<<<<< HEAD
             <arg value="--verbose" />
+=======
+            <arg value="- -verbose" />
+>>>>>>> branch 'hdfview-3-1_14' of https://github.com/HDFGroup/hdfview.git
             <arg value="--name" />
             <arg value="${ant.project.name}" />
             <arg value="--module-path" />
