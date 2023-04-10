@@ -2251,7 +2251,7 @@
             <tarfileset dir="${dist.dir}" filemode="755">
                 <include name="COPYING.txt" />
                 <include name="README.txt" />
-                <include name="${ant.project.name}.app" />
+                <include name="${ant.project.name}.app/**" />
             </tarfileset>
         </tar>
     </target>
