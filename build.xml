@@ -1188,6 +1188,7 @@
             <fileset dir="${hdf.lib.dir}/../bin">
                 <include name="hdf.dll"/>
                 <include name="mfhdf.dll"/>
+                <include name="xdr.dll"/>
             </fileset>
 
             <fileset dir="${hdf5.lib.dir}">
