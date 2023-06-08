@@ -184,6 +184,9 @@ public class HDFView implements DataViewManager
     /* GUI component: The text area for showing status messages */
     private Text                       status;
 
+    /* GUI component: The area for object view */
+    private ScrolledComposite treeArea;
+
     /* GUI component: The area for quick general view */
     private ScrolledComposite          generalArea;
 
@@ -333,6 +336,7 @@ public class HDFView implements DataViewManager
                 font = new Font(display, fType, fSize, SWT.NORMAL);
             }
             catch (Exception ex) {
+                log.debug("Failed to load font");
                 font = null;
             }
 
@@ -453,8 +457,10 @@ public class HDFView implements DataViewManager
      * </pre>
      */
     private Shell createMainWindow() {
+        Image hdfImage = ViewProperties.getLargeHdfIcon();
         // Create a new display window
         final Shell shell = new Shell(display);
+        shell.setImage(hdfImage);
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setFont(currentFont);
         shell.setText("HDFView " + HDFVIEW_VERSION);
@@ -915,8 +921,8 @@ public class HDFView implements DataViewManager
                     font = null;
                 }
 
+                log.trace("update fonts");
                 updateFont(font);
-                //}
             }
         });
 
@@ -1215,7 +1221,7 @@ public class HDFView implements DataViewManager
         contentArea.setSashWidth(10);
 
         // Add TreeView and DataView to content area pane
-        ScrolledComposite treeArea = new ScrolledComposite(contentArea, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+        treeArea = new ScrolledComposite(contentArea, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
         treeArea.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         treeArea.setExpandHorizontal(true);
         treeArea.setExpandVertical(true);
@@ -1670,12 +1676,16 @@ public class HDFView implements DataViewManager
         if (currentFont != null)
             currentFont.dispose();
 
+        log.trace("updateFont():");
         currentFont = font;
 
         mainWindow.setFont(font);
         recentFilesButton.setFont(font);
+        recentFilesButton.requestLayout();
         urlBar.setFont(font);
+        urlBar.requestLayout();
         clearTextButton.setFont(font);
+        clearTextButton.requestLayout();
         status.setFont(font);
 
         // On certain platforms the url_bar items don't update their size after
@@ -1685,13 +1695,35 @@ public class HDFView implements DataViewManager
             urlBar.add(item);
         }
 
+        treeArea.setFont(font);
+        treeArea.requestLayout();
+        for (Control control : treeArea.getChildren()) {
+            control.setFont(font);
+            control.requestLayout();
+        }
+
+        generalArea.setFont(font);
+        generalArea.requestLayout();
+        for (Control control : generalArea.getChildren()) {
+            control.setFont(font);
+            control.requestLayout();
+        }
+
         if (treeView.getSelectedFile() != null)
             urlBar.select(0);
 
         if (treeView instanceof DefaultTreeView)
             ((DefaultTreeView) treeView).updateFont(font);
 
-        mainWindow.layout();
+        Shell[] shellList = display.getShells();
+        if (shellList != null) {
+            for (int i = 0; i < shellList.length; i++) {
+                shellList[i].setFont(font);
+                shellList[i].requestLayout();
+            }
+        }
+
+        mainWindow.requestLayout();
     }
 
     /**
