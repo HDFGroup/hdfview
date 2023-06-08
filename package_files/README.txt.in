@@ -67,7 +67,7 @@ macOS
 ===========================================================================
 Windows
 ===========================================================================
-HelloWorld/
+@HDFJAVA_PACKAGE_NAME@/
   @HDFJAVA_PACKAGE_NAME@.exe       // Application launchers
   app/
     doc/        // @HDFJAVA_PACKAGE_NAME@ documents

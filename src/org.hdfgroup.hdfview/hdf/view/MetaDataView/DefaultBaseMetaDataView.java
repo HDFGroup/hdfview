@@ -1174,6 +1174,27 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         item.setText(rowData);
     }
 
+    /**
+     * Updates the current font.
+     *
+     * @param font the new font
+     */
+    public void updateFont(Font font) {
+        if (curFont != null)
+            curFont.dispose();
+
+        log.trace("updateFont():");
+        curFont = font;
+
+        attributeInfoPane.setFont(font);
+        attributeInfoPane.pack();
+        attributeInfoPane.requestLayout();
+
+        generalObjectInfoPane.setFont(font);
+        generalObjectInfoPane.pack();
+        generalObjectInfoPane.requestLayout();
+    }
+
     private class UserBlockDialog extends Dialog {
         private Shell          shell;
 

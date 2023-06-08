@@ -2884,9 +2884,12 @@ public class DefaultTreeView implements TreeView {
         if (curFont != null)
             curFont.dispose();
 
+        log.trace("updateFont():");
         curFont = font;
 
         tree.setFont(font);
+        tree.pack();
+        tree.requestLayout();
     }
 
     /**
