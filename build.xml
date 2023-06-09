@@ -1231,7 +1231,7 @@
                 <exclude name="slf4j*.jar" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
-                <filename regex="libhdf5\.so(\.[0-9][0-9][0-9])$"/>
+                <filename regex="libhdf5\.so(\.[0-9][0-9][0-9][0-9]?)$"/>
             </fileset>
         </copy>
 
@@ -1274,7 +1274,7 @@
                 <exclude name="slf4j*.jar" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
-                <filename regex="libhdf5(\.[0-9][0-9][0-9])(\.dylib)$"/>
+                <filename regex="libhdf5(\.[0-9][0-9][0-9][0-9]?)(\.dylib)$"/>
                 <exclude name="*.a" />
             </fileset>
         </copy>
