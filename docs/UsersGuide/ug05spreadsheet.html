@@ -1,0 +1,593 @@
+<?php
+$page_title = "HDFView User's Guide -- Table Viewer";
+include ("../../../../links.php");
+include ("../../../../includes/header.html");
+?>
+<link href="edit.css" rel="stylesheet" type="text/css" />
+
+
+<p>
+<a href="index.html">[Index]</a>
+<a href="ug01introduction.html">[1]</a>
+<a href="ug02start.html">[2]</a>
+<a href="ug03objects.html">[3]</a>
+<a href="ug04treeview.html">[4]</a>
+<a href="ug05spreadsheet.html">[5]</a>
+<a href="ug06imageview.html">[6]</a>
+<a href="ug07useroptions.html">[7]</a>
+</p>
+<p>
+<fieldset><h1>Chapter 5: Table Viewer</h1></fieldset>
+</p>
+
+<p>
+HDFView displays datasets in a two-dimensional table, the TableView. The TableView
+allows you to view and change the values of an image's dataset. You can select rows
+and columns and plot the row/column data in a line plot. The current version of
+HDFView does not allow
+you to change data values of an HDF4 Vdata.</p>
+
+<p>
+If a dataset has three or more dimensions you can only view two dimensions at a time. Using the <a href="images/datasetselection.png"> Dataset Selection Dialog</a>,
+you may select any two dimensions of the dataset to display and a third dimension
+to flip the two-dimension table along that dimension.</p>
+
+<ul class="ul">
+<li class="li2"><a href="ug05spreadsheet.html#ug05display">5.1 Open Dataset</a></li>
+<li class="li2"><a href="ug05spreadsheet.html#ug05subset">5.2 Subset and Dimension Selection</a>
+  <ul class="ul">
+    <li class="li2"> <a href="ug05spreadsheet.html#ug05range">5.2.1 Setting Valid Values</a>
+    <li class="li2"> <a href="ug05spreadsheet.html#ug05subset_size">5.2.2 Dimension Size</a></li>
+    <li class="li2"> <a href="ug05spreadsheet.html#ug05subset_3d">5.2.3 Three or More Dimensions</a></li>
+    <li class="li2"> <a href="ug05spreadsheet.html#ug05subset_transpose">5.2.4 Swap Dimension and Data Transpose</a></li>
+    <li class="li2"> <a href="ug05spreadsheet.html#ug05subset_compound">5.2.5 Compound Dataset Options</a></li>
+  </ul></li>
+<li class="li2"><a href="ug05spreadsheet.html#ug05lineplot">5.3 Display a Column/Row Line Plot</a></li>
+<li class="li2"><a href="ug05spreadsheet.html#ug05change">5.4 Change Data Value</a></li>
+<li class="li2"><a href="ug05spreadsheet.html#ug05save">5.5 Save Data Values to a Text File</a></li>
+<li class="li2"><a href="ug05spreadsheet.html#ug05import">5.6 Import Data from a Text File</a></li>
+<li class="li2"><a href="ug05spreadsheet.html#ug05datasetreferences">5.7 Dataset storing references</a></li>
+ <ul class="ul">
+    <li class="li2"> <a href="ug05spreadsheet.html#ug05objectref">5.7.1 Dataset Storing Object References</a></li>
+    <li class="li2"> <a href="ug05spreadsheet.html#ug05regionalref">5.7.2 Dataset Storing Dataset Region References</a></li>
+  </ul></li>
+<li class="li2"><a href="ug05spreadsheet.html#ug05savebinary">5.8 Save Data Values to a Binary File</a></li>
+<li class="li2"><a href="ug05spreadsheet.html#ug05importbinary">5.9 Import Data from a Binary File</a></li>
+</ul>
+
+<hr noshade size=1 />
+
+<h2>
+<a name="ug05display"></a>5.1 Open Dataset</h2>
+<p>
+To open the entire contents of a dataset, double-click on the dataset or
+select the dataset, then choose the &ldquo;Open&rdquo; command from the
+Context menu. A new spreadsheet window is created.</p>
+
+<p>HDFView displays numerical datasets in a &ldquo;spreadsheet&rdquo;,
+which shows the data values in a grid. A one-dimensional dataset is
+displayed as a single column and a number of rows of dimension size.
+A two-dimensional dataset is displayed as a number of columns of the
+first dimension size and a number of rows of the second dimension
+size, i.e. dim[0]=height and dim[1]=width by default. You can change the
+order of the dimensions using the &ldquo;Open As&rdquo; command.</p>
+
+<center><p>
+<img src="images/dataset2d.png" />
+<br />
+<b>Spreadsheet with a 2-D dataset</b></p>
+</center>
+
+<h2>
+<a name="ug05subset"></a>5.2 Subset and Dimension Selection</h2>
+
+<p>Opening an entire large dataset may cause an
+&lsquo;Out Of Memory Error&rsquo; because
+the Java Virtual Machine cannot create the required objects. HDFView provides
+options to select a subset of a dataset for display. You can also select
+dimensions and the order of dimensions to display, e.g., to switch the columns
+and rows.</p>
+
+<p>To make a selection, select a dataset from the tree and choose the
+&ldquo;Open As&rdquo; command from the Context menu. The selection
+dialog box appears. You can make a selection by dragging the mouse on the preview
+image or entering the values of start, end, and stride. The figure below shows that
+a subset of size 66 x 159 is selected from a true color image with the size of 179 x 359.</p>
+
+<center><p>
+<img src="images/datasetsubsetimage.png" />
+<br /><b>The Dataset Selection dialog box</b></p></center>
+
+<p>By default, a scalar dataset (e.g., a dataset or SDS of numbers)
+is displayed in a spreadsheet. You can also display
+a dataset as an image. To display a dataset as an image, click the Image radio button in the Dataset
+Selection dialog box and select a predefined color table for the
+dataset. This operation takes the data values of the dataset as values of an
+indexed array, i.e., as indices into a palette. The default palette will
+be used to create the image from the dataset if it does not have an attached
+palette. If the data values are not integers or have a range outside
+0 to 255: they are binned into 256 equally spaced intervals.</p>
+
+
+<h3><a name="ug05range"></a>5.2.1 Setting Valid Values</h3>
+<p>
+The "Open As" option allows you to set a range of valid data values, as well as
+setting specific values to be considered invalid, when displaying a dataset as an
+image (see dataset selection dialog figure above). By setting these, any pixels
+(data points) whose values are outside the valid range will not be shown and pixels
+whose value has been set as an invalid value will be mapped to 0.
+
+As an example, the figure below shows a dataset with the value '55' set to be invalid:
+
+<center>
+<img src="images/validrange.png" />
+<br />
+</center>
+
+<h3><a name="ug05subset_size"></a>
+5.2.2 Dimension Size</h3>
+<p>
+A subset is determined by the start and end locations, and the stride. The
+&ldquo;Start&rdquo;
+array determines the starting coordinates of the subset to select. The
+&ldquo;End&rdquo;
+array determines the ending coordinates of the subset to select. The
+&ldquo;Stride&rdquo;
+array chooses array locations from the dataspace with each value in the stride
+array determining how many elements to move in each dimension. Setting a value
+in the stride array to 1 moves to each element in that dimension of the dataspace;
+setting a value of 2 in a location in the stride array moves to every other
+element in that dimension of the dataspace. In other words, the stride determines
+the number of elements to move from the start location in each dimension.</p>
+
+<p>
+HDFView uses a common-sense indexing scheme for selecting rows and columns.
+If the user wants a subset that begins at i,j the START coordinates will start at j, j
+instead of i-1, j-1.</p>
+
+<p>
+An example of a 2-D integer dataset of size 8 X 9.</p>
+<center>
+<table border="0" cellspacing="0" cellpadding="1" width="360" bgcolor="#FFF999" >
+<caption>
+<b>2-D int array of size 8X9</b>
+</caption>
+<tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td></tr>
+<tr><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td></tr>
+<tr><td>31</td><td>32</td><td>33</td><td>34</td><td>35</td><td>36</td><td>37</td><td>38</td><td>39</td></tr>
+<tr><td>41</td><td>42</td><td>43</td><td>44</td><td>45</td><td>46</td><td>47</td><td>48</td><td>49</td></tr>
+<tr><td>51</td><td>52</td><td>53</td><td>54</td><td>55</td><td>56</td><td>57</td><td>58</td><td>59</td></tr>
+<tr><td>61</td><td>62</td><td>63</td><td>64</td><td>65</td><td>66</td><td>67</td><td>68</td><td>69</td></tr>
+<tr><td>71</td><td>72</td><td>73</td><td>74</td><td>75</td><td>76</td><td>77</td><td>78</td><td>79</td></tr>
+<tr><td>81</td><td>82</td><td>83</td><td>84</td><td>85</td><td>86</td><td>87</td><td>88</td><td>89</td></tr>
+</table>
+</center>
+
+<p>
+The following are a few examples of subsets of the 2-D int array.</p>
+
+<center><p>
+<img src="images/datasetsubsetexample1.png" />
+<br />
+<b>The whole dataset -- start=(0, 0), end=(7, 8) and stride=(1, 1)</b></p>
+</center>
+
+<center><p>
+<img src="images/datasetsubsetexample2.png" />
+<br />
+<b>Subset -- start=(2, 3), end=(6, 7) and stride=(1, 1)</b></p>
+</center>
+
+<center><p>
+<img src="images/datasetsubsetexample3.png" />
+<br />
+<b>Subset with stride -- start=(2, 3), end=(5, 6) and stride=(2, 2)</b></p>
+</center>
+
+<h3><a name="ug05subset_3d"></a>
+5.2.3 Three or More Dimensions</h3>
+<p>
+For a three or more dimensional dataset, the first two dimensions are displayed
+as a 2-D spreadsheet, and the third dimension is chosen as the page number
+of the 2-D spreadsheet, i.e. dim[0]=height, dim[1]=width and dim[2]=depth
+by default. Using the &ldquo;Open As&rdquo; option to change the default
+order of dimensions, the user can flip the page forward or backward to
+look at the 2D data values at different positions along the third dimension.
+The current page number is displayed in the status bar of the HDFView.</p>
+
+<p>To flip a data sheet of a 3-D dataset, use the &ldquo;First&rdquo;,
+&ldquo;Previous&rdquo;, &ldquo;Next&rdquo; or &ldquo;Last&rdquo; command
+on the tool bar.</p>
+
+<p>The following figure shows how a 4-D integer dataset of size
+5 x 4 x 3 x 2 is displayed.
+The data is displayed in a spreadsheet of 5 X 4
+(dim0 by dim1), of page 2 (dim2), cutting locations 2 at dim3.</p>
+
+<center><p>
+<img src="images/dataset3d.png" />
+<br />
+<b>Spreadsheet with 4-D dataset <span class="comment"></b></p>
+</center>
+
+<h3><a name="ug05subset_transpose"></a>
+5.2.4 Swap Dimension and Data Transpose</h3>
+<p>
+By default, HDFView chooses the first coordinate, dim[0], as the
+ROW index and the second coordinate, dim[1], as the COLUMN index.
+For example, a 2-D dataset of 8 X 9 (dim0=8, dim1=9) is displayed
+as eight rows and nine columns by default.</p>
+<p>
+You can also swap the dimension order. However, swapping the dimension
+order does not change the data order. To change the data order,
+use the &ldquo;Transpose&rdquo; option. Swapping and transposing only apply
+to the data in the display and not to the data in the file.</p>
+
+<p>
+Let us use the previous example to demonstrate this procedure.</p>
+<center>
+<table border="0" cellspacing="0" cellpadding="1" width="360" bgcolor="#FFF999" >
+<caption>
+<b>2-D int array of size 8X9</b>
+</caption>
+<tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td></tr>
+<tr><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td></tr>
+<tr><td>31</td><td>32</td><td>33</td><td>34</td><td>35</td><td>36</td><td>37</td><td>38</td><td>39</td></tr>
+<tr><td>41</td><td>42</td><td>43</td><td>44</td><td>45</td><td>46</td><td>47</td><td>48</td><td>49</td></tr>
+<tr><td>51</td><td>52</td><td>53</td><td>54</td><td>55</td><td>56</td><td>57</td><td>58</td><td>59</td></tr>
+<tr><td>61</td><td>62</td><td>63</td><td>64</td><td>65</td><td>66</td><td>67</td><td>68</td><td>69</td></tr>
+<tr><td>71</td><td>72</td><td>73</td><td>74</td><td>75</td><td>76</td><td>77</td><td>78</td><td>79</td></tr>
+<tr><td>81</td><td>82</td><td>83</td><td>84</td><td>85</td><td>86</td><td>87</td><td>88</td><td>89</td></tr>
+</table>
+</center>
+
+<p>
+By default, the dataset is displayed as eight rows and nine columns.</p>
+<center><p>
+<img src="images/datasetsubsetexample1.png" />
+<br />
+<b>Default dimension order -- row index = dim[0], column index = dim[1]</b></p>
+</center>
+
+<p>
+Swap row and column dimensions to display the dataset as nine rows and eight columns and transpose the data (changing the data order) when
+we swap the row and column dimensions. To transpose the data, select the
+&ldquo;Transpose&rdquo; option from the drop-down menu. For example,
+transpose the data to display the dataset as nine rows and
+eight columns. </p>
+
+<center><p>
+<img src="images/datasetreorder.png" />
+<br />
+<b>Swap row/column dimensions -- row index = dim[1], column index = dim[0]</b></p>
+</center>
+
+<p>
+In some cases, we also want to reshape the data (not changing the data order) when
+we swap the row and column dimensions. To reshape the data, select the
+&ldquo;Reshape&rdquo; option from the drop-down menu. For example,
+reshape the data to display the dataset as nine rows and
+eight columns. The
+order of data stays the same (counting from the location [0, 0], [0, 1], ... [2, 0], [2, 1], ...).</p>
+
+<center><p>
+<img src="images/datasetreshape.png" />
+<br />
+<b>Transpose data -- row index = dim[1], column index = dim[0]</b></p>
+</center>
+
+
+<h3><a name="ug05subset_compound"></a>
+5.2.5 Compound Dataset Options</h3>
+<p>
+HDFView displays HDF4 Vdata and a simple, one-dimension HDF5 compound dataset (without a nested compound)
+ as a 2-D table with rows as records and columns as fields/members.</p>
+
+<center><p>
+<img src="images/datasetcompound.png" >
+<br /><b>Compound dataset</b></p></center>
+
+<p>
+You can also select fields/members to display. For a contiguous selection, hold
+down the &ldquo;Shift&rdquo; key while clicking the first and last
+fields/members of your selection. For a discontiguous selection, hold down the
+&ldquo;Ctrl&rdquo; key while clicking the fields/members that you want to select.</p>
+
+<center><p>
+<img src="images/datasetsubsetcompound.png" />
+<br /><b>Field/Member selection of a compound dataset</b></p></center>
+
+<p>
+HDFView displays a nested HDF5 compound dataset as a nested list of members, only for two levels. The nested
+names are separated by &ldquo;-&gt;&rdquo; for more deeply nested names. For example, if a
+compound dataset &ldquo;A&rdquo; has the following
+nested structure:</p>
+<pre>
+    A --> a_name
+    A --> b_name
+    A --> c_name
+    A --> nested_name --> a_name
+    A --> nested_name --> c_name
+    i.e.
+    A = {a_name, b_name, c_name, nested_name{a_name, c_name}}
+</pre>
+<center><p>
+<img src="images/datasetsubsetnested.png" />
+<br /><b>Nested compound dataset</b></p></center>
+<p>
+If the nested_name->a_name member of the compound dataset &ldquo;A&rdquo; had members:</p>
+<pre>
+    A --> a_name
+    A --> b_name
+    A --> c_name
+    A --> nested_name --> a_name --> d_name
+    A --> nested_name --> c_name --> e_name
+    i.e.
+    A = {a_name, b_name, c_name, nested_name{a_name{d_name, e_name}, c_name}}
+</pre>
+<p>
+Then the more deeply nested header names include the full parent name with &ldquo;-&gt;&rdquo;.
+</p>
+<center><p>
+<img src="images/datasetsubsetdeeplynested.png" />
+<br /><b>Nested compound dataset</b></p></center>
+
+<p>
+HDFView displays multi-dimension compound datasets as a 2-D table with
+nested sub-columns. The members are shown in the sub-columns with nested header names appended
+with {#} where # is the dimension index.</p>
+
+<center><p>
+<img src="images/datasetcompound2d.png" />
+<br />
+<b>2-D compound dataset</b></p>
+</center>
+
+<h2>
+<a name="ug05lineplot"></a>
+5.3 Display a Column/Row Line Plot</h2>
+<p>
+Column or row data of numerical values can be displayed in a simple line
+plot. Select rows or columns by dragging the mouse on the rows or columns
+that you want to plot; then click the chart icon:
+<img src="images/icon_chart.gif" />. The row or column data is plotted
+against a column or row index, respectively.</p>
+
+<p>The following figure shows that data of five columns are displayed in five
+lines of different colors. The horizontal labels are the row index of the
+100 data points. The vertical labels are the ten points of equal data range
+with the maximum and minimum of the column data. The line legend is drawn at
+the right of the line plot with column names and line colors.</p>
+
+<center><p>
+<img src="images/chartline.png" />
+<br /><b>Line plot</b></p>
+</center>
+
+<h2>
+<a name="ug05change"></a>
+5.4 Change Data Value</h2>
+<p>
+You can change the values of a dataset in two ways: type data into the table
+cell or paste data from the system clipboard. HDFView rejects invalid data values.
+For example, it does not accept a floating point number into an integer
+dataset. The table below
+lists the rules for entering data. <b><i>Any </i></b><b><i>changes of data
+values only exist in memory. They are not saved to file until you choose
+&ldquo;Save&rdquo; from the File menu, or, when you dismiss
+the table, you will be asked if you want to save the changes to the
+file</i></b>.</p>
+
+<center><table border="2" width="60%" >
+<thead><tr>
+<th><b>Data type</b></th>
+<th><b>Acceptable formats</b></th></tr>
+</thead>
+
+<tr>
+<td>byte</td>
+<td>-127 to 128</td>
+</tr>
+
+<tr>
+<td>short</td>
+<td>-32768 to 32767</td>
+</tr>
+
+<tr>
+<td>int</td>
+<td>-2147483648 to 2147483647</td>
+</tr>
+
+<tr>
+<td>float, double</td>
+<td>Numbers of the form &ldquo;99.9&rdquo; or &ldquo;8&rdquo;, and
+&ldquo;-9.9&rdquo; or &ldquo;-9&rdquo;, and &ldquo;.9&rdquo; or
+&ldquo;-.9&rdquo; Numeric overflow or underflow will be detected.</td>
+</tr>
+
+<tr>
+<td>string</td>
+<td>A string longer than the stored value will be silently truncated when
+written to the file.</td>
+</tr>
+
+<tr>
+<td>unsigned byte</td>
+<td>0 to 255</td>
+</tr>
+
+<tr>
+<td>unsigned short</td>
+<td>0 to 65535</td>
+</tr>
+
+<tr>
+<td>unsigned int</td>
+<td>0 to 4294967295</td>
+</tr>
+
+<caption align="bottom">
+<b>Data formats for entering data</b>
+</caption>
+</table></center>
+
+<p>
+Data values can be copied with &ldquo;Copy&rdquo; and &ldquo;Paste&rdquo;.
+Data can be copied within a spreadsheet or between two spreadsheets. To
+copy data, select the data cells to copy, then choose the
+&ldquo;Copy&rdquo; command from the Table menu.
+Then select the cells to paste into and select the &ldquo;Paste&ldquo; command
+from the Table menu.</p>
+
+<p>
+You can also copy and paste between HDFView and other applications. To copy
+external data from other applications such as a text editor or Microsoft
+Excel, select and copy data from the application, then paste the data
+into the HDFView TableView, and vice versa.</p>
+
+<p>
+You can also change values by using predefined math functions. To change
+table values, select the data area and choose the &ldquo;Math conversion&rdquo;
+command from the Table menu. A list
+of predefined mathematic functions are provided. Select a function and enter the
+function parameters. The values of the selected data cells will be changed based on the
+mathematic function.</p>
+
+<h2>
+<a name="ug05save"></a>
+5.5 Save Data Values to a Text File</h2>
+<p>
+Writing table data into an ASCII file is nearly transparent. Select
+&ldquo;Import/Export Data&rdquo; from the menu bar, then select
+&ldquo;Export data to Text File&rdquo; from the dropdown menu, and the
+Save Current Data to Text File dialog box pops up for you to enter the
+name of the file.
+The data values of the current table will be written to the file. The data values
+are separated by the data delimiter specified in &ldquo;User Options&rdquo;. <b><i>The text
+file does not contain any datatype and dataspace information.</i></b>.</p>
+
+<center><p>
+<img src="images/saveastext.png" />
+<br />
+<b>Save current data to text file</b></p>
+</center>
+
+<h2>
+<a name="ug05import"></a>
+5.6 Import Data from a Text File</h2>
+<p>
+You can fill the table cells directly from a text file. Select
+&ldquo;Import/Export Data&rdquo; from the menu bar, then select the
+&ldquo;Import Data From Text File&rdquo; command from the dropdown menu and
+select the text file to import. The data values must be separated by a
+space or the delimiter specified in &ldquo;User Options&rdquo;. The cells of
+the table are filled row by row starting with the selected cell. The line breaks in the
+text file are not important. For example,</p>
+<pre>
+10 11 12 13 14 15
+16 17 18 19 20 21
+</pre>
+<p>
+and
+</p>
+<pre>
+10 11 12 13
+14 15 16 17
+18 19
+20 21
+</pre>
+<p>
+are the same.</p>
+
+<h2>
+<a name="ug05datasetreferences"></a>
+5.7 Dataset storing references</h2>
+<p>A dataset can store reference values of other datasets in the same file.</p>
+<h3><a name="ug05objectref"></a>
+5.7.1 Dataset Storing Object References</h3>
+<p>
+A dataset can store object references of other datasets. You can open a dataset containing object references.
+You can then select and right click on any value
+in the dataset and it will give two options, to either open as a table or an image.</p>
+<center><p>
+<img src="images/datasetobjectreferences.png" />
+<br />
+<b>Dataset storing object references</b></p>
+</center>
+<p>
+If opened as a table, then the dataset of reference value
+&ldquo;1696&rdquo; is opened as shown below.</p>
+
+<center><p>
+<img src="images/datapointedbyref.png" />
+<br />
+<b>Dataset pointed by object reference</b></p>
+</center>
+
+<h3><a name="ug05regionalref"></a>
+5.7.2 Dataset Storing Dataset Region References</h3>
+<p>
+A dataset can store dataset region reference values. You can right click on any value to either show the dataset as a table or an image.</p>
+<center><p>
+<img src="images/datasetregionblock.png" />
+<br />
+<b>Dataset pointed by region reference block reference</b></p>
+</center>
+<center><p>
+<img src="images/datasetregionpoint.png" />
+<br />
+<b>Dataset pointed by region reference point reference</b></p>
+</center>
+
+<h2>
+<a name="ug05savebinary"></a>
+5.8 Save Data Values to a Binary File</h2>
+<p>
+The table data can be written to a binary file. Select
+&ldquo;Import/Export Data&rdquo; from the menu bar, then select the
+&ldquo;Export Data to Binary File&rdquo; from the dropdown menu. Select the
+order in which you want the bytes to be. The Save Current Data to Binary
+File dialog box pops up for you to enter the name of the file.
+The data values of the current table will be written to the file. <b><i>The binary
+file does not contain any datatype and dataspace information. Currently, only the entire contents of the
+table are written to a binary file.</i></b>.</p>
+
+<center><p>
+<img src="images/saveasbinary.png" />
+<br />
+<b>Save current data to binary file</b></p>
+</center>
+
+<h2>
+<a name="ug05importbinary"></a>
+5.9 Import Data from a Binary File</h2>
+<p>
+You can fill the table directly from a binary file. Select
+&ldquo;Import/Export Data&rdquo; from the menu bar, then select the
+&ldquo;Import Data From Binary File&rdquo; command from the dropdown menu
+and select the byte order. It is assumed that the user should know the
+data type in the binary file and the byte order.
+Select the binary file to import. The cells of
+the table are filled with the corresponding values.</p>
+
+<!-- BEGIN OF FOOTER INFO -->
+<hr noshade size=1 />
+
+<p>
+<a href="index.html">[Index]</a>
+<a href="ug01introduction.html">[1]</a>
+<a href="ug02start.html">[2]</a>
+<a href="ug03objects.html">[3]</a>
+<a href="ug04treeview.html">[4]</a>
+<a href="ug05spreadsheet.html">[5]</a>
+<a href="ug06imageview.html">[6]</a>
+<a href="ug07useroptions.html">[7]</a>
+</p>
+<p>
+<!-- END OF FOOTER INFO -->
+<!--
+<?php
+include ("../../../includes/footer.html");
+?>
+ -->
