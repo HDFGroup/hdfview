@@ -4,6 +4,7 @@
     xmlns:fx="javafx:com.sun.javafx.tools.ant"
     xmlns:sonar="antlib:org.sonar.ant"
     xmlns:jacoco="antlib:org.jacoco.ant"
+	xmlns:doxygen="antlib:org.doxygen.tools"
     xmlns:if="ant:if"
     xmlns:unless="ant:unless">
     <property environment="env" />
@@ -1991,13 +1992,10 @@
     <target name="submit-notary">
         <exec executable="/usr/bin/xcrun" failonerror="true">
             <redirector output="retUUID.txt" alwayslog="true"/>
-            <arg value="altool"/>
-            <arg value="--notarize-app"/>
-            <arg value="--type"/>
-            <arg value="osx"/>
-            <arg value="--primary-bundle-id"/>
-            <arg value="app.${ant.project.name}-${app.version}"/>
-            <arg value="--username"/>
+            <arg value="notarytool"/>
+            <arg value="submit"/>
+            <arg value="--wait"/>
+            <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
@@ -2029,11 +2027,11 @@
                 <striplinebreaks/>
             </filterchain>
         </loadfile>
-        <sleep minutes="10"/>
+        #<sleep minutes="10"/>
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
-            <arg value="altool"/>
-            <arg value="--notarization-info"/>
+            <arg value="notarytool"/>
+            <arg value="info"/>
             <arg value="${retUUID}"/>
             <arg value="--username"/>
             <arg value="${notarize.account}"/>
@@ -2069,12 +2067,9 @@
         <target name="zip-submit-notary">
             <exec executable="/usr/bin/xcrun" failonerror="true">
                 <redirector output="retUUID.txt" alwayslog="true"/>
-                <arg value="altool"/>
-                <arg value="--notarize-app"/>
-                <arg value="--type"/>
-                <arg value="osx"/>
-                <arg value="--primary-bundle-id"/>
-                <arg value="app.${ant.project.name}-${app.version}"/>
+                <arg value="anotarytool"/>
+                <arg value="submit"/>
+                <arg value="--wait"/>
                 <arg value="--username"/>
                 <arg value="${notarize.account}"/>
                 <arg value="--password"/>
