@@ -2027,7 +2027,7 @@
                 <striplinebreaks/>
             </filterchain>
         </loadfile>
-        #<sleep minutes="10"/>
+        <!-- <sleep minutes="10"/> -->
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
             <arg value="notarytool"/>
