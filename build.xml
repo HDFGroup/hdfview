@@ -1231,7 +1231,7 @@
                 <exclude name="slf4j*.jar" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
-                <filename regex="libhdf5\.so(\.[0-9][0-9][0-9])$"/>
+                <filename regex="libhdf5\.so(\.[0-9][0-9][0-9][0-9]?)$"/>
             </fileset>
         </copy>
 
@@ -1274,7 +1274,7 @@
                 <exclude name="slf4j*.jar" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
-                <filename regex="libhdf5(\.[0-9][0-9][0-9])(\.dylib)$"/>
+                <filename regex="libhdf5(\.[0-9][0-9][0-9][0-9]?)(\.dylib)$"/>
                 <exclude name="*.a" />
             </fileset>
         </copy>
@@ -1991,13 +1991,10 @@
     <target name="submit-notary">
         <exec executable="/usr/bin/xcrun" failonerror="true">
             <redirector output="retUUID.txt" alwayslog="true"/>
-            <arg value="altool"/>
-            <arg value="--notarize-app"/>
-            <arg value="--type"/>
-            <arg value="osx"/>
-            <arg value="--primary-bundle-id"/>
-            <arg value="app.${ant.project.name}-${app.version}"/>
-            <arg value="--username"/>
+            <arg value="notarytool"/>
+            <arg value="submit"/>
+            <arg value="--wait"/>
+            <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
@@ -2029,11 +2026,11 @@
                 <striplinebreaks/>
             </filterchain>
         </loadfile>
-        <sleep minutes="10"/>
+        <!-- <sleep minutes="10"/> -->
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
-            <arg value="altool"/>
-            <arg value="--notarization-info"/>
+            <arg value="notarytool"/>
+            <arg value="info"/>
             <arg value="${retUUID}"/>
             <arg value="--username"/>
             <arg value="${notarize.account}"/>
@@ -2069,12 +2066,9 @@
         <target name="zip-submit-notary">
             <exec executable="/usr/bin/xcrun" failonerror="true">
                 <redirector output="retUUID.txt" alwayslog="true"/>
-                <arg value="altool"/>
-                <arg value="--notarize-app"/>
-                <arg value="--type"/>
-                <arg value="osx"/>
-                <arg value="--primary-bundle-id"/>
-                <arg value="app.${ant.project.name}-${app.version}"/>
+                <arg value="anotarytool"/>
+                <arg value="submit"/>
+                <arg value="--wait"/>
                 <arg value="--username"/>
                 <arg value="${notarize.account}"/>
                 <arg value="--password"/>
