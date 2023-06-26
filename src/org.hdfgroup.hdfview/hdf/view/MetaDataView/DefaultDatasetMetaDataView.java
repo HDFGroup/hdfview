@@ -91,7 +91,10 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
         text.setEditable(false);
         text.setFont(curFont);
-        if (d.isScalar()) {
+        if (d.isNULL()) {
+            labelInfo = "NULL";
+        }
+        else if (d.isScalar()) {
             labelInfo = "Scalar";
         }
         else {
@@ -100,7 +103,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         text.setText(labelInfo);
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        if (!d.isScalar()) {
+        if (!d.isScalar() && !d.isNULL()) {
             /* Dataset dimension size section */
             label = new Label(datasetInfoGroup, SWT.LEFT);
             label.setFont(curFont);
@@ -281,6 +284,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         Button showDataOptionButton = new Button(datasetInfoGroup, SWT.PUSH);
         showDataOptionButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, 2, 1));
         showDataOptionButton.setText("Show Data with Options");
+        showDataOptionButton.setEnabled(!d.isNULL());
         showDataOptionButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
