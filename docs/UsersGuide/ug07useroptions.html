@@ -1,0 +1,307 @@
+<?php
+   $page_title = "HDFView User's Guide - User Options";
+   include ("../../../../links.php");
+   include ("../../../../includes/header.html");
+   ?>
+   <link href="edit.css" rel="stylesheet" type="text/css" />
+<p>
+   <a href="index.html">[Index]</a>
+   <a href="ug01introduction.html">[1]</a>
+   <a href="ug02start.html">[2]</a>
+   <a href="ug03objects.html">[3]</a>
+   <a href="ug04treeview.html">[4]</a>
+   <a href="ug05spreadsheet.html">[5]</a>
+   <a href="ug06imageview.html">[6]</a>
+   <a href="ug07useroptions.html">[7]</a>   </p>
+
+   <h1><fieldset>Chapter 8: User Options</fieldset></h1>
+   <p>
+   This chapter explains the different options of HDFView
+   accessible from the Tools menu.</p>
+
+   <ul class="ul">
+   <li><a href="ug07useroptions.html#ug07general">7.1 General Settings</a></li>
+       <ul class="ul">
+       <li><a href="ug07useroptions.html#ug07directory">7.1.1 Working Directory</a></li>
+       <li><a href="ug07useroptions.html#ug07help">7.1.2 User's Guide Path</a></li>
+       <li><a href="ug07useroptions.html#ug07fileaccess">7.1.3 File Access Mode</a></li>
+       <li><a href="ug07useroptions.html#ug07font">7.1.4 Text Font</a></li>
+       <li><a href="ug07useroptions.html#ug07imageopt">7.1.5 Image Options</a></li>
+       <li><a href="ug07useroptions.html#ug07dataopt">7.1.6 Data Options</a></li>
+       <li><a href="ug07useroptions.html#ug07objectcount">7.1.7 Number of Open Objects</a></li>
+       </ul>
+   <li><a href="ug07useroptions.html#ug07hdf">7.2 HDF Settings</a></li>
+       <ul class="ul">
+       <li><a href="ug07useroptions.html#ug07extension">7.2.1 File Extensions</a></li>
+       <li><a href="ug07useroptions.html#ug07libversion">7.2.2 Library Versions</a></li>
+       <li><a href="ug07useroptions.html#ug07dataopt">7.2.3 Data Options</a></li>
+       <li><a href="ug07useroptions.html#ug07displayind">7.2.4 Display Indexing</a></li>
+       </ul>
+   <li><a href="ug07useroptions.html#ug07modules">7.3 Module Settings</a></li>
+       <ul class="ul">
+       <li><a href="ug07useroptions.html#ug07modulelist">7.3.1 Module Extensions</a></li>
+   </ul>
+
+
+   <hr />
+
+   <h2><a name="ug07general"></a>7.1 General Settings</h2>
+
+   <p>
+   HDFView comes with an array of configurable options that determine the way it
+   operates on or displays data. These can be changed by clicking on "User Options"
+   from the Tools menu. This section describes the general HDFView options.
+   </p>
+
+   <center>
+   <p>
+   <img src="images/usergeneraloptions.png" />
+   <br />
+   <b>User Options General Settings</b>
+   </p>
+   </center>
+
+   <p>
+   Upon exit, HDFView saves all the current settings to a properties file in the
+   user's home directory. The file's name follows the format '.hdfview{version number}'
+   where version number is the current version number of HDFView.
+   </p>
+
+   <h3><a name="ug07directory"></a>7.1.1 Default Working Directory</h3>
+   <b>Initial Working Directory</b>
+   <p>
+   Initially, HDFView will open with the working directory for a file search dialog
+   being set to the path specified by this section.
+   </p>
+   <ul class="ul">
+   <li>
+   <ul class="ul">
+   <li>If HDFView is started with the system property, hdfview.workdir,
+   defined on the command line invocation of HDFView;
+        <center>java ... -Dhdfview.workdir="some/path" ...</center>
+   </li>
+   <li>
+   If HDFView is started with the argument, startDir, on the command line invocation of HDFView;
+        <center>java ... hdf.view.HDFView startDir=some_location "ARGS"</center>
+   </li>
+   </ul>
+   </li>
+   <li>If "User Work" is selected, HDFView will open with the working directory
+   for a file search dialog set to the folder specified by a system property, user.dir.
+   </li>
+   <li>If "User Home" is selected, HDFView will open with the working directory
+   for a file search dialog set to the folder specified by a system property, user.home.
+   </li>
+   <li>If neither of the "User" check boxes are selected, then HDFView will open with the
+   working directory for a file search dialog set to a directory specified in the text field entry
+   box. By default, this will be the system property, user.dir, which is usually the current
+   user location where HDFView was launched. There is a browse button available to select a
+   different folder.
+   </li>
+   </ul>
+   <br />
+   <b>Active Working Directory</b>
+   <p>
+   Thereafter, HDFView will open with the working directory for a file search dialog
+   being set to the path specified in the text field under this section.
+   </p>
+   <ul class="ul">
+   <li>The initial working directory as described above.</li>
+   <li>The directory used to load a file specified as an argument on the command line invocation of HDFView.
+      java ... hdf.view.HDFView startDir=some_location "ARGS"</li>
+   <li>A location saved in the HDFView property file, .hdfview3.1.2 in the user home directory.
+      work.dir=dir_path
+      This is property is only set by using the "User Options" dialog.</li>
+   <li>The last directory used to load a file using the HDFView file search dialog.</li>
+   <li>Using the "User Options" dialog to reset the working directory:</li>
+      <ul class="ul">
+      <li>To the user home directory.</li>
+      <li>To the system identified working directory.</li>
+      <li>To a directory selected by the user using a file system browse dialog or typed into a text box.</li>
+      </ul>
+   </ul>
+
+
+   <h3><a name="ug07help"></a>7.1.2 User's Guide Path</h3>
+   <p>
+   This section contains a single field which holds the path to the HDFView User's
+   Guide. The path can either be entered as an absolute file name, file path,
+   or URL to a remote file, or the browse button can be used to locate the guide from
+   the filesystem. When the user clicks the <img src="images/help.gif" /> icon on
+   the tool bar, the program goes to the path specified here and opens the User's Guide
+   if it is able to locate it.</p>
+
+
+   <h3><a name="ug07fileaccess"></a>7.1.3 File Access Mode</h3>
+   <p>
+   By default, HDFView opens files in editing mode, allowing both reading and writing to
+   files, as well as the ability to save changes. However, by changing the default mode
+   to read only, the user can force HDFView to open all files as read-only, disabling
+   editing and preventing changes to opened files.</p>
+
+
+   <h3><a name="ug07font"></a>7.1.4 Text Font</h3>
+   <p>
+   Under this section, the user can specify what size of font, as well as font type, to use.
+   The newly selected font takes place immediately and affects all text displayed inside
+   HDFView.</p>
+
+   <h3><a name="ug07imageopt"></a>7.1.5 Image Options</h3>
+   <p>
+   The "Autogain Image Contrast" option here calculates a gain and bias combination that
+   stretches images to match with the graphics system's pixel values. Further information
+   is provided by the <img src="images/help.gif"> icon in the User Options.
+   </p>
+
+   <p>
+   The "Show Values" option enables showing the values of individual pixels in an image.
+   While this option is selected, moving the cursor over a pixel of an image inside the
+   ImageViewer will display that pixel's location (in relative terms from the origin), as
+   well as the value of the pixel.
+   </p>
+
+   <p>
+   The Image Origin dropbox in this section allows the user to select which of the four corners,
+   Upper left, Upper right, Lower left or Lower right, to use as the origin for images.
+   </p>
+
+   <h3><a name="ug07dataopt"></a>7.1.6 Data Options</h3>
+   <p>
+   The Index Base determines whether indexed objects, such as numbered cells or the
+   coordinates of an image's origin, should start with 0 or 1 as the first index.
+   </p>
+
+   <p>
+   The Data Delimiter section allows the user to select a character to use as a separator
+   for data when performing operations such as saving data to a file, importing data from
+   a file or copying/pasting data between HDFView and other applications. The delimiter
+   selected will be appended to data written to files, as shown below.
+   <b>Note: When importing data from a file, the user must know the delimiter used
+   for the file, else data may not be able to be imported properly</b>.
+   </p>
+
+   <center>
+   <p>
+   <img src="images/delimiter_example.png">
+   <br />
+   <b>Dataset saved to file with ':' delimiter</b>
+   </p>
+   </center>
+
+
+   <h3><a name="ug07objectcount"></a>7.1.7 Number of Open Objects</h3>
+   <p>
+   By default, HDFView loads all objects in a file upon loading the file. In some cases,
+   however, it is useful to load a subset of the objects. To do so, first click on
+   "Open All" in the "Objects to Open" section to unselect it, then pick a suitable start
+   member (with member 0 being the root group) and the number of members to load in total.
+   <b>Note: Groups count towards the member count, as does the root group</b>.
+   </p>
+
+   <center>
+   <p>
+   <img src="images/membercount.png">
+   <br />
+   <b>Start Member = 0, Member Count = 10</b>
+   </p>
+   </center>
+
+
+   <h2><a name="ug07hdf"></a>7.2 HDF Settings</h2>
+   <p>
+   HDFView comes with an array of configurable options that determine the way it
+   operates on or displays data. These can be changed by clicking on "User Options"
+   from the Tools menu. This section describes the HDF format specific options.
+   </p>
+
+   <center>
+   <p>
+   <img src="images/userhdfoptions.png" />
+   <br /><b>User Options HDF Settings</b>
+   </p>
+   </center>
+
+
+   <h3><a name="ug07extension"></a>7.2.1 File Extensions</h3>
+   <p>
+   The text field located here displays a list of all file formats currently recognized
+   by HDFView. This is used when choosing a file to open, as HDFView will look for
+   and show files that have an extension matching any from this list. If needed,
+   the user can type into this field and add their own file types for HDFView to look for.
+   </p>
+
+
+   <h3><a name="ug07libversion"></a>7.2.2 Library Versions</h3>
+   <p>
+   Here the user can choose which version, the earliest version or latest version,
+   of the HDF5 library to be used as the default when creating objects.
+   </p>
+
+   <h3><a name="ug07dataopt"></a>7.2.3 Data Options</h3>
+   <p>
+   The "Convert Enum" option enforces conversion of enum type data into a string equivalent.
+   Further information is provided by the <img src="images/help.gif"> icon next to the
+   "Convert Enum" option.
+   </p>
+
+   <p>
+   "Show RegRef Values" allows the user to see the data pointed to by a Dataset Region Reference
+   inline with the selected reference. If this option is not selected, the user must right click
+   on a region reference and choose to display as a table or image in order to view the associated
+   data.
+   </p>
+
+
+   <h3><a name="ug07displayind"></a>7.2.4 Display Indexing</h3>
+   <p>
+   Display Indexing options change the order in which objects are displayed in the HDFView
+   TreeView panel.
+   </p>
+
+   <p>
+   The Indexing Type determines the way in which the objects get sorted. Objects can either
+   be sorted by name or by the order in which they were created.
+   </p>
+
+   <p>
+   Indexing Order further sorts the objects by ascending or descending order. If "Increments"
+   is chosen, objects that would come first after sorting will be displayed at the top of the
+   TreeView, with all following objects arranged below. If "Decrements" is chosen, these objects
+   would instead be displayed at the bottom of the TreeView, with all following objects arranged
+   above.
+   </p>
+
+   <center>
+   <p>
+   <img src="images/usermoduleoptions.png" />
+   <br /><b>User Options Modules Settings</b>
+   </p>
+   </center>
+
+
+   <h3><a name="ug07modulelist"></a>7.2.1 Module Extensions</h3>
+   <p>
+   The fields located here allow other data display methods to be used for the standard
+   views. A separate document explains the requirements for these modules.
+   </p>
+
+
+   <!-- BEGIN OF FOOTER INFO -->
+   <hr noshade size=1 />
+
+   <p>
+   <a href="index.html">[Index]</a>
+   <a href="ug01introduction.html">[1]</a>
+   <a href="ug02start.html">[2]</a>
+   <a href="ug03objects.html">[3]</a>
+   <a href="ug04treeview.html">[4]</a>
+   <a href="ug05spreadsheet.html">[5]</a>
+   <a href="ug06imageview.html">[6]</a>
+   <a href="ug07useroptions.html">[7]</a>   </p>
+   <p>
+   <!-- END OF FOOTER INFO -->
+<hr />
+
+ <?php
+    include ("../../../../includes/footer.html");
+ ?>

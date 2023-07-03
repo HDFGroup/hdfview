@@ -329,6 +329,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 sid = H5.H5Dget_space(did);
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 space_type = H5.H5Sget_simple_extent_type(sid);
+                if (space_type == HDF5Constants.H5S_NULL)
+                    isNULL = true;
+                else
+                    isNULL = false;
                 tid = H5.H5Dget_type(did);
                 log.trace("init(): tid={} sid={} rank={} space_type={} ", tid, sid, rank, space_type);
 

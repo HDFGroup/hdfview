@@ -2028,7 +2028,9 @@ public class H5File extends FileFormat
         if ((tid = attr.getAttributeDatatype().createNative()) >= 0) {
             log.trace("writeAttribute(): tid {} from toNative :{}", tid, attr.getAttributeDatatype().getDescription());
             try {
-                if (attr.isAttributeScalar())
+                if (attr.isAttributeNULL())
+                    sid = H5.H5Screate(HDF5Constants.H5S_NULL);
+                else if (attr.isAttributeScalar())
                     sid = H5.H5Screate(HDF5Constants.H5S_SCALAR);
                 else
                     sid = H5.H5Screate_simple(attr.getAttributeRank(), attr.getAttributeDims(), null);
@@ -2039,25 +2041,27 @@ public class H5File extends FileFormat
                     aid = H5.H5Acreate(objID, name, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 log.trace("writeAttribute(): aid {} opened/created", aid);
 
-                // update value of the attribute
-                Object attrValue;
-                try {
-                    attrValue = attr.getAttributeData();
-                }
-                catch (Exception ex) {
-                    attrValue = null;
-                    log.trace("writeAttribute(): getAttributeData() failure:", ex);
-                }
-
-                //log.trace("writeAttribute(): attrValue={}", attrValue);
-                if (attrValue != null) {
+                if (!attr.isAttributeNULL()) {
+                    // update value of the attribute
+                    Object attrValue;
                     try {
-                        ((H5Attribute)attr).AttributeCommonIO(aid, H5File.IO_TYPE.WRITE, attrValue);
+                        attrValue = attr.getAttributeData();
                     }
                     catch (Exception ex) {
-                        log.debug("writeAttribute(): failed to write attribute: ", ex);
+                        attrValue = null;
+                        log.trace("writeAttribute(): getAttributeData() failure:", ex);
                     }
-                } // (attrValue != null)
+
+                    // log.trace("writeAttribute(): attrValue={}", attrValue);
+                    if (attrValue != null) {
+                        try {
+                            ((H5Attribute) attr).AttributeCommonIO(aid, H5File.IO_TYPE.WRITE, attrValue);
+                        }
+                        catch (Exception ex) {
+                            log.debug("writeAttribute(): failed to write attribute: ", ex);
+                        }
+                    } // (attrValue != null)
+                }
             }
             finally {
                 try {

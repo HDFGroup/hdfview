@@ -124,8 +124,12 @@ public interface Attribute
     int getAttributePlane();
 
     /**
-     * @return true if the data is a single scalar point; otherwise, returns
-     *         false.
+     * @return true if the dataspace is a NULL; otherwise, returns false.
+     */
+    boolean isAttributeNULL();
+
+    /**
+     * @return true if the data is a single scalar point; otherwise, returns false.
      */
     boolean isAttributeScalar();
 

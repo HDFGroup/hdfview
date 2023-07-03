@@ -476,8 +476,14 @@ public class NC2Attribute extends ScalarDS implements Attribute
     }
 
     /**
-     * @return true if the data is a single scalar point; otherwise, returns
-     *         false.
+     * @return true if the dataspace is a NULL; otherwise, returns false.
+     */
+    public boolean isAttributeNULL() {
+        return isNULL();
+    }
+
+    /**
+     * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isAttributeScalar() {
         return isScalar();

@@ -1533,36 +1533,6 @@ public class ViewProperties extends PreferenceStore
                 }
             }
         }
-
-        // load srb account
-        // log.trace("load user properties: srb account");
-        // propVal = null;
-        // String srbaccount[] = new String[7];
-        //  (int i = 0; i < MAX_RECENT_FILES; i++) {
-        //  (null == (srbaccount[0] = getString("srbaccount" + i + ".host")))
-        // continue;
-        //
-        //  (null == (srbaccount[1] = getString("srbaccount" + i + ".port")))
-        // continue;
-        //
-        //  (null == (srbaccount[2] = getString("srbaccount" + i + ".user")))
-        // continue;
-        //
-        //  (null == (srbaccount[3] = getString("srbaccount" + i + ".password")))
-        // continue;
-        //
-        //  (null == (srbaccount[4] = getString("srbaccount" + i + ".home")))
-        // continue;
-        //
-        //  (null == (srbaccount[5] = getString("srbaccount" + i + ".domain")))
-        // continue;
-        //
-        //  (null == (srbaccount[6] = getString("srbaccount" + i + ".resource")))
-        // continue;
-        //
-        // srbAccountList.add(srbaccount);
-        // srbaccount = new String[7];
-        // }
     }
 
     /**
@@ -1651,28 +1621,6 @@ public class ViewProperties extends PreferenceStore
             theFile = paletteList.get(i);
             if ((theFile != null) && (theFile.length() > 0)) setValue("palette.file" + i, theFile);
         }
-
-        // save srb account
-        // log.trace("save user properties: srb account");
-        // String srbaccount[] = null;
-        // size = srbAccountList.size();
-        // minSize = Math.min(size, MAX_RECENT_FILES);
-        //  (int i = 0; i < minSize; i++) {
-        // srbaccount = srbAccountList.get(i);
-        //  ((srbaccount[0] != null) && (srbaccount[1] != null) && (srbaccount[2] !=
-        // null)
-        // && (srbaccount[3] != null) && (srbaccount[4] != null) && (srbaccount[5] !=
-        // null)
-        // && (srbaccount[6] != null)) {
-        // setValue("srbaccount" + i + ".host", srbaccount[0]);
-        // setValue("srbaccount" + i + ".port", srbaccount[1]);
-        // setValue("srbaccount" + i + ".user", srbaccount[2]);
-        // setValue("srbaccount" + i + ".password", srbaccount[3]);
-        // setValue("srbaccount" + i + ".home", srbaccount[4]);
-        // setValue("srbaccount" + i + ".domain", srbaccount[5]);
-        // setValue("srbaccount" + i + ".resource", srbaccount[6]);
-        // }
-        // }
 
         // save default modules
         log.trace("save user properties: default modules");
