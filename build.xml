@@ -2067,7 +2067,7 @@
         <target name="zip-submit-notary">
             <exec executable="/usr/bin/xcrun" failonerror="true">
                 <redirector output="retUUID.txt" alwayslog="true"/>
-                <arg value="anotarytool"/>
+                <arg value="notarytool"/>
                 <arg value="submit"/>
                 <arg value="--wait"/>
                 <arg value="--username"/>
