@@ -378,7 +378,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                         @Override
                         public void run() {
                             try {
-                                viewManager.getTreeView().showDataContent((HObject) item.getData());
+                                HObject selectedObject = (HObject) item.getData();
+                                if ((selectedObject instanceof Dataset) && !((Dataset) selectedObject).isNULL()) {
+                                    viewManager.getTreeView().showDataContent(selectedObject);
+                                }
+                                else {
+                                    Tools.showInformation(Display.getDefault().getShells()[0], "Open",
+                                            "No data to display in an object with a NULL dataspace.");
+                                }
                             }
                             catch (Exception ex) {
                                 log.debug("Attribute showDataContent failure: ", ex);
@@ -757,7 +764,14 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                         @Override
                         public void run() {
                             try {
-                                viewManager.getTreeView().showDataContent((HObject) item.getData());
+                                HObject selectedObject = (HObject) item.getData();
+                                if ((selectedObject instanceof Dataset) && !((Dataset) selectedObject).isNULL()) {
+                                    viewManager.getTreeView().showDataContent(selectedObject);
+                                }
+                                else {
+                                    Tools.showInformation(Display.getDefault().getShells()[0], "Open",
+                                            "No data to display in an object with a NULL dataspace.");
+                                }
                             }
                             catch (Exception ex) {
                                 log.debug("Attribute showDataContent failure: ", ex);
@@ -1156,7 +1170,10 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             rowData[0] = attrName;
         }
 
-        if (attr.isAttributeScalar()) {
+        if (attr.isAttributeNULL()) {
+            attrSize.append("NULL");
+        }
+        else if (attr.isAttributeScalar()) {
             attrSize.append("Scalar");
         }
         else {
@@ -1169,7 +1186,10 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         rowData[1] = attrType;
         rowData[2] = attrSize.toString();
-        rowData[3] = attrValue;
+        if (attr.isAttributeNULL())
+            rowData[3] = "NULL";
+        else
+            rowData[3] = attrValue;
 
         item.setText(rowData);
     }

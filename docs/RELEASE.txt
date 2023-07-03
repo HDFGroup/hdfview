@@ -67,6 +67,7 @@ Minor Bug Fixes
     * Added an initilize lib version bounds function. Now the change
       lib version dialog correctly preloads the combo box values.
     * Correct display of dimension for scalar types.
+    * Add display of NULL for dataspaces and prevent opening of a data table.
 
 
 Limitations / Known Problems

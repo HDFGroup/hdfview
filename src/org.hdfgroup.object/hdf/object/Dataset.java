@@ -170,28 +170,31 @@ public abstract class Dataset extends HObject implements DataFormat
     /**
      * Array of strings that represent the dimension names. It is null if dimension names do not exist.
      */
-    protected String[]        dimNames;
+    protected String[] dimNames;
 
     /** Flag to indicate if the byte[] array is converted to strings */
-    protected boolean         convertByteToString = true;
+    protected boolean convertByteToString = true;
 
     /** Flag to indicate if data values are loaded into memory. */
-    protected boolean         isDataLoaded        = false;
+    protected boolean isDataLoaded = false;
 
     /** Flag to indicate if this dataset has been initialized */
-    protected boolean         inited = false;
+    protected boolean inited = false;
 
     /** The number of data points in the memory buffer. */
-    protected long            nPoints             = 1;
+    protected long nPoints = 1;
+
+    /** Flag to indicate if the dataspace is NULL */
+    protected boolean isNULL = false;
 
     /** Flag to indicate if the data is a single scalar point */
-    protected boolean   isScalar;
+    protected boolean isScalar = false;
 
     /** True if this dataset is an image. */
-    protected boolean isImage;
+    protected boolean isImage = false;
 
     /** True if this dataset is ASCII text. */
-    protected boolean isText;
+    protected boolean isText = false;
 
     /**
      * The data buffer that contains the raw data directly reading from file
@@ -1363,8 +1366,14 @@ public abstract class Dataset extends HObject implements DataFormat
     }
 
     /**
-     * @return true if the data is a single scalar point; otherwise, returns
-     *         false.
+     * @return true if the dataspace is a NULL; otherwise, returns false.
+     */
+    public boolean isNULL() {
+        return isNULL;
+    }
+
+    /**
+     * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isScalar() {
         return isScalar;

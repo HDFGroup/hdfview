@@ -312,6 +312,10 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
                 sid = H5.H5Aget_space(aid);
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 space_type = H5.H5Sget_simple_extent_type(sid);
+                if (space_type == HDF5Constants.H5S_NULL)
+                    isNULL = true;
+                else
+                    isNULL = false;
                 tid = H5.H5Aget_type(aid);
                 tclass = H5.H5Tget_class(tid);
                 log.trace("init(): tid={} sid={} rank={} space_type={}", tid, sid, rank, space_type);
@@ -1538,8 +1542,15 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute
     }
 
     /**
-     * @return true if the data is a single scalar point; otherwise, returns
-     *         false.
+     * @return true if the dataspace is a NULL; otherwise, returns false.
+     */
+    @Override
+    public boolean isAttributeNULL() {
+        return isNULL();
+    }
+
+    /**
+     * @return true if the data is a single scalar point; otherwise, returns false.
      */
     @Override
     public boolean isAttributeScalar() {
