@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -123,15 +123,12 @@ import hdf.view.dialog.NewDatasetDialog;
 /**
  * ImageView displays an HDF dataset as an image.
  *
- * A scalar dataset in HDF can be displayed in image or table. By default, an
- * HDF4 GR image and HDF5 image is displayed as an image. Other scalar datasets
- * are display in a two-dimensional table.
+ * A scalar dataset in HDF can be displayed in image or table. By default, an HDF4 GR image and HDF5 image is displayed
+ * as an image. Other scalar datasets are display in a two-dimensional table.
  *
- * Users can also choose to display a scalar dataset as image. Currently this version
- * of the ImageView only supports 8-bit raster image with indexed RGB color
- * model of 256 colors or 24-bit true color raster image. Data of other type
- * will be converted to 8-bit integer. The simple linear conversion is used for
- * this purpose:
+ * Users can also choose to display a scalar dataset as image. Currently this version of the ImageView only supports
+ * 8-bit raster image with indexed RGB color model of 256 colors or 24-bit true color raster image. Data of other type
+ * will be converted to 8-bit integer. The simple linear conversion is used for this purpose:
  *
  * <pre>
  * y = f * (x - min),
@@ -142,10 +139,9 @@ import hdf.view.dialog.NewDatasetDialog;
  *             min = the minimum of the original data.
  * </pre>
  *
- * A default color table is provided for images without palette attached to it.
- * Current choice of default palettes include Gray, Rainbow, Nature and Wave.
- * For more infomation on palette,
- * read <a href="https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html">HDF5 Image and Palette Specification</a>
+ * A default color table is provided for images without palette attached to it. Current choice of default palettes
+ * include Gray, Rainbow, Nature and Wave. For more infomation on palette, read
+ * <a href="https://hdfgroup.github.io/hdf5/_i_m_g.html">HDF5 Image and Palette Specification</a>
  *
  * @author Jordan T. Henderson
  * @version 2.4 2//2016
