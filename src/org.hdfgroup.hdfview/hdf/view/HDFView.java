@@ -455,10 +455,8 @@ public class HDFView implements DataViewManager
      * </pre>
      */
     private Shell createMainWindow() {
-        Image hdfImage = ViewProperties.getLargeHdfIcon();
         // Create a new display window
         final Shell shell = new Shell(display);
-        shell.setImage(hdfImage);
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setFont(currentFont);
         shell.setText("HDFView " + HDFVIEW_VERSION);
@@ -2260,7 +2258,7 @@ public class HDFView implements DataViewManager
         private void createContents(final Shell shell) {
             shell.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(shell, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -2305,7 +2303,7 @@ public class HDFView implements DataViewManager
             dialog.setText("HDFView Java Version");
             dialog.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(dialog, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -2369,7 +2367,7 @@ public class HDFView implements DataViewManager
             dialog.setText("Supported File Formats");
             dialog.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(dialog, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -2440,7 +2438,7 @@ public class HDFView implements DataViewManager
             dialog.setText("About HDFView");
             dialog.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(dialog, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -2510,7 +2508,7 @@ public class HDFView implements DataViewManager
             shell.setText("Unregister a file format");
             shell.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(shell, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
