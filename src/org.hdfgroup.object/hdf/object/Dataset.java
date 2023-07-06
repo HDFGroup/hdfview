@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -31,16 +31,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The abstract class provides general APIs to create and manipulate dataset/attribute
- * objects, and retrieve dataset/attribute properties, datatype and dimension sizes.
+ * The abstract class provides general APIs to create and manipulate dataset/attribute objects, and retrieve
+ * dataset/attribute properties, datatype and dimension sizes.
  *
- * This class provides two convenient functions, read()/write(), to read/write
- * data values. Reading/writing data may take many library calls if we use the
- * library APIs directly. The read() and write functions hide all the details of
+ * This class provides two convenient functions, read()/write(), to read/write data values. Reading/writing data may
+ * take many library calls if we use the library APIs directly. The read() and write functions hide all the details of
  * these calls from users.
  *
- * For more details on dataset and attributes,
- * see <b> <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
+ * For more details on dataset and attributes, See
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_d__u_g.html#sec_dataset">HDF5 Datasets in HDF5 User Guide</a>
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in HDF5 User Guide</a>
  *
  * @see hdf.object.ScalarDS
  * @see hdf.object.CompoundDS

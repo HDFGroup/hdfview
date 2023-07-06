@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -40,9 +40,8 @@ public abstract class ScalarDS extends Dataset
     private static final Logger log = LoggerFactory.getLogger(ScalarDS.class);
 
     /************************************************************
-     * The following constant strings are copied from           *
-     * https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html *
-     * to make the definition consistent with the image specs.  *
+     * The following constant strings are copied from * https://hdfgroup.github.io/hdf5/_i_m_g.html * to make the
+     * definition consistent with the image specs. *
      ************************************************************/
 
     /**
@@ -308,7 +307,7 @@ public abstract class ScalarDS extends Dataset
      * Returns true if this dataset is an image.
      *
      * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For more
-     * details, read <a href="https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification</a>
+     * details, read <a href="https://hdfgroup.github.io/hdf5/_i_m_g.html"> HDF5 Image and Palette Specification</a>
      *
      * @return true if the dataset is an image; otherwise, returns false.
      */

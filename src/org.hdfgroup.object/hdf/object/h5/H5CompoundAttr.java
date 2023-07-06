@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -53,26 +53,24 @@ import hdf.object.h5.H5ReferenceType;
 /**
  * The H5CompoundAttr class defines an HDF5 attribute of compound datatypes.
  *
- * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
- * dataset, group or named datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group or named
+ * datatype.
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a
- * collection of one or more atomic types or small arrays of such types. Each member of a compound
- * type has a name which is unique within that type, and a byte offset that determines the first
- * byte (smallest byte address) of that member in a compound datum.
+ * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of one or more
+ * atomic types or small arrays of such types. Each member of a compound type has a name which is unique within that
+ * type, and a byte offset that determines the first byte (smallest byte address) of that member in a compound datum.
  *
- * For more information on HDF5 attributes and datatypes, read the <a href=
- * "https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5
- * User's Guide</a>.
+ * For more information on HDF5 attributes and datatypes, read the
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in HDF5 User Guide</a>
  *
- * There are two basic types of compound attributes: simple compound data and nested compound data.
- * Members of a simple compound attribute have atomic datatypes. Members of a nested compound attribute
- * are compound or array of compound data.
+ * There are two basic types of compound attributes: simple compound data and nested compound data. Members of a simple
+ * compound attribute have atomic datatypes. Members of a nested compound attribute are compound or array of compound
+ * data.
  *
- * Since Java does not understand C structures, we cannot directly read/write compound data values
- * as in the following C example.
+ * Since Java does not understand C structures, we cannot directly read/write compound data values as in the following C
+ * example.
  *
  * <pre>
  * typedef struct s1_t {
@@ -86,11 +84,10 @@ import hdf.object.h5.H5ReferenceType;
  *     H5Dread(..., s1);
  * </pre>
  *
- * Values of compound data fields are stored in java.util.Vector object. We read and write compound
- * data by fields instead of compound structure. As for the example above, the java.util.Vector
- * object has three elements: int[LENGTH], float[LENGTH] and double[LENGTH]. Since Java understands
- * the primitive datatypes of int, float and double, we will be able to read/write the compound data
- * by field.
+ * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by fields
+ * instead of compound structure. As for the example above, the java.util.Vector object has three elements: int[LENGTH],
+ * float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of int, float and double, we will be
+ * able to read/write the compound data by field.
  *
  * @version 1.0 6/15/2021
  * @author Allen Byrne

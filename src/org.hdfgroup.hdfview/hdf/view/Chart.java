@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -42,11 +42,11 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
 /**
- * ChartView displays a histogram/line chart of selected row/column of table data
- * or image data. There are two types of chart, histogram and line plot.
+ * ChartView displays a histogram/line chart of selected row/column of table data or image data. There are two types of
+ * chart, histogram and line plot.
  *
  * @author Jordan T. Henderson
- * @version 2.4 2/27/16
+ * @version 2.4 2/27/2016
  */
 public class Chart extends Dialog
 {
