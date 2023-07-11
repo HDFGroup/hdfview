@@ -12,29 +12,33 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up JDK 19
       uses: actions/setup-java@v3
       with:
         java-version: '19'
         distribution: 'temurin'
+
     - name: Build with Ant
       run: ant -noinput -buildfile build.xml binaryPackage
 
   test:
-
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up JDK 19
       uses: actions/setup-java@v3
       with:
         java-version: '19'
         distribution: 'temurin'
+
     - name: Build with Ant
       run: ant -noinput -buildfile build.xml junit
+
