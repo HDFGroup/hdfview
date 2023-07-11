@@ -29,7 +29,6 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'snapshot'
-        regex: true
         file: 'last-file.txt'
 
     - name: Read base-name file
@@ -43,7 +42,6 @@ jobs:
         #version: 'tags/hdf-4_2_16-2'
         #file: 'hdf-4_2_16-2-ubuntu-2204.tar.gz'
         version: 'snapshot'
-        regex: true
         file: '${{ steps.gethdf4base.outputs.hdf4-name }}-ubuntu-2204.tar.gz'
 
     - name: List files for the space (Linux)
@@ -68,7 +66,6 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'snapshot'
-        regex: true
         file: 'last-file.txt'
 
     - name: Read base-name file
@@ -82,7 +79,6 @@ jobs:
         #version: 'tags/1.14.2'
         #file: 'hdf5-1_14_2-ubuntu-2204.tar.gz'
         version: 'snapshot'
-        regex: true
         file: '${{ steps.gethdf5base.outputs.hdf5-name }}-ubuntu-2204.tar.gz'
 
     - name: List files for the space (Linux)
