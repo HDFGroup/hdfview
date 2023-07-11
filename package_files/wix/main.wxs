@@ -59,7 +59,7 @@
 
 
         <!-- Reference to HDF icon to be used later -->
-        <Icon Id="hdf_icon" SourceFile="src\hdf\view\icons\hdf.ico"/>
+        <Icon Id="hdf_icon" SourceFile="src\hdf\view\icons\hdfview.ico"/>
 
 
         <!-- Property to set the default program installation folder name -->

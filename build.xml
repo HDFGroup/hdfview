@@ -66,11 +66,6 @@
     <property name="test.path" value="test/**"/>
     <property name="examples.test.path" value="${examples.path} ${test.path}"/>
 
-    <!-- Old style java version -->
-    <condition property="version1.8">
-      <equals arg1="1.8" arg2="${ant.java.version}"/>
-    </condition>
-
     <loadfile property="hdf4.version" srcFile="${hdf4.settings.version}" failonerror="false">
         <filterchain>
             <tokenfilter>
@@ -1548,7 +1543,7 @@
             <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
             <arg value="--icon" />
-            <arg value="${basedir}/package_files/hdf.png" />
+            <arg value="${basedir}/package_files/hdfview.png" />
             <arg value="--linux-menu-group" />
             <arg value="The HDF Group" />
             <!-- Runtime images -->
@@ -1615,7 +1610,7 @@
             <arg value="-Djava.library.path=$APPDIR" />
             <!-- Application images -->
             <arg value="--icon" />
-            <arg value="${basedir}/package_files/hdf.ico" />
+            <arg value="${basedir}/package_files/hdfview.ico" />
             <arg value="--temp" />
             <arg value="${build.dir}/temp" />
             <!-- Runtime images -->
