@@ -27,7 +27,7 @@ jobs:
     - name: Get hdf4 release base name
       uses: robinraju/release-downloader@v1.8
       with:
-        repository: "HDFGroup/hdf4"
+        repository: "byrnHDF/hdf4"
         tag: "snapshot"
         fileName: "last-file.txt"
 #      uses: dsaltares/fetch-gh-release-asset@master
@@ -43,7 +43,7 @@ jobs:
     - name: Get hdf4 release
       uses: dsaltares/fetch-gh-release-asset@master
       with:
-        repo: 'HDFGroup/hdf4'
+        repo: 'byrnHDF/hdf4'
         #version: 'tags/hdf-4_2_16-2'
         #file: 'hdf-4_2_16-2-ubuntu-2204.tar.gz'
         version: 'tags/snapshot'
