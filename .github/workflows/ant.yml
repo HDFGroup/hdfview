@@ -67,8 +67,8 @@ jobs:
     - name: set hdflib name
       id: set-hdflib-name
       env:
-        HDFLIB: ${{ github.workspace }}/hdf4/HDF_Group/HDF/*/lib
-      run: echo "HDFLIB_ENV=$HDFLIB" >> $GITHUB_ENV
+        HDFLIBS: ${{ github.workspace }}/hdf4/HDF_Group/HDF/*/lib
+      run: echo "HDFLIB_ENV=$HDFLIBS" >> $GITHUB_ENV
 
     - name: Get hdf5 release base name
       uses: dsaltares/fetch-gh-release-asset@master
@@ -109,8 +109,8 @@ jobs:
     - name: set hdf5lib name
       id: set-hdf5lib-name
       env:
-        HDF5LIB: ${{ github.workspace }}//hdf5/HDF_Group/HDF5/*/lib
-      run: echo "HDF5LIB_ENV=$HDF5LIB" >> $GITHUB_ENV
+        HDF5LIBS: ${{ github.workspace }}//hdf5/HDF_Group/HDF5/*/lib
+      run: echo "HDF5LIB_ENV=$HDF5LIBS" >> $GITHUB_ENV
 
     - name: Build with Ant
       run: ant -noinput -buildfile build.xml binaryPackage
