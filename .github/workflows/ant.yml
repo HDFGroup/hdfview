@@ -138,7 +138,7 @@ jobs:
             path: ${{ github.workspace }}/build/dist/HDFView-99.99.99-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-    - name: Build with Ant
+    - name: Test with Ant
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
