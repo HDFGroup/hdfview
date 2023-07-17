@@ -67,7 +67,7 @@ jobs:
     - name: set hdflib name
       id: set-hdflib-name
       env:
-        HDFLIBS: $(echo "${{ github.workspace }}/hdf4/HDF_Group/HDF/*/lib")
+        HDFLIBS: $(echo "${{ github.workspace }}/hdf4/HDF_Group/HDF/*")
       run: echo "HDFLIB_ENV=$HDFLIBS" >> $GITHUB_OUTPUT
 
     - name: Get hdf5 release base name
@@ -109,7 +109,7 @@ jobs:
     - name: set hdf5lib name
       id: set-hdf5lib-name
       env:
-        HDF5LIBS: $(echo "${{ github.workspace }}//hdf5/HDF_Group/HDF5/*/lib")
+        HDF5LIBS: $(echo "${{ github.workspace }}//hdf5/HDF_Group/HDF5/*")
       run: echo "HDF5LIB_ENV=$HDF5LIBS" >> $GITHUB_OUTPUT
 
     - name: Build with Ant
