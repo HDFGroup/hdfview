@@ -139,5 +139,8 @@ jobs:
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Build with Ant
+      env:
+        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
+        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml junit
 
