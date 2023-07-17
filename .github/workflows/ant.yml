@@ -67,7 +67,7 @@ jobs:
     - name: set hdflib name
       id: set-hdflib-name
       env:
-        HDFLIBS: ${{ github.workspace }}/hdf4/HDF_Group/HDF/*/lib
+        HDFLIBS: $(echo "${{ github.workspace }}/hdf4/HDF_Group/HDF/*/lib")
       run: echo "HDFLIB_ENV=$HDFLIBS" >> $GITHUB_ENV
 
     - name: Get hdf5 release base name
@@ -109,13 +109,13 @@ jobs:
     - name: set hdf5lib name
       id: set-hdf5lib-name
       env:
-        HDF5LIBS: ${{ github.workspace }}//hdf5/HDF_Group/HDF5/*/lib
+        HDF5LIBS: $(echo "${{ github.workspace }}//hdf5/HDF_Group/HDF5/*/lib")
       run: echo "HDF5LIB_ENV=$HDF5LIBS" >> $GITHUB_ENV
 
     - name: Build with Ant
       env:
-        HDFLIBS: ${{ HDFLIB_ENV }}
-        HDF5LIBS: ${{ HDF5LIB_ENV }}
+        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
+        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml binaryPackage
 
     - name: List files in the space (Linux)
