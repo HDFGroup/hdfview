@@ -20,15 +20,14 @@ newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================
-    * This version supports the new references available in hdf5 1.12 releases.
-    * Support for reading a SWMR created file, using a configurable timer to 
-      refresh dataset tables.
-    * Refactored the attribute object classes to use the same object logic as
-      datasets. This allows data objects to display table views using the same
-      logic. This includes the editing and reference handling.
+    * GH #121 Updated all icons with transpareancy
 
 Major Bug Fixes
 ==============================================================================
+    * GH #119 (crashes opening HDF4 file) has been fixed. The problem was
+      that the HDF4 xdr.dll file was not copied from the hdf4 install location.
+
+    ***** Previous fixes *****
     * HDFVIEW-284 (crashes on NETCDF-4 grids) has been fixed. The problem was
       that references in variable-length containers were trying to be handled
       like strings. Upon investigation, the problem was found to extend to 
@@ -46,29 +45,13 @@ Major Bug Fixes
       Sub-issue HDFView-223 updated the DataProviders, DataDisplayConverters
       and DataValidators to work with variable-length List of Lists.
 
-    ***** Previous fixes *****
-    * HDFVIEW-197 (incorrectly displaying image data) has been fixed. The
-      problem was that the initial starting values for calculation of minimum
-      and maximum data values were invalid. In addition, an option to allow
-      dynamic data ranges has been added. 
-
-    * Added support to read and display non-standard floating point numbers.
-    * Added optional startDir to command line options.
-    * Corrected user.home vs user.dir confusion.
-    * Split Current Working Directory options into three selections:
-      a. Current Work Directory or user.dir system property
-      b. User Home Directory or user.home system property
-      c. User selected directory
-
 Minor Bug Fixes
 ==============================================================================
-    * Corrected the create new attribute dialog from trying to write
-      the attribute twice.
-    * Added an initilize lib version bounds function. Now the change
-      lib version dialog correctly preloads the combo box values.
-    * Correct display of dimension for scalar types.
-    * Add display of NULL for dataspaces and prevent opening of a data table.
+    * Corrected how the program updates changes to the fonts made in the User Preferences
+      dialog. There are still issues with having to trigger a visual refresh.
 
+    * GH #73 (Check aarch64 in machine.arch property) fixed by adding a section to
+      for aarch64.
 
 Limitations / Known Problems
 ==============================================================================
@@ -98,6 +81,9 @@ Limitations / Known Problems
       palette is broken.
 
     * Logging and optional HDF4 requires rebuilds from source.
+
+    * Automatically opening HDFView and displaying a file selected still does display
+    the file on a mac.
 
 
 Other Notes

@@ -2298,7 +2298,7 @@ public class H5File extends FileFormat
             loadIntoMemory();
         }
 
-        log.trace("open(loadFullHeirarchy = {}, plist = {}): finish", loadFullHierarchy, plist);
+        log.trace("open(loadFullHierarchy = {}, plist = {}): finish", loadFullHierarchy, plist);
         return fid;
     }
 
