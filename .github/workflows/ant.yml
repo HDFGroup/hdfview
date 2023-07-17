@@ -113,6 +113,9 @@ jobs:
       run: echo "HDF5LIB_ENV=$HDF5LIBS" >> $GITHUB_ENV
 
     - name: Build with Ant
+      env:
+        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
+        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml binaryPackage
 
     - name: List files in the space (Linux)
