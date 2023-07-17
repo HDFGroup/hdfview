@@ -109,13 +109,13 @@ jobs:
     - name: set hdf5lib name
       id: set-hdf5lib-name
       env:
-        HDF5LIBS: ${{ github.workspace }}//hdf5/HDF_Group/HDF5/*
+        HDF5LIBS: ${{ github.workspace }}/hdf5/HDF_Group/HDF5/*
       run: echo "HDF5LIB_ENV=$HDF5LIBS" >> $GITHUB_OUTPUT
 
     - name: List files for the binaries (Linux)
       run: |
-            ls -l ${{ github.workspace }}/hdf4
-            ls -l ${{ github.workspace }}/hdf5
+            ls -l ${{ github.workspace }}/hdf4/HDF_Group
+            ls -l ${{ github.workspace }}/hdf5/HDF_Group
 
     - name: Build with Ant
       env:
