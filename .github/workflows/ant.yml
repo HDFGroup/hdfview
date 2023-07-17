@@ -114,8 +114,8 @@ jobs:
 
     - name: Build with Ant
       env:
-        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
-        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
+        HDFLIBS: ${{ HDFLIB_ENV }}
+        HDF5LIBS: ${{ HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml binaryPackage
 
     - name: List files in the space (Linux)
