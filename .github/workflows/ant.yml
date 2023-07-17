@@ -112,6 +112,11 @@ jobs:
         HDF5LIBS: ${{ github.workspace }}//hdf5/HDF_Group/HDF5/*
       run: echo "HDF5LIB_ENV=$HDF5LIBS" >> $GITHUB_OUTPUT
 
+    - name: List files for the binaries (Linux)
+      run: |
+            ls -l ${{ github.workspace }}/hdf4
+            ls -l ${{ github.workspace }}/hdf5
+
     - name: Build with Ant
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
