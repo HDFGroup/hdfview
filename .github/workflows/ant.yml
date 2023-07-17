@@ -67,7 +67,7 @@ jobs:
     - name: set hdflib name
       id: set-hdflib-name
       run: |
-        HDFDIR: ${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        HDFDIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
         FILE_NAME_HDF=$(echo "ls ${{ github.workspace }}/hdf4/HDF_Group/HDF")
         echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
 
@@ -110,7 +110,7 @@ jobs:
     - name: set hdf5lib name
       id: set-hdf5lib-name
       run: |
-        HDF5DIR: ${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
         FILE_NAME_HDF5=$(echo "ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5")
         echo "HDF5LIB_ENV=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
 
