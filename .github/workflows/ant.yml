@@ -57,7 +57,7 @@ jobs:
       run: tar -zxvf ${{ github.workspace }}/${{ steps.gethdf4base.outputs.hdf4-name }}-ubuntu-2204.tar.gz
 
     - name: Uncompress hdf4 binary (Linux)
-        run: |
+      run: |
           cd "${{ github.workspace }}/hdf4"
           tar -zxvf ${{ github.workspace }}/hdf4/HDF-*-Linux.tar.gz --strip-components 1
 
@@ -99,7 +99,9 @@ jobs:
       run: tar -zxvf ${{ github.workspace }}/${{ steps.gethdf5base.outputs.hdf5-name }}-ubuntu-2204.tar.gz
 
     - name: Uncompress hdf5 binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Linux.tar.gz --strip-components 1
+      run:  |
+          cd "${{ github.workspace }}/hdf5"
+          tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Linux.tar.gz --strip-components 1
 
 #    - name: Install hdf5 binary (Linux)
 #      run: sh ${{ github.workspace }}/${{ steps.gethdf5base.outputs.hdf5-name }}.sh --exclude-subdir --skip-license
