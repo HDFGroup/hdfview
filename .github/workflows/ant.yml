@@ -182,12 +182,15 @@ jobs:
 
     - name: Uncompress hdf4 binary (Linux)
       working-directory: ${{ github.workspace }}/hdf4
-      run: 7z x HDF-*-win64.zip -ohdf4
+      run: |
+            7z x HDF-*-win64.zip
+            cd HDF-*-win64
+            xcopy . .. /E/H/C/I
       shell: bash
 
     - name: List files for the space (Linux)
       run: |
-            ls -l ${{ github.workspace }}/hdf4/hdf4
+            ls -l ${{ github.workspace }}/hdf4/HDF-*-win64
             ls ${{ runner.workspace }}/hdfview/hdf4
 
     - name: set hdflib name
