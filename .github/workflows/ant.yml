@@ -11,18 +11,14 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build-linux:
+  get-base-names:
     runs-on: ubuntu-latest
-    name: "Ubuntu gcc"
+    outputs:
+      hdf4-name: ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}
+      hdf5-name: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: Set up JDK 19
-      uses: actions/setup-java@v3
-      with:
-        java-version: '19'
-        distribution: 'temurin'
 
     - name: Get hdf4 release base name
 #      uses: robinraju/release-downloader@v1.8
@@ -38,7 +34,32 @@ jobs:
 
     - name: Read base-name file
       id: gethdf4base
-      run: echo "hdf4-name=$(cat last-file.txt)" >> $GITHUB_OUTPUT
+      run: echo "HDF4_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
+
+    - name: Get hdf5 release base name
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'HDFGroup/hdf5'
+        version: 'tags/snapshot'
+        file: 'last-file.txt'
+
+    - name: Read base-name file
+      id: gethdf5base
+      run: echo "HDF5_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
+
+  build-linux:
+    runs-on: ubuntu-latest
+    needs: get-base-names
+    name: "Ubuntu gcc"
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 19
+      uses: actions/setup-java@v3
+      with:
+        java-version: '19'
+        distribution: 'temurin'
 
     - name: Get hdf4 release
       uses: dsaltares/fetch-gh-release-asset@master
@@ -47,7 +68,7 @@ jobs:
         #version: 'tags/hdf-4_2_16-2'
         #file: 'hdf-4_2_16-2-ubuntu-2204.tar.gz'
         version: 'tags/snapshot'
-        file: '${{ steps.gethdf4base.outputs.hdf4-name }}-ubuntu-2204.tar.gz'
+        file: '${{ needs.get-base-names.outputs.hdf4-name }}-ubuntu-2204.tar.gz'
 
     - name: List files for the space (Linux)
       run: |
@@ -55,7 +76,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ steps.gethdf4base.outputs.hdf4-name }}-ubuntu-2204.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf4-name }}-ubuntu-2204.tar.gz
 
     - name: Uncompress hdf4 binary (Linux)
       run: |
@@ -69,17 +90,6 @@ jobs:
         FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
         echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
 
-    - name: Get hdf5 release base name
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot'
-        file: 'last-file.txt'
-
-    - name: Read base-name file
-      id: gethdf5base
-      run: echo "hdf5-name=$(cat last-file.txt)" >> $GITHUB_OUTPUT
-
     - name: Get hdf5 release
       uses: dsaltares/fetch-gh-release-asset@master
       with:
@@ -87,7 +97,7 @@ jobs:
         #version: 'tags/1.14.2'
         #file: 'hdf5-1_14_2-ubuntu-2204.tar.gz'
         version: 'tags/snapshot'
-        file: '${{ steps.gethdf5base.outputs.hdf5-name }}-ubuntu-2204.tar.gz'
+        file: '${{ needs.get-base-names.outputs.hdf5-name }}-ubuntu-2204.tar.gz'
 
     - name: List files for the space (Linux)
       run: |
@@ -95,7 +105,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ steps.gethdf5base.outputs.hdf5-name }}-ubuntu-2204.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf5-name }}-ubuntu-2204.tar.gz
 
     - name: Uncompress hdf5 binary (Linux)
       run:  |
@@ -140,6 +150,7 @@ jobs:
       run: ant -noinput -buildfile build.xml junit
   build-win:
     runs-on: windows-latest
+    needs: get-base-names
     name: "Windows MSVC"
 
     steps:
@@ -151,24 +162,6 @@ jobs:
         java-version: '19'
         distribution: 'temurin'
 
-    - name: Get hdf4 release base name
-#      uses: robinraju/release-downloader@v1.8
-#      with:
-#        repository: "HDFGroup/hdf4"
-#        tag: "snapshot"
-#        fileName: "last-file.txt"
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf4'
-        version: 'tags/snapshot'
-        file: 'last-file.txt'
-
-    - name: Read base-name file
-      id: gethdf4base
-      run: |
-          HDF4_NAME_BASE=$(type last-file.txt)
-          echo "hdf4-name=$HDF4_NAME_BASE" >> $GITHUB_OUTPUT
-
     - name: Get hdf4 release
       uses: dsaltares/fetch-gh-release-asset@master
       with:
@@ -176,7 +169,7 @@ jobs:
         #version: 'tags/hdf-4_2_16-2'
         #file: 'hdf-4_2_16-2-win_vs2022.zip'
         version: 'tags/snapshot'
-        file: '${{ steps.gethdf4base.outputs.hdf4-name }}-win_vs2022.zip'
+        file: '${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip'
 
     - name: List files for the space (Linux)
       run: |
@@ -184,7 +177,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ steps.gethdf4base.outputs.hdf4-name }}-win_vs2022.zip
+      run: tar -zxvf ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip
 
     - name: Uncompress hdf4 binary (Linux)
       run: |
@@ -198,19 +191,6 @@ jobs:
         FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
         echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
 
-    - name: Get hdf5 release base name
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot'
-        file: 'last-file.txt'
-
-    - name: Read base-name file
-      id: gethdf5base
-      run: |
-          HDF5_NAME_BASE=$(type last-file.txt)
-          echo "hdf5-name=$HDF5_NAME_BASE" >> $GITHUB_OUTPUT
-
     - name: Get hdf5 release
       uses: dsaltares/fetch-gh-release-asset@master
       with:
@@ -218,7 +198,7 @@ jobs:
         #version: 'tags/1.14.2'
         #file: 'hdf5-1_14_2-win_vs2022.zip'
         version: 'tags/snapshot'
-        file: '${{ steps.gethdf5base.outputs.hdf5-name }}-win_vs2022.zip'
+        file: '${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip'
 
     - name: List files for the space (Linux)
       run: |
@@ -226,7 +206,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ steps.gethdf5base.outputs.hdf5-name }}-win_vs2022.zip
+      run: tar -zxvf ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip
 
     - name: Uncompress hdf5 binary (Linux)
       run:  |
