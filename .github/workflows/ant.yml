@@ -177,8 +177,8 @@ jobs:
 
     - name: List files for the space (Linux)
       run: |
-            ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}
+            ls -l ${{ github.workspace }}/hdf4
+            ls ${{ runner.workspace }}/hdfview
 
     - name: Uncompress hdf4 binary (Linux)
       working-directory: ${{ github.workspace }}/hdf4
@@ -206,8 +206,8 @@ jobs:
 
     - name: List files for the space (Win)
       run: |
-            ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}
+            ls -l ${{ github.workspace }}/hdf5
+            ls ${{ runner.workspace }}/hdfview
 
     - name: Uncompress hdf5 binary (Win)
       working-directory: ${{ github.workspace }}/hdf5
