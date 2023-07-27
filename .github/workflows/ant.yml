@@ -185,6 +185,11 @@ jobs:
       run: 7z x HDF-*-win64.zip -ohdf4
       shell: bash
 
+    - name: List files for the space (Linux)
+      run: |
+            ls -l ${{ github.workspace }}/hdf4
+            ls ${{ runner.workspace }}/hdfview/hdf4
+
     - name: set hdflib name
       id: set-hdflib-name
       run: |
