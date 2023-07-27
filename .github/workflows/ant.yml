@@ -186,15 +186,14 @@ jobs:
       shell: bash
 
     - name: cd hdf4 binary (Win)
-      run: cd HDF-*-win64
+      working-directory: ${{ github.workspace }}/hdf4
+      run: |
+          cd HDF-*-win64
+          xcopy .\* ..\ /i/s/e/h
       shell: bash
 
     - name: List files for the space (Win)
       run: ls .
-
-    - name: move hdf4 binary (Linux)
-      run: xcopy .\* ..\ /i/s/e/h
-      shell: bash
 
     - name: set hdflib name
       id: set-hdflib-name
@@ -226,15 +225,14 @@ jobs:
       shell: bash
 
     - name: cd hdf4 binary (Win)
-      run: cd HDF5-*-win64
+      working-directory: ${{ github.workspace }}/hdf5
+      run: |
+          cd HDF5-*-win64
+          xcopy .\* ..\ /i/s/e/h
       shell: bash
 
     - name: List files for the space (Win)
       run: ls .
-
-    - name: move hdf4 binary (Linux)
-      run: xcopy .\* ..\ /i/s/e/h
-      shell: bash
 
     - name: set hdf5lib name
       id: set-hdf5lib-name
