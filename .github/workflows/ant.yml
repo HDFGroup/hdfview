@@ -175,20 +175,20 @@ jobs:
     - name: Uncompress gh binary (Win)
       run: 7z x ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip
 
-    - name: List files for the space (Win)
-      run: |
-            ls -l ${{ github.workspace }}/hdf4
-            ls ${{ runner.workspace }}/hdfview
-
     - name: Uncompress hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf4
       run: 7z x HDF-*-win64.zip
       shell: bash
 
+    - name: List files for the space (Win)
+      run: |
+            ls -l ${{ github.workspace }}/hdf4
+            ls ${{ runner.workspace }}/hdfview
+
     - name: cd hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf4
       run: |
-          cd "HDF-*-win64"
+          cd HDF-*-win64
           xcopy ".\* "..\" /i /s /e /h /y
       shell: bash
 
@@ -214,20 +214,20 @@ jobs:
     - name: Uncompress gh binary (Win)
       run: 7z x ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip
 
-    - name: List files for the space (Win)
-      run: |
-            ls -l ${{ github.workspace }}/hdf5
-            ls ${{ runner.workspace }}/hdfview
-
     - name: Uncompress hdf5 binary (Win)
       working-directory: ${{ github.workspace }}/hdf5
       run: 7z x HDF5-*-win64.zip
       shell: bash
 
+    - name: List files for the space (Win)
+      run: |
+            ls -l ${{ github.workspace }}/hdf5
+            ls ${{ runner.workspace }}/hdfview
+
     - name: cd hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf5
       run: |
-          cd "HDF5-*-win64"
+          cd HDF5-*-win64
           xcopy ".\* "..\" /i /s /e /h /y
       shell: bash
 
