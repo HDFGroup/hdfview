@@ -180,9 +180,10 @@ jobs:
       run: tar -zxvf ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip
 
     - name: Uncompress hdf4 binary (Linux)
-      run: |
+      run:  |
           cd "${{ github.workspace }}/hdf4"
-          tar -zxvf ${{ github.workspace }}/hdf4/HDF-*-win64.zip --strip-components 1
+          7z x ${{ github.workspace }}/hdf4/HDF4-*-win64.zip
+      shell: bash
 
     - name: set hdflib name
       id: set-hdflib-name
@@ -211,7 +212,8 @@ jobs:
     - name: Uncompress hdf5 binary (Linux)
       run:  |
           cd "${{ github.workspace }}/hdf5"
-          tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-win64.zip --strip-components 1
+          7z x ${{ github.workspace }}/hdf5/HDF5-*-win64.zip
+      shell: bash
 
     - name: set hdf5lib name
       id: set-hdf5lib-name
