@@ -165,7 +165,9 @@ jobs:
 
     - name: Read base-name file
       id: gethdf4base
-      run: echo "hdf4-name=$(type last-file.txt)" >> $GITHUB_OUTPUT
+      run: |
+          HDF4_NAME_BASE=$(type last-file.txt)
+          echo "hdf4-name=$HDF4_NAME_BASE" >> $GITHUB_OUTPUT
 
     - name: Get hdf4 release
       uses: dsaltares/fetch-gh-release-asset@master
@@ -205,7 +207,9 @@ jobs:
 
     - name: Read base-name file
       id: gethdf5base
-      run: echo "hdf5-name=$(type last-file.txt)" >> $GITHUB_OUTPUT
+      run: |
+          HDF5_NAME_BASE=$(type last-file.txt)
+          echo "hdf5-name=$HDF5_NAME_BASE" >> $GITHUB_OUTPUT
 
     - name: Get hdf5 release
       uses: dsaltares/fetch-gh-release-asset@master
