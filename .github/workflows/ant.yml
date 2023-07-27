@@ -147,7 +147,8 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-      run: ant -noinput -buildfile build.xml junit
+      run: ant -noinput -buildfile build.xml junit 
+
   build-win:
     runs-on: windows-latest
     needs: get-base-names
@@ -177,12 +178,11 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip
+      run: 7z x ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip
 
     - name: Uncompress hdf4 binary (Linux)
-      run:  |
-          cd "${{ github.workspace }}/hdf4"
-          7z x ${{ github.workspace }}/hdf4/HDF4-*-win64.zip
+      working-directory: ${{ github.workspace }}/hdf4
+      run: for %I in (HDF4-*-win64.zip) do 7z x %I
       shell: bash
 
     - name: set hdflib name
@@ -201,18 +201,17 @@ jobs:
         version: 'tags/snapshot'
         file: '${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip'
 
-    - name: List files for the space (Linux)
+    - name: List files for the space (Win)
       run: |
             ls -l ${{ github.workspace }}
             ls ${{ runner.workspace }}
 
-    - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip
+    - name: Uncompress gh binary (Win)
+      run: 7z x ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip
 
-    - name: Uncompress hdf5 binary (Linux)
-      run:  |
-          cd "${{ github.workspace }}/hdf5"
-          7z x ${{ github.workspace }}/hdf5/HDF5-*-win64.zip
+    - name: Uncompress hdf5 binary (Win)
+      working-directory: ${{ github.workspace }}/hdf5
+      run: for %I in (HDF5-*-win64.zip) do 7z x %I
       shell: bash
 
     - name: set hdf5lib name
@@ -222,7 +221,7 @@ jobs:
         FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
         echo "HDF5LIB_ENV=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
 
-    - name: List files for the binaries (Linux)
+    - name: List files for the binaries (Win)
       run: |
             ls -l ${{ github.workspace }}/hdf4/HDF_Group/HDF
             ls -l ${{ github.workspace }}/hdf5/HDF_Group/HDF5
@@ -233,13 +232,13 @@ jobs:
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml binaryPackage
 
-    - name: List files in the space (Linux)
+    - name: List files in the space (Win)
       run: |
             ls ${{ github.workspace }}
             ls -l ${{ runner.workspace }}
 
     # Save files created by ctest script
-    - name: Save published binary (Linux)
+    - name: Save published binary (Win)
       uses: actions/upload-artifact@v3
       with:
             name: tgz-ubuntu-2204-binary
