@@ -182,7 +182,7 @@ jobs:
 
     - name: Uncompress hdf4 binary (Linux)
       working-directory: ${{ github.workspace }}/hdf4
-      run: for %I in (HDF4-*-win64.zip) do 7z x %I
+      run: 7z x HDF4-*-win64.zip -ohdf4
       shell: bash
 
     - name: set hdflib name
@@ -211,7 +211,7 @@ jobs:
 
     - name: Uncompress hdf5 binary (Win)
       working-directory: ${{ github.workspace }}/hdf5
-      run: for %I in (HDF5-*-win64.zip) do 7z x %I
+      run: 7z x HDF5-*-win64.zip -ohdf5
       shell: bash
 
     - name: set hdf5lib name
