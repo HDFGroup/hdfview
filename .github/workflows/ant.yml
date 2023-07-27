@@ -192,7 +192,7 @@ jobs:
 
     - name: move hdf4 binary (Linux)
       working-directory: ${{ github.workspace }}/hdf4
-      run: xcopy . ${{ github.workspace }}/hdf4 /E/H/C/I
+      run: xcopy . ${{ github.workspace }}/hdf4/ /i/s/e/h
       shell: bash
 
     - name: List files for the space (Linux)
