@@ -22,6 +22,7 @@
     <!-- MAC notary: -->
     <property name="notarize.account" value="${env.NOTARY_USER}" />
     <property name="notarize.keychain_key" value="${env.NOTARY_KEY}" />
+    <property name="notarize.altool" value="-altool" />
 
     <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
     <loadfile property="app.version" srcFile="${basedir}/VERSION">
@@ -1751,9 +1752,9 @@
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
-        <antcall target="submit-notary" />
+        <antcall target="submit-notary${notarize.altool}" />
 
-        <antcall target="post-notary" />
+        <antcall target="post-notary${notarize.altool}" />
 
         <antcall target="staple-notary" />
 
@@ -1984,6 +1985,95 @@
           MAC NOTARY FOR JPACKAGE
           ================================================================= -->
 
+    <target name="submit-notary-altool">
+        <exec executable="/usr/bin/xcrun" failonerror="true">
+            <redirector output="retUUID.txt" alwayslog="true"/>
+            <arg value="altool"/>
+            <arg value="--notarize-app"/>
+            <arg value="--type"/>
+            <arg value="osx"/>
+            <arg value="--primary-bundle-id"/>
+            <arg value="app.${ant.project.name}-${app.version}"/>
+            <arg value="--username"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+            <arg value="--file"/>
+            <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
+        </exec>
+        <loadfile property="retUUID" srcfile="retUUID.txt">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <echo>notarize-app:${retUUID}</echo>
+    </target>
+
+    <target name="post-notary-altool">
+        <loadfile property="retUUID" srcfile="retUUID.txt">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <sleep minutes="10"/>
+        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
+            <redirector output="notary.txt" alwayslog="true"/>
+            <arg value="altool"/>
+            <arg value="--notarization-info"/>
+            <arg value="${retUUID}"/>
+            <arg value="--username"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+        </exec>
+        <condition property="isnotarized">
+            <resourcecontains resource="notary.txt" substring="success"/>
+        </condition>
+        <echo>notarize-info:${logInfo}</echo>
+    </target>
+
+        <target name="zip-submit-notary-altool">
+            <exec executable="/usr/bin/xcrun" failonerror="true">
+                <redirector output="retUUID.txt" alwayslog="true"/>
+                <arg value="altool"/>
+                <arg value="--notarize-app"/>
+                <arg value="--type"/>
+                <arg value="osx"/>
+                <arg value="--primary-bundle-id"/>
+                <arg value="app.${ant.project.name}-${app.version}"/>
+                <arg value="--username"/>
+                <arg value="${notarize.account}"/>
+                <arg value="--password"/>
+                <arg value="${notarize.keychain_key}"/>
+                <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+                <arg value="--file"/>
+                <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
+            </exec>
+            <loadfile property="retUUID" srcfile="retUUID.txt">
+                <filterchain>
+                    <tokenfilter>
+                        <containsregex
+                             pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                             replace="\1" />
+                    </tokenfilter>
+                    <striplinebreaks/>
+                </filterchain>
+            </loadfile>
+            <echo>notarize-app:${retUUID}</echo>
+        </target>
+
     <target name="submit-notary">
         <exec executable="/usr/bin/xcrun" failonerror="true">
             <redirector output="retUUID.txt" alwayslog="true"/>
@@ -2022,7 +2112,6 @@
                 <striplinebreaks/>
             </filterchain>
         </loadfile>
-        <!-- <sleep minutes="10"/> -->
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
             <arg value="notarytool"/>
@@ -2190,9 +2279,9 @@
             <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
-        <antcall target="zip-submit-notary" />
+        <antcall target="zip-submit-notary${notarize.altool}" />
 
-        <antcall target="post-notary" />
+        <antcall target="post-notary${notarize.altool}" />
 
         <antcall target="zip-staple-notary" />
 
