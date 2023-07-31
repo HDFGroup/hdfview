@@ -188,8 +188,7 @@ jobs:
     - name: cd hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf4
       run: |
-          cd HDF*
-          xcopy ".\* "..\" /i /s /e /h /y
+          xcopy "HDF*\* ".\" /i /s /e /h /y
       shell: bash
 
     - name: List files for the space (Win)
@@ -227,8 +226,7 @@ jobs:
     - name: cd hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf5
       run: |
-          cd HDF5*
-          xcopy ".\* "..\" /i /s /e /h /y
+          xcopy "HDF5*\* ".\" /i /s /e /h /y
       shell: bash
 
     - name: List files for the space (Win)
