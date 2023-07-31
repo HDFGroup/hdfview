@@ -53,6 +53,10 @@ Minor Bug Fixes
     * GH #73 (Check aarch64 in machine.arch property) fixed by adding a section to
       for aarch64.
 
+    * GH #147 (HDFView 3.3.0 shows incorrect references in compound types in datasets)
+      fixed by adding a start index into the object reference array of data read from a
+      compound type.
+
 Limitations / Known Problems
 ==============================================================================
     * HDFView currently cannot nicely handle large datasets when using the
