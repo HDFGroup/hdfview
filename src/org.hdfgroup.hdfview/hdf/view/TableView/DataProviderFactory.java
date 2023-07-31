@@ -1712,7 +1712,7 @@ public class DataProviderFactory
         private String populateReference(Object byteBuf, int startIndex) {
             byte[] rElements = new byte[(int)typeSize];
             try {
-                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+                System.arraycopy(byteBuf, startIndex * (int) typeSize, rElements, 0, (int) typeSize);
             }
             catch (Exception err) {
                 log.trace("populateReference(): arraycopy failure: ", err);
@@ -1731,7 +1731,7 @@ public class DataProviderFactory
             long fid = ((HObject)dataFormatReference).getFileFormat().getFID();
             byte[] rElements = new byte[(int)typeSize];
             try {
-                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+                System.arraycopy(byteBuf, startIndex * (int) typeSize, rElements, 0, (int) typeSize);
             }
             catch (Exception err) {
                 log.trace("populateReferenceRegion(): arraycopy failure: ", err);
