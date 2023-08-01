@@ -256,7 +256,7 @@ jobs:
     - name: List files for the space (Windows)
       run: |
             Get-ChildItem -Path ${{ github.workspace }}
-            Get-ChildItem -Path ${{ runner.workspace }}/build
+            Get-ChildItem -Path ${{ github.workspace }}/build
       shell: pwsh
 
     # Save files created by ctest script
