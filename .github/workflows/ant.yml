@@ -188,11 +188,11 @@ jobs:
     - name: cd hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf4
       run: |
-        Copy-Item -Path "${{ github.workspace }}/hdf4/HDF*/*" -Destination "${{ github.workspace }}/hdf4" -Recurse
+        Copy-Item -Path "${{ github.workspace }}/hdf4/HDF*/*" -Destination "${{ github.workspace }}/hdf4/HDF_Group/HDF" -Recurse
       shell: pwsh
 
     - name: List files for the space (Win)
-      run: ls .
+      run: ls -l ${{ github.workspace }}/hdf4
 
     - name: set hdflib name
       id: set-hdflib-name
@@ -226,11 +226,11 @@ jobs:
     - name: cd hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf5
       run: |
-        Copy-Item -Path "${{ github.workspace }}/hdf5/HDF*/*" -Destination "${{ github.workspace }}/hdf5" -Recurse
+        Copy-Item -Path "${{ github.workspace }}/hdf5/HDF*/*" -Destination "${{ github.workspace }}/hdf5/HDF_Group/HDF5" -Recurse
       shell: pwsh
 
     - name: List files for the space (Win)
-      run: ls .
+      run: ls -l ${{ github.workspace }}/hdf5
 
     - name: set hdf5lib name
       id: set-hdf5lib-name
