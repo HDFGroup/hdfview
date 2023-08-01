@@ -188,7 +188,7 @@ jobs:
     - name: cd hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf4
       run: |
-        Copy-Item -Path "${{ github.workspace }}/hdf4/HDF*/*" -Destination "${{ github.workspace }}/hdf4/HDF_Group/HDF" -Recurse
+        Copy-Item -Path "${{ github.workspace }}/hdf4/HDF*/*" -Destination "${{ github.workspace }}/hdf4/The_HDF_Group/HDF" -Recurse
       shell: pwsh
 
     - name: List files for the space (Win)
@@ -197,8 +197,8 @@ jobs:
     - name: set hdflib name
       id: set-hdflib-name
       run: |
-        HDFDIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
+        HDFDIR=${{ github.workspace }}/hdf4/The_HDF_Group/HDF/
+        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/The_HDF_Group/HDF)
         echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
 
     - name: Get hdf5 release
@@ -226,7 +226,7 @@ jobs:
     - name: cd hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf5
       run: |
-        Copy-Item -Path "${{ github.workspace }}/hdf5/HDF*/*" -Destination "${{ github.workspace }}/hdf5/HDF_Group/HDF5" -Recurse
+        Copy-Item -Path "${{ github.workspace }}/hdf5/HDF*/*" -Destination "${{ github.workspace }}/hdf5/The_HDF_Group/HDF5" -Recurse
       shell: pwsh
 
     - name: List files for the space (Win)
@@ -235,8 +235,8 @@ jobs:
     - name: set hdf5lib name
       id: set-hdf5lib-name
       run: |
-        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
+        HDF5DIR=${{ github.workspace }}/hdf5/The_HDF_Group/HDF5/
+        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/The_HDF_Group/HDF5)
         echo "HDF5LIB_ENV=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
 
     - name: List files for the binaries (Win)
