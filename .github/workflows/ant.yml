@@ -256,14 +256,14 @@ jobs:
     - name: List files for the space (Windows)
       run: |
             Get-ChildItem -Path ${{ github.workspace }}
-            Get-ChildItem -Path ${{ runner.workspace }}
+            Get-ChildItem -Path ${{ runner.workspace }}/build
       shell: pwsh
 
     # Save files created by ctest script
     - name: Save published binary (Win)
       uses: actions/upload-artifact@v3
       with:
-            name: tgz-ubuntu-2204-binary
+            name: zip-win-2022-binary
             path: ${{ github.workspace }}/build/dist/HDFView-99.99.99-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 

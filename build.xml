@@ -499,7 +499,7 @@
                 <path refid="hdfobject-jar" />
                 <path refid="application" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${hdf.lib.dir}/../bin${path.separator}${hdf5.lib.dir}/../bin${path.separator}${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
             <!--  <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />  -->
             <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
@@ -519,7 +519,7 @@
                 <path refid="hdfobject-jar" />
                 <path refid="application" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${hdf.lib.dir}/../bin${path.separator}${hdf5.lib.dir}/../bin${path.separator}${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
             <!--  <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />  -->
             <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
@@ -576,7 +576,7 @@
                 <pathelement location="${classes.dir}" />
                 <pathelement path="${exclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${hdf.lib.dir}/../bin${path.separator}${hdf5.lib.dir}/../bin${path.separator}${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
         </java>
     </target>
@@ -696,7 +696,7 @@
                 <path refid="build-classpath" />
                 <pathelement location="${testclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${hdf.lib.dir}/../bin${path.separator}${hdf5.lib.dir}/../bin${path.separator}${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
             <test name="${build.object.test}" todir="${report.dir}" outfile="TEST-${build.object.test}">
                 <formatter type="plain" />
@@ -715,7 +715,7 @@
                 <path refid="build-classpath" />
                 <pathelement location="${testclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${hdf.lib.dir}/../bin${path.separator}${hdf5.lib.dir}/../bin${path.separator}${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
             <test name="${build.object.test}" todir="${report.dir}" outfile="TEST-${build.object.test}">
                 <formatter type="plain" />
@@ -734,7 +734,7 @@
                 <path refid="build-classpath" />
                 <pathelement location="${testclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${hdf.lib.dir}/../bin${path.separator}${hdf5.lib.dir}/../bin${path.separator}${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
 
             <formatter type="xml" />
@@ -812,7 +812,7 @@
                     <pathelement location="${uitestclasses.dir}" />
                 </classpath>
 
-                <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+                <sysproperty key="java.library.path" path="${hdf.lib.dir}/../bin${path.separator}${hdf5.lib.dir}/../bin${path.separator}${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
                 <sysproperty key="hdfview.root" path="@{rootdir}" />
                 <sysproperty key="hdfview.workdir" path="@{workdir}" />
                 <sysproperty key="hdfview.propfile" path="@{propfile}" />
