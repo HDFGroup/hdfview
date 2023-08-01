@@ -198,7 +198,7 @@ jobs:
     - name: set hdflib name
       id: set-hdflib-name
       run: |
-        HDFDIR=${{ github.workspace }}/HDF_Group/HDF
+        HDFDIR="${{ github.workspace }}/HDF_Group/HDF"
         echo "HDFLIB_ENV=$HDFDIR" >> $GITHUB_OUTPUT
       shell: bash
 
@@ -237,7 +237,7 @@ jobs:
     - name: set hdf5lib name
       id: set-hdf5lib-name
       run: |
-        HDF5DIR=${{ github.workspace }}/HDF_Group/HDF5
+        HDF5DIR="${{ github.workspace }}/HDF_Group/HDF5"
         echo "HDF5LIB_ENV=$HDF5DIR" >> $GITHUB_OUTPUT
       shell: bash
 
@@ -272,5 +272,4 @@ jobs:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml junit
-
 
