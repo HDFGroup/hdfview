@@ -4,6 +4,7 @@
     xmlns:fx="javafx:com.sun.javafx.tools.ant"
     xmlns:sonar="antlib:org.sonar.ant"
     xmlns:jacoco="antlib:org.jacoco.ant"
+	xmlns:doxygen="antlib:org.doxygen.tools"
     xmlns:if="ant:if"
     xmlns:unless="ant:unless">
     <property environment="env" />
@@ -485,7 +486,7 @@
         <os family="mac" />
     </condition>
 
-    <target name="rundebug" depends="jar" description="Runs the application with remote debugger">
+    <target name="rundebug" depends="deploy,jar" description="Runs the application with remote debugger">
         <mkdir dir="${jar.dir}/lib/ext" />
         <java fork="true" classname="${main-class}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.run}" />
@@ -498,15 +499,15 @@
                 <path refid="hdfobject-jar" />
                 <path refid="application" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${release.dir}/bin${path.separator}${release.dir}/bin" />
             <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
             <!--  <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />  -->
             <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <env key="${platform.hdf.lib}" path="${release.dir}/bin${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
         </java>
     </target>
 
-    <target name="run" depends="jar" description="Runs the application">
+    <target name="run" depends="deploy,jar" description="Runs the application">
         <mkdir dir="${jar.dir}/lib/ext" />
         <java fork="true" classname="${main-class}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.run}" />
@@ -518,11 +519,11 @@
                 <path refid="hdfobject-jar" />
                 <path refid="application" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${release.dir}/bin${path.separator}${release.dir}/bin" />
             <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
             <!--  <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />  -->
             <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <env key="${platform.hdf.lib}" path="${release.dir}/bin${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
         </java>
     </target>
 
@@ -558,7 +559,7 @@
         <fileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
     </target>
 
-    <target name="run-one-example" depends="compile-test" description="Runs one example">
+    <target name="run-one-example" depends="deploy,compile-test" description="Runs one example">
         <dirname property="exfile.dir" file="${build.exfile}" />
         <basename property="exdir.name" file="${exfile.dir}" />
         <basename property="exfile.name" file="${build.exfile}" suffix=".class" />
@@ -575,8 +576,8 @@
                 <pathelement location="${classes.dir}" />
                 <pathelement path="${exclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <sysproperty key="java.library.path" path="${release.dir}/bin${path.separator}${release.dir}/bin" />
+            <env key="${platform.hdf.lib}" path="${release.dir}/bin${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
         </java>
     </target>
 
@@ -682,7 +683,7 @@
         <property name="agentvmparam" value="" />
     </target>
 
-    <target name="junit-debug-test" depends="objectjar,clean-junit-uitest,compile-test,jacoco">
+    <target name="junit-debug-test" depends="deploy,objectjar,clean-junit-uitest,compile-test,jacoco">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -695,15 +696,15 @@
                 <path refid="build-classpath" />
                 <pathelement location="${testclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <sysproperty key="java.library.path" path="${release.dir}/bin${path.separator}${release.dir}/bin" />
+            <env key="${platform.hdf.lib}" path="${release.dir}/bin${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
             <test name="${build.object.test}" todir="${report.dir}" outfile="TEST-${build.object.test}">
                 <formatter type="plain" />
             </test>
         </junit>
     </target>
 
-    <target name="junit-single-test" depends="objectjar,clean-junit-uitest,compile-test,jacoco">
+    <target name="junit-single-test" depends="deploy,objectjar,clean-junit-uitest,compile-test,jacoco">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -714,15 +715,15 @@
                 <path refid="build-classpath" />
                 <pathelement location="${testclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <sysproperty key="java.library.path" path="${release.dir}/bin${path.separator}${release.dir}/bin" />
+            <env key="${platform.hdf.lib}" path="${release.dir}/bin${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
             <test name="${build.object.test}" todir="${report.dir}" outfile="TEST-${build.object.test}">
                 <formatter type="plain" />
             </test>
         </junit>
     </target>
 
-    <target name="junit" depends="objectjar,clean-junit-uitest,compile-test,jacoco" description="Runs the Object Library tests">
+    <target name="junit" depends="deploy,objectjar,clean-junit-uitest,compile-test,jacoco" description="Runs the Object Library tests">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -733,8 +734,8 @@
                 <path refid="build-classpath" />
                 <pathelement location="${testclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <sysproperty key="java.library.path" path="${release.dir}/bin${path.separator}${release.dir}/bin" />
+            <env key="${platform.hdf.lib}" path="${release.dir}/bin${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
 
             <formatter type="xml" />
             <formatter type="plain" />
@@ -811,11 +812,11 @@
                     <pathelement location="${uitestclasses.dir}" />
                 </classpath>
 
-                <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+                <sysproperty key="java.library.path" path="${release.dir}/bin${path.separator}${release.dir}/bin" />
                 <sysproperty key="hdfview.root" path="@{rootdir}" />
                 <sysproperty key="hdfview.workdir" path="@{workdir}" />
                 <sysproperty key="hdfview.propfile" path="@{propfile}" />
-                <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+                <env key="${platform.hdf.lib}" path="${release.dir}/bin${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
 
                 <test name="uitest.${test}" todir="${report.dir}" outfile="TEST-uitest.${test}">
                   <formatter type="xml" />
@@ -1182,6 +1183,7 @@
                 <include name="hdf_java.dll" />
             </fileset>
             <fileset dir="${hdf.lib.dir}/../bin">
+                <include name="hdf_java.dll" />
                 <include name="hdf.dll"/>
                 <include name="mfhdf.dll"/>
                 <include name="xdr.dll"/>
@@ -1191,6 +1193,7 @@
                 <include name="hdf5_java.dll" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}/../bin">
+                <include name="hdf5_java.dll" />
                 <include name="hdf5.dll"/>
             </fileset>
         </copy>
@@ -1657,7 +1660,7 @@
         <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" readonly="false" />
         <echo message="xxxx Sign the windows binary xxxx"/>
         <!-- Sign the generated exe -->
-        <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
+        <exec executable="${env.SIGNTOOLDIR}\signtool.exe" failifexecutionfails="false">
             <arg value="sign" />
             <arg value="/v" />
             <arg value="/debug" />

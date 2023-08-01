@@ -96,7 +96,7 @@ jobs:
         repo: 'HDFGroup/hdf5'
         #version: 'tags/1.14.2'
         #file: 'hdf5-1_14_2-ubuntu-2204.tar.gz'
-        version: 'tags/snapshot'
+        version: 'tags/snapshot-1.14'
         file: '${{ needs.get-base-names.outputs.hdf5-name }}-ubuntu-2204.tar.gz'
 
     - name: List files for the space (Linux)
@@ -141,6 +141,130 @@ jobs:
       with:
             name: tgz-ubuntu-2204-binary
             path: ${{ github.workspace }}/build/dist/HDFView-99.99.99-Linux-x86_64.tar.gz
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+    - name: Test with Ant
+      env:
+        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
+        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
+      run: ant -noinput -buildfile build.xml junit 
+
+  build-win:
+    runs-on: windows-latest
+    needs: get-base-names
+    name: "Windows MSVC"
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 19
+      uses: actions/setup-java@v3
+      with:
+        java-version: '19'
+        distribution: 'temurin'
+
+    - name: Get hdf4 release
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'HDFGroup/hdf4'
+        #version: 'tags/hdf-4_2_16-2'
+        #file: 'hdf-4_2_16-2-win_vs2022.zip'
+        version: 'tags/snapshot'
+        file: '${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip'
+
+    - name: Uncompress gh binary (Win)
+      run: 7z x ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip
+
+    - name: Uncompress hdf4 binary (Win)
+      working-directory: ${{ github.workspace }}/hdf4
+      run: 7z x HDF-*-win64.zip
+      shell: bash
+
+    - name: List files for the space (Win)
+      run: |
+            ls -l ${{ github.workspace }}/hdf4
+            ls ${{ runner.workspace }}/hdfview
+
+    - name: create hdf4 location (Win)
+      working-directory: ${{ github.workspace }}/hdf4
+      run: |
+        New-Item -Path "${{ github.workspace }}/HDF_Group/HDF" -ItemType Directory
+        Copy-Item -Path "${{ github.workspace }}/hdf4/HDF*/*" -Destination "${{ github.workspace }}/HDF_Group/HDF" -Recurse
+      shell: pwsh
+
+    - name: List files for the space (Win)
+      run: ls -l ${{ github.workspace }}/HDF_Group/HDF
+
+    - name: set hdflib name
+      id: set-hdflib-name
+      run: |
+        HDFDIR="${{ github.workspace }}/HDF_Group/HDF"
+        echo "HDFLIB_ENV=$HDFDIR" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Get hdf5 release
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'HDFGroup/hdf5'
+        #version: 'tags/1.14.2'
+        #file: 'hdf5-1_14_2-win_vs2022.zip'
+        version: 'tags/snapshot-1.14'
+        file: '${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip'
+
+    - name: Uncompress gh binary (Win)
+      run: 7z x ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip
+
+    - name: Uncompress hdf5 binary (Win)
+      working-directory: ${{ github.workspace }}/hdf5
+      run: 7z x HDF5-*-win64.zip
+      shell: bash
+
+    - name: List files for the space (Win)
+      run: |
+            ls -l ${{ github.workspace }}/hdf5
+            ls ${{ runner.workspace }}/hdfview
+
+    - name: create hdf5 location (Win)
+      working-directory: ${{ github.workspace }}/hdf5
+      run: |
+        New-Item -Path "${{ github.workspace }}/HDF_Group/HDF5" -ItemType Directory
+        Copy-Item -Path "${{ github.workspace }}/hdf5/HDF*/*" -Destination "${{ github.workspace }}/HDF_Group/HDF5" -Recurse
+      shell: pwsh
+
+    - name: List files for the space (Win)
+      run: ls -l ${{ github.workspace }}/HDF_Group/HDF5
+
+    - name: set hdf5lib name
+      id: set-hdf5lib-name
+      run: |
+        HDF5DIR="${{ github.workspace }}/HDF_Group/HDF5"
+        echo "HDF5LIB_ENV=$HDF5DIR" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: List files for the binaries (Win)
+      run: |
+            ls -l ${{ github.workspace }}/HDF_Group/HDF
+            ls -l ${{ github.workspace }}/HDF_Group/HDF5
+
+    - name: Build with Ant
+      env:
+        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
+        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
+      run: ant -noinput -buildfile build.xml binaryPackage
+      shell: bash
+
+    - name: List files for the space (Windows)
+      run: |
+            Get-ChildItem -Path ${{ github.workspace }}
+            Get-ChildItem -Path ${{ github.workspace }}/build
+      shell: pwsh
+
+    # Save files created by ctest script
+    - name: Save published binary (Win)
+      uses: actions/upload-artifact@v3
+      with:
+            name: zip-win-2022-binary
+            path: ${{ github.workspace }}/build/dist/HDFView-3.3.99-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
