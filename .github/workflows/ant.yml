@@ -200,6 +200,7 @@ jobs:
       run: |
         HDFDIR=${{ github.workspace }}/HDF_Group/HDF
         echo "HDFLIB_ENV=$HDFDIR" >> $GITHUB_OUTPUT
+      shell: bash
 
     - name: Get hdf5 release
       uses: dsaltares/fetch-gh-release-asset@master
@@ -238,6 +239,7 @@ jobs:
       run: |
         HDF5DIR=${{ github.workspace }}/HDF_Group/HDF5
         echo "HDF5LIB_ENV=$HDF5DIR" >> $GITHUB_OUTPUT
+      shell: bash
 
     - name: List files for the binaries (Win)
       run: |
@@ -249,11 +251,13 @@ jobs:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml binaryPackage
+      shell: bash
 
     - name: List files in the space (Win)
       run: |
             ls ${{ github.workspace }}
             ls -l ${{ runner.workspace }}
+      shell: bash
 
     # Save files created by ctest script
     - name: Save published binary (Win)
