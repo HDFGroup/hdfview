@@ -253,11 +253,11 @@ jobs:
       run: ant -noinput -buildfile build.xml binaryPackage
       shell: bash
 
-    - name: List files in the space (Win)
+    - name: List files for the space (Windows)
       run: |
-            ls ${{ github.workspace }}
-            ls -l ${{ runner.workspace }}
-      shell: bash
+            Get-ChildItem -Path ${{ github.workspace }}
+            Get-ChildItem -Path ${{ runner.workspace }}
+      shell: pwsh
 
     # Save files created by ctest script
     - name: Save published binary (Win)
