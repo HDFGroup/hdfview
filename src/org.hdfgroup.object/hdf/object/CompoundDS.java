@@ -502,6 +502,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      */
     protected Object convertByteMember(final Datatype dtype, byte[] byteData) {
         Object theObj = null;
+        log.trace("convertByteMember(): byteData={} start", byteData);
 
         if (dtype.getDatatypeSize() == 1) {
             /*
@@ -549,6 +550,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
         }
         else if (dtype.isArray()) {
             Datatype baseType = dtype.getDatatypeBase();
+            log.trace("convertByteMember(): converting byte array to baseType array");
 
             /*
              * Retrieve the real base datatype in the case of ARRAY of ARRAY datatypes.
@@ -602,12 +604,14 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
             }
         }
         else if (dtype.isCompound()) {
+            log.debug("convertByteMember(): compound datatype class");
             /*
              * TODO: still valid after reading change?
              */
             theObj = convertCompoundByteMembers(dtype, byteData);
         }
         else {
+            log.debug("convertByteMember(): byteData={}", byteData);
             theObj = byteData;
         }
 

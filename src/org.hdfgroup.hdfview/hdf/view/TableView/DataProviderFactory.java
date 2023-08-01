@@ -1654,6 +1654,7 @@ public class DataProviderFactory
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
                 byte[] rElements = null;
 
+                log.trace("getDataValue(dataBuf={}): start", dataBuf);
                 if (dataBuf instanceof ArrayList)
                     rElements = (byte[]) ((ArrayList) dataBuf).get(bufIndex);
                 else
@@ -1687,6 +1688,7 @@ public class DataProviderFactory
             else
                 rElements = (byte[]) obj;
 
+            log.trace("getDataValue(rElements:{})", rElements);
             try {
                 if (h5dtype.isStdRef())
                     theValue = populateReference(rElements, index);
@@ -1710,7 +1712,7 @@ public class DataProviderFactory
         private String populateReference(Object byteBuf, int startIndex) {
             byte[] rElements = new byte[(int)typeSize];
             try {
-                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+                System.arraycopy(byteBuf, startIndex * (int) typeSize, rElements, 0, (int) typeSize);
             }
             catch (Exception err) {
                 log.trace("populateReference(): arraycopy failure: ", err);
@@ -1729,7 +1731,7 @@ public class DataProviderFactory
             long fid = ((HObject)dataFormatReference).getFileFormat().getFID();
             byte[] rElements = new byte[(int)typeSize];
             try {
-                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+                System.arraycopy(byteBuf, startIndex * (int) typeSize, rElements, 0, (int) typeSize);
             }
             catch (Exception err) {
                 log.trace("populateReferenceRegion(): arraycopy failure: ", err);
@@ -1749,7 +1751,7 @@ public class DataProviderFactory
             log.trace("populateReferenceObject byteBuf={}", byteBuf);
             byte[] rElements = new byte[(int)typeSize];
             try {
-                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+                System.arraycopy(byteBuf, startIndex * (int) typeSize, rElements, 0, (int) typeSize);
             }
             catch (Exception err) {
                 log.trace("populateReferenceRegion(): arraycopy failure: ", err);

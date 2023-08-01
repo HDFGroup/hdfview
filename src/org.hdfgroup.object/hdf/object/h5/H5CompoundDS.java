@@ -812,6 +812,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
     @Override
     protected Object convertByteMember(final Datatype dtype, byte[] byteData) {
         Object theObj = null;
+        log.debug("convertByteMember(): dtype={} byteData={}", dtype, byteData);
 
         if (dtype.isFloat() && dtype.getDatatypeSize() == 16)
             theObj = ((H5Datatype)dtype).byteToBigDecimal(byteData, 0);
