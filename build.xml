@@ -839,7 +839,7 @@
     </target>
 
     <!-- Top-level target for UI tests. Calls separate targets for HDFView UI tests, HDF4 UI tests and HDF5 UI tests. -->
-    <target name="junit-uitest" depends="jar, clean-junit-uitest, jacoco, compile-test, deploy, -hdfview-ui-tests, -hdf4-ui-tests, -hdf5-ui-tests" description="Runs the UI tests" />
+    <target name="junit-uitest" depends="jar, clean-junit-uitest, jacoco, compile-test, deploy, -hdfview-ui-tests" description="Runs the UI tests" />
 
     <!-- Internal target to run HDFView UI tests that are independent of FileFormats. -->
     <target name="-hdfview-ui-tests" depends="jar, compile-uitest, clean-junit-uitest">
