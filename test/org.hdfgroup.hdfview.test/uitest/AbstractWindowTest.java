@@ -84,7 +84,7 @@ public abstract class AbstractWindowTest {
 
     private static final CyclicBarrier swtBarrier = new CyclicBarrier(2);
 
-    private static int TEST_DELAY = 0;
+    private static int TEST_DELAY = 10;
 
     private static int open_files = 0;
 
@@ -370,6 +370,7 @@ public abstract class AbstractWindowTest {
             throw new IllegalArgumentException("SWTBotTree parameter is null");
         if (filename == null)
             throw new IllegalArgumentException("file name parameter is null");
+        bot.sleep(500);
 
         String expectedRowCountStr = String.valueOf(expectedRowCount);
         int visibleRowCount = tree.visibleRowCount();
@@ -610,6 +611,7 @@ public abstract class AbstractWindowTest {
                 lastVisibleCellPos = table.scrollViewport(lastVisibleCellPos, rowIndex, colIndex);
                 log.trace("lastVisibleCellPos: row is {}, col is {}", lastVisibleCellPos.row, lastVisibleCellPos.column);
                 table.click(lastVisibleCellPos.row, lastVisibleCellPos.column);
+                // bot.sleep(100);
                 String val = bot.shells()[1].bot().text(textboxIndex).getText();
 
                 // Disabled until Data conversion can be figured out
