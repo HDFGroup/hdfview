@@ -611,7 +611,7 @@ public abstract class AbstractWindowTest {
                 lastVisibleCellPos = table.scrollViewport(lastVisibleCellPos, rowIndex, colIndex);
                 log.trace("lastVisibleCellPos: row is {}, col is {}", lastVisibleCellPos.row, lastVisibleCellPos.column);
                 table.click(lastVisibleCellPos.row, lastVisibleCellPos.column);
-                // bot.sleep(100);
+                bot.sleep(50);
                 String val = bot.shells()[1].bot().text(textboxIndex).getText();
 
                 // Disabled until Data conversion can be figured out
