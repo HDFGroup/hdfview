@@ -1644,6 +1644,7 @@ public class DataProviderFactory
 
             h5dtype = (H5Datatype)dtype;
             typeSize = h5dtype.getDatatypeSize();
+            log.trace("typeSize={}=", typeSize);
         }
 
         @Override
@@ -1661,11 +1662,11 @@ public class DataProviderFactory
                     rElements = (byte[]) dataBuf;
 
                 if (h5dtype.isStdRef())
-                    theValue = populateReference(rElements, bufIndex);
+                    theValue = populateReference(rElements, 0);
                 else if (h5dtype.isRegRef())
-                    theValue = populateReferenceRegion(rElements, bufIndex);
+                    theValue = populateReferenceRegion(rElements, 0);
                 else if (h5dtype.isRefObj())
-                    theValue = populateReferenceObject(rElements, bufIndex);
+                    theValue = populateReferenceObject(rElements, 0);
                 else
                     theValue = super.getDataValue(columnIndex, rowIndex);
             }
@@ -1691,11 +1692,11 @@ public class DataProviderFactory
             log.trace("getDataValue(rElements:{})", rElements);
             try {
                 if (h5dtype.isStdRef())
-                    theValue = populateReference(rElements, index);
+                    theValue = populateReference(rElements, 0);
                 else if (h5dtype.isRegRef())
-                    theValue = populateReferenceRegion(rElements, index);
+                    theValue = populateReferenceRegion(rElements, 0);
                 else if (h5dtype.isRefObj())
-                    theValue = populateReferenceObject(rElements, index);
+                    theValue = populateReferenceObject(rElements, 0);
                 else
                     theValue = super.getDataValue(obj, index);
             }
