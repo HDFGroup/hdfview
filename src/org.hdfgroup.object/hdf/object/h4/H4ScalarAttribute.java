@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -33,14 +33,13 @@ import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 
 /**
- * An attribute is a (name, value) pair of metadata attached to a primary data object such as a
- * dataset, group or named datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group or named
+ * datatype.
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * For more details on attributes, <a href=
- * "https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5
- * User's Guide</a>
+ * For more details on attributes, read <a href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5
+ * Attributes in HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
  *
@@ -66,8 +65,7 @@ import hdf.object.ScalarDS;
  * </pre>
  *
  *
- * For an atomic datatype, the value of an H4ScalarAttribute will be a 1D array of integers, floats and
- * strings.
+ * For an atomic datatype, the value of an H4ScalarAttribute will be a 1D array of integers, floats and strings.
  *
  * @see hdf.object.Datatype
  *
@@ -474,8 +472,15 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
     }
 
     /**
-     * @return true if the data is a single scalar point; otherwise, returns
-     *         false.
+     * @return true if the dataspace is a NULL; otherwise, returns false.
+     */
+    @Override
+    public boolean isAttributeNULL() {
+        return isNULL();
+    }
+
+    /**
+     * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isAttributeScalar() {
         return isScalar();

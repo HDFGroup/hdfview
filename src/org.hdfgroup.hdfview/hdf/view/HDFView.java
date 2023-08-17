@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -94,18 +94,16 @@ import hdf.view.dialog.UserOptionsViewModulesPage;
 
 
 /**
- * HDFView is the main class of this HDF visual tool. It is used to layout the
- * graphical components of the hdfview. The major GUI components of the HDFView
- * include Menubar, Toolbar, TreeView, ContentView, and MessageArea.
+ * HDFView is the main class of this HDF visual tool. It is used to layout the graphical components of the hdfview. The
+ * major GUI components of the HDFView include Menubar, Toolbar, TreeView, ContentView, and MessageArea.
  *
- * The HDFView is designed in such a way that it does not have direct access to
- * the HDF library. All the HDF library access is done through HDF objects.
- * Therefore, the HDFView package depends on the object package but not the
- * library package. The source code of the view package (hdf.view) should
- * be compiled with the library package (hdf.hdflib and hdf.hdf5lib).
+ * The HDFView is designed in such a way that it does not have direct access to the HDF library. All the HDF library
+ * access is done through HDF objects. Therefore, the HDFView package depends on the object package but not the library
+ * package. The source code of the view package (hdf.view) should be compiled with the library package (hdf.hdflib and
+ * hdf.hdf5lib).
  *
  * @author Jordan T. Henderson
- * @version 2.4 //2015
+ * @version 2.4 2015
  */
 public class HDFView implements DataViewManager
 {
@@ -457,10 +455,8 @@ public class HDFView implements DataViewManager
      * </pre>
      */
     private Shell createMainWindow() {
-        Image hdfImage = ViewProperties.getLargeHdfIcon();
         // Create a new display window
         final Shell shell = new Shell(display);
-        shell.setImage(hdfImage);
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setFont(currentFont);
         shell.setText("HDFView " + HDFVIEW_VERSION);
@@ -2262,7 +2258,7 @@ public class HDFView implements DataViewManager
         private void createContents(final Shell shell) {
             shell.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(shell, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -2307,7 +2303,7 @@ public class HDFView implements DataViewManager
             dialog.setText("HDFView Java Version");
             dialog.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(dialog, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -2371,7 +2367,7 @@ public class HDFView implements DataViewManager
             dialog.setText("Supported File Formats");
             dialog.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(dialog, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -2442,7 +2438,7 @@ public class HDFView implements DataViewManager
             dialog.setText("About HDFView");
             dialog.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(dialog, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -2512,7 +2508,7 @@ public class HDFView implements DataViewManager
             shell.setText("Unregister a file format");
             shell.setLayout(new GridLayout(2, false));
 
-            Image hdfImage = ViewProperties.getLargeHdfIcon();
+            Image hdfImage = ViewProperties.getHDFViewIcon();
 
             Label imageLabel = new Label(shell, SWT.CENTER);
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -91,7 +91,10 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         text = new Text(datasetInfoGroup, SWT.SINGLE | SWT.BORDER);
         text.setEditable(false);
         text.setFont(curFont);
-        if (d.isScalar()) {
+        if (d.isNULL()) {
+            labelInfo = "NULL";
+        }
+        else if (d.isScalar()) {
             labelInfo = "Scalar";
         }
         else {
@@ -100,7 +103,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         text.setText(labelInfo);
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-        if (!d.isScalar()) {
+        if (!d.isScalar() && !d.isNULL()) {
             /* Dataset dimension size section */
             label = new Label(datasetInfoGroup, SWT.LEFT);
             label.setFont(curFont);
@@ -281,6 +284,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         Button showDataOptionButton = new Button(datasetInfoGroup, SWT.PUSH);
         showDataOptionButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, 2, 1));
         showDataOptionButton.setText("Show Data with Options");
+        showDataOptionButton.setEnabled(!d.isNULL());
         showDataOptionButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {

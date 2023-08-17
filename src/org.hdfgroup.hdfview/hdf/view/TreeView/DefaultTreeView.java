@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -328,13 +328,18 @@ public class DefaultTreeView implements TreeView {
                         tree.notifyListeners(SWT.Expand, expand);
                 }
                 else {
-                    try {
-                        loadDataThread = new LoadDataThread();
-                        loadDataThread.start();
+                    if ((selectedObject instanceof Dataset) && !((Dataset) selectedObject).isNULL()) {
+                        try {
+                            loadDataThread = new LoadDataThread();
+                            loadDataThread.start();
+                        }
+                        catch (Exception err) {
+                            shell.getDisplay().beep();
+                            Tools.showError(shell, "Select", err.getMessage());
+                        }
                     }
-                    catch (Exception err) {
-                        shell.getDisplay().beep();
-                        Tools.showError(shell, "Select", err.getMessage());
+                    else {
+                        Tools.showInformation(shell, "Open", "No data to display in an object with a NULL dataspace.");
                     }
                 }
             }
@@ -354,8 +359,14 @@ public class DefaultTreeView implements TreeView {
 
                 try {
                     if(!(selectedObject instanceof Group)) {
-                        loadDataThread = new LoadDataThread();
-                        loadDataThread.start();
+                        if ((selectedObject instanceof Dataset) && !((Dataset) selectedObject).isNULL()) {
+                            loadDataThread = new LoadDataThread();
+                            loadDataThread.start();
+                        }
+                        else {
+                            Tools.showInformation(shell, "Open",
+                                    "No data to display in an object with a NULL dataspace.");
+                        }
                     }
                     else {
                         boolean isExpanded = selectedItem.getExpanded();
@@ -577,8 +588,13 @@ public class DefaultTreeView implements TreeView {
                 isDefaultDisplay = true;
 
                 try {
-                    loadDataThread = new LoadDataThread();
-                    loadDataThread.start();
+                    if ((selectedObject instanceof Dataset) && !((Dataset) selectedObject).isNULL()) {
+                        loadDataThread = new LoadDataThread();
+                        loadDataThread.start();
+                    }
+                    else {
+                        Tools.showInformation(shell, "Open", "No data to display in an object with a NULL dataspace.");
+                    }
                 }
                 catch (Exception err) {
                     shell.getDisplay().beep();
@@ -595,8 +611,13 @@ public class DefaultTreeView implements TreeView {
                 isDefaultDisplay = false;
 
                 try {
-                    loadDataThread = new LoadDataThread();
-                    loadDataThread.start();
+                    if ((selectedObject instanceof Dataset) && !((Dataset) selectedObject).isNULL()) {
+                        loadDataThread = new LoadDataThread();
+                        loadDataThread.start();
+                    }
+                    else {
+                        Tools.showInformation(shell, "Open", "No data to display in an object with a NULL dataspace.");
+                    }
                 }
                 catch (Exception err) {
                     shell.getDisplay().beep();

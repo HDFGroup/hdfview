@@ -4,9 +4,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -1644,6 +1644,7 @@ public class DataProviderFactory
 
             h5dtype = (H5Datatype)dtype;
             typeSize = h5dtype.getDatatypeSize();
+            log.trace("typeSize={}=", typeSize);
         }
 
         @Override
@@ -1654,17 +1655,18 @@ public class DataProviderFactory
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
                 byte[] rElements = null;
 
+                log.trace("getDataValue(dataBuf={}): start", dataBuf);
                 if (dataBuf instanceof ArrayList)
                     rElements = (byte[]) ((ArrayList) dataBuf).get(bufIndex);
                 else
                     rElements = (byte[]) dataBuf;
 
                 if (h5dtype.isStdRef())
-                    theValue = populateReference(rElements, bufIndex);
+                    theValue = populateReference(rElements, 0);
                 else if (h5dtype.isRegRef())
-                    theValue = populateReferenceRegion(rElements, bufIndex);
+                    theValue = populateReferenceRegion(rElements, 0);
                 else if (h5dtype.isRefObj())
-                    theValue = populateReferenceObject(rElements, bufIndex);
+                    theValue = populateReferenceObject(rElements, 0);
                 else
                     theValue = super.getDataValue(columnIndex, rowIndex);
             }
@@ -1687,13 +1689,14 @@ public class DataProviderFactory
             else
                 rElements = (byte[]) obj;
 
+            log.trace("getDataValue(rElements:{})", rElements);
             try {
                 if (h5dtype.isStdRef())
-                    theValue = populateReference(rElements, index);
+                    theValue = populateReference(rElements, 0);
                 else if (h5dtype.isRegRef())
-                    theValue = populateReferenceRegion(rElements, index);
+                    theValue = populateReferenceRegion(rElements, 0);
                 else if (h5dtype.isRefObj())
-                    theValue = populateReferenceObject(rElements, index);
+                    theValue = populateReferenceObject(rElements, 0);
                 else
                     theValue = super.getDataValue(obj, index);
             }
@@ -1710,7 +1713,7 @@ public class DataProviderFactory
         private String populateReference(Object byteBuf, int startIndex) {
             byte[] rElements = new byte[(int)typeSize];
             try {
-                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+                System.arraycopy(byteBuf, startIndex * (int) typeSize, rElements, 0, (int) typeSize);
             }
             catch (Exception err) {
                 log.trace("populateReference(): arraycopy failure: ", err);
@@ -1729,7 +1732,7 @@ public class DataProviderFactory
             long fid = ((HObject)dataFormatReference).getFileFormat().getFID();
             byte[] rElements = new byte[(int)typeSize];
             try {
-                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+                System.arraycopy(byteBuf, startIndex * (int) typeSize, rElements, 0, (int) typeSize);
             }
             catch (Exception err) {
                 log.trace("populateReferenceRegion(): arraycopy failure: ", err);
@@ -1749,7 +1752,7 @@ public class DataProviderFactory
             log.trace("populateReferenceObject byteBuf={}", byteBuf);
             byte[] rElements = new byte[(int)typeSize];
             try {
-                System.arraycopy(byteBuf, 0, rElements, 0, (int)typeSize);
+                System.arraycopy(byteBuf, startIndex * (int) typeSize, rElements, 0, (int) typeSize);
             }
             catch (Exception err) {
                 log.trace("populateReferenceRegion(): arraycopy failure: ", err);

@@ -1,0 +1,288 @@
+   <?php
+   $page_title = "HDFView User's Guide - Getting Started";
+   include ("../../../../links.php");
+   include ("../../../../includes/header.html");
+   ?>
+   <link href="edit.css" rel="stylesheet" type="text/css" />
+<p>
+   <a href="index.html">[Index]</a>
+   <a href="ug01introduction.html">[1]</a>
+   <a href="ug02start.html">[2]</a>
+   <a href="ug03objects.html">[3]</a>
+   <a href="ug04treeview.html">[4]</a>
+   <a href="ug05spreadsheet.html">[5]</a>
+   <a href="ug06imageview.html">[6]</a>
+   <a href="ug07useroptions.html">[7]</a>   </p>
+
+   <h1><fieldset>Chapter 2: Getting Started</fieldset></h1>
+   <p>
+   This chapter assumes that you have installed HDFView and, along with &ldquo;Chapter 3:
+    The HDF Object Model,&rdquo; is designed to help you get to the point where you are
+    actually looking at HDF datasets.</p>
+
+   <ul class="ul">
+   <li><a href="ug02start.html#ug02main">2.1 The Main Window</a></li>
+   <li><a href="ug02start.html#ug02load">2.2 Opening a File</a></li>
+   <li><a href="ug02start.html#ug02tree">2.3 Tree View of File Hierarchy</a></li>
+   <li><a href="ug02start.html#ug02message">2.4 Status Information</a></li>
+   <li><a href="ug02start.html#ug02property">2.5 Viewing HDF Metadata</a></li>
+   <li><a href="ug02start.html#ug02option">2.6 Command-line options</a></li>
+   </ul>
+
+   <hr />
+
+   <h2>
+   <a name="ug02main"></a>2.1 The Main Window</h2>
+   <p>
+   When you first open HDFView, the HDFView window appears with an empty tree
+   and metadata panel. After you open an HDF file, the structure of the file is displayed
+   in the Tree Panel. The metadata content of a data object is displayed in the metadata panel
+   by selecting an object.</p>
+
+   <p>
+   The main window consists of five components: <b>Menu bar, Tool bar, File bar,
+   Tree panel, Metadata Panel, Info panel.</b></p>
+
+   <center><p>
+   <img src="images/hdfviewfile.png" />
+   <br /><b>The main window with a file</b></p></center>
+
+   <ul class="ul">
+   <li>
+   <b><i>Menu bar</i></b><br />
+   The Menu bar is where you choose menu commands: &ldquo;File&rdquo;,
+   &ldquo;Window&rdquo;, &ldquo;Tools&rdquo;, and &ldquo;Help&rdquo;.</li>
+
+   <li>
+   <b><i>Tool bar</i></b><br />
+   The Tool bar is located under the menu bar and displays buttons with icons that are shortcuts for commonly performed
+   tasks, such as opening and closing a file, zooming in or out of an image, or
+   flipping forward and backward through data pages.</li>
+
+   <li>
+   <b><i>File bar</i></b><br />
+   The File bar consists of a Recent Files button which allows you to select among a
+   list of files that you have recently opened. In addition to this is a File/URL text
+   field in which you enter information that leads or points to a file that you want to open.
+   Valid file names include an absolute file name, a path name, and a URL to a remote file,
+   such as /samples/hdf5_test.h5.<br />
+   Using a path name and selecting multiple files will open all the selected files.<br />
+   Valid remote file prefix:<br />
+   <ul class="ul">
+   <li>&ldquo;http://&rdquo;</li>
+   <li>&ldquo;https://&rdquo;</li>
+   <li>&ldquo;ftp://&rdquo;</li>
+   </ul>
+   </li>
+
+   <li>
+   <b><i>Tree panel</i></b><br />
+   The Tree panel is the left panel in the HDFView window. It displays the group
+   structure of an HDF file as a tree of &ldquo;folders.&rdquo; Other objects,
+   such as datasets and images, are displayed as leaf objects in the tree.</li>
+
+   <li>
+   <b><i>Metadata panel</i></b><br />
+   The metadata panel is the right panel in the HDFView window where the metadata content of objects are displayed in
+   a tabbed view. The &ldquo;Object Attribute Info&rdquo; tab displays a list of attributes attached to the selected
+   object. The attribute name, type, size and a short sample of data is displayed. Double-clicking on an attribute
+   line will open a Data window for the selected attribute. There is an &ldquo;Add Attribute&rdquo; button to create a new attribute attached to
+   the currently selected object in the treeview. And a &ldquo;Delete Attribute&rdquo; button to remove the selected attribute.<br />
+   The &ldquo;General Object Info&rdquo; tab displays various object information such as names of objects, member names and types,
+   or paths, type and version bounds for file types.
+   </li>
+
+   <li>
+   <b><i>Info panel</i></b><br />
+   The Info panel is the bottom panel that spans the width of the HDFView window.
+   It displays status information. A status
+   message includes file or data information, warning or error messages and the
+   status of data processing</li>
+   </ul>
+
+   <h2>Menu bar</h2>
+   <p>
+   The Menu bar is at the top of the HDFView window. You can select a menu command
+   from menu items or press key combinations from the keyboard to invoke the menu
+   item's action without navigating through the menu hierarchy.</p>
+
+   <p>
+   <i><b>File menu</b></i><br />
+   The File menu contains commands to open and close files, create and save files, and
+   exit HDFView.</p>
+
+   <center><p>
+   <img src="images/filemenu.png" />
+   <br /><b>File menu</b></p></center>
+
+
+   <i><b>Window menu</b></i><br />
+   The Window menu displays a list of currently open data windows along with the close,
+   tile, and cascade window commands. You can bring a data window to the front by choosing
+   the data name from the Window menu. The &ldquo;Cascade&rdquo; and
+   &ldquo;Tile&rdquo; commands
+   cascade or tile all open windows. The &ldquo;Close&rdquo; command closes the
+   <em>active</em> data window. The &ldquo;Close All&rdquo; command closes
+   all open windows.
+   All open data windows are listed at the bottom of the Window menu. Select
+   one of the items on the list to bring that window to the front.
+   <center><p>
+   <img src="images/filewindow.png" />
+   <br /><b>Window menu</b></p></center>
+
+
+   <p><i><b>Tools menu</b></i><br />
+   The Tools menu contains a list of commands to launch tools such as
+   image conversion and user options. The &ldquo;User Options&rdquo;
+   command launches a dialog box that allows you to change user preferences:
+   the path of the User's Guide, font size, delimiter and more. For more information,
+   see <a href="ug07useroptions.html">User Options</a>.</p>
+   <center><p>
+   <img src="images/filetools.png" />
+   <br /><b>Tools menu</b></p></center>
+
+
+   <i><b>Help menu</b></i><br />
+   The Help menu displays the User's Guide, the version of the HDF4, HDF5 and Java
+   libraries, currently supported file formats and the About box.
+
+   <center><p>
+   <img src="images/filehelp.png" />
+   <br /><b>Help menu</b></p></center>
+
+   <h2>
+   <a name="ug02load"></a>2.2 Opening a File</h2>
+
+   <p>Select the &ldquo;Open&rdquo; command from the file menu or click the
+   &ldquo;Open&rdquo; icon in the tool bar to invoke the local file manager,
+   and select a file to open from the local file manager. Selecting
+   &ldquo;Open As Read-Only&rdquo; opens a file with read-only permission,
+   which means that editing functions are disabled and changes are not allowed.  Selecting
+   &ldquo;Open As Read/Write&rdquo; opens a file with read and write permission, hdf5 will
+   modify the file even if no changes are saved.<br />Note that HDFView defaults to
+   opening a file as read-only unless the default is changed in the
+   &ldquo;User Options/General Settings&rdquo; Default File Access Mode section (see
+   <a href="ug07useroptions.html#ug07fileaccess">File Access</a>).<br />
+   By default, HDFView will only show files that have a file extension matching those
+   specified in the &ldquo;User Options/HDF Settings&rdquo; File Extension list (see
+   <a href="ug07useroptions.html#ug07extension">File Extensions</a>), however, the user
+   can click on the drop-down box in the open file dialog box and select "All Files"
+   in order to show all files if needed.
+   </p>
+<center><p>
+   <img src="images/filemanager.png" />
+   <br /><b>Local file manager</b></p></center>
+
+   <h2>
+   <a name="ug02tree"></a>2.3 Tree View of File Hierarchy</h2>
+   <p>
+   An HDF file contains one or more objects, optionally grouped in a hierarchy.
+   For general information about the structure and contents of HDF files,
+   see the HDF documentation at
+   <a href="https://portal.hdfgroup.org/display/HDF5/HDF5"> HDF5 Documentation</a> and
+   <a href="https://portal.hdfgroup.org/display/HDF4/HDF4"> HDF4 Documentation</a>.</p>
+
+   <p>
+   The structure of the file is displayed in the Tree panel, which is the left
+   panel in the HDFView window. Data objects are represented as icons, and
+   groups are represented by folders. An HDF file may contain groups,
+   datasets (arrays), committed datatypes, and links.</p>
+
+<p>The hierarchy of the file can be navigated by selecting folders to
+   &ldquo;open&rdquo;
+   a group, which displays the objects contained by the group. When an object
+   is selected (by double clicking the object or by right clicking the object and
+   selecting "Open" or "Open As" from the popup menu), the data is displayed
+   appropriately in a window (usually a table or spreadsheet type.).</p>
+
+   <p>
+   You can open multiple files at one time. Files are listed as root objects
+   in the tree. The following figure illustrates that
+   an HDF5 file, hdf5_test.h5, and an HDF4 file, annras.hdf, are currently open. </p>
+
+<center>
+   <p><img src="images/treeview.png" />
+   <br /><b>Tree view</b></p></center>
+
+   <p>
+   You can also search for data objects within a file by right-clicking on the file
+   and selecting "Find" from the Context menu. Type in the name of a data object to look
+   for and HDFView will highlight the first occurrence of the object within the file. The
+   wildcard '*', which specifies that any number of characters can come after the text before
+   the '*' character, can be used to broaden your search. As an example, searching for 'dataset*'
+   will find any objects whose name is a variation on 'dataset', i.e. 'dataset',
+   'dataset_int', 'dataset75', etc.
+
+   <h2>
+
+   <a name="ug02message"></a>2.4 Viewing Status Information</h2>
+   <p>
+   Short status information and feedback messages are displayed in the information
+   panel. Such information includes error messages and feedback from user's
+   actions.</p>
+
+<h2>
+   <a name="ug02property"></a>2.5 Viewing HDF Metadata</h2>
+   <p>
+   To see the metadata of a data object, left-click the data object. Then, choose the
+   &ldquo;Object Attribute Info&rdquo; tab to display a list of attributes attached to the selected
+   object. The &ldquo;General Object Info&rdquo; tab displays various object information such as names of objects, member names and types,
+   or paths, type and version bounds for file types.</p>
+   <p>
+   To view a user block in text, left-click the file node (the root group)
+   and select the &ldquo;General Object Info&rdquo; tab. Click the &ldquo;Show User Block&rdquo; button
+   to show the user block information in text.</p>
+
+<center>
+   <p><img src="images/userblock.png" />
+   <br />
+   <b>User block in text</b></p>
+</center>
+
+   <h2>
+
+   <a name="ug02option"></a>2.6 Command-line Options</h2>
+   <p>
+   The following command line options are available to HDFView:
+
+   <br /><br />
+
+   <code>-root &nbsp;path</code><br />
+   &nbsp;&nbsp;&nbsp;&nbsp; specify the working directory to start HDFView in
+
+   <br /><br />
+
+   <code>-g, -geometry &nbsp;WIDTHxHEIGHT+XOFF+YOFF</code><br />
+   &nbsp;&nbsp;&nbsp;&nbsp; specify the dimensions and location of the HDFView window
+
+   <br /><br />
+
+   <code>-java.version</code><br />
+   &nbsp;&nbsp;&nbsp;&nbsp; display java version information
+
+   <br /><br />
+
+   <code>&lt;filename&gt;</code><br />
+   &nbsp;&nbsp;&nbsp;&nbsp; open the specified file/s upon start
+   </p>
+
+   <!-- BEGIN OF FOOTER INFO -->
+   <hr noshade size=1 />
+
+   <p>
+   <a href="index.html">[Index]</a>
+   <a href="ug01introduction.html">[1]</a>
+   <a href="ug02start.html">[2]</a>
+   <a href="ug03objects.html">[3]</a>
+   <a href="ug04treeview.html">[4]</a>
+   <a href="ug05spreadsheet.html">[5]</a>
+   <a href="ug06imageview.html">[6]</a>
+   <a href="ug07useroptions.html">[7]</a>   </p>
+   <p>
+   <!-- END OF FOOTER INFO -->
+<hr />
+
+ <?php
+    include ("../../../../includes/footer.html");
+ ?>
+

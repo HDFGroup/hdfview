@@ -4,6 +4,7 @@
     xmlns:fx="javafx:com.sun.javafx.tools.ant"
     xmlns:sonar="antlib:org.sonar.ant"
     xmlns:jacoco="antlib:org.jacoco.ant"
+	xmlns:doxygen="antlib:org.doxygen.tools"
     xmlns:if="ant:if"
     xmlns:unless="ant:unless">
     <property environment="env" />
@@ -21,6 +22,7 @@
     <!-- MAC notary: -->
     <property name="notarize.account" value="${env.NOTARY_USER}" />
     <property name="notarize.keychain_key" value="${env.NOTARY_KEY}" />
+    <property name="notarize.altool" value="-altool" />
 
     <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
     <loadfile property="app.version" srcFile="${basedir}/VERSION">
@@ -65,11 +67,6 @@
     <property name="examples.path" value="examples/**"/>
     <property name="test.path" value="test/**"/>
     <property name="examples.test.path" value="${examples.path} ${test.path}"/>
-
-    <!-- Old style java version -->
-    <condition property="version1.8">
-      <equals arg1="1.8" arg2="${ant.java.version}"/>
-    </condition>
 
     <loadfile property="hdf4.version" srcFile="${hdf4.settings.version}" failonerror="false">
         <filterchain>
@@ -489,7 +486,7 @@
         <os family="mac" />
     </condition>
 
-    <target name="rundebug" depends="jar" description="Runs the application with remote debugger">
+    <target name="rundebug" depends="deploy,jar" description="Runs the application with remote debugger">
         <mkdir dir="${jar.dir}/lib/ext" />
         <java fork="true" classname="${main-class}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.run}" />
@@ -502,15 +499,15 @@
                 <path refid="hdfobject-jar" />
                 <path refid="application" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
             <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
             <!--  <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />  -->
             <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <env key="${platform.hdf.lib}" path="${release.dir}${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
         </java>
     </target>
 
-    <target name="run" depends="jar" description="Runs the application">
+    <target name="run" depends="deploy,jar" description="Runs the application">
         <mkdir dir="${jar.dir}/lib/ext" />
         <java fork="true" classname="${main-class}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.run}" />
@@ -522,11 +519,11 @@
                 <path refid="hdfobject-jar" />
                 <path refid="application" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
             <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
             <!--  <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />  -->
             <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <env key="${platform.hdf.lib}" path="${release.dir}${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
         </java>
     </target>
 
@@ -562,7 +559,7 @@
         <fileset dir="${exclasses.dir}" includes="**/*.class" excludes="**/*$* **/*.txt testfiles/**" />
     </target>
 
-    <target name="run-one-example" depends="compile-test" description="Runs one example">
+    <target name="run-one-example" depends="deploy,compile-test" description="Runs one example">
         <dirname property="exfile.dir" file="${build.exfile}" />
         <basename property="exdir.name" file="${exfile.dir}" />
         <basename property="exfile.name" file="${build.exfile}" suffix=".class" />
@@ -579,8 +576,8 @@
                 <pathelement location="${classes.dir}" />
                 <pathelement path="${exclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
+            <env key="${platform.hdf.lib}" path="${release.dir}${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
         </java>
     </target>
 
@@ -686,7 +683,7 @@
         <property name="agentvmparam" value="" />
     </target>
 
-    <target name="junit-debug-test" depends="objectjar,clean-junit-uitest,compile-test,jacoco">
+    <target name="junit-debug-test" depends="deploy,objectjar,clean-junit-uitest,compile-test,jacoco">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -699,15 +696,15 @@
                 <path refid="build-classpath" />
                 <pathelement location="${testclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
+            <env key="${platform.hdf.lib}" path="${release.dir}${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
             <test name="${build.object.test}" todir="${report.dir}" outfile="TEST-${build.object.test}">
                 <formatter type="plain" />
             </test>
         </junit>
     </target>
 
-    <target name="junit-single-test" depends="objectjar,clean-junit-uitest,compile-test,jacoco">
+    <target name="junit-single-test" depends="deploy,objectjar,clean-junit-uitest,compile-test,jacoco">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -718,15 +715,15 @@
                 <path refid="build-classpath" />
                 <pathelement location="${testclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
+            <env key="${platform.hdf.lib}" path="${release.dir}${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
             <test name="${build.object.test}" todir="${report.dir}" outfile="TEST-${build.object.test}">
                 <formatter type="plain" />
             </test>
         </junit>
     </target>
 
-    <target name="junit" depends="objectjar,clean-junit-uitest,compile-test,jacoco" description="Runs the Object Library tests">
+    <target name="junit" depends="deploy,objectjar,clean-junit-uitest,compile-test,jacoco" description="Runs the Object Library tests">
         <mkdir dir="${report.dir}" />
         <junit showoutput="yes" enabletestlistenerevents="true" fork="yes" printsummary="withOutAndErr" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
@@ -737,8 +734,8 @@
                 <path refid="build-classpath" />
                 <pathelement location="${testclasses.dir}" />
             </classpath>
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
-            <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+            <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
+            <env key="${platform.hdf.lib}" path="${release.dir}${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
 
             <formatter type="xml" />
             <formatter type="plain" />
@@ -815,11 +812,11 @@
                     <pathelement location="${uitestclasses.dir}" />
                 </classpath>
 
-                <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+                <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
                 <sysproperty key="hdfview.root" path="@{rootdir}" />
                 <sysproperty key="hdfview.workdir" path="@{workdir}" />
                 <sysproperty key="hdfview.propfile" path="@{propfile}" />
-                <env key="${platform.hdf.lib}" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}${path.separator}${platform.hdf.lib}" />
+                <env key="${platform.hdf.lib}" path="${release.dir}${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
 
                 <test name="uitest.${test}" todir="${report.dir}" outfile="TEST-uitest.${test}">
                   <formatter type="xml" />
@@ -842,7 +839,7 @@
     </target>
 
     <!-- Top-level target for UI tests. Calls separate targets for HDFView UI tests, HDF4 UI tests and HDF5 UI tests. -->
-    <target name="junit-uitest" depends="jar, clean-junit-uitest, jacoco, compile-test, -hdfview-ui-tests, -hdf4-ui-tests, -hdf5-ui-tests" description="Runs the UI tests" />
+    <target name="junit-uitest" depends="jar, clean-junit-uitest, jacoco, compile-test, deploy, -hdfview-ui-tests" description="Runs the UI tests" />
 
     <!-- Internal target to run HDFView UI tests that are independent of FileFormats. -->
     <target name="-hdfview-ui-tests" depends="jar, compile-uitest, clean-junit-uitest">
@@ -1186,6 +1183,7 @@
                 <include name="hdf_java.dll" />
             </fileset>
             <fileset dir="${hdf.lib.dir}/../bin">
+                <include name="hdf_java.dll" />
                 <include name="hdf.dll"/>
                 <include name="mfhdf.dll"/>
                 <include name="xdr.dll"/>
@@ -1195,6 +1193,7 @@
                 <include name="hdf5_java.dll" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}/../bin">
+                <include name="hdf5_java.dll" />
                 <include name="hdf5.dll"/>
             </fileset>
         </copy>
@@ -1548,7 +1547,7 @@
             <arg value="-Djava.library.path='$APPDIR'" />
             <!-- Application images -->
             <arg value="--icon" />
-            <arg value="${basedir}/package_files/hdf.png" />
+            <arg value="${basedir}/package_files/hdfview.png" />
             <arg value="--linux-menu-group" />
             <arg value="The HDF Group" />
             <!-- Runtime images -->
@@ -1615,7 +1614,7 @@
             <arg value="-Djava.library.path=$APPDIR" />
             <!-- Application images -->
             <arg value="--icon" />
-            <arg value="${basedir}/package_files/hdf.ico" />
+            <arg value="${basedir}/package_files/hdfview.ico" />
             <arg value="--temp" />
             <arg value="${build.dir}/temp" />
             <!-- Runtime images -->
@@ -1661,7 +1660,7 @@
         <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" readonly="false" />
         <echo message="xxxx Sign the windows binary xxxx"/>
         <!-- Sign the generated exe -->
-        <exec executable="${env.SIGNTOOLDIR}\signtool.exe">
+        <exec executable="${env.SIGNTOOLDIR}\signtool.exe" failifexecutionfails="false">
             <arg value="sign" />
             <arg value="/v" />
             <arg value="/debug" />
@@ -1755,9 +1754,9 @@
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
-        <antcall target="submit-notary" />
+        <antcall target="submit-notary${notarize.altool}" />
 
-        <antcall target="post-notary" />
+        <antcall target="post-notary${notarize.altool}" />
 
         <antcall target="staple-notary" />
 
@@ -1988,6 +1987,95 @@
           MAC NOTARY FOR JPACKAGE
           ================================================================= -->
 
+    <target name="submit-notary-altool">
+        <exec executable="/usr/bin/xcrun" failonerror="true">
+            <redirector output="retUUID.txt" alwayslog="true"/>
+            <arg value="altool"/>
+            <arg value="--notarize-app"/>
+            <arg value="--type"/>
+            <arg value="osx"/>
+            <arg value="--primary-bundle-id"/>
+            <arg value="app.${ant.project.name}-${app.version}"/>
+            <arg value="--username"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+            <arg value="--file"/>
+            <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
+        </exec>
+        <loadfile property="retUUID" srcfile="retUUID.txt">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <echo>notarize-app:${retUUID}</echo>
+    </target>
+
+    <target name="post-notary-altool">
+        <loadfile property="retUUID" srcfile="retUUID.txt">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <sleep minutes="10"/>
+        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
+            <redirector output="notary.txt" alwayslog="true"/>
+            <arg value="altool"/>
+            <arg value="--notarization-info"/>
+            <arg value="${retUUID}"/>
+            <arg value="--username"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+        </exec>
+        <condition property="isnotarized">
+            <resourcecontains resource="notary.txt" substring="success"/>
+        </condition>
+        <echo>notarize-info:${logInfo}</echo>
+    </target>
+
+        <target name="zip-submit-notary-altool">
+            <exec executable="/usr/bin/xcrun" failonerror="true">
+                <redirector output="retUUID.txt" alwayslog="true"/>
+                <arg value="altool"/>
+                <arg value="--notarize-app"/>
+                <arg value="--type"/>
+                <arg value="osx"/>
+                <arg value="--primary-bundle-id"/>
+                <arg value="app.${ant.project.name}-${app.version}"/>
+                <arg value="--username"/>
+                <arg value="${notarize.account}"/>
+                <arg value="--password"/>
+                <arg value="${notarize.keychain_key}"/>
+                <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+                <arg value="--file"/>
+                <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
+            </exec>
+            <loadfile property="retUUID" srcfile="retUUID.txt">
+                <filterchain>
+                    <tokenfilter>
+                        <containsregex
+                             pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                             replace="\1" />
+                    </tokenfilter>
+                    <striplinebreaks/>
+                </filterchain>
+            </loadfile>
+            <echo>notarize-app:${retUUID}</echo>
+        </target>
+
     <target name="submit-notary">
         <exec executable="/usr/bin/xcrun" failonerror="true">
             <redirector output="retUUID.txt" alwayslog="true"/>
@@ -2026,7 +2114,6 @@
                 <striplinebreaks/>
             </filterchain>
         </loadfile>
-        <!-- <sleep minutes="10"/> -->
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
             <arg value="notarytool"/>
@@ -2066,7 +2153,7 @@
         <target name="zip-submit-notary">
             <exec executable="/usr/bin/xcrun" failonerror="true">
                 <redirector output="retUUID.txt" alwayslog="true"/>
-                <arg value="anotarytool"/>
+                <arg value="notarytool"/>
                 <arg value="submit"/>
                 <arg value="--wait"/>
                 <arg value="--username"/>
@@ -2194,9 +2281,9 @@
             <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
-        <antcall target="zip-submit-notary" />
+        <antcall target="zip-submit-notary${notarize.altool}" />
 
-        <antcall target="post-notary" />
+        <antcall target="post-notary${notarize.altool}" />
 
         <antcall target="zip-staple-notary" />
 

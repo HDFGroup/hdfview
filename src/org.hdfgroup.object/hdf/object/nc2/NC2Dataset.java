@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -32,12 +32,11 @@ import ucar.ma2.DataType;
 import ucar.nc2.Variable;
 
 /**
- * NC2Dataset describes an multi-dimension array of HDF5 scalar or atomic data
- * types, such as byte, int, short, long, float, double and string, and
- * operations performed on the scalar dataset
+ * NC2Dataset describes an multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
+ * float, double and string, and operations performed on the scalar dataset
  *
- * The library predefines a modest number of datatypes. For details, read <a
- * href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/HDF5_Users_Guide/Datatypes/HDF5_Datatypes.htm">HDF5 Datatypes</a>
+ * The library predefines a modest number of datatypes. For details, read
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
