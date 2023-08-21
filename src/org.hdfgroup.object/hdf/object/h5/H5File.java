@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -620,8 +620,8 @@ public class H5File extends FileFormat
      * attributes to an HDF5 image dataset with a single call. The {@link #writeAttribute(HObject, Attribute, boolean)}
      * method may be used to write image attributes that are not handled by this method.
      *
-     * For more information about HDF5 image attributes, see the
-     * <a href="https://support.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html"> HDF5 Image and Palette Specification</a>.
+     * For more information about HDF5 image attributes, read <a href="https://hdfgroup.github.io/hdf5/_i_m_g.html">HDF5
+     * Image and Palette Specification</a>
      *
      * This method can be called to create attributes for 24-bit true color and indexed images. The
      * <code>selectionFlag</code> parameter controls whether this will be an indexed or true color image. If
@@ -643,18 +643,18 @@ public class H5File extends FileFormat
      * This method is in the H5File class rather than H5ScalarDS because images are typically thought of at the File
      * Format implementation level.
      *
-     * @param dataset
-     *            The image dataset the attributes are added to.
-     * @param selectionFlag
-     *            Selects the image type and, for 24-bit true color images, the interlace mode. Valid values are:
-     *            <ul>
-     *            <li>-1: Indexed Image. <li>ScalarDS.INTERLACE_PIXEL: True Color Image. The component values for a
-     *            pixel are stored contiguously. <li>ScalarDS.INTERLACE_PLANE: True Color Image. Each component is
-     *            stored in a separate plane.
-     *            </ul>
+     * @param dataset       The image dataset the attributes are added to.
+     * @param selectionFlag Selects the image type and, for 24-bit true color images, the interlace mode. Valid values
+     *                      are:
+     *                      <ul>
+     *                      <li>-1: Indexed Image.
+     *                      <li>ScalarDS.INTERLACE_PIXEL: True Color Image. The component values for a pixel are stored
+     *                      contiguously.
+     *                      <li>ScalarDS.INTERLACE_PLANE: True Color Image. Each component is stored in a separate
+     *                      plane.
+     *                      </ul>
      *
-     * @throws Exception
-     *             If there is a problem creating the attributes, or if the selectionFlag is invalid.
+     * @throws Exception If there is a problem creating the attributes, or if the selectionFlag is invalid.
      */
     private static final void createImageAttributes(Dataset dataset, int selectionFlag) throws Exception {
         log.trace("createImageAttributes(): start: dataset={}", dataset.toString());
@@ -2028,7 +2028,9 @@ public class H5File extends FileFormat
         if ((tid = attr.getAttributeDatatype().createNative()) >= 0) {
             log.trace("writeAttribute(): tid {} from toNative :{}", tid, attr.getAttributeDatatype().getDescription());
             try {
-                if (attr.isAttributeScalar())
+                if (attr.isAttributeNULL())
+                    sid = H5.H5Screate(HDF5Constants.H5S_NULL);
+                else if (attr.isAttributeScalar())
                     sid = H5.H5Screate(HDF5Constants.H5S_SCALAR);
                 else
                     sid = H5.H5Screate_simple(attr.getAttributeRank(), attr.getAttributeDims(), null);
@@ -2039,25 +2041,27 @@ public class H5File extends FileFormat
                     aid = H5.H5Acreate(objID, name, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 log.trace("writeAttribute(): aid {} opened/created", aid);
 
-                // update value of the attribute
-                Object attrValue;
-                try {
-                    attrValue = attr.getAttributeData();
-                }
-                catch (Exception ex) {
-                    attrValue = null;
-                    log.trace("writeAttribute(): getAttributeData() failure:", ex);
-                }
-
-                //log.trace("writeAttribute(): attrValue={}", attrValue);
-                if (attrValue != null) {
+                if (!attr.isAttributeNULL()) {
+                    // update value of the attribute
+                    Object attrValue;
                     try {
-                        ((H5Attribute)attr).AttributeCommonIO(aid, H5File.IO_TYPE.WRITE, attrValue);
+                        attrValue = attr.getAttributeData();
                     }
                     catch (Exception ex) {
-                        log.debug("writeAttribute(): failed to write attribute: ", ex);
+                        attrValue = null;
+                        log.trace("writeAttribute(): getAttributeData() failure:", ex);
                     }
-                } // (attrValue != null)
+
+                    // log.trace("writeAttribute(): attrValue={}", attrValue);
+                    if (attrValue != null) {
+                        try {
+                            ((H5Attribute) attr).AttributeCommonIO(aid, H5File.IO_TYPE.WRITE, attrValue);
+                        }
+                        catch (Exception ex) {
+                            log.debug("writeAttribute(): failed to write attribute: ", ex);
+                        }
+                    } // (attrValue != null)
+                }
             }
             finally {
                 try {
@@ -2280,7 +2284,7 @@ public class H5File extends FileFormat
             loadIntoMemory();
         }
 
-        log.trace("open(loadFullHeirarchy = {}, plist = {}): finish", loadFullHierarchy, plist);
+        log.trace("open(loadFullHierarchy = {}, plist = {}): finish", loadFullHierarchy, plist);
         return fid;
     }
 

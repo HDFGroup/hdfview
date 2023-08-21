@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -41,20 +41,17 @@ import hdf.object.Utils;
 /**
  * A CompoundDS is a dataset with compound datatype.
  *
- * A compound datatype is an aggregation of one or more datatypes. Each member
- * of a compound type has a name which is unique within that type, and a
- * datatype of that member in a compound datum. Compound datatypes can be nested,
- * i.e. members of a compound datatype can be some other compound datatype.
+ * A compound datatype is an aggregation of one or more datatypes. Each member of a compound type has a name which is
+ * unique within that type, and a datatype of that member in a compound datum. Compound datatypes can be nested, i.e.
+ * members of a compound datatype can be some other compound datatype.
  *
- * For more details on compound datatypes,
- * see <b> <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
+ * For more details on compound datatypes, See
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
  *
- * Since Java cannot handle C-structured compound data, data in a compound dataset
- * is loaded in to an Java List. Each element of the list is a data array that
- * corresponds to a compound field. The data is read/written by compound field.
+ * Since Java cannot handle C-structured compound data, data in a compound dataset is loaded in to an Java List. Each
+ * element of the list is a data array that corresponds to a compound field. The data is read/written by compound field.
  *
- * For example, if compound dataset "comp" has the following nested structure,
- * and member datatypes
+ * For example, if compound dataset "comp" has the following nested structure, and member datatypes
  *
  * <pre>
  * comp --&gt; m01 (int)
@@ -65,8 +62,7 @@ import hdf.object.Utils;
  * comp --&gt; nest1 --&gt; nest2 --&gt; m22 (double)
  * </pre>
  *
- * The data object is a Java list of six arrays: {int[], float[], char[],
- * Stirng[], long[] and double[]}.
+ * The data object is a Java list of six arrays: {int[], float[], char[], Stirng[], long[] and double[]}.
  *
  *
  * @version 1.1 9/4/2007
@@ -506,6 +502,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      */
     protected Object convertByteMember(final Datatype dtype, byte[] byteData) {
         Object theObj = null;
+        log.trace("convertByteMember(): byteData={} start", byteData);
 
         if (dtype.getDatatypeSize() == 1) {
             /*
@@ -553,6 +550,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
         }
         else if (dtype.isArray()) {
             Datatype baseType = dtype.getDatatypeBase();
+            log.trace("convertByteMember(): converting byte array to baseType array");
 
             /*
              * Retrieve the real base datatype in the case of ARRAY of ARRAY datatypes.
@@ -606,12 +604,14 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
             }
         }
         else if (dtype.isCompound()) {
+            log.debug("convertByteMember(): compound datatype class");
             /*
              * TODO: still valid after reading change?
              */
             theObj = convertCompoundByteMembers(dtype, byteData);
         }
         else {
+            log.debug("convertByteMember(): byteData={}", byteData);
             theObj = byteData;
         }
 

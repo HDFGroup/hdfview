@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -27,20 +27,17 @@ import org.slf4j.LoggerFactory;
 /**
  * Datatype is an abstract class that defines datatype characteristics and APIs for a data type.
  *
- * A datatype has four basic characteristics: class, size, byte order and sign. These
- * characteristics are defined in the
- * <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>.
+ * A datatype has four basic characteristics: class, size, byte order and sign. These characteristics are defined in the
+ * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
  *
- * These characteristics apply to all the sub-classes. The sub-classes may have different ways to
- * describe a datatype. We here define the <strong> native datatype</strong> to the datatype used by
- * the sub-class. For example, H5Datatype uses a datatype identifier (hid_t) to specify a datatype.
- * NC2Datatype uses ucar.nc2.DataType object to describe its datatype. "Native" here is different
- * from the "native" definition in the HDF5 library.
+ * These characteristics apply to all the sub-classes. The sub-classes may have different ways to describe a datatype.
+ * We here define the <strong> native datatype</strong> to the datatype used by the sub-class. For example, H5Datatype
+ * uses a datatype identifier (hid_t) to specify a datatype. NC2Datatype uses ucar.nc2.DataType object to describe its
+ * datatype. "Native" here is different from the "native" definition in the HDF5 library.
  *
- * Two functions, createNative() and fromNative(), are defined to convert the general
- * characteristics to/from the native datatype. Sub-classes must implement these functions so that
- * the conversion will be done correctly. The values of the CLASS member are not identical to HDF5
- * values for a datatype class.
+ * Two functions, createNative() and fromNative(), are defined to convert the general characteristics to/from the native
+ * datatype. Sub-classes must implement these functions so that the conversion will be done correctly. The values of the
+ * CLASS member are not identical to HDF5 values for a datatype class.
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -57,102 +54,102 @@ public abstract class Datatype extends HObject implements MetaDataContainer
     public static final int NATIVE = -1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_NO_CLASS = -1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_INTEGER = 0;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_FLOAT = 1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_CHAR = 2;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_STRING = 3;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_BITFIELD = 4;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_OPAQUE = 5;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_COMPOUND = 6;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_REFERENCE = 7;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_ENUM = 8;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_VLEN = 9;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_ARRAY = 10;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_TIME = 11;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int ORDER_LE = 0;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int ORDER_BE = 1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int ORDER_VAX = 2;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int ORDER_NONE = 3;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int SIGN_NONE = 0;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int SIGN_2 = 1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
      */
     public static final int NSGN = 2;
 
@@ -767,6 +764,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer
             description.append("8-bit ").append((isUnsigned() ? "unsigned " : "")).append("integer");
             break;
         case CLASS_INTEGER:
+            log.trace("getDescription(): Int [{}]", datatypeNATIVE);
             if (datatypeNATIVE)
                 description.append("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
             else

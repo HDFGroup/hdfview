@@ -5,9 +5,9 @@
  *                                                                           *
  * This file is part of the HDF Java Products distribution.                  *
  * The full copyright notice, including terms governing use, modification,   *
- * and redistribution, is contained in the files COPYING and Copyright.html. *
- * COPYING can be found at the root of the source code distribution tree.    *
- * Or, see https://support.hdfgroup.org/products/licenses.html               *
+ * and redistribution, is contained in the COPYING file, which can be found  *
+ * at the root of the source code distribution tree,                         *
+ * or in https://www.hdfgroup.org/licenses.                                  *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  ****************************************************************************/
@@ -31,16 +31,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The abstract class provides general APIs to create and manipulate dataset/attribute
- * objects, and retrieve dataset/attribute properties, datatype and dimension sizes.
+ * The abstract class provides general APIs to create and manipulate dataset/attribute objects, and retrieve
+ * dataset/attribute properties, datatype and dimension sizes.
  *
- * This class provides two convenient functions, read()/write(), to read/write
- * data values. Reading/writing data may take many library calls if we use the
- * library APIs directly. The read() and write functions hide all the details of
+ * This class provides two convenient functions, read()/write(), to read/write data values. Reading/writing data may
+ * take many library calls if we use the library APIs directly. The read() and write functions hide all the details of
  * these calls from users.
  *
- * For more details on dataset and attributes,
- * see <b> <a href="https://support.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html">HDF5 User's Guide</a> </b>
+ * For more details on dataset and attributes, See
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_d__u_g.html#sec_dataset">HDF5 Datasets in HDF5 User Guide</a>
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in HDF5 User Guide</a>
  *
  * @see hdf.object.ScalarDS
  * @see hdf.object.CompoundDS
@@ -170,28 +170,31 @@ public abstract class Dataset extends HObject implements DataFormat
     /**
      * Array of strings that represent the dimension names. It is null if dimension names do not exist.
      */
-    protected String[]        dimNames;
+    protected String[] dimNames;
 
     /** Flag to indicate if the byte[] array is converted to strings */
-    protected boolean         convertByteToString = true;
+    protected boolean convertByteToString = true;
 
     /** Flag to indicate if data values are loaded into memory. */
-    protected boolean         isDataLoaded        = false;
+    protected boolean isDataLoaded = false;
 
     /** Flag to indicate if this dataset has been initialized */
-    protected boolean         inited = false;
+    protected boolean inited = false;
 
     /** The number of data points in the memory buffer. */
-    protected long            nPoints             = 1;
+    protected long nPoints = 1;
+
+    /** Flag to indicate if the dataspace is NULL */
+    protected boolean isNULL = false;
 
     /** Flag to indicate if the data is a single scalar point */
-    protected boolean   isScalar;
+    protected boolean isScalar = false;
 
     /** True if this dataset is an image. */
-    protected boolean isImage;
+    protected boolean isImage = false;
 
     /** True if this dataset is ASCII text. */
-    protected boolean isText;
+    protected boolean isText = false;
 
     /**
      * The data buffer that contains the raw data directly reading from file
@@ -1363,8 +1366,14 @@ public abstract class Dataset extends HObject implements DataFormat
     }
 
     /**
-     * @return true if the data is a single scalar point; otherwise, returns
-     *         false.
+     * @return true if the dataspace is a NULL; otherwise, returns false.
+     */
+    public boolean isNULL() {
+        return isNULL;
+    }
+
+    /**
+     * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isScalar() {
         return isScalar;

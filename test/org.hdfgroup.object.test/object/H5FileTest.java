@@ -1533,17 +1533,6 @@ public class H5FileTest
                 assertFalse("H5Lget_info(): ", link_info == null);
                 log.trace("H5Lget_info(): NAME_SOFT_LINK_DANGLE {}", link_info.type);
                 assertTrue("H5Lget_info(): link type", link_info.type == HDF5Constants.H5L_TYPE_SOFT);
-
-//                String[] link_value = { null, null };
-//                String targetObjName = null;
-//                try {
-//                    H5.H5Lget_value(gid, "NAME_SOFT_LINK_DANGLE", link_value, HDF5Constants.H5P_DEFAULT);
-//                }
-//                catch (Exception ex) {
-//                    log.debug("H5Lget_value(): H5Lget_value {} failure: ", obj.getFullName(), ex);
-//                }
-//                log.trace("H5Lget_value(): NAME_SOFT_LINK_DANGLE {} {}", link_value[0], link_value[1]);
-//                assertEquals("DS1", link_value[0]);
             }
             finally {
                 try {
@@ -1717,16 +1706,6 @@ public class H5FileTest
         }
         assertFalse("H5Lget_info ", link_info == null);
         assertTrue("H5Lget_info link type", link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL);
-
-//        String[] link_value = { null, null };
-//        String targetObjName = null;
-//        try {
-//            H5.H5Lget_value(gid, "GROUP_HARD_LINK_DANGLE", link_value, HDF5Constants.H5P_DEFAULT);
-//        }
-//        catch (Exception ex) {
-//            log.debug("getLinkTargetName(): H5Lget_value {} failure: ", obj.getFullName(), ex);
-//        }
-//        assertEquals("DGroup", link_value[1] + FileFormat.FILE_OBJ_SEP + link_value[0]);
 
         try {
             fgrp1.close(gid);
