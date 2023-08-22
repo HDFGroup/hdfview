@@ -1,0 +1,479 @@
+<?php
+$page_title = "HDFView User's Guide -- Tree Viewer";
+include ("../../../../links.php");
+include ("../../../../includes/header.html");
+?>
+<link href="edit.css" rel="stylesheet" type="text/css" />
+<p>
+<a href="index.html">[Index]</a>
+<a href="ug01introduction.html">[1]</a>
+<a href="ug02start.html">[2]</a>
+<a href="ug03objects.html">[3]</a>
+<a href="ug04treeview.html">[4]</a>
+<a href="ug05spreadsheet.html">[5]</a>
+<a href="ug06imageview.html">[6]</a>
+<a href="ug07useroptions.html">[7]</a></p>
+<fieldset><h1>Chapter 4: The Tree Viewer</h1></fieldset>
+
+<ul class="ul">
+  <li class="li2"><a href="ug04treeview.html#ug04overview">4.1 Overview</a></li>
+  <li class="li2"><a href="ug04treeview.html#ug04tree">4.2 Tree Structure</a></li>
+  <li class="li2"><a href="ug04treeview.html#ug04data">4.3 View Data Content</a></li>
+      <ul class="ul">
+        <li class="li2"><a href="ug04treeview.html#ug04bitmask">4.3.1 Show Bit Values</a>
+      </ul>
+  <li class="li2"><a href="ug04treeview.html#ug04metadata">4.4 Display Metadata and Attributes</a></li>
+  <li class="li2"><a href="ug04treeview.html#ug04edit">4.5 Edit File and  File Structure</a>
+      <ul class="ul">
+        <li class="li2"><a href="ug04treeview.html#ug04file">4.5.1 Create and Save File</a></li>
+        <li class="li2"><a href="ug04treeview.html#ug04libversion">4.5.2 Setting the Library Version Bounds</a></li>
+        <li class="li2"><a href="ug04treeview.html#ug04add">4.5.3 Add and Delete Object</a></li>
+        <li class="li2"><a href="ug04treeview.html#ug04copy">4.5.4 Copy and Paste Object</a></li>
+        <li class="li2"><a href="ug04treeview.html#ug04move">4.5.5 Move Object</a></li>
+        <li class="li2"><a href="ug04treeview.html#ug04attribute">4.5.6 Add, Delete and Modify Attribute</a></li>
+      </ul>
+  </li>
+</ul>
+<hr noshade="noshade" size="1" />
+<p>&nbsp;</p>
+<h2> <a name="ug04overview" id="ug04overview"></a>4.1 Overview</h2>
+<p>The Tree Viewer (or panel) shows the objects in each open file, and supports
+  the navigation and
+  editing of those objects. Multiple files can be viewed and edited, and both
+  HDF4 and HDF5 files can be opened. The viewing and editing operations work
+  for both HDF4 and HDF5, although some operations cannot be implemented for
+  HDF4.</p>
+
+<p>Every HDF5 object appears in at least one group. A set of objects can be
+stored together in a group. You can use the group object API functions
+to create and manipulate the groups. With the groups, you can organize
+the data objects in an HDF file. Objects in HDF4 may or may not belong to
+a group. An object that does not belong to any group is called a lone object,
+such as lone Vdata. To map HDF4 structure to HDF5 structure, a
+&ldquo;dummy&rdquo; root
+group is created in the tree view and lone objects are put at the root group.</p>
+
+<p>Since objects can have names in more than one group, the set of all
+objects in an HDF file is a directed graph. It is difficult to manipulate
+and browse the graph on a 2-D virtual screen. Instead of showing the directed
+graph of the HDF file structure, HDFView displays HDF objects in a conventional
+structure as a tree of &ldquo;folders,&rdquo; breaking the &ldquo;loops&rdquo;
+in the graph when
+necessary. The tree viewer of HDFView provides users an easy way to browse
+and manage HDF data objects in an HDF file. The following icons are used to
+represent HDF objects:</p>
+<ul class="ul">
+<li class="li2"><img src="images/icon_hdf4.gif"> --- HDF4 file</li>
+<li class="li2"><img src="images/icon_hdf5.gif"> --- HDF5 file</li>
+<li class="li2"><img src="images/icon_folderclose.gif"> --- Collapsed group folder</li>
+<li class="li2"><img src="images/icon_folderopen.gif"> --- Expanded group folder</li>
+<li class="li2"><img src="images/icon_dataset.gif"> --- HDF4 SDS or HDF5 scalar dataset</li>
+<li class="li2"><img src="images/icon_table.gif"> --- HDF4 Vdata or HDF5 compound dataset</li>
+<li class="li2"><img src="images/icon_text.gif"> --- HDF4 SDS or HDF5 scalar dataset of type String</li>
+<li class="li2"><img src="images/icon_image.gif"> --- HDF4 GR image or HDF5 image</li>
+<li class="li2"><img src="images/icon_datatype.gif"> --- HDF5 committed datatype</li>
+<li class="li2"><img src="images/icon_link.gif"> --- HDF5 object association</li>
+</ul>
+<br />
+
+<hr noshade size=1 />
+<a name="ug04tree"></a>
+<h2>
+4.2 Tree Structure</h2>
+<p>
+Upon opening an HDF file, HDFView displays the tree structure of the HDF
+file in the tree viewer, which is the left panel in  the HDFView window. Every
+HDF file has exactly one root group that is created when the file is created.
+The root group is added to the root of the tree. When two or more files are
+open, the root groups of the files are listed at the root in the tree view.</p>
+
+<p>Groups are presented as folders in the tree viewer. Opening and closing
+folders, you can browse the individual HDF objects in the HDF file. Datasets,
+images and tables are leaf objects in the tree. Double clicking a leaf object allows
+you to see the content of the object displayed in a data/document window. </p>
+
+<center>
+<p><img src="images/treeview.png" />
+<br />
+<b>The tree viewer</b></p>
+</center>
+
+
+<h2>
+<a name="ug04data"></a>4.3 View Data Content</h2>
+<p>
+The Tree View allows the user to navigate the structure of the HDF file,
+to select individual objects, and to view the content of the selected object.</p>
+
+<p>
+You can open a data object in the tree by a double-mouse-click or selecting the
+&ldquo;Open&rdquo; command from the object's popup menu (accessed by right clicking
+on the object). By default, data content is displayed as an image, a table or text
+based on its datatype. See the following chapters for a detailed discussion of the
+data viewers.</p>
+
+<center>
+<p><img src="images/menupopup.png" />
+<br /><b>The object popup menu</b></p></center>
+
+
+<p>
+If the data value is not in memory, the &ldquo;Open&rdquo; action will load
+the data from the file and display it. If the data is already loaded into
+memory, it will just display the data. If you want to refresh data in memory
+or open a dataset with a different selection (subset or display option),
+you have to use the &ldquo;Open As&rdquo; command.</p>
+
+<p>
+Using &ldquo;Open As&rdquo;, you can select a subset of the dataset to
+display or change the default display options. For example, you can display
+the data values of an image in a spreadsheet, or show a scalar dataset
+as an image. For multi-dimension datasets, you can select any of two
+dimensions to display. The mouse-drag navigator allows you to select a
+subset by dragging the mouse over the preview image. For more details
+about how to select a subset and dimensions, see
+<a href="ug05spreadsheet.html#ug05subset">5.2 Subset and Dimension Selection</a>.</p>
+
+<p>
+The &ldquo;Start&rdquo; field(s) determines the starting coordinate of
+the selected area.</p>
+
+<p>The &ldquo;End&rdquo; field(s) determines the ending coordinate of the
+selected area.</p>
+
+<p>The &ldquo;Stride&rdquo; field(s) chooses array locations from the
+dataspace with each value in the stride array determining how many
+elements to move in each dimension. Setting a value in the stride array
+to 1 moves to each element in that dimension of the dataspace; setting a
+value of 2 in the stride array moves to every other element in that
+dimension of the dataspace. In other words, the stride determines the
+number of elements to move from the start location in each dimension.
+Stride values of 0 are not allowed. If the stride parameter is NULL, a contiguous
+hyperslab is selected (as if each value in the stride array was set to
+all 1's).</p>
+
+<h3>
+<a name="ug04bitmask"></a>4.3.1 Show Bit Values</h3>
+
+<p />
+HDFView allows users to view bit values of integers in two ways:
+<ul>
+    <li> applying a bitmask to data values </li>
+    <li> showing values of selected bits</li>
+</ul>
+
+<p />
+The figure below shows the GUI layout of the two options:
+<center>
+</p><img src="images/bitmask_options.png" />
+<br /><b>The bitmask options</b></p></center>
+<p />
+Applying a bitmask means to use the bitwise operation &#39;AND&#39; to the original data. For example,
+<br /><img src="images/bitmask_and.png" />
+
+<P />
+Showing values of selected bits means to apply the bitmask to the data and throw
+away any unnecessary bits that are not selected by the bitmask, i.e. the &#39;0&#39; bits
+in the bitmask. In most of the cases, this will be the beginning and ending &#39;0&#39; bits
+in the bitmask. For example,
+<br /><img src="images/bitmask_extract.png" />
+<p />
+For the current implementation, only contiguous bits are allowed when the option of
+"Show Value of Selected Bits" is selected.
+<p />
+
+
+<h2>
+<a name="ug04metadata"></a>4.4 Display Metadata and Attributes</h2>
+<p>
+The metadata of an object appears by selecting the object (icon) in the tree.
+  The metadata panel is the right panel in the HDFView window where the metadata content of objects are displayed in
+  a tabbed view. The &ldquo;Object Attribute Info&rdquo; tab displays a list of attributes attached to the selected
+  object. The attribute name, type, size and a short sample of data is displayed. Double-clicking on an attribute
+  line will open a Data window for the selected attribute. There is an &ldquo;Add Attribute&rdquo; button to create a new attribute attached to
+  the currently selected object in the treeview. And a &ldquo;Delete Attribute&rdquo; button to remove the selected attribute.<br />
+  The &ldquo;General Object Info&rdquo; tab displays various object information such as names of objects, member names and types,
+  or paths, type and version bounds for file types.
+</p>
+
+<p>General metadata includes the name, type, and path of the data object.</p>
+
+<p>For groups, general metadata also includes the name, type, and size of all
+the members of the group. The following figure shows an example of the general
+information of a group.</p>
+
+<center>
+<p><img src="images/groupmetadata.png" />
+<br />
+<b>General properties of an HDF group</b></p>
+</center>
+
+
+<p>For a dataset (or image), the general metadata also includes the dataspace
+information (rank, current, and maximum size of each dimension) and datatype
+information (type, size, and order).
+The following figure shows an example of the metadata for a dataset.</p>
+
+<center>
+<p><img src="images/datasetmetadata.png" />
+<br />
+<b>General properties of a dataset</b></p>
+</center>
+
+<p>
+To see the attributes of an object, click the &ldquo;Object Attribute Info&rdquo; tab
+in the object's metadata panel. The name, type, size, and value of all attributes
+of the selected object are displayed in a table. The following figure shows an example
+of the attribute display.</p>
+
+<center>
+<p><img src="images/attributemetadata.png" />
+<br /><b>The Attributes tab</b></p></center>
+
+<h2>
+<a name="ug04edit"></a>4.5 Edit File and File Structure</h2>
+<p>
+HDFView allows you to create and save files and to add and delete objects in the
+files. <b>Users should be aware that all the changes are made to the actual stored
+file. This version does not support the undo operation; editing results cannot
+be automatically recovered</b>.</p>
+
+<h3>
+<a name="ug04file"></a>4.5.1 Create and Save File</h3>
+<p>
+The file creation dialog box appears when you choose the
+&ldquo;New -> HDF4/5&rdquo; command from the File menu. Choose the path and the
+file name you want to create and click the &ldquo;Save&rdquo; button
+from the New File dialog box. A new file will be created with an empty root group.</p>
+
+<center>
+<p><img src="images/newfile.png" />
+<br /><b>Create New File</b></p></center>
+
+<p>
+Select &ldquo;Save As&rdquo; from the File menu to save the currently selected
+file into a new file of the same format, i.e. HDF4 to HDF4 or HDF5 to HDF5.
+(HDFView does not support HDF4 to HDF5 conversion.)</p>
+
+<p>For HDF5, a new file is written that does not contain the inaccessible
+objects, and it packs the unusable space. Thus, the new file may be smaller
+than the original. <b>Dataset or attribute values that are object references
+can not be updated.</b> For HDF4, a new file is the exact copy, same file
+content and file size.</p>
+
+<h3>
+<a name="ug04libversion"></a>4.5.2 Setting the Library Version Bounds</h3>
+<p>The library version bounds of an HDF5 file can be set by right clicking
+the file from treeview, then selecting &ldquo;Set Lib version bounds&rdquo;
+from the Context menu and setting the earliest version and latest version.
+In order to see the currently set library versions of an HDF5 File,
+select the &ldquo;General Object Info&rdquo; tab of the metadata panel and it will display
+the library versions that had been set earlier.</p>
+<center>
+<p><img src="images/versionbounds.png" />
+<br /><b>Setting the library version bounds of an HDF5 file</b></p></center>
+
+<h3>
+<a name="ug04add"></a>4.5.3 Add and Delete Object</h3>
+<p>
+All objects in HDFView are created by selecting the "New" command from the Context
+menu, accessed by right clicking on any object in the TreeView panel.
+</p>
+
+<p>
+To create a new group, select the &ldquo;New -> Group&rdquo; command from the
+Context menu, then give the name of the new group and the parent group to which the new group
+is to be added.</p>
+
+<center>
+<p><img src="images/newgroup.png" />
+<br /><b>The New Group dialog box</b></p></center>
+
+<p>By clicking on the &ldquo;more&rdquo; button, the user can set the
+options, creation order, and link storage when creating groups. Help buttons
+are provided for more information about the options.</p>
+
+<center>
+<p><img src="images/newgroupmore.png" />
+<br /><b>Create new group options</b></p></center>
+
+<p>
+To create a new dataset, select the &ldquo;New -> Dataset&rdquo; command from the
+HDF5 Context menu, or &ldquo;New -> SDS&rdquo; from the HDF4 Context menu, then
+specify the name, path, datatype, dataspace, and storage layout and compression
+of the new dataset. The current version only supports creating simple datatypes.
+This version cannot create an HDF4 VData; however, these types of objects can be
+viewed. Supported datatypes include integers (byte, short, int, long), float,
+double, and character. For HDF5, it also includes String and Object references.</p>
+
+<center>
+<p><img src="images/newdataset.png" />
+<br /><b>The New Dataset dialog box</b></p></center>
+
+<p>
+To create a new compound dataset (HDF5 only), select the &ldquo;New -> Compound Dataset&rdquo;
+command from the Context menu. Then, specify the name, path and template to use
+(if applicable), as well as the dataspace, storage layout and compression and
+properties of the new dataset. Supported datatypes include integers
+(byte, short, int, long), float, double, String and Object reference.</p>
+
+<center>
+<p><img src="images/newcompound.png" />
+<br /><b>The New Compound Dataset dialog box</b></p></center>
+
+<p>
+The &ldquo;New -> Image&rdquo; command from the Context menu allows you to create
+an empty image with default image attributes. The new image does not have
+any palette attached to it. You can create two kinds of images: an indexed
+image with 256 colors and a 24-bit true color image.</p>
+
+<center>
+<p><img src="images/newimage.png" />
+<br /><b>The New HDF Image dialog box</b></p></center>
+
+<p>
+The &ldquo;New -> Datatype&rdquo; command from the Context menu allows you to create
+a new committed datatype (HDF5 only). Committed datatypes are able to be shared
+among datasets within an HDF5 file.
+</p>
+
+<center>
+<p><img src="images/newdatatype.png" />
+<br /><b>The New Datatype dialog box</b></p></center>
+
+<p>
+The &ldquo;New -> Link&rdquo; command from the Context menu allows you to
+create links to objects (HDF5 only). Three types of links can be created:
+hard, soft, or external. Hard links and soft links are links
+to objects in the same HDF5 file. External links are links to objects in a
+different HDF5 file. Soft links and external links are symbolic links and
+are allowed to dangle, meaning that the target object need not exist at
+the time the link is created. A Help button is provided for more information
+about links.</p>
+
+<center>
+<p><img src="images/newlink.png" />
+<br /><b>The New Link dialog box</b></p></center>
+
+<p>
+The type for a soft link or external link object that links to a
+non-existing target object is unknown, so it will have a different
+icon: &lsquo;<img src="images/question.png" />&rsquo;
+The user can change the target object being linked to by selecting the
+link object from the tree view and select the &ldquo;General Object Info&rdquo; tab in
+the Metadata panel. In the Properties dialog box, edit the
+&ldquo;Link to Target&rdquo; field to change the target object.</p>
+
+<center>
+<p><img src="images/linktargetinfo.png" />
+<br /><b>Change the target object for a dangling link</b></p></center>
+
+<p>
+To delete objects from the tree, you first select the objects, then choose the
+&ldquo;Delete&rdquo; command from the Context menu. A confirmation dialog
+appears to verify that you want to delete the selected objects.
+<b>Deleting an object from an HDF4 file is not supported</b>.
+</p>
+
+<p>
+Deleting an HDF5 object calls the H5Gunlink() function of the HDF5 library. The unlink
+function removes the link, and when an object has no remaining links, it can be deleted.
+However, the HDF5 library does not currently reclaim the space in the file. This means
+that the size of the file does not shrink even though objects are removed. (Users are
+cautioned that repeatedly creating and deleting objects with HDFView can cause the HDF5
+file to grow.) To get rid of the inaccessible objects, you have to save the current
+file into a new file and rename the new file to the current file.</p>
+
+
+<h3>
+<a name="ug04copy"></a>4.5.4 Copy and Paste Object</h3>
+<p>
+HDFView allows you to copy an object and paste it in the same file or a different file
+of the same type. To copy and paste an HDF5 object from the tree, select
+the object and then select the &ldquo;Copy&rdquo; command from the Context
+menu. You then select a group by right clicking on the group to which the
+object is to be pasted. After you select the &ldquo;Paste&rdquo; command, the
+object is copied into the selected group. HDFView does not allow
+you to copy/paste an object of different format. The &ldquo;Paste&rdquo;
+command will create a new object in the selected group instead of
+making a hard link.</p>
+
+<p>
+You can also select multiple objects in the tree and apply the copy/paste action to
+the selected objects. Selection can be contiguous and discontiguous. To make a
+contiguous selection, click on the first object, then click on the second object while
+holding down the Shift key. All the objects between the two objects will be selected
+inclusively. To make a discontiguous selection, hold down the Ctrl key while clicking
+the objects with the left mouse button. The objects being clicked will be selected.
+The rest of the operation of copying/pasting multiple objects is the same as that of
+copying/pasting a single object.</p>
+
+<p>
+Copying a group will also copy all the descendents of the group. Copying a root
+group is not allowed.</p>
+
+<h3>
+<a name="ug04move"></a>4.5.5 Move Object</h3>
+<p>HDFView allows you to move an object within the same HDF5 file from
+one location to another. Moving objects from one file to another file is
+not supported by HDFView. To move an HDF5 object from the tree, right click
+the object and then select the &ldquo;Cut&rdquo; command from the Context
+menu. You then select a group by a right click on the group where the
+object is to be moved. Select the &ldquo;Paste&rdquo; command, the object
+is then moved into the selected group.</p>
+<p>
+You can also select multiple objects in the tree and apply the move action to
+the selected objects. Selection can be contiguous and discontiguous.</p>
+<p>
+Moving a group will also move all the descendents of the group. Moving a root
+group is not allowed. <b>Moving objects is not supported by HDF4 Files</b>.</p>
+
+
+<h3>
+<a name="ug04attribute"></a>4.5.6 Add, Delete and Modify Attribute</h3>
+<p>
+To add an attribute, click the &ldquo;Add Attribute&rdquo; button on the &ldquo;Object Attribute Info&rdquo; tab in
+the object's metadata panel. You can create an attribute of a string, scalar,
+and 1D array of simple datatypes. Attributes of multiple dimensions or a compound
+datatype are not supported.</p>
+
+<center>
+<p><img src="images/newattribute.png" />
+<br /><b>The New Attribute dialog box</b></p></center>
+
+<p>
+To change the value of an attribute, type the new value into the cell. Only
+string and scalar attributes can be modified. The new value must be interpretable
+as a value of the correct type for the attribute. For a string value, the value
+typed will be truncated to the size of the attribute if it is longer than the
+declared size of the attribute. A valid data value must follow the rules specified
+by the section <a href="ug05spreadsheet.html#ug05change">5.4 Change Data Value</a>.</p>
+
+<p>
+To change the name of an attribute, right-click the attribute in the &ldquo;Object Attribute Info&rdquo; tab in
+the object's metadata panel. Note: once the attribute name is changed, it cannot be changed again until
+the file is closed and reopened.</p>
+<p>
+To delete an attribute, select the attribute and click the &ldquo;Delete&rdquo;
+button in the &ldquo;Object Attribute Info&rdquo; tab in
+the object's metadata panel. <b>Deleting an attribute of an HDF4 object is not supported</b>.</p>
+
+
+<!-- BEGIN OF FOOTER INFO -->
+<hr noshade size=1 />
+<p>
+<a href="index.html">[Index]</a>
+<a href="ug01introduction.html">[1]</a>
+<a href="ug02start.html">[2]</a>
+<a href="ug03objects.html">[3]</a>
+<a href="ug04treeview.html">[4]</a>
+<a href="ug05spreadsheet.html">[5]</a>
+<a href="ug06imageview.html">[6]</a>
+<a href="ug07useroptions.html">[7]</a></p>
+
+<!-- END OF FOOTER INFO -->
+<!--
+<?php
+include ("../../../includes/footer.html");
+?>
+ -->
