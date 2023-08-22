@@ -45,23 +45,17 @@ release. Future HDFView releases indicated on this schedule are tentative.
 of HDF5 and HDF4. Previous releases of HDFView that were based on HDF5 1.8,
 1.10, and 1.12 (e.g. 3.1.x, 3.2.x) have been retired.
 
-| Release | Based on | New Features |
-| ------- | -------- | ------------ |
-| 3.3.0 | HDF5 1.14.0, HDF4 4.2.16 | Supports HDF5 1.12 references, Single-Writer/Multiple-Readers (SWMR) reads, bug fixes |
-| 3.3.1 | HDF5 1.14.2, HDF4 4.2.16-2 | Fixes a critical HDF4 + HDFView bug |
+| Release | HDF5 | HDF4 | New Features |
+| ------- | ---- | ---- | ------------ |
+| 3.3.0 | 1.14.0 | 4.2.16 | Supports HDF5 1.12 references, Single-Writer/Multiple-Readers (SWMR) reads, bug fixes |
+| 3.3.1 | 1.14.2 | 4.2.16-2 | Fixes a critical HDF4 + HDFView bug |
 
-This list of feature release versions is also tentative, and the specific release
-in which a feature is introduced may change.
 
-SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
+PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
-Periodically development code snapshots are provided at the following URL:
-    
-   https://github.com/HDFGroup/hdfview/releases/tag/snapshot
-
 Source packages for current and previous releases are located at:
     
-   https://portal.hdfgroup.org/display/support/Downloads
+   https://portal.hdfgroup.org/display/support/Download+HDFView
 
 Development code is available at our Github location:
     
