@@ -1,6 +1,6 @@
 HDFView version 3.3.1 currently under development
 
-![HDF5 Logo](docs/img/HDFView_logo.png)
+![HDF5 Logo](src/HDFView.png)
 
 [![Java CI](https://github.com/HDFGroup/hdfview/actions/workflows/ant.yml/badge.svg)](https://github.com/HDFGroup/hdfview/actions/workflows/ant.yml)
 
