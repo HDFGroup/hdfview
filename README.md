@@ -16,7 +16,6 @@ Information regarding Help Desk and Support services is available at
    https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
 
 
-
 FORUM and NEWS
 --------------
 The [HDF Forum](https://forum.hdfgroup.org) is provided for public announcements and discussions
@@ -49,6 +48,7 @@ of HDF5 and HDF4. Previous releases of HDFView that were based on HDF5 1.8,
 | ------- | ---- | ---- | ------------ |
 | 3.3.0 | 1.14.0 | 4.2.16 | Supports HDF5 1.12 references, Single-Writer/Multiple-Readers (SWMR) reads, bug fixes |
 | 3.3.1 | 1.14.2 | 4.2.16-2 | Fixes a critical HDF4 + HDFView bug |
+| 3.3.2 | 1.14.4 | 4.3.0 | Maintenance release |
 
 
 PREVIOUS RELEASES AND SOURCE CODE
