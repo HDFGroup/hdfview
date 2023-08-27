@@ -20,14 +20,19 @@ newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================
+    *
+
+    ***** Previous fixes *****
     * GH #121 Updated all icons with transpareancy
 
 Major Bug Fixes
 ==============================================================================
+    *
+
+    ***** Previous fixes *****
     * GH #119 (crashes opening HDF4 file) has been fixed. The problem was
       that the HDF4 xdr.dll file was not copied from the hdf4 install location.
 
-    ***** Previous fixes *****
     * HDFVIEW-284 (crashes on NETCDF-4 grids) has been fixed. The problem was
       that references in variable-length containers were trying to be handled
       like strings. Upon investigation, the problem was found to extend to 
@@ -47,6 +52,9 @@ Major Bug Fixes
 
 Minor Bug Fixes
 ==============================================================================
+    *
+
+    ***** Previous fixes *****
     * Corrected how the program updates changes to the fonts made in the User Preferences
       dialog. There are still issues with having to trigger a visual refresh.
 
