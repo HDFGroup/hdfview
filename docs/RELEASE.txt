@@ -18,6 +18,7 @@ JDK
 This release was built and tested with OpenJDK 19. It uses modules and the
 newest jpackage for distribution.
 
+
 Major Enhancements
 ==============================================================================
     *
@@ -50,6 +51,7 @@ Major Bug Fixes
       Sub-issue HDFView-223 updated the DataProviders, DataDisplayConverters
       and DataValidators to work with variable-length List of Lists.
 
+
 Minor Bug Fixes
 ==============================================================================
     *
@@ -64,6 +66,7 @@ Minor Bug Fixes
     * GH #147 (HDFView 3.3.0 shows incorrect references in compound types in datasets)
       fixed by adding a start index into the object reference array of data read from a
       compound type.
+
 
 Limitations / Known Problems
 ==============================================================================
@@ -94,8 +97,8 @@ Limitations / Known Problems
 
     * Logging and optional HDF4 requires rebuilds from source.
 
-    * Automatically opening HDFView and displaying a file selected still does display
-    the file on a mac.
+    * Automatically opening HDFView and displaying a file selected still does
+      not display the file on a mac.
 
 
 Other Notes
