@@ -24,7 +24,7 @@ Major Enhancements
     *
 
     ***** Previous fixes *****
-    * GH #121 Updated all icons with transpareancy
+    * GH #121 Updated all icons with transparancy
 
 Major Bug Fixes
 ==============================================================================
