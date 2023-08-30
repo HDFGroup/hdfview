@@ -24,7 +24,7 @@ Major Enhancements
     *
 
     ***** Previous fixes *****
-    * GH #121 Updated all icons with transparancy
+    * GH #121 Updated all icons with transparency
 
 Major Bug Fixes
 ==============================================================================
@@ -35,11 +35,12 @@ Major Bug Fixes
       that the HDF4 xdr.dll file was not copied from the hdf4 install location.
 
     * HDFVIEW-284 (crashes on NETCDF-4 grids) has been fixed. The problem was
-      that references in variable-length containers were trying to be handled
-      like strings. Upon investigation, the problem was found to extend to 
-      references in any container. The table display code for vlen references
-      also changed to account for the hdf5 Java API fixes.
-      The fix required that variable-length types in the Java wrappers in the
+      that references in variable-length containers were handled like strings.
+      Upon investigation, the problem found was that references in any container
+      were handled like strings.
+        The table display code for vlen references  also changed to account for
+      the changes which fixed the hdf5 Java API. The fix required that
+      variable-length types in the Java wrappers in the
       hdf5 library for read and write also be fixed.
 
       HDFView-221 Add support for true Variable-length types in Java
