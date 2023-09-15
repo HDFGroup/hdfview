@@ -18,22 +18,29 @@ JDK
 This release was built and tested with OpenJDK 19. It uses modules and the
 newest jpackage for distribution.
 
+
 Major Enhancements
 ==============================================================================
-    * GH #121 Updated all icons with transpareancy
+    *
+
+    ***** Previous fixes *****
+    * GH #121 Updated all icons with transparency
 
 Major Bug Fixes
 ==============================================================================
+    *
+
+    ***** Previous fixes *****
     * GH #119 (crashes opening HDF4 file) has been fixed. The problem was
       that the HDF4 xdr.dll file was not copied from the hdf4 install location.
 
-    ***** Previous fixes *****
     * HDFVIEW-284 (crashes on NETCDF-4 grids) has been fixed. The problem was
-      that references in variable-length containers were trying to be handled
-      like strings. Upon investigation, the problem was found to extend to 
-      references in any container. The table display code for vlen references
-      also changed to account for the hdf5 Java API fixes.
-      The fix required that variable-length types in the Java wrappers in the
+      that references in variable-length containers were handled like strings.
+      Upon investigation, the problem found was that references in any container
+      were handled like strings.
+        The table display code for vlen references  also changed to account for
+      the changes which fixed the hdf5 Java API. The fix required that
+      variable-length types in the Java wrappers in the
       hdf5 library for read and write also be fixed.
 
       HDFView-221 Add support for true Variable-length types in Java
@@ -45,8 +52,12 @@ Major Bug Fixes
       Sub-issue HDFView-223 updated the DataProviders, DataDisplayConverters
       and DataValidators to work with variable-length List of Lists.
 
+
 Minor Bug Fixes
 ==============================================================================
+    *
+
+    ***** Previous fixes *****
     * Corrected how the program updates changes to the fonts made in the User Preferences
       dialog. There are still issues with having to trigger a visual refresh.
 
@@ -56,6 +67,7 @@ Minor Bug Fixes
     * GH #147 (HDFView 3.3.0 shows incorrect references in compound types in datasets)
       fixed by adding a start index into the object reference array of data read from a
       compound type.
+
 
 Limitations / Known Problems
 ==============================================================================
@@ -86,8 +98,8 @@ Limitations / Known Problems
 
     * Logging and optional HDF4 requires rebuilds from source.
 
-    * Automatically opening HDFView and displaying a file selected still does display
-    the file on a mac.
+    * Automatically opening HDFView and displaying a file selected still does
+      not display the file on a mac.
 
 
 Other Notes
