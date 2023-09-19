@@ -49,6 +49,8 @@ public class H5ObjectEx_T_RegionReferenceAttribute {
         long[] dims2      = {DS2DIM0, DS2DIM1};
         // data buffer for writing region reference
         byte[][] dset_data = new byte[DIM0][HDF5Constants.H5R_REF_BUF_SIZE];
+        H5Datatype typeInt = null;
+        H5Datatype typeRef = null;
         // data buffer for writing dataset
         byte[][] write_data     = new byte[DS2DIM0][DS2DIM1];
         StringBuffer[] str_data = {new StringBuffer("The quick brown"), new StringBuffer("fox jumps over "),
