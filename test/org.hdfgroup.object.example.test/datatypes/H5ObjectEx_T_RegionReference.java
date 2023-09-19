@@ -38,12 +38,14 @@ public class H5ObjectEx_T_RegionReference {
     private static void writeRegRef()
     {
         H5File file = null;
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         H5ScalarDS dset = null;
         H5ScalarDS dset2 = null;
         H5Group grp = null;
-        long[] dims       = {DIM0};
-        long[] dims2      = {DS2DIM0, DS2DIM1};
+        long[] dims = { DIM0 };
+        long[] dims2 = { DS2DIM0, DS2DIM1 };
         // data buffer for writing region reference
         byte[][] dset_data = new byte[DIM0][HDF5Constants.H5R_REF_BUF_SIZE];
         H5Datatype typeInt = null;
@@ -167,14 +169,6 @@ public class H5ObjectEx_T_RegionReference {
         try {
             if (dataset_id >= 0)
                 H5.H5Dclose(dataset_id);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();

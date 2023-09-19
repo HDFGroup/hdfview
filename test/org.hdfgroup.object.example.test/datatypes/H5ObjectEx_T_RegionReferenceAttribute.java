@@ -1,15 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of HDF5.  The full HDF5 copyright notice, including     *
- * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://www.hdfgroup.org/licenses.               *
- * If you do not have access to either file, you may request a copy from     *
- * help@hdfgroup.org.                                                        *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 /************************************************************
   This example shows how to read and write object references
   to a dataset.  The program first creates objects in the
@@ -18,6 +6,7 @@
   reopens the file, dereferences the references, and outputs
   the names of their targets to the screen.
  ************************************************************/
+
 package datatypes;
 
 import java.util.EnumSet;
@@ -26,6 +15,15 @@ import java.util.Map;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.h5.H5Datatype;
+import hdf.object.h5.H5File;
+import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ReferenceType;
+import hdf.object.h5.H5ScalarDS;
 
 public class H5ObjectEx_T_RegionReferenceAttribute {
     private static String FILENAME      = "H5Ex_T_RegionReferenceAttribute.h5";
@@ -40,7 +38,8 @@ public class H5ObjectEx_T_RegionReferenceAttribute {
 
     private static void writeRegRef()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
+        H5File file = null;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
         long dataspace_id = HDF5Constants.H5I_INVALID_HID;
         long filespace_id = HDF5Constants.H5I_INVALID_HID;
         long group_id     = HDF5Constants.H5I_INVALID_HID;
@@ -57,8 +56,17 @@ public class H5ObjectEx_T_RegionReferenceAttribute {
 
         // Create a new file using default properties.
         try {
-            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+            file = new H5File(FILENAME, FileFormat.CREATE);
+            file_id = file.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Create the base datatypes.
+        try {
+            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 8, Datatype.ORDER_BE, Datatype.NATIVE);
+            typeRef = new H5ReferenceType(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -165,7 +173,7 @@ public class H5ObjectEx_T_RegionReferenceAttribute {
         catch (Exception ex) {
         }
 
-        // End access to theattribute, dataset and release resources used by it.
+        // End access to the attribute, dataset and release resources used by it.
         try {
             H5.H5Sclose(dataspace_id);
         }
@@ -183,14 +191,6 @@ public class H5ObjectEx_T_RegionReferenceAttribute {
         try {
             if (dataset_id >= 0)
                 H5.H5Dclose(dataset_id);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (filespace_id >= 0)
-                H5.H5Sclose(filespace_id);
         }
         catch (Exception e) {
             e.printStackTrace();
