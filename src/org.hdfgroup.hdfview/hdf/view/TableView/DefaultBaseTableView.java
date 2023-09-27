@@ -122,7 +122,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
-import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 import hdf.object.CompoundDS;
@@ -461,10 +460,6 @@ public abstract class DefaultBaseTableView implements TableView
                 isRegRef = ((H5Datatype)dtype).isRegRef();
                 isObjRef = ((H5Datatype)dtype).isRefObj();
             }
-        }
-
-        if (((HObject) dataObject).getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
-            H5.H5PLappend(ViewProperties.getPluginDir());
         }
 
         // Setup subset information

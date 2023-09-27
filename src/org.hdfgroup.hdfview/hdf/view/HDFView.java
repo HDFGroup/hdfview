@@ -92,6 +92,7 @@ import hdf.view.dialog.UserOptionsHDFPage;
 import hdf.view.dialog.UserOptionsNode;
 import hdf.view.dialog.UserOptionsViewModulesPage;
 
+import hdf.hdf5lib.H5;
 
 /**
  * HDFView is the main class of this HDF visual tool. It is used to layout the graphical components of the hdfview. The
@@ -290,6 +291,9 @@ public class HDFView implements DataViewManager
         catch (Exception ex) {
             currentFont = null;
         }
+
+        if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5) != null)
+            H5.H5PLappend(ViewProperties.getPluginDir());
 
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
@@ -906,6 +910,9 @@ public class HDFView implements DataViewManager
                 // if (userOptionDialog.isWorkDirChanged())
                 // this will always overwrite the currentDir until isWorkDirChanged() is fixed
                 currentDir = ViewProperties.getWorkDir();
+
+                if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5) != null)
+                    H5.H5PLappend(ViewProperties.getPluginDir());
 
                 //if (userOptionDialog.isFontChanged()) {
                 Font font = null;
