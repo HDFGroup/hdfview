@@ -201,6 +201,9 @@ public class ViewProperties extends PreferenceStore
     /** default starting file directory */
     private static String            workDir                = System.getProperty("user.dir");
 
+    /** default plugin directory */
+    private static String pluginDir = System.getProperty("user.dir") + "/plugin";
+
     /** default HDF file extensions */
     private static String            fileExt                = "hdf, h4, hdf4, h5, hdf5, he2, he5";
 
@@ -317,6 +320,8 @@ public class ViewProperties extends PreferenceStore
         setDefault("work.dir", getWorkDir());
 
         setUsersGuide(rootDir + usersGuide);
+
+        setPluginDir(rootDir + "/plugin");
 
         setDefault("users.guide", viewRoot + "/UsersGuide/index.html");
         setDefault("image.contrast", false);
@@ -1450,6 +1455,10 @@ public class ViewProperties extends PreferenceStore
         if (!isDefault("work.dir"))
             setWorkDir(propVal);
 
+        propVal = getString("plugin.dir");
+        if (!isDefault("plugin.dir"))
+            setPluginDir(propVal);
+
         propVal = getString("file.extension");
         if (!isDefault("file.extension")) {
             setFileExtension(propVal);
@@ -1553,6 +1562,9 @@ public class ViewProperties extends PreferenceStore
         if (usersGuide != null) setValue("users.guide", usersGuide);
 
         if (workDir != null) setValue("work.dir", workDir);
+
+        if (pluginDir != null)
+            setValue("plugin.dir", pluginDir);
 
         if (fileExt != null) setValue("file.extension", fileExt);
 
@@ -1691,6 +1703,21 @@ public class ViewProperties extends PreferenceStore
         }
         log.trace("getWorkDir: final workPath={}", workPath);
         return workPath;
+    }
+
+    /** @return the default plugin directory. */
+    public static String getPluginDir() {
+        String pluginPath = pluginDir;
+        log.trace("getPluginDir: pluginDir={}", pluginDir);
+        if (pluginPath == null) {
+            pluginPath = System.getProperty("hdfview.plugindir");
+            log.trace("getPluginDir: hdfview.plugindir={}", pluginPath);
+            if (pluginPath == null) {
+                pluginPath = System.getProperty("user.dir") + "/plugin";
+            }
+        }
+        log.trace("getPluginDir: final pluginPath={}", pluginPath);
+        return pluginPath;
     }
 
     /** @return the maximum number of the most recent file */
@@ -1866,6 +1893,16 @@ public class ViewProperties extends PreferenceStore
     public static void setWorkDir(String wDir) {
         log.trace("ViewProperties:setWorkDir wDir={}", wDir);
         workDir = wDir;
+    }
+
+    /**
+     * set the path of the default plugin directory
+     *
+     * @param plDir the default plugin directory
+     */
+    public static void setPluginDir(String plDir) {
+        log.trace("ViewProperties:setPluginDir plDir={}", plDir);
+        pluginDir = plDir;
     }
 
     /** set the file extension

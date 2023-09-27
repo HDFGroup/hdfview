@@ -1122,6 +1122,7 @@
         <mkdir dir="${release.dir}/extra" />
         <mkdir dir="${release.dir}/samples" />
         <mkdir dir="${release.dir}/doc" />
+        <mkdir dir="${release.dir}/plugin" />
 
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}">
@@ -1170,12 +1171,16 @@
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.lib" />
             </fileset>
-
             <fileset dir="${hdf5.lib.dir}">
                 <include name="*.jar" />
                 <include name="hdf5_java.dll" />
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.lib" />
+            </fileset>
+        </copy>
+        <copy todir="${release.dir}/bin/plugin">
+            <fileset dir="${hdf5.lib.dir}/plugin">
+                <include name="*.dll" />
             </fileset>
         </copy>
         <copy todir="${release.dir}/bin">
@@ -1188,7 +1193,6 @@
                 <include name="mfhdf.dll"/>
                 <include name="xdr.dll"/>
             </fileset>
-
             <fileset dir="${hdf5.lib.dir}">
                 <include name="hdf5_java.dll" />
             </fileset>
@@ -1233,6 +1237,11 @@
                 <filename regex="libhdf5\.so(\.[0-9][0-9][0-9][0-9]?)$"/>
             </fileset>
         </copy>
+        <copy todir="${release.dir}/plugin">
+            <fileset dir="${hdf5.lib.dir}/plugin">
+                <include name="*.so" />
+            </fileset>
+        </copy>
 
         <!-- Create the .sh run script -->
         <copy file="${packagefiles.dir}/hdfview.sh.in" tofile="${release.dir}/hdfview.sh" />
@@ -1275,6 +1284,11 @@
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
                 <filename regex="libhdf5(\.[0-9][0-9][0-9][0-9]?)(\.dylib)$"/>
                 <exclude name="*.a" />
+            </fileset>
+        </copy>
+        <copy todir="${release.dir}/plugin">
+            <fileset dir="${hdf5.lib.dir}/plugin">
+                <include name="*.dylib" />
             </fileset>
         </copy>
     </target>
