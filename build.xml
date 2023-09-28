@@ -569,12 +569,12 @@
         <java fork="true" classname="${exfile.name}" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
             <jvmarg value="${XstartOnFirstThreadFlag}" />
+            <jvmarg line="${exfile.name}.class" />
             <classpath>
                 <path refid="project-classpath" />
                 <path refid="log-classpath" />
                 <path refid="hdfobject-jar" />
-                <pathelement location="${classes.dir}" />
-                <pathelement path="${exclasses.dir}" />
+                <pathelement location="${exclasses.dir}" />
             </classpath>
             <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
             <env key="${platform.hdf.lib}" path="${release.dir}${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />

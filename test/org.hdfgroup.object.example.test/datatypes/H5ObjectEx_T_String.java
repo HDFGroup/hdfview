@@ -25,11 +25,11 @@ public class H5ObjectEx_T_String {
     private static void CreateDataset() {
         H5File file = null;
         H5ScalarDS dset = null;
-        long file_id = -1;
-        long memtype_id = -1;
-        long filetype_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         byte[][] dset_data = new byte[DIM0][SDIM];
         StringBuilder[] str_data = { new StringBuilder("Parting"), new StringBuilder("is such"),
