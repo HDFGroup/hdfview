@@ -5,6 +5,8 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.junit.Test;
+
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.swt.widgets.Display;
@@ -18,23 +20,25 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.junit.Test;
 
 public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
     @Test
-    public void createNewHDF5VLDatatype() {
-        String filename = "testvldt.h5";
-        String dtname = "testvldtname";
+    public void createNewHDF5VLDatatype()
+    {
+        String filename        = "testvldt.h5";
+        String dtname          = "testvldtname";
         SWTBotShell tableShell = null;
-        File hdf_file = createFile(filename);
+        File hdf_file          = createFile(filename);
 
         try {
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("createNewHDF5VLDatatype()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==1);
-            assertTrue("createNewHDF5VLDatatype() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
+            assertTrue(constructWrongValueMessage("createNewHDF5VLDatatype()", "filetree wrong row count",
+                                                  "1", String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 1);
+            assertTrue("createNewHDF5VLDatatype() filetree is missing file '" + filename + "'",
+                       items[0].getText().compareTo(filename) == 0);
 
             items[0].click();
             items[0].contextMenu().contextMenu("New").menu("Datatype").click();
@@ -53,10 +57,13 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("createNewHDF5VLDatatype()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==2);
-            assertTrue("createNewHDF5VLDatatype() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
-            assertTrue("createNewHDF5VLDatatype() filetree is missing group '" + dtname + "'", items[0].getNode(0).getText().compareTo(dtname)==0);
+            assertTrue(constructWrongValueMessage("createNewHDF5VLDatatype()", "filetree wrong row count",
+                                                  "2", String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 2);
+            assertTrue("createNewHDF5VLDatatype() filetree is missing file '" + filename + "'",
+                       items[0].getText().compareTo(filename) == 0);
+            assertTrue("createNewHDF5VLDatatype() filetree is missing group '" + dtname + "'",
+                       items[0].getNode(0).getText().compareTo(dtname) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -67,7 +74,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
+            if (tableShell != null && tableShell.isOpen()) {
                 tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
@@ -75,24 +82,28 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             try {
                 closeFile(hdf_file, true);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+            }
         }
     }
 
     @Test
-    public void createNewHDF5VLDataset() {
-        String filename = "testvldataset.h5";
-        String dsname = "testvldatasetname";
+    public void createNewHDF5VLDataset()
+    {
+        String filename        = "testvldataset.h5";
+        String dsname          = "testvldatasetname";
         SWTBotShell tableShell = null;
-        File hdf_file = createFile(filename);
+        File hdf_file          = createFile(filename);
 
         try {
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==1);
-            assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
+            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "filetree wrong row count", "1",
+                                                  String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 1);
+            assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + "'",
+                       items[0].getText().compareTo(filename) == 0);
 
             items[0].click();
             items[0].contextMenu().contextMenu("New").menu("Dataset").click();
@@ -111,10 +122,13 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==2);
-            assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
-            assertTrue("createNewHDF5VLDataset() filetree is missing dataset '" + dsname + "'", items[0].getNode(0).getText().compareTo(dsname)==0);
+            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "filetree wrong row count", "2",
+                                                  String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 2);
+            assertTrue("createNewHDF5VLDataset() filetree is missing file '" + filename + "'",
+                       items[0].getText().compareTo(filename) == 0);
+            assertTrue("createNewHDF5VLDataset() filetree is missing dataset '" + dsname + "'",
+                       items[0].getNode(0).getText().compareTo(dsname) == 0);
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Open").click();
@@ -125,27 +139,33 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
 
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+            SWTBotNatTable table =
+                new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
 
             table.click(1, 1);
             String initval = tableShell.bot().text(0).getText();
 
             String expected = "[]";
-            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "wrong data", expected, initval), initval.equals(expected));
+            assertTrue(
+                constructWrongValueMessage("createNewHDF5VLDataset()", "wrong data", expected, initval),
+                initval.equals(expected));
 
             final SWTBotNatTable edittable = table;
-            final SWTBotShell editShell = tableShell;
+            final SWTBotShell editShell    = tableShell;
             Display.getDefault().syncExec(new Runnable() {
                 @Override
-                public void run() {
+                public void run()
+                {
                     String val = "[1.0, 2.1, 3.2]";
                     edittable.doubleclick(1, 1);
                     edittable.widget.getActiveCellEditor().setEditorValue(val);
-                    edittable.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT, true, true);
+                    edittable.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT,
+                                                                  true, true);
                     edittable.click(1, 1);
                     String newval = editShell.bot().text(0).getText();
-                    assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "wrong value",
-                            val, newval), newval.equals(val));
+                    assertTrue(
+                        constructWrongValueMessage("createNewHDF5VLDataset()", "wrong value", val, newval),
+                        newval.equals(val));
                 }
             });
 
@@ -163,12 +183,15 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             tableShell.activate();
             bot.waitUntil(Conditions.shellIsActive(tableShell.getText()));
 
-            SWTBotNatTable table2 = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+            SWTBotNatTable table2 =
+                new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
 
             String expected2 = "[1.0, 2.1, 3.2]";
             table2.click(1, 1);
             String updateval = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "wrong data", expected2, updateval), updateval.equals(expected2));
+            assertTrue(
+                constructWrongValueMessage("createNewHDF5VLDataset()", "wrong data", expected2, updateval),
+                updateval.equals(expected2));
 
             tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -182,7 +205,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
+            if (tableShell != null && tableShell.isOpen()) {
                 tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
@@ -190,24 +213,28 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             try {
                 closeFile(hdf_file, true);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+            }
         }
     }
 
     @Test
-    public void createNewHDF5VLAttribute() {
-        String filename = "testvlattr.h5";
-        String daname = "testvlattrname";
+    public void createNewHDF5VLAttribute()
+    {
+        String filename        = "testvlattr.h5";
+        String daname          = "testvlattrname";
         SWTBotShell tableShell = null;
-        File hdf_file = createFile(filename);
+        File hdf_file          = createFile(filename);
 
         try {
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==1);
-            assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
+            assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "filetree wrong row count",
+                                                  "1", String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 1);
+            assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + "'",
+                       items[0].getText().compareTo(filename) == 0);
 
             items[0].click();
 
@@ -229,35 +256,43 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
 
             items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount()==1);
-            assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename)==0);
+            assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "filetree wrong row count",
+                                                  "1", String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 1);
+            assertTrue("createNewHDF5VLAttribute() filetree is missing file '" + filename + "'",
+                       items[0].getText().compareTo(filename) == 0);
 
             // Open dataset Attribute Table
             SWTBotTable attrTable = openAttributeTable(filetree, filename, "/");
-            tableShell = openAttributeObject(attrTable, daname, 0);
+            tableShell            = openAttributeObject(attrTable, daname, 0);
 
-            SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+            SWTBotNatTable table =
+                new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
 
             table.click(1, 1);
             String initval = tableShell.bot().text(0).getText();
 
             String expected = "[]";
-            assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "wrong data", expected, initval), initval.equals(expected));
+            assertTrue(
+                constructWrongValueMessage("createNewHDF5VLAttribute()", "wrong data", expected, initval),
+                initval.equals(expected));
 
             final SWTBotNatTable edittable = table;
-            final SWTBotShell editShell = tableShell;
+            final SWTBotShell editShell    = tableShell;
             Display.getDefault().syncExec(new Runnable() {
                 @Override
-                public void run() {
+                public void run()
+                {
                     String val = "[1, 2, 3]";
                     edittable.doubleclick(1, 1);
                     edittable.widget.getActiveCellEditor().setEditorValue(val);
-                    edittable.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT, true, true);
+                    edittable.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT,
+                                                                  true, true);
                     edittable.click(1, 1);
                     String newval = editShell.bot().text(0).getText();
-                    assertTrue(constructWrongValueMessage("createNewHDF5VLAttribute()", "wrong value",
-                            val, newval), newval.equals(val));
+                    assertTrue(
+                        constructWrongValueMessage("createNewHDF5VLAttribute()", "wrong value", val, newval),
+                        newval.equals(val));
                 }
             });
 
@@ -269,15 +304,18 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             items[0].click();
 
             // Open dataset Attribute Table
-            attrTable = openAttributeTable(filetree, filename, "/");
+            attrTable  = openAttributeTable(filetree, filename, "/");
             tableShell = openAttributeObject(attrTable, daname, 0);
 
-            SWTBotNatTable table2 = new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
+            SWTBotNatTable table2 =
+                new SWTBotNatTable(tableShell.bot().widget(WidgetOfType.widgetOfType(NatTable.class)));
 
             String expected2 = "[1, 2, 3]";
             table2.click(1, 1);
             String updateval = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("createNewHDF5VLDataset()", "wrong data", expected2, updateval), updateval.equals(expected2));
+            assertTrue(
+                constructWrongValueMessage("createNewHDF5VLDataset()", "wrong data", expected2, updateval),
+                updateval.equals(expected2));
 
             tableShell.bot().menu().menu("Table").menu("Close").click();
             bot.waitUntil(Conditions.shellCloses(tableShell));
@@ -291,7 +329,7 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             fail(ae.getMessage());
         }
         finally {
-            if(tableShell != null && tableShell.isOpen()) {
+            if (tableShell != null && tableShell.isOpen()) {
                 tableShell.bot().menu().menu("Table").menu("Close").click();
                 bot.waitUntil(Conditions.shellCloses(tableShell));
             }
@@ -299,7 +337,8 @@ public class TestTreeViewNewVLDatatypes extends AbstractWindowTest {
             try {
                 closeFile(hdf_file, true);
             }
-            catch (Exception ex) {}
+            catch (Exception ex) {
+            }
         }
     }
 }

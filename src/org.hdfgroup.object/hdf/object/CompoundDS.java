@@ -24,11 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import hdf.hdf5lib.HDFNativeData;
-
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -38,18 +33,25 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.Utils;
 
+import hdf.hdf5lib.HDFNativeData;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A CompoundDS is a dataset with compound datatype.
  *
- * A compound datatype is an aggregation of one or more datatypes. Each member of a compound type has a name which is
- * unique within that type, and a datatype of that member in a compound datum. Compound datatypes can be nested, i.e.
- * members of a compound datatype can be some other compound datatype.
+ * A compound datatype is an aggregation of one or more datatypes. Each member of a compound type has a name
+ * which is unique within that type, and a datatype of that member in a compound datum. Compound datatypes can
+ * be nested, i.e. members of a compound datatype can be some other compound datatype.
  *
  * For more details on compound datatypes, See
- * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+ * Guide</a>
  *
- * Since Java cannot handle C-structured compound data, data in a compound dataset is loaded in to an Java List. Each
- * element of the list is a data array that corresponds to a compound field. The data is read/written by compound field.
+ * Since Java cannot handle C-structured compound data, data in a compound dataset is loaded in to an Java
+ * List. Each element of the list is a data array that corresponds to a compound field. The data is
+ * read/written by compound field.
  *
  * For example, if compound dataset "comp" has the following nested structure, and member datatypes
  *
@@ -68,8 +70,7 @@ import hdf.object.Utils;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class CompoundDS extends Dataset implements CompoundDataFormat
-{
+public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     private static final long serialVersionUID = -4880399929644095662L;
 
     private static final Logger log = LoggerFactory.getLogger(CompoundDS.class);
@@ -187,7 +188,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * @param thePath
      *            the full path of the data object, e.g. "/arrays/".
      */
-    public CompoundDS(FileFormat theFile, String theName, String thePath) {
+    public CompoundDS(FileFormat theFile, String theName, String thePath)
+    {
         this(theFile, theName, thePath, null);
     }
 
@@ -205,20 +207,22 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      *            the oid of the data object.
      */
     @Deprecated
-    public CompoundDS(FileFormat theFile, String dsName, String dsPath, long[] oid) {
+    public CompoundDS(FileFormat theFile, String dsName, String dsPath, long[] oid)
+    {
         super(theFile, dsName, dsPath, oid);
 
-        numberOfMembers = 0;
-        memberNames = null;
+        numberOfMembers  = 0;
+        memberNames      = null;
         isMemberSelected = null;
-        memberTypes = null;
+        memberTypes      = null;
     }
 
     /**
      * Resets selection of dataspace
      */
     @Override
-    protected void resetSelection() {
+    protected void resetSelection()
+    {
         super.resetSelection();
         setAllMemberSelection(true);
     }
@@ -229,7 +233,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * @return the number of members of the compound dataset.
      */
     @Override
-    public final int getMemberCount() {
+    public final int getMemberCount()
+    {
         return numberOfMembers;
     }
 
@@ -246,7 +251,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * @return the number of selected members.
      */
     @Override
-    public final int getSelectedMemberCount() {
+    public final int getSelectedMemberCount()
+    {
         int count = 0;
 
         if (isMemberSelected != null) {
@@ -270,7 +276,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * @return the names of compound members.
      */
     @Override
-    public final String[] getMemberNames() {
+    public final String[] getMemberNames()
+    {
         return memberNames;
     }
 
@@ -280,13 +287,14 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * @return an array of the names of the selected members of the compound dataset.
      */
     @Override
-    public final String[] getSelectedMemberNames() {
+    public final String[] getSelectedMemberNames()
+    {
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberNames(): isMemberSelected array is null");
             return memberNames;
         }
 
-        int idx = 0;
+        int idx        = 0;
         String[] names = new String[getSelectedMemberCount()];
         for (int i = 0; i < isMemberSelected.length; i++) {
             if (isMemberSelected[i])
@@ -305,7 +313,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * @return true if the i-th memeber is selected; otherwise returns false.
      */
     @Override
-    public final boolean isMemberSelected(int idx) {
+    public final boolean isMemberSelected(int idx)
+    {
         if ((isMemberSelected != null) && (isMemberSelected.length > idx))
             return isMemberSelected[idx];
         else
@@ -319,7 +328,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      *            the index of compound member.
      */
     @Override
-    public final void selectMember(int idx) {
+    public final void selectMember(int idx)
+    {
         if ((isMemberSelected != null) && (isMemberSelected.length > idx))
             isMemberSelected[idx] = true;
     }
@@ -333,7 +343,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      *            selected for read/write.
      */
     @Override
-    public final void setAllMemberSelection(boolean selectAll) {
+    public final void setAllMemberSelection(boolean selectAll)
+    {
         if (isMemberSelected == null)
             return;
 
@@ -363,7 +374,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      *         of compound.
      */
     @Override
-    public final int[] getMemberOrders() {
+    public final int[] getMemberOrders()
+    {
         return memberOrders;
     }
 
@@ -388,13 +400,14 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      *         members of compound.
      */
     @Override
-    public final int[] getSelectedMemberOrders() {
+    public final int[] getSelectedMemberOrders()
+    {
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberOrders(): isMemberSelected array is null");
             return memberOrders;
         }
 
-        int idx = 0;
+        int idx      = 0;
         int[] orders = new int[getSelectedMemberCount()];
         for (int i = 0; i < isMemberSelected.length; i++) {
             if (isMemberSelected[i])
@@ -426,11 +439,12 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      *         member is not an array.
      */
     @Override
-    public final int[] getMemberDims(int i) {
+    public final int[] getMemberDims(int i)
+    {
         if (memberDims == null) {
             return null;
         }
-        return (int[]) memberDims[i];
+        return (int[])memberDims[i];
     }
 
     /**
@@ -443,7 +457,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * @return the array of datatype objects of the compound members.
      */
     @Override
-    public final Datatype[] getMemberTypes() {
+    public final Datatype[] getMemberTypes()
+    {
         return memberTypes;
     }
 
@@ -453,13 +468,14 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * @return an array of datatype objects of selected compound members.
      */
     @Override
-    public final Datatype[] getSelectedMemberTypes() {
+    public final Datatype[] getSelectedMemberTypes()
+    {
         if (isMemberSelected == null) {
             log.debug("getSelectedMemberTypes(): isMemberSelected array is null");
             return memberTypes;
         }
 
-        int idx = 0;
+        int idx          = 0;
         Datatype[] types = new Datatype[getSelectedMemberCount()];
         for (int i = 0; i < isMemberSelected.length; i++) {
             if (isMemberSelected[i])
@@ -475,7 +491,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      * @return the fill values for the data object.
      */
     @Override
-    public Object getFillValue() {
+    public Object getFillValue()
+    {
         return null;
     }
 
@@ -484,9 +501,10 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      */
     @Deprecated
     @Override
-    public Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception {
+    public Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception
+    {
         throw new UnsupportedOperationException(
-                "Writing a subset of a compound dataset to a new dataset is not implemented.");
+            "Writing a subset of a compound dataset to a new dataset is not implemented.");
     }
 
     /**
@@ -500,7 +518,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      *
      * @return the converted object
      */
-    protected Object convertByteMember(final Datatype dtype, byte[] byteData) {
+    protected Object convertByteMember(final Datatype dtype, byte[] byteData)
+    {
         Object theObj = null;
         log.trace("convertByteMember(): byteData={} start", byteData);
 
@@ -510,10 +529,11 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
              */
             theObj = byteData;
         }
-        else if (dtype.isString() && !dtype.isVarStr() && convertByteToString && (byteData instanceof byte[])) {
+        else if (dtype.isString() && !dtype.isVarStr() && convertByteToString &&
+                 (byteData instanceof byte[])) {
             log.trace("convertByteMember(): converting byte array to string array");
 
-            theObj = byteToString(byteData, (int) dtype.getDatatypeSize());
+            theObj = byteToString(byteData, (int)dtype.getDatatypeSize());
         }
         else if (dtype.isInteger()) {
             log.trace("convertByteMember(): converting byte array to integer array");
@@ -576,12 +596,11 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
                 theObj = convertByteMember(baseType, byteData);
                 break;
 
-            case Datatype.CLASS_ARRAY:
-            {
+            case Datatype.CLASS_ARRAY: {
                 Datatype arrayType = dtype.getDatatypeBase();
 
                 long[] arrayDims = dtype.getArrayDims();
-                int arrSize = 1;
+                int arrSize      = 1;
                 for (int i = 0; i < arrayDims.length; i++)
                     arrSize *= arrayDims[i];
                 log.trace("convertByteMember(): no CLASS_ARRAY arrayType={} arrSize={}", arrayType, arrSize);
@@ -589,9 +608,9 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
                 theObj = new Object[arrSize];
 
                 for (int i = 0; i < arrSize; i++) {
-                    byte[] indexedBytes = Arrays.copyOfRange(byteData, (int) (i * arrayType.getDatatypeSize()),
-                            (int) ((i + 1) * arrayType.getDatatypeSize()));
-                    ((Object[]) theObj)[i] = convertByteMember(arrayType, indexedBytes);
+                    byte[] indexedBytes = Arrays.copyOfRange(byteData, (int)(i * arrayType.getDatatypeSize()),
+                                                             (int)((i + 1) * arrayType.getDatatypeSize()));
+                    ((Object[])theObj)[i] = convertByteMember(arrayType, indexedBytes);
                 }
 
                 break;
@@ -628,12 +647,13 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
      *            The byte array representing the data of the compound Datatype
      * @return The converted types of the bytes
      */
-    protected Object convertCompoundByteMembers(final Datatype dtype, byte[] data) {
+    protected Object convertCompoundByteMembers(final Datatype dtype, byte[] data)
+    {
         List<Object> theData = null;
 
         List<Datatype> allSelectedTypes = Arrays.asList(this.getSelectedMemberTypes());
-        List<Datatype> localTypes = new ArrayList<>(dtype.getCompoundMemberTypes());
-        Iterator<Datatype> localIt = localTypes.iterator();
+        List<Datatype> localTypes       = new ArrayList<>(dtype.getCompoundMemberTypes());
+        Iterator<Datatype> localIt      = localTypes.iterator();
         while (localIt.hasNext()) {
             Datatype curType = localIt.next();
 
@@ -649,11 +669,11 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat
             Datatype curType = localTypes.get(i);
 
             if (curType.isCompound())
-                theData.add(convertCompoundByteMembers(curType,
-                        Arrays.copyOfRange(data, index, index + (int) curType.getDatatypeSize())));
+                theData.add(convertCompoundByteMembers(
+                    curType, Arrays.copyOfRange(data, index, index + (int)curType.getDatatypeSize())));
             else
-                theData.add(convertByteMember(curType,
-                        Arrays.copyOfRange(data, index, index + (int) curType.getDatatypeSize())));
+                theData.add(convertByteMember(
+                    curType, Arrays.copyOfRange(data, index, index + (int)curType.getDatatypeSize())));
 
             index += curType.getDatatypeSize();
         }

@@ -14,17 +14,18 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 
 public class H5ObjectEx_D_ReadWrite {
-    private static String FILENAME = "H5ObjectEx_D_ReadWrite.h5";
-    private static String DATASETNAME = "DS1";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 7;
+    private static String FILENAME         = "H5ObjectEx_D_ReadWrite.h5";
+    private static String DATASETNAME      = "DS1";
+    private static final int DIM_X         = 4;
+    private static final int DIM_Y         = 7;
     private static final int DATATYPE_SIZE = 4;
 
-    private static void WriteDataset() {
-        H5File file = null;
-        Dataset dset = null;
-        long[] dims = { DIM_X, DIM_Y };
-        int[][] dset_data = new int[DIM_X][DIM_Y];
+    private static void WriteDataset()
+    {
+        H5File file        = null;
+        Dataset dset       = null;
+        long[] dims        = {DIM_X, DIM_Y};
+        int[][] dset_data  = new int[DIM_X][DIM_Y];
         H5Datatype typeInt = null;
 
         // Initialize data.
@@ -43,7 +44,8 @@ public class H5ObjectEx_D_ReadWrite {
 
         // Create the datatype.
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
+            typeInt =
+                new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -52,9 +54,7 @@ public class H5ObjectEx_D_ReadWrite {
         // Create the dataset. We will use all default properties for this example.
         // And write the data to the dataset.
         try {
-            dset = file.createScalarDS("/" + DATASETNAME, null, typeInt,
-                    dims, null, null, 0,
-                    dset_data);
+            dset = file.createScalarDS("/" + DATASETNAME, null, typeInt, dims, null, null, 0, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -69,10 +69,11 @@ public class H5ObjectEx_D_ReadWrite {
         }
     }
 
-    private static void ReadDataset() {
-        H5File file = null;
-        Dataset dset = null;
-        int[] dset_data = new int[DIM_X*DIM_Y];
+    private static void ReadDataset()
+    {
+        H5File file     = null;
+        Dataset dset    = null;
+        int[] dset_data = new int[DIM_X * DIM_Y];
 
         // Open file using the default properties.
         try {
@@ -85,7 +86,7 @@ public class H5ObjectEx_D_ReadWrite {
 
         // Open dataset using the default properties.
         try {
-            dset = (Dataset) file.get(DATASETNAME);
+            dset = (Dataset)file.get(DATASETNAME);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -94,7 +95,7 @@ public class H5ObjectEx_D_ReadWrite {
         // Read the data using the default properties.
         try {
             dset.init();
-            dset_data = (int[]) dset.getData();
+            dset_data = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -105,7 +106,7 @@ public class H5ObjectEx_D_ReadWrite {
         for (int indx = 0; indx < DIM_X; indx++) {
             System.out.print(" [ ");
             for (int jndx = 0; jndx < DIM_Y; jndx++)
-                System.out.print(dset_data[indx*DIM_Y+jndx] + " ");
+                System.out.print(dset_data[indx * DIM_Y + jndx] + " ");
             System.out.println("]");
         }
         System.out.println();
@@ -119,9 +120,9 @@ public class H5ObjectEx_D_ReadWrite {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_D_ReadWrite.WriteDataset();
         H5ObjectEx_D_ReadWrite.ReadDataset();
     }
-
 }

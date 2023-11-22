@@ -22,10 +22,27 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import hdf.object.CompoundDS;
+import hdf.object.CompoundDataFormat;
+import hdf.object.DataFormat;
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.HObject;
+import hdf.object.ScalarDS;
+import hdf.object.Utils;
+import hdf.object.h5.H5Datatype;
+import hdf.view.DataView.DataViewManager;
+import hdf.view.HDFView;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
+import hdf.hdf5lib.HDF5Constants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,24 +74,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
 
-import hdf.hdf5lib.HDF5Constants;
-
-import hdf.object.CompoundDS;
-import hdf.object.CompoundDataFormat;
-import hdf.object.DataFormat;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.HObject;
-import hdf.object.ScalarDS;
-import hdf.object.Utils;
-import hdf.object.h5.H5Datatype;
-
-import hdf.view.HDFView;
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-import hdf.view.DataView.DataViewManager;
-
 /**
  * A class to construct a CompoundDS TableView.
  */
@@ -88,9 +87,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      * @param theView
      *            the main HDFView.
      */
-    public DefaultCompoundDSTableView(DataViewManager theView) {
-        this(theView, null);
-    }
+    public DefaultCompoundDSTableView(DataViewManager theView) { this(theView, null); }
 
     /**
      * Constructs a CompoundDS TableView with the specified data properties.
@@ -106,7 +103,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      *            ViewProperties.DATA_VIEW_KEY.
      */
     @SuppressWarnings("rawtypes")
-    public DefaultCompoundDSTableView(DataViewManager theView, HashMap dataPropertiesMap) {
+    public DefaultCompoundDSTableView(DataViewManager theView, HashMap dataPropertiesMap)
+    {
         super(theView, dataPropertiesMap);
 
         isDataTransposed = false; // Disable transpose for compound datasets
@@ -121,7 +119,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     }
 
     @Override
-    protected void loadData(DataFormat dataObject) throws Exception {
+    protected void loadData(DataFormat dataObject) throws Exception
+    {
         super.loadData(dataObject);
 
         if (dataValue == null) {
@@ -141,15 +140,17 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      * @return The newly created NatTable
      */
     @Override
-    protected NatTable createTable(Composite parent, DataFormat dataObject) {
+    protected NatTable createTable(Composite parent, DataFormat dataObject)
+    {
         // Create body layer
-        final ColumnGroupModel columnGroupModel = new ColumnGroupModel();
+        final ColumnGroupModel columnGroupModel      = new ColumnGroupModel();
         final ColumnGroupModel secondLevelGroupModel = new ColumnGroupModel();
 
         try {
             dataProvider = DataProviderFactory.getDataProvider(dataObject, dataValue, isDataTransposed);
 
-            log.trace("createTable(): rows={} : cols={}", dataProvider.getRowCount(), dataProvider.getColumnCount());
+            log.trace("createTable(): rows={} : cols={}", dataProvider.getRowCount(),
+                      dataProvider.getColumnCount());
 
             dataLayer = new DataLayer(dataProvider);
         }
@@ -158,23 +159,24 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             return null;
         }
 
-        final ColumnGroupExpandCollapseLayer expandCollapseLayer = new ColumnGroupExpandCollapseLayer(dataLayer,
-                secondLevelGroupModel, columnGroupModel);
-        selectionLayer = new SelectionLayer(expandCollapseLayer);
+        final ColumnGroupExpandCollapseLayer expandCollapseLayer =
+            new ColumnGroupExpandCollapseLayer(dataLayer, secondLevelGroupModel, columnGroupModel);
+        selectionLayer                    = new SelectionLayer(expandCollapseLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
 
         dataLayer.setDefaultColumnWidth(80);
 
         // Create the Column Header layer
         columnHeaderDataProvider = new CompoundDSColumnHeaderDataProvider(dataObject);
-        ColumnHeaderLayer columnHeaderLayer = new ColumnHeader(new DataLayer(columnHeaderDataProvider), viewportLayer,
-                selectionLayer);
+        ColumnHeaderLayer columnHeaderLayer =
+            new ColumnHeader(new DataLayer(columnHeaderDataProvider), viewportLayer, selectionLayer);
 
         // Set up column grouping
-        ColumnGroupHeaderLayer columnGroupHeaderLayer = new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer,
-                columnGroupModel);
-        CompoundDSNestedColumnHeaderLayer nestedColumnGroupHeaderLayer = new CompoundDSNestedColumnHeaderLayer(
-                columnGroupHeaderLayer, selectionLayer, secondLevelGroupModel);
+        ColumnGroupHeaderLayer columnGroupHeaderLayer =
+            new ColumnGroupHeaderLayer(columnHeaderLayer, selectionLayer, columnGroupModel);
+        CompoundDSNestedColumnHeaderLayer nestedColumnGroupHeaderLayer =
+            new CompoundDSNestedColumnHeaderLayer(columnGroupHeaderLayer, selectionLayer,
+                                                  secondLevelGroupModel);
 
         // Create the Row Header layer
         rowHeaderDataProvider = new RowHeaderDataProvider(dataObject);
@@ -182,17 +184,17 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         // Try to adapt row height to current font
         int defaultRowHeight = curFont == null ? 20 : (2 * curFont.getFontData()[0].getHeight());
 
-        DataLayer baseLayer = new DataLayer(rowHeaderDataProvider, 40, defaultRowHeight);
+        DataLayer baseLayer           = new DataLayer(rowHeaderDataProvider, 40, defaultRowHeight);
         RowHeaderLayer rowHeaderLayer = new RowHeader(baseLayer, viewportLayer, selectionLayer);
 
         // Create the Corner Layer
         ILayer cornerLayer = new CornerLayer(
-                new DataLayer(new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
-                rowHeaderLayer, nestedColumnGroupHeaderLayer);
+            new DataLayer(new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider)),
+            rowHeaderLayer, nestedColumnGroupHeaderLayer);
 
         // Create the Grid Layer
-        GridLayer gridLayer = new EditingGridLayer(viewportLayer, nestedColumnGroupHeaderLayer, rowHeaderLayer,
-                cornerLayer);
+        GridLayer gridLayer =
+            new EditingGridLayer(viewportLayer, nestedColumnGroupHeaderLayer, rowHeaderLayer, cornerLayer);
 
         final NatTable natTable = new NatTable(parent, gridLayer, false);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
@@ -210,7 +212,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      * Returns the selected data values of the ScalarDS
      */
     @Override
-    public Object getSelectedData() {
+    public Object getSelectedData()
+    {
         Object selectedData = null;
 
         int cols = this.getSelectedColumnCount();
@@ -224,17 +227,17 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
         Object colData = null;
         try {
-            colData = ((List<?>) dataObject.getData()).get(selectionLayer.getSelectedColumnPositions()[0]);
+            colData = ((List<?>)dataObject.getData()).get(selectionLayer.getSelectedColumnPositions()[0]);
         }
         catch (Exception ex) {
             log.debug("getSelectedData(): ", ex);
             return null;
         }
 
-        int size = Array.getLength(colData);
+        int size     = Array.getLength(colData);
         String cName = colData.getClass().getName();
-        int cIndex = cName.lastIndexOf('[');
-        char nt = ' ';
+        int cIndex   = cName.lastIndexOf('[');
+        char nt      = ' ';
         if (cIndex >= 0) {
             nt = cName.charAt(cIndex + 1);
         }
@@ -285,8 +288,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             log.trace("getSelectedData(): colData={}", dataArrayValue);
         }
         else {
-            //dataArrayValue = Array.get(colData, 0);
-            //Array.set(selectedData, 0, dataArrayValue);
+            // dataArrayValue = Array.get(colData, 0);
+            // Array.set(selectedData, 0, dataArrayValue);
             System.arraycopy(colData, 0, selectedData, 0, size);
             log.trace("getSelectedData(): colData={}", colData);
         }
@@ -308,26 +311,29 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      * @return a new IEditableRule for the dataset
      */
     @Override
-    protected IEditableRule getDataEditingRule(DataFormat dataObject) {
+    protected IEditableRule getDataEditingRule(DataFormat dataObject)
+    {
         if (dataObject == null)
             return null;
 
         // Only Allow editing if not in read-only mode
         return new EditableRule() {
             @Override
-            public boolean isEditable(int columnIndex, int rowIndex) {
+            public boolean isEditable(int columnIndex, int rowIndex)
+            {
                 /*
                  * TODO: Should be able to edit character-displayed types and datasets when
                  * displayed as hex/binary.
                  */
-                //return !(isReadOnly || isDisplayTypeChar || showAsBin || showAsHex);
+                // return !(isReadOnly || isDisplayTypeChar || showAsBin || showAsHex);
                 return !isReadOnly;
             }
         };
     }
 
     @Override
-    protected void showStdRefData(byte[] refarr) {
+    protected void showStdRefData(byte[] refarr)
+    {
 
         if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show reference data: invalid or null data");
@@ -335,7 +341,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             return;
         }
 
-        log.trace("showRegRefData: refarr={}; Currently no support for show Std. Ref. Data in Compound Datasets", refarr);
+        log.trace(
+            "showRegRefData: refarr={}; Currently no support for show Std. Ref. Data in Compound Datasets",
+            refarr);
     }
 
     /**
@@ -347,38 +355,40 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      *
      */
     @Override
-    protected void showObjRefData(byte[] refarr) {
+    protected void showObjRefData(byte[] refarr)
+    {
         if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showObjRefData(): refarr is null or invalid");
             return;
         }
 
-        String objref = H5Datatype.descReferenceObject(((HObject) dataObject).getFileFormat().getFID(), refarr);
+        String objref =
+            H5Datatype.descReferenceObject(((HObject)dataObject).getFileFormat().getFID(), refarr);
 
         // find the object location
-        String oidStr = objref.substring(objref.indexOf('/'), objref.indexOf("H5O_TYPE_OBJ_REF")-1);
-        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
+        String oidStr = objref.substring(objref.indexOf('/'), objref.indexOf("H5O_TYPE_OBJ_REF") - 1);
+        HObject obj   = FileFormat.findObject(((HObject)dataObject).getFileFormat(), oidStr);
         if (obj == null || !(obj instanceof ScalarDS)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showObjRefData(): obj is null or not a Scalar Dataset");
             return;
         }
 
-        ScalarDS dset = (ScalarDS) obj;
+        ScalarDS dset     = (ScalarDS)obj;
         ScalarDS dsetCopy = null;
 
         // create an instance of the dataset constructor
         Constructor<? extends ScalarDS> constructor = null;
-        Object[] paramObj = null;
-        Object data = null;
+        Object[] paramObj                           = null;
+        Object data                                 = null;
 
         try {
-            Class[] paramClass = { FileFormat.class, String.class, String.class };
-            constructor = dset.getClass().getConstructor(paramClass);
-            paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
-            dsetCopy = constructor.newInstance(paramObj);
-            data = dsetCopy.getData();
+            Class[] paramClass = {FileFormat.class, String.class, String.class};
+            constructor        = dset.getClass().getConstructor(paramClass);
+            paramObj           = new Object[] {dset.getFileFormat(), dset.getName(), dset.getPath()};
+            dsetCopy           = constructor.newInstance(paramObj);
+            data               = dsetCopy.getData();
         }
         catch (Exception ex) {
             log.debug("showObjRefData(): couldn't show data: ", ex);
@@ -390,14 +400,14 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             return;
 
         Class<?> theClass = null;
-        String viewName = null;
+        String viewName   = null;
 
         switch (viewType) {
         case IMAGE:
             viewName = HDFView.getListOfImageViews().get(0);
             break;
         case TABLE:
-            viewName = (String) HDFView.getListOfTableViews().get(0);
+            viewName = (String)HDFView.getListOfTableViews().get(0);
             break;
         default:
             viewName = null;
@@ -433,14 +443,15 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
             catch (Exception ex) {
                 log.debug("showObjRefData(): no suitable display class found");
-                Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
+                Tools.showError(shell, "Select",
+                                "Could not show reference data: no suitable display class found");
                 return;
             }
         }
 
         HashMap map = new HashMap(1);
         map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy);
-        Object[] args = { viewer, map };
+        Object[] args = {viewer, map};
 
         try {
             Tools.newInstance(theClass, args);
@@ -460,24 +471,26 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      *
      */
     @Override
-    protected void showRegRefData(byte[] refarr) {
+    protected void showRegRefData(byte[] refarr)
+    {
         if (refarr == null || (refarr.length <= 0) || H5Datatype.zeroArrayCheck(refarr)) {
             Tools.showError(shell, "Select", "Could not show region reference data: invalid or null data");
             log.debug("showRegRefData(): refarr is null or invalid");
             return;
         }
 
-        String reg = H5Datatype.descRegionDataset(((HObject) dataObject).getFileFormat().getFID(), refarr);
+        String reg = H5Datatype.descRegionDataset(((HObject)dataObject).getFileFormat().getFID(), refarr);
 
         boolean isPointSelection = (reg.indexOf('-') <= 0);
 
         // find the object location
-        String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf("REGION_TYPE")-1);
+        String oidStr = reg.substring(reg.indexOf('/'), reg.indexOf("REGION_TYPE") - 1);
 
         // decode the region selection
         String regStr = reg.substring(reg.indexOf('{') + 1, reg.indexOf('}'));
         if (regStr == null || regStr.length() <= 0) {
-            Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
+            Tools.showError(shell, "Select",
+                            "Could not show region reference data: no region selection made.");
             log.debug("showRegRefData(): no region selection made");
             return; // no selection
         }
@@ -486,30 +499,31 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         // regStr = reg.substring(reg.indexOf('}') + 1);
 
         StringTokenizer st = new StringTokenizer(regStr);
-        int nSelections = st.countTokens();
+        int nSelections    = st.countTokens();
         if (nSelections <= 0) {
-            Tools.showError(shell, "Select", "Could not show region reference data: no region selection made.");
+            Tools.showError(shell, "Select",
+                            "Could not show region reference data: no region selection made.");
             log.debug("showRegRefData(): no region selection made");
             return; // no selection
         }
 
-        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), oidStr);
+        HObject obj = FileFormat.findObject(((HObject)dataObject).getFileFormat(), oidStr);
         if (obj == null || !(obj instanceof ScalarDS)) {
             Tools.showError(shell, "Select", "Could not show object reference data: invalid or null data");
             log.debug("showRegRefData(): obj is null or not a Scalar Dataset");
             return;
         }
 
-        ScalarDS dset = (ScalarDS) obj;
+        ScalarDS dset     = (ScalarDS)obj;
         ScalarDS dsetCopy = null;
 
         // create an instance of the dataset constructor
         Constructor<? extends ScalarDS> constructor = null;
-        Object[] paramObj = null;
+        Object[] paramObj                           = null;
         try {
-            Class[] paramClass = { FileFormat.class, String.class, String.class };
-            constructor = dset.getClass().getConstructor(paramClass);
-            paramObj = new Object[] { dset.getFileFormat(), dset.getName(), dset.getPath() };
+            Class[] paramClass = {FileFormat.class, String.class, String.class};
+            constructor        = dset.getClass().getConstructor(paramClass);
+            paramObj           = new Object[] {dset.getFileFormat(), dset.getName(), dset.getPath()};
         }
         catch (Exception ex) {
             log.debug("showRegRefData(): constructor failure: ", ex);
@@ -547,9 +561,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             // set the selected dimension sizes based on the region selection
             // info.
-            int idx = 0;
+            int idx        = 0;
             String sizeStr = null;
-            String token = st.nextToken();
+            String token   = st.nextToken();
 
             token = token.replace('(', ' ');
             token = token.replace(')', ' ');
@@ -558,18 +572,18 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 StringTokenizer tmp = new StringTokenizer(token, ",");
                 while (tmp.hasMoreTokens()) {
                     count[idx] = 1;
-                    sizeStr = tmp.nextToken().trim();
+                    sizeStr    = tmp.nextToken().trim();
                     start[idx] = Long.valueOf(sizeStr);
                     idx++;
                 }
             }
             else {
                 // rectangle selection
-                String startStr = token.substring(0, token.indexOf('-'));
-                String endStr = token.substring(token.indexOf('-') + 1);
+                String startStr     = token.substring(0, token.indexOf('-'));
+                String endStr       = token.substring(token.indexOf('-') + 1);
                 StringTokenizer tmp = new StringTokenizer(startStr, ",");
                 while (tmp.hasMoreTokens()) {
-                    sizeStr = tmp.nextToken().trim();
+                    sizeStr    = tmp.nextToken().trim();
                     start[idx] = Long.valueOf(sizeStr);
                     idx++;
                 }
@@ -577,7 +591,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 idx = 0;
                 tmp = new StringTokenizer(endStr, ",");
                 while (tmp.hasMoreTokens()) {
-                    sizeStr = tmp.nextToken().trim();
+                    sizeStr    = tmp.nextToken().trim();
                     count[idx] = Long.valueOf(sizeStr) - start[idx] + 1;
                     idx++;
                 }
@@ -592,14 +606,14 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
 
             Class<?> theClass = null;
-            String viewName = null;
+            String viewName   = null;
 
             switch (viewType) {
             case IMAGE:
                 viewName = HDFView.getListOfImageViews().get(0);
                 break;
             case TABLE:
-                viewName = (String) HDFView.getListOfTableViews().get(0);
+                viewName = (String)HDFView.getListOfTableViews().get(0);
                 break;
             default:
                 viewName = null;
@@ -635,14 +649,15 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 }
                 catch (Exception ex) {
                     log.debug("showRegRefData(): no suitable display class found");
-                    Tools.showError(shell, "Select", "Could not show reference data: no suitable display class found");
+                    Tools.showError(shell, "Select",
+                                    "Could not show reference data: no suitable display class found");
                     return;
                 }
             }
 
             HashMap map = new HashMap(1);
             map.put(ViewProperties.DATA_VIEW_KEY.OBJECT, dsetCopy);
-            Object[] args = { viewer, map };
+            Object[] args = {viewer, map};
 
             try {
                 Tools.newInstance(theClass, args);
@@ -652,26 +667,26 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 Tools.showError(shell, "Select", "Could not show reference data: " + ex.toString());
             }
         } // (st.hasMoreTokens())
-    } // end of showRegRefData()
+    }     // end of showRegRefData()
 
     /**
      * Update cell value label and cell value field when a cell is selected
      */
-    private class CompoundDSCellSelectionListener implements ILayerListener
-    {
+    private class CompoundDSCellSelectionListener implements ILayerListener {
         @Override
-        public void handleLayerEvent(ILayerEvent e) {
+        public void handleLayerEvent(ILayerEvent e)
+        {
             if (e instanceof CellSelectionEvent) {
-                CellSelectionEvent event = (CellSelectionEvent) e;
-                boolean valIsRegRef = false;
-                boolean valIsObjRef = false;
+                CellSelectionEvent event = (CellSelectionEvent)e;
+                boolean valIsRegRef      = false;
+                boolean valIsObjRef      = false;
 
                 HashMap<Integer, Integer> baseIndexMap;
                 HashMap<Integer, Integer> relCmpdStartIndexMap;
 
-                CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
-                Datatype cmpdType = dataObject.getDatatype();
-                Datatype[] selectedMemberTypes = dataFormat.getSelectedMemberTypes();
+                CompoundDataFormat dataFormat     = (CompoundDataFormat)dataObject;
+                Datatype cmpdType                 = dataObject.getDatatype();
+                Datatype[] selectedMemberTypes    = dataFormat.getSelectedMemberTypes();
                 List<Datatype> localSelectedTypes = Arrays.asList(selectedMemberTypes);
 
                 HashMap<Integer, Integer>[] maps = null;
@@ -681,7 +696,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 catch (Exception ex) {
                     log.debug("CompoundDSCellSelectionListener: buildIndexMaps", ex);
                 }
-                baseIndexMap = maps[DataFactoryUtils.COL_TO_BASE_CLASS_MAP_INDEX];
+                baseIndexMap         = maps[DataFactoryUtils.COL_TO_BASE_CLASS_MAP_INDEX];
                 relCmpdStartIndexMap = maps[DataFactoryUtils.CMPD_START_IDX_MAP_INDEX];
 
                 if (baseIndexMap.size() == 0) {
@@ -697,12 +712,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                  * only. For top-level CompoundData, this should be the entire width of the
                  * dataset. For nested CompoundData, nCols will be a subset of these columns.
                  */
-                int nCols = (int) dataFormat.getWidth() * baseIndexMap.size();
-                int nRows = (int) dataFormat.getHeight();
+                int nCols = (int)dataFormat.getWidth() * baseIndexMap.size();
+                int nRows = (int)dataFormat.getHeight();
 
-                int nSubColumns = (int) dataFormat.getWidth();
-                int fieldIndex = event.getColumnPosition();
-                int rowIdx = event.getRowPosition();
+                int nSubColumns = (int)dataFormat.getWidth();
+                int fieldIndex  = event.getColumnPosition();
+                int rowIdx      = event.getRowPosition();
 
                 if (nSubColumns > 1) { // multi-dimension compound dataset
                     /*
@@ -715,14 +730,16 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                         fieldIndex = selectedMemberTypes.length;
 
                     int realColIdx = event.getColumnPosition() / selectedMemberTypes.length;
-                    rowIdx = event.getRowPosition() * nSubColumns + realColIdx;
+                    rowIdx         = event.getRowPosition() * nSubColumns + realColIdx;
                 }
-                log.trace("CompoundDSCellSelectionListener: CellSelected fieldIndex={}:{}", rowIdx, fieldIndex);
+                log.trace("CompoundDSCellSelectionListener: CellSelected fieldIndex={}:{}", rowIdx,
+                          fieldIndex);
 
-                int bIndex = baseIndexMap.get(fieldIndex-1);
-                Object colValue = ((List<?>) dataValue).get(bIndex);
+                int bIndex      = baseIndexMap.get(fieldIndex - 1);
+                Object colValue = ((List<?>)dataValue).get(bIndex);
                 if (colValue == null)
-                    log.debug("CompoundDSCellSelectionListener: CellSelected colValue is null for Idx={}", bIndex);
+                    log.debug("CompoundDSCellSelectionListener: CellSelected colValue is null for Idx={}",
+                              bIndex);
 
                 Datatype selectedType = selectedMemberTypes[bIndex];
 
@@ -731,18 +748,25 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     valIsObjRef = (selectedType.getDatatypeSize() == HDF5Constants.H5R_OBJ_REF_BUF_SIZE);
                 }
 
-                int rowStart = ((RowHeaderDataProvider) rowHeaderDataProvider).start;
-                int rowStride = ((RowHeaderDataProvider) rowHeaderDataProvider).stride;
+                int rowStart  = ((RowHeaderDataProvider)rowHeaderDataProvider).start;
+                int rowStride = ((RowHeaderDataProvider)rowHeaderDataProvider).stride;
 
-                int rowIndex = rowStart + indexBase + dataTable.getRowIndexByPosition(event.getRowPosition()) * rowStride;
-                Object fieldName = columnHeaderDataProvider.getDataValue(dataTable.getColumnIndexByPosition(event.getColumnPosition()), 0);
+                int rowIndex = rowStart + indexBase +
+                               dataTable.getRowIndexByPosition(event.getRowPosition()) * rowStride;
+                Object fieldName = columnHeaderDataProvider.getDataValue(
+                    dataTable.getColumnIndexByPosition(event.getColumnPosition()), 0);
 
                 String colIndex = "";
                 if (dataObject.getWidth() > 1) {
-                    int groupSize = ((CompoundDataFormat) dataObject).getSelectedMemberCount();
-                    colIndex = "[" + String.valueOf((dataTable.getColumnIndexByPosition(event.getColumnPosition())) / groupSize) + "]";
+                    int groupSize = ((CompoundDataFormat)dataObject).getSelectedMemberCount();
+                    colIndex =
+                        "[" +
+                        String.valueOf((dataTable.getColumnIndexByPosition(event.getColumnPosition())) /
+                                       groupSize) +
+                        "]";
                 }
-                Object val = dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
+                Object val =
+                    dataTable.getDataValueByPosition(event.getColumnPosition(), event.getRowPosition());
 
                 cellLabel.setText(String.valueOf(rowIndex) + ", " + fieldName + colIndex + " =  ");
 
@@ -755,27 +779,31 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 if (valIsRegRef) {
                     boolean displayValues = ViewProperties.showRegRefValues();
 
-                    if (val != null && ((String) val).compareTo("NULL") != 0) {
-                        strVal = (String) val;
+                    if (val != null && ((String)val).compareTo("NULL") != 0) {
+                        strVal = (String)val;
                     }
                     else {
                         strVal = null;
                     }
                 }
                 else if (valIsObjRef) {
-                    if (val != null && ((String) val).compareTo("NULL") != 0) {
-                        strVal = (String) val;
+                    if (val != null && ((String)val).compareTo("NULL") != 0) {
+                        strVal = (String)val;
                     }
                     else {
                         strVal = null;
                     }
                 }
 
-                ILayerCell cell = dataTable.getCellByPosition(((CellSelectionEvent) e).getColumnPosition(), ((CellSelectionEvent) e).getRowPosition());
-                strVal = dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val).toString();
+                ILayerCell cell = dataTable.getCellByPosition(((CellSelectionEvent)e).getColumnPosition(),
+                                                              ((CellSelectionEvent)e).getRowPosition());
+                strVal =
+                    dataDisplayConverter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), val)
+                        .toString();
 
                 cellValueField.setText(strVal);
-                ((ScrolledComposite) cellValueField.getParent()).setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+                ((ScrolledComposite)cellValueField.getParent())
+                    .setMinSize(cellValueField.computeSize(SWT.DEFAULT, SWT.DEFAULT));
             }
         }
     }
@@ -787,19 +815,20 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     private class CompoundDSColumnHeaderDataProvider implements IDataProvider {
         // Column names with CompoundDS SEPARATOR character '->' left intact.
         // Used in CompoundDSNestedColumnHeader to provide correct nesting structure.
-        private final String[]          columnNamesFull;
+        private final String[] columnNamesFull;
 
         // Simplified base column names without separator character. Used to
         // actually label the columns.
         private final ArrayList<String> columnNames;
 
-        private final int               ncols;
-        private final int               groupSize;
+        private final int ncols;
+        private final int groupSize;
 
-        public CompoundDSColumnHeaderDataProvider(DataFormat dataObject) {
-            CompoundDataFormat dataFormat = (CompoundDataFormat) dataObject;
+        public CompoundDSColumnHeaderDataProvider(DataFormat dataObject)
+        {
+            CompoundDataFormat dataFormat = (CompoundDataFormat)dataObject;
 
-            Datatype cmpdType = dataObject.getDatatype();
+            Datatype cmpdType            = dataObject.getDatatype();
             List<Datatype> selectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
             final List<String> datasetMemberNames = Arrays.asList(dataFormat.getSelectedMemberNames());
 
@@ -815,7 +844,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             // nested field with the full name 'nested_name->a_name' has a simplified column
             // name of 'a_name'
             for (int j = 0; j < columnNames.size(); j++) {
-                String nestedName = columnNames.get(j);
+                String nestedName   = columnNames.get(j);
                 int nestingPosition = nestedName.lastIndexOf("->");
 
                 // If this is a nested field, this column's name is whatever follows the last
@@ -826,17 +855,19 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             groupSize = columnNames.size();
 
-            ncols = columnNames.size() * (int) dataFormat.getWidth();
+            ncols = columnNames.size() * (int)dataFormat.getWidth();
         }
 
         private void recursiveColumnHeaderSetup(List<String> outColNames, CompoundDataFormat dataFormat,
-                Datatype curDtype, List<String> memberNames, List<Datatype> memberTypes) {
+                                                Datatype curDtype, List<String> memberNames,
+                                                List<Datatype> memberTypes)
+        {
 
             if (curDtype.isArray()) {
                 /*
                  * ARRAY of COMPOUND type
                  */
-                int arrSize = 1;
+                int arrSize                 = 1;
                 Datatype nestedCompoundType = curDtype;
                 while (nestedCompoundType != null) {
                     if (nestedCompoundType.isCompound()) {
@@ -868,7 +899,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                  * directly follow the name of the top-level member itself and will break if
                  * that assumption is not true.
                  */
-                StringBuilder sBuilder = new StringBuilder();
+                StringBuilder sBuilder              = new StringBuilder();
                 ArrayList<String> nestedMemberNames = new ArrayList<>(arrSize * memberNames.size());
                 for (int i = 0; i < arrSize; i++) {
                     for (int j = 0; j < memberNames.size(); j++) {
@@ -888,10 +919,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     }
                 }
 
-                recursiveColumnHeaderSetup(outColNames, dataFormat, nestedCompoundType, nestedMemberNames, memberTypes);
+                recursiveColumnHeaderSetup(outColNames, dataFormat, nestedCompoundType, nestedMemberNames,
+                                           memberTypes);
             }
             else if (curDtype.isVLEN() && !curDtype.isVarStr()) {
-                log.debug("recursiveColumnHeaderSetup: curDtype={} size={}", curDtype, curDtype.getDatatypeSize());
+                log.debug("recursiveColumnHeaderSetup: curDtype={} size={}", curDtype,
+                          curDtype.getDatatypeSize());
                 /*
                  * TODO: empty until we have true variable-length support.
                  */
@@ -899,11 +932,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             else if (curDtype.isCompound()) {
                 ListIterator<String> localIt = memberNames.listIterator();
                 while (localIt.hasNext()) {
-                    int curIdx = localIt.nextIndex();
-                    String curName = localIt.next();
-                    Datatype curType = memberTypes.get(curIdx % memberTypes.size());
+                    int curIdx                         = localIt.nextIndex();
+                    String curName                     = localIt.next();
+                    Datatype curType                   = memberTypes.get(curIdx % memberTypes.size());
                     Datatype nestedArrayOfCompoundType = null;
-                    boolean nestedArrayOfCompound = false;
+                    boolean nestedArrayOfCompound      = false;
 
                     /*
                      * Recursively detect any nested array/vlen of compound types and deal with them
@@ -913,7 +946,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                         Datatype base = curType.getDatatypeBase();
                         while (base != null) {
                             if (base.isCompound()) {
-                                nestedArrayOfCompound = true;
+                                nestedArrayOfCompound     = true;
                                 nestedArrayOfCompoundType = base;
                                 break;
                             }
@@ -927,7 +960,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                      * members n times, where n is the number of array or vlen elements.
                      */
                     if (nestedArrayOfCompound) {
-                        List<Datatype> selTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedArrayOfCompoundType);
+                        List<Datatype> selTypes =
+                            DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedArrayOfCompoundType);
                         List<String> selMemberNames = new ArrayList<>(selTypes.size());
 
                         int arrCmpdLen = calcArrayOfCompoundLen(selTypes);
@@ -935,7 +969,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                             selMemberNames.add(localIt.next());
                         }
 
-                        recursiveColumnHeaderSetup(outColNames, dataFormat, curType, selMemberNames, selTypes);
+                        recursiveColumnHeaderSetup(outColNames, dataFormat, curType, selMemberNames,
+                                                   selTypes);
                     }
                     else {
                         // Copy the dataset member name reference, so changes to the column name
@@ -948,8 +983,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             }
         }
 
-        private int calcArrayOfCompoundLen(List<Datatype> datatypes) {
-            int count = 0;
+        private int calcArrayOfCompoundLen(List<Datatype> datatypes)
+        {
+            int count                  = 0;
             Iterator<Datatype> localIt = datatypes.iterator();
             while (localIt.hasNext()) {
                 Datatype curType = localIt.next();
@@ -971,17 +1007,20 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
 
         @Override
-        public int getColumnCount() {
+        public int getColumnCount()
+        {
             return ncols;
         }
 
         @Override
-        public int getRowCount() {
+        public int getRowCount()
+        {
             return 1;
         }
 
         @Override
-        public Object getDataValue(int columnIndex, int rowIndex) {
+        public Object getDataValue(int columnIndex, int rowIndex)
+        {
             try {
                 return columnNames.get(columnIndex % groupSize);
             }
@@ -992,7 +1031,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         }
 
         @Override
-        public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
+        public void setDataValue(int columnIndex, int rowIndex, Object newValue)
+        {
             // Disable column header editing
             return;
         }
@@ -1003,7 +1043,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      */
     private class CompoundDSNestedColumnHeaderLayer extends ColumnGroupGroupHeaderLayer {
         public CompoundDSNestedColumnHeaderLayer(ColumnGroupHeaderLayer columnGroupHeaderLayer,
-                SelectionLayer selectionLayer, ColumnGroupModel columnGroupModel) {
+                                                 SelectionLayer selectionLayer,
+                                                 ColumnGroupModel columnGroupModel)
+        {
             super(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
 
             if (curFont != null) {
@@ -1011,9 +1053,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 columnGroupHeaderLayer.setRowHeight(2 * curFont.getFontData()[0].getHeight());
             }
 
-            final String[] allColumnNames = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).columnNamesFull;
-            final int groupSize = ((CompoundDSColumnHeaderDataProvider) columnHeaderDataProvider).groupSize;
-            log.trace("CompoundDSNestedColumnHeaderLayer: groupSize={} -- allColumnNames={}", groupSize, allColumnNames);
+            final String[] allColumnNames =
+                ((CompoundDSColumnHeaderDataProvider)columnHeaderDataProvider).columnNamesFull;
+            final int groupSize = ((CompoundDSColumnHeaderDataProvider)columnHeaderDataProvider).groupSize;
+            log.trace("CompoundDSNestedColumnHeaderLayer: groupSize={} -- allColumnNames={}", groupSize,
+                      allColumnNames);
 
             // Set up first-level column grouping
             int[] indices = new int[groupSize];
@@ -1029,7 +1073,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             StringBuilder columnHeaderBuilder = new StringBuilder();
             for (int k = 0; k < dataObject.getWidth(); k++) {
                 for (int i = 0; i < allColumnNames.length; i++) {
-                    int colindex = i + k * allColumnNames.length;
+                    int colindex        = i + k * allColumnNames.length;
                     int nestingPosition = allColumnNames[i].lastIndexOf("->");
 
                     columnHeaderBuilder.setLength(0);
@@ -1038,13 +1082,15 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                         ColumnGroup nestingGroup = columnGroupModel.getColumnGroupByIndex(colindex);
                         if (nestingGroup != null) {
                             String columnGroupName = nestingGroup.getName();
-                            int groupTitleStartPosition = allColumnNames[i].lastIndexOf("->", nestingPosition);
+                            int groupTitleStartPosition =
+                                allColumnNames[i].lastIndexOf("->", nestingPosition);
                             String nestingName = allColumnNames[i].substring(nestingPosition + 2);
                             String newGroupName;
 
                             if (groupTitleStartPosition == 0) {
                                 /* Singly nested member */
-                                newGroupName = allColumnNames[i].substring(groupTitleStartPosition, nestingPosition);
+                                newGroupName =
+                                    allColumnNames[i].substring(groupTitleStartPosition, nestingPosition);
                             }
                             else if (groupTitleStartPosition > 0) {
                                 /* Member nested at second level or beyond, skip past leading '->' */
@@ -1069,10 +1115,13 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                                 processArrayOfCompound(columnHeaderBuilder, nestingName);
                             }
 
-                            columnGroupHeaderLayer.addColumnsIndexesToGroup(columnHeaderBuilder.toString(), colindex);
+                            columnGroupHeaderLayer.addColumnsIndexesToGroup(columnHeaderBuilder.toString(),
+                                                                            colindex);
                         }
                         else
-                            log.debug("CompoundDSNestedColumnHeaderLayer: nesting group was null for index {}", colindex);
+                            log.debug(
+                                "CompoundDSNestedColumnHeaderLayer: nesting group was null for index {}",
+                                colindex);
                     }
                     else if (allColumnNames[i].matches(".*\\[[0-9]*\\]")) {
                         /*
@@ -1081,13 +1130,15 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                         columnHeaderBuilder.append("ARRAY");
                         processArrayOfCompound(columnHeaderBuilder, allColumnNames[i]);
 
-                        columnGroupHeaderLayer.addColumnsIndexesToGroup(columnHeaderBuilder.toString(), colindex);
+                        columnGroupHeaderLayer.addColumnsIndexesToGroup(columnHeaderBuilder.toString(),
+                                                                        colindex);
                     }
                 }
             }
         }
 
-        private void processArrayOfCompound(StringBuilder curBuilder, String columnName) {
+        private void processArrayOfCompound(StringBuilder curBuilder, String columnName)
+        {
             Pattern indexPattern = Pattern.compile(".*\\[([0-9]*)\\]");
             Matcher indexMatcher = indexPattern.matcher(columnName);
 

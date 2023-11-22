@@ -8,35 +8,37 @@
 
 package datatypes;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
-public class H5ObjectEx_T_StringAttribute {
-    private static String FILENAME = "H5ObjectEx_T_StringAttribute.h5";
-    private static String DATASETNAME = "DS1";
-    private static String ATTRIBUTENAME = "A1";
-    private static final int DIM0 = 4;
-    private static final int SDIM = 8;
-    private static final int RANK = 1;
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 
-    private static void CreateDataset() {
-        H5File file = null;
-        H5ScalarDS dset = null;
-        long memtype_id = -1;
-        long filetype_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long attribute_id = -1;
-        long[] dims = { DIM0 };
-        byte[][] dset_data = new byte[DIM0][SDIM];
-        H5Datatype typeInt = null;
-        StringBuilder[] str_data = { new StringBuilder("Parting"), new StringBuilder("is such"),
-                new StringBuilder("sweet"), new StringBuilder("sorrow.") };
+public class H5ObjectEx_T_StringAttribute {
+    private static String FILENAME      = "H5ObjectEx_T_StringAttribute.h5";
+    private static String DATASETNAME   = "DS1";
+    private static String ATTRIBUTENAME = "A1";
+    private static final int DIM0       = 4;
+    private static final int SDIM       = 8;
+    private static final int RANK       = 1;
+
+    private static void CreateDataset()
+    {
+        H5File file              = null;
+        H5ScalarDS dset          = null;
+        long memtype_id          = -1;
+        long filetype_id         = -1;
+        long dataspace_id        = -1;
+        long dataset_id          = -1;
+        long attribute_id        = -1;
+        long[] dims              = {DIM0};
+        byte[][] dset_data       = new byte[DIM0][SDIM];
+        H5Datatype typeInt       = null;
+        StringBuilder[] str_data = {new StringBuilder("Parting"), new StringBuilder("is such"),
+                                    new StringBuilder("sweet"), new StringBuilder("sorrow.")};
 
         // Create a new file using default properties.
         try {
@@ -77,7 +79,7 @@ public class H5ObjectEx_T_StringAttribute {
 
         // Create dataset with a scalar dataspace.
         try {
-            dset = (H5ScalarDS) file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
+            dset = (H5ScalarDS)file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -97,7 +99,7 @@ public class H5ObjectEx_T_StringAttribute {
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
                 attribute_id = H5.H5Acreate(dataset_id, ATTRIBUTENAME, filetype_id, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -108,7 +110,7 @@ public class H5ObjectEx_T_StringAttribute {
             for (int indx = 0; indx < DIM0; indx++) {
                 for (int jndx = 0; jndx < SDIM; jndx++) {
                     if (jndx < str_data[indx].length())
-                        dset_data[indx][jndx] = (byte) str_data[indx].charAt(jndx);
+                        dset_data[indx][jndx] = (byte)str_data[indx].charAt(jndx);
                     else
                         dset_data[indx][jndx] = 0;
                 }
@@ -173,16 +175,17 @@ public class H5ObjectEx_T_StringAttribute {
         }
     }
 
-    private static void ReadDataset() {
-        H5File file = null;
-        H5ScalarDS dset = null;
-        long filetype_id = -1;
-        long memtype_id = -1;
+    private static void ReadDataset()
+    {
+        H5File file       = null;
+        H5ScalarDS dset   = null;
+        long filetype_id  = -1;
+        long memtype_id   = -1;
         long dataspace_id = -1;
-        long dataset_id = -1;
+        long dataset_id   = -1;
         long attribute_id = -1;
-        long sdim = 0;
-        long[] dims = { DIM0 };
+        long sdim         = 0;
+        long[] dims       = {DIM0};
         byte[][] dset_data;
         StringBuilder[] str_data;
 
@@ -197,7 +200,7 @@ public class H5ObjectEx_T_StringAttribute {
 
         // Open an existing dataset.
         try {
-            dset = (H5ScalarDS) file.get(DATASETNAME);
+            dset       = (H5ScalarDS)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -207,7 +210,7 @@ public class H5ObjectEx_T_StringAttribute {
         try {
             if (dataset_id >= 0)
                 attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                                                  HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -244,8 +247,8 @@ public class H5ObjectEx_T_StringAttribute {
         }
 
         // Allocate space for data.
-        dset_data = new byte[(int) dims[0]][(int)sdim];
-        str_data = new StringBuilder[(int) dims[0]];
+        dset_data = new byte[(int)dims[0]][(int)sdim];
+        str_data  = new StringBuilder[(int)dims[0]];
 
         // Create the memory datatype.
         try {
@@ -262,7 +265,7 @@ public class H5ObjectEx_T_StringAttribute {
             if ((attribute_id >= 0) && (memtype_id >= 0))
                 H5.H5Aread(attribute_id, memtype_id, dset_data);
             byte[] tempbuf = new byte[(int)sdim];
-            for (int indx = 0; indx < (int) dims[0]; indx++) {
+            for (int indx = 0; indx < (int)dims[0]; indx++) {
                 for (int jndx = 0; jndx < sdim; jndx++) {
                     tempbuf[jndx] = dset_data[indx][jndx];
                 }
@@ -330,10 +333,10 @@ public class H5ObjectEx_T_StringAttribute {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_T_StringAttribute.CreateDataset();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -341,5 +344,4 @@ public class H5ObjectEx_T_StringAttribute {
         // data using malloc().
         H5ObjectEx_T_StringAttribute.ReadDataset();
     }
-
 }

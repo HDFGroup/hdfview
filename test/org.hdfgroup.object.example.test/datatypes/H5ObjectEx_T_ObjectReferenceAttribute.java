@@ -13,9 +13,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
@@ -25,57 +22,56 @@ import hdf.object.h5.H5ReferenceType;
 import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ScalarDS;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5ObjectEx_T_ObjectReferenceAttribute {
-    private static String FILENAME = "H5ObjectEx_T_ObjectReferenceAttribute.h5";
-    private static String DATASETNAME = "DS1";
+    private static String FILENAME      = "H5ObjectEx_T_ObjectReferenceAttribute.h5";
+    private static String DATASETNAME   = "DS1";
     private static String ATTRIBUTENAME = "A1";
-    private static String DATASETNAME2 = "DS2";
-    private static String GROUPNAME = "G1";
-    private static final int DIM0 = 2;
-    private static final int RANK = 1;
+    private static String DATASETNAME2  = "DS2";
+    private static String GROUPNAME     = "G1";
+    private static final int DIM0       = 2;
+    private static final int RANK       = 1;
 
     // Values for the status of object type
     enum H5O_TYPE_obj {
-        H5O_TYPE_UNKNOWN(HDF5Constants.H5O_TYPE_UNKNOWN), /* Unknown object type */
-        H5O_TYPE_GROUP(HDF5Constants.H5O_TYPE_GROUP), /* Object is a group */
-        H5O_TYPE_DATASET(HDF5Constants.H5O_TYPE_DATASET), /* Object is a dataset */
+        H5O_TYPE_UNKNOWN(HDF5Constants.H5O_TYPE_UNKNOWN),               /* Unknown object type */
+        H5O_TYPE_GROUP(HDF5Constants.H5O_TYPE_GROUP),                   /* Object is a group */
+        H5O_TYPE_DATASET(HDF5Constants.H5O_TYPE_DATASET),               /* Object is a dataset */
         H5O_TYPE_NAMED_DATATYPE(HDF5Constants.H5O_TYPE_NAMED_DATATYPE); /* Object is a named data type */
         private static final Map<Integer, H5O_TYPE_obj> lookup = new HashMap<>();
 
-        static {
+        static
+        {
             for (H5O_TYPE_obj s : EnumSet.allOf(H5O_TYPE_obj.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5O_TYPE_obj(int layout_type) {
-            this.code = layout_type;
-        }
+        H5O_TYPE_obj(int layout_type) { this.code = layout_type; }
 
-        public int getCode() {
-            return this.code;
-        }
+        public int getCode() { return this.code; }
 
-        public static H5O_TYPE_obj get(int code) {
-            return lookup.get(code);
-        }
+        public static H5O_TYPE_obj get(int code) { return lookup.get(code); }
     }
 
-    private static void writeObjRef() {
-        H5File file = null;
-        long file_id = HDF5Constants.H5I_INVALID_HID;
-        H5ScalarDS dset = null;
-        H5ScalarDS dset2 = null;
-        H5Group grp = null;
-        long[] dims = { DIM0 };
+    private static void writeObjRef()
+    {
+        H5File file        = null;
+        long file_id       = HDF5Constants.H5I_INVALID_HID;
+        H5ScalarDS dset    = null;
+        H5ScalarDS dset2   = null;
+        H5Group grp        = null;
+        long[] dims        = {DIM0};
         byte[][] dset_data = new byte[DIM0][HDF5Constants.H5R_REF_BUF_SIZE];
         H5Datatype typeInt = null;
         H5Datatype typeRef = null;
 
         // Create a new file using default properties.
         try {
-            file = new H5File(FILENAME, FileFormat.CREATE);
+            file    = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -85,7 +81,8 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
         // Create the base datatypes.
         try {
             typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 8, Datatype.ORDER_BE, Datatype.NATIVE);
-            typeRef = new H5ReferenceType(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+            typeRef = new H5ReferenceType(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE,
+                                          Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -93,7 +90,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
 
         // Create dataset with a scalar dataspace.
         try {
-            dset2 = (H5ScalarDS) file.createScalarDS(DATASETNAME2, null, typeInt, dims, null, null, 0, null);
+            dset2 = (H5ScalarDS)file.createScalarDS(DATASETNAME2, null, typeInt, dims, null, null, 0, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -101,7 +98,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
 
         // Create a group in the file.
         try {
-            grp = (H5Group) file.createGroup("/" + GROUPNAME, null);
+            grp = (H5Group)file.createGroup("/" + GROUPNAME, null);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -125,7 +122,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
             // Create dataset with a scalar dataspace to serve as the parent
             // for the attribute.
             try {
-                dset = (H5ScalarDS) file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
+                dset = (H5ScalarDS)file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -145,8 +142,16 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
             ex.printStackTrace();
         }
         finally {
-            try {H5.H5Rdestroy(dset_data[1]);} catch (Exception ex) {}
-            try {H5.H5Rdestroy(dset_data[0]);} catch (Exception ex) {}
+            try {
+                H5.H5Rdestroy(dset_data[1]);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                H5.H5Rdestroy(dset_data[0]);
+            }
+            catch (Exception ex) {
+            }
         }
 
         // Close the file.
@@ -158,15 +163,16 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
         }
     }
 
-    private static void readObjRef() {
-        H5File file = null;
-        H5ScalarDS dset = null;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long attribute_id = HDF5Constants.H5I_INVALID_HID;
-        int object_type = -1;
-        long object_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM0 };
+    private static void readObjRef()
+    {
+        H5File file        = null;
+        H5ScalarDS dset    = null;
+        long dataspace_id  = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id    = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id  = HDF5Constants.H5I_INVALID_HID;
+        int object_type    = -1;
+        long object_id     = HDF5Constants.H5I_INVALID_HID;
+        long[] dims        = {DIM0};
         byte[][] dset_data = new byte[DIM0][HDF5Constants.H5R_REF_BUF_SIZE];
 
         // Open an existing file.
@@ -180,7 +186,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
 
         // Open an existing dataset.
         try {
-            dset = (H5ScalarDS) file.get(DATASETNAME);
+            dset       = (H5ScalarDS)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -190,7 +196,7 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
         try {
             if (dataset_id >= 0)
                 attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                                                  HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -229,7 +235,8 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
             // Open the referenced object, get its name and type.
             try {
                 if (dataset_id >= 0) {
-                    object_id = H5.H5Ropen_object(dset_data[indx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    object_id   = H5.H5Ropen_object(dset_data[indx], HDF5Constants.H5P_DEFAULT,
+                                                    HDF5Constants.H5P_DEFAULT);
                     object_type = H5.H5Rget_obj_type(dataset_id, HDF5Constants.H5R_OBJECT, dset_data[indx]);
                 }
                 String obj_name = null;
@@ -259,7 +266,11 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
                 e.printStackTrace();
             }
             finally {
-                try {H5.H5Oclose(object_id);} catch (Exception ex) {}
+                try {
+                    H5.H5Oclose(object_id);
+                }
+                catch (Exception ex) {
+                }
             }
         }
 
@@ -298,9 +309,9 @@ public class H5ObjectEx_T_ObjectReferenceAttribute {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_T_ObjectReferenceAttribute.writeObjRef();
         H5ObjectEx_T_ObjectReferenceAttribute.readObjRef();
     }
-
 }

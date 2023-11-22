@@ -17,13 +17,13 @@ package hdf.object.h5;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import hdf.object.Attribute;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An class that provides general I/O operations for object metadata
@@ -36,23 +36,22 @@ import hdf.object.MetaDataContainer;
  * @author Peter X. Cao, Jordan T. Henderson
  */
 @SuppressWarnings("rawtypes")
-public class H5MetaDataContainer extends HObject implements MetaDataContainer
-{
+public class H5MetaDataContainer extends HObject implements MetaDataContainer {
 
     private static final Logger log = LoggerFactory.getLogger(H5Group.class);
 
     /** The HObject to which this MetaDataContainer is attached */
-    protected HObject         parentObject;
+    protected HObject parentObject;
 
     /**
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
      */
     @SuppressWarnings("rawtypes")
-    protected List            attributeList;
+    protected List attributeList;
 
     /** the number of attributes */
-    private int               nAttributes      = -1;
+    private int nAttributes = -1;
 
     /**
      * Constructs an HDF5 group with specific name, path, and parent.
@@ -66,7 +65,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      * @param parent
      *            the parent of this group.
      */
-    public H5MetaDataContainer(FileFormat theFile, String name, String path, HObject parent) {
+    public H5MetaDataContainer(FileFormat theFile, String name, String path, HObject parent)
+    {
         this(theFile, name, path, parent, null);
     }
 
@@ -85,7 +85,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      *            the oid of this group.
      */
     @Deprecated
-    public H5MetaDataContainer(FileFormat theFile, String name, String path, HObject parent, long[] oid) {
+    public H5MetaDataContainer(FileFormat theFile, String name, String path, HObject parent, long[] oid)
+    {
         super(theFile, name, path, oid);
 
         this.parentObject = parent;
@@ -97,9 +98,10 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public void clear() {
+    public void clear()
+    {
         if (attributeList != null)
-            ((Vector) attributeList).setSize(0);
+            ((Vector)attributeList).setSize(0);
     }
 
     /**
@@ -107,18 +109,14 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      *
      * @return the list.
      */
-    public List getAttributeList() {
-        return attributeList;
-    }
+    public List getAttributeList() { return attributeList; }
 
     /**
      * Retrieves the object's number of attributes.
      *
      * @return the list size.
      */
-    public int getObjectAttributeSize() {
-        return nAttributes;
-    }
+    public int getObjectAttributeSize() { return nAttributes; }
 
     /**
      * Updates the object's number of attributes.
@@ -126,9 +124,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      * @param objectAttributes
      *            the number of attributes for an object.
      */
-    public void setObjectAttributeSize(int objectAttributes) {
-        nAttributes = objectAttributes;
-    }
+    public void setObjectAttributeSize(int objectAttributes) { nAttributes = objectAttributes; }
 
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
@@ -140,8 +136,9 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      * @throws Exception
      *             if the metadata can not be retrieved
      */
-    public List getMetadata() throws Exception {
-        int gmIndexType = 0;
+    public List getMetadata() throws Exception
+    {
+        int gmIndexType  = 0;
         int gmIndexOrder = 0;
 
         try {
@@ -173,7 +170,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      *             if the metadata can not be retrieved
      */
     @SuppressWarnings("rawtypes")
-    public List getMetadata(int... attrPropList) throws Exception {
+    public List getMetadata(int... attrPropList) throws Exception
+    {
         try {
             this.linkTargetObjName = H5File.getLinkTargetName(this.parentObject);
         }
@@ -187,7 +185,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
         }
 
         int indxType = fileFormat.getIndexType(null);
-        int order = fileFormat.getIndexOrder(null);
+        int order    = fileFormat.getIndexOrder(null);
 
         if (attrPropList.length > 0) {
             indxType = attrPropList[0];
@@ -221,7 +219,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      * @throws Exception
      *             if the metadata can not be written
      */
-    public void writeMetadata(Object metadata) throws Exception {
+    public void writeMetadata(Object metadata) throws Exception
+    {
         // only attribute metadata is supported.
         if (!(metadata instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an Attribute");
@@ -229,7 +228,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
         }
 
         boolean attrExisted = false;
-        Attribute attr = (Attribute) metadata;
+        Attribute attr      = (Attribute)metadata;
         log.trace("writeMetadata(): {}", attr.getAttributeName());
 
         if (attributeList == null)
@@ -255,12 +254,13 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      * @throws Exception
      *             if the metadata can not be removed
      */
-    public void removeMetadata(Object metadata) throws Exception {
+    public void removeMetadata(Object metadata) throws Exception
+    {
         // only attribute metadata is supported.
         if (!(metadata instanceof Attribute))
             throw new IllegalArgumentException("Object not an Attribute");
 
-        Attribute attr = (Attribute) metadata;
+        Attribute attr = (Attribute)metadata;
         log.trace("removeMetadata(): {}", attr.getAttributeName());
         List attrList = getMetadata();
         attrList.remove(attr);
@@ -276,7 +276,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      * @throws Exception
      *             if the metadata can not be updated
      */
-    public void updateMetadata(Object metadata) throws Exception {
+    public void updateMetadata(Object metadata) throws Exception
+    {
         // only attribute metadata is supported.
         if (!(metadata instanceof Attribute)) {
             log.debug("updateMetadata(): Object not an Attribute");
@@ -291,9 +292,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      *
      * @return true if it has any attributes, false otherwise.
      */
-    public boolean hasAttribute() {
-        return (nAttributes > 0);
-    }
+    public boolean hasAttribute() { return (nAttributes > 0); }
 
     /*
      * (non-Javadoc)
@@ -301,7 +300,8 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      * @see hdf.object.HObject#open(int)
      */
     @Override
-    public long open() {
+    public long open()
+    {
         return -1;
     }
 
@@ -311,6 +311,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer
      * @see hdf.object.HObject#close(int)
      */
     @Override
-    public void close(long tid) {
+    public void close(long tid)
+    {
     }
 }

@@ -23,6 +23,17 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import hdf.object.Attribute;
+import hdf.object.Datatype;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
+import hdf.object.h5.H5CompoundAttr;
+import hdf.object.h5.H5Datatype;
+import hdf.object.h5.H5ScalarAttr;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
@@ -42,18 +53,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.Attribute;
-import hdf.object.Datatype;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
-import hdf.object.h5.H5CompoundAttr;
-import hdf.object.h5.H5Datatype;
-import hdf.object.h5.H5ScalarAttr;
-
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-
 /**
  * NewScalarAttributeDialog displays components for adding a new attribute.
  *
@@ -62,17 +61,18 @@ import hdf.view.ViewProperties;
  */
 public class NewScalarAttributeDialog extends NewDataObjectDialog {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NewScalarAttributeDialog.class);
+    private static final org.slf4j.Logger log =
+        org.slf4j.LoggerFactory.getLogger(NewScalarAttributeDialog.class);
 
     /** the default length of a string attribute */
-    public static final int   DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;
+    public static final int DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;
 
-    private Text              currentSizeField;
+    private Text currentSizeField;
 
-    private Combo             rankChoice;
+    private Combo rankChoice;
 
     /** TextField for entering the name of the attribute */
-    protected Text            nameField;
+    protected Text nameField;
 
     /**
      * Constructs a NewScalarAttributeDialog with specified object (dataset, group, or
@@ -85,21 +85,22 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
      * @param objs
      *            the list of all objects.
      */
-    public NewScalarAttributeDialog(Shell parent, HObject pObject, List<HObject> objs) {
+    public NewScalarAttributeDialog(Shell parent, HObject pObject, List<HObject> objs)
+    {
         super(parent, pObject, objs);
     }
 
     /**
      * Open the NewScalarAttributeDialog for adding a new attribute.
      */
-    public void open() {
+    public void open()
+    {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell        = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Attribute...");
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
-
 
         // Create Attribute name / Parent Object region
         Composite fieldComposite = new Composite(shell, SWT.NONE);
@@ -149,8 +150,9 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
         rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         rankChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                int rank = rankChoice.getSelectionIndex() + 1;
+            public void widgetSelected(SelectionEvent e)
+            {
+                int rank                     = rankChoice.getSelectionIndex() + 1;
                 StringBuilder currentSizeStr = new StringBuilder("1");
 
                 for (int i = 1; i < rank; i++) {
@@ -160,7 +162,7 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
                 currentSizeField.setText(currentSizeStr.toString());
 
                 String currentStr = currentSizeField.getText();
-                int idx = currentStr.lastIndexOf('x');
+                int idx           = currentStr.lastIndexOf('x');
             }
         });
 
@@ -185,7 +187,8 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (createAttribute()) {
                     shell.dispose();
                 }
@@ -198,7 +201,8 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
         cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = null;
                 shell.dispose();
             }
@@ -210,7 +214,8 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
         helpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         helpButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 new HelpDialog(shell).open();
             }
         });
@@ -219,15 +224,17 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+            public void widgetDisposed(DisposeEvent e)
+            {
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
+        Point shellSize        = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
@@ -240,8 +247,9 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
     }
 
     /** Check if the dim size is valid */
-    private void checkDimSize() {
-        String dimStr = currentSizeField.getText();
+    private void checkDimSize()
+    {
+        String dimStr         = currentSizeField.getText();
         StringTokenizer stDim = new StringTokenizer(dimStr, "x");
 
         int rank = stDim.countTokens();
@@ -262,9 +270,10 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean createAttribute() {
+    private boolean createAttribute()
+    {
         String attrName = null;
-        int rank = -1;
+        int rank        = -1;
         long[] dims;
 
         attrName = nameField.getText();
@@ -278,17 +287,18 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
             return false;
         }
 
-        rank = rankChoice.getSelectionIndex() + 1;
+        rank               = rankChoice.getSelectionIndex() + 1;
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Create", "Number of values in the current dimension size is less than " + rank);
+            Tools.showError(shell, "Create",
+                            "Number of values in the current dimension size is less than " + rank);
             return false;
         }
 
-        long lsize = 1; // The total size
-        long l = 0;
-        dims = new long[rank];
+        long lsize   = 1; // The total size
+        long l       = 0;
+        dims         = new long[rank];
         String token = null;
         for (int i = 0; i < rank; i++) {
             token = st.nextToken().trim();
@@ -317,10 +327,10 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
             H5Datatype datatype = (H5Datatype)createNewDatatype(null);
 
             if (datatype.isCompound())
-                attr = (Attribute)new H5CompoundAttr(parentObj, attrName, datatype, dims);
+                attr = (Attribute) new H5CompoundAttr(parentObj, attrName, datatype, dims);
             else
-                attr = (Attribute)new H5ScalarAttr(parentObj, attrName, datatype, dims);
-            Object value = H5Datatype.allocateArray(datatype, (int) lsize);
+                attr = (Attribute) new H5ScalarAttr(parentObj, attrName, datatype, dims);
+            Object value = H5Datatype.allocateArray(datatype, (int)lsize);
             attr.setAttributeData(value);
 
             log.trace("writeMetadata() via write()");
@@ -340,14 +350,13 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
     private class HelpDialog extends Dialog {
         private Shell helpShell;
 
-        public HelpDialog(Shell parent) {
-            super(parent, SWT.APPLICATION_MODAL);
-        }
+        public HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
 
-        public void open() {
+        public void open()
+        {
             Shell parent = getParent();
-            helpShell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-                    SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
+            helpShell =
+                new Shell(parent, SWT.TITLE | SWT.CLOSE | SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
             helpShell.setFont(curFont);
             helpShell.setText("Create New Attribute");
             helpShell.setImages(ViewProperties.getHdfIcons());
@@ -362,10 +371,11 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
 
                 if (ClassLoader.getSystemResource("hdf/view/HDFView.class").toString().startsWith("jar")) {
                     // Attempt to load HTML help file from jar
-                    try (InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewAttrHelp.html")) {
-                        Scanner scan = new Scanner(in);
+                    try (InputStream in =
+                             getClass().getClassLoader().getResourceAsStream("hdf/view/NewAttrHelp.html")) {
+                        Scanner scan         = new Scanner(in);
                         StringBuilder buffer = new StringBuilder();
-                        while(scan.hasNextLine()) {
+                        while (scan.hasNextLine()) {
                             buffer.append(scan.nextLine());
                         }
 
@@ -409,7 +419,7 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
                             log.debug("help information:", mfu);
                         }
 
-                        URL uu[] = { url, url2, url3 };
+                        URL uu[] = {url, url2, url3};
                         try (URLClassLoader cl = new URLClassLoader(uu)) {
                             URL u = cl.findResource("hdf/view/NewAttrHelp.html");
 
@@ -436,7 +446,8 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
                 okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
                 okButton.addSelectionListener(new SelectionAdapter() {
                     @Override
-                    public void widgetSelected(SelectionEvent e) {
+                    public void widgetSelected(SelectionEvent e)
+                    {
                         helpShell.dispose();
                     }
                 });
@@ -446,14 +457,14 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
                 helpShell.setSize(new Point(500, 500));
 
                 Rectangle parentBounds = parent.getBounds();
-                Point shellSize = helpShell.getSize();
+                Point shellSize        = helpShell.getSize();
                 helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                                       (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
                 helpShell.open();
 
                 Display display = parent.getDisplay();
-                while(!helpShell.isDisposed()) {
+                while (!helpShell.isDisposed()) {
                     if (!display.readAndDispatch())
                         display.sleep();
                 }
@@ -462,9 +473,9 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
                 // Try opening help link in external browser if platform
                 // doesn't support SWT browser
                 Tools.showError(shell, "Browser support",
-                        "Platform doesn't support Browser. Opening external link in web browser...");
+                                "Platform doesn't support Browser. Opening external link in web browser...");
 
-                //TODO: Add support for launching in external browser
+                // TODO: Add support for launching in external browser
             }
             catch (Exception ex) {
                 log.debug("Open New Attribute Help failure: ", ex);
@@ -473,7 +484,5 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
     }
 
     /** @return the new attribute created. */
-    public Attribute getAttribute() {
-        return (Attribute)newObject;
-    }
+    public Attribute getAttribute() { return (Attribute)newObject; }
 }

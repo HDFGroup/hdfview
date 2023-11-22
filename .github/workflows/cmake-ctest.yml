@@ -1,0 +1,337 @@
+name: hdfview ctest runs
+
+# Controls when the action will run. Triggers the workflow on a schedule
+on:
+  workflow_call:
+    inputs:
+      use_hdf:
+        description: "The hdf5 base name of the binaries"
+        required: true
+        type: string
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel
+jobs:
+  build_and_test_win:
+  # Windows w/ MSVC + CMake
+  #
+    name: "Windows MSVC CTest"
+    runs-on: windows-latest
+    steps:
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - uses: actions/checkout@v3
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.12.1
+
+      - name: Get hdf5 release
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'HDFGroup/hdf5'
+          #version: 'tags/1.14.2'
+          #file: 'hdf5-1_14_2-win_vs2022.zip'
+          version: 'tags/snapshot'
+          file: '${{ inputs.use_hdf }}-win_vs2022.zip'
+
+      - name: Uncompress gh binary (Win)
+        run: 7z x ${{ github.workspace }}/${{ inputs.use_hdf }}-win_vs2022.zip
+
+      - name: Uncompress hdf5 binary (Win)
+        working-directory: ${{ github.workspace }}/hdf5
+        run: 7z x HDF5-*-win64.zip
+        shell: bash
+
+      - name: List files for the space (Win)
+        run: |
+              ls -l ${{ github.workspace }}/hdf5
+
+      - name: create hdf5 location (Win)
+        working-directory: ${{ github.workspace }}/hdf5
+        run: |
+          New-Item -Path "${{ github.workspace }}/HDF_Group/HDF5" -ItemType Directory
+          Copy-Item -Path "${{ github.workspace }}/hdf5/HDF*/*" -Destination "${{ github.workspace }}/HDF_Group/HDF5" -Recurse
+        shell: pwsh
+
+      - name: List files for the space (Win)
+        run: ls -l ${{ github.workspace }}/HDF_Group/HDF5
+
+      - name: set hdf5lib name
+        id: set-hdf5lib-name
+        run: |
+          HDF5DIR="${{ github.workspace }}/HDF_Group/HDF5"
+          echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: List files for the binaries (Win)
+        run: |
+            ls -l ${{ github.workspace }}/HDF_Group/HDF5
+
+      - name: Set file base name (Windows)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows)
+        uses: actions/download-artifact@v3
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Run ctest (Windows)
+        env:
+          HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+        run: |
+          cd "${{ runner.workspace }}/hdf5_plugins/hdfsrc"
+          cmake --workflow --preset=ci-StdShar-MSVC --fresh
+        shell: bash
+
+      - name: Publish binary (Windows)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5_plugins"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5_plugins/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build/hdf5_plugins/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5_plugins/hdfsrc/README.md -Destination ${{ runner.workspace }}/build/hdf5_plugins/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5_plugins/build/ci-StdShar-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5_plugins/ -Include *.zip
+          cd "${{ runner.workspace }}/build"
+          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win_vs2022.zip hdf5_plugins
+        shell: pwsh
+
+      - name: List files in the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      # Save files created by ctest script
+      - name: Save published binary (Windows)
+        uses: actions/upload-artifact@v3
+        with:
+              name: zip-vs2022-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_linux:
+  # Linux (Ubuntu) w/ gcc + CMake
+  #
+    name: "Ubuntu gcc CMake"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install CMake Dependencies (Linux)
+        run: sudo apt-get install ninja-build doxygen graphviz
+
+      - uses: actions/checkout@v3
+
+      - name: Get hdf5 release
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'HDFGroup/hdf5'
+          #version: 'tags/1.14.2'
+          #file: 'hdf5-1_14_2-ubuntu-2204.tar.gz'
+          version: 'tags/snapshot'
+          file: '${{ inputs.use_hdf }}-ubuntu-2204.tar.gz'
+
+      - name: List files for the space (Linux)
+        run: |
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}
+
+      - name: Uncompress gh binary (Linux)
+        run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-ubuntu-2204.tar.gz
+
+      - name: Uncompress hdf5 binary (Linux)
+        run:  |
+            cd "${{ github.workspace }}/hdf5"
+            tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Linux.tar.gz --strip-components 1
+
+      - name: set hdf5lib name
+        id: set-hdf5lib-name
+        run: |
+          HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+          FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
+          echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+
+      - name: List files for the binaries (Linux)
+        run: |
+            ls -l ${{ github.workspace }}/hdf5/HDF_Group/HDF5
+
+      - name: Set file base name (Linux)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux)
+        uses: actions/download-artifact@v3
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Run ctest (Linux)
+        env:
+          HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+        run: |
+          cd "${{ runner.workspace }}/hdf5_plugins/hdfsrc"
+          cmake --workflow --preset=ci-StdShar-GNUC --fresh
+        shell: bash
+
+      - name: Publish binary (Linux)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5_plugins"
+          cp ${{ runner.workspace }}/hdf5_plugins/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5_plugins
+          cp ${{ runner.workspace }}/hdf5_plugins/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5_plugins
+          cp ${{ runner.workspace }}/hdf5_plugins/build/ci-StdShar-GNUC/*.tar.gz ${{ runner.workspace }}/build/hdf5_plugins
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz hdf5_plugins
+        shell: bash
+
+      - name: List files in the space (Linux)
+        run: |
+              ls ${{ github.workspace }}
+              ls -l ${{ runner.workspace }}
+
+      # Save files created by ctest script
+      - name: Save published binary (Linux)
+        uses: actions/upload-artifact@v3
+        with:
+              name: tgz-ubuntu-2204-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_mac:
+  # MacOS w/ Clang + CMake
+  #
+    name: "MacOS Clang CMake"
+    runs-on: macos-11
+    steps:
+      - name: Install Dependencies (MacOS)
+        run: brew install ninja doxygen
+
+      - uses: actions/checkout@v3
+
+      - name: Get hdf5 release
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'HDFGroup/hdf5'
+          #version: 'tags/1.14.2'
+          #file: 'hdf5-1_14_2-osx12.tar.gz'
+          version: 'tags/snapshot'
+          file: '${{ inputs.use_hdf }}-osx12.tar.gz'
+
+      - name: List files for the space (MacOS)
+        run: |
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}
+
+      - name: Uncompress gh binary (MacOS)
+        run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-osx12.tar.gz
+
+      - name: Uncompress hdf5 binary (MacOS)
+        run:  |
+            cd "${{ github.workspace }}/hdf5"
+            tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Darwin.tar.gz --strip-components 1
+
+      - name: set hdf5lib name
+        id: set-hdf5lib-name
+        run: |
+          HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+          FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
+          echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+
+      - name: List files for the binaries (MacOS)
+        run: |
+            ls -l ${{ github.workspace }}/hdf5/HDF_Group/HDF5
+
+      - name: Set file base name (MacOS)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (MacOS)
+        uses: actions/download-artifact@v3
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (MacOS)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (MacOS)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+  
+      - name: Run ctest (MacOS)
+        id: run-ctest
+        env:
+          HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+        run: |
+          cd "${{ runner.workspace }}/hdf5_plugins/hdfsrc"
+          cmake --workflow --preset=ci-StdShar-Clang --fresh
+        shell: bash
+
+      - name: Publish binary (MacOS)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5_plugins"
+          cp ${{ runner.workspace }}/hdf5_plugins/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5_plugins
+          cp ${{ runner.workspace }}/hdf5_plugins/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5_plugins
+          cp ${{ runner.workspace }}/hdf5_plugins/build/ci-StdShar-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5_plugins
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz hdf5_plugins
+        shell: bash
+
+      - name: List files in the space (MacOS)
+        run: |
+              ls ${{ github.workspace }}
+              ls -l ${{ runner.workspace }}
+
+      # Save files created by ctest script
+      - name: Save published binary (MacOS)
+        uses: actions/upload-artifact@v3
+        with:
+              name: tgz-osx12-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+

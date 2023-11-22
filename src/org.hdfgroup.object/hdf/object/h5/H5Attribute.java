@@ -15,7 +15,6 @@
 package hdf.object.h5;
 
 import hdf.object.Attribute;
-
 import hdf.object.h5.H5File;
 
 /**

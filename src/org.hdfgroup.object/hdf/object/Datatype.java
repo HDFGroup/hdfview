@@ -27,23 +27,24 @@ import org.slf4j.LoggerFactory;
 /**
  * Datatype is an abstract class that defines datatype characteristics and APIs for a data type.
  *
- * A datatype has four basic characteristics: class, size, byte order and sign. These characteristics are defined in the
- * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+ * A datatype has four basic characteristics: class, size, byte order and sign. These characteristics are
+ * defined in the See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in
+ * HDF5 User Guide</a>
  *
- * These characteristics apply to all the sub-classes. The sub-classes may have different ways to describe a datatype.
- * We here define the <strong> native datatype</strong> to the datatype used by the sub-class. For example, H5Datatype
- * uses a datatype identifier (hid_t) to specify a datatype. NC2Datatype uses ucar.nc2.DataType object to describe its
- * datatype. "Native" here is different from the "native" definition in the HDF5 library.
+ * These characteristics apply to all the sub-classes. The sub-classes may have different ways to describe a
+ * datatype. We here define the <strong> native datatype</strong> to the datatype used by the sub-class. For
+ * example, H5Datatype uses a datatype identifier (hid_t) to specify a datatype. NC2Datatype uses
+ * ucar.nc2.DataType object to describe its datatype. "Native" here is different from the "native" definition
+ * in the HDF5 library.
  *
- * Two functions, createNative() and fromNative(), are defined to convert the general characteristics to/from the native
- * datatype. Sub-classes must implement these functions so that the conversion will be done correctly. The values of the
- * CLASS member are not identical to HDF5 values for a datatype class.
+ * Two functions, createNative() and fromNative(), are defined to convert the general characteristics to/from
+ * the native datatype. Sub-classes must implement these functions so that the conversion will be done
+ * correctly. The values of the CLASS member are not identical to HDF5 values for a datatype class.
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Datatype extends HObject implements MetaDataContainer
-{
+public abstract class Datatype extends HObject implements MetaDataContainer {
     private static final long serialVersionUID = -581324710549963177L;
 
     private static final Logger log = LoggerFactory.getLogger(Datatype.class);
@@ -54,102 +55,122 @@ public abstract class Datatype extends HObject implements MetaDataContainer
     public static final int NATIVE = -1;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_NO_CLASS = -1;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_INTEGER = 0;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_FLOAT = 1;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_CHAR = 2;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_STRING = 3;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_BITFIELD = 4;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_OPAQUE = 5;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_COMPOUND = 6;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_REFERENCE = 7;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_ENUM = 8;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_VLEN = 9;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_ARRAY = 10;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int CLASS_TIME = 11;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int ORDER_LE = 0;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int ORDER_BE = 1;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int ORDER_VAX = 2;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int ORDER_NONE = 3;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int SIGN_NONE = 0;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int SIGN_2 = 1;
 
     /**
-     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+     * See <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+     * Guide</a>
      */
     public static final int NSGN = 2;
 
@@ -239,7 +260,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @param typePath
      *            the full group path of the datatype, e.g. "/datatypes/".
      */
-    public Datatype(FileFormat theFile, String typeName, String typePath) {
+    public Datatype(FileFormat theFile, String typeName, String typePath)
+    {
         this(theFile, typeName, typePath, null);
     }
 
@@ -257,7 +279,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *            the oidof the datatype.
      */
     @Deprecated
-    public Datatype(FileFormat theFile, String typeName, String typePath, long[] oid) {
+    public Datatype(FileFormat theFile, String typeName, String typePath, long[] oid)
+    {
         super(theFile, typeName, typePath, oid);
     }
 
@@ -267,10 +290,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
-     * <li>to create 16-bit signed integer with big endian<br>
-     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
-     * <li>to create native float<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE,
+     * Datatype.SIGN_NONE); <li>to create 16-bit signed integer with big endian<br> Datatype type = new
+     * Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE); <li>to create native float<br>
      * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
      * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
@@ -290,7 +312,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @throws Exception
      *            if there is an error
      */
-    public Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
+    public Datatype(int tclass, int tsize, int torder, int tsign) throws Exception
+    {
         this(tclass, tsize, torder, tsign, null);
     }
 
@@ -300,10 +323,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
-     * <li>to create 16-bit signed integer with big endian<br>
-     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
-     * <li>to create native float<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE,
+     * Datatype.SIGN_NONE); <li>to create 16-bit signed integer with big endian<br> Datatype type = new
+     * Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE); <li>to create native float<br>
      * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
      * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
@@ -327,7 +349,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @throws Exception
      *            if there is an error
      */
-    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
+    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception
+    {
         this(null, tclass, tsize, torder, tsign, tbase, null);
     }
 
@@ -337,10 +360,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
-     * <li>to create 16-bit signed integer with big endian<br>
-     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
-     * <li>to create native float<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE,
+     * Datatype.SIGN_NONE); <li>to create 16-bit signed integer with big endian<br> Datatype type = new
+     * Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE); <li>to create native float<br>
      * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
      * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
@@ -366,36 +388,38 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @throws Exception
      *            if there is an error
      */
-    public Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
+    public Datatype(FileFormat theFile, int tclass, int tsize, int torder, int tsign, Datatype tbase,
+                    Datatype pbase) throws Exception
+    {
         super(theFile, null, null, null);
         if ((tsize == 0) || (tsize < 0 && tsize != Datatype.NATIVE))
             throw new Exception("invalid datatype size - " + tsize);
-        if ((torder != Datatype.ORDER_LE) && (torder != Datatype.ORDER_BE) && (torder != Datatype.ORDER_VAX)
-                && (torder != Datatype.ORDER_NONE) && (torder != Datatype.NATIVE))
+        if ((torder != Datatype.ORDER_LE) && (torder != Datatype.ORDER_BE) &&
+            (torder != Datatype.ORDER_VAX) && (torder != Datatype.ORDER_NONE) && (torder != Datatype.NATIVE))
             throw new Exception("invalid datatype order - " + torder);
         if ((tsign != Datatype.SIGN_NONE) && (tsign != Datatype.SIGN_2) && (tsign != Datatype.NATIVE))
             throw new Exception("invalid datatype sign - " + tsign);
 
         datatypeClass = tclass;
-        datatypeSize = tsize;
+        datatypeSize  = tsize;
         if (datatypeSize == NATIVE)
             datatypeNATIVE = true;
         else
             datatypeNATIVE = false;
         datatypeOrder = torder;
-        datatypeSign = tsign;
-        enumMembers = null;
-        baseType = tbase;
-        arrayDims = null;
+        datatypeSign  = tsign;
+        enumMembers   = null;
+        baseType      = tbase;
+        arrayDims     = null;
         isVariableStr = (datatypeClass == Datatype.CLASS_STRING) && (tsize < 0);
-        isVLEN = (datatypeClass == Datatype.CLASS_VLEN) || isVariableStr;
+        isVLEN        = (datatypeClass == Datatype.CLASS_VLEN) || isVariableStr;
 
-        compoundMemberNames = new ArrayList<>();
-        compoundMemberTypes = new ArrayList<>();
+        compoundMemberNames   = new ArrayList<>();
+        compoundMemberTypes   = new ArrayList<>();
         compoundMemberOffsets = new ArrayList<>();
 
         log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}",
-                datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
+                  datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
     }
 
     /**
@@ -404,10 +428,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * The following is a list of a few examples of Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);
-     * <li>to create 16-bit signed integer with big endian<br>
-     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);
-     * <li>to create native float<br>
+     * Datatype type = new Dataype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE,
+     * Datatype.SIGN_NONE); <li>to create 16-bit signed integer with big endian<br> Datatype type = new
+     * Dataype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE); <li>to create native float<br>
      * Datatype type = new Dataype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
      * <li>to create 64-bit double<br>
      * Datatype type = new Dataype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
@@ -431,7 +454,9 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @throws Exception
      *            if there is an error
      */
-    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase) throws Exception {
+    public Datatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, Datatype pbase)
+        throws Exception
+    {
         this(null, tclass, tsize, torder, tsign, tbase, pbase);
     }
 
@@ -456,9 +481,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @throws Exception
      *            if there is an error
      */
-    public Datatype(FileFormat theFile, long tid) throws Exception {
-        this(theFile, tid, null);
-    }
+    public Datatype(FileFormat theFile, long tid) throws Exception { this(theFile, tid, null); }
 
     /**
      * Constructs a Datatype with a given native datatype identifier.
@@ -483,7 +506,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @throws Exception
      *            if there is an error
      */
-    public Datatype(FileFormat theFile, long tid, Datatype pbase) throws Exception {
+    public Datatype(FileFormat theFile, long tid, Datatype pbase) throws Exception
+    {
         this(theFile, CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE, null, pbase);
     }
 
@@ -494,7 +518,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @return the datatype identifier if successful; otherwise returns negative value.
      */
     @Override
-    public long open() {
+    public long open()
+    {
         return -1;
     }
 
@@ -528,9 +553,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *
      * @return the class of the datatype.
      */
-    public int getDatatypeClass() {
-        return datatypeClass;
-    }
+    public int getDatatypeClass() { return datatypeClass; }
 
     /**
      * Returns the size of the datatype in bytes. For example, for a 32-bit
@@ -538,9 +561,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *
      * @return the size of the datatype.
      */
-    public long getDatatypeSize() {
-        return datatypeSize;
-    }
+    public long getDatatypeSize() { return datatypeSize; }
 
     /**
      * Returns the byte order of the datatype. Valid values are
@@ -553,18 +574,14 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *
      * @return the byte order of the datatype.
      */
-    public int getDatatypeOrder() {
-        return datatypeOrder;
-    }
+    public int getDatatypeOrder() { return datatypeOrder; }
 
     /**
      * Returns the sign (SIGN_NONE, SIGN_2) of an integer datatype.
      *
      * @return the sign of the datatype.
      */
-    public int getDatatypeSign() {
-        return datatypeSign;
-    }
+    public int getDatatypeSign() { return datatypeSign; }
 
     /**
      * Returns the base datatype for this datatype.
@@ -574,9 +591,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *
      * @return the datatype of the contained basetype.
      */
-    public Datatype getDatatypeBase() {
-        return baseType;
-    }
+    public Datatype getDatatypeBase() { return baseType; }
 
     /**
      * Sets the (key, value) pairs of enum members for enum datatype.
@@ -594,10 +609,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @param enumStr
      *            the (key, value) pairs of enum members
      */
-    public final void setEnumMembers(String enumStr) {
+    public final void setEnumMembers(String enumStr)
+    {
         log.trace("setEnumMembers: start enum_members={}", enumStr);
         if (enumStr != null) {
-            enumMembers = new HashMap<>();
+            enumMembers      = new HashMap<>();
             String[] entries = enumStr.split(",");
             for (String entry : entries) {
                 String[] keyValue = entry.split("=");
@@ -606,7 +622,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer
                     log.trace("setEnumMembers: value={} name={}", keyValue[0].trim(), keyValue[1].trim());
             }
         }
-        datatypeDescription = null; //reset description
+        datatypeDescription = null; // reset description
         log.trace("setEnumMembers: finish enum size={}", enumMembers.size());
     }
 
@@ -615,7 +631,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *
      * @return enumStr Map&lt;String,String%gt; pairs of enum members
      */
-    public final Map<String, String> getEnumMembers() {
+    public final Map<String, String> getEnumMembers()
+    {
         if (enumMembers == null) {
             log.trace("getEnumMembers: null");
             enumMembers = new HashMap<>();
@@ -636,17 +653,16 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @return enumStr the (key, value) pairs of enum members
      */
     @SuppressWarnings("rawtypes")
-    public final String getEnumMembersAsString() {
+    public final String getEnumMembersAsString()
+    {
         StringBuilder enumStr = new StringBuilder();
         if (getEnumMembers() != null) {
             Iterator<Entry<String, String>> entries = enumMembers.entrySet().iterator();
-            int i = enumMembers.size();
+            int i                                   = enumMembers.size();
             log.trace("getEnumMembersAsString: enum size={}", i);
             while (entries.hasNext()) {
                 Entry thisEntry = entries.next();
-                enumStr.append((String) thisEntry.getKey())
-                       .append("=")
-                       .append((String) thisEntry.getValue());
+                enumStr.append((String)thisEntry.getKey()).append("=").append((String)thisEntry.getValue());
 
                 i--;
                 if (i > 0)
@@ -662,39 +678,28 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *
      * @return dims the dimensions of the Array Datatype
      */
-    public final long[] getArrayDims() {
-        return arrayDims;
-    }
-
+    public final long[] getArrayDims() { return arrayDims; }
 
     /**
      * Returns the member names of a Compound Datatype.
      *
      * @return member names of a Compound Datatype
      */
-    public final List<String> getCompoundMemberNames() {
-        return compoundMemberNames;
-    }
-
+    public final List<String> getCompoundMemberNames() { return compoundMemberNames; }
 
     /**
      * Returns member types of a Compound Datatype.
      *
      * @return member types of a Compound Datatype
      */
-    public final List<Datatype> getCompoundMemberTypes() {
-        return compoundMemberTypes;
-    }
-
+    public final List<Datatype> getCompoundMemberTypes() { return compoundMemberTypes; }
 
     /**
      * Returns the member offsets of a Compound Datatype.
      *
      * @return member offsets of a Compound Datatype
      */
-    public final List<Long> getCompoundMemberOffsets() {
-        return compoundMemberOffsets;
-    }
+    public final List<Long> getCompoundMemberOffsets() { return compoundMemberOffsets; }
 
     /**
      * Converts the datatype object to a native datatype.
@@ -744,16 +749,15 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *
      * @return the datatype reference type if successful; otherwise returns negative value.
      */
-    public long getReferenceType() {
-        return -1;
-    }
+    public long getReferenceType() { return -1; }
 
     /**
      * Returns a short text description of this datatype.
      *
      * @return a short text description of this datatype
      */
-    public String getDescription() {
+    public String getDescription()
+    {
         if (datatypeDescription != null)
             return datatypeDescription;
 
@@ -768,8 +772,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer
             if (datatypeNATIVE)
                 description.append("native ").append((isUnsigned() ? "unsigned " : "")).append("integer");
             else
-                description.append(String.valueOf(datatypeSize * 8)).append("-bit ")
-                .append((isUnsigned() ? "unsigned " : "")).append("integer");
+                description.append(String.valueOf(datatypeSize * 8))
+                    .append("-bit ")
+                    .append((isUnsigned() ? "unsigned " : ""))
+                    .append("integer");
             break;
         case CLASS_FLOAT:
             if (datatypeNATIVE)
@@ -838,7 +844,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * @return true if the datatype is unsigned;
      *         otherwise, returns false.
      */
-    public boolean isUnsigned() {
+    public boolean isUnsigned()
+    {
         if (baseType != null)
             return baseType.isUnsigned();
         else {
@@ -878,117 +885,91 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *
      * @return true if the datatype is integer; false otherwise
      */
-    public boolean isInteger() {
-        return (datatypeClass == Datatype.CLASS_INTEGER);
-    }
+    public boolean isInteger() { return (datatypeClass == Datatype.CLASS_INTEGER); }
 
     /**
      * Checks if this datatype is a floating-point type.
      *
      * @return true if the datatype is floating-point; false otherwise
      */
-    public boolean isFloat() {
-        return (datatypeClass == Datatype.CLASS_FLOAT);
-    }
+    public boolean isFloat() { return (datatypeClass == Datatype.CLASS_FLOAT); }
 
     /**
      * Checks if this datatype is a named type.
      *
      * @return true if the datatype is named; false otherwise
      */
-    public boolean isNamed() {
-        return isNamed;
-    }
+    public boolean isNamed() { return isNamed; }
 
     /**
      * Checks if this datatype is a variable-length string type.
      *
      * @return true if the datatype is variable-length string; false otherwise
      */
-    public boolean isVarStr() {
-        return isVariableStr;
-    }
+    public boolean isVarStr() { return isVariableStr; }
 
     /**
      * Checks if this datatype is a variable-length type.
      *
      * @return true if the datatype is variable-length; false otherwise
      */
-    public boolean isVLEN() {
-        return isVLEN;
-    }
+    public boolean isVLEN() { return isVLEN; }
 
     /**
      * Checks if this datatype is an compound type.
      *
      * @return true if the datatype is compound; false otherwise
      */
-    public boolean isCompound() {
-        return (datatypeClass == Datatype.CLASS_COMPOUND);
-    }
+    public boolean isCompound() { return (datatypeClass == Datatype.CLASS_COMPOUND); }
 
     /**
      * Checks if this datatype is an array type.
      *
      * @return true if the datatype is array; false otherwise
      */
-    public boolean isArray() {
-        return (datatypeClass == Datatype.CLASS_ARRAY);
-    }
+    public boolean isArray() { return (datatypeClass == Datatype.CLASS_ARRAY); }
 
     /**
      * Checks if this datatype is a string type.
      *
      * @return true if the datatype is string; false otherwise
      */
-    public boolean isString() {
-        return (datatypeClass == Datatype.CLASS_STRING);
-    }
+    public boolean isString() { return (datatypeClass == Datatype.CLASS_STRING); }
 
     /**
      * Checks if this datatype is a character type.
      *
      * @return true if the datatype is character; false otherwise
      */
-    public boolean isChar() {
-        return (datatypeClass == Datatype.CLASS_CHAR);
-    }
+    public boolean isChar() { return (datatypeClass == Datatype.CLASS_CHAR); }
 
     /**
      * Checks if this datatype is a reference type.
      *
      * @return true if the datatype is reference; false otherwise
      */
-    public boolean isRef() {
-        return (datatypeClass == Datatype.CLASS_REFERENCE);
-    }
+    public boolean isRef() { return (datatypeClass == Datatype.CLASS_REFERENCE); }
 
     /**
      * Checks if this datatype is a enum type.
      *
      * @return true if the datatype is enum; false otherwise
      */
-    public boolean isEnum() {
-        return (datatypeClass == Datatype.CLASS_ENUM);
-    }
+    public boolean isEnum() { return (datatypeClass == Datatype.CLASS_ENUM); }
 
     /**
      * Checks if this datatype is a opaque type.
      *
      * @return true if the datatype is opaque; false otherwise
      */
-    public boolean isOpaque() {
-        return (datatypeClass == Datatype.CLASS_OPAQUE);
-    }
+    public boolean isOpaque() { return (datatypeClass == Datatype.CLASS_OPAQUE); }
 
     /**
      * Checks if this datatype is a bitfield type.
      *
      * @return true if the datatype is bitfield; false otherwise
      */
-    public boolean isBitField() {
-        return (datatypeClass == Datatype.CLASS_BITFIELD);
-    }
+    public boolean isBitField() { return (datatypeClass == Datatype.CLASS_BITFIELD); }
 
     /* Implement interface MetaDataContainer */
 
@@ -997,7 +978,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      * The list should be empty after this call returns.
      */
     @Override
-    public void clear() {
+    public void clear()
+    {
     }
 
     /**
@@ -1012,7 +994,8 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      */
     @Override
     @SuppressWarnings("rawtypes")
-    public List getMetadata() throws Exception {
+    public List getMetadata() throws Exception
+    {
         return null;
     }
 
@@ -1034,8 +1017,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *             if the metadata can not be written
      */
     @Override
-    public void writeMetadata(Object info) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:writeMetadata.");
+    public void writeMetadata(Object info) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement Datatype:writeMetadata.");
     }
 
     /**
@@ -1048,8 +1033,10 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *             if the metadata can not be removed
      */
     @Override
-    public void removeMetadata(Object info) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:removeMetadata.");
+    public void removeMetadata(Object info) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement Datatype:removeMetadata.");
     }
 
     /**
@@ -1062,12 +1049,15 @@ public abstract class Datatype extends HObject implements MetaDataContainer
      *             if the metadata can not be updated
      */
     @Override
-    public void updateMetadata(Object info) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement Datatype:updateMetadata.");
+    public void updateMetadata(Object info) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement Datatype:updateMetadata.");
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return getDescription();
     }
 }

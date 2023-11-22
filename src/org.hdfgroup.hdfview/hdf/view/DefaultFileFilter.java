@@ -27,9 +27,9 @@ import java.util.StringTokenizer;
  */
 public class DefaultFileFilter {
     private Hashtable<String, DefaultFileFilter> filters = null;
-    private String description = null;
-    private String fullDescription = null;
-    private boolean useExtensionsInDescription = true;
+    private String description                           = null;
+    private String fullDescription                       = null;
+    private boolean useExtensionsInDescription           = true;
 
     /**
      * Creates a file filter. If no filters are added, then all files are
@@ -37,9 +37,7 @@ public class DefaultFileFilter {
      *
      * @see #addExtension
      */
-    public DefaultFileFilter() {
-        this.filters = new Hashtable<>();
-    }
+    public DefaultFileFilter() { this.filters = new Hashtable<>(); }
 
     /**
      * Creates a file filter that accepts files with the given extension.
@@ -49,9 +47,7 @@ public class DefaultFileFilter {
      *
      * @param extension the file extension to filter on
      */
-    public DefaultFileFilter(String extension) {
-        this(extension, null);
-    }
+    public DefaultFileFilter(String extension) { this(extension, null); }
 
     /**
      * Creates a file filter that accepts the given file type. Example: new
@@ -65,7 +61,8 @@ public class DefaultFileFilter {
      * @param extension the file extension to filter on
      * @param description the file extension full description
      */
-    public DefaultFileFilter(String extension, String description) {
+    public DefaultFileFilter(String extension, String description)
+    {
         this();
         if (extension != null) {
             addExtension(extension);
@@ -86,9 +83,7 @@ public class DefaultFileFilter {
      * @param filters
      *          the list of filter names
      */
-    public DefaultFileFilter(String[] filters) {
-        this(filters, null);
-    }
+    public DefaultFileFilter(String[] filters) { this(filters, null); }
 
     /**
      * Creates a file filter from the given string array and description.
@@ -104,7 +99,8 @@ public class DefaultFileFilter {
      * @param description
      *          the name of the filter list
      */
-    public DefaultFileFilter(String[] filters, String description) {
+    public DefaultFileFilter(String[] filters, String description)
+    {
         this();
         for (int i = 0; i < filters.length; i++) {
             // add filters one by one
@@ -118,9 +114,10 @@ public class DefaultFileFilter {
     /**
      * @return the file extensions associated with this DefaultFileFilter
      */
-    public String getExtensions() {
+    public String getExtensions()
+    {
         Enumeration<String> extensions = filters.keys();
-        String extString = "";
+        String extString               = "";
 
         while (extensions.hasMoreElements()) {
             extString += "*." + extensions.nextElement();
@@ -146,12 +143,13 @@ public class DefaultFileFilter {
      *
      * @param extension the file extension to add to the file filter
      */
-    public void addExtension(String extension) {
+    public void addExtension(String extension)
+    {
         if (filters == null) {
             filters = new Hashtable<>(5);
         }
 
-        String ext = null;
+        String ext         = null;
         StringTokenizer st = new StringTokenizer(extension, ",");
         while (st.hasMoreElements()) {
             ext = st.nextToken().trim();
@@ -165,11 +163,11 @@ public class DefaultFileFilter {
      * @return the human readable description of this filter. For example:
      * "JPEG and GIF Image Files (*.jpg, *.gif)"
      */
-    public String getDescription() {
+    public String getDescription()
+    {
         if (fullDescription == null) {
             if ((description == null) || isExtensionListInDescription()) {
-                fullDescription = description == null ? "(" : description
-                        + " (";
+                fullDescription = description == null ? "(" : description + " (";
                 // build the description from the extension list
                 Enumeration<String> extensions = filters.keys();
                 if (extensions != null) {
@@ -182,7 +180,7 @@ public class DefaultFileFilter {
                     fullDescription += "." + extensions.nextElement();
                     while (extensions.hasMoreElements()) {
                         fullDescription += ", "
-                                + "." + extensions.nextElement();
+                                           + "." + extensions.nextElement();
                     }
                 }
                 fullDescription += ")";
@@ -200,9 +198,10 @@ public class DefaultFileFilter {
      *
      * @param description the full description of the file filter
      */
-    public void setDescription(String description) {
+    public void setDescription(String description)
+    {
         this.description = description;
-        fullDescription = null;
+        fullDescription  = null;
     }
 
     /**
@@ -214,9 +213,10 @@ public class DefaultFileFilter {
      *
      * @param b the show state of the extension list
      */
-    public void setExtensionListInDescription(boolean b) {
+    public void setExtensionListInDescription(boolean b)
+    {
         useExtensionsInDescription = b;
-        fullDescription = null;
+        fullDescription            = null;
     }
 
     /**
@@ -226,12 +226,11 @@ public class DefaultFileFilter {
      * Only relevent if a description was provided in the constructor or using
      * setDescription();
      */
-    public boolean isExtensionListInDescription() {
-        return useExtensionsInDescription;
-    }
+    public boolean isExtensionListInDescription() { return useExtensionsInDescription; }
 
     /** @return a file filter for HDF4/5 file. */
-    public static DefaultFileFilter getFileFilter() {
+    public static DefaultFileFilter getFileFilter()
+    {
         // update extensions
         String fileExtensions = ViewProperties.getFileExtension();
 
@@ -244,7 +243,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for NetCDF3 file. */
-    public static DefaultFileFilter getFileFilterNetCDF3() {
+    public static DefaultFileFilter getFileFilterNetCDF3()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("nc");
         filter.setDescription("NetCDF3 files");
@@ -253,7 +253,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for HDF4 file. */
-    public static DefaultFileFilter getFileFilterHDF4() {
+    public static DefaultFileFilter getFileFilterHDF4()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("hdf");
         filter.addExtension("h4");
@@ -264,7 +265,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for HDF5 file. */
-    public static DefaultFileFilter getFileFilterHDF5() {
+    public static DefaultFileFilter getFileFilterHDF5()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("h5");
         filter.addExtension("hdf5");
@@ -274,7 +276,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for JPEG image files. */
-    public static DefaultFileFilter getFileFilterJPEG() {
+    public static DefaultFileFilter getFileFilterJPEG()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("jpg");
         filter.addExtension("jpeg");
@@ -288,7 +291,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for TIFF image files. */
-    public static DefaultFileFilter getFileFilterTIFF() {
+    public static DefaultFileFilter getFileFilterTIFF()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("tif");
         filter.addExtension("tiff");
@@ -298,7 +302,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for PNG image files. */
-    public static DefaultFileFilter getFileFilterPNG() {
+    public static DefaultFileFilter getFileFilterPNG()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("png");
         filter.setDescription("PNG images");
@@ -307,7 +312,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for BMP image files. */
-    public static DefaultFileFilter getFileFilterBMP() {
+    public static DefaultFileFilter getFileFilterBMP()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("bmp");
         filter.addExtension("dib");
@@ -317,7 +323,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for GIF image files. */
-    public static DefaultFileFilter getFileFilterGIF() {
+    public static DefaultFileFilter getFileFilterGIF()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("gif");
         filter.setDescription("GIF images");
@@ -326,7 +333,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for GIF, JPEG, BMP, or PNG image files. */
-    public static DefaultFileFilter getImageFileFilter() {
+    public static DefaultFileFilter getImageFileFilter()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("jpg");
         filter.addExtension("jpeg");
@@ -344,7 +352,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for text file. */
-    public static DefaultFileFilter getFileFilterText() {
+    public static DefaultFileFilter getFileFilterText()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("txt");
         filter.addExtension("text");
@@ -354,7 +363,8 @@ public class DefaultFileFilter {
     }
 
     /** @return a file filter for binary file. */
-    public static DefaultFileFilter getFileFilterBinary() {
+    public static DefaultFileFilter getFileFilterBinary()
+    {
         DefaultFileFilter filter = new DefaultFileFilter();
         filter.addExtension("bin");
         filter.setDescription("Binary");

@@ -13,9 +13,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -24,6 +21,9 @@ import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
 import hdf.object.h5.H5ReferenceType;
 import hdf.object.h5.H5ScalarDS;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 
 public class H5ObjectEx_T_RegionReference {
     private static String FILENAME     = "H5ObjectEx_T_RegionReference.h5";
@@ -37,15 +37,15 @@ public class H5ObjectEx_T_RegionReference {
 
     private static void writeRegRef()
     {
-        H5File file = null;
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+        H5File file       = null;
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        H5ScalarDS dset = null;
-        H5ScalarDS dset2 = null;
-        H5Group grp = null;
-        long[] dims = { DIM0 };
-        long[] dims2 = { DS2DIM0, DS2DIM1 };
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        H5ScalarDS dset   = null;
+        H5ScalarDS dset2  = null;
+        H5Group grp       = null;
+        long[] dims       = {DIM0};
+        long[] dims2      = {DS2DIM0, DS2DIM1};
         // data buffer for writing region reference
         byte[][] dset_data = new byte[DIM0][HDF5Constants.H5R_REF_BUF_SIZE];
         H5Datatype typeInt = null;
@@ -57,7 +57,7 @@ public class H5ObjectEx_T_RegionReference {
 
         // Create a new file using default properties.
         try {
-            file = new H5File(FILENAME, FileFormat.CREATE);
+            file    = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -67,7 +67,8 @@ public class H5ObjectEx_T_RegionReference {
         // Create the base datatypes.
         try {
             typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 8, Datatype.ORDER_BE, Datatype.NATIVE);
-            typeRef = new H5ReferenceType(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);
+            typeRef = new H5ReferenceType(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE,
+                                          Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();

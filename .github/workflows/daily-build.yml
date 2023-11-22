@@ -1,0 +1,110 @@
+name: hdfview daily build
+
+# Controls when the action will run. Triggers the workflow on a schedule
+on:
+  workflow_dispatch:
+    inputs:
+      use_ignore:
+        description: 'Ignore has changes check'
+        type: string
+        required: false
+        default: check
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
+#  push:
+#    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel.
+jobs:
+  get-base-names:
+    runs-on: ubuntu-latest
+    outputs:
+      hdf4-name: ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}
+      hdf5-name: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
+      run-ignore: ${{ steps.getinputs.outputs.INPUTS_IGNORE }}
+      run-environ: ${{ steps.getinputs.outputs.INPUTS_ENVIRON }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Get hdf4 release base name
+#      uses: robinraju/release-downloader@v1.8
+#      with:
+#        repository: "HDFGroup/hdf4"
+#        tag: "snapshot"
+#        fileName: "last-file.txt"
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'HDFGroup/hdf4'
+        version: 'tags/snapshot'
+        file: 'last-file.txt'
+
+    - name: Read base-name file
+      id: gethdf4base
+      run: echo "HDF4_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
+
+    - name: Get hdf5 release base name
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'HDFGroup/hdf5'
+        version: 'tags/snapshot'
+        file: 'last-file.txt'
+
+    - name: Read base-name file
+      id: gethdf5base
+      run: echo "HDF5_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
+
+    - run: |
+        echo "hdf4 base name is ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}."
+        echo "hdf5 base name is ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}."
+
+    - name: Read inputs
+      id: getinputs
+      run: |
+        echo "INPUTS_IGNORE=${{ ((github.event.inputs.use_ignore == '' && github.event.inputs.use_ignore)  || 'ignore') }}" >> $GITHUB_OUTPUT
+        echo "INPUTS_ENVIRON=${{ ((github.event.inputs.use_environ == '' && github.event.inputs.use_environ)  || 'snapshots') }}" >> $GITHUB_OUTPUT
+
+    - run: echo "use_ignore is ${{ steps.getinputs.outputs.INPUTS_IGNORE }}."
+
+    - run: echo "use_environ is ${{ steps.getinputs.outputs.INPUTS_ENVIRON }}."
+
+  call-workflow-tarball:
+    needs: get-base-names
+    uses: ./.github/workflows/tarball.yml
+    with:
+      use_ignore: ${{ needs.get-base-names.outputs.run-ignore }}
+      use_environ: ${{ needs.get-base-names.outputs.run-environ }}
+
+  call-workflow-ant:
+    needs: [get-base-names, call-workflow-tarball]
+    uses: ./.github/workflows/cmake-ctest.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      use_hdf: ${{ needs.get-base-names.outputs.hdf4-name }}
+      use_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
+      #use_tag: snapshot
+      #use_environ: snapshots
+    if: ${{ ((needs.get-base-names.outputs.run-environ == 'snapshots') && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore'))) || (needs.get-base-names.outputs.run-environ  == 'release') }}
+
+  call-workflow-release:
+    needs: [call-workflow-tarball, call-workflow-ant]
+    permissions:
+      contents: write # In order to allow tag creation
+    uses: ./.github/workflows/release-files.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
+      file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
+      use_tag: ${{ needs.get-base-names.outputs.run-environ }}
+      use_environ: ${{ needs.get-base-names.outputs.run-environ }}
+    if: ${{ ((needs.get-base-names.outputs.run-environ == 'snapshots') && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore'))) || (needs.get-base-names.outputs.run-environ  == 'release') }}
+

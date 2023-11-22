@@ -8,9 +8,10 @@ import java.util.Properties;
 public class HDFVersions {
     private static Properties props;
 
-    static {
+    static
+    {
         InputStream inst = null;
-        props = new Properties();
+        props            = new Properties();
         try {
             inst = HDFVersions.class.getResourceAsStream("/versions.properties");
             props.load(inst);
@@ -21,23 +22,14 @@ public class HDFVersions {
     }
 
     /** @return the property to track the current versions of java */
-    public static String getPropertyVersionJava(){
-        return props.getProperty("JAVA_VERSION");
-    }
+    public static String getPropertyVersionJava() { return props.getProperty("JAVA_VERSION"); }
 
     /** @return the property to track the current versions of hdf4 */
-    public static String getPropertyVersionHDF4(){
-        return props.getProperty("HDF4_VERSION");
-    }
+    public static String getPropertyVersionHDF4() { return props.getProperty("HDF4_VERSION"); }
 
     /** @return the property to track the current versions of hdf5 */
-    public static String getPropertyVersionHDF5(){
-        return props.getProperty("HDF5_VERSION");
-    }
+    public static String getPropertyVersionHDF5() { return props.getProperty("HDF5_VERSION"); }
 
     /** @return the property to track the current versions of hdfview */
-    public static String getPropertyVersionView(){
-        return props.getProperty("HDFVIEW_VERSION");
-    }
+    public static String getPropertyVersionView() { return props.getProperty("HDFVIEW_VERSION"); }
 }
-

@@ -23,6 +23,17 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.ScalarDS;
+import hdf.view.DataView.DataView;
+import hdf.view.ImageView.ImageView;
+import hdf.view.TableView.TableView;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,17 +56,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.ScalarDS;
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-import hdf.view.DataView.DataView;
-import hdf.view.ImageView.ImageView;
-import hdf.view.TableView.TableView;
-
 /**
  * NewDatasetDialog shows a message dialog requesting user input for creating a
  * new HDF4/5 dataset.
@@ -67,23 +67,23 @@ public class NewDatasetDialog extends NewDataObjectDialog {
 
     private static final Logger log = LoggerFactory.getLogger(NewDatasetDialog.class);
 
-    private String            maxSize;
+    private String maxSize;
 
-    private Text              currentSizeField, chunkSizeField, fillValueField;
+    private Text currentSizeField, chunkSizeField, fillValueField;
 
-    private Combo             parentChoice, rankChoice, compressionLevel;
+    private Combo parentChoice, rankChoice, compressionLevel;
 
-    private Button            checkCompression, checkFillValue;
+    private Button checkCompression, checkFillValue;
 
-    private Button            checkContiguous, checkChunked;
+    private Button checkContiguous, checkChunked;
 
     /** TextField for entering the name of the object */
-    protected Text            nameField;
+    protected Text nameField;
 
     /** A list of current groups */
-    private List<Group>       groupList;
+    private List<Group> groupList;
 
-    private final DataView    dataView;
+    private final DataView dataView;
 
     /**
      * Constructs a NewDatasetDialog with specified list of possible parent
@@ -96,7 +96,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
      * @param objs
      *            the list of all objects.
      */
-    public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
+    public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs)
+    {
         super(parent, pGroup, objs);
 
         dataView = null;
@@ -115,7 +116,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
      * @param observer
      *            the Dataview attached to this dialog.
      */
-    public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs, DataView observer) {
+    public NewDatasetDialog(Shell parent, Group pGroup, List<?> objs, DataView observer)
+    {
         super(parent, pGroup, objs);
 
         dataView = observer;
@@ -124,14 +126,14 @@ public class NewDatasetDialog extends NewDataObjectDialog {
     /**
      * Open the NewDataseteDialog for adding a new dataset.
      */
-    public void open() {
+    public void open()
+    {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell        = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Dataset...");
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
-
 
         // Create Dataset name / Parent Group region
         Composite fieldComposite = new Composite(shell, SWT.NONE);
@@ -158,19 +160,20 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 parentObj = groupList.get(parentChoice.getSelectionIndex());
             }
         });
 
-        groupList = new Vector<>();
-        Object obj = null;
+        groupList            = new Vector<>();
+        Object obj           = null;
         Iterator<?> iterator = objList.iterator();
 
         while (iterator.hasNext()) {
             obj = iterator.next();
             if (obj instanceof Group) {
-                Group g = (Group) obj;
+                Group g = (Group)obj;
                 groupList.add(g);
                 if (g.isRoot()) {
                     parentChoice.add(HObject.SEPARATOR);
@@ -181,11 +184,12 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             }
         }
 
-        if (((Group) parentObj).isRoot()) {
+        if (((Group)parentObj).isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentObj.getPath() + parentObj.getName() + HObject.SEPARATOR));
+            parentChoice.select(
+                parentChoice.indexOf(parentObj.getPath() + parentObj.getName() + HObject.SEPARATOR));
         }
 
         // Create New Dataset from scratch
@@ -218,8 +222,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             rankChoice.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
-                    int rank = rankChoice.getSelectionIndex() + 1;
+                public void widgetSelected(SelectionEvent e)
+                {
+                    int rank                     = rankChoice.getSelectionIndex() + 1;
                     StringBuilder currentSizeStr = new StringBuilder("1");
 
                     for (int i = 1; i < rank; i++) {
@@ -229,7 +234,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                     currentSizeField.setText(currentSizeStr.toString());
 
                     String currentStr = currentSizeField.getText();
-                    int idx = currentStr.lastIndexOf('x');
+                    int idx           = currentStr.lastIndexOf('x');
 
                     StringBuilder chunkStr = new StringBuilder();
 
@@ -267,13 +272,19 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             setMaxSizeButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
             setMaxSizeButton.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     if (maxSize == null || maxSize.length() < 1)
                         maxSize = currentSizeField.getText();
 
-                    String msg = new InputDialog(shell, "Set Max Size", "Enter max dimension sizes. \n"
-                            + "Use \"unlimited\" for unlimited dimension size.\n\n" + "For example,\n" + "    200 x 100\n"
-                            + "    100 x unlimited\n\n", maxSize).open();
+                    String msg = new InputDialog(shell, "Set Max Size",
+                                                 "Enter max dimension sizes. \n"
+                                                     + "Use \"unlimited\" for unlimited dimension size.\n\n"
+                                                     + "For example,\n"
+                                                     + "    200 x 100\n"
+                                                     + "    100 x unlimited\n\n",
+                                                 maxSize)
+                                     .open();
 
                     if (msg == null || msg.length() < 1)
                         maxSize = currentSizeField.getText();
@@ -284,9 +295,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 }
             });
 
-
             // Create Storage Properties region
-            org.eclipse.swt.widgets.Group storagePropertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
+            org.eclipse.swt.widgets.Group storagePropertiesGroup =
+                new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
             storagePropertiesGroup.setFont(curFont);
             storagePropertiesGroup.setText("Storage Properties");
             storagePropertiesGroup.setLayout(new GridLayout(5, true));
@@ -303,7 +314,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             checkContiguous.setSelection(true);
             checkContiguous.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     chunkSizeField.setEnabled(false);
                 }
             });
@@ -320,11 +332,12 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             checkChunked.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     chunkSizeField.setEnabled(true);
                     StringBuilder chunkStr = new StringBuilder();
-                    StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
-                    int rank = rankChoice.getSelectionIndex() + 1;
+                    StringTokenizer st     = new StringTokenizer(currentSizeField.getText(), "x");
+                    int rank               = rankChoice.getSelectionIndex() + 1;
                     while (st.hasMoreTokens()) {
                         long l = Math.max(1, Long.valueOf(st.nextToken().trim()) / (2 * rank));
                         chunkStr.append(String.valueOf(l));
@@ -351,14 +364,15 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             checkCompression.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     boolean isCompressed = checkCompression.getSelection();
 
                     if (isCompressed && isH5) {
                         if (!checkChunked.getSelection()) {
-                            int rank = rankChoice.getSelectionIndex() + 1;
-                            String currentStr = currentSizeField.getText();
-                            int idx = currentStr.lastIndexOf('x');
+                            int rank               = rankChoice.getSelectionIndex() + 1;
+                            String currentStr      = currentSizeField.getText();
+                            int idx                = currentStr.lastIndexOf('x');
                             StringBuilder chunkStr = new StringBuilder();
 
                             if (rank <= 1) {
@@ -400,7 +414,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             compressionLevel.select(6);
             compressionLevel.setEnabled(false);
 
-            if(isH5) {
+            if (isH5) {
                 checkFillValue = new Button(storagePropertiesGroup, SWT.CHECK);
                 checkFillValue.setFont(curFont);
                 checkFillValue.setText("Fill Value");
@@ -408,7 +422,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 checkFillValue.setSelection(false);
                 checkFillValue.addSelectionListener(new SelectionAdapter() {
                     @Override
-                    public void widgetSelected(SelectionEvent e) {
+                    public void widgetSelected(SelectionEvent e)
+                    {
                         fillValueField.setEnabled(checkFillValue.getSelection());
                     }
                 });
@@ -418,7 +433,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 fillValueField.setText("0");
                 fillValueField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
                 fillValueField.setEnabled(false);
-            } else {
+            }
+            else {
                 // Add two dummy labels
                 label = new Label(storagePropertiesGroup, SWT.LEFT);
                 label.setFont(curFont);
@@ -432,7 +448,6 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             }
         }
 
-
         // Create Ok/Cancel/Help button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout((dataView == null) ? 3 : 2, false));
@@ -444,7 +459,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (dataView instanceof TableView) {
                     newObject = createFromTable();
                 }
@@ -465,13 +481,14 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         cancelButton.setFont(curFont);
         cancelButton.setText(" &Cancel ");
         cancelButton.setLayoutData(new GridData((dataView == null) ? SWT.CENTER : SWT.BEGINNING, SWT.FILL,
-                (dataView == null) ? false : true, false));
+                                                (dataView == null) ? false : true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = null;
                 shell.dispose();
-                ((Vector<Group>) groupList).setSize(0);
+                ((Vector<Group>)groupList).setSize(0);
             }
         });
 
@@ -482,7 +499,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             helpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             helpButton.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     new HelpDialog(shell).open();
                 }
             });
@@ -492,15 +510,17 @@ public class NewDatasetDialog extends NewDataObjectDialog {
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+            public void widgetDisposed(DisposeEvent e)
+            {
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
+        Point shellSize        = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
@@ -513,10 +533,11 @@ public class NewDatasetDialog extends NewDataObjectDialog {
     }
 
     /** Check if the max size is valid */
-    private void checkMaxSize() {
+    private void checkMaxSize()
+    {
         boolean isChunkNeeded = false;
-        String dimStr = currentSizeField.getText();
-        String maxSizeStr = maxSize;
+        String dimStr         = currentSizeField.getText();
+        String maxSizeStr     = maxSize;
         StringTokenizer stMax = new StringTokenizer(maxSizeStr, "x");
         StringTokenizer stDim = new StringTokenizer(dimStr, "x");
 
@@ -535,7 +556,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
 
             token = token.toLowerCase();
             if (token.startsWith("u")) {
-                max = -1;
+                max           = -1;
                 isChunkNeeded = true;
             }
             else {
@@ -592,14 +613,15 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         }
     }
 
-    private HObject createFromScratch() {
-        String name = null;
+    private HObject createFromScratch()
+    {
+        String name  = null;
         Group pgroup = null;
-        int rank = -1;
-        int gzip = -1;
+        int rank     = -1;
+        int gzip     = -1;
         long[] dims;
         long[] maxdims = null;
-        long[] chunks = null;
+        long[] chunks  = null;
 
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
@@ -622,16 +644,17 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             return null;
         }
 
-        rank = rankChoice.getSelectionIndex() + 1;
+        rank               = rankChoice.getSelectionIndex() + 1;
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Create", "Number of values in the current dimension size is less than " + rank);
+            Tools.showError(shell, "Create",
+                            "Number of values in the current dimension size is less than " + rank);
             return null;
         }
 
-        long l = 0;
-        dims = new long[rank];
+        long l       = 0;
+        dims         = new long[rank];
         String token = null;
         for (int i = 0; i < rank; i++) {
             token = st.nextToken().trim();
@@ -658,11 +681,12 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             st = new StringTokenizer(maxSizeStr, "x");
             if (st.countTokens() < rank) {
                 shell.getDisplay().beep();
-                Tools.showError(shell, "Create", "Number of values in the max dimension size is less than " + rank);
+                Tools.showError(shell, "Create",
+                                "Number of values in the max dimension size is less than " + rank);
                 return null;
             }
 
-            l = 0;
+            l       = 0;
             maxdims = new long[rank];
             for (int i = 0; i < rank; i++) {
                 token = st.nextToken().trim();
@@ -703,7 +727,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 return null;
             }
 
-            l = 0;
+            l      = 0;
             chunks = new long[rank];
             for (int i = 0; i < rank; i++) {
                 token = st.nextToken().trim();
@@ -712,7 +736,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 }
                 catch (NumberFormatException ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Create", "Invalid chunk dimension size: " + chunkSizeField.getText());
+                    Tools.showError(shell, "Create",
+                                    "Invalid chunk dimension size: " + chunkSizeField.getText());
                     return null;
                 }
 
@@ -726,7 +751,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             } //  (int i=0; i<rank; i++)
 
             long tchunksize = 1;
-            long tdimsize = 1;
+            long tdimsize   = 1;
             for (int i = 0; i < rank; i++) {
                 tchunksize *= chunks[i];
                 tdimsize *= dims[i];
@@ -734,18 +759,21 @@ public class NewDatasetDialog extends NewDataObjectDialog {
 
             if (tchunksize >= tdimsize) {
                 shell.getDisplay().beep();
-                if(!Tools.showConfirm(shell, "Create",
-                        "Chunk size is equal/greater than the current size. "
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
+                if (!Tools.showConfirm(shell, "Create",
+                                       "Chunk size is equal/greater than the current size. "
+                                           + "\nAre you sure you want to set chunk size to " +
+                                           chunkSizeField.getText() + "?")) {
                     return null;
                 }
             }
 
             if (tchunksize == 1) {
                 shell.getDisplay().beep();
-                if(!Tools.showConfirm(shell, "Create",
+                if (!Tools.showConfirm(
+                        shell, "Create",
                         "Chunk size is one, which may cause large memory overhead for large dataset."
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
+                            + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() +
+                            "?")) {
                     return null;
                 }
             }
@@ -765,10 +793,12 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             String fillValue = null;
 
             if (fillValueField != null) {
-                if (fillValueField.isEnabled()) fillValue = fillValueField.getText();
+                if (fillValueField.isEnabled())
+                    fillValue = fillValueField.getText();
             }
 
-            obj = fileFormat.createScalarDS(name, pgroup, datatype, dims, maxdims, chunks, gzip, fillValue, null);
+            obj = fileFormat.createScalarDS(name, pgroup, datatype, dims, maxdims, chunks, gzip, fillValue,
+                                            null);
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
@@ -779,10 +809,11 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         return obj;
     }
 
-    private HObject createFromTable() {
+    private HObject createFromTable()
+    {
         HObject obj = null;
 
-        String name = null;
+        String name  = null;
         Group pgroup = null;
 
         name = nameField.getText();
@@ -805,25 +836,25 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             return null;
         }
 
-        TableView tableView = (TableView) dataView;
-        Object theData = tableView.getSelectedData();
+        TableView tableView = (TableView)dataView;
+        Object theData      = tableView.getSelectedData();
         if (theData == null) {
             return null;
         }
 
-        int w = tableView.getSelectedColumnCount();
-        int h = tableView.getSelectedRowCount();
-        Dataset dataset = (Dataset) tableView.getDataObject();
+        int w           = tableView.getSelectedColumnCount();
+        int h           = tableView.getSelectedRowCount();
+        Dataset dataset = (Dataset)tableView.getDataObject();
         if (dataset instanceof ScalarDS) {
-            ScalarDS sd = (ScalarDS) dataset;
+            ScalarDS sd = (ScalarDS)dataset;
             if (sd.getDatatype().isUnsigned()) {
                 theData = Dataset.convertToUnsignedC(theData, null);
             }
         }
 
         try {
-            long[] dims = { h, w };
-            obj = dataset.copy(pgroup, name, dims, theData);
+            long[] dims = {h, w};
+            obj         = dataset.copy(pgroup, name, dims, theData);
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
@@ -834,9 +865,10 @@ public class NewDatasetDialog extends NewDataObjectDialog {
         return obj;
     }
 
-    private HObject createFromImage() {
-        HObject obj = null;
-        String name = null;
+    private HObject createFromImage()
+    {
+        HObject obj  = null;
+        String name  = null;
         Group pgroup = null;
 
         name = nameField.getText();
@@ -859,9 +891,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             return null;
         }
 
-        ImageView imageView = (ImageView) dataView;
-        ScalarDS dataset = (ScalarDS) imageView.getDataObject();
-        Object theData = imageView.getSelectedData();
+        ImageView imageView = (ImageView)dataView;
+        ScalarDS dataset    = (ScalarDS)imageView.getDataObject();
+        Object theData      = imageView.getSelectedData();
 
         if (theData == null) {
             return null;
@@ -893,13 +925,13 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                     }
                 }
                 else {
-                    dims = new long[2];
+                    dims    = new long[2];
                     dims[0] = h;
                     dims[1] = w;
                 }
             }
             else {
-                dims = new long[2];
+                dims    = new long[2];
                 dims[0] = w;
                 dims[1] = h;
             }
@@ -918,14 +950,13 @@ public class NewDatasetDialog extends NewDataObjectDialog {
     private class HelpDialog extends Dialog {
         private Shell helpShell;
 
-        public HelpDialog(Shell parent) {
-            super(parent, SWT.APPLICATION_MODAL);
-        }
+        public HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
 
-        public void open() {
+        public void open()
+        {
             Shell parent = getParent();
-            helpShell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-                    SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
+            helpShell =
+                new Shell(parent, SWT.TITLE | SWT.CLOSE | SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
             helpShell.setFont(curFont);
             helpShell.setText("Create New Dataset");
             helpShell.setImages(ViewProperties.getHdfIcons());
@@ -940,10 +971,11 @@ public class NewDatasetDialog extends NewDataObjectDialog {
 
                 if (ClassLoader.getSystemResource("hdf/view/HDFView.class").toString().startsWith("jar")) {
                     // Attempt to load HTML help file from jar
-                    try (InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewDatasetHelp.html")) {
-                        Scanner scan = new Scanner(in);
+                    try (InputStream in = getClass().getClassLoader().getResourceAsStream(
+                             "hdf/view/NewDatasetHelp.html")) {
+                        Scanner scan         = new Scanner(in);
                         StringBuilder buffer = new StringBuilder();
-                        while(scan.hasNextLine()) {
+                        while (scan.hasNextLine()) {
                             buffer.append(scan.nextLine());
                         }
 
@@ -987,7 +1019,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                             log.debug("help information:", mfu);
                         }
 
-                        URL uu[] = { url, url2, url3 };
+                        URL uu[] = {url, url2, url3};
                         try (URLClassLoader cl = new URLClassLoader(uu)) {
                             URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
 
@@ -1014,7 +1046,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
                 okButton.addSelectionListener(new SelectionAdapter() {
                     @Override
-                    public void widgetSelected(SelectionEvent e) {
+                    public void widgetSelected(SelectionEvent e)
+                    {
                         helpShell.dispose();
                     }
                 });
@@ -1024,14 +1057,14 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 helpShell.setSize(new Point(500, 500));
 
                 Rectangle parentBounds = parent.getBounds();
-                Point shellSize = helpShell.getSize();
+                Point shellSize        = helpShell.getSize();
                 helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                                       (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
                 helpShell.open();
 
                 Display display = parent.getDisplay();
-                while(!helpShell.isDisposed()) {
+                while (!helpShell.isDisposed()) {
                     if (!display.readAndDispatch())
                         display.sleep();
                 }
@@ -1040,9 +1073,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 // Try opening help link in external browser if platform
                 // doesn't support SWT browser
                 Tools.showError(shell, "Browser support",
-                        "Platform doesn't support Browser. Opening external link in web browser...");
+                                "Platform doesn't support Browser. Opening external link in web browser...");
 
-                //TODO: Add support for launching in external browser
+                // TODO: Add support for launching in external browser
             }
             catch (Exception ex) {
                 log.debug("Open New Dataset Help failure: ", ex);

@@ -36,20 +36,18 @@ public abstract class UserOptionsDefaultPage extends PreferencePage {
     private static final Logger log = LoggerFactory.getLogger(UserOptionsDefaultPage.class);
 
     /** The reference to the visual shell */
-    protected Shell                 shell;
+    protected Shell shell;
 
     /** The setting of the current font */
-    protected Font                  curFont;
+    protected Font curFont;
 
     /** The setting of the root directory */
-    protected String                rootDir = null;
+    protected String rootDir = null;
 
     /**
      * <code>UserOptionsDefaultPage</code> default constructor.
      */
-    public UserOptionsDefaultPage() {
-        super();
-    }
+    public UserOptionsDefaultPage() { super(); }
 
     /**
      * Creates a new abstract <code>UserOptionsDefaultPage</code> with the
@@ -57,9 +55,7 @@ public abstract class UserOptionsDefaultPage extends PreferencePage {
      *
      * @param title the page title
      */
-    public UserOptionsDefaultPage(String title) {
-        super(title);
-    }
+    public UserOptionsDefaultPage(String title) { super(title); }
 
     /**
      * Creates a new abstract <code>UserOptionsDefaultPage</code> with the
@@ -68,28 +64,26 @@ public abstract class UserOptionsDefaultPage extends PreferencePage {
      * @param title the page title
      * @param image the image for this page, or <code>null</code> if none
      */
-    public UserOptionsDefaultPage(String title, ImageDescriptor image) {
-        super(title, image);
-    }
+    public UserOptionsDefaultPage(String title, ImageDescriptor image) { super(title, image); }
 
     @Override
     public void createControl(Composite parent)
     {
         super.createControl(parent);
 
-        Button applyButton = this.getApplyButton();
+        Button applyButton    = this.getApplyButton();
         Button defaultsButton = this.getDefaultsButton();
         if (applyButton != null && defaultsButton != null) {
             /* Apply and default button are shown */
 
             /* Customize apply button (text + image) */
             applyButton.setText("apply changes");
-            //applyButton.setImage(SWTHelper.loadImage("save.gif"));
+            // applyButton.setImage(SWTHelper.loadImage("save.gif"));
             this.setButtonLayoutData(applyButton);
 
             /* Customize defaults button (text + image) */
             defaultsButton.setText("restore defaults");
-            //defaultsButton.setImage(SWTHelper.loadImage("clear.gif"));
+            // defaultsButton.setImage(SWTHelper.loadImage("clear.gif"));
             this.setButtonLayoutData(defaultsButton);
         }
     }

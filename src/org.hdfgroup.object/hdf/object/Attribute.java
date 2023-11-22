@@ -22,8 +22,7 @@ import java.util.Collection;
  *
  * @see hdf.object.HObject
  */
-public interface Attribute
-{
+public interface Attribute {
     /**
      * Returns the HObject to which this Attribute is currently "attached".
      *

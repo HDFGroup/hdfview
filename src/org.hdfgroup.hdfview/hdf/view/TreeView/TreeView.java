@@ -16,14 +16,14 @@ package hdf.view.TreeView;
 
 import java.util.List;
 
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
-
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.view.DataView.DataView;
 import hdf.view.MetaDataView.MetaDataView;
+
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 /**
  * TreeView defines APIs for opening a file and displaying the file structure in
@@ -137,8 +137,7 @@ public abstract interface TreeView {
      *
      * @throws Exception if a failure occurred
      */
-    public abstract DataView showDataContent(HObject dataObject)
-            throws Exception;
+    public abstract DataView showDataContent(HObject dataObject) throws Exception;
 
     /**
      * Adds an already created HObject to the tree under the
@@ -169,5 +168,4 @@ public abstract interface TreeView {
      * @return the tree item that contains the given data object.
      */
     public abstract TreeItem findTreeItem(HObject obj);
-
 }

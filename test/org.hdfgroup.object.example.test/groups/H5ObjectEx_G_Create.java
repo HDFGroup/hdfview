@@ -8,14 +8,14 @@ import hdf.object.FileFormat;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
 
-
 public class H5ObjectEx_G_Create {
-    private static String FILENAME = "H5ObjectEx_G_Create.h5";
+    private static String FILENAME  = "H5ObjectEx_G_Create.h5";
     private static String GROUPNAME = "G1";
 
-    private static void CreateGroup() {
-        H5File file = null;
-        H5Group grp = null;
+    private static void CreateGroup()
+    {
+        H5File file   = null;
+        H5Group grp   = null;
         long group_id = -1;
 
         // Create a new file using default properties.
@@ -29,7 +29,7 @@ public class H5ObjectEx_G_Create {
 
         // Create a group in the file.
         try {
-            grp = (H5Group)file.createGroup("/" + GROUPNAME, null);
+            grp      = (H5Group)file.createGroup("/" + GROUPNAME, null);
             group_id = grp.open();
         }
         catch (Exception e) {
@@ -69,11 +69,7 @@ public class H5ObjectEx_G_Create {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
-        H5ObjectEx_G_Create.CreateGroup();
-    }
-
+    public static void main(String[] args) { H5ObjectEx_G_Create.CreateGroup(); }
 }

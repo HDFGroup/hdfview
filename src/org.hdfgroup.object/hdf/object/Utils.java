@@ -16,9 +16,7 @@ package hdf.object;
 
 /** General utility class */
 public final class Utils {
-    private Utils() {
-        throw new IllegalStateException("Utility class");
-    }
+    private Utils() { throw new IllegalStateException("Utility class"); }
 
     /**
      * Retrieves the Java Runtime Class of the given Object. B = byte array, S = short array, I = int
@@ -28,14 +26,15 @@ public final class Utils {
      *            the Object to determine the Runtime Class of
      * @return the Java Runtime Class of the given Object.
      */
-    public static char getJavaObjectRuntimeClass(Object o) {
+    public static char getJavaObjectRuntimeClass(Object o)
+    {
         if (o == null)
             return ' ';
 
         String cName = o.getClass().getName();
 
-        if (cName.equals("java.lang.String") || cName.equals("java.util.Vector")
-                || cName.equals("java.util.Arrays$ArrayList") || cName.equals("java.util.ArrayList"))
+        if (cName.equals("java.lang.String") || cName.equals("java.util.Vector") ||
+            cName.equals("java.util.Arrays$ArrayList") || cName.equals("java.util.ArrayList"))
             return 'L';
 
         int cIndex = cName.lastIndexOf('[');
@@ -45,5 +44,4 @@ public final class Utils {
 
         return ' ';
     }
-
 }

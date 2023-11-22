@@ -13,9 +13,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -24,56 +21,57 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5ObjectEx_D_Alloc {
-    private static String FILENAME = "H5ObjectEx_D_Alloc.h5";
-    private static String DATASETNAME1 = "DS1";
-    private static String DATASETNAME2 = "DS2";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 7;
-    private static final int FILLVAL = 99;
-    private static final int RANK = 2;
+    private static String FILENAME         = "H5ObjectEx_D_Alloc.h5";
+    private static String DATASETNAME1     = "DS1";
+    private static String DATASETNAME2     = "DS2";
+    private static final int DIM_X         = 4;
+    private static final int DIM_Y         = 7;
+    private static final int FILLVAL       = 99;
+    private static final int RANK          = 2;
     private static final int DATATYPE_SIZE = 4;
 
     // Values for the status of space allocation
     enum H5D_space_status {
-        H5D_SPACE_STATUS_ERROR(-1), H5D_SPACE_STATUS_NOT_ALLOCATED(0), H5D_SPACE_STATUS_PART_ALLOCATED(
-                1), H5D_SPACE_STATUS_ALLOCATED(2);
+        H5D_SPACE_STATUS_ERROR(-1),
+        H5D_SPACE_STATUS_NOT_ALLOCATED(0),
+        H5D_SPACE_STATUS_PART_ALLOCATED(1),
+        H5D_SPACE_STATUS_ALLOCATED(2);
         private static final Map<Integer, H5D_space_status> lookup = new HashMap<Integer, H5D_space_status>();
 
-        static {
+        static
+        {
             for (H5D_space_status s : EnumSet.allOf(H5D_space_status.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5D_space_status(int space_status) {
-            this.code = space_status;
-        }
+        H5D_space_status(int space_status) { this.code = space_status; }
 
-        public int getCode() {
-            return this.code;
-        }
+        public int getCode() { return this.code; }
 
-        public static H5D_space_status get(int code) {
-            return lookup.get(code);
-        }
+        public static H5D_space_status get(int code) { return lookup.get(code); }
     }
 
-    private static void allocation() {
-        H5File file = null;
-        Dataset dset1 = null;
-        Dataset dset2 = null;
-        long file_id = -1;
-        long filespace_id = -1;
-        long dataset_id1 = -1;
-        long dataset_id2 = -1;
-        long dcpl_id = -1;
-        long type_id = -1;
-        long[] dims = { DIM_X, DIM_Y };
-        int[][] dset_data = new int[DIM_X][DIM_Y];
-        int space_status = -1;
-        long storage_size = 0;
+    private static void allocation()
+    {
+        H5File file        = null;
+        Dataset dset1      = null;
+        Dataset dset2      = null;
+        long file_id       = -1;
+        long filespace_id  = -1;
+        long dataset_id1   = -1;
+        long dataset_id2   = -1;
+        long dcpl_id       = -1;
+        long type_id       = -1;
+        long[] dims        = {DIM_X, DIM_Y};
+        int[][] dset_data  = new int[DIM_X][DIM_Y];
+        int space_status   = -1;
+        long storage_size  = 0;
         H5Datatype typeInt = null;
 
         // Initialize the dataset.
@@ -83,7 +81,7 @@ public class H5ObjectEx_D_Alloc {
 
         // Create a file using default properties.
         try {
-            file = new H5File(FILENAME, FileFormat.CREATE);
+            file    = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -91,12 +89,12 @@ public class H5ObjectEx_D_Alloc {
         }
 
         System.out.println("Creating datasets...");
-        System.out.println(DATASETNAME1
-                + " has allocation time H5D_ALLOC_TIME_LATE");
+        System.out.println(DATASETNAME1 + " has allocation time H5D_ALLOC_TIME_LATE");
 
         // Create the datatype for the datasets.
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_BE, Datatype.NATIVE);
+            typeInt =
+                new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_BE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -104,17 +102,14 @@ public class H5ObjectEx_D_Alloc {
 
         // Create the dataset using the dataset default creation property list.
         try {
-            dset1 = file.createScalarDS(DATASETNAME1, null, typeInt,
-                    dims, null, null, 0,
-                    null);
+            dset1       = file.createScalarDS(DATASETNAME1, null, typeInt, dims, null, null, 0, null);
             dataset_id1 = dset1.open();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
-        System.out.println(DATASETNAME2
-                + " has allocation time H5D_ALLOC_TIME_EARLY");
+        System.out.println(DATASETNAME2 + " has allocation time H5D_ALLOC_TIME_EARLY");
         System.out.println();
 
         // Create the dataset creation property list, and set the chunk size.
@@ -139,12 +134,12 @@ public class H5ObjectEx_D_Alloc {
         // Create the dataset using the dataset creation property list.
         try {
             filespace_id = H5.H5Screate_simple(RANK, dims, null);
-            type_id = typeInt.createNative();
+            type_id      = typeInt.createNative();
             if ((file_id >= 0) && (filespace_id >= 0) && (type_id >= 0) && (dcpl_id >= 0)) {
-                dataset_id2 = H5.H5Dcreate(file_id, DATASETNAME2, type_id, filespace_id,
-                        HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
-                dset2 = new H5ScalarDS(file, DATASETNAME2, "/");
-                Group pgroup = (Group) file.get("/");
+                dataset_id2  = H5.H5Dcreate(file_id, DATASETNAME2, type_id, filespace_id,
+                                            HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+                dset2        = new H5ScalarDS(file, DATASETNAME2, "/");
+                Group pgroup = (Group)file.get("/");
                 pgroup.addToMemberList(dset2);
             }
         }
@@ -170,10 +165,8 @@ public class H5ObjectEx_D_Alloc {
         String the_space = " ";
         if (H5D_space_status.get(space_status) != H5D_space_status.H5D_SPACE_STATUS_ALLOCATED)
             the_space += "not ";
-        System.out.println("Space for " + DATASETNAME1 + " has" + the_space
-                + "been allocated.");
-        System.out.println("Storage size for " + DATASETNAME1 + " is: "
-                + storage_size + " bytes.");
+        System.out.println("Space for " + DATASETNAME1 + " has" + the_space + "been allocated.");
+        System.out.println("Storage size for " + DATASETNAME1 + " is: " + storage_size + " bytes.");
 
         // Retrieve and print space status and storage size for dset2.
         try {
@@ -193,10 +186,8 @@ public class H5ObjectEx_D_Alloc {
         the_space = " ";
         if (H5D_space_status.get(space_status) != H5D_space_status.H5D_SPACE_STATUS_ALLOCATED)
             the_space += "not ";
-        System.out.println("Space for " + DATASETNAME2 + " has" + the_space
-                + "been allocated.");
-        System.out.println("Storage size for " + DATASETNAME2 + " is: "
-                + storage_size + " bytes.");
+        System.out.println("Space for " + DATASETNAME2 + " has" + the_space + "been allocated.");
+        System.out.println("Storage size for " + DATASETNAME2 + " is: " + storage_size + " bytes.");
         System.out.println();
 
         System.out.println("Writing data...");
@@ -236,10 +227,8 @@ public class H5ObjectEx_D_Alloc {
         the_space = " ";
         if (H5D_space_status.get(space_status) != H5D_space_status.H5D_SPACE_STATUS_ALLOCATED)
             the_space += "not ";
-        System.out.println("Space for " + DATASETNAME1 + " has" + the_space
-                + "been allocated.");
-        System.out.println("Storage size for " + DATASETNAME1 + " is: "
-                + storage_size + " bytes.");
+        System.out.println("Space for " + DATASETNAME1 + " has" + the_space + "been allocated.");
+        System.out.println("Storage size for " + DATASETNAME1 + " is: " + storage_size + " bytes.");
 
         // Retrieve and print space status and storage size for dset2.
         try {
@@ -259,10 +248,8 @@ public class H5ObjectEx_D_Alloc {
         the_space = " ";
         if (H5D_space_status.get(space_status) != H5D_space_status.H5D_SPACE_STATUS_ALLOCATED)
             the_space += "not ";
-        System.out.println("Space for " + DATASETNAME2 + " has" + the_space
-                + "been allocated.");
-        System.out.println("Storage size for " + DATASETNAME2 + " is: "
-                + storage_size + " bytes.");
+        System.out.println("Space for " + DATASETNAME2 + " has" + the_space + "been allocated.");
+        System.out.println("Storage size for " + DATASETNAME2 + " is: " + storage_size + " bytes.");
         System.out.println();
 
         // End access to the dataset and release resources used by it.
@@ -315,8 +302,5 @@ public class H5ObjectEx_D_Alloc {
         }
     }
 
-    public static void main(String[] args) {
-        H5ObjectEx_D_Alloc.allocation();
-    }
-
+    public static void main(String[] args) { H5ObjectEx_D_Alloc.allocation(); }
 }

@@ -23,6 +23,15 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import hdf.object.Attribute;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +54,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.Attribute;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
-
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-
 /**
  * NewStringAttributeDialog displays components for adding a new attribute.
  *
@@ -66,20 +65,20 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
     private static final Logger log = LoggerFactory.getLogger(NewStringAttributeDialog.class);
 
     /** the default length of a string attribute */
-    public static final int   DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;
+    public static final int DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;
 
     /** TextField for entering the name of the dataset */
-    private Text              nameField;
+    private Text nameField;
 
     /** TextField for entering the attribute value. */
-    private Text              valueField;
+    private Text valueField;
 
     /** The Choice of the object list */
-    private Combo             objChoice;
+    private Combo objChoice;
 
-    private Button            h4GrAttrRadioButton;
+    private Button h4GrAttrRadioButton;
 
-    private Label             arrayLengthLabel;
+    private Label arrayLengthLabel;
 
     /** If the attribute should be attached to a hdf4 object */
     protected boolean isH4;
@@ -97,7 +96,8 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
      * @param objs
      *            the list of all objects.
      */
-    public NewStringAttributeDialog(Shell parent, HObject pObject, List<HObject> objs) {
+    public NewStringAttributeDialog(Shell parent, HObject pObject, List<HObject> objs)
+    {
         super(parent, pObject, objs);
         isH4 = pObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4));
         isN3 = pObject.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3));
@@ -106,14 +106,14 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
     /**
      * Open the NewStringAttributeDialog for adding a new attribute.
      */
-    public void open() {
+    public void open()
+    {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell        = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Attribute...");
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
-
 
         // Create content region
         Composite content = new Composite(shell, SWT.NONE);
@@ -135,16 +135,14 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         Composite optionsComposite = new Composite(content, SWT.NONE);
         optionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         optionsComposite.setLayout(new GridLayout(
-                (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot()) ? 5 : 3,
-                        false)
-                );
+            (!isH5 && (parentObj instanceof Group) && ((Group)parentObj).isRoot()) ? 5 : 3, false));
 
         // Dummy label
         label = new Label(optionsComposite, SWT.LEFT);
         label.setFont(curFont);
         label.setText("");
 
-        if (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot()) {
+        if (!isH5 && (parentObj instanceof Group) && ((Group)parentObj).isRoot()) {
             label = new Label(optionsComposite, SWT.LEFT);
             label.setFont(curFont);
             label.setText("");
@@ -156,7 +154,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
 
         createDatatypeWidget();
 
-        if (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot()) {
+        if (!isH5 && (parentObj instanceof Group) && ((Group)parentObj).isRoot()) {
             Button h4SdAttrRadioButton = new Button(optionsComposite, SWT.RADIO);
             h4SdAttrRadioButton.setFont(curFont);
             h4SdAttrRadioButton.setText("SD");
@@ -196,13 +194,14 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         objChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         objChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 String objName = objChoice.getItem(objChoice.getSelectionIndex());
 
                 long[] ref = null;
                 try {
                     HObject obj = fileFormat.get(objName);
-                    ref = obj.getOID();
+                    ref         = obj.getOID();
                 }
                 catch (Exception ex) {
                     log.debug("object id:", ex);
@@ -225,10 +224,11 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         Iterator<?> it = objList.iterator();
         HObject hobj;
         while (it.hasNext()) {
-            hobj = (HObject) it.next();
+            hobj = (HObject)it.next();
 
             if (hobj instanceof Group) {
-                if (((Group) hobj).isRoot()) continue;
+                if (((Group)hobj).isRoot())
+                    continue;
             }
 
             objChoice.add(hobj.getFullName());
@@ -249,7 +249,8 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (createAttribute()) {
                     shell.dispose();
                 }
@@ -262,7 +263,8 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         cancelButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = null;
                 shell.dispose();
             }
@@ -274,7 +276,8 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         helpButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         helpButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 new HelpDialog(shell).open();
             }
         });
@@ -283,15 +286,17 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+            public void widgetDisposed(DisposeEvent e)
+            {
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
+        Point shellSize        = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
@@ -304,8 +309,9 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean createAttribute() {
-        Object value = null;
+    private boolean createAttribute()
+    {
+        Object value    = null;
         String strValue = valueField.getText();
 
         String attrName = nameField.getText();
@@ -340,7 +346,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         }
 
         StringTokenizer st = new StringTokenizer(strValue, ",");
-        int count = Math.min(arraySize, st.countTokens());
+        int count          = Math.min(arraySize, st.countTokens());
         String theToken;
         log.trace("Count of Values is {}", count);
 
@@ -348,8 +354,8 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         Datatype datatype = super.createNewDatatype(null);
         if (isVLen) {
             log.trace("Attribute isVLen={} and tsize={}", isVLen, tsize);
-            String[] strArray = { strValue };
-            value = strArray;
+            String[] strArray = {strValue};
+            value             = strArray;
         }
         else {
             if (tclass == Datatype.CLASS_STRING) {
@@ -359,8 +365,8 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                     }
                 }
 
-                String[] strArray = { strValue };
-                value = strArray;
+                String[] strArray = {strValue};
+                value             = strArray;
 
                 if (isH5) {
                     arraySize = 1; // support string type
@@ -368,10 +374,11 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                 else {
                     arraySize = tsize; // array of characters
                 }
-                log.trace("Attribute CLASS_STRING: isVlenStr={} and tsize={} and arraySize={}", isVlenStr, tsize, arraySize);
+                log.trace("Attribute CLASS_STRING: isVlenStr={} and tsize={} and arraySize={}", isVlenStr,
+                          tsize, arraySize);
             }
             else if (tclass == Datatype.CLASS_REFERENCE) {
-                arraySize = st.countTokens();
+                arraySize  = st.countTokens();
                 long[] ref = new long[arraySize];
                 for (int j = 0; j < arraySize; j++) {
                     theToken = st.nextToken().trim();
@@ -407,13 +414,13 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                             else if (sv > 255) {
                                 sv = 255;
                             }
-                            b[j] = (byte) sv;
+                            b[j] = (byte)sv;
                         }
                         value = b;
                     }
                     else if (tsize == 2) {
                         short[] s = new short[arraySize];
-                        int iv = 0;
+                        int iv    = 0;
                         for (int j = 0; j < count; j++) {
                             theToken = st.nextToken().trim();
                             try {
@@ -429,7 +436,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                             else if (iv > 65535) {
                                 iv = 65535;
                             }
-                            s[j] = (short) iv;
+                            s[j] = (short)iv;
                         }
                         value = s;
                     }
@@ -451,12 +458,12 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                             if (lv > 4294967295L) {
                                 lv = 4294967295L;
                             }
-                            i[j] = (int) lv;
+                            i[j] = (int)lv;
                         }
                         value = i;
                     }
                     else if (tsize == 8) {
-                        long[] i = new long[arraySize];
+                        long[] i      = new long[arraySize];
                         BigInteger lv = BigInteger.valueOf(0);
                         for (int j = 0; j < count; j++) {
                             theToken = st.nextToken().trim();
@@ -572,7 +579,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
             }
         }
 
-        long[] dims = { arraySize };
+        long[] dims    = {arraySize};
         Attribute attr = null;
         try {
             if (isH4)
@@ -585,7 +592,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
             log.debug("createAttribute(): ", ex);
             return false;
         }
-        if (attr ==null) {
+        if (attr == null) {
             Tools.showError(shell, "Create", "Attribute could not be created");
             log.debug("createAttribute(): failed");
             return false;
@@ -593,14 +600,15 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
         attr.setAttributeData(value);
 
         try {
-            if (!isH5 && (parentObj instanceof Group) && ((Group) parentObj).isRoot() && h4GrAttrRadioButton.getSelection()) {
+            if (!isH5 && (parentObj instanceof Group) && ((Group)parentObj).isRoot() &&
+                h4GrAttrRadioButton.getSelection()) {
                 parentObj.getFileFormat().writeAttribute(parentObj, attr, false);
                 // don't find a good way to write HDF4 global
                 // attribute. Use the isExisted to separate the
                 // global attribute is GR or SD
 
-                if (((MetaDataContainer) parentObj).getMetadata() == null) {
-                    ((MetaDataContainer) parentObj).getMetadata().add(attr);
+                if (((MetaDataContainer)parentObj).getMetadata() == null) {
+                    ((MetaDataContainer)parentObj).getMetadata().add(attr);
                 }
             }
             else {
@@ -622,14 +630,13 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
     private class HelpDialog extends Dialog {
         private Shell helpShell;
 
-        public HelpDialog(Shell parent) {
-            super(parent, SWT.APPLICATION_MODAL);
-        }
+        public HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
 
-        public void open() {
+        public void open()
+        {
             Shell parent = getParent();
-            helpShell = new Shell(parent, SWT.TITLE | SWT.CLOSE |
-                    SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
+            helpShell =
+                new Shell(parent, SWT.TITLE | SWT.CLOSE | SWT.RESIZE | SWT.BORDER | SWT.APPLICATION_MODAL);
             helpShell.setFont(curFont);
             helpShell.setText("Create New Attribute");
             helpShell.setImages(ViewProperties.getHdfIcons());
@@ -644,10 +651,11 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
 
                 if (ClassLoader.getSystemResource("hdf/view/HDFView.class").toString().startsWith("jar")) {
                     // Attempt to load HTML help file from jar
-                    try (InputStream in = getClass().getClassLoader().getResourceAsStream("hdf/view/NewAttrHelp.html")) {
-                        Scanner scan = new Scanner(in);
+                    try (InputStream in =
+                             getClass().getClassLoader().getResourceAsStream("hdf/view/NewAttrHelp.html")) {
+                        Scanner scan         = new Scanner(in);
                         StringBuilder buffer = new StringBuilder();
-                        while(scan.hasNextLine()) {
+                        while (scan.hasNextLine()) {
                             buffer.append(scan.nextLine());
                         }
 
@@ -691,7 +699,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                             log.debug("help information:", mfu);
                         }
 
-                        URL uu[] = { url, url2, url3 };
+                        URL uu[] = {url, url2, url3};
                         try (URLClassLoader cl = new URLClassLoader(uu)) {
                             URL u = cl.findResource("hdf/view/NewAttrHelp.html");
 
@@ -718,7 +726,8 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                 okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
                 okButton.addSelectionListener(new SelectionAdapter() {
                     @Override
-                    public void widgetSelected(SelectionEvent e) {
+                    public void widgetSelected(SelectionEvent e)
+                    {
                         helpShell.dispose();
                     }
                 });
@@ -728,14 +737,14 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                 helpShell.setSize(new Point(500, 500));
 
                 Rectangle parentBounds = parent.getBounds();
-                Point shellSize = helpShell.getSize();
+                Point shellSize        = helpShell.getSize();
                 helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                                       (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
                 helpShell.open();
 
                 Display display = parent.getDisplay();
-                while(!helpShell.isDisposed()) {
+                while (!helpShell.isDisposed()) {
                     if (!display.readAndDispatch())
                         display.sleep();
                 }
@@ -744,9 +753,9 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                 // Try opening help link in external browser if platform
                 // doesn't support SWT browser
                 Tools.showError(shell, "Browser support",
-                        "Platform doesn't support Browser. Opening external link in web browser...");
+                                "Platform doesn't support Browser. Opening external link in web browser...");
 
-                //TODO: Add support for launching in external browser
+                // TODO: Add support for launching in external browser
             }
             catch (Exception ex) {
                 log.debug("Open New Attribute Help failure: ", ex);
@@ -755,7 +764,5 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
     }
 
     /** @return the new attribute created. */
-    public Attribute getAttribute() {
-        return (Attribute)newObject;
-    }
+    public Attribute getAttribute() { return (Attribute)newObject; }
 }

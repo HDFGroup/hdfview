@@ -17,6 +17,8 @@ package hdf.view.dialog;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import hdf.view.ViewProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +30,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import hdf.view.ViewProperties;
-
-
 /**
  * UserOptionsViewModulesPage.java - Configuration page for user-implementable
  * modules.
@@ -38,7 +37,7 @@ import hdf.view.ViewProperties;
 public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     private static final Logger log = LoggerFactory.getLogger(UserOptionsViewModulesPage.class);
 
-    private Combo                 choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView;
+    private Combo choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView;
 
     /** A list of Tree view implementations. */
     private static ArrayList<String> treeViews;
@@ -58,15 +57,14 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     /**
      * Configuration page for user-implementable modules.
      */
-    public UserOptionsViewModulesPage() {
-        super("View Modules Settings");
-    }
+    public UserOptionsViewModulesPage() { super("View Modules Settings"); }
 
     /**
      * Performs special processing when this page's Defaults button has been pressed.
      */
     @Override
-    public void performDefaults() {
+    public void performDefaults()
+    {
         super.performDefaults();
     }
 
@@ -76,13 +74,15 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
      * @return <code>false</code> to abort the container's OK processing and <code>true</code> to allow
      *         the OK to happen
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public boolean performOk() {
+    public boolean performOk()
+    {
         getPreferenceStore();
 
-        ArrayList[] moduleList = { treeViews, metaDataViews, tableViews, imageViews, paletteViews };
-        Combo[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView };
+        ArrayList[] moduleList = {treeViews, metaDataViews, tableViews, imageViews, paletteViews};
+        Combo[] choiceList     = {choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView,
+                                  choicePaletteView};
         for (int i = 0; i < moduleList.length; i++) {
             Combo curModuleCombo = choiceList[i];
             if (curModuleCombo != null) {
@@ -98,15 +98,16 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     /**
      * Loads all stored values in the <code>FieldEditor</code>s.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected void load() {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    protected void load()
+    {
         getPreferenceStore();
 
-        treeViews = (ArrayList<String>) ViewProperties.getTreeViewList();
-        metaDataViews = (ArrayList<String>) ViewProperties.getMetaDataViewList();
-        tableViews = (ArrayList<String>) ViewProperties.getTableViewList();
-        imageViews = (ArrayList<String>) ViewProperties.getImageViewList();
-        paletteViews = (ArrayList<String>) ViewProperties.getPaletteViewList();
+        treeViews     = (ArrayList<String>)ViewProperties.getTreeViewList();
+        metaDataViews = (ArrayList<String>)ViewProperties.getMetaDataViewList();
+        tableViews    = (ArrayList<String>)ViewProperties.getTableViewList();
+        imageViews    = (ArrayList<String>)ViewProperties.getImageViewList();
+        paletteViews  = (ArrayList<String>)ViewProperties.getPaletteViewList();
         // srbVector = (ArrayList<String>)ViewProperties.getSrbAccount();
 
         choiceTreeView.setItems(treeViews.toArray(new String[0]));
@@ -120,8 +121,9 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
         choicePaletteView.setItems(paletteViews.toArray(new String[0]));
         choicePaletteView.select(0);
 
-        ArrayList[] moduleList = { treeViews, metaDataViews, tableViews, imageViews, paletteViews };
-        Combo[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView };
+        ArrayList[] moduleList = {treeViews, metaDataViews, tableViews, imageViews, paletteViews};
+        Combo[] choiceList     = {choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView,
+                                  choicePaletteView};
         for (int i = 0; i < moduleList.length; i++) {
             Object theModule = choiceList[i].getItem(choiceList[i].getSelectionIndex());
             moduleList[i].remove(theModule);
@@ -137,8 +139,9 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
      * @return the new control
      */
     @Override
-    protected Control createContents(Composite parent) {
-        shell = parent.getShell();
+    protected Control createContents(Composite parent)
+    {
+        shell               = parent.getShell();
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new GridLayout());
 
@@ -151,7 +154,8 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
         choiceTreeView = new Combo(treeViewGroup, SWT.SINGLE | SWT.READ_ONLY);
         choiceTreeView.setFont(curFont);
 
-        org.eclipse.swt.widgets.Group metadataViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
+        org.eclipse.swt.widgets.Group metadataViewGroup =
+            new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         metadataViewGroup.setLayout(new FillLayout());
         metadataViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         metadataViewGroup.setFont(curFont);
@@ -178,7 +182,8 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
         choiceImageView = new Combo(imageViewGroup, SWT.SINGLE | SWT.READ_ONLY);
         choiceImageView.setFont(curFont);
 
-        org.eclipse.swt.widgets.Group paletteViewGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
+        org.eclipse.swt.widgets.Group paletteViewGroup =
+            new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         paletteViewGroup.setLayout(new FillLayout());
         paletteViewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         paletteViewGroup.setFont(curFont);
@@ -189,6 +194,5 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
 
         load();
         return composite;
-
     }
 }

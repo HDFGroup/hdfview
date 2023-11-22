@@ -16,15 +16,15 @@ package hdf.view.DataView;
 
 import java.util.HashMap;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
-
 import hdf.object.HObject;
 import hdf.view.ImageView.ImageView;
 import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.PaletteView.PaletteView;
 import hdf.view.TableView.TableView;
 import hdf.view.TreeView.TreeView;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * The data view factory interface for displaying data objects
@@ -44,7 +44,8 @@ public abstract class DataViewFactory {
      * @return the table view.
      */
     @SuppressWarnings("rawtypes")
-    public abstract TableView    getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException;
+    public abstract TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap)
+        throws ClassNotFoundException;
 
     /**
      * Get an instance of ImageView given the appropriate constructor parameters
@@ -60,7 +61,8 @@ public abstract class DataViewFactory {
      * @return the image view.
      */
     @SuppressWarnings("rawtypes")
-    public abstract ImageView    getImageView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException;
+    public abstract ImageView getImageView(DataViewManager viewer, HashMap dataPropertiesMap)
+        throws ClassNotFoundException;
 
     /**
      * Get an instance of PaletteView given the appropriate constructor parameters
@@ -77,7 +79,8 @@ public abstract class DataViewFactory {
      *
      * @return the palette view.
      */
-    public abstract PaletteView  getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView) throws ClassNotFoundException;
+    public abstract PaletteView getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView)
+        throws ClassNotFoundException;
 
     /**
      * Get an instance of MetaDataView given the appropriate constructor parameters
@@ -94,7 +97,8 @@ public abstract class DataViewFactory {
      *
      * @return the metadata view.
      */
-    public abstract MetaDataView getMetaDataView(Composite parent, DataViewManager viewer, HObject theObj) throws ClassNotFoundException;
+    public abstract MetaDataView getMetaDataView(Composite parent, DataViewManager viewer, HObject theObj)
+        throws ClassNotFoundException;
 
     /**
      * Get an instance of TreeView given the appropriate constructor parameters
@@ -109,5 +113,6 @@ public abstract class DataViewFactory {
      *
      * @return the tree view.
      */
-    public abstract TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException;
+    public abstract TreeView getTreeView(Composite parent, DataViewManager viewer)
+        throws ClassNotFoundException;
 }

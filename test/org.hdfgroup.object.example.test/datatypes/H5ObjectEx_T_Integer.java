@@ -10,26 +10,28 @@ package datatypes;
 
 import java.text.DecimalFormat;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
-public class H5ObjectEx_T_Integer {
-    private static String FILENAME = "H5ObjectEx_T_Integer.h5";
-    private static String DATASETNAME = "DS1";
-    private static final int DIM0 = 4;
-    private static final int DIM1 = 7;
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 
-    private static void CreateDataset() {
-        H5File file = null;
-        H5ScalarDS dset = null;
-        long dataset_id = -1;
-        long[] dims = { DIM0, DIM1 };
-        int[][] dset_data = new int[DIM0][DIM1];
+public class H5ObjectEx_T_Integer {
+    private static String FILENAME    = "H5ObjectEx_T_Integer.h5";
+    private static String DATASETNAME = "DS1";
+    private static final int DIM0     = 4;
+    private static final int DIM1     = 7;
+
+    private static void CreateDataset()
+    {
+        H5File file        = null;
+        H5ScalarDS dset    = null;
+        long dataset_id    = -1;
+        long[] dims        = {DIM0, DIM1};
+        int[][] dset_data  = new int[DIM0][DIM1];
         H5Datatype typeInt = null;
 
         // Initialize data.
@@ -60,7 +62,7 @@ public class H5ObjectEx_T_Integer {
         // regardless of the native integer type. The HDF5 library
         // automatically converts between different integer types.
         try {
-            dset = (H5ScalarDS) file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
+            dset = (H5ScalarDS)file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -70,8 +72,8 @@ public class H5ObjectEx_T_Integer {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -95,12 +97,13 @@ public class H5ObjectEx_T_Integer {
         }
     }
 
-    private static void ReadDataset() {
-        H5File file = null;
-        H5ScalarDS dset = null;
+    private static void ReadDataset()
+    {
+        H5File file       = null;
+        H5ScalarDS dset   = null;
         long dataspace_id = -1;
-        long dataset_id = -1;
-        long[] dims = { DIM0, DIM1 };
+        long dataset_id   = -1;
+        long[] dims       = {DIM0, DIM1};
         int[][] dset_data;
 
         // Open an existing file.
@@ -114,7 +117,7 @@ public class H5ObjectEx_T_Integer {
 
         // Open an existing dataset.
         try {
-            dset = (H5ScalarDS) file.get(DATASETNAME);
+            dset       = (H5ScalarDS)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -140,13 +143,13 @@ public class H5ObjectEx_T_Integer {
 
         // Allocate array of pointers to two-dimensional arrays (the
         // elements of the dataset.
-        dset_data = new int[(int) dims[0]][(int) (dims[1])];
+        dset_data = new int[(int)dims[0]][(int)(dims[1])];
 
         // Read data.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -191,7 +194,8 @@ public class H5ObjectEx_T_Integer {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_T_Integer.CreateDataset();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -199,5 +203,4 @@ public class H5ObjectEx_T_Integer {
         // data using malloc().
         H5ObjectEx_T_Integer.ReadDataset();
     }
-
 }

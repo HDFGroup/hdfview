@@ -10,8 +10,6 @@
  ************************************************************/
 package datasets;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -20,23 +18,27 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5ObjectEx_D_Hyperslab {
-    private static String FILENAME = "H5ObjectEx_D_Hyperslab.h5";
-    private static String DATASETNAME = "DS1";
-    private static final int DIM_X = 6;
-    private static final int DIM_Y = 8;
-    private static final int RANK = 2;
+    private static String FILENAME         = "H5ObjectEx_D_Hyperslab.h5";
+    private static String DATASETNAME      = "DS1";
+    private static final int DIM_X         = 6;
+    private static final int DIM_Y         = 8;
+    private static final int RANK          = 2;
     private static final int DATATYPE_SIZE = 4;
 
-    private static void writeHyperslab() {
-        H5File file = null;
-        Dataset dset = null;
-        long file_id = -1;
-        long filespace_id = -1;
-        long dataset_id = -1;
-        long type_id = -1;
-        long[] dims = { DIM_X, DIM_Y };
-        int[][] dset_data = new int[DIM_X][DIM_Y];
+    private static void writeHyperslab()
+    {
+        H5File file        = null;
+        Dataset dset       = null;
+        long file_id       = -1;
+        long filespace_id  = -1;
+        long dataset_id    = -1;
+        long type_id       = -1;
+        long[] dims        = {DIM_X, DIM_Y};
+        int[][] dset_data  = new int[DIM_X][DIM_Y];
         H5Datatype typeInt = null;
 
         // Initialize data to "1", to make it easier to see the selections.
@@ -56,7 +58,7 @@ public class H5ObjectEx_D_Hyperslab {
 
         // Create a new file using default properties.
         try {
-            file = new H5File(FILENAME, FileFormat.CREATE);
+            file    = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -65,7 +67,8 @@ public class H5ObjectEx_D_Hyperslab {
 
         // Create datatype.
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
+            typeInt =
+                new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +78,7 @@ public class H5ObjectEx_D_Hyperslab {
         // size to be the current size.
         try {
             filespace_id = H5.H5Screate_simple(RANK, dims, null);
-            type_id = typeInt.createNative();
+            type_id      = typeInt.createNative();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -84,11 +87,11 @@ public class H5ObjectEx_D_Hyperslab {
         // Create the dataset. We will use all default properties for this example.
         try {
             if ((file_id >= 0) && (filespace_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME,
-                        type_id, filespace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            dset = new H5ScalarDS(file, DATASETNAME, "/");
-            Group pgroup = (Group) file.get("/");
+                dataset_id =
+                    H5.H5Dcreate(file_id, DATASETNAME, type_id, filespace_id, HDF5Constants.H5P_DEFAULT,
+                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            dset         = new H5ScalarDS(file, DATASETNAME, "/");
+            Group pgroup = (Group)file.get("/");
             pgroup.addToMemberList(dset);
         }
         catch (Exception e) {
@@ -96,14 +99,14 @@ public class H5ObjectEx_D_Hyperslab {
         }
 
         // Define and select the first part of the hyperslab selection.
-        long[] start = { 0, 0 };
-        long[] stride = { 3, 3 };
-        long[] count = { 2, 3 };
-        long[] block = { 2, 2 };
+        long[] start  = {0, 0};
+        long[] stride = {3, 3};
+        long[] count  = {2, 3};
+        long[] block  = {2, 2};
         try {
             if ((filespace_id >= 0))
-                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET,
-                        start, stride, count, block);
+                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count,
+                                       block);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -115,14 +118,13 @@ public class H5ObjectEx_D_Hyperslab {
         block[1] = 1;
         try {
             if ((filespace_id >= 0)) {
-                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_NOTB,
-                        start, stride, count, block);
+                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_NOTB, start, stride, count,
+                                       block);
 
                 // Write the data to the dataset.
                 if (dataset_id >= 0)
-                    H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT,
-                            HDF5Constants.H5S_ALL, filespace_id, HDF5Constants.H5P_DEFAULT,
-                            dset_data);
+                    H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, filespace_id,
+                                HDF5Constants.H5P_DEFAULT, dset_data);
             }
         }
         catch (Exception e) {
@@ -163,13 +165,14 @@ public class H5ObjectEx_D_Hyperslab {
         }
     }
 
-    private static void readHyperslab() {
-        H5File file = null;
-        Dataset dset = null;
+    private static void readHyperslab()
+    {
+        H5File file       = null;
+        Dataset dset      = null;
         long filespace_id = -1;
-        long dataset_id = -1;
-        long dcpl_id = -1;
-        int[] dset_data = new int[DIM_X*DIM_Y];
+        long dataset_id   = -1;
+        long dcpl_id      = -1;
+        int[] dset_data   = new int[DIM_X * DIM_Y];
 
         // Open an existing file.
         try {
@@ -182,7 +185,7 @@ public class H5ObjectEx_D_Hyperslab {
 
         // Open an existing dataset.
         try {
-            dset = (Dataset) file.get(DATASETNAME);
+            dset       = (Dataset)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -192,7 +195,7 @@ public class H5ObjectEx_D_Hyperslab {
         // Read the data using the default properties.
         try {
             dset.init();
-            dset_data = (int[]) dset.getData();
+            dset_data = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -203,7 +206,7 @@ public class H5ObjectEx_D_Hyperslab {
         for (int indx = 0; indx < DIM_X; indx++) {
             System.out.print(" [ ");
             for (int jndx = 0; jndx < DIM_Y; jndx++)
-                System.out.print(dset_data[indx*DIM_Y+jndx] + " ");
+                System.out.print(dset_data[indx * DIM_Y + jndx] + " ");
             System.out.println("]");
         }
         System.out.println();
@@ -211,27 +214,26 @@ public class H5ObjectEx_D_Hyperslab {
         // Initialize the read array.
         for (int indx = 0; indx < DIM_X; indx++)
             for (int jndx = 0; jndx < DIM_Y; jndx++)
-                dset_data[indx*DIM_Y+jndx] = 0;
+                dset_data[indx * DIM_Y + jndx] = 0;
 
         // Define and select the hyperslab to use for reading.
         try {
             if (dataset_id >= 0) {
                 filespace_id = H5.H5Dget_space(dataset_id);
 
-                long[] start = { 0, 1 };
-                long[] stride = { 4, 4 };
-                long[] count = { 2, 2 };
-                long[] block = { 2, 3 };
+                long[] start  = {0, 1};
+                long[] stride = {4, 4};
+                long[] count  = {2, 2};
+                long[] block  = {2, 3};
 
                 if (filespace_id >= 0) {
-                    H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET,
-                            start, stride, count, block);
+                    H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count,
+                                           block);
 
                     // Read the data using the previously defined hyperslab.
                     if ((dataset_id >= 0) && (filespace_id >= 0))
-                        H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT,
-                                HDF5Constants.H5S_ALL, filespace_id, HDF5Constants.H5P_DEFAULT,
-                                dset_data);
+                        H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                                   filespace_id, HDF5Constants.H5P_DEFAULT, dset_data);
                 }
             }
         }
@@ -244,7 +246,7 @@ public class H5ObjectEx_D_Hyperslab {
         for (int indx = 0; indx < DIM_X; indx++) {
             System.out.print(" [ ");
             for (int jndx = 0; jndx < DIM_Y; jndx++)
-                System.out.print(dset_data[indx*DIM_Y+jndx] + " ");
+                System.out.print(dset_data[indx * DIM_Y + jndx] + " ");
             System.out.println("]");
         }
         System.out.println();
@@ -283,9 +285,9 @@ public class H5ObjectEx_D_Hyperslab {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_D_Hyperslab.writeHyperslab();
         H5ObjectEx_D_Hyperslab.readHyperslab();
     }
-
 }
