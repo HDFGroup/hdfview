@@ -462,7 +462,6 @@ public abstract class DefaultBaseTableView implements TableView
             }
         }
 
-
         // Setup subset information
         int space_type = dataObject.getSpaceType();
         int rank = dataObject.getRank();
