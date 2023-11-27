@@ -13,8 +13,7 @@ jobs:
     - name: Run clang-format style check for Java code
       uses: DoozyX/clang-format-lint-action@v0.13
       with:
-        source: '.'
+        source: './src ./test'
         extensions: 'java'
         clangFormatVersion: 13
         style: file
-        include: './src ./test'

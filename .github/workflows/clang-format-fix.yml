@@ -25,12 +25,11 @@ jobs:
     - name: Fix Java formatting issues detected by clang-format
       uses: DoozyX/clang-format-lint-action@v0.13
       with:
-        source: '.'
+        source: '../src ./test'
         extensions: 'java'
         clangFormatVersion: 13
         inplace: True
         style: file
-        include: './src ./test'
     - uses: EndBug/add-and-commit@v9
       with:
           author_name: github-actions
