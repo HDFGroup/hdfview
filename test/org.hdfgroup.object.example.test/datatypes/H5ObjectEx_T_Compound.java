@@ -12,48 +12,52 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5File;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5ObjectEx_T_Compound {
-    private static String FILENAME = "H5ObjectEx_T_Compound.h5";
-    private static String DATASETNAME = "DS1";
-    private static final int DIM0 = 4;
-    private static final int RANK = 1;
-    protected static final int INTEGERSIZE = 4;
-    protected static final int DOUBLESIZE = 8;
+    private static String FILENAME           = "H5ObjectEx_T_Compound.h5";
+    private static String DATASETNAME        = "DS1";
+    private static final int DIM0            = 4;
+    private static final int RANK            = 1;
+    protected static final int INTEGERSIZE   = 4;
+    protected static final int DOUBLESIZE    = 8;
     protected final static int MAXSTRINGSIZE = 80;
 
     static class Sensor_Datatype {
         static int numberMembers = 4;
-        static int[] memberDims = { 1, 1, 1, 1 };
+        static int[] memberDims  = {1, 1, 1, 1};
 
-        static String[] memberNames = { "Serial number", "Location", "Temperature (F)", "Pressure (inHg)" };
-        static long[] memberMemTypes = { HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5T_C_S1,
-                HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5T_NATIVE_DOUBLE };
-        static long[] memberFileTypes = { HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
-                HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE };
-        static int[] memberStorage = { INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE };
+        static String[] memberNames   = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
+        static long[] memberMemTypes  = {HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5T_C_S1,
+                                        HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5T_NATIVE_DOUBLE};
+        static long[] memberFileTypes = {HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
+                                         HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
+        static int[] memberStorage    = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
 
         // Data size is the storage size for the members.
-        static int getTotalDataSize() {
+        static int getTotalDataSize()
+        {
             int data_size = 0;
             for (int indx = 0; indx < numberMembers; indx++)
                 data_size += memberStorage[indx] * memberDims[indx];
             return DIM0 * data_size;
         }
 
-        static int getDataSize() {
+        static int getDataSize()
+        {
             int data_size = 0;
             for (int indx = 0; indx < numberMembers; indx++)
                 data_size += memberStorage[indx] * memberDims[indx];
             return data_size;
         }
 
-        static int getOffset(int memberItem) {
+        static int getOffset(int memberItem)
+        {
             int data_offset = 0;
             for (int indx = 0; indx < memberItem; indx++)
                 data_offset += memberStorage[indx];
@@ -67,59 +71,64 @@ public class H5ObjectEx_T_Compound {
         public double temperature;
         public double pressure;
 
-        Sensor(int serial_no, String location, double temperature, double pressure) {
-            this.serial_no = serial_no;
-            this.location = location;
+        Sensor(int serial_no, String location, double temperature, double pressure)
+        {
+            this.serial_no   = serial_no;
+            this.location    = location;
             this.temperature = temperature;
-            this.pressure = pressure;
+            this.pressure    = pressure;
         }
 
-        Sensor(ByteBuffer databuf, int dbposition) {
-            readBuffer(databuf, dbposition);
-        }
+        Sensor(ByteBuffer databuf, int dbposition) { readBuffer(databuf, dbposition); }
 
-        void writeBuffer(ByteBuffer databuf, int dbposition) {
+        void writeBuffer(ByteBuffer databuf, int dbposition)
+        {
             databuf.putInt(dbposition + Sensor_Datatype.getOffset(0), serial_no);
             byte[] temp_str = location.getBytes(Charset.forName("UTF-8"));
-            int arraylen = (temp_str.length > MAXSTRINGSIZE) ? MAXSTRINGSIZE : temp_str.length;
+            int arraylen    = (temp_str.length > MAXSTRINGSIZE) ? MAXSTRINGSIZE : temp_str.length;
             for (int ndx = 0; ndx < arraylen; ndx++)
                 databuf.put(dbposition + Sensor_Datatype.getOffset(1) + ndx, temp_str[ndx]);
             for (int ndx = arraylen; ndx < MAXSTRINGSIZE; ndx++)
-                databuf.put(dbposition + Sensor_Datatype.getOffset(1) + arraylen, (byte) 0);
+                databuf.put(dbposition + Sensor_Datatype.getOffset(1) + arraylen, (byte)0);
             databuf.putDouble(dbposition + Sensor_Datatype.getOffset(2), temperature);
             databuf.putDouble(dbposition + Sensor_Datatype.getOffset(3), pressure);
         }
 
-        void readBuffer(ByteBuffer databuf, int dbposition) {
-            this.serial_no = databuf.getInt(dbposition + Sensor_Datatype.getOffset(0));
+        void readBuffer(ByteBuffer databuf, int dbposition)
+        {
+            this.serial_no       = databuf.getInt(dbposition + Sensor_Datatype.getOffset(0));
             ByteBuffer stringbuf = databuf.duplicate();
             stringbuf.position(dbposition + Sensor_Datatype.getOffset(1));
             stringbuf.limit(dbposition + Sensor_Datatype.getOffset(1) + MAXSTRINGSIZE);
             byte[] bytearr = new byte[stringbuf.remaining()];
             stringbuf.get(bytearr);
-            this.location = new String(bytearr, Charset.forName("UTF-8")).trim();
+            this.location    = new String(bytearr, Charset.forName("UTF-8")).trim();
             this.temperature = databuf.getDouble(dbposition + Sensor_Datatype.getOffset(2));
-            this.pressure = databuf.getDouble(dbposition + Sensor_Datatype.getOffset(3));
+            this.pressure    = databuf.getDouble(dbposition + Sensor_Datatype.getOffset(3));
         }
 
         @Override
-        public String toString() {
-            return String.format("Serial number   : " + serial_no + "%n" + "Location        : " + location + "%n"
-                    + "Temperature (F) : " + temperature + "%n" + "Pressure (inHg) : " + pressure + "%n");
+        public String toString()
+        {
+            return String.format("Serial number   : " + serial_no + "%n"
+                                 + "Location        : " + location + "%n"
+                                 + "Temperature (F) : " + temperature + "%n"
+                                 + "Pressure (inHg) : " + pressure + "%n");
         }
     }
 
-    private static void CreateDataset() {
-        H5File file = null;
-        long file_id = -1;
-        long strtype_id = -1;
-        long memtype_id = -1;
-        long filetype_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long[] dims = { DIM0 };
+    private static void CreateDataset()
+    {
+        H5File file          = null;
+        long file_id         = -1;
+        long strtype_id      = -1;
+        long memtype_id      = -1;
+        long filetype_id     = -1;
+        long dataspace_id    = -1;
+        long dataset_id      = -1;
+        long[] dims          = {DIM0};
         Sensor[] object_data = new Sensor[DIM0];
-        byte[] dset_data = null;
+        byte[] dset_data     = null;
 
         // Initialize data.
         object_data[0] = new Sensor(1153, new String("Exterior (static)"), 53.23, 24.57);
@@ -129,7 +138,7 @@ public class H5ObjectEx_T_Compound {
 
         // Create a new file using default properties.
         try {
-            file = new H5File(FILENAME, FileFormat.CREATE);
+            file    = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -154,8 +163,8 @@ public class H5ObjectEx_T_Compound {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == HDF5Constants.H5T_C_S1)
                         type_id = strtype_id;
-                    H5.H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
-                            type_id);
+                    H5.H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx],
+                                 Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -174,8 +183,8 @@ public class H5ObjectEx_T_Compound {
                     long type_id = Sensor_Datatype.memberFileTypes[indx];
                     if (type_id == HDF5Constants.H5T_C_S1)
                         type_id = strtype_id;
-                    H5.H5Tinsert(filetype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
-                            type_id);
+                    H5.H5Tinsert(filetype_id, Sensor_Datatype.memberNames[indx],
+                                 Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -195,8 +204,9 @@ public class H5ObjectEx_T_Compound {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, filetype_id, dataspace_id, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dataset_id =
+                    H5.H5Dcreate(file_id, DATASETNAME, filetype_id, dataspace_id, HDF5Constants.H5P_DEFAULT,
+                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -204,16 +214,16 @@ public class H5ObjectEx_T_Compound {
 
         // Write the compound data to the dataset.
         // allocate memory for read buffer.
-        dset_data = new byte[(int) dims[0] * Sensor_Datatype.getDataSize()];
+        dset_data         = new byte[(int)dims[0] * Sensor_Datatype.getDataSize()];
         ByteBuffer outBuf = ByteBuffer.wrap(dset_data);
         outBuf.order(ByteOrder.nativeOrder());
-        for (int indx = 0; indx < (int) dims[0]; indx++) {
+        for (int indx = 0; indx < (int)dims[0]; indx++) {
             object_data[indx].writeBuffer(outBuf, indx * Sensor_Datatype.getDataSize());
         }
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
                 H5.H5Dwrite(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                            HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -272,14 +282,15 @@ public class H5ObjectEx_T_Compound {
         }
     }
 
-    private static void ReadDataset() {
-        H5File file = null;
+    private static void ReadDataset()
+    {
+        H5File file       = null;
         H5CompoundDS dset = null;
-        long strtype_id = -1;
-        long memtype_id = -1;
+        long strtype_id   = -1;
+        long memtype_id   = -1;
         long dataspace_id = -1;
-        long dataset_id = -1;
-        long[] dims = { DIM0 };
+        long dataset_id   = -1;
+        long[] dims       = {DIM0};
         Sensor[] object_data2;
         byte[] dset_data;
 
@@ -294,7 +305,7 @@ public class H5ObjectEx_T_Compound {
 
         // Open an existing dataset.
         try {
-            dset = (H5CompoundDS) file.get(DATASETNAME);
+            dset       = (H5CompoundDS)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -336,8 +347,8 @@ public class H5ObjectEx_T_Compound {
                     long type_id = Sensor_Datatype.memberMemTypes[indx];
                     if (type_id == HDF5Constants.H5T_C_S1)
                         type_id = strtype_id;
-                    H5.H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx], Sensor_Datatype.getOffset(indx),
-                            type_id);
+                    H5.H5Tinsert(memtype_id, Sensor_Datatype.memberNames[indx],
+                                 Sensor_Datatype.getOffset(indx), type_id);
                 }
             }
         }
@@ -346,19 +357,19 @@ public class H5ObjectEx_T_Compound {
         }
 
         // allocate memory for read buffer.
-        byte[] read_data = new byte[(int) dims[0] * Sensor_Datatype.getDataSize()];
+        byte[] read_data = new byte[(int)dims[0] * Sensor_Datatype.getDataSize()];
 
-        object_data2 = new Sensor[(int) dims[0]];
+        object_data2 = new Sensor[(int)dims[0]];
 
         // Read data.
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
                 H5.H5Dread(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, read_data);
+                           HDF5Constants.H5P_DEFAULT, read_data);
 
             ByteBuffer inBuf = ByteBuffer.wrap(read_data);
             inBuf.order(ByteOrder.nativeOrder());
-            for (int indx = 0; indx < (int) dims[0]; indx++) {
+            for (int indx = 0; indx < (int)dims[0]; indx++) {
                 object_data2[indx] = new Sensor(inBuf, indx * Sensor_Datatype.getDataSize());
             }
         }
@@ -416,7 +427,8 @@ public class H5ObjectEx_T_Compound {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_T_Compound.CreateDataset();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -424,5 +436,4 @@ public class H5ObjectEx_T_Compound {
         // data using malloc().
         H5ObjectEx_T_Compound.ReadDataset();
     }
-
 }

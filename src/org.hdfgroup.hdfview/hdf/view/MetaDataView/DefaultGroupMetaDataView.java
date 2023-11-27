@@ -16,6 +16,18 @@ package hdf.view.MetaDataView;
 
 import java.util.List;
 
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.h5.H5Link;
+import hdf.object.nc2.NC2Group;
+import hdf.view.DataView.DataViewManager;
+import hdf.view.ViewProperties;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,17 +41,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.h5.H5Link;
-import hdf.object.nc2.NC2Group;
-import hdf.view.ViewProperties;
-import hdf.view.DataView.DataViewManager;
 
 /**
  *
@@ -59,17 +60,19 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
      * @param theObj
      *        the object to display the metadata info
      */
-    public DefaultGroupMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
+    public DefaultGroupMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj)
+    {
         super(parentComposite, viewer, theObj);
     }
 
     @Override
-    protected void addObjectSpecificContent() {
+    protected void addObjectSpecificContent()
+    {
         super.addObjectSpecificContent();
 
-        Group g = (Group) dataObject;
+        Group g       = (Group)dataObject;
         List<?> mlist = g.getMemberList();
-        int n = mlist.size();
+        int n         = mlist.size();
 
         log.trace("addObjectSpecificContent(): group object extra info mlist size = {}", n);
 
@@ -123,7 +126,7 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
         }
         if (isN3) {
             StringBuilder objDimensionStr = new StringBuilder("No Dimensions");
-            int[] listDimSelector = { 0, 0, 1};
+            int[] listDimSelector         = {0, 0, 1};
             try {
                 List ncDimensions = ((NC2Group)g).getMetadata(listDimSelector);
                 if (ncDimensions != null) {
@@ -147,7 +150,8 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
             label.setFont(curFont);
             label.setText("Dimensions: ");
 
-            ScrolledComposite dimensionScroller = new ScrolledComposite(generalObjectInfoPane, SWT.V_SCROLL | SWT.BORDER);
+            ScrolledComposite dimensionScroller =
+                new ScrolledComposite(generalObjectInfoPane, SWT.V_SCROLL | SWT.BORDER);
             dimensionScroller.setExpandHorizontal(true);
             dimensionScroller.setExpandVertical(true);
             dimensionScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
@@ -160,7 +164,7 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
             dimensionScroller.setContent(text);
 
             StringBuilder objEnumTypedefStr = new StringBuilder("No Enums");
-            int[] listEnumSelector = { 0, 0, 0, 1};
+            int[] listEnumSelector          = {0, 0, 0, 1};
             try {
                 List ncEnums = ((NC2Group)g).getMetadata(listEnumSelector);
                 if (ncEnums != null) {
@@ -184,7 +188,8 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
             label.setFont(curFont);
             label.setText("Enums: ");
 
-            ScrolledComposite enumScroller = new ScrolledComposite(generalObjectInfoPane, SWT.V_SCROLL | SWT.BORDER);
+            ScrolledComposite enumScroller =
+                new ScrolledComposite(generalObjectInfoPane, SWT.V_SCROLL | SWT.BORDER);
             enumScroller.setExpandHorizontal(true);
             enumScroller.setExpandVertical(true);
             enumScroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
@@ -196,7 +201,8 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             enumScroller.setContent(text);
         }
-        org.eclipse.swt.widgets.Group groupInfoGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
+        org.eclipse.swt.widgets.Group groupInfoGroup =
+            new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
         groupInfoGroup.setFont(curFont);
         groupInfoGroup.setText("Group Members");
         groupInfoGroup.setLayout(new GridLayout(1, true));
@@ -210,10 +216,11 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
         else {
             label = new Label(groupInfoGroup, SWT.RIGHT);
             label.setFont(curFont);
-            label.setText("Number of members: " + n + " (in memory)," + "" + g.getNumberOfMembersInFile() + " (in file)");
+            label.setText("Number of members: " + n + " (in memory),"
+                          + "" + g.getNumberOfMembersInFile() + " (in file)");
         }
 
-        String[] columnNames = { "Name", "Type" };
+        String[] columnNames = {"Name", "Type"};
 
         Table memberTable = new Table(groupInfoGroup, SWT.BORDER);
         memberTable.setLinesVisible(true);
@@ -230,8 +237,8 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
         if (mlist != null && n > 0) {
             String rowData[][] = new String[n][2];
             for (int i = 0; i < n; i++) {
-                HObject theObj = (HObject) mlist.get(i);
-                rowData[i][0] = theObj.getName();
+                HObject theObj = (HObject)mlist.get(i);
+                rowData[i][0]  = theObj.getName();
                 if (theObj instanceof Group) {
                     rowData[i][1] = "Group";
                 }
@@ -265,5 +272,4 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
             memberTable.getColumn(i).pack();
         }
     }
-
 }

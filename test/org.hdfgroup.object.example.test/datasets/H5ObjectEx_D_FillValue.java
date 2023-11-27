@@ -10,8 +10,6 @@
  ************************************************************/
 package datasets;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
@@ -19,36 +17,40 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5ObjectEx_D_FillValue {
-    private static String FILENAME = "H5ObjectEx_D_FillValue.h5";
-    private static String DATASETNAME = "ExtendibleArray";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 7;
-    private static final int EDIM_X = 6;
-    private static final int EDIM_Y = 10;
-    private static final int CHUNK_X = 4;
-    private static final int CHUNK_Y = 4;
-    private static final int RANK = 2;
-    private static final int NDIMS = 2;
-    private static final int FILLVAL = 99;
+    private static String FILENAME         = "H5ObjectEx_D_FillValue.h5";
+    private static String DATASETNAME      = "ExtendibleArray";
+    private static final int DIM_X         = 4;
+    private static final int DIM_Y         = 7;
+    private static final int EDIM_X        = 6;
+    private static final int EDIM_Y        = 10;
+    private static final int CHUNK_X       = 4;
+    private static final int CHUNK_Y       = 4;
+    private static final int RANK          = 2;
+    private static final int NDIMS         = 2;
+    private static final int FILLVAL       = 99;
     private static final int DATATYPE_SIZE = 4;
 
-    private static void fillValue() {
-        H5File file = null;
-        H5ScalarDS dset = null;
-        long file_id = -1;
-        long dcpl_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long type_id = -1;
-        long[] dims = { DIM_X, DIM_Y };
-        long[] extdims = { EDIM_X, EDIM_Y };
-        long[] chunk_dims = { CHUNK_X, CHUNK_Y };
-        long[] maxdims = { HDF5Constants.H5S_UNLIMITED, HDF5Constants.H5S_UNLIMITED };
+    private static void fillValue()
+    {
+        H5File file             = null;
+        H5ScalarDS dset         = null;
+        long file_id            = -1;
+        long dcpl_id            = -1;
+        long dataspace_id       = -1;
+        long dataset_id         = -1;
+        long type_id            = -1;
+        long[] dims             = {DIM_X, DIM_Y};
+        long[] extdims          = {EDIM_X, EDIM_Y};
+        long[] chunk_dims       = {CHUNK_X, CHUNK_Y};
+        long[] maxdims          = {HDF5Constants.H5S_UNLIMITED, HDF5Constants.H5S_UNLIMITED};
         int[][] write_dset_data = new int[DIM_X][DIM_Y];
-        int[] read_dset_data = new int[DIM_X*DIM_Y];
-        int[] extend_dset_data = new int[EDIM_X*EDIM_Y];
-        H5Datatype typeInt = null;
+        int[] read_dset_data    = new int[DIM_X * DIM_Y];
+        int[] extend_dset_data  = new int[EDIM_X * EDIM_Y];
+        H5Datatype typeInt      = null;
 
         // Initialize the dataset.
         for (int indx = 0; indx < DIM_X; indx++)
@@ -57,7 +59,7 @@ public class H5ObjectEx_D_FillValue {
 
         // Create a new file using default properties.
         try {
-            file = new H5File(FILENAME, FileFormat.CREATE);
+            file    = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -66,7 +68,8 @@ public class H5ObjectEx_D_FillValue {
 
         // Create datatype.
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
+            typeInt =
+                new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +78,7 @@ public class H5ObjectEx_D_FillValue {
         // Create dataspace with unlimited dimensions.
         try {
             dataspace_id = H5.H5Screate_simple(RANK, dims, maxdims);
-            type_id = typeInt.createNative();
+            type_id      = typeInt.createNative();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -100,7 +103,7 @@ public class H5ObjectEx_D_FillValue {
 
         // Set the fill value for the dataset
         try {
-            int[] fill_value = { FILLVAL };
+            int[] fill_value = {FILLVAL};
             if (dcpl_id >= 0)
                 H5.H5Pset_fill_value(dcpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);
         }
@@ -122,10 +125,10 @@ public class H5ObjectEx_D_FillValue {
         // Create the dataset using the dataset creation property list.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME,
-                        type_id, dataspace_id, HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
-            dset = new H5ScalarDS(file, DATASETNAME, "/");
-            Group pgroup = (Group) file.get("/");
+                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, type_id, dataspace_id,
+                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+            dset         = new H5ScalarDS(file, DATASETNAME, "/");
+            Group pgroup = (Group)file.get("/");
             pgroup.addToMemberList(dset);
         }
         catch (Exception e) {
@@ -135,7 +138,7 @@ public class H5ObjectEx_D_FillValue {
         // Read values from the dataset, which has not been written to yet.
         try {
             dset.init();
-            read_dset_data = (int[]) dset.getData();
+            read_dset_data = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -146,7 +149,7 @@ public class H5ObjectEx_D_FillValue {
         for (int indx = 0; indx < DIM_X; indx++) {
             System.out.print(" [ ");
             for (int jndx = 0; jndx < DIM_Y; jndx++)
-                System.out.print(read_dset_data[indx*DIM_Y+jndx] + " ");
+                System.out.print(read_dset_data[indx * DIM_Y + jndx] + " ");
             System.out.println("]");
         }
         System.out.println();
@@ -162,7 +165,7 @@ public class H5ObjectEx_D_FillValue {
         // Read the data back.
         try {
             dset.init();
-            read_dset_data = (int[]) dset.getData();
+            read_dset_data = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -173,7 +176,7 @@ public class H5ObjectEx_D_FillValue {
         for (int indx = 0; indx < DIM_X; indx++) {
             System.out.print(" [ ");
             for (int jndx = 0; jndx < DIM_Y; jndx++)
-                System.out.print(read_dset_data[indx*DIM_Y+jndx] + " ");
+                System.out.print(read_dset_data[indx * DIM_Y + jndx] + " ");
             System.out.println("]");
         }
         System.out.println();
@@ -189,7 +192,7 @@ public class H5ObjectEx_D_FillValue {
         // Read from the extended dataset.
         try {
             dset.init();
-            extend_dset_data = (int[]) dset.getData();
+            extend_dset_data = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -200,7 +203,7 @@ public class H5ObjectEx_D_FillValue {
         for (int indx = 0; indx < EDIM_X; indx++) {
             System.out.print(" [ ");
             for (int jndx = 0; jndx < EDIM_Y; jndx++)
-                System.out.print(extend_dset_data[indx*EDIM_Y+jndx] + " ");
+                System.out.print(extend_dset_data[indx * EDIM_Y + jndx] + " ");
             System.out.println("]");
         }
         System.out.println();
@@ -247,8 +250,5 @@ public class H5ObjectEx_D_FillValue {
         }
     }
 
-    public static void main(String[] args) {
-        H5ObjectEx_D_FillValue.fillValue();
-    }
-
+    public static void main(String[] args) { H5ObjectEx_D_FillValue.fillValue(); }
 }

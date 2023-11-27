@@ -23,8 +23,7 @@ package hdf.object;
  * @version 1.0 4/2/2018
  * @author Jordan T. Henderson
  */
-public interface DataFormat
-{
+public interface DataFormat {
     /**
      * The status of initialization for this object
      *
@@ -186,7 +185,6 @@ public interface DataFormat
      * @return the dimension sizes of the data object.
      */
     long[] getDims();
-
 
     /****************************************************************
      * * The following four definitions are used for data subsetting. * *

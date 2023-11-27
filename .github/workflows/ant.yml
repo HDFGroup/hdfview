@@ -1,159 +1,31 @@
-# This workflow will build a Java project with Ant
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-ant
+name: hdfview 1_14 ci runs
 
-name: Java 1.14 CI
-
+# Controls when the action will run. Triggers the workflow on a schedule
 on:
-  workflow_dispatch:
-#  push:
-#    branches: [ "hdfview-3-1_14" ]
-  pull_request:
-    branches: [ "hdfview-3-1_14" ]
+  workflow_call:
+    inputs:
+      use_hdf:
+        description: "The hdf4 base name of the binaries"
+        required: true
+        type: string
+      use_hdf5:
+        description: "The hdf5 base name of the binaries"
+        required: true
+        type: string
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
-  get-base-names:
-    runs-on: ubuntu-latest
-    outputs:
-      hdf4-name: ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}
-      hdf5-name: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Get hdf4 release base name
-#      uses: robinraju/release-downloader@v1.8
-#      with:
-#        repository: "HDFGroup/hdf4"
-#        tag: "snapshot"
-#        fileName: "last-file.txt"
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf4'
-        version: 'tags/snapshot'
-        file: 'last-file.txt'
-
-    - name: Read base-name file
-      id: gethdf4base
-      run: echo "HDF4_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
-
-    - name: Get hdf5 release base name
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot-1.14'
-        file: 'last-file.txt'
-
-    - name: Read base-name file
-      id: gethdf5base
-      run: echo "HDF5_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
-
-  build-linux:
-    runs-on: ubuntu-latest
-    needs: get-base-names
-    name: "Ubuntu gcc"
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up JDK 19
-      uses: actions/setup-java@v3
-      with:
-        java-version: '19'
-        distribution: 'temurin'
-
-    - name: Get hdf4 release
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf4'
-        #version: 'tags/hdf-4_2_16-2'
-        #file: 'hdf-4_2_16-2-ubuntu-2204.tar.gz'
-        version: 'tags/snapshot'
-        file: '${{ needs.get-base-names.outputs.hdf4-name }}-ubuntu-2204.tar.gz'
-
-    - name: List files for the space (Linux)
-      run: |
-            ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}
-
-    - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf4-name }}-ubuntu-2204.tar.gz
-
-    - name: Uncompress hdf4 binary (Linux)
-      run: |
-          cd "${{ github.workspace }}/hdf4"
-          tar -zxvf ${{ github.workspace }}/hdf4/HDF-*-Linux.tar.gz --strip-components 1
-
-    - name: set hdflib name
-      id: set-hdflib-name
-      run: |
-        HDFDIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
-        echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
-
-    - name: Get hdf5 release
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf5'
-        #version: 'tags/1.14.2'
-        #file: 'hdf5-1_14_2-ubuntu-2204.tar.gz'
-        version: 'tags/snapshot-1.14'
-        file: '${{ needs.get-base-names.outputs.hdf5-name }}-ubuntu-2204.tar.gz'
-
-    - name: List files for the space (Linux)
-      run: |
-            ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}
-
-    - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf5-name }}-ubuntu-2204.tar.gz
-
-    - name: Uncompress hdf5 binary (Linux)
-      run:  |
-          cd "${{ github.workspace }}/hdf5"
-          tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Linux.tar.gz --strip-components 1
-
-    - name: set hdf5lib name
-      id: set-hdf5lib-name
-      run: |
-        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
-        echo "HDF5LIB_ENV=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
-
-    - name: List files for the binaries (Linux)
-      run: |
-            ls -l ${{ github.workspace }}/hdf4/HDF_Group/HDF
-            ls -l ${{ github.workspace }}/hdf5/HDF_Group/HDF5
-
-    - name: Build with Ant
-      env:
-        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
-        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-      run: ant -noinput -buildfile build.xml binaryPackage
-
-    - name: List files in the space (Linux)
-      run: |
-            ls ${{ github.workspace }}
-            ls -l ${{ runner.workspace }}
-
-    # Save files created by ctest script
-    - name: Save published binary (Linux)
-      uses: actions/upload-artifact@v3
-      with:
-            name: tgz-ubuntu-2204-binary
-            path: ${{ github.workspace }}/build/dist/HDFView-3.3.99-Linux-x86_64.tar.gz
-            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-    - name: Test with Ant
-      env:
-        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
-        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-      run: ant -noinput -buildfile build.xml junit 
-
-  build-win:
+  build_and_test_win:
+  # Windows w/ MSVC + CMake
+  #
+    name: "Windows MSVC CTest"
     runs-on: windows-latest
-    needs: get-base-names
-    name: "Windows MSVC"
-
     steps:
     - uses: actions/checkout@v3
 
@@ -163,17 +35,18 @@ jobs:
         java-version: '19'
         distribution: 'temurin'
 
+    - name: Enable Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1.12.1
+
     - name: Get hdf4 release
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        #version: 'tags/hdf-4_2_16-2'
-        #file: 'hdf-4_2_16-2-win_vs2022.zip'
         version: 'tags/snapshot'
-        file: '${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip'
+        file: '${{ inputs.use_hdf }}-win_vs2022.zip'
 
     - name: Uncompress gh binary (Win)
-      run: 7z x ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf4-name }}-win_vs2022.zip
+      run: 7z x ${{ github.workspace }}/${{ inputs.use_hdf }}-win_vs2022.zip
 
     - name: Uncompress hdf4 binary (Win)
       working-directory: ${{ github.workspace }}/hdf4
@@ -206,13 +79,11 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        #version: 'tags/1.14.2'
-        #file: 'hdf5-1_14_2-win_vs2022.zip'
         version: 'tags/snapshot-1.14'
-        file: '${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip'
+        file: '${{ inputs.use_hdf5 }}-win_vs2022.zip'
 
     - name: Uncompress gh binary (Win)
-      run: 7z x ${{ github.workspace }}/${{ needs.get-base-names.outputs.hdf5-name }}-win_vs2022.zip
+      run: 7z x ${{ github.workspace }}/${{ inputs.use_hdf5 }}-win_vs2022.zip
 
     - name: Uncompress hdf5 binary (Win)
       working-directory: ${{ github.workspace }}/hdf5
@@ -246,25 +117,56 @@ jobs:
             ls -l ${{ github.workspace }}/HDF_Group/HDF
             ls -l ${{ github.workspace }}/HDF_Group/HDF5
 
+    - name: Set file base name (Windows)
+      id: set-file-base
+      run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+      shell: bash
+
+      # Get files created by release script
+    - name: Get zip-tarball (Windows)
+      uses: actions/download-artifact@v3
+      with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+    - name: using powershell
+      shell: pwsh
+      run: Get-Location
+
+    - name: List files for the space (Windows)
+      run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+      shell: pwsh
+
+    - name: Uncompress source (Windows)
+      working-directory: ${{ github.workspace }}
+      run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+      shell: bash
+
     - name: Build with Ant
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-      run: ant -noinput -buildfile build.xml binaryPackage
+      run: |
+        cd "${{ runner.workspace }}/hdfview/hdfsrc"
+        ant -noinput -buildfile build.xml binaryPackage
       shell: bash
 
     - name: List files for the space (Windows)
       run: |
             Get-ChildItem -Path ${{ github.workspace }}
-            Get-ChildItem -Path ${{ github.workspace }}/build
+            Get-ChildItem -Path ${{ github.workspace }}/hdfsrc/build
       shell: pwsh
 
     # Save files created by ctest script
     - name: Save published binary (Win)
       uses: actions/upload-artifact@v3
       with:
-            name: zip-win-2022-binary
-            path: ${{ github.workspace }}/build/dist/HDFView-3.3.99-win64.zip
+            name: zip-win-vs2022-binary
+            path: ${{ github.workspace }}/hdfsrc/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
@@ -272,4 +174,109 @@ jobs:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml junit
+
+  build_and_test_linux:
+  # Linux (Ubuntu) w/ gcc + CMake
+  #
+    name: "Ubuntu gcc CMake"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 19
+      uses: actions/setup-java@v3
+      with:
+        java-version: '19'
+        distribution: 'temurin'
+
+    - name: Get hdf4 release
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'HDFGroup/hdf4'
+        version: 'tags/snapshot'
+        file: '${{ inputs.use_hdf }}-ubuntu-2204.tar.gz'
+
+    - name: List files for the space (Linux)
+      run: |
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}
+
+    - name: Uncompress gh binary (Linux)
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-ubuntu-2204.tar.gz
+
+    - name: Uncompress hdf4 binary (Linux)
+      run: |
+          cd "${{ github.workspace }}/hdf4"
+          tar -zxvf ${{ github.workspace }}/hdf4/HDF-*-Linux.tar.gz --strip-components 1
+
+    - name: set hdflib name
+      id: set-hdflib-name
+      run: |
+        HDFDIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
+        echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
+
+    - name: Get hdf5 release
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'HDFGroup/hdf5'
+        version: 'tags/snapshot-1.14'
+        file: '${{ inputs.use_hdf5 }}-ubuntu-2204.tar.gz'
+
+    - name: List files for the space (Linux)
+      run: |
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}
+
+    - name: Uncompress gh binary (Linux)
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf5 }}-ubuntu-2204.tar.gz
+
+    - name: Uncompress hdf5 binary (Linux)
+      run:  |
+          cd "${{ github.workspace }}/hdf5"
+          tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Linux.tar.gz --strip-components 1
+
+    - name: set hdf5lib name
+      id: set-hdf5lib-name
+      run: |
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
+        echo "HDF5LIB_ENV=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+
+    - name: List files for the binaries (Linux)
+      run: |
+            ls -l ${{ github.workspace }}/hdf4/HDF_Group/HDF
+            ls -l ${{ github.workspace }}/hdf5/HDF_Group/HDF5
+
+    - name: Set file base name (Linux)
+      id: set-file-base
+      run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Build with Ant
+      env:
+        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
+        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
+      run: ant -noinput -buildfile build.xml binaryPackage
+
+    - name: List files in the space (Linux)
+      run: |
+            ls ${{ github.workspace }}
+            ls -l ${{ runner.workspace }}
+
+    # Save files created by ctest script
+    - name: Save published binary (Linux)
+      uses: actions/upload-artifact@v3
+      with:
+            name: tgz-ubuntu-2204-binary
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+    - name: Test with Ant
+      env:
+        HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
+        HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
+      run: ant -noinput -buildfile build.xml junit 
 

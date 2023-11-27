@@ -7,6 +7,15 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
+import hdf.object.Dataset;
+import hdf.object.FileFormat;
+import hdf.object.h5.H5CompoundDS;
+import hdf.object.h5.H5File;
+import hdf.object.h5.H5ScalarDS;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,15 +24,6 @@ import org.junit.Test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-
-import hdf.object.Dataset;
-import hdf.object.FileFormat;
-import hdf.object.h5.H5CompoundDS;
-import hdf.object.h5.H5File;
-import hdf.object.h5.H5ScalarDS;
 
 /**
  * TestCase for bug fixes.
@@ -56,15 +56,15 @@ import hdf.object.h5.H5ScalarDS;
  *
  * @author Peter Cao, The HDF Group
  */
-public class H5BugFixTest
-{
-    private static final Logger log = LoggerFactory.getLogger(H5BugFixTest.class);
-    private static final int NLOOPS = 10;
+public class H5BugFixTest {
+    private static final Logger log    = LoggerFactory.getLogger(H5BugFixTest.class);
+    private static final int NLOOPS    = 10;
     private static final H5File H5FILE = new H5File();
 
     private H5File testFile = null;
 
-    private static void collectGarbage() {
+    private static void collectGarbage()
+    {
         try {
             System.gc();
             Thread.sleep(100);
@@ -74,17 +74,20 @@ public class H5BugFixTest
         }
     }
 
-    protected void closeFile() {
+    protected void closeFile()
+    {
         if (testFile != null) {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {}
+            catch (final Exception ex) {
+            }
             testFile = null;
         }
     }
 
-    protected void checkObjCount(long fileid) {
+    protected void checkObjCount(long fileid)
+    {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
@@ -96,7 +99,8 @@ public class H5BugFixTest
     }
 
     @BeforeClass
-    public static void createFile() throws Exception {
+    public static void createFile() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -115,7 +119,8 @@ public class H5BugFixTest
     }
 
     @AfterClass
-    public static void checkIDs() throws Exception {
+    public static void checkIDs() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -128,7 +133,8 @@ public class H5BugFixTest
 
     @SuppressWarnings("deprecation")
     @Before
-    public void openFiles() throws Exception {
+    public void openFiles() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -137,12 +143,13 @@ public class H5BugFixTest
         catch (Exception ex) {
             ex.printStackTrace();
         }
-        testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+        testFile = (H5File)H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
         assertNotNull(testFile);
     }
 
     @After
-    public void removeFiles() throws Exception {
+    public void removeFiles() throws Exception
+    {
         if (testFile != null) {
             closeFile();
         }
@@ -180,11 +187,12 @@ public class H5BugFixTest
      */
     @SuppressWarnings("rawtypes")
     @Test
-    public void testBug847() throws Exception {
+    public void testBug847() throws Exception
+    {
         log.debug("testBug847");
         List<?> data = null;
 
-        final H5CompoundDS dset = (H5CompoundDS) testFile.get(H5TestFile.NAME_DATASET_COMPOUND);
+        final H5CompoundDS dset = (H5CompoundDS)testFile.get(H5TestFile.NAME_DATASET_COMPOUND);
         assertNotNull(dset);
 
         for (int loop = 0; loop < NLOOPS; loop++) {
@@ -192,7 +200,7 @@ public class H5BugFixTest
             dset.init();
 
             try {
-                data = (List<?>) dset.getData();
+                data = (List<?>)dset.getData();
             }
             catch (final Exception ex) {
                 fail("getData() failed. " + ex);
@@ -201,9 +209,9 @@ public class H5BugFixTest
             assertTrue(data.size() > 0);
 
             // check the data values
-            int[] ints = (int[]) data.get(0);
-            float[] floats = (float[]) data.get(1);
-            String[] strs = (String[]) data.get(2);
+            int[] ints     = (int[])data.get(0);
+            float[] floats = (float[])data.get(1);
+            String[] strs  = (String[])data.get(2);
             assertNotNull(ints);
             assertNotNull(floats);
             assertNotNull(strs);
@@ -213,10 +221,10 @@ public class H5BugFixTest
                 assertTrue(H5TestFile.DATA_STR[i].equals(strs[i]));
             }
 
-            final int rank = dset.getRank();
-            final long[] dims = dset.getDims();
-            final long[] start = dset.getStartDims();
-            final long[] count = dset.getSelectedDims();
+            final int rank            = dset.getRank();
+            final long[] dims         = dset.getDims();
+            final long[] start        = dset.getStartDims();
+            final long[] count        = dset.getSelectedDims();
             final int[] selectedIndex = dset.getSelectedIndex();
 
             // read data row by row
@@ -237,15 +245,15 @@ public class H5BugFixTest
                 start[0] = i;
 
                 try {
-                    data = (List) dset.getData();
+                    data = (List)dset.getData();
                 }
                 catch (final Exception ex) {
                     fail("getData() failed. " + ex);
                 }
 
-                ints = (int[]) data.get(0);
-                floats = (float[]) data.get(1);
-                strs = (String[]) data.get(2);
+                ints   = (int[])data.get(0);
+                floats = (float[])data.get(1);
+                strs   = (String[])data.get(2);
                 assertNotNull(ints);
                 assertNotNull(floats);
                 assertNotNull(strs);
@@ -264,7 +272,7 @@ public class H5BugFixTest
                 dset.selectMember(i);
 
                 try {
-                    data = (List) dset.getData();
+                    data = (List)dset.getData();
                 }
                 catch (final Exception ex) {
                     fail("getData() failed. " + ex);
@@ -273,27 +281,27 @@ public class H5BugFixTest
                 assertTrue(data.size() == 1);
 
                 switch (i) {
-                    case 0:
-                        ints = (int[]) data.get(0);
-                        assertNotNull(ints);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
-                            assertEquals(H5TestFile.DATA_INT[j], ints[j]);
-                        break;
-                    case 1:
-                        floats = (float[]) data.get(0);
-                        assertNotNull(floats);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
-                            assertEquals(H5TestFile.DATA_FLOAT[j], floats[j], Float.MIN_VALUE);
-                        break;
-                    case 2:
-                        strs = (String[]) data.get(0);
-                        assertNotNull(strs);
-                        for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
-                            assertTrue(H5TestFile.DATA_STR[j].equals(strs[j]));
-                        break;
+                case 0:
+                    ints = (int[])data.get(0);
+                    assertNotNull(ints);
+                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
+                        assertEquals(H5TestFile.DATA_INT[j], ints[j]);
+                    break;
+                case 1:
+                    floats = (float[])data.get(0);
+                    assertNotNull(floats);
+                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
+                        assertEquals(H5TestFile.DATA_FLOAT[j], floats[j], Float.MIN_VALUE);
+                    break;
+                case 2:
+                    strs = (String[])data.get(0);
+                    assertNotNull(strs);
+                    for (int j = 0; j < H5TestFile.DIM_SIZE; j++)
+                        assertTrue(H5TestFile.DATA_STR[j].equals(strs[j]));
+                    break;
                 }
             } //  (int i=0; i<nmembers; i++) {
-        } //  (int loop=0; loop<NLOOPS; loop++) {
+        }     //  (int loop=0; loop<NLOOPS; loop++) {
     }
 
     /**
@@ -317,16 +325,18 @@ public class H5BugFixTest
      * </pre>
      */
     @Test
-    public void testBug863() throws Exception {
+    public void testBug863() throws Exception
+    {
         log.debug("testBug863");
         // Close default testFile
         closeFile();
 
-        Dataset dset = null;
-        final String dnames[] = { H5TestFile.NAME_DATASET_CHAR, H5TestFile.NAME_DATASET_COMPOUND,
-                H5TestFile.NAME_DATASET_COMPOUND_SUB, H5TestFile.NAME_DATASET_ENUM, H5TestFile.NAME_DATASET_FLOAT,
-                H5TestFile.NAME_DATASET_IMAGE, H5TestFile.NAME_DATASET_INT, H5TestFile.NAME_DATASET_STR,
-                H5TestFile.NAME_DATASET_INT_SUB, H5TestFile.NAME_DATASET_FLOAT_SUB_SUB };
+        Dataset dset          = null;
+        final String dnames[] = {H5TestFile.NAME_DATASET_CHAR,         H5TestFile.NAME_DATASET_COMPOUND,
+                                 H5TestFile.NAME_DATASET_COMPOUND_SUB, H5TestFile.NAME_DATASET_ENUM,
+                                 H5TestFile.NAME_DATASET_FLOAT,        H5TestFile.NAME_DATASET_IMAGE,
+                                 H5TestFile.NAME_DATASET_INT,          H5TestFile.NAME_DATASET_STR,
+                                 H5TestFile.NAME_DATASET_INT_SUB,      H5TestFile.NAME_DATASET_FLOAT_SUB_SUB};
 
         // test two open options: open full tree or open individual object only
         for (int openOption = 0; openOption < 2; openOption++) {
@@ -345,7 +355,7 @@ public class H5BugFixTest
                 try {
                     // datasets
                     for (int j = 0; j < dnames.length; j++) {
-                        dset = (Dataset) file.get(dnames[j]);
+                        dset              = (Dataset)file.get(dnames[j]);
                         final Object data = dset.getData();
                         dset.write(data);
                         if (dset.getDatatype().isCompound())
@@ -363,7 +373,6 @@ public class H5BugFixTest
                     file.get(H5TestFile.NAME_DATATYPE_INT);
                     file.get(H5TestFile.NAME_DATATYPE_FLOAT);
                     file.get(H5TestFile.NAME_DATATYPE_STR);
-
                 }
                 catch (final Exception ex) {
                     fail("file.get() failed. " + ex);
@@ -376,6 +385,6 @@ public class H5BugFixTest
                     fail("file.close() failed. " + ex);
                 }
             } //  (int i=0; i<NLOOPS; i++)
-        } //  (int openOption=0; openOption<2; openOption++)
+        }     //  (int openOption=0; openOption<2; openOption++)
     }
 }

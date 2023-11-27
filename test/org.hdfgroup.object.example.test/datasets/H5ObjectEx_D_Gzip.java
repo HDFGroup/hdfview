@@ -13,55 +13,57 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5ObjectEx_D_Gzip {
-    private static String FILENAME = "H5ObjectEx_D_Gzip.h5";
-    private static String DATASETNAME = "DS1";
-    private static final int DIM_X = 32;
-    private static final int DIM_Y = 64;
-    private static final int CHUNK_X = 4;
-    private static final int CHUNK_Y = 8;
-    private static final int RANK = 2;
-    private static final int NDIMS = 2;
+    private static String FILENAME         = "H5ObjectEx_D_Gzip.h5";
+    private static String DATASETNAME      = "DS1";
+    private static final int DIM_X         = 32;
+    private static final int DIM_Y         = 64;
+    private static final int CHUNK_X       = 4;
+    private static final int CHUNK_Y       = 8;
+    private static final int RANK          = 2;
+    private static final int NDIMS         = 2;
     private static final int DATATYPE_SIZE = 4;
 
     // Values for the status of space allocation
     enum H5Z_filter {
-        H5Z_FILTER_ERROR(HDF5Constants.H5Z_FILTER_ERROR), H5Z_FILTER_NONE(HDF5Constants.H5Z_FILTER_NONE),
-        H5Z_FILTER_DEFLATE(HDF5Constants.H5Z_FILTER_DEFLATE), H5Z_FILTER_SHUFFLE(HDF5Constants.H5Z_FILTER_SHUFFLE),
-        H5Z_FILTER_FLETCHER32(HDF5Constants.H5Z_FILTER_FLETCHER32), H5Z_FILTER_SZIP(HDF5Constants.H5Z_FILTER_SZIP),
-        H5Z_FILTER_NBIT(HDF5Constants.H5Z_FILTER_NBIT), H5Z_FILTER_SCALEOFFSET(HDF5Constants.H5Z_FILTER_SCALEOFFSET),
-        H5Z_FILTER_RESERVED(HDF5Constants.H5Z_FILTER_RESERVED), H5Z_FILTER_MAX(HDF5Constants.H5Z_FILTER_MAX);
+        H5Z_FILTER_ERROR(HDF5Constants.H5Z_FILTER_ERROR),
+        H5Z_FILTER_NONE(HDF5Constants.H5Z_FILTER_NONE),
+        H5Z_FILTER_DEFLATE(HDF5Constants.H5Z_FILTER_DEFLATE),
+        H5Z_FILTER_SHUFFLE(HDF5Constants.H5Z_FILTER_SHUFFLE),
+        H5Z_FILTER_FLETCHER32(HDF5Constants.H5Z_FILTER_FLETCHER32),
+        H5Z_FILTER_SZIP(HDF5Constants.H5Z_FILTER_SZIP),
+        H5Z_FILTER_NBIT(HDF5Constants.H5Z_FILTER_NBIT),
+        H5Z_FILTER_SCALEOFFSET(HDF5Constants.H5Z_FILTER_SCALEOFFSET),
+        H5Z_FILTER_RESERVED(HDF5Constants.H5Z_FILTER_RESERVED),
+        H5Z_FILTER_MAX(HDF5Constants.H5Z_FILTER_MAX);
         private static final Map<Integer, H5Z_filter> lookup = new HashMap<Integer, H5Z_filter>();
 
-        static {
+        static
+        {
             for (H5Z_filter s : EnumSet.allOf(H5Z_filter.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5Z_filter(int layout_type) {
-            this.code = layout_type;
-        }
+        H5Z_filter(int layout_type) { this.code = layout_type; }
 
-        public int getCode() {
-            return this.code;
-        }
+        public int getCode() { return this.code; }
 
-        public static H5Z_filter get(int code) {
-            return lookup.get(code);
-        }
+        public static H5Z_filter get(int code) { return lookup.get(code); }
     }
 
-    private static boolean checkGzipFilter() {
+    private static boolean checkGzipFilter()
+    {
         try {
             int available = H5.H5Zfilter_avail(HDF5Constants.H5Z_FILTER_DEFLATE);
             if (available == 0) {
@@ -75,8 +77,8 @@ public class H5ObjectEx_D_Gzip {
 
         try {
             int filter_info = H5.H5Zget_filter_info(HDF5Constants.H5Z_FILTER_DEFLATE);
-            if (((filter_info & HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0)
-                    || ((filter_info & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0)) {
+            if (((filter_info & HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
+                ((filter_info & HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0)) {
                 System.out.println("gzip filter not available for encoding and decoding.");
                 return false;
             }
@@ -87,12 +89,13 @@ public class H5ObjectEx_D_Gzip {
         return true;
     }
 
-    private static void writeGzip() {
-        H5File file = null;
-        Dataset dset = null;
-        long[] dims = { DIM_X, DIM_Y };
-        long[] chunk_dims = { CHUNK_X, CHUNK_Y };
-        int[][] dset_data = new int[DIM_X][DIM_Y];
+    private static void writeGzip()
+    {
+        H5File file        = null;
+        Dataset dset       = null;
+        long[] dims        = {DIM_X, DIM_Y};
+        long[] chunk_dims  = {CHUNK_X, CHUNK_Y};
+        int[][] dset_data  = new int[DIM_X][DIM_Y];
         H5Datatype typeInt = null;
 
         // Initialize data.
@@ -111,7 +114,8 @@ public class H5ObjectEx_D_Gzip {
 
         // Create the datatype.
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
+            typeInt =
+                new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -134,12 +138,13 @@ public class H5ObjectEx_D_Gzip {
         }
     }
 
-    private static void readGzip() {
-        H5File file = null;
-        Dataset dset = null;
+    private static void readGzip()
+    {
+        H5File file     = null;
+        Dataset dset    = null;
         long dataset_id = -1;
-        long dcpl_id = -1;
-        int[] dset_data = new int[DIM_X*DIM_Y];
+        long dcpl_id    = -1;
+        int[] dset_data = new int[DIM_X * DIM_Y];
 
         // Open an existing file.
         try {
@@ -152,7 +157,7 @@ public class H5ObjectEx_D_Gzip {
 
         // Open an existing dataset.
         try {
-            dset = (Dataset) file.get(DATASETNAME);
+            dset       = (Dataset)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -173,14 +178,14 @@ public class H5ObjectEx_D_Gzip {
         try {
             if (dcpl_id >= 0) {
                 // Java lib requires a valid filter_name object and cd_values
-                int[] flags = { 0 };
-                long[] cd_nelmts = { 1 };
-                int[] cd_values = { 0 };
-                String[] filter_name = { "" };
-                int[] filter_config = { 0 };
-                int filter_type = -1;
-                filter_type = H5.H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values,
-                        120, filter_name, filter_config);
+                int[] flags          = {0};
+                long[] cd_nelmts     = {1};
+                int[] cd_values      = {0};
+                String[] filter_name = {""};
+                int[] filter_config  = {0};
+                int filter_type      = -1;
+                filter_type = H5.H5Pget_filter(dcpl_id, 0, flags, cd_nelmts, cd_values, 120, filter_name,
+                                               filter_config);
                 System.out.print("Filter type is: ");
                 switch (H5Z_filter.get(filter_type)) {
                 case H5Z_FILTER_DEFLATE:
@@ -214,7 +219,7 @@ public class H5ObjectEx_D_Gzip {
         // Read the data using the default properties.
         try {
             dset.init();
-            dset_data = (int[]) dset.getData();
+            dset_data = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -225,8 +230,8 @@ public class H5ObjectEx_D_Gzip {
         int max = dset_data[0];
         for (int indx = 0; indx < DIM_X; indx++) {
             for (int jndx = 0; jndx < DIM_Y; jndx++)
-                if (max < dset_data[indx*DIM_Y+jndx])
-                    max = dset_data[indx*DIM_Y+jndx];
+                if (max < dset_data[indx * DIM_Y + jndx])
+                    max = dset_data[indx * DIM_Y + jndx];
         }
         // Print the maximum value.
         System.out.println("Maximum value in " + DATASETNAME + " is: " + max);
@@ -257,7 +262,8 @@ public class H5ObjectEx_D_Gzip {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         // Check if gzip compression is available and can be used for both
         // compression and decompression. Normally we do not perform error
         // checking in these examples for the sake of clarity, but in this
@@ -268,5 +274,4 @@ public class H5ObjectEx_D_Gzip {
             H5ObjectEx_D_Gzip.readGzip();
         }
     }
-
 }

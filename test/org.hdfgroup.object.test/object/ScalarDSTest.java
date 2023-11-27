@@ -6,6 +6,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import hdf.object.FileFormat;
+import hdf.object.ScalarDS;
+import hdf.object.h5.H5File;
+import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ScalarDS;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,35 +24,27 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-
-import hdf.object.FileFormat;
-import hdf.object.ScalarDS;
-import hdf.object.h5.H5File;
-import hdf.object.h5.H5Group;
-import hdf.object.h5.H5ScalarDS;
-
 /**
  * @author rsinha
  *
  */
 public class ScalarDSTest {
-    private static final Logger log = LoggerFactory.getLogger(ScalarDSTest.class);
+    private static final Logger log    = LoggerFactory.getLogger(ScalarDSTest.class);
     private static final H5File H5FILE = new H5File();
 
-    private H5File testFile = null;
-    private H5Group testGroup = null;
-    private ScalarDS intDset = null;
-    private ScalarDS floatDset = null;
-    private ScalarDS charDset = null;
-    private ScalarDS strDset = null;
-    private ScalarDS enumDset = null;
-    private ScalarDS imageDset = null;
+    private H5File testFile      = null;
+    private H5Group testGroup    = null;
+    private ScalarDS intDset     = null;
+    private ScalarDS floatDset   = null;
+    private ScalarDS charDset    = null;
+    private ScalarDS strDset     = null;
+    private ScalarDS enumDset    = null;
+    private ScalarDS imageDset   = null;
     private ScalarDS imagePalete = null;
-    private ScalarDS ORDset = null;
+    private ScalarDS ORDset      = null;
 
-    protected void closeFile() {
+    protected void closeFile()
+    {
         if (testFile != null) {
             try {
                 testFile.close();
@@ -54,7 +55,8 @@ public class ScalarDSTest {
         }
     }
 
-    protected void checkObjCount(long fileid) {
+    protected void checkObjCount(long fileid)
+    {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
@@ -66,7 +68,8 @@ public class ScalarDSTest {
     }
 
     @BeforeClass
-    public static void createFile() throws Exception {
+    public static void createFile() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -85,7 +88,8 @@ public class ScalarDSTest {
     }
 
     @AfterClass
-    public static void checkIDs() throws Exception {
+    public static void checkIDs() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -98,7 +102,8 @@ public class ScalarDSTest {
 
     @SuppressWarnings("deprecation")
     @Before
-    public void openFiles() throws Exception {
+    public void openFiles() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -108,35 +113,36 @@ public class ScalarDSTest {
             ex.printStackTrace();
         }
         try {
-            testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.READ);
+            testFile = (H5File)H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.READ);
         }
         catch (Exception ex) {
             ex.printStackTrace();
         }
         assertNotNull(testFile);
-        testGroup = (H5Group) testFile.get(H5TestFile.NAME_GROUP_ATTR);
+        testGroup = (H5Group)testFile.get(H5TestFile.NAME_GROUP_ATTR);
         assertNotNull(testGroup);
 
-        intDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_INT);
+        intDset = (ScalarDS)testFile.get(H5TestFile.NAME_DATASET_INT);
         assertNotNull(intDset);
-        floatDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_FLOAT);
+        floatDset = (ScalarDS)testFile.get(H5TestFile.NAME_DATASET_FLOAT);
         assertNotNull(floatDset);
-        charDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_CHAR);
+        charDset = (ScalarDS)testFile.get(H5TestFile.NAME_DATASET_CHAR);
         assertNotNull(charDset);
-        strDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_STR);
+        strDset = (ScalarDS)testFile.get(H5TestFile.NAME_DATASET_STR);
         assertNotNull(strDset);
-        enumDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_ENUM);
+        enumDset = (ScalarDS)testFile.get(H5TestFile.NAME_DATASET_ENUM);
         assertNotNull(enumDset);
-        imageDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_IMAGE);
+        imageDset = (ScalarDS)testFile.get(H5TestFile.NAME_DATASET_IMAGE);
         assertNotNull(imageDset);
-        ORDset = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_OBJ_REF);
+        ORDset = (ScalarDS)testFile.get(H5TestFile.NAME_DATASET_OBJ_REF);
         assertNotNull(ORDset);
-        imagePalete = (ScalarDS) testFile.get(H5TestFile.NAME_DATASET_IMAGE_PALETTE);
+        imagePalete = (ScalarDS)testFile.get(H5TestFile.NAME_DATASET_IMAGE_PALETTE);
         assertNotNull(imagePalete);
     }
 
     @After
-    public void removeFiles() throws Exception {
+    public void removeFiles() throws Exception
+    {
         if (testFile != null) {
             closeFile();
         }
@@ -167,7 +173,8 @@ public class ScalarDSTest {
      * </ul>
      */
     @Test
-    public void testImageFunctionality() {
+    public void testImageFunctionality()
+    {
         log.debug("testImageFunctionality");
         assertTrue(((H5ScalarDS)imageDset).hasAttribute());
         assertTrue(imageDset.isImage());
@@ -207,7 +214,8 @@ public class ScalarDSTest {
      * </ul>
      */
     @Test
-    public void testIsText() {
+    public void testIsText()
+    {
         log.debug("testIsText");
         assertTrue(strDset.getDatatype().isText());
         assertFalse(imageDset.getDatatype().isText());

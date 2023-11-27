@@ -22,8 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A scalar dataset is a multiple dimension array of scalar points. The Datatype of a scalar dataset must be an atomic
- * datatype. Common datatypes of scalar datasets include char, byte, short, int, long, float, double and string.
+ * A scalar dataset is a multiple dimension array of scalar points. The Datatype of a scalar dataset must be
+ * an atomic datatype. Common datatypes of scalar datasets include char, byte, short, int, long, float, double
+ * and string.
  *
  * A ScalarDS can be an image or spreadsheet data. ScalarDS defines methods to deal with both images and
  * spreadsheets.
@@ -33,15 +34,14 @@ import org.slf4j.LoggerFactory;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class ScalarDS extends Dataset
-{
+public abstract class ScalarDS extends Dataset {
     private static final long serialVersionUID = 8925371455928203981L;
 
     private static final Logger log = LoggerFactory.getLogger(ScalarDS.class);
 
     /************************************************************
-     * The following constant strings are copied from * https://hdfgroup.github.io/hdf5/_i_m_g.html * to make the
-     * definition consistent with the image specs. *
+     * The following constant strings are copied from * https://hdfgroup.github.io/hdf5/_i_m_g.html * to make
+     *the definition consistent with the image specs. *
      ************************************************************/
 
     /**
@@ -56,22 +56,23 @@ public abstract class ScalarDS extends Dataset
     public static final int INTERLACE_PLANE = 2;
 
     /**
-     * The interlace mode of the stored raster image data. Valid values are INTERLACE_PIXEL, INTERLACE_LINE and
-     * INTERLACE_PLANE.
+     * The interlace mode of the stored raster image data. Valid values are INTERLACE_PIXEL, INTERLACE_LINE
+     * and INTERLACE_PLANE.
      */
     protected int interlace;
 
     /**
-     * The min-max range of image data values. For example, [0, 255] indicates the min is 0, and the max is 255.
+     * The min-max range of image data values. For example, [0, 255] indicates the min is 0, and the max is
+     * 255.
      */
     protected double[] imageDataRange;
 
     /**
      * The indexed RGB color model with 256 colors.
      *
-     * The palette values are stored in a two-dimensional byte array and arrange by color components of red, green and
-     * blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are the red, green and blue
-     * components respectively.
+     * The palette values are stored in a two-dimensional byte array and arrange by color components of red,
+     * green and blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are the
+     * red, green and blue components respectively.
      */
     protected byte[][] palette;
 
@@ -105,11 +106,11 @@ public abstract class ScalarDS extends Dataset
     public boolean isFillValueConverted;
 
     /**
-     * Constructs an instance of a ScalarDS with specific name and path. An HDF data object must have a name. The path
-     * is the group path starting from the root.
+     * Constructs an instance of a ScalarDS with specific name and path. An HDF data object must have a name.
+     * The path is the group path starting from the root.
      *
-     * For example, in H5ScalarDS(h5file, "dset", "/arrays/"), "dset" is the name of the dataset, "/arrays" is the group
-     * path of the dataset.
+     * For example, in H5ScalarDS(h5file, "dset", "/arrays/"), "dset" is the name of the dataset, "/arrays" is
+     * the group path of the dataset.
      *
      * @param theFile
      *            the file that contains the data object.
@@ -118,7 +119,8 @@ public abstract class ScalarDS extends Dataset
      * @param thePath
      *            the full path of the data object, e.g. "/arrays/".
      */
-    public ScalarDS(FileFormat theFile, String theName, String thePath) {
+    public ScalarDS(FileFormat theFile, String theName, String thePath)
+    {
         this(theFile, theName, thePath, null);
     }
 
@@ -136,19 +138,20 @@ public abstract class ScalarDS extends Dataset
      *            the object id of the data object.
      */
     @Deprecated
-    public ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid) {
+    public ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid)
+    {
         super(theFile, theName, thePath, oid);
 
-        palette = null;
-        isImage = false;
-        isTrueColor = false;
-        isText = false;
-        interlace = -1;
-        imageDataRange = null;
-        isImageDisplay = false;
-        isDefaultImageOrder = true;
+        palette              = null;
+        isImage              = false;
+        isTrueColor          = false;
+        isText               = false;
+        interlace            = -1;
+        imageDataRange       = null;
+        isImageDisplay       = false;
+        isDefaultImageOrder  = true;
         isFillValueConverted = false;
-        filteredImageValues = new Vector<>();
+        filteredImageValues  = new Vector<>();
     }
 
     /**
@@ -164,7 +167,8 @@ public abstract class ScalarDS extends Dataset
      * @see #read()
      */
     @Override
-    public void clearData() {
+    public void clearData()
+    {
         super.clearData();
         unsignedConverted = false;
     }
@@ -178,20 +182,21 @@ public abstract class ScalarDS extends Dataset
      * @return the converted data buffer.
      */
     @Override
-    public Object convertFromUnsignedC() {
+    public Object convertFromUnsignedC()
+    {
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
         log.trace("convertFromUnsignedC(): unsigned={}", getDatatype().isUnsigned());
         if ((data != null) && getDatatype().isUnsigned() && !unsignedConverted) {
             log.trace("convertFromUnsignedC(): convert");
-            originalBuf = data;
-            convertedBuf = convertFromUnsignedC(originalBuf, convertedBuf);
-            data = convertedBuf;
+            originalBuf       = data;
+            convertedBuf      = convertFromUnsignedC(originalBuf, convertedBuf);
+            data              = convertedBuf;
             unsignedConverted = true;
 
             if (fillValue != null) {
                 if (!isFillValueConverted) {
-                    fillValue = convertFromUnsignedC(fillValue, null);
+                    fillValue            = convertFromUnsignedC(fillValue, null);
                     isFillValueConverted = true;
                 }
             }
@@ -201,7 +206,8 @@ public abstract class ScalarDS extends Dataset
     }
 
     /**
-     * Converts Java integer data of this dataset back to unsigned C-type integer data if they are unsigned integers.
+     * Converts Java integer data of this dataset back to unsigned C-type integer data if they are unsigned
+     * integers.
      *
      * @see hdf.object.Dataset#convertToUnsignedC(Object)
      * @see hdf.object.Dataset#convertToUnsignedC(Object, Object)
@@ -210,15 +216,16 @@ public abstract class ScalarDS extends Dataset
      * @return the converted data buffer.
      */
     @Override
-    public Object convertToUnsignedC() {
+    public Object convertToUnsignedC()
+    {
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
         log.trace("convertToUnsignedC(): unsigned={}", getDatatype().isUnsigned());
         if ((data != null) && getDatatype().isUnsigned()) {
             log.trace("convertToUnsignedC(): convert");
             convertedBuf = data;
-            originalBuf = convertToUnsignedC(convertedBuf, originalBuf);
-            data = originalBuf;
+            originalBuf  = convertToUnsignedC(convertedBuf, originalBuf);
+            data         = originalBuf;
         }
 
         return data;
@@ -227,28 +234,26 @@ public abstract class ScalarDS extends Dataset
     /**
      * Returns the palette of this scalar dataset or null if palette does not exist.
      *
-     * A Scalar dataset can be displayed as spreadsheet data or an image. When a scalar dataset is displayed as an
-     * image, the palette or color table may be needed to translate a pixel value to color components (for example, red,
-     * green, and blue). Some scalar datasets have no palette and some datasets have one or more than one palettes. If
-     * an associated palette exists but is not loaded, this interface retrieves the palette from the file and returns the
-     * palette. If the palette is loaded, it returns the palette. It returns null if there is no palette associated with
-     * the dataset.
+     * A Scalar dataset can be displayed as spreadsheet data or an image. When a scalar dataset is displayed
+     * as an image, the palette or color table may be needed to translate a pixel value to color components
+     * (for example, red, green, and blue). Some scalar datasets have no palette and some datasets have one or
+     * more than one palettes. If an associated palette exists but is not loaded, this interface retrieves the
+     * palette from the file and returns the palette. If the palette is loaded, it returns the palette. It
+     * returns null if there is no palette associated with the dataset.
      *
      * Current implementation only supports palette model of indexed RGB with 256 colors. Other models such as
      * YUV", "CMY", "CMYK", "YCbCr", "HSV will be supported in the future.
      *
-     * The palette values are stored in a two-dimensional byte array and are arranges by color components of red, green and
-     * blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are the red, green and blue
-     * components respectively.
+     * The palette values are stored in a two-dimensional byte array and are arranges by color components of
+     * red, green and blue. palette[][] = byte[3][256], where, palette[0][], palette[1][] and palette[2][] are
+     * the red, green and blue components respectively.
      *
-     * Sub-classes have to implement this interface. HDF4 and HDF5 images use different libraries to retrieve the
-     * associated palette.
+     * Sub-classes have to implement this interface. HDF4 and HDF5 images use different libraries to retrieve
+     * the associated palette.
      *
      * @return the 2D palette byte array.
      */
-    public byte[][] getPalette() {
-        return palette;
-    }
+    public byte[][] getPalette() { return palette; }
 
     /**
      * Sets the palette for this dataset.
@@ -256,37 +261,34 @@ public abstract class ScalarDS extends Dataset
      * @param pal
      *            the 2D palette byte array.
      */
-    public final void setPalette(byte[][] pal) {
-        palette = pal;
-    }
+    public final void setPalette(byte[][] pal) { palette = pal; }
 
     /**
      * Reads a specific image palette from file.
      *
-     * A scalar dataset may have multiple palettes attached to it. readPalette(int idx) returns a specific palette
-     * identified by its index.
+     * A scalar dataset may have multiple palettes attached to it. readPalette(int idx) returns a specific
+     * palette identified by its index.
      *
      * @param idx
      *            the index of the palette to read.
      *
      * @return the image palette
      */
-    public byte[][] readPalette(int idx) {
-        return null;
-    }
+    public byte[][] readPalette(int idx) { return null; }
 
     /**
      * Get the name of a specific image palette from file.
      *
-     * A scalar dataset may have multiple palettes attached to it. getPaletteName(int idx) returns the name of a
-     * specific palette identified by its index.
+     * A scalar dataset may have multiple palettes attached to it. getPaletteName(int idx) returns the name of
+     * a specific palette identified by its index.
      *
      * @param idx
      *            the index of the palette to retrieve the name.
      *
      * @return The name of the palette
      */
-    public String getPaletteName(int idx) {
+    public String getPaletteName(int idx)
+    {
         String paletteName = "Default ";
         if (idx != 0)
             paletteName = "Default " + idx;
@@ -299,21 +301,18 @@ public abstract class ScalarDS extends Dataset
      * @return the number of palettes if it has any,
      *         0 if there is no palette attribute attached to this dataset.
      */
-    public int getNumberOfPalettes() {
-        return 0;
-    }
+    public int getNumberOfPalettes() { return 0; }
 
     /**
      * Returns true if this dataset is an image.
      *
-     * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For more
-     * details, read <a href="https://hdfgroup.github.io/hdf5/_i_m_g.html"> HDF5 Image and Palette Specification</a>
+     * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For
+     * more details, read <a href="https://hdfgroup.github.io/hdf5/_i_m_g.html"> HDF5 Image and Palette
+     * Specification</a>
      *
      * @return true if the dataset is an image; otherwise, returns false.
      */
-    public final boolean isImage() {
-        return isImage;
-    }
+    public final boolean isImage() { return isImage; }
 
     /**
      * Returns true if this dataset is displayed as an image.
@@ -322,21 +321,17 @@ public abstract class ScalarDS extends Dataset
      *
      * @return true if this dataset is displayed as an image; otherwise, returns false.
      */
-    public final boolean isImageDisplay() {
-
-        return isImageDisplay;
-    }
+    public final boolean isImageDisplay() { return isImageDisplay; }
 
     /**
      * Returns true if this dataset is displayed as an image with default image order.
      *
      * A ScalarDS can be displayed as an image with different orders of dimensions.
      *
-     * @return true if this dataset is displayed as an image with default image order; otherwise, returns false.
+     * @return true if this dataset is displayed as an image with default image order; otherwise, returns
+     *     false.
      */
-    public final boolean isDefaultImageOrder() {
-        return isDefaultImageOrder;
-    }
+    public final boolean isDefaultImageOrder() { return isDefaultImageOrder; }
 
     /**
      * Sets the flag to display the dataset as an image.
@@ -344,9 +339,7 @@ public abstract class ScalarDS extends Dataset
      * @param b
      *            if b is true, display the dataset as an image
      */
-    public final void setIsImageDisplay(boolean b) {
-        isImageDisplay = b;
-    }
+    public final void setIsImageDisplay(boolean b) { isImageDisplay = b; }
 
     /**
      * Sets the flag to indicate this dataset is an image.
@@ -354,9 +347,7 @@ public abstract class ScalarDS extends Dataset
      * @param b
      *            if b is true, the dataset is an image.
      */
-    public final void setIsImage(boolean b) {
-        isImage = b;
-    }
+    public final void setIsImage(boolean b) { isImage = b; }
 
     /**
      * Sets data range for an image.
@@ -366,7 +357,8 @@ public abstract class ScalarDS extends Dataset
      * @param max
      *            the data range end.
      */
-    public final void setImageDataRange(double min, double max) {
+    public final void setImageDataRange(double min, double max)
+    {
         if (max <= min)
             return;
 
@@ -383,7 +375,8 @@ public abstract class ScalarDS extends Dataset
      * @param x
      *            value to be filtered
      */
-    public void addFilteredImageValue(Number x) {
+    public void addFilteredImageValue(Number x)
+    {
         Iterator<Number> it = filteredImageValues.iterator();
         while (it.hasNext()) {
             if (it.next().toString().equals(x.toString()))
@@ -398,18 +391,14 @@ public abstract class ScalarDS extends Dataset
      *
      * @return the list of Image values
      */
-    public List<Number> getFilteredImageValues() {
-        return filteredImageValues;
-    }
+    public List<Number> getFilteredImageValues() { return filteredImageValues; }
 
     /**
      * @return true if this dataset is a true color image.
      *
      */
 
-    public final boolean isTrueColor() {
-        return isTrueColor;
-    }
+    public final boolean isTrueColor() { return isTrueColor; }
 
     /**
      * Returns the interlace mode of a true color image (RGB).
@@ -424,18 +413,14 @@ public abstract class ScalarDS extends Dataset
      *
      * @return the interlace mode of a true color image (RGB).
      */
-    public final int getInterlace() {
-        return interlace;
-    }
+    public final int getInterlace() { return interlace; }
 
     /**
      * Returns the (min, max) pair of image data range.
      *
      * @return the (min, max) pair of image data range.
      */
-    public double[] getImageDataRange() {
-        return imageDataRange;
-    }
+    public double[] getImageDataRange() { return imageDataRange; }
 
     /**
      * Returns the fill values for the dataset.
@@ -443,7 +428,8 @@ public abstract class ScalarDS extends Dataset
      * @return the fill values for the dataset.
      */
     @Override
-    public final Object getFillValue() {
+    public final Object getFillValue()
+    {
         return fillValue;
     }
 }

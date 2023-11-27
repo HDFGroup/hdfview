@@ -19,6 +19,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.ScalarDS;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -36,14 +44,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.ScalarDS;
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-
 /**
  * NewImageDialog shows a message dialog requesting user input for creating a
  * new HDF4/5 Image.
@@ -53,12 +53,11 @@ import hdf.view.ViewProperties;
  */
 public class NewImageDialog extends NewDataObjectDialog {
 
-    private Text        nameField, widthField, heightField;
+    private Text nameField, widthField, heightField;
 
-    private Combo       parentChoice;
+    private Combo parentChoice;
 
-    private Button      checkIndex, checkTrueColor, checkInterlacePixel,
-                        checkInterlacePlane;
+    private Button checkIndex, checkTrueColor, checkInterlacePixel, checkInterlacePlane;
 
     /** A list of current groups */
     private List<Group> groupList;
@@ -73,21 +72,19 @@ public class NewImageDialog extends NewDataObjectDialog {
      * @param objs
      *            the list of all objects.
      */
-    public NewImageDialog(Shell parent, Group pGroup, List<?> objs) {
-        super(parent, pGroup, objs);
-    }
+    public NewImageDialog(Shell parent, Group pGroup, List<?> objs) { super(parent, pGroup, objs); }
 
     /**
      * Open the NewImageDialog for adding a new image.
      */
-    public void open() {
+    public void open()
+    {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell        = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New HDF Image...");
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
-
 
         // Create main content region
         Composite content = new Composite(shell, SWT.BORDER);
@@ -100,7 +97,7 @@ public class NewImageDialog extends NewDataObjectDialog {
 
         nameField = new Text(content, SWT.SINGLE | SWT.BORDER);
         nameField.setFont(curFont);
-        GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        GridData fieldData     = new GridData(SWT.FILL, SWT.FILL, true, false);
         fieldData.minimumWidth = 300;
         nameField.setLayoutData(fieldData);
 
@@ -113,35 +110,35 @@ public class NewImageDialog extends NewDataObjectDialog {
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 parentObj = groupList.get(parentChoice.getSelectionIndex());
             }
         });
 
-        groupList = new ArrayList<>();
-        Object obj = null;
+        groupList            = new ArrayList<>();
+        Object obj           = null;
         Iterator<?> iterator = objList.iterator();
         while (iterator.hasNext()) {
             obj = iterator.next();
             if (obj instanceof Group) {
-                Group g = (Group) obj;
+                Group g = (Group)obj;
                 groupList.add(g);
                 if (g.isRoot()) {
                     parentChoice.add(HObject.SEPARATOR);
                 }
                 else {
-                    parentChoice.add(g.getPath() + g.getName()
-                            + HObject.SEPARATOR);
+                    parentChoice.add(g.getPath() + g.getName() + HObject.SEPARATOR);
                 }
             }
         }
 
-        if (((Group) parentObj).isRoot()) {
+        if (((Group)parentObj).isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentObj.getPath() + parentObj.getName()
-                    + HObject.SEPARATOR));
+            parentChoice.select(
+                parentChoice.indexOf(parentObj.getPath() + parentObj.getName() + HObject.SEPARATOR));
         }
 
         label = new Label(content, SWT.LEFT);
@@ -174,7 +171,8 @@ public class NewImageDialog extends NewDataObjectDialog {
         checkIndex.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkIndex.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 checkInterlacePixel.setSelection(true);
                 checkInterlacePlane.setSelection(false);
                 checkInterlacePixel.setEnabled(false);
@@ -188,7 +186,8 @@ public class NewImageDialog extends NewDataObjectDialog {
         checkTrueColor.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         checkTrueColor.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 checkInterlacePixel.setEnabled(true);
                 checkInterlacePlane.setEnabled(true);
             }
@@ -212,7 +211,6 @@ public class NewImageDialog extends NewDataObjectDialog {
         checkInterlacePlane.setText("Plane interlace");
         checkInterlacePlane.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
-
         // Create Ok/Cancel button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, true));
@@ -224,7 +222,8 @@ public class NewImageDialog extends NewDataObjectDialog {
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = createHDFimage();
                 if (newObject != null) {
                     shell.dispose();
@@ -238,10 +237,11 @@ public class NewImageDialog extends NewDataObjectDialog {
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = null;
                 shell.dispose();
-                ((Vector<Group>) groupList).setSize(0);
+                ((Vector<Group>)groupList).setSize(0);
             }
         });
 
@@ -254,15 +254,17 @@ public class NewImageDialog extends NewDataObjectDialog {
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+            public void widgetDisposed(DisposeEvent e)
+            {
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
+        Point shellSize        = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
@@ -274,7 +276,8 @@ public class NewImageDialog extends NewDataObjectDialog {
                 display.sleep();
     }
 
-    private Dataset createHDFimage() {
+    private Dataset createHDFimage()
+    {
         Dataset dataset = null;
 
         String name = nameField.getText();
@@ -312,23 +315,23 @@ public class NewImageDialog extends NewDataObjectDialog {
             return null;
         }
 
-        long[] dims = null;
-        int tclass = Datatype.CLASS_CHAR;
-        int tsign = Datatype.SIGN_NONE;
-        int tsize = 1;
-        int torder = Datatype.NATIVE;
+        long[] dims   = null;
+        int tclass    = Datatype.CLASS_CHAR;
+        int tsign     = Datatype.SIGN_NONE;
+        int tsize     = 1;
+        int torder    = Datatype.NATIVE;
         int interlace = ScalarDS.INTERLACE_PIXEL;
-        int ncomp = 2;
+        int ncomp     = 2;
 
         if (checkIndex.getSelection()) {
             // indexed colormap
             if (isH5) {
-                long[] tmpdims = { h, w };
-                dims = tmpdims;
+                long[] tmpdims = {h, w};
+                dims           = tmpdims;
             }
             else {
-                long[] tmpdims = { w, h };
-                dims = tmpdims;
+                long[] tmpdims = {w, h};
+                dims           = tmpdims;
             }
         }
         else {
@@ -336,20 +339,20 @@ public class NewImageDialog extends NewDataObjectDialog {
             if (isH5) {
                 // HDF5 true color image
                 if (checkInterlacePixel.getSelection()) {
-                    long[] tmpdims = { h, w, 3 };
-                    dims = tmpdims;
+                    long[] tmpdims = {h, w, 3};
+                    dims           = tmpdims;
                 }
                 else {
-                    interlace = ScalarDS.INTERLACE_PLANE;
-                    long[] tmpdims = { 3, h, w };
-                    dims = tmpdims;
+                    interlace      = ScalarDS.INTERLACE_PLANE;
+                    long[] tmpdims = {3, h, w};
+                    dims           = tmpdims;
                 }
             }
             else {
                 // HDF4 true color image
-                ncomp = 3;
-                long[] tmpdims = { w, h };
-                dims = tmpdims;
+                ncomp          = 3;
+                long[] tmpdims = {w, h};
+                dims           = tmpdims;
                 if (checkInterlacePlane.getSelection()) {
                     interlace = ScalarDS.INTERLACE_PLANE;
                 }
@@ -358,7 +361,8 @@ public class NewImageDialog extends NewDataObjectDialog {
 
         try {
             Datatype datatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
-            dataset = fileFormat.createImage(name, pgroup, datatype, dims, dims, null, -1, ncomp, interlace, null);
+            dataset =
+                fileFormat.createImage(name, pgroup, datatype, dims, dims, null, -1, ncomp, interlace, null);
             dataset.init();
         }
         catch (Exception ex) {

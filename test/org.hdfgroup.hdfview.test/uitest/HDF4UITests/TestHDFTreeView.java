@@ -5,11 +5,12 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.junit.Test;
+
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
-import org.junit.Test;
 
 import uitest.AbstractWindowTest;
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
@@ -17,22 +18,16 @@ import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 public class TestHDFTreeView extends AbstractWindowTest {
 
     @Test
-    public void testVGLongname() {
-        String[][] expectedData =
-            {   { "-127" },
-                { "-127" },
-                { "-127" },
-                { "-127" },
-                { "-127" },
-                { "-127" },
-                { "-127" },
-                { "-127" },
-                { "-127" },
-                { "-127" } };
-        SWTBotShell tableShell = null;
-        String filename = "VGlongname.hdf";
-        String groupname = "SD Vgroup - this vgroup has an sds as a member and it is actually meant to test long vgroup name";
-        String datasetName = "SDS belongs to VG_LONGNAME, which has a very long name that is used to test the new feature of variable length vgroup name";
+    public void testVGLongname()
+    {
+        String[][] expectedData = {{"-127"}, {"-127"}, {"-127"}, {"-127"}, {"-127"},
+                                   {"-127"}, {"-127"}, {"-127"}, {"-127"}, {"-127"}};
+        SWTBotShell tableShell  = null;
+        String filename         = "VGlongname.hdf";
+        String groupname =
+            "SD Vgroup - this vgroup has an sds as a member and it is actually meant to test long vgroup name";
+        String datasetName =
+            "SDS belongs to VG_LONGNAME, which has a very long name that is used to test the new feature of variable length vgroup name";
         File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
@@ -45,17 +40,18 @@ public class TestHDFTreeView extends AbstractWindowTest {
             tabItem.activate();
 
             String val = bot.textWithLabel("Name: ").getText();
-            assertTrue(constructWrongValueMessage("testVSLongname()", "wrong name", groupname, val), val.equals(groupname)); // Test group name
+            assertTrue(constructWrongValueMessage("testVSLongname()", "wrong name", groupname, val),
+                       val.equals(groupname)); // Test group name
 
             // Open dataset
             tableShell = openTreeviewObject(filetree, filename, groupname + "/" + datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
 
-            TableDataRetriever retriever = DataRetrieverFactory.getTableDataRetriever(dataTable, "testVGLongname()", false);
+            TableDataRetriever retriever =
+                DataRetrieverFactory.getTableDataRetriever(dataTable, "testVGLongname()", false);
             retriever.setContainerHeaderOffset(2, 0);
 
             retriever.testAllTableLocations(expectedData);
-
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -77,11 +73,12 @@ public class TestHDFTreeView extends AbstractWindowTest {
         }
     }
     @Test
-    public void testVSLongname() {
+    public void testVSLongname()
+    {
         SWTBotShell tableShell = null;
-        String filename = "vslongname.hdf";
-        String datasetName = "Vdata 2 91123456789212345678931234567894123456789512345678961234";
-        File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
+        String filename        = "vslongname.hdf";
+        String datasetName     = "Vdata 2 91123456789212345678931234567894123456789512345678961234";
+        File hdfFile           = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -93,15 +90,16 @@ public class TestHDFTreeView extends AbstractWindowTest {
             tabItem.activate();
 
             String val = bot.textWithLabel("Name: ").getText();
-            assertTrue(constructWrongValueMessage("testVSLongname()", "wrong name", datasetName, val), val.equals(datasetName)); // Test dataset name
+            assertTrue(constructWrongValueMessage("testVSLongname()", "wrong name", datasetName, val),
+                       val.equals(datasetName)); // Test dataset name
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
             assertTrue(constructWrongValueMessage("testVSLongname()", "wrong rank", "1", val),
-                    val.equals("1"));           // Test rank
+                       val.equals("1")); // Test rank
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 3).getText();
             assertTrue(constructWrongValueMessage("testVSLongname()", "wrong data type", "Vdata", val),
-                    val.equals("Vdata"));   // Test data type
+                       val.equals("Vdata")); // Test data type
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -122,5 +120,4 @@ public class TestHDFTreeView extends AbstractWindowTest {
             }
         }
     }
-
 }

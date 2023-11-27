@@ -569,12 +569,12 @@
         <java fork="true" classname="${exfile.name}" dir="${classes.dir}">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.test}" />
             <jvmarg value="${XstartOnFirstThreadFlag}" />
+            <jvmarg line="${exfile.name}.class" />
             <classpath>
                 <path refid="project-classpath" />
                 <path refid="log-classpath" />
                 <path refid="hdfobject-jar" />
-                <pathelement location="${classes.dir}" />
-                <pathelement path="${exclasses.dir}" />
+                <pathelement location="${exclasses.dir}" />
             </classpath>
             <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
             <env key="${platform.hdf.lib}" path="${release.dir}${path.separator}${release.dir}/bin${path.separator}${platform.hdf.lib}" />
@@ -1122,6 +1122,7 @@
         <mkdir dir="${release.dir}/extra" />
         <mkdir dir="${release.dir}/samples" />
         <mkdir dir="${release.dir}/doc" />
+        <mkdir dir="${release.dir}/plugin" />
 
         <!-- Copy the application and dependencies -->
         <copy todir="${release.dir}">
@@ -1170,7 +1171,6 @@
                 <exclude name="slf4j*.jar" />
                 <exclude name="*.lib" />
             </fileset>
-
             <fileset dir="${hdf5.lib.dir}">
                 <include name="*.jar" />
                 <include name="hdf5_java.dll" />
@@ -1188,13 +1188,24 @@
                 <include name="mfhdf.dll"/>
                 <include name="xdr.dll"/>
             </fileset>
-
             <fileset dir="${hdf5.lib.dir}">
                 <include name="hdf5_java.dll" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}/../bin">
                 <include name="hdf5_java.dll" />
                 <include name="hdf5.dll"/>
+            </fileset>
+        </copy>
+        <!-- Optional copy xdr -->
+        <copy todir="${release.dir}/bin" failonerror="false">
+            <fileset dir="${hdf.lib.dir}/../bin">
+                <include name="xdr.dll"/>
+            </fileset>
+        </copy>
+        <!-- Optional copy plugins -->
+        <copy todir="${release.dir}/bin/plugin" failonerror="false">
+            <fileset dir="${hdf5.lib.dir}/plugin">
+                <include name="*.dll" />
             </fileset>
         </copy>
 
@@ -1220,10 +1231,6 @@
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
                 <filename regex="libmfhdf\.so(\.[0-9])$"/>
             </fileset>
-            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <filename regex="libxdr\.so(\.[0-9])$"/>
-                <exclude name="*.a" />
-            </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
                 <include name="libhdf5_java.so" />
                 <include name="*.jar" />
@@ -1231,6 +1238,19 @@
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
                 <filename regex="libhdf5\.so(\.[0-9][0-9][0-9][0-9]?)$"/>
+            </fileset>
+        </copy>
+        <!-- Optional copy xdr -->
+        <copy todir="${release.dir}" failonerror="false">
+            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
+                <filename regex="libxdr\.so(\.[0-9])$"/>
+                <exclude name="*.a" />
+            </fileset>
+        </copy>
+        <!-- Optional copy plugins -->
+        <copy todir="${release.dir}/plugin" failonerror="false">
+            <fileset dir="${hdf5.lib.dir}/plugin">
+                <include name="*.so" />
             </fileset>
         </copy>
 
@@ -1263,10 +1283,6 @@
                 <filename regex="libmfhdf(\.[0-9])(\.dylib)$"/>
                 <exclude name="*.a" />
             </fileset>
-            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <filename regex="libxdr(\.[0-9])(\.dylib)$"/>
-                <exclude name="*.a" />
-            </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
                 <include name="libhdf5_java.dylib" />
                 <include name="*.jar" />
@@ -1275,6 +1291,19 @@
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
                 <filename regex="libhdf5(\.[0-9][0-9][0-9][0-9]?)(\.dylib)$"/>
                 <exclude name="*.a" />
+            </fileset>
+        </copy>
+        <!-- Optional copy xdr -->
+        <copy todir="${release.dir}" failonerror="false">
+            <fileset dir="${hdf.lib.dir}" followsymlinks="true">
+                <filename regex="libxdr(\.[0-9])(\.dylib)$"/>
+                <exclude name="*.a" />
+            </fileset>
+        </copy>
+        <!-- Optional copy plugins -->
+        <copy todir="${release.dir}/plugin" failonerror="false">
+            <fileset dir="${hdf5.lib.dir}/plugin">
+                <include name="*.dylib" />
             </fileset>
         </copy>
     </target>

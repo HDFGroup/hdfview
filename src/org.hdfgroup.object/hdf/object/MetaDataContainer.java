@@ -27,8 +27,7 @@ import java.util.List;
  * @author Peter X. Cao, Jordan T. Henderson
  */
 @SuppressWarnings("rawtypes")
-public interface MetaDataContainer
-{
+public interface MetaDataContainer {
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
      *

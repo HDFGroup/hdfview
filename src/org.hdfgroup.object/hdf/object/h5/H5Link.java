@@ -16,8 +16,10 @@ package hdf.object.h5;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import hdf.object.Attribute;
+import hdf.object.FileFormat;
+import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
@@ -27,10 +29,8 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.hdf5lib.structs.H5O_token_t;
 
-import hdf.object.Attribute;
-import hdf.object.FileFormat;
-import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An H5Link object represents an existing HDF5 object in file.
@@ -44,8 +44,7 @@ import hdf.object.MetaDataContainer;
  * @author Nidhi Gupta
  */
 
-public class H5Link extends HObject implements MetaDataContainer
-{
+public class H5Link extends HObject implements MetaDataContainer {
     private static final long serialVersionUID = -8137277460521594367L;
 
     private static final Logger log = LoggerFactory.getLogger(H5Link.class);
@@ -63,7 +62,8 @@ public class H5Link extends HObject implements MetaDataContainer
      * @param thePath
      *            the full path of this link, e.g. "/groups/".
      */
-    public H5Link(FileFormat theFile, String theName, String thePath) {
+    public H5Link(FileFormat theFile, String theName, String thePath)
+    {
         this(theFile, theName, thePath, null);
     }
 
@@ -80,7 +80,8 @@ public class H5Link extends HObject implements MetaDataContainer
      *            the oid of this link, e.g. "/groups/".
      */
     @SuppressWarnings("deprecation")
-    public H5Link(FileFormat theFile, String theName, String thePath, long[] oid) {
+    public H5Link(FileFormat theFile, String theName, String thePath, long[] oid)
+    {
         super(theFile, theName, thePath, oid);
 
         if (theFile != null) {
@@ -88,12 +89,14 @@ public class H5Link extends HObject implements MetaDataContainer
                 // retrieve the object ID
                 byte[] refBuf = null;
                 try {
-                    refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
+                    refBuf =
+                        H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
                     this.oid = HDFNativeData.byteToLong(refBuf);
                     log.trace("constructor REF {} to OID {}", refBuf, this.oid);
                 }
                 catch (Exception ex) {
-                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(), this.getFullName());
+                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(),
+                              this.getFullName());
                 }
                 finally {
                     if (refBuf != null)
@@ -102,7 +105,8 @@ public class H5Link extends HObject implements MetaDataContainer
             }
             log.trace("constructor OID {}", this.oid);
             try {
-                objInfo = H5.H5Oget_info_by_name(theFile.getFID(), this.getFullName(), HDF5Constants.H5O_INFO_BASIC, HDF5Constants.H5P_DEFAULT);
+                objInfo = H5.H5Oget_info_by_name(theFile.getFID(), this.getFullName(),
+                                                 HDF5Constants.H5O_INFO_BASIC, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
                 objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
@@ -110,7 +114,7 @@ public class H5Link extends HObject implements MetaDataContainer
         }
         else {
             this.oid = null;
-            objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
+            objInfo  = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
         }
     }
 
@@ -120,7 +124,8 @@ public class H5Link extends HObject implements MetaDataContainer
      * @see hdf.object.HObject#open()
      */
     @Override
-    public long open() {
+    public long open()
+    {
         return 0;
     }
 
@@ -130,7 +135,8 @@ public class H5Link extends HObject implements MetaDataContainer
      * @see hdf.object.HObject#close(int)
      */
     @Override
-    public void close(long id) {
+    public void close(long id)
+    {
     }
 
     /**
@@ -138,7 +144,8 @@ public class H5Link extends HObject implements MetaDataContainer
      *
      * @return true if it has any attributes, false otherwise.
      */
-    public long[] getToken() {
+    public long[] getToken()
+    {
         H5O_token_t token = objInfo.token;
         return HDFNativeData.byteToLong(token.data);
     }
@@ -149,7 +156,8 @@ public class H5Link extends HObject implements MetaDataContainer
      * @return true if it has any attributes, false otherwise.
      */
     @Override
-    public boolean hasAttribute() {
+    public boolean hasAttribute()
+    {
         return false;
     }
 
@@ -158,7 +166,8 @@ public class H5Link extends HObject implements MetaDataContainer
      * The list should be empty after this call returns.
      */
     @Override
-    public void clear() {
+    public void clear()
+    {
     }
 
     /**
@@ -172,7 +181,8 @@ public class H5Link extends HObject implements MetaDataContainer
      *             if the metadata can not be retrieved
      */
     @Override
-    public List<Attribute> getMetadata() throws HDF5Exception {
+    public List<Attribute> getMetadata() throws HDF5Exception
+    {
         try {
             this.linkTargetObjName = H5File.getLinkTargetName(this);
         }
@@ -196,7 +206,8 @@ public class H5Link extends HObject implements MetaDataContainer
      * @throws HDF5Exception
      *             if the metadata can not be retrieved
      */
-    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
+    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception
+    {
         try {
             this.linkTargetObjName = H5File.getLinkTargetName(this);
         }
@@ -225,7 +236,8 @@ public class H5Link extends HObject implements MetaDataContainer
      *             if the metadata can not be written
      */
     @Override
-    public void writeMetadata(Object info) throws Exception {
+    public void writeMetadata(Object info) throws Exception
+    {
     }
 
     /**
@@ -238,7 +250,8 @@ public class H5Link extends HObject implements MetaDataContainer
      *             if the metadata can not be removed
      */
     @Override
-    public void removeMetadata(Object info) throws HDF5Exception {
+    public void removeMetadata(Object info) throws HDF5Exception
+    {
     }
 
     /**
@@ -251,7 +264,8 @@ public class H5Link extends HObject implements MetaDataContainer
      *             if the metadata can not be updated
      */
     @Override
-    public void updateMetadata(Object info) throws HDF5Exception {
+    public void updateMetadata(Object info) throws HDF5Exception
+    {
     }
 
     /*
@@ -260,7 +274,8 @@ public class H5Link extends HObject implements MetaDataContainer
      * @see hdf.object.HObject#setName(java.lang.String)
      */
     @Override
-    public void setName(String newName) throws Exception {
+    public void setName(String newName) throws Exception
+    {
         if (newName == null)
             throw new IllegalArgumentException("The new name is NULL");
 

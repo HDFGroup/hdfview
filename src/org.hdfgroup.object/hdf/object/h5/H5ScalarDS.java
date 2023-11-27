@@ -21,8 +21,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import hdf.object.Attribute;
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
+import hdf.object.ScalarDS;
+import hdf.object.h5.H5Attribute;
+import hdf.object.h5.H5MetaDataContainer;
+import hdf.object.h5.H5ReferenceType;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
@@ -34,31 +43,21 @@ import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.hdf5lib.structs.H5O_token_t;
 
-import hdf.object.Attribute;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
-import hdf.object.ScalarDS;
-
-import hdf.object.h5.H5Attribute;
-import hdf.object.h5.H5MetaDataContainer;
-import hdf.object.h5.H5ReferenceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * H5ScalarDS describes a multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
- * float, double and string, and operations performed on the scalar dataset.
+ * H5ScalarDS describes a multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short,
+ * long, float, double and string, and operations performed on the scalar dataset.
  *
  * The library predefines a modest number of datatypes. For details, read
- * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+ * Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H5ScalarDS extends ScalarDS implements MetaDataContainer
-{
+public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
     private static final long serialVersionUID = 2887517608230611642L;
 
     private static final Logger log = LoggerFactory.getLogger(H5ScalarDS.class);
@@ -95,8 +94,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     /**
      * Constructs an instance of a H5 scalar dataset with given file, dataset name and path.
      *
-     * For example, in H5ScalarDS(h5file, "dset", "/arrays/"), "dset" is the name of the dataset, "/arrays" is the group
-     * path of the dataset.
+     * For example, in H5ScalarDS(h5file, "dset", "/arrays/"), "dset" is the name of the dataset, "/arrays" is
+     * the group path of the dataset.
      *
      * @param theFile
      *            the file that contains the data object.
@@ -105,7 +104,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @param thePath
      *            the full path of the data object, e.g. "/arrays/".
      */
-    public H5ScalarDS(FileFormat theFile, String theName, String thePath) {
+    public H5ScalarDS(FileFormat theFile, String theName, String thePath)
+    {
         this(theFile, theName, thePath, null);
     }
 
@@ -123,23 +123,26 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *            the oid of the data object.
      */
     @Deprecated
-    public H5ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid) {
+    public H5ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid)
+    {
         super(theFile, theName, thePath, oid);
         unsignedConverted = false;
-        NumberOfPalettes = 0;
-        objMetadata = new H5MetaDataContainer(theFile, theName, thePath, this);
+        NumberOfPalettes  = 0;
+        objMetadata       = new H5MetaDataContainer(theFile, theName, thePath, this);
 
         if (theFile != null) {
             if (oid == null) {
                 // retrieve the object ID
                 byte[] refBuf = null;
                 try {
-                    refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
+                    refBuf =
+                        H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
                     this.oid = HDFNativeData.byteToLong(refBuf);
                     log.trace("constructor REF {} to OID {}", refBuf, this.oid);
                 }
                 catch (Exception ex) {
-                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(), this.getFullName());
+                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(),
+                              this.getFullName());
                 }
                 finally {
                     if (refBuf != null)
@@ -148,7 +151,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             }
             log.trace("constructor OID {}", this.oid);
             try {
-                objInfo = H5.H5Oget_info_by_name(theFile.getFID(), this.getFullName(), HDF5Constants.H5O_INFO_BASIC, HDF5Constants.H5P_DEFAULT);
+                objInfo = H5.H5Oget_info_by_name(theFile.getFID(), this.getFullName(),
+                                                 HDF5Constants.H5O_INFO_BASIC, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
                 objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
@@ -156,7 +160,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         }
         else {
             this.oid = null;
-            objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
+            objInfo  = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
         }
     }
 
@@ -166,7 +170,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.HObject#open()
      */
     @Override
-    public long open() {
+    public long open()
+    {
         long did = HDF5Constants.H5I_INVALID_HID;
 
         if (getFID() < 0)
@@ -191,7 +196,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.HObject#close(int)
      */
     @Override
-    public void close(long did) {
+    public void close(long did)
+    {
         if (did >= 0) {
             try {
                 H5.H5Fflush(did, HDF5Constants.H5F_SCOPE_LOCAL);
@@ -255,7 +261,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * </pre>
      */
     @Override
-    public void init() {
+    public void init()
+    {
         if (inited) {
             // already called. Initialize only once
             resetSelection();
@@ -263,9 +270,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             return;
         }
 
-        long did = HDF5Constants.H5I_INVALID_HID;
-        long tid = HDF5Constants.H5I_INVALID_HID;
-        long sid = HDF5Constants.H5I_INVALID_HID;
+        long did       = HDF5Constants.H5I_INVALID_HID;
+        long tid       = HDF5Constants.H5I_INVALID_HID;
+        long sid       = HDF5Constants.H5I_INVALID_HID;
         long nativeTID = HDF5Constants.H5I_INVALID_HID;
 
         did = open();
@@ -281,8 +288,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             try {
                 pid = H5.H5Dget_create_plist(did);
                 try {
-                    int nfiles = H5.H5Pget_external_count(pid);
-                    isExternal = (nfiles > 0);
+                    int nfiles     = H5.H5Pget_external_count(pid);
+                    isExternal     = (nfiles > 0);
                     int layoutType = H5.H5Pget_layout(pid);
                     if (isVirtual = (layoutType == HDF5Constants.H5D_VIRTUAL)) {
                         try {
@@ -305,7 +312,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                             log.debug("init(): vds count error: ", err);
                         }
                     }
-                    log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal, isVirtual);
+                    log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal,
+                              isVirtual);
                 }
                 catch (Exception ex) {
                     log.debug("init(): check if it is an external or virtual dataset: ", ex);
@@ -326,8 +334,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             NumberOfPalettes = readNumberOfPalette(did);
 
             try {
-                sid = H5.H5Dget_space(did);
-                rank = H5.H5Sget_simple_extent_ndims(sid);
+                sid        = H5.H5Dget_space(did);
+                rank       = H5.H5Sget_simple_extent_ndims(sid);
                 space_type = H5.H5Sget_simple_extent_type(sid);
                 if (space_type == HDF5Constants.H5S_NULL)
                     isNULL = true;
@@ -339,14 +347,14 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 if (rank == 0) {
                     // a scalar data point
                     isScalar = true;
-                    rank = 1;
-                    dims = new long[] { 1 };
+                    rank     = 1;
+                    dims     = new long[] {1};
                     log.trace("init(): rank is a scalar data point");
                 }
                 else {
                     isScalar = false;
-                    dims = new long[rank];
-                    maxDims = new long[rank];
+                    dims     = new long[rank];
+                    maxDims  = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
                     log.trace("init(): rank={}, dims={}, maxDims={}", rank, dims, maxDims);
                 }
@@ -366,9 +374,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     else
                         datatype = new H5Datatype(getFileFormat(), tid);
 
-                    log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}",
-                            tid, datatype.getDatatypeClass(), ((H5Datatype) datatype).isText(), datatype.isNamed(), datatype.isVLEN(),
-                            datatype.isEnum(), datatype.isUnsigned(), ((H5Datatype) datatype).isStdRef(), ((H5Datatype) datatype).isRegRef());
+                    log.trace(
+                        "init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}",
+                        tid, datatype.getDatatypeClass(), ((H5Datatype)datatype).isText(), datatype.isNamed(),
+                        datatype.isVLEN(), datatype.isEnum(), datatype.isUnsigned(),
+                        ((H5Datatype)datatype).isStdRef(), ((H5Datatype)datatype).isRegRef());
                 }
                 catch (Exception ex) {
                     log.debug("init(): failed to create datatype for dataset: ", ex);
@@ -377,7 +387,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
                 // Check if the datatype in the file is the native datatype
                 try {
-                    nativeTID = H5.H5Tget_native_type(tid);
+                    nativeTID        = H5.H5Tget_native_type(tid);
                     isNativeDatatype = H5.H5Tequal(tid, nativeTID);
                     log.trace("init(): isNativeDatatype={}", isNativeDatatype);
                 }
@@ -386,13 +396,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 }
 
                 try {
-                    pid = H5.H5Dget_create_plist(did);
-                    int[] fillStatus = { 0 };
+                    pid              = H5.H5Dget_create_plist(did);
+                    int[] fillStatus = {0};
                     if (H5.H5Pfill_value_defined(pid, fillStatus) >= 0) {
                         // Check if fill value is user-defined before retrieving it.
                         if (fillStatus[0] == HDF5Constants.H5D_FILL_VALUE_USER_DEFINED) {
                             try {
-                                fillValue = H5Datatype.allocateArray((H5Datatype) datatype, 1);
+                                fillValue = H5Datatype.allocateArray((H5Datatype)datatype, 1);
                             }
                             catch (OutOfMemoryError e) {
                                 log.debug("init(): out of memory: ", e);
@@ -409,13 +419,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                                 log.trace("init(): H5Pget_fill_value={}", fillValue);
                                 if (fillValue != null) {
                                     if (datatype.isUnsigned() && !isFillValueConverted) {
-                                        fillValue = ScalarDS.convertFromUnsignedC(fillValue, null);
+                                        fillValue            = ScalarDS.convertFromUnsignedC(fillValue, null);
                                         isFillValueConverted = true;
                                     }
 
                                     int n = Array.getLength(fillValue);
                                     for (int i = 0; i < n; i++)
-                                        addFilteredImageValue((Number) Array.get(fillValue, i));
+                                        addFilteredImageValue((Number)Array.get(fillValue, i));
                                 }
                             }
                             catch (Exception ex2) {
@@ -469,7 +479,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             // 2) INTERLACE_MODE = INTERLACE_PIXEL,
             // 3) INTERLACE_MODE = INTERLACE_PLANE
             if ((rank >= 3) && isImage) {
-                interlace = -1;
+                interlace   = -1;
                 isTrueColor = isStringAttributeOf(did, "IMAGE_SUBCLASS", "IMAGE_TRUECOLOR");
 
                 if (isTrueColor) {
@@ -482,7 +492,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
             close(did);
 
-            startDims = new long[rank];
+            startDims    = new long[rank];
             selectedDims = new long[rank];
 
             resetSelection();
@@ -498,7 +508,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *
      * @return true if it has any attributes, false otherwise.
      */
-    public long[] getToken() {
+    public long[] getToken()
+    {
         H5O_token_t token = objInfo.token;
         return HDFNativeData.byteToLong(token.data);
     }
@@ -509,7 +520,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @return true if it has any attributes, false otherwise.
      */
     @Override
-    public boolean hasAttribute() {
+    public boolean hasAttribute()
+    {
         objInfo.num_attrs = objMetadata.getObjectAttributeSize();
 
         if (objInfo.num_attrs < 0) {
@@ -520,14 +532,16 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 try {
                     objInfo = H5.H5Oget_info(did);
 
-                    if(objInfo.num_attrs > 0) {
+                    if (objInfo.num_attrs > 0) {
                         // test if it is an image
                         // check image
                         Object avalue = getAttrValue(did, "CLASS");
                         if (avalue != null) {
                             try {
-                                isImageDisplay = isImage = "IMAGE".equalsIgnoreCase(new String((byte[]) avalue).trim());
-                                log.trace("hasAttribute(): isImageDisplay dataset: {} with value = {}", isImageDisplay, avalue);
+                                isImageDisplay = isImage =
+                                    "IMAGE".equalsIgnoreCase(new String((byte[])avalue).trim());
+                                log.trace("hasAttribute(): isImageDisplay dataset: {} with value = {}",
+                                          isImageDisplay, avalue);
                             }
                             catch (Exception err) {
                                 log.debug("hasAttribute(): check image: ", err);
@@ -547,7 +561,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                                 x0 = x1 = 0;
                             }
                             if (x1 > x0) {
-                                imageDataRange = new double[2];
+                                imageDataRange    = new double[2];
                                 imageDataRange[0] = x0;
                                 imageDataRange[1] = x1;
                             }
@@ -568,7 +582,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 finally {
                     close(did);
                 }
-                objMetadata.setObjectAttributeSize((int) objInfo.num_attrs);
+                objMetadata.setObjectAttributeSize((int)objInfo.num_attrs);
             }
             else {
                 log.debug("hasAttribute(): could not open dataset");
@@ -585,7 +599,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @return the datatype of the data object.
      */
     @Override
-    public Datatype getDatatype() {
+    public Datatype getDatatype()
+    {
         if (!inited)
             init();
 
@@ -667,8 +682,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * Refreshes the dataset before re-read of data.
      */
     @Override
-    public Object refreshData() {
-        inited = false;
+    public Object refreshData()
+    {
+        inited  = false;
         refresh = true;
 
         init();
@@ -680,7 +696,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * The list should be empty after this call returns.
      */
     @Override
-    public void clear() {
+    public void clear()
+    {
         super.clear();
         objMetadata.clear();
     }
@@ -691,7 +708,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.Dataset#readBytes()
      */
     @Override
-    public byte[] readBytes() throws HDF5Exception {
+    public byte[] readBytes() throws HDF5Exception
+    {
         byte[] theData = null;
 
         if (!isInited())
@@ -701,10 +719,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         if (did >= 0) {
             long fspace = HDF5Constants.H5I_INVALID_HID;
             long mspace = HDF5Constants.H5I_INVALID_HID;
-            long tid = HDF5Constants.H5I_INVALID_HID;
+            long tid    = HDF5Constants.H5I_INVALID_HID;
 
             try {
-                long[] lsize = { 1 };
+                long[] lsize = {1};
                 for (int j = 0; j < selectedDims.length; j++)
                     lsize[0] *= selectedDims[j];
 
@@ -714,9 +732,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 // set the rectangle selection
                 // HDF5 bug: for scalar dataset, H5Sselect_hyperslab gives core dump
                 if (rank * dims[0] > 1)
-                    H5.H5Sselect_hyperslab(fspace, HDF5Constants.H5S_SELECT_SET, startDims, selectedStride, selectedDims, null); // set block to 1
+                    H5.H5Sselect_hyperslab(fspace, HDF5Constants.H5S_SELECT_SET, startDims, selectedStride,
+                                           selectedDims, null); // set block to 1
 
-                tid = H5.H5Dget_type(did);
+                tid       = H5.H5Dget_type(did);
                 long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("readBytes(): size = {}", size);
 
@@ -725,7 +744,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
                 theData = new byte[(int)size];
 
-                log.trace("readBytes(): H5Dread: did={} tid={} fspace={} mspace={}", did, tid, fspace, mspace);
+                log.trace("readBytes(): H5Dread: did={} tid={} fspace={} mspace={}", did, tid, fspace,
+                          mspace);
                 H5.H5Dread(did, tid, mspace, fspace, HDF5Constants.H5P_DEFAULT, theData);
             }
             catch (Exception ex) {
@@ -836,7 +856,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *             if object can not be read
      */
     @Override
-    public Object read() throws Exception {
+    public Object read() throws Exception
+    {
         Object readData = null;
 
         if (!isInited())
@@ -863,7 +884,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *             If there is an error at the HDF5 library level.
      */
     @Override
-    public void write(Object buf) throws Exception {
+    public void write(Object buf) throws Exception
+    {
         if (this.getFileFormat().isReadOnly())
             throw new Exception("cannot write to scalar dataset in file opened as read-only");
 
@@ -879,10 +901,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         }
     }
 
-    private Object scalarDatasetCommonIO(H5File.IO_TYPE ioType, Object writeBuf) throws Exception {
-        H5Datatype dsDatatype = (H5Datatype) getDatatype();
-        H5Datatype dsBaseDatatype = (H5Datatype) getDatatype().getDatatypeBase();
-        boolean BDTisRef = false;
+    private Object scalarDatasetCommonIO(H5File.IO_TYPE ioType, Object writeBuf) throws Exception
+    {
+        H5Datatype dsDatatype     = (H5Datatype)getDatatype();
+        H5Datatype dsBaseDatatype = (H5Datatype)getDatatype().getDatatypeBase();
+        boolean BDTisRef          = false;
         if (dsBaseDatatype != null)
             BDTisRef = dsBaseDatatype.isStdRef();
         Object theData = null;
@@ -899,18 +922,22 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
         long did = open();
         if (did >= 0) {
-            long[] spaceIDs = { HDF5Constants.H5I_INVALID_HID, HDF5Constants.H5I_INVALID_HID }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
+            long[] spaceIDs = {HDF5Constants.H5I_INVALID_HID,
+                               HDF5Constants.H5I_INVALID_HID}; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
                 /*
                  * NOTE: this call sets up a hyperslab selection in the file according to the
                  * current selection in the dataset object.
                  */
-                long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
-                        selectedStride, selectedDims, spaceIDs);
+                long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(
+                    did, dims, startDims, selectedStride, selectedDims, spaceIDs);
 
                 if (ioType == H5File.IO_TYPE.READ) {
-                    log.trace("scalarDatasetCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}", dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(), dsDatatype.isRefObj());
+                    log.trace(
+                        "scalarDatasetCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}",
+                        dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(),
+                        dsDatatype.isRefObj());
                     if (dsDatatype.isVarStr()) {
                         try {
                             theData = H5Datatype.allocateArray(dsDatatype, (int)totalSelectedSpacePoints);
@@ -925,8 +952,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                         for (int j = 0; j < (int)totalSelectedSpacePoints; j++)
                             ((ArrayList[])theData)[j] = new ArrayList<byte[]>();
                     }
-                    else if ((originalBuf == null) || dsDatatype.isEnum() || dsDatatype.isText() || dsDatatype.isRefObj()
-                            || ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
+                    else if ((originalBuf == null) || dsDatatype.isEnum() || dsDatatype.isText() ||
+                             dsDatatype.isRefObj() ||
+                             ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
                         try {
                             theData = H5Datatype.allocateArray(dsDatatype, (int)totalSelectedSpacePoints);
                         }
@@ -937,7 +965,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     }
                     else {
                         // reuse the buffer if the size is the same
-                        log.trace("scalarDatasetCommonIO():read ioType reuse the buffer if the size is the same");
+                        log.trace(
+                            "scalarDatasetCommonIO():read ioType reuse the buffer if the size is the same");
                         theData = originalBuf;
                     }
 
@@ -951,32 +980,41 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                             tid = dsDatatype.createNative();
 
                             if (dsDatatype.isVarStr()) {
-                                log.trace("scalarDatasetCommonIO(): H5Dread_VLStrings did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
-                                        did, tid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                                log.trace(
+                                    "scalarDatasetCommonIO(): H5Dread_VLStrings did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
+                                    did, tid,
+                                    (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                                H5.H5Dread_VLStrings(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
-                                        (Object[]) theData);
+                                H5.H5Dread_VLStrings(did, tid, spaceIDs[0], spaceIDs[1],
+                                                     HDF5Constants.H5P_DEFAULT, (Object[])theData);
                             }
-                            else if (dsDatatype.isVLEN() || (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isVLEN())) {
-                                log.trace("scalarDatasetCommonIO(): H5DreadVL did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
-                                        did, tid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                            else if (dsDatatype.isVLEN() ||
+                                     (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isVLEN())) {
+                                log.trace(
+                                    "scalarDatasetCommonIO(): H5DreadVL did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
+                                    did, tid,
+                                    (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
                                 H5.H5DreadVL(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
-                                        (Object[]) theData);
+                                             (Object[])theData);
                             }
                             else {
-                                log.trace("scalarDatasetCommonIO(): H5Dread did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
-                                        did, tid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                                log.trace(
+                                    "scalarDatasetCommonIO(): H5Dread did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
+                                    did, tid,
+                                    (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                                H5.H5Dread(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, theData);
+                                H5.H5Dread(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                                           theData);
                             }
                         }
                         catch (HDF5DataFiltersException exfltr) {
                             log.debug("scalarDatasetCommonIO(): read failure: ", exfltr);
-                            throw new Exception("Filter not available exception: " + exfltr.getMessage(), exfltr);
+                            throw new Exception("Filter not available exception: " + exfltr.getMessage(),
+                                                exfltr);
                         }
                         catch (Exception ex) {
                             log.debug("scalarDatasetCommonIO(): read failure: ", ex);
@@ -990,29 +1028,37 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                          * Perform any necessary data conversions.
                          */
                         if (dsDatatype.isText() && convertByteToString && (theData instanceof byte[])) {
-                            log.trace("scalarDatasetCommonIO(): isText: converting byte array to string array");
-                            theData = byteToString((byte[]) theData, (int) dsDatatype.getDatatypeSize());
+                            log.trace(
+                                "scalarDatasetCommonIO(): isText: converting byte array to string array");
+                            theData = byteToString((byte[])theData, (int)dsDatatype.getDatatypeSize());
                         }
                         else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
-                            log.trace("scalarDatasetCommonIO(): isFloat: converting byte array to BigDecimal array");
-                            theData = dsDatatype.byteToBigDecimal(0, (int)totalSelectedSpacePoints, (byte[]) theData);
+                            log.trace(
+                                "scalarDatasetCommonIO(): isFloat: converting byte array to BigDecimal array");
+                            theData = dsDatatype.byteToBigDecimal(0, (int)totalSelectedSpacePoints,
+                                                                  (byte[])theData);
                         }
-                        else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() && dsDatatype.getDatatypeBase().getDatatypeSize() == 16) {
-                            log.trace("scalarDatasetCommonIO(): isArray and isFloat: converting byte array to BigDecimal array");
+                        else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() &&
+                                 dsDatatype.getDatatypeBase().getDatatypeSize() == 16) {
+                            log.trace(
+                                "scalarDatasetCommonIO(): isArray and isFloat: converting byte array to BigDecimal array");
                             long[] arrayDims = dsDatatype.getArrayDims();
-                            int asize = (int)totalSelectedSpacePoints;
+                            int asize        = (int)totalSelectedSpacePoints;
                             for (int j = 0; j < arrayDims.length; j++) {
                                 asize *= arrayDims[j];
                             }
-                            theData = ((H5Datatype)dsDatatype.getDatatypeBase()).byteToBigDecimal(0, asize, (byte[]) theData);
+                            theData = ((H5Datatype)dsDatatype.getDatatypeBase())
+                                          .byteToBigDecimal(0, asize, (byte[])theData);
                         }
                         else if (dsDatatype.isRef() && (theData instanceof byte[])) {
-                            log.trace("AttributeCommonIO():read ioType isRef: converting byte array to List of bytes");
+                            log.trace(
+                                "AttributeCommonIO():read ioType isRef: converting byte array to List of bytes");
                             ArrayList<byte[]> theListData = new ArrayList<>((int)totalSelectedSpacePoints);
-                            for (int m = 0; m < (int) totalSelectedSpacePoints; m++) {
+                            for (int m = 0; m < (int)totalSelectedSpacePoints; m++) {
                                 byte[] curBytes = new byte[(int)dsDatatype.getDatatypeSize()];
                                 try {
-                                    System.arraycopy(theData, m * (int)dsDatatype.getDatatypeSize(), curBytes, 0, (int)dsDatatype.getDatatypeSize());
+                                    System.arraycopy(theData, m * (int)dsDatatype.getDatatypeSize(), curBytes,
+                                                     0, (int)dsDatatype.getDatatypeSize());
                                     theListData.add(curBytes);
                                 }
                                 catch (Exception err) {
@@ -1033,29 +1079,35 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     Object tmpData = writeBuf;
                     try {
                         // Check if we need to convert integer data
-                        int tsize = (int) dsDatatype.getDatatypeSize();
+                        int tsize    = (int)dsDatatype.getDatatypeSize();
                         String cname = writeBuf.getClass().getName();
                         log.trace("scalarDatasetCommonIO(): cname={} of datatype size={}", cname, tsize);
                         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-                        boolean doIntConversion = (((tsize == 1) && (dname == 'S')) || ((tsize == 2) && (dname == 'I'))
-                                || ((tsize == 4) && (dname == 'J')) || (dsDatatype.isUnsigned() && unsignedConverted));
+                        boolean doIntConversion =
+                            (((tsize == 1) && (dname == 'S')) || ((tsize == 2) && (dname == 'I')) ||
+                             ((tsize == 4) && (dname == 'J')) ||
+                             (dsDatatype.isUnsigned() && unsignedConverted));
 
                         if (doIntConversion) {
-                            log.trace("scalarDatasetCommonIO(): converting integer data to unsigned C-type integers");
+                            log.trace(
+                                "scalarDatasetCommonIO(): converting integer data to unsigned C-type integers");
                             tmpData = convertToUnsignedC(writeBuf, null);
                         }
-                        else if (dsDatatype.isText() && !dsDatatype.isVarStr() && convertByteToString && !(writeBuf instanceof byte[])) {
+                        else if (dsDatatype.isText() && !dsDatatype.isVarStr() && convertByteToString &&
+                                 !(writeBuf instanceof byte[])) {
                             log.trace("scalarDatasetCommonIO(): converting string array to byte array");
-                            tmpData = stringToByte((String[]) writeBuf, tsize);
+                            tmpData = stringToByte((String[])writeBuf, tsize);
                         }
                         else if (dsDatatype.isEnum() && (Array.get(writeBuf, 0) instanceof String)) {
                             log.trace("scalarDatasetCommonIO(): converting enum names to values");
-                            tmpData = dsDatatype.convertEnumNameToValue((String[]) writeBuf);
+                            tmpData = dsDatatype.convertEnumNameToValue((String[])writeBuf);
                         }
                         else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
-                            log.trace("scalarDatasetCommonIO(): isFloat: converting BigDecimal array to byte array");
+                            log.trace(
+                                "scalarDatasetCommonIO(): isFloat: converting BigDecimal array to byte array");
                             throw new Exception("data conversion failure: cannot write BigDecimal values");
-                            //tmpData = dsDatatype.bigDecimalToByte(0, (int)totalSelectedSpacePoints, (BigDecimal[]) writeBuf);
+                            // tmpData = dsDatatype.bigDecimalToByte(0, (int)totalSelectedSpacePoints,
+                            // (BigDecimal[]) writeBuf);
                         }
                     }
                     catch (Exception ex) {
@@ -1071,25 +1123,35 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                         tid = dsDatatype.createNative();
 
                         if (dsDatatype.isVarStr()) {
-                            log.trace("scalarDatasetCommonIO(): H5Dwrite_VLStrings did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
-                                    did, tid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                            (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                            log.trace(
+                                "scalarDatasetCommonIO(): H5Dwrite_VLStrings did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
+                                did, tid,
+                                (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                            H5.H5Dwrite_VLStrings(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) tmpData);
+                            H5.H5Dwrite_VLStrings(did, tid, spaceIDs[0], spaceIDs[1],
+                                                  HDF5Constants.H5P_DEFAULT, (Object[])tmpData);
                         }
-                        else if (dsDatatype.isVLEN() || (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isVLEN())) {
-                            log.trace("scalarDatasetCommonIO(): H5DwriteVL did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
-                                    did, tid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                            (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                        else if (dsDatatype.isVLEN() ||
+                                 (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isVLEN())) {
+                            log.trace(
+                                "scalarDatasetCommonIO(): H5DwriteVL did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
+                                did, tid,
+                                (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                            H5.H5DwriteVL(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) tmpData);
+                            H5.H5DwriteVL(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                                          (Object[])tmpData);
                         }
                         else {
-                            log.trace("scalarDatasetCommonIO(): H5Dwrite did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
-                                    did, tid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                            (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                            log.trace(
+                                "scalarDatasetCommonIO(): H5Dwrite did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
+                                did, tid,
+                                (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                            H5.H5Dwrite(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, tmpData);
+                            H5.H5Dwrite(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                                        tmpData);
                         }
                     }
                     catch (Exception ex) {
@@ -1107,7 +1169,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                         H5.H5Sclose(spaceIDs[0]);
                     }
                     catch (Exception ex) {
-                        log.debug("scalarDatasetCommonIO(): H5Sclose(spaceIDs[0] {}) failure: ", spaceIDs[0], ex);
+                        log.debug("scalarDatasetCommonIO(): H5Sclose(spaceIDs[0] {}) failure: ", spaceIDs[0],
+                                  ex);
                     }
                 }
 
@@ -1116,7 +1179,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                         H5.H5Sclose(spaceIDs[1]);
                     }
                     catch (Exception ex) {
-                        log.debug("scalarDatasetCommonIO(): H5Sclose(spaceIDs[1] {}) failure: ", spaceIDs[1], ex);
+                        log.debug("scalarDatasetCommonIO(): H5Sclose(spaceIDs[1] {}) failure: ", spaceIDs[1],
+                                  ex);
                     }
                 }
 
@@ -1140,8 +1204,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *             if the metadata can not be retrieved
      */
     @Override
-    public List<Attribute> getMetadata() throws HDF5Exception {
-        int gmIndexType = 0;
+    public List<Attribute> getMetadata() throws HDF5Exception
+    {
+        int gmIndexType  = 0;
         int gmIndexOrder = 0;
 
         try {
@@ -1172,7 +1237,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @throws HDF5Exception
      *             if the metadata can not be retrieved
      */
-    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
+    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception
+    {
         if (!isInited())
             init();
 
@@ -1184,7 +1250,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         }
 
         if (objMetadata.getAttributeList() == null) {
-            long did = HDF5Constants.H5I_INVALID_HID;
+            long did  = HDF5Constants.H5I_INVALID_HID;
             long pcid = HDF5Constants.H5I_INVALID_HID;
             long paid = HDF5Constants.H5I_INVALID_HID;
 
@@ -1192,11 +1258,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             if (did >= 0) {
                 try {
                     // get the compression and chunk information
-                    pcid = H5.H5Dget_create_plist(did);
-                    paid = H5.H5Dget_access_plist(did);
+                    pcid             = H5.H5Dget_create_plist(did);
+                    paid             = H5.H5Dget_access_plist(did);
                     long storageSize = H5.H5Dget_storage_size(did);
-                    int nfilt = H5.H5Pget_nfilters(pcid);
-                    int layoutType = H5.H5Pget_layout(pcid);
+                    int nfilt        = H5.H5Pget_nfilters(pcid);
+                    int layoutType   = H5.H5Pget_layout(pcid);
 
                     storageLayout.setLength(0);
                     compression.setLength(0);
@@ -1217,7 +1283,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                             if (datumSize < 0) {
                                 long tmptid = HDF5Constants.H5I_INVALID_HID;
                                 try {
-                                    tmptid = H5.H5Dget_type(did);
+                                    tmptid    = H5.H5Dget_type(did);
                                     datumSize = H5.H5Tget_size(tmptid);
                                 }
                                 finally {
@@ -1225,7 +1291,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                                         H5.H5Tclose(tmptid);
                                     }
                                     catch (Exception ex2) {
-                                        log.debug("getMetadata(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);
+                                        log.debug("getMetadata(): H5Tclose(tmptid {}) failure: ", tmptid,
+                                                  ex2);
                                     }
                                 }
                             }
@@ -1237,7 +1304,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                             /* compression ratio = uncompressed size / compressed size */
 
                             if (storageSize != 0) {
-                                double ratio = (double) uncompSize / (double) storageSize;
+                                double ratio     = (double)uncompSize / (double)storageSize;
                                 DecimalFormat df = new DecimalFormat();
                                 df.setMinimumFractionDigits(3);
                                 df.setMaximumFractionDigits(3);
@@ -1276,9 +1343,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                                     try {
                                         H5.H5Pget_virtual_vspace(pcid, next);
                                         H5.H5Pget_virtual_srcspace(pcid, next);
-                                        String fname = H5.H5Pget_virtual_filename(pcid, next);
+                                        String fname    = H5.H5Pget_virtual_filename(pcid, next);
                                         String dsetname = H5.H5Pget_virtual_dsetname(pcid, next);
-                                        storageLayout.append("\n").append(fname).append(" : ").append(dsetname);
+                                        storageLayout.append("\n").append(fname).append(" : ").append(
+                                            dsetname);
                                     }
                                     catch (Exception err) {
                                         log.debug("getMetadata(): vds space[{}] error: ", next, err);
@@ -1297,13 +1365,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                         storageLayout.append("NONE");
                     }
 
-                    int[] flags = { 0, 0 };
-                    long[] cdNelmts = { 20 };
-                    int[] cdValues = new int[(int) cdNelmts[0]];
-                    String[] cdName = { "", "" };
+                    int[] flags     = {0, 0};
+                    long[] cdNelmts = {20};
+                    int[] cdValues  = new int[(int)cdNelmts[0]];
+                    String[] cdName = {"", ""};
                     log.trace("getMetadata(): {} filters in pipeline", nfilt);
-                    int filter = -1;
-                    int[] filterConfig = { 1 };
+                    int filter         = -1;
+                    int[] filterConfig = {1};
 
                     filters.setLength(0);
 
@@ -1320,10 +1388,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
                             try {
                                 cdNelmts[0] = 20;
-                                cdValues = new int[(int) cdNelmts[0]];
-                                cdValues = new int[(int) cdNelmts[0]];
-                                filter = H5.H5Pget_filter(pcid, i, flags, cdNelmts, cdValues, 120, cdName, filterConfig);
-                                log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cdName[0], cdNelmts[0]);
+                                cdValues    = new int[(int)cdNelmts[0]];
+                                cdValues    = new int[(int)cdNelmts[0]];
+                                filter = H5.H5Pget_filter(pcid, i, flags, cdNelmts, cdValues, 120, cdName,
+                                                          filterConfig);
+                                log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cdName[0],
+                                          cdNelmts[0]);
                                 for (int j = 0; j < cdNelmts[0]; j++)
                                     log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cdValues[j]);
                             }
@@ -1367,13 +1437,17 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                                 }
                                 if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)
                                     compression.append(": H5Z_FILTER_CONFIG_DECODE_ENABLED");
-                                else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED)
-                                        || (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED
-                                                + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)))
+                                else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) ||
+                                         (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED +
+                                                   HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)))
                                     compression.append(": H5Z_FILTER_CONFIG_ENCODE_ENABLED");
                             }
                             else {
-                                filters.append("USERDEFINED ").append(cdName[0]).append("(").append(filter).append("): ");
+                                filters.append("USERDEFINED ")
+                                    .append(cdName[0])
+                                    .append("(")
+                                    .append(filter)
+                                    .append("): ");
                                 for (int j = 0; j < cdNelmts[0]; j++) {
                                     if (j > 0)
                                         filters.append(", ");
@@ -1393,7 +1467,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     storage.append("SIZE: ").append(storageSize);
 
                     try {
-                        int[] at = { 0 };
+                        int[] at = {0};
                         H5.H5Pget_alloc_time(pcid, at);
                         storage.append(", allocation time: ");
                         if (at[0] == HDF5Constants.H5D_ALLOC_TIME_EARLY)
@@ -1456,7 +1530,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *             if the metadata can not be written
      */
     @Override
-    public void writeMetadata(Object info) throws Exception {
+    public void writeMetadata(Object info) throws Exception
+    {
         try {
             objMetadata.writeMetadata(info);
         }
@@ -1475,7 +1550,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *             if the metadata can not be removed
      */
     @Override
-    public void removeMetadata(Object info) throws HDF5Exception {
+    public void removeMetadata(Object info) throws HDF5Exception
+    {
         try {
             objMetadata.removeMetadata(info);
         }
@@ -1484,7 +1560,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             return;
         }
 
-        Attribute attr = (Attribute) info;
+        Attribute attr = (Attribute)info;
         log.trace("removeMetadata(): {}", attr.getAttributeName());
         long did = open();
         if (did >= 0) {
@@ -1510,7 +1586,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *             if the metadata can not be updated
      */
     @Override
-    public void updateMetadata(Object info) throws HDF5Exception {
+    public void updateMetadata(Object info) throws HDF5Exception
+    {
         try {
             objMetadata.updateMetadata(info);
         }
@@ -1526,7 +1603,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.HObject#setName(java.lang.String)
      */
     @Override
-    public void setName(String newName) throws Exception {
+    public void setName(String newName) throws Exception
+    {
         if (newName == null)
             throw new IllegalArgumentException("The new name is NULL");
 
@@ -1538,15 +1616,16 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * Resets selection of dataspace
      */
     @Override
-    protected void resetSelection() {
+    protected void resetSelection()
+    {
         super.resetSelection();
 
         if (interlace == INTERLACE_PIXEL) {
             // 24-bit TRUE color image
             // [height][width][pixel components]
-            selectedDims[2] = 3;
-            selectedDims[0] = dims[0];
-            selectedDims[1] = dims[1];
+            selectedDims[2]  = 3;
+            selectedDims[0]  = dims[0];
+            selectedDims[1]  = dims[1];
             selectedIndex[0] = 0; // index for height
             selectedIndex[1] = 1; // index for width
             selectedIndex[2] = 2; // index for depth
@@ -1554,9 +1633,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         else if (interlace == INTERLACE_PLANE) {
             // 24-bit TRUE color image
             // [pixel components][height][width]
-            selectedDims[0] = 3;
-            selectedDims[1] = dims[1];
-            selectedDims[2] = dims[2];
+            selectedDims[0]  = 3;
+            selectedDims[1]  = dims[1];
+            selectedDims[2]  = dims[2];
             selectedIndex[0] = 1; // index for height
             selectedIndex[1] = 2; // index for width
             selectedIndex[2] = 0; // index for depth
@@ -1593,7 +1672,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @throws Exception if there is a failure.
      */
     public static Dataset create(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
-            long[] chunks, int gzip, Object data) throws Exception {
+                                 long[] chunks, int gzip, Object data) throws Exception
+    {
         return create(name, pgroup, type, dims, maxdims, chunks, gzip, null, data);
     }
 
@@ -1605,11 +1685,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * <pre>
      * H5File file = new H5File(&quot;test.h5&quot;, H5File.CREATE);
      * int max_str_len = 120;
-     * Datatype strType = new H5Datatype(Datatype.CLASS_STRING, max_str_len, Datatype.NATIVE, Datatype.NATIVE);
-     * int size = 10000;
-     * long dims[] = { size };
-     * long chunks[] = { 1000 };
-     * int gzip = 9;
+     * Datatype strType = new H5Datatype(Datatype.CLASS_STRING, max_str_len, Datatype.NATIVE,
+     * Datatype.NATIVE); int size = 10000; long dims[] = { size }; long chunks[] = { 1000 }; int gzip = 9;
      * String strs[] = new String[size];
      *
      * for (int i = 0; i &lt; size; i++)
@@ -1649,20 +1726,21 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @throws Exception if there is a failure.
      */
     public static Dataset create(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
-            long[] chunks, int gzip, Object fillValue, Object data) throws Exception {
+                                 long[] chunks, int gzip, Object fillValue, Object data) throws Exception
+    {
         H5ScalarDS dataset = null;
-        String fullPath = null;
-        long did = HDF5Constants.H5I_INVALID_HID;
-        long plist = HDF5Constants.H5I_INVALID_HID;
-        long sid = HDF5Constants.H5I_INVALID_HID;
-        long tid = HDF5Constants.H5I_INVALID_HID;
+        String fullPath    = null;
+        long did           = HDF5Constants.H5I_INVALID_HID;
+        long plist         = HDF5Constants.H5I_INVALID_HID;
+        long sid           = HDF5Constants.H5I_INVALID_HID;
+        long tid           = HDF5Constants.H5I_INVALID_HID;
 
         if ((pgroup == null) || (name == null) || (dims == null) || ((gzip > 0) && (chunks == null))) {
             log.debug("create(): one or more parameters are null");
             return null;
         }
 
-        H5File file = (H5File) pgroup.getFileFormat();
+        H5File file = (H5File)pgroup.getFileFormat();
         if (file == null) {
             log.debug("create(): parent group FileFormat is null");
             return null;
@@ -1744,7 +1822,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 long fid = file.getFID();
 
                 log.trace("create(): create dataset fid={}", fid);
-                did = H5.H5Dcreate(fid, fullPath, tid, sid, HDF5Constants.H5P_DEFAULT, plist, HDF5Constants.H5P_DEFAULT);
+                did = H5.H5Dcreate(fid, fullPath, tid, sid, HDF5Constants.H5P_DEFAULT, plist,
+                                   HDF5Constants.H5P_DEFAULT);
                 log.trace("create(): create dataset did={}", did);
                 dataset = new H5ScalarDS(file, name, path);
             }
@@ -1791,24 +1870,25 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     }
 
     // check _FillValue, valid_min, valid_max, and valid_range
-    private void checkCFconvention(long oid) throws Exception {
+    private void checkCFconvention(long oid) throws Exception
+    {
         Object avalue = getAttrValue(oid, "_FillValue");
 
         if (avalue != null) {
             int n = Array.getLength(avalue);
             for (int i = 0; i < n; i++)
-                addFilteredImageValue((Number) Array.get(avalue, i));
+                addFilteredImageValue((Number)Array.get(avalue, i));
         }
 
         if (imageDataRange == null || imageDataRange[1] <= imageDataRange[0]) {
             double x0 = 0;
             double x1 = 0;
-            avalue = getAttrValue(oid, "valid_range");
+            avalue    = getAttrValue(oid, "valid_range");
             if (avalue != null) {
                 try {
-                    x0 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
-                    x1 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 1).toString());
-                    imageDataRange = new double[2];
+                    x0                = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
+                    x1                = Double.parseDouble(java.lang.reflect.Array.get(avalue, 1).toString());
+                    imageDataRange    = new double[2];
                     imageDataRange[0] = x0;
                     imageDataRange[1] = x1;
                     return;
@@ -1830,7 +1910,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 if (avalue != null) {
                     try {
                         x1 = Double.parseDouble(java.lang.reflect.Array.get(avalue, 0).toString());
-                        imageDataRange = new double[2];
+                        imageDataRange    = new double[2];
                         imageDataRange[0] = x0;
                         imageDataRange[1] = x1;
                     }
@@ -1842,18 +1922,20 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         } // (imageDataRange==null || imageDataRange[1]<=imageDataRange[0])
     }
 
-    private Object getAttrValue(long oid, String aname) {
+    private Object getAttrValue(long oid, String aname)
+    {
         log.trace("getAttrValue(): start: name={}", aname);
 
-        long aid = HDF5Constants.H5I_INVALID_HID;
-        long atid = HDF5Constants.H5I_INVALID_HID;
-        long asid = HDF5Constants.H5I_INVALID_HID;
+        long aid      = HDF5Constants.H5I_INVALID_HID;
+        long atid     = HDF5Constants.H5I_INVALID_HID;
+        long asid     = HDF5Constants.H5I_INVALID_HID;
         Object avalue = null;
 
         try {
             // try to find attribute name
-            if(H5.H5Aexists_by_name(oid, ".", aname, HDF5Constants.H5P_DEFAULT))
-                aid = H5.H5Aopen_by_name(oid, ".", aname, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            if (H5.H5Aexists_by_name(oid, ".", aname, HDF5Constants.H5P_DEFAULT))
+                aid =
+                    H5.H5Aopen_by_name(oid, ".", aname, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (HDF5LibraryException ex5) {
             log.debug("getAttrValue(): Failed to find attribute {} : Expected", aname);
@@ -1863,9 +1945,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         }
         if (aid > 0) {
             try {
-                atid = H5.H5Aget_type(aid);
+                atid        = H5.H5Aget_type(aid);
                 long tmptid = atid;
-                atid = H5.H5Tget_native_type(tmptid);
+                atid        = H5.H5Tget_native_type(tmptid);
                 try {
                     H5.H5Tclose(tmptid);
                 }
@@ -1873,7 +1955,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     log.debug("getAttrValue(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
                 }
 
-                asid = H5.H5Aget_space(aid);
+                asid         = H5.H5Aget_space(aid);
                 long adims[] = null;
 
                 int arank = H5.H5Sget_simple_extent_ndims(asid);
@@ -1892,17 +1974,18 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 }
                 log.trace("getAttrValue(): lsize={}", lsize);
 
-                if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE) throw new Exception("Invalid int size");
+                if (lsize < Integer.MIN_VALUE || lsize > Integer.MAX_VALUE)
+                    throw new Exception("Invalid int size");
 
                 H5Datatype dsDatatype = null;
-                int nativeClass = H5.H5Tget_class(atid);
+                int nativeClass       = H5.H5Tget_class(atid);
                 if (nativeClass == HDF5Constants.H5T_REFERENCE)
                     dsDatatype = new H5ReferenceType(getFileFormat(), lsize, atid);
                 else
                     dsDatatype = new H5Datatype(getFileFormat(), atid);
 
                 try {
-                    avalue = H5Datatype.allocateArray(dsDatatype, (int) lsize);
+                    avalue = H5Datatype.allocateArray(dsDatatype, (int)lsize);
                 }
                 catch (OutOfMemoryError e) {
                     log.debug("getAttrValue(): out of memory: ", e);
@@ -1951,20 +2034,22 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         return avalue;
     }
 
-    private boolean isStringAttributeOf(long objID, String name, String value) {
+    private boolean isStringAttributeOf(long objID, String name, String value)
+    {
         boolean retValue = false;
-        long aid = HDF5Constants.H5I_INVALID_HID;
-        long atid = HDF5Constants.H5I_INVALID_HID;
+        long aid         = HDF5Constants.H5I_INVALID_HID;
+        long atid        = HDF5Constants.H5I_INVALID_HID;
 
         try {
             if (H5.H5Aexists_by_name(objID, ".", name, HDF5Constants.H5P_DEFAULT)) {
-                aid = H5.H5Aopen_by_name(objID, ".", name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                atid = H5.H5Aget_type(aid);
-                int size = (int)H5.H5Tget_size(atid);
+                aid              = H5.H5Aopen_by_name(objID, ".", name, HDF5Constants.H5P_DEFAULT,
+                                                      HDF5Constants.H5P_DEFAULT);
+                atid             = H5.H5Aget_type(aid);
+                int size         = (int)H5.H5Tget_size(atid);
                 byte[] attrValue = new byte[size];
                 H5.H5Aread(aid, atid, attrValue);
                 String strValue = new String(attrValue).trim();
-                retValue = strValue.equalsIgnoreCase(value);
+                retValue        = strValue.equalsIgnoreCase(value);
             }
         }
         catch (Exception ex) {
@@ -1994,7 +2079,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.Dataset#copy(hdf.object.Group, java.lang.String, long[], java.lang.Object)
      */
     @Override
-    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
+    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception
+    {
         // must give a location to copy
         if (pgroup == null) {
             log.debug("copy(): Parent group is null");
@@ -2002,13 +2088,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         }
 
         Dataset dataset = null;
-        long srcdid = HDF5Constants.H5I_INVALID_HID;
-        long dstdid = HDF5Constants.H5I_INVALID_HID;
-        long plist = HDF5Constants.H5I_INVALID_HID;
-        long tid = HDF5Constants.H5I_INVALID_HID;
-        long sid = HDF5Constants.H5I_INVALID_HID;
-        String dname = null;
-        String path = null;
+        long srcdid     = HDF5Constants.H5I_INVALID_HID;
+        long dstdid     = HDF5Constants.H5I_INVALID_HID;
+        long plist      = HDF5Constants.H5I_INVALID_HID;
+        long tid        = HDF5Constants.H5I_INVALID_HID;
+        long sid        = HDF5Constants.H5I_INVALID_HID;
+        String dname    = null;
+        String path     = null;
 
         if (pgroup.isRoot())
             path = HObject.SEPARATOR;
@@ -2019,11 +2105,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         srcdid = open();
         if (srcdid >= 0) {
             try {
-                tid = H5.H5Dget_type(srcdid);
-                sid = H5.H5Screate_simple(dims.length, dims, null);
+                tid   = H5.H5Dget_type(srcdid);
+                sid   = H5.H5Screate_simple(dims.length, dims, null);
                 plist = H5.H5Dget_create_plist(srcdid);
 
-                long[] chunks = new long[dims.length];
+                long[] chunks        = new long[dims.length];
                 boolean setChunkFlag = false;
                 try {
                     H5.H5Pget_chunk(plist, dims.length, chunks);
@@ -2046,7 +2132,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
                 try {
                     dstdid = H5.H5Dcreate(pgroup.getFID(), dname, tid, sid, HDF5Constants.H5P_DEFAULT, plist,
-                            HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT);
                 }
                 catch (Exception e) {
                     log.debug("copy(): H5Dcreate: ", e);
@@ -2112,7 +2198,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         pgroup.addToMemberList(dataset);
 
         if (dataset != null)
-            ((ScalarDS) dataset).setIsImage(isImage);
+            ((ScalarDS)dataset).setIsImage(isImage);
 
         return dataset;
     }
@@ -2122,9 +2208,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *
      * @return the number of palettes if it has any, 0 otherwise.
      */
-    public int getNumberOfPalettes() {
-        return NumberOfPalettes;
-    }
+    public int getNumberOfPalettes() { return NumberOfPalettes; }
 
     /*
      * (non-Javadoc)
@@ -2132,7 +2216,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.ScalarDS#getPalette()
      */
     @Override
-    public byte[][] getPalette() {
+    public byte[][] getPalette()
+    {
         log.trace("getPalette(): NumberOfPalettes={}", NumberOfPalettes);
         if (NumberOfPalettes > 0)
             if (palette == null)
@@ -2147,10 +2232,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.ScalarDS#getPaletteName(int)
      */
     @Override
-    public String getPaletteName(int idx) {
-        int count = readNumberOfPalettes();
-        long did = HDF5Constants.H5I_INVALID_HID;
-        long palID = HDF5Constants.H5I_INVALID_HID;
+    public String getPaletteName(int idx)
+    {
+        int count          = readNumberOfPalettes();
+        long did           = HDF5Constants.H5I_INVALID_HID;
+        long palID         = HDF5Constants.H5I_INVALID_HID;
         String paletteName = null;
 
         if (count < 1) {
@@ -2164,7 +2250,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         if (did >= 0) {
             try {
                 refBuf = getPaletteRefs(did);
-                palID = H5.H5Ropen_object(refBuf[idx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                palID  = H5.H5Ropen_object(refBuf[idx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 paletteName = H5.H5Iget_name(palID);
             }
             catch (Exception ex) {
@@ -2187,12 +2273,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.ScalarDS#readPalette(int)
      */
     @Override
-    public byte[][] readPalette(int idx) {
+    public byte[][] readPalette(int idx)
+    {
         byte[][] thePalette = null;
-        int count = readNumberOfPalettes();
-        long did = HDF5Constants.H5I_INVALID_HID;
-        long palID = HDF5Constants.H5I_INVALID_HID;
-        long tid = HDF5Constants.H5I_INVALID_HID;
+        int count           = readNumberOfPalettes();
+        long did            = HDF5Constants.H5I_INVALID_HID;
+        long palID          = HDF5Constants.H5I_INVALID_HID;
+        long tid            = HDF5Constants.H5I_INVALID_HID;
         log.trace("readPalette(): palette count={}", count);
 
         if (count < 1) {
@@ -2200,21 +2287,22 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             return null;
         }
 
-        byte[] p = null;
+        byte[] p        = null;
         byte[][] refBuf = null;
 
         did = open();
         if (did >= 0) {
             try {
                 refBuf = getPaletteRefs(did);
-                palID = H5.H5Ropen_object(refBuf[idx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                palID  = H5.H5Ropen_object(refBuf[idx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 log.trace("readPalette(): H5Ropen_object: {}", palID);
                 tid = H5.H5Dget_type(palID);
 
                 // support only 3*256 byte palette data
                 if (H5.H5Dget_storage_size(palID) <= 768) {
                     p = new byte[3 * 256];
-                    H5.H5Dread(palID, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, p);
+                    H5.H5Dread(palID, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                               HDF5Constants.H5P_DEFAULT, p);
                 }
             }
             catch (HDF5Exception ex) {
@@ -2247,7 +2335,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         return thePalette;
     }
 
-    private static byte[] parseFillValue(Datatype type, Object fillValue) throws Exception {
+    private static byte[] parseFillValue(Datatype type, Object fillValue) throws Exception
+    {
         byte[] data = null;
 
         if (type == null || fillValue == null) {
@@ -2256,13 +2345,13 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
         }
 
         int datatypeClass = type.getDatatypeClass();
-        int datatypeSize = (int)type.getDatatypeSize();
+        int datatypeSize  = (int)type.getDatatypeSize();
 
         double valDbl = 0;
         String valStr = null;
 
         if (fillValue instanceof String)
-            valStr = (String) fillValue;
+            valStr = (String)fillValue;
         else if (fillValue.getClass().isArray())
             valStr = Array.get(fillValue, 0).toString();
 
@@ -2283,22 +2372,22 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             case Datatype.CLASS_CHAR:
                 log.trace("parseFillValue(): class CLASS_INT-ENUM-CHAR");
                 if (datatypeSize == 1)
-                    data = new byte[] { (byte) valDbl };
+                    data = new byte[] {(byte)valDbl};
                 else if (datatypeSize == 2)
-                    data = HDFNativeData.shortToByte((short) valDbl);
+                    data = HDFNativeData.shortToByte((short)valDbl);
                 else if (datatypeSize == 8)
-                    data = HDFNativeData.longToByte((long) valDbl);
+                    data = HDFNativeData.longToByte((long)valDbl);
                 else
-                    data = HDFNativeData.intToByte((int) valDbl);
+                    data = HDFNativeData.intToByte((int)valDbl);
                 break;
             case Datatype.CLASS_FLOAT:
                 log.trace("parseFillValue(): class CLASS_FLOAT");
                 if (datatypeSize > 8)
-                    data =  valStr.getBytes();
+                    data = valStr.getBytes();
                 else if (datatypeSize == 8)
                     data = HDFNativeData.doubleToByte(valDbl);
                 else
-                    data = HDFNativeData.floatToByte((float) valDbl);
+                    data = HDFNativeData.floatToByte((float)valDbl);
                 break;
             case Datatype.CLASS_STRING:
                 log.trace("parseFillValue(): class CLASS_STRING");
@@ -2307,7 +2396,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                 break;
             case Datatype.CLASS_REFERENCE:
                 log.trace("parseFillValue(): class CLASS_REFERENCE");
-                data = HDFNativeData.longToByte((long) valDbl);
+                data = HDFNativeData.longToByte((long)valDbl);
                 break;
             default:
                 log.debug("parseFillValue(): datatypeClass unknown");
@@ -2327,7 +2416,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      *
      * @return the number of palettes referenced.
      */
-    public int readNumberOfPalettes() {
+    public int readNumberOfPalettes()
+    {
         log.trace("readNumberOfPalettes(): isInited={}", isInited());
         if (!isInited())
             init(); // init will be called to get refs
@@ -2338,19 +2428,21 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     /**
      * reads references of palettes to calculate the numberOfPalettes.
      */
-    private int readNumberOfPalette(long did) {
-        long aid = HDF5Constants.H5I_INVALID_HID;
-        long sid = HDF5Constants.H5I_INVALID_HID;
-        long atype = HDF5Constants.H5I_INVALID_HID;
-        int size = 0;
-        int rank = 0;
+    private int readNumberOfPalette(long did)
+    {
+        long aid      = HDF5Constants.H5I_INVALID_HID;
+        long sid      = HDF5Constants.H5I_INVALID_HID;
+        long atype    = HDF5Constants.H5I_INVALID_HID;
+        int size      = 0;
+        int rank      = 0;
         byte[] refbuf = null;
         log.trace("readNumberOfPalette(): did={}", did);
 
         try {
-            if(H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT)) {
-                aid = H5.H5Aopen_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                sid = H5.H5Aget_space(aid);
+            if (H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT)) {
+                aid  = H5.H5Aopen_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
+                sid  = H5.H5Aget_space(aid);
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 size = 1;
                 if (rank > 0) {
@@ -2358,11 +2450,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     H5.H5Sget_simple_extent_dims(sid, dims, null);
                     log.trace("readNumberOfPalette(): rank={}, dims={}", rank, dims);
                     for (int i = 0; i < rank; i++)
-                        size *= (int) dims[i];
+                        size *= (int)dims[i];
                 }
                 log.trace("readNumberOfPalette(): size={}", size);
 
-                if ((size * HDF5Constants.H5R_REF_BUF_SIZE) < Integer.MIN_VALUE || (size * HDF5Constants.H5R_REF_BUF_SIZE) > Integer.MAX_VALUE)
+                if ((size * HDF5Constants.H5R_REF_BUF_SIZE) < Integer.MIN_VALUE ||
+                    (size * HDF5Constants.H5R_REF_BUF_SIZE) > Integer.MAX_VALUE)
                     throw new HDF5Exception("Invalid int size");
             }
         }
@@ -2395,22 +2488,24 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     }
 
     /**
-     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore, the array
-     * length is 8*numberOfPalettes.
+     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore,
+     * the array length is 8*numberOfPalettes.
      */
-    private byte[][] getPaletteRefs(long did) {
-        long aid = HDF5Constants.H5I_INVALID_HID;
-        long sid = HDF5Constants.H5I_INVALID_HID;
-        long atype = HDF5Constants.H5I_INVALID_HID;
-        int size = 0;
-        int rank = 0;
+    private byte[][] getPaletteRefs(long did)
+    {
+        long aid        = HDF5Constants.H5I_INVALID_HID;
+        long sid        = HDF5Constants.H5I_INVALID_HID;
+        long atype      = HDF5Constants.H5I_INVALID_HID;
+        int size        = 0;
+        int rank        = 0;
         byte[][] refBuf = null;
         log.trace("getPaletteRefs(): did={}", did);
 
         try {
-            if(H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT)) {
-                aid = H5.H5Aopen_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                sid = H5.H5Aget_space(aid);
+            if (H5.H5Aexists_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT)) {
+                aid  = H5.H5Aopen_by_name(did, ".", "PALETTE", HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
+                sid  = H5.H5Aget_space(aid);
                 rank = H5.H5Sget_simple_extent_ndims(sid);
                 size = 1;
                 if (rank > 0) {
@@ -2418,11 +2513,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
                     H5.H5Sget_simple_extent_dims(sid, dims, null);
                     log.trace("getPaletteRefs(): rank={}, dims={}", rank, dims);
                     for (int i = 0; i < rank; i++)
-                        size *= (int) dims[i];
+                        size *= (int)dims[i];
                 }
                 log.trace("getPaletteRefs(): size={}", size);
 
-                if ((size * HDF5Constants.H5R_REF_BUF_SIZE) < Integer.MIN_VALUE || (size * HDF5Constants.H5R_REF_BUF_SIZE) > Integer.MAX_VALUE)
+                if ((size * HDF5Constants.H5R_REF_BUF_SIZE) < Integer.MIN_VALUE ||
+                    (size * HDF5Constants.H5R_REF_BUF_SIZE) > Integer.MAX_VALUE)
                     throw new HDF5Exception("Invalid int size");
                 refBuf = new byte[size][HDF5Constants.H5R_REF_BUF_SIZE];
 
@@ -2452,19 +2548,20 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
     }
 
     /**
-     * H5Dset_extent verifies that the dataset is at least of size size, extending it if necessary. The dimensionality
-     * of size is the same as that of the dataspace of the dataset being changed.
+     * H5Dset_extent verifies that the dataset is at least of size size, extending it if necessary. The
+     * dimensionality of size is the same as that of the dataspace of the dataset being changed.
      *
-     * This function can be applied to the following datasets: 1) Any dataset with unlimited dimensions 2) A dataset
-     * with fixed dimensions if the current dimension sizes are less than the maximum sizes set with maxdims (see
-     * H5Screate_simple)
+     * This function can be applied to the following datasets: 1) Any dataset with unlimited dimensions 2) A
+     * dataset with fixed dimensions if the current dimension sizes are less than the maximum sizes set with
+     * maxdims (see H5Screate_simple)
      *
      * @param newDims the dimension target size
      *
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
-    public void extend(long[] newDims) throws HDF5Exception {
+    public void extend(long[] newDims) throws HDF5Exception
+    {
         long did = HDF5Constants.H5I_INVALID_HID;
         long sid = HDF5Constants.H5I_INVALID_HID;
 
@@ -2473,7 +2570,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
             try {
                 H5.H5Dset_extent(did, newDims);
                 H5.H5Fflush(did, HDF5Constants.H5F_SCOPE_GLOBAL);
-                sid = H5.H5Dget_space(did);
+                sid              = H5.H5Dget_space(did);
                 long[] checkDims = new long[rank];
                 H5.H5Sget_simple_extent_dims(sid, checkDims, null);
                 log.trace("extend(): rank={}, checkDims={}", rank, checkDims);
@@ -2504,7 +2601,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.Dataset#isVirtual()
      */
     @Override
-    public boolean isVirtual() {
+    public boolean isVirtual()
+    {
         return isVirtual;
     }
 
@@ -2514,8 +2612,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.Dataset#getVirtualFilename(int)
      */
     @Override
-    public String getVirtualFilename(int index) {
-        if(isVirtual)
+    public String getVirtualFilename(int index)
+    {
+        if (isVirtual)
             return virtualNameList.get(index);
         else
             return null;
@@ -2527,8 +2626,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.Dataset#getVirtualMaps()
      */
     @Override
-    public int getVirtualMaps() {
-        if(isVirtual)
+    public int getVirtualMaps()
+    {
+        if (isVirtual)
             return virtualNameList.size();
         else
             return -1;
@@ -2540,7 +2640,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
      * @see hdf.object.Dataset#toString(String delimiter, int maxItems)
      */
     @Override
-    public String toString(String delimiter, int maxItems) {
+    public String toString(String delimiter, int maxItems)
+    {
         Object theData = originalBuf;
         if (theData == null) {
             log.debug("toString: value is null");
@@ -2565,36 +2666,36 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer
 
         // value is an array
         StringBuilder sb = new StringBuilder();
-        long lsize = 1;
+        long lsize       = 1;
         for (int j = 0; j < dims.length; j++)
             lsize *= dims[j];
 
-        log.trace("toString: isStdRef={} Array.getLength={}", ((H5Datatype) getDatatype()).isStdRef(), Array.getLength(theData));
-        if (((H5Datatype) getDatatype()).isStdRef()) {
+        log.trace("toString: isStdRef={} Array.getLength={}", ((H5Datatype)getDatatype()).isStdRef(),
+                  Array.getLength(theData));
+        if (((H5Datatype)getDatatype()).isStdRef()) {
             String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+            char dname   = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: isStdRef with cname={} dname={}", cname, dname);
             for (int i = 0; i < (int)lsize; i++) {
-                int refIndex = HDF5Constants.H5R_REF_BUF_SIZE * i;
-                byte[] refarr = new byte[(int) HDF5Constants.H5R_REF_BUF_SIZE];
+                int refIndex  = HDF5Constants.H5R_REF_BUF_SIZE * i;
+                byte[] refarr = new byte[(int)HDF5Constants.H5R_REF_BUF_SIZE];
                 System.arraycopy(theData, refIndex, refarr, 0, (int)HDF5Constants.H5R_REF_BUF_SIZE);
-                String ref_str = ((H5ReferenceType) getDatatype()).getReferenceRegion(refarr, false);
+                String ref_str = ((H5ReferenceType)getDatatype()).getReferenceRegion(refarr, false);
                 log.trace("toString: ref_str[{}]={}", i, ref_str);
                 if (i > 0)
                     sb.append(", ");
                 sb.append(ref_str);
 
-//                int n = ref_str.length();
-//                if (maxItems > 0) {
-//                    if (n > maxItems)
-//                        break;
-//                    else
-//                        maxItems -= n;
-//                }
+                //                int n = ref_str.length();
+                //                if (maxItems > 0) {
+                //                    if (n > maxItems)
+                //                        break;
+                //                    else
+                //                        maxItems -= n;
+                //                }
             }
             return sb.toString();
         }
         return super.toString(delimiter, maxItems);
     }
-
 }

@@ -33,15 +33,15 @@ public class UserOptionsDialog extends PreferenceDialog {
 
     private static final Logger log = LoggerFactory.getLogger(UserOptionsDialog.class);
 
-    private Shell                         shell;
+    private Shell shell;
 
-    private Font                          curFont;
+    private Font curFont;
 
     /** The setting of the root directory */
-    protected String                      rootDir = null;
+    protected String rootDir = null;
 
     /** The setting of the working directory */
-    protected String                      workDir = null;
+    protected String workDir = null;
 
     /**
      * UserOptionsDialog displays components for choosing user options.
@@ -53,7 +53,8 @@ public class UserOptionsDialog extends PreferenceDialog {
      * @param viewRoot
      *        the root dir for the app
      */
-    public UserOptionsDialog(Shell parent, PreferenceManager mgr, String viewRoot) {
+    public UserOptionsDialog(Shell parent, PreferenceManager mgr, String viewRoot)
+    {
         super(parent, mgr);
 
         rootDir = viewRoot;
@@ -62,7 +63,8 @@ public class UserOptionsDialog extends PreferenceDialog {
     /**
      * Create the UserOptions Dialog.
      */
-    public void create() {
+    public void create()
+    {
         super.create();
         getShell().setSize(getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
     }

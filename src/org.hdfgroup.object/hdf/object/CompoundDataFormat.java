@@ -23,8 +23,7 @@ package hdf.object;
  * @version 1.0 5/3/2018
  * @author Jordan T. Henderson
  */
-public interface CompoundDataFormat extends DataFormat
-{
+public interface CompoundDataFormat extends DataFormat {
     /**
      * Returns the number of members of the compound data object.
      *
@@ -176,5 +175,4 @@ public interface CompoundDataFormat extends DataFormat
      * @return an array of datatype objects of the selected compound members.
      */
     Datatype[] getSelectedMemberTypes();
-
 }

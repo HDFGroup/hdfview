@@ -23,9 +23,9 @@ import hdf.object.DataFormat;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
-import hdf.view.DataView.DataViewManager;
 
 /**
  * A simple Factory class which returns concrete instances of the default
@@ -35,9 +35,9 @@ import hdf.view.DataView.DataViewManager;
  * @author jhenderson
  * @version 1.0 4/18/2018
  */
-public class DefaultTableViewFactory extends TableViewFactory
-{
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTableViewFactory.class);
+public class DefaultTableViewFactory extends TableViewFactory {
+    private static final org.slf4j.Logger log =
+        org.slf4j.LoggerFactory.getLogger(DefaultTableViewFactory.class);
 
     /**
      * Get the TableView for the data object identified by the data properties mapping
@@ -51,17 +51,19 @@ public class DefaultTableViewFactory extends TableViewFactory
      *
      * @throws ClassNotFoundException if a failure occurred
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
+    public TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap)
+        throws ClassNotFoundException
+    {
         String dataViewName = null;
-        Object[] initargs = { viewer, dataPropertiesMap };
-        TableView theView = null;
-        HObject dataObject = null;
+        Object[] initargs   = {viewer, dataPropertiesMap};
+        TableView theView   = null;
+        HObject dataObject  = null;
 
         /* Retrieve the data object to be displayed */
         if (dataPropertiesMap != null)
-            dataObject = (HObject) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.OBJECT);
+            dataObject = (HObject)dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.OBJECT);
 
         if (dataObject == null)
             dataObject = viewer.getTreeView().getCurrentObject();
@@ -76,7 +78,7 @@ public class DefaultTableViewFactory extends TableViewFactory
          * data options map, retrieve its name now, otherwise use the default TableView
          * class.
          */
-        dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
+        dataViewName = (String)dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
         if (dataViewName == null || dataViewName.equals(ViewProperties.DEFAULT_MODULE_TEXT)) {
             if (dataObject instanceof ScalarDS)
                 dataViewName = ViewProperties.DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME;
@@ -98,25 +100,26 @@ public class DefaultTableViewFactory extends TableViewFactory
             theClass = null;
         }
 
-        if (theClass == null) throw new ClassNotFoundException();
+        if (theClass == null)
+            throw new ClassNotFoundException();
 
         /* Check to see if there is a bitmask to be applied to the data */
-        BitSet bitmask = (BitSet) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
+        BitSet bitmask = (BitSet)dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
         if (bitmask != null) {
             /*
              * Create a copy of the data object in order to apply the bitmask
              * non-destructively
              */
-            HObject dCopy = null;
+            HObject dCopy                              = null;
             Constructor<? extends HObject> constructor = null;
-            Object[] paramObj = null;
+            Object[] paramObj                          = null;
 
             try {
-                Class<?>[] paramClass = { FileFormat.class, String.class, String.class, long[].class };
-                constructor = dataObject.getClass().getConstructor(paramClass);
+                Class<?>[] paramClass = {FileFormat.class, String.class, String.class, long[].class};
+                constructor           = dataObject.getClass().getConstructor(paramClass);
 
-                paramObj = new Object[] { dataObject.getFileFormat(), dataObject.getName(), dataObject.getPath(),
-                        dataObject.getOID() };
+                paramObj = new Object[] {dataObject.getFileFormat(), dataObject.getName(),
+                                         dataObject.getPath(), dataObject.getOID()};
             }
             catch (Exception ex) {
                 constructor = null;
@@ -133,15 +136,20 @@ public class DefaultTableViewFactory extends TableViewFactory
 
             if (dCopy != null) {
                 try {
-                    ((DataFormat) dCopy).init();
+                    ((DataFormat)dCopy).init();
 
-                    int space_type = ((DataFormat) dataObject).getSpaceType();
-                    int rank = ((DataFormat) dataObject).getRank();
-                    System.arraycopy(((DataFormat) dataObject).getDims(), 0, ((DataFormat) dCopy).getDims(), 0, rank);
-                    System.arraycopy(((DataFormat) dataObject).getStartDims(), 0, ((DataFormat) dCopy).getStartDims(),0, rank);
-                    System.arraycopy(((DataFormat) dataObject).getSelectedDims(), 0, ((DataFormat) dCopy).getSelectedDims(), 0, rank);
-                    System.arraycopy(((DataFormat) dataObject).getStride(), 0, ((DataFormat) dCopy).getStride(), 0, rank);
-                    System.arraycopy(((DataFormat) dataObject).getSelectedIndex(), 0, ((DataFormat) dCopy).getSelectedIndex(), 0, 3);
+                    int space_type = ((DataFormat)dataObject).getSpaceType();
+                    int rank       = ((DataFormat)dataObject).getRank();
+                    System.arraycopy(((DataFormat)dataObject).getDims(), 0, ((DataFormat)dCopy).getDims(), 0,
+                                     rank);
+                    System.arraycopy(((DataFormat)dataObject).getStartDims(), 0,
+                                     ((DataFormat)dCopy).getStartDims(), 0, rank);
+                    System.arraycopy(((DataFormat)dataObject).getSelectedDims(), 0,
+                                     ((DataFormat)dCopy).getSelectedDims(), 0, rank);
+                    System.arraycopy(((DataFormat)dataObject).getStride(), 0, ((DataFormat)dCopy).getStride(),
+                                     0, rank);
+                    System.arraycopy(((DataFormat)dataObject).getSelectedIndex(), 0,
+                                     ((DataFormat)dCopy).getSelectedIndex(), 0, 3);
                 }
                 catch (Exception ex) {
                     ex.printStackTrace();
@@ -152,7 +160,7 @@ public class DefaultTableViewFactory extends TableViewFactory
         }
 
         try {
-            theView = (TableView) Tools.newInstance(theClass, initargs);
+            theView = (TableView)Tools.newInstance(theClass, initargs);
 
             log.trace("getTableView(): returning TableView instance {}", theView);
         }
@@ -163,5 +171,4 @@ public class DefaultTableViewFactory extends TableViewFactory
 
         return theView;
     }
-
 }

@@ -34,13 +34,14 @@ import org.slf4j.LoggerFactory;
  * The abstract class provides general APIs to create and manipulate dataset/attribute objects, and retrieve
  * dataset/attribute properties, datatype and dimension sizes.
  *
- * This class provides two convenient functions, read()/write(), to read/write data values. Reading/writing data may
- * take many library calls if we use the library APIs directly. The read() and write functions hide all the details of
- * these calls from users.
+ * This class provides two convenient functions, read()/write(), to read/write data values. Reading/writing
+ * data may take many library calls if we use the library APIs directly. The read() and write functions hide
+ * all the details of these calls from users.
  *
  * For more details on dataset and attributes, See
  * <a href="https://hdfgroup.github.io/hdf5/_h5_d__u_g.html#sec_dataset">HDF5 Datasets in HDF5 User Guide</a>
- * <a href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in HDF5 User Guide</a>
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in HDF5 User
+ * Guide</a>
  *
  * @see hdf.object.ScalarDS
  * @see hdf.object.CompoundDS
@@ -48,36 +49,35 @@ import org.slf4j.LoggerFactory;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public abstract class Dataset extends HObject implements DataFormat
-{
-    private static final long serialVersionUID    = -3360885430038261178L;
+public abstract class Dataset extends HObject implements DataFormat {
+    private static final long serialVersionUID = -3360885430038261178L;
 
     private static final Logger log = LoggerFactory.getLogger(Dataset.class);
 
     /**
      * The memory buffer that holds the raw data array of the dataset.
      */
-    protected transient Object          data;
+    protected transient Object data;
 
     /**
      * The type of space for the dataset.
      */
-    protected int             space_type;
+    protected int space_type;
 
     /**
      * The number of dimensions of the dataset.
      */
-    protected int             rank;
+    protected int rank;
 
     /**
      * The current dimension sizes of the dataset
      */
-    protected long[]          dims;
+    protected long[] dims;
 
     /**
      * The max dimension sizes of the dataset
      */
-    protected long[]          maxDims;
+    protected long[] maxDims;
 
     /**
      * Array that contains the number of data points selected (for read/write)
@@ -103,14 +103,14 @@ public abstract class Dataset extends HObject implements DataFormat
      *     32, 33, 34
      * </pre>
      */
-    protected long[]          selectedDims;
+    protected long[] selectedDims;
 
     /**
      * The starting position of each dimension of a selected subset. With both
      * the starting position and selected sizes, the subset of a rectangle
      * selection is fully defined.
      */
-    protected long[]          startDims;
+    protected long[] startDims;
 
     /**
      * Array that contains the indices of the dimensions selected for display.
@@ -136,36 +136,36 @@ public abstract class Dataset extends HObject implements DataFormat
      * location is fixed at 0 by default.
      * </OL>
      */
-    protected final int[]     selectedIndex;
+    protected final int[] selectedIndex;
 
     /**
      * The number of elements to move from the start location in each dimension.
      * For example, if selectedStride[0] = 2, every other data point is selected
      * along dim[0].
      */
-    protected long[]          selectedStride;
+    protected long[] selectedStride;
 
     /**
      * The array of dimension sizes for a chunk.
      */
-    protected long[]          chunkSize;
+    protected long[] chunkSize;
 
     /** The compression information. */
-    protected StringBuilder   compression;
+    protected StringBuilder compression;
     /** The compression information default prefix. */
     public static final String COMPRESSION_GZIP_TXT = "GZIP: level = ";
 
     /** The filters information. */
-    protected StringBuilder   filters;
+    protected StringBuilder filters;
 
     /** The storage layout information. */
-    protected StringBuilder   storageLayout;
+    protected StringBuilder storageLayout;
 
     /** The storage information. */
-    protected StringBuilder   storage;
+    protected StringBuilder storage;
 
     /** The datatype object of the dataset. */
-    protected Datatype        datatype;
+    protected Datatype datatype;
 
     /**
      * Array of strings that represent the dimension names. It is null if dimension names do not exist.
@@ -222,9 +222,7 @@ public abstract class Dataset extends HObject implements DataFormat
      * @param dsPath
      *            the full group path of this Dataset, e.g. "/arrays/".
      */
-    public Dataset(FileFormat theFile, String dsName, String dsPath) {
-        this(theFile, dsName, dsPath, null);
-    }
+    public Dataset(FileFormat theFile, String dsName, String dsPath) { this(theFile, dsName, dsPath, null); }
 
     /**
      * @deprecated Not for public use in the future. <br>
@@ -240,27 +238,28 @@ public abstract class Dataset extends HObject implements DataFormat
      *            the oid of this Dataset.
      */
     @Deprecated
-    public Dataset(FileFormat theFile, String dsName, String dsPath, long[] oid) {
+    public Dataset(FileFormat theFile, String dsName, String dsPath, long[] oid)
+    {
         super(theFile, dsName, dsPath, oid);
         log.trace("Dataset: start {}", dsName);
 
-        datatype = null;
-        rank = -1;
-        space_type = -1;
-        data = null;
-        dims = null;
-        maxDims = null;
-        selectedDims = null;
-        startDims = null;
+        datatype       = null;
+        rank           = -1;
+        space_type     = -1;
+        data           = null;
+        dims           = null;
+        maxDims        = null;
+        selectedDims   = null;
+        startDims      = null;
         selectedStride = null;
-        chunkSize = null;
-        compression = new StringBuilder("NONE");
-        filters = new StringBuilder("NONE");
-        storageLayout = new StringBuilder("NONE");
-        storage = new StringBuilder("NONE");
-        dimNames = null;
+        chunkSize      = null;
+        compression    = new StringBuilder("NONE");
+        filters        = new StringBuilder("NONE");
+        storageLayout  = new StringBuilder("NONE");
+        storage        = new StringBuilder("NONE");
+        dimNames       = null;
 
-        selectedIndex = new int[3];
+        selectedIndex    = new int[3];
         selectedIndex[0] = 0;
         selectedIndex[1] = 1;
         selectedIndex[2] = 2;
@@ -270,12 +269,13 @@ public abstract class Dataset extends HObject implements DataFormat
      * Clears memory held by the dataset, such as the data buffer.
      */
     @SuppressWarnings("rawtypes")
-    public void clear() {
+    public void clear()
+    {
         if (data != null) {
             if (data instanceof List)
-                ((List) data).clear();
-            data = null;
-            originalBuf = null;
+                ((List)data).clear();
+            data         = null;
+            originalBuf  = null;
             convertedBuf = null;
         }
         isDataLoaded = false;
@@ -287,7 +287,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the type of space for the dataset.
      */
     @Override
-    public final int getSpaceType() {
+    public final int getSpaceType()
+    {
         return space_type;
     }
 
@@ -297,7 +298,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the number of dimensions of the dataset.
      */
     @Override
-    public final int getRank() {
+    public final int getRank()
+    {
         return rank;
     }
 
@@ -307,7 +309,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the dimension sizes of the dataset.
      */
     @Override
-    public final long[] getDims() {
+    public final long[] getDims()
+    {
         return dims;
     }
 
@@ -316,7 +319,8 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return the max dimension sizes of the dataset.
      */
-    public final long[] getMaxDims() {
+    public final long[] getMaxDims()
+    {
         if (maxDims == null)
             return dims;
 
@@ -353,7 +357,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the dimension sizes of the selected subset.
      */
     @Override
-    public final long[] getSelectedDims() {
+    public final long[] getSelectedDims()
+    {
         return selectedDims;
     }
 
@@ -384,7 +389,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the starting position of a selected subset.
      */
     @Override
-    public final long[] getStartDims() {
+    public final long[] getStartDims()
+    {
         return startDims;
     }
 
@@ -416,7 +422,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the selectedStride of the selected dataset.
      */
     @Override
-    public final long[] getStride() {
+    public final long[] getStride()
+    {
         if (rank <= 0)
             return null;
 
@@ -450,9 +457,7 @@ public abstract class Dataset extends HObject implements DataFormat
      *            convert bytes to strings if b is true; otherwise, if false, do
      *            not convert bytes to strings.
      */
-    public final void setConvertByteToString(boolean b) {
-        convertByteToString = b;
-    }
+    public final void setConvertByteToString(boolean b) { convertByteToString = b; }
 
     /**
      * Returns the flag that indicates if a byte array is converted to a string
@@ -461,9 +466,7 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return true if byte array is converted to string; otherwise, returns
      *         false if there is no conversion.
      */
-    public final boolean getConvertByteToString() {
-        return convertByteToString;
-    }
+    public final boolean getConvertByteToString() { return convertByteToString; }
 
     /**
      * Reads the raw data of the dataset from file to a byte array.
@@ -489,7 +492,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @throws Exception if buffer can not be written
      */
     @Override
-    public final void write() throws Exception {
+    public final void write() throws Exception
+    {
         log.trace("Dataset: write enter");
         if (data != null) {
             log.trace("Dataset: write data");
@@ -528,16 +532,18 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return true if the data has been initialized
      */
     @Override
-    public final boolean isInited() {
+    public final boolean isInited()
+    {
         return inited;
     }
 
     /**
      * Resets selection of dataspace
      */
-    protected void resetSelection() {
+    protected void resetSelection()
+    {
         for (int i = 0; i < rank; i++) {
-            startDims[i] = 0;
+            startDims[i]    = 0;
             selectedDims[i] = 1;
             if (selectedStride != null)
                 selectedStride[i] = 1;
@@ -545,13 +551,13 @@ public abstract class Dataset extends HObject implements DataFormat
 
         if (rank == 1) {
             selectedIndex[0] = 0;
-            selectedDims[0] = dims[0];
+            selectedDims[0]  = dims[0];
         }
         else if (rank == 2) {
             selectedIndex[0] = 0;
             selectedIndex[1] = 1;
-            selectedDims[0] = dims[0];
-            selectedDims[1] = dims[1];
+            selectedDims[0]  = dims[0];
+            selectedDims[1]  = dims[1];
         }
         else if (rank > 2) {
             if (isImage) {
@@ -664,15 +670,16 @@ public abstract class Dataset extends HObject implements DataFormat
      * @throws OutOfMemoryError if memory is exhausted
      */
     @Override
-    public Object getData() throws Exception, OutOfMemoryError {
+    public Object getData() throws Exception, OutOfMemoryError
+    {
         log.trace("getData(): isDataLoaded={}", isDataLoaded);
         if (!isDataLoaded) {
             data = read(); // load the data
             if (data != null) {
-                originalBuf = data;
+                originalBuf  = data;
                 isDataLoaded = true;
-                nPoints = 1;
-                log.trace("getData(): selectedDims length={}",selectedDims.length);
+                nPoints      = 1;
+                log.trace("getData(): selectedDims length={}", selectedDims.length);
                 for (int j = 0; j < selectedDims.length; j++)
                     nPoints *= selectedDims[j];
             }
@@ -692,13 +699,14 @@ public abstract class Dataset extends HObject implements DataFormat
      * @param d  the object data -must be an array of Objects
      */
     @Override
-    public final void setData(Object d) {
+    public final void setData(Object d)
+    {
         if (!(this instanceof Attribute))
             throw new UnsupportedOperationException("setData: unsupported for non-Attribute objects");
 
         log.trace("setData(): isDataLoaded={}", isDataLoaded);
-        data = d;
-        originalBuf = data;
+        data         = d;
+        originalBuf  = data;
         isDataLoaded = true;
     }
 
@@ -715,7 +723,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @see #read()
      */
     @Override
-    public void clearData() {
+    public void clearData()
+    {
         isDataLoaded = false;
     }
 
@@ -731,7 +740,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @see #read()
      */
     @Override
-    public Object refreshData() {
+    public Object refreshData()
+    {
         Object dataValue = null;
 
         clearData();
@@ -784,7 +794,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the size of dimension of the vertical axis.
      */
     @Override
-    public final long getHeight() {
+    public final long getHeight()
+    {
         if ((selectedDims == null) || (selectedIndex == null))
             return 0;
 
@@ -825,7 +836,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the size of dimension of the horizontal axis.
      */
     @Override
-    public final long getWidth() {
+    public final long getWidth()
+    {
         if ((selectedDims == null) || (selectedIndex == null))
             return 0;
 
@@ -866,7 +878,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the size of dimension of the frame axis.
      */
     @Override
-    public final long getDepth() {
+    public final long getDepth()
+    {
         if ((selectedDims == null) || (selectedIndex == null))
             return 0;
 
@@ -907,7 +920,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the array of the indices of display order.
      */
     @Override
-    public final int[] getSelectedIndex() {
+    public final int[] getSelectedIndex()
+    {
         return selectedIndex;
     }
 
@@ -920,7 +934,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the string representation of compression information.
      */
     @Override
-    public final String getCompression() {
+    public final String getCompression()
+    {
         return compression.toString();
     }
 
@@ -929,27 +944,21 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return the string representation of filter information.
      */
-    public final String getFilters() {
-        return filters.toString();
-    }
+    public final String getFilters() { return filters.toString(); }
 
     /**
      * Returns the string representation of storage layout information.
      *
      * @return the string representation of storage layout information.
      */
-    public final String getStorageLayout() {
-        return storageLayout.toString();
-    }
+    public final String getStorageLayout() { return storageLayout.toString(); }
 
     /**
      * Returns the string representation of storage information.
      *
      * @return the string representation of storage information.
      */
-    public final String getStorage() {
-        return storage.toString();
-    }
+    public final String getStorage() { return storage.toString(); }
 
     /**
      * Returns the array that contains the dimension sizes of the chunk of the
@@ -958,9 +967,7 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the array of chunk sizes or returns null if the dataset is not
      *         chunked.
      */
-    public final long[] getChunkSize() {
-        return chunkSize;
-    }
+    public final long[] getChunkSize() { return chunkSize; }
 
     /**
      * Returns the datatype of the data object.
@@ -968,7 +975,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the datatype of the data object.
      */
     @Override
-    public Datatype getDatatype() {
+    public Datatype getDatatype()
+    {
         return datatype;
     }
 
@@ -981,7 +989,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the converted object
      */
     @Deprecated
-    public static Object convertFromUnsignedC(Object dataIN) {
+    public static Object convertFromUnsignedC(Object dataIN)
+    {
         return Dataset.convertFromUnsignedC(dataIN, null);
     }
 
@@ -1038,7 +1047,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the upgraded 1D array of Java integers.
      */
     @SuppressWarnings("rawtypes")
-    public static Object convertFromUnsignedC(Object dataIN, Object dataOUT) {
+    public static Object convertFromUnsignedC(Object dataIN, Object dataOUT)
+    {
         if (dataIN == null) {
             log.debug("convertFromUnsignedC(): data_in is null");
             return null;
@@ -1059,8 +1069,8 @@ public abstract class Dataset extends HObject implements DataFormat
         }
 
         String cname = dataClass.getName();
-        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
-        int size = Array.getLength(dataIN);
+        char dname   = cname.charAt(cname.lastIndexOf('[') + 1);
+        int size     = Array.getLength(dataIN);
         log.trace("convertFromUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'B') {
@@ -1069,11 +1079,11 @@ public abstract class Dataset extends HObject implements DataFormat
             if (dataOUT == null)
                 sdata = new short[size];
             else
-                sdata = (short[]) dataOUT;
+                sdata = (short[])dataOUT;
 
-            byte[] bdata = (byte[]) dataIN;
+            byte[] bdata = (byte[])dataIN;
             for (int i = 0; i < size; i++)
-                sdata[i] = (short) ((bdata[i] + 256) & 0xFF);
+                sdata[i] = (short)((bdata[i] + 256) & 0xFF);
 
             dataOUT = sdata;
         }
@@ -1083,9 +1093,9 @@ public abstract class Dataset extends HObject implements DataFormat
             if (dataOUT == null)
                 idata = new int[size];
             else
-                idata = (int[]) dataOUT;
+                idata = (int[])dataOUT;
 
-            short[] sdata = (short[]) dataIN;
+            short[] sdata = (short[])dataIN;
             for (int i = 0; i < size; i++)
                 idata[i] = (sdata[i] + 65536) & 0xFFFF;
 
@@ -1097,9 +1107,9 @@ public abstract class Dataset extends HObject implements DataFormat
             if (dataOUT == null)
                 ldata = new long[size];
             else
-                ldata = (long[]) dataOUT;
+                ldata = (long[])dataOUT;
 
-            int[] idata = (int[]) dataIN;
+            int[] idata = (int[])dataIN;
             for (int i = 0; i < size; i++)
                 ldata[i] = (idata[i] + 4294967296L) & 0xFFFFFFFFL;
 
@@ -1123,7 +1133,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the upgraded 1D array of Java integers.
      */
     @Deprecated
-    public static Object convertToUnsignedC(Object dataIN) {
+    public static Object convertToUnsignedC(Object dataIN)
+    {
         return Dataset.convertToUnsignedC(dataIN, null);
     }
 
@@ -1145,7 +1156,8 @@ public abstract class Dataset extends HObject implements DataFormat
      * @return the converted data of unsigned C-type integer array.
      */
     @SuppressWarnings("rawtypes")
-    public static Object convertToUnsignedC(Object dataIN, Object dataOUT) {
+    public static Object convertToUnsignedC(Object dataIN, Object dataOUT)
+    {
         if (dataIN == null) {
             log.debug("convertToUnsignedC(): data_in is null");
             return null;
@@ -1166,8 +1178,8 @@ public abstract class Dataset extends HObject implements DataFormat
         }
 
         String cname = dataClass.getName();
-        char dname = cname.charAt(cname.lastIndexOf('[') + 1);
-        int size = Array.getLength(dataIN);
+        char dname   = cname.charAt(cname.lastIndexOf('[') + 1);
+        int size     = Array.getLength(dataIN);
         log.trace("convertToUnsignedC(): cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'S') {
@@ -1176,10 +1188,10 @@ public abstract class Dataset extends HObject implements DataFormat
             if (dataOUT == null)
                 bdata = new byte[size];
             else
-                bdata = (byte[]) dataOUT;
-            short[] sdata = (short[]) dataIN;
+                bdata = (byte[])dataOUT;
+            short[] sdata = (short[])dataIN;
             for (int i = 0; i < size; i++)
-                bdata[i] = (byte) sdata[i];
+                bdata[i] = (byte)sdata[i];
             dataOUT = bdata;
         }
         else if (dname == 'I') {
@@ -1188,10 +1200,10 @@ public abstract class Dataset extends HObject implements DataFormat
             if (dataOUT == null)
                 sdata = new short[size];
             else
-                sdata = (short[]) dataOUT;
-            int[] idata = (int[]) dataIN;
+                sdata = (short[])dataOUT;
+            int[] idata = (int[])dataIN;
             for (int i = 0; i < size; i++)
-                sdata[i] = (short) idata[i];
+                sdata[i] = (short)idata[i];
             dataOUT = sdata;
         }
         else if (dname == 'J') {
@@ -1200,10 +1212,10 @@ public abstract class Dataset extends HObject implements DataFormat
             if (dataOUT == null)
                 idata = new int[size];
             else
-                idata = (int[]) dataOUT;
-            long[] ldata = (long[]) dataIN;
+                idata = (int[])dataOUT;
+            long[] ldata = (long[])dataIN;
             for (int i = 0; i < size; i++)
-                idata[i] = (int) ldata[i];
+                idata[i] = (int)ldata[i];
             dataOUT = idata;
         }
         else {
@@ -1242,7 +1254,8 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return the array of Java String.
      */
-    public static final String[] byteToString(byte[] bytes, int length) {
+    public static final String[] byteToString(byte[] bytes, int length)
+    {
         if (bytes == null) {
             log.debug("byteToString(): input is null");
             return null;
@@ -1251,8 +1264,8 @@ public abstract class Dataset extends HObject implements DataFormat
         int n = bytes.length / length;
         log.trace("byteToString(): n={} from length of {}", n, length);
         String[] strArray = new String[n];
-        String str = null;
-        int idx = 0;
+        String str        = null;
+        int idx           = 0;
         for (int i = 0; i < n; i++) {
             str = new String(bytes, i * length, length);
             idx = str.indexOf('\0');
@@ -1287,13 +1300,14 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return the array of bytes.
      */
-    public static final byte[] stringToByte(String[] strings, int length) {
+    public static final byte[] stringToByte(String[] strings, int length)
+    {
         if (strings == null) {
             log.debug("stringToByte(): input is null");
             return null;
         }
 
-        int size = strings.length;
+        int size     = strings.length;
         byte[] bytes = new byte[size * length];
         log.trace("stringToByte(): size={} length={}", size, length);
         StringBuilder strBuff = new StringBuilder(length);
@@ -1324,9 +1338,7 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return the names of dimensions, or null if there is no dimension name.
      */
-    public final String[] getDimNames() {
-        return dimNames;
-    }
+    public final String[] getDimNames() { return dimNames; }
 
     /**
      * Checks if a given datatype is a string. Sub-classes must replace this
@@ -1337,9 +1349,7 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return true if the datatype is a string; otherwise returns false.
      */
-    public boolean isString(long tid) {
-        return false;
-    }
+    public boolean isString(long tid) { return false; }
 
     /**
      * Returns the size in bytes of a given datatype. Sub-classes must replace
@@ -1350,9 +1360,7 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return The size of the datatype
      */
-    public long getSize(long tid) {
-        return -1;
-    }
+    public long getSize(long tid) { return -1; }
 
     /**
      * Get Class of the original data buffer if converted.
@@ -1361,23 +1369,20 @@ public abstract class Dataset extends HObject implements DataFormat
      */
     @Override
     @SuppressWarnings("rawtypes")
-    public final Class getOriginalClass() {
+    public final Class getOriginalClass()
+    {
         return originalBuf.getClass();
     }
 
     /**
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
-    public boolean isNULL() {
-        return isNULL;
-    }
+    public boolean isNULL() { return isNULL; }
 
     /**
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
-    public boolean isScalar() {
-        return isScalar;
-    }
+    public boolean isScalar() { return isScalar; }
 
     /**
      * Checks if dataset is virtual. Sub-classes must replace
@@ -1385,9 +1390,7 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return true if the dataset is virtual; otherwise returns false.
      */
-    public boolean isVirtual() {
-        return false;
-    }
+    public boolean isVirtual() { return false; }
 
     /**
      * Gets the source file name at index if dataset is virtual. Sub-classes must replace
@@ -1398,9 +1401,7 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return filename if the dataset is virtual; otherwise returns null.
      */
-    public String getVirtualFilename(int index) {
-        return null;
-    }
+    public String getVirtualFilename(int index) { return null; }
 
     /**
      * Gets the number of source files if dataset is virtual. Sub-classes must replace
@@ -1408,9 +1409,7 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return the list size if the dataset is virtual; otherwise returns negative.
      */
-    public int getVirtualMaps() {
-        return -1;
-    }
+    public int getVirtualMaps() { return -1; }
 
     /**
      * Returns a string representation of the data value. For
@@ -1428,9 +1427,7 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return the string representation of the data values.
      */
-    public String toString(String delimiter) {
-        return toString(delimiter, -1);
-    }
+    public String toString(String delimiter) { return toString(delimiter, -1); }
 
     /**
      * Returns a string representation of the data value. For
@@ -1450,7 +1447,8 @@ public abstract class Dataset extends HObject implements DataFormat
      *
      * @return the string representation of the data values.
      */
-    public String toString(String delimiter, int maxItems) {
+    public String toString(String delimiter, int maxItems)
+    {
         Object theData = originalBuf;
         if (theData == null) {
             log.debug("toString: value is null");
@@ -1481,31 +1479,32 @@ public abstract class Dataset extends HObject implements DataFormat
         return toString(theData, getDatatype(), delimiter, n);
     }
 
-    protected String toString(Object theData, Datatype theType, String delimiter, int count) {
+    protected String toString(Object theData, Datatype theType, String delimiter, int count)
+    {
         log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", theType.isEnum(),
-                theType.isUnsigned(), count);
-        StringBuilder sb = new StringBuilder();
+                  theType.isUnsigned(), count);
+        StringBuilder sb                 = new StringBuilder();
         Class<? extends Object> valClass = theData.getClass();
 
         if (theType.isEnum()) {
             String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+            char dname   = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: is_enum with cname={} dname={}", cname, dname);
 
             Map<String, String> map = theType.getEnumMembers();
-            String theValue = null;
+            String theValue         = null;
             switch (dname) {
             case 'B':
-                byte[] barray = (byte[]) theData;
-                short sValue = barray[0];
-                theValue = String.valueOf(sValue);
+                byte[] barray = (byte[])theData;
+                short sValue  = barray[0];
+                theValue      = String.valueOf(sValue);
                 if (map.containsKey(theValue))
                     sb.append(map.get(theValue));
                 else
                     sb.append(sValue);
                 for (int i = 1; i < count; i++) {
                     sb.append(delimiter);
-                    sValue = barray[i];
+                    sValue   = barray[i];
                     theValue = String.valueOf(sValue);
                     if (map.containsKey(theValue))
                         sb.append(map.get(theValue));
@@ -1514,16 +1513,16 @@ public abstract class Dataset extends HObject implements DataFormat
                 }
                 break;
             case 'S':
-                short[] sarray = (short[]) theData;
-                int iValue = sarray[0];
-                theValue = String.valueOf(iValue);
+                short[] sarray = (short[])theData;
+                int iValue     = sarray[0];
+                theValue       = String.valueOf(iValue);
                 if (map.containsKey(theValue))
                     sb.append(map.get(theValue));
                 else
                     sb.append(iValue);
                 for (int i = 1; i < count; i++) {
                     sb.append(delimiter);
-                    iValue = sarray[i];
+                    iValue   = sarray[i];
                     theValue = String.valueOf(iValue);
                     if (map.containsKey(theValue))
                         sb.append(map.get(theValue));
@@ -1532,16 +1531,16 @@ public abstract class Dataset extends HObject implements DataFormat
                 }
                 break;
             case 'I':
-                int[] iarray = (int[]) theData;
-                long lValue = iarray[0];
-                theValue = String.valueOf(lValue);
+                int[] iarray = (int[])theData;
+                long lValue  = iarray[0];
+                theValue     = String.valueOf(lValue);
                 if (map.containsKey(theValue))
                     sb.append(map.get(theValue));
                 else
                     sb.append(lValue);
                 for (int i = 1; i < count; i++) {
                     sb.append(delimiter);
-                    lValue = iarray[i];
+                    lValue   = iarray[i];
                     theValue = String.valueOf(lValue);
                     if (map.containsKey(theValue))
                         sb.append(map.get(theValue));
@@ -1550,16 +1549,16 @@ public abstract class Dataset extends HObject implements DataFormat
                 }
                 break;
             case 'J':
-                long[] larray = (long[]) theData;
-                Long l = larray[0];
-                theValue = Long.toString(l);
+                long[] larray = (long[])theData;
+                Long l        = larray[0];
+                theValue      = Long.toString(l);
                 if (map.containsKey(theValue))
                     sb.append(map.get(theValue));
                 else
                     sb.append(theValue);
                 for (int i = 1; i < count; i++) {
                     sb.append(delimiter);
-                    l = larray[i];
+                    l        = larray[i];
                     theValue = Long.toString(l);
                     if (map.containsKey(theValue))
                         sb.append(map.get(theValue));
@@ -1578,13 +1577,13 @@ public abstract class Dataset extends HObject implements DataFormat
         }
         else if (theType.isUnsigned()) {
             String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+            char dname   = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
 
             switch (dname) {
             case 'B':
-                byte[] barray = (byte[]) theData;
-                short sValue = barray[0];
+                byte[] barray = (byte[])theData;
+                short sValue  = barray[0];
                 if (sValue < 0)
                     sValue += 256;
                 sb.append(sValue);
@@ -1597,8 +1596,8 @@ public abstract class Dataset extends HObject implements DataFormat
                 }
                 break;
             case 'S':
-                short[] sarray = (short[]) theData;
-                int iValue = sarray[0];
+                short[] sarray = (short[])theData;
+                int iValue     = sarray[0];
                 if (iValue < 0)
                     iValue += 65536;
                 sb.append(iValue);
@@ -1611,8 +1610,8 @@ public abstract class Dataset extends HObject implements DataFormat
                 }
                 break;
             case 'I':
-                int[] iarray = (int[]) theData;
-                long lValue = iarray[0];
+                int[] iarray = (int[])theData;
+                long lValue  = iarray[0];
                 if (lValue < 0)
                     lValue += 4294967296L;
                 sb.append(lValue);
@@ -1625,27 +1624,27 @@ public abstract class Dataset extends HObject implements DataFormat
                 }
                 break;
             case 'J':
-                long[] larray = (long[]) theData;
-                Long l = larray[0];
+                long[] larray   = (long[])theData;
+                Long l          = larray[0];
                 String theValue = Long.toString(l);
                 if (l < 0) {
-                    l = (l << 1) >>> 1;
+                    l               = (l << 1) >>> 1;
                     BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
                     BigInteger big2 = new BigInteger(l.toString());
-                    BigInteger big = big1.add(big2);
-                    theValue = big.toString();
+                    BigInteger big  = big1.add(big2);
+                    theValue        = big.toString();
                 }
                 sb.append(theValue);
                 for (int i = 1; i < count; i++) {
                     sb.append(delimiter);
-                    l = larray[i];
+                    l        = larray[i];
                     theValue = Long.toString(l);
                     if (l < 0) {
-                        l = (l << 1) >>> 1;
+                        l               = (l << 1) >>> 1;
                         BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
                         BigInteger big2 = new BigInteger(l.toString());
-                        BigInteger big = big1.add(big2);
-                        theValue = big.toString();
+                        BigInteger big  = big1.add(big2);
+                        theValue        = big.toString();
                     }
                     sb.append(theValue);
                 }
@@ -1696,9 +1695,9 @@ public abstract class Dataset extends HObject implements DataFormat
             else
                 strValue = value.toString();
 
-            //if (count > 0 && strValue.length() > count)
-            // truncate the extra characters
-            //    strValue = strValue.substring(0, count);
+            // if (count > 0 && strValue.length() > count)
+            //  truncate the extra characters
+            //     strValue = strValue.substring(0, count);
             sb.append(strValue);
 
             for (int i = 1; i < count; i++) {

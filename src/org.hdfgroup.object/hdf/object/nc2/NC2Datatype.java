@@ -16,10 +16,10 @@ package hdf.object.nc2;
 
 import java.util.List;
 
+import hdf.object.Datatype;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import hdf.object.Datatype;
 
 import ucar.ma2.DataType;
 
@@ -30,8 +30,7 @@ import ucar.ma2.DataType;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class NC2Datatype extends Datatype
-{
+public class NC2Datatype extends Datatype {
     private static final long serialVersionUID = 5399364372073889764L;
 
     private static final Logger log = LoggerFactory.getLogger(NC2Datatype.class);
@@ -44,13 +43,12 @@ public class NC2Datatype extends Datatype
      * following list a few example of how to create a Datatype.
      * <ol>
      * <li>to create unsigned native integer<br>
-     * NC2Datatype type = new NC2Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE, Datatype.SIGN_NONE);</li>
-     * <li>to create 16-bit signed integer with big endian<br>
-     * NC2Datatype type = new NC2Datatype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);</li>
-     * <li>to create native float<br>
-     * NC2Datatype type = new NC2Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE);</li>
-     * <li>to create 64-bit double<br>
-     * NC2Datatype type = new NC2Datatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);</li>
+     * NC2Datatype type = new NC2Datatype(Datatype.CLASS_INTEGER, Datatype.NATIVE, Datatype.NATIVE,
+     * Datatype.SIGN_NONE);</li> <li>to create 16-bit signed integer with big endian<br> NC2Datatype type =
+     * new NC2Datatype(Datatype.CLASS_INTEGER, 2, Datatype.ORDER_BE, Datatype.NATIVE);</li> <li>to create
+     * native float<br> NC2Datatype type = new NC2Datatype(Datatype.CLASS_FLOAT, Datatype.NATIVE,
+     * Datatype.NATIVE, Datatype.NATIVE);</li> <li>to create 64-bit double<br> NC2Datatype type = new
+     * NC2Datatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);</li>
      * </ol>
      *
      * @param tclass
@@ -67,7 +65,8 @@ public class NC2Datatype extends Datatype
      * @throws Exception
      *            if there is an error
      */
-    public NC2Datatype(int tclass, int tsize, int torder, int tsign) throws Exception {
+    public NC2Datatype(int tclass, int tsize, int torder, int tsign) throws Exception
+    {
         super(tclass, tsize, torder, tsign);
         datatypeDescription = getDescription();
     }
@@ -81,7 +80,8 @@ public class NC2Datatype extends Datatype
      * @throws Exception
      *            if there is an error
      */
-    public NC2Datatype(DataType theType) throws Exception {
+    public NC2Datatype(DataType theType) throws Exception
+    {
         super(null, -1);
         log.trace("NC2Datatype: start nc2 type = {}", theType);
         nativeType = theType;
@@ -101,46 +101,47 @@ public class NC2Datatype extends Datatype
      *            UNUSED.
      */
     @Override
-    public void fromNative(long tid) {
+    public void fromNative(long tid)
+    {
         if (nativeType == null)
             return;
 
         datatypeOrder = NATIVE;
         if (nativeType.equals(DataType.CHAR)) {
             datatypeClass = CLASS_CHAR;
-            datatypeSize = 1;
+            datatypeSize  = 1;
         }
         else if (nativeType.equals(DataType.BYTE)) {
             datatypeClass = CLASS_INTEGER;
-            datatypeSize = 1;
+            datatypeSize  = 1;
         }
         else if (nativeType.equals(DataType.SHORT)) {
             datatypeClass = CLASS_INTEGER;
-            datatypeSize = 2;
+            datatypeSize  = 2;
         }
         else if (nativeType.equals(DataType.INT)) {
             datatypeClass = CLASS_INTEGER;
-            datatypeSize = 4;
+            datatypeSize  = 4;
         }
         else if (nativeType.equals(DataType.LONG)) {
             datatypeClass = CLASS_INTEGER;
-            datatypeSize = 8;
+            datatypeSize  = 8;
         }
         else if (nativeType.equals(DataType.FLOAT)) {
             datatypeClass = CLASS_FLOAT;
-            datatypeSize = 4;
+            datatypeSize  = 4;
         }
         else if (nativeType.equals(DataType.DOUBLE)) {
             datatypeClass = CLASS_FLOAT;
-            datatypeSize = 8;
+            datatypeSize  = 8;
         }
         else if (nativeType.equals(DataType.STRING)) {
             datatypeClass = CLASS_STRING;
-            datatypeSize = 80; // default length. need to figure out the actual length
+            datatypeSize  = 80; // default length. need to figure out the actual length
         }
         else if (nativeType.equals(DataType.OPAQUE)) {
             datatypeClass = CLASS_OPAQUE;
-            datatypeSize = 1;
+            datatypeSize  = 1;
         }
 
         log.trace("Datatype class={} size={}", datatypeClass, datatypeSize);
@@ -161,7 +162,8 @@ public class NC2Datatype extends Datatype
      * @throws OutOfMemoryError
      *             if the array cannot be allocated
      */
-    public static final Object allocateArray(DataType dtype, int datasize) throws OutOfMemoryError {
+    public static final Object allocateArray(DataType dtype, int datasize) throws OutOfMemoryError
+    {
         if ((datasize <= 0) || (dtype == null)) {
             log.debug("datasize <= 0");
             return null;
@@ -193,7 +195,8 @@ public class NC2Datatype extends Datatype
      * @see hdf.object.Datatype#getDatatypeDescription()
      */
     @Override
-    public String getDescription() {
+    public String getDescription()
+    {
         if (datatypeDescription != null)
             return datatypeDescription;
 
@@ -213,7 +216,8 @@ public class NC2Datatype extends Datatype
      * @see hdf.object.Datatype#isUnsigned()
      */
     @Override
-    public boolean isUnsigned() {
+    public boolean isUnsigned()
+    {
         if (nativeType.isNumeric())
             return false;
         else
@@ -221,7 +225,8 @@ public class NC2Datatype extends Datatype
     }
 
     @Override
-    public boolean isText() {
+    public boolean isText()
+    {
         return (nativeType == DataType.CHAR);
     }
 
@@ -230,7 +235,8 @@ public class NC2Datatype extends Datatype
      * @see hdf.object.Datatype#createNative()
      */
     @Override
-    public long createNative() {
+    public long createNative()
+    {
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1)
                 nativeType = DataType.BYTE;
@@ -263,7 +269,8 @@ public class NC2Datatype extends Datatype
      * @see hdf.object.Datatype#close(int)
      */
     @Override
-    public void close(long id) {
+    public void close(long id)
+    {
         // No implementation
     }
 
@@ -282,7 +289,8 @@ public class NC2Datatype extends Datatype
      *             if the metadata can not be retrieved
      */
     @SuppressWarnings("rawtypes")
-    public List getMetadata(int... attrPropList) throws Exception {
+    public List getMetadata(int... attrPropList) throws Exception
+    {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
 
@@ -292,7 +300,8 @@ public class NC2Datatype extends Datatype
      * @return true if it has any attributes, false otherwise.
      */
     @Override
-    public boolean hasAttribute() {
+    public boolean hasAttribute()
+    {
         return false;
     }
 }

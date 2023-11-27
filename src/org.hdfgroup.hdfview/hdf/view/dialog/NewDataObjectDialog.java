@@ -18,6 +18,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.h5.H5Datatype;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,14 +43,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.h5.H5Datatype;
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-
 /**
  * NewDataDialog is an intermediate class for creating data types.
  */
@@ -51,10 +51,10 @@ public class NewDataObjectDialog extends Dialog {
     private static final Logger log = LoggerFactory.getLogger(NewDataObjectDialog.class);
 
     /** the visual shell for the dialog */
-    protected Shell   shell;
+    protected Shell shell;
 
     /** the current font */
-    protected Font    curFont;
+    protected Font curFont;
 
     /** the object which the this object is attached */
     protected HObject parentObj;
@@ -66,29 +66,29 @@ public class NewDataObjectDialog extends Dialog {
     protected HObject newObject;
 
     /** TextField for entering the length of the data array or string. */
-    protected Text    lengthField;
+    protected Text lengthField;
 
     /** The Choice of the datatypes */
     /** The named datatype combobox for the object */
-    protected Combo   namedChoice;
+    protected Combo namedChoice;
     /** The class combobox for the object */
-    protected Combo   classChoice;
+    protected Combo classChoice;
     /** The size combobox for the object */
-    protected Combo   sizeChoice;
+    protected Combo sizeChoice;
     /** The endianess combobox for the object */
-    protected Combo   endianChoice;
+    protected Combo endianChoice;
 
     /** The Choice of the object list */
     /** The committed datatype button for the object */
-    protected Button  useCommittedType;
+    protected Button useCommittedType;
     /** The unsigned data button for the object */
-    protected Button  checkUnsigned;
+    protected Button checkUnsigned;
     /** The list of objects for the object */
     protected List<?> objList;
     /** The list of datatypes for the object */
     protected List<Datatype> namedList;
     /** The length label for the object */
-    protected Label   arrayLengthLabel;
+    protected Label arrayLengthLabel;
 
     /** The attributes of the datatype */
     /** The default class for the object */
@@ -124,15 +124,13 @@ public class NewDataObjectDialog extends Dialog {
      * @param objs
      *        the list of objects
      */
-    public NewDataObjectDialog(Shell parent, HObject pGroup, List<?> objs) {
+    public NewDataObjectDialog(Shell parent, HObject pGroup, List<?> objs)
+    {
         super(parent, SWT.APPLICATION_MODAL);
 
         try {
-            curFont = new Font(
-                    Display.getCurrent(),
-                    ViewProperties.getFontType(),
-                    ViewProperties.getFontSize(),
-                    SWT.NORMAL);
+            curFont = new Font(Display.getCurrent(), ViewProperties.getFontType(),
+                               ViewProperties.getFontSize(), SWT.NORMAL);
         }
         catch (Exception ex) {
             curFont = null;
@@ -140,14 +138,15 @@ public class NewDataObjectDialog extends Dialog {
 
         newObject = null;
         parentObj = pGroup;
-        objList = objs;
+        objList   = objs;
 
         fileFormat = pGroup.getFileFormat();
-        isH5 = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
+        isH5       = pGroup.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
     }
 
     /** the new dataset properties to be created. */
-    public void createDatatypeWidget() {
+    public void createDatatypeWidget()
+    {
         Label label;
 
         // Create Datatype region
@@ -163,7 +162,7 @@ public class NewDataObjectDialog extends Dialog {
         useCommittedType.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         useCommittedType.setEnabled(isH5);
 
-        if(isH5) {
+        if (isH5) {
             label = new Label(datatypeGroup, SWT.LEFT);
             label.setFont(curFont);
             label.setText("Committed Datatype: ");
@@ -173,23 +172,24 @@ public class NewDataObjectDialog extends Dialog {
             namedChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             namedChoice.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     refObject = namedList.get(namedChoice.getSelectionIndex());
                 }
             });
 
-            //Dummy label
+            // Dummy label
             label = new Label(datatypeGroup, SWT.LEFT);
             label.setFont(curFont);
             label.setText("");
 
-            namedList = new Vector<>(objList.size());
-            Object obj = null;
+            namedList            = new Vector<>(objList.size());
+            Object obj           = null;
             Iterator<?> iterator = objList.iterator();
             while (iterator.hasNext()) {
                 obj = iterator.next();
                 if (obj instanceof Datatype) {
-                    H5Datatype ndt = (H5Datatype) obj;
+                    H5Datatype ndt = (H5Datatype)obj;
                     namedList.add(ndt);
                     namedChoice.add(((Datatype)obj).getFullName());
                 }
@@ -221,7 +221,8 @@ public class NewDataObjectDialog extends Dialog {
         classChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         classChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 int idx = classChoice.getSelectionIndex();
                 sizeChoice.select(0);
                 endianChoice.select(0);
@@ -288,7 +289,7 @@ public class NewDataObjectDialog extends Dialog {
         classChoice.add("FLOAT");
         classChoice.add("CHAR");
 
-        if(isH5) {
+        if (isH5) {
             classChoice.add("STRING");
             classChoice.add("REFERENCE");
             classChoice.add("ENUM");
@@ -302,14 +303,15 @@ public class NewDataObjectDialog extends Dialog {
         sizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         sizeChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (classChoice.getSelectionIndex() == 0) {
                     checkUnsigned.setEnabled(true);
                 }
             }
         });
 
-        if(isH5) {
+        if (isH5) {
             sizeChoice.add("NATIVE");
         }
         else {
@@ -326,7 +328,7 @@ public class NewDataObjectDialog extends Dialog {
         endianChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         endianChoice.setEnabled(isH5);
 
-        if(isH5) {
+        if (isH5) {
             endianChoice.add("NATIVE");
             endianChoice.add("LITTLE ENDIAN");
             endianChoice.add("BIG ENDIAN");
@@ -360,23 +362,24 @@ public class NewDataObjectDialog extends Dialog {
      *
      * @return the new object created.
      */
-    public Datatype createNewDatatype(String name) {
+    public Datatype createNewDatatype(String name)
+    {
         Datatype datatype = null;
 
-        tclass = Datatype.CLASS_NO_CLASS;
-        tsize = Datatype.NATIVE;
-        torder = Datatype.NATIVE;
-        tsign = Datatype.NATIVE;
-        isEnum = false;
+        tclass     = Datatype.CLASS_NO_CLASS;
+        tsize      = Datatype.NATIVE;
+        torder     = Datatype.NATIVE;
+        tsign      = Datatype.NATIVE;
+        isEnum     = false;
         strEnumMap = null;
-        isVLen = false;
-        isVlenStr = false;
+        isVLen     = false;
+        isVlenStr  = false;
 
         if (useCommittedType.getSelection()) {
             datatype = (Datatype)refObject;
         }
         else {
-           // idx is set to datatype class
+            // idx is set to datatype class
             int idx = classChoice.getSelectionIndex();
             if (idx == 0) {
                 tclass = Datatype.CLASS_INTEGER;
@@ -415,9 +418,9 @@ public class NewDataObjectDialog extends Dialog {
                 tclass = Datatype.CLASS_FLOAT;
             }
             else if (idx == 8) {
-                tclass = Datatype.CLASS_STRING;
+                tclass    = Datatype.CLASS_STRING;
                 isVlenStr = true;
-                tsize = -1;
+                tsize     = -1;
             }
 
             // idx is set to datatype size
@@ -441,7 +444,7 @@ public class NewDataObjectDialog extends Dialog {
                 }
             }
             else if (tclass == Datatype.CLASS_REFERENCE) {
-                tsize = 1;
+                tsize  = 1;
                 torder = Datatype.NATIVE;
             }
             else if (idx == 0) {
@@ -454,22 +457,22 @@ public class NewDataObjectDialog extends Dialog {
                 // Note that idx == 0 is set to either
                 //       "NATIVE" if isH5 is true
                 //       "DEFAULT" otherwise
-                switch(idx) {
-                    case 1:
-                        tsize = 1;
-                        break;
-                    case 2:
-                        tsize = 2;
-                        break;
-                    case 3:
-                        tsize = 4;
-                        break;
-                    case 4:
-                        tsize = 8;
-                        break;
-                    default:
-                        tsize = -1;
-                        break;
+                switch (idx) {
+                case 1:
+                    tsize = 1;
+                    break;
+                case 2:
+                    tsize = 2;
+                    break;
+                case 3:
+                    tsize = 4;
+                    break;
+                case 4:
+                    tsize = 8;
+                    break;
+                default:
+                    tsize = -1;
+                    break;
                 }
                 log.trace("CLASS_INTEGER or CLASS_ENUM: tsize={}", tsize);
             }
@@ -504,8 +507,8 @@ public class NewDataObjectDialog extends Dialog {
                 Datatype basedatatype = null;
                 if (isVLen) {
                     basedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
-                    tclass = Datatype.CLASS_VLEN;
-                    thedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
+                    tclass       = Datatype.CLASS_VLEN;
+                    thedatatype  = fileFormat.createDatatype(tclass, tsize, torder, tsign, basedatatype);
                 }
                 else if (isEnum && isH5) {
                     strEnumMap = lengthField.getText();
@@ -522,7 +525,7 @@ public class NewDataObjectDialog extends Dialog {
                 else
                     thedatatype = fileFormat.createDatatype(tclass, tsize, torder, tsign);
 
-                if(isH5)
+                if (isH5)
                     datatype = fileFormat.createNamedDatatype(thedatatype, name);
                 else
                     datatype = thedatatype;
@@ -537,12 +540,8 @@ public class NewDataObjectDialog extends Dialog {
     }
 
     /** @return the new object created. */
-    public HObject getObject() {
-        return newObject;
-    }
+    public HObject getObject() { return newObject; }
 
     /** @return the parent group of the new dataset. */
-    public Group getParentGroup() {
-        return (Group) parentObj;
-    }
+    public Group getParentGroup() { return (Group)parentObj; }
 }

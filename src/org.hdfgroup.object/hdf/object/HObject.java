@@ -65,12 +65,13 @@ import org.slf4j.LoggerFactory;
  *                // retrieve the object ID
  *                byte[] refBuf = null;
  *                try {
- *                    refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
- *                    this.oid = HDFNativeData.byteToLong(refBuf);
- *                    log.trace("constructor REF {} to OID {}", refBuf, this.oid);
+ *                    refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(),
+ * HDF5Constants.H5P_DEFAULT); this.oid = HDFNativeData.byteToLong(refBuf); log.trace("constructor REF {} to
+ * OID {}", refBuf, this.oid);
  *                }
  *                catch (Exception ex) {
- *                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(), this.getFullName());
+ *                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(),
+ * this.getFullName());
  *                }
  *                finally {
  *                    if (refBuf)
@@ -82,15 +83,14 @@ import org.slf4j.LoggerFactory;
  * @author Peter X. Cao, Jordan T. Henderson
  * @see <a href="DataFormat.html">hdf.object.DataFormat</a>
  */
-public abstract class HObject implements Serializable
-{
+public abstract class HObject implements Serializable {
     /**
      * The serialVersionUID is a universal version identifier for a Serializable
      * class. Deserialization uses this number to ensure that a loaded class
      * corresponds exactly to a serialized object. For details, see
      * http://java.sun.com/j2se/1.5.0/docs/api/java/io/Serializable.html
      */
-    private static final long  serialVersionUID = -1723666708199882519L;
+    private static final long serialVersionUID = -1723666708199882519L;
 
     private static final Logger log = LoggerFactory.getLogger(HObject.class);
 
@@ -102,7 +102,7 @@ public abstract class HObject implements Serializable
     /**
      * The full path of the file that contains the object.
      */
-    private String             filename;
+    private String filename;
 
     /**
      * The file which contains the object
@@ -113,17 +113,17 @@ public abstract class HObject implements Serializable
      * The name of the data object. The root group has its default name, a
      * slash. The name can be changed except the root group.
      */
-    private String             name;
+    private String name;
 
     /**
      * The full path of the data object. The full path always starts with the
      * root, a slash. The path cannot be changed. Also, a path must be ended with a
      * slash. For example, /arrays/ints/
      */
-    private String             path;
+    private String path;
 
     /** The full name of the data object, i.e. "path + name" */
-    private String             fullName;
+    private String fullName;
 
     /**
      * Array of long integer storing unique identifier for the object.
@@ -133,12 +133,12 @@ public abstract class HObject implements Serializable
      * HDF5 objects are uniquely identified by a reference. i.e.
      * oid[0...7] = H5R_ref_t.
      */
-    protected long[]           oid;
+    protected long[] oid;
 
     /**
      * The name of the Target Object that is being linked to.
      */
-    protected String           linkTargetObjName;
+    protected String linkTargetObjName;
 
     /**
      * Number of attributes attached to the object.
@@ -148,9 +148,7 @@ public abstract class HObject implements Serializable
     /**
      * Constructs an instance of a data object without name and path.
      */
-    public HObject() {
-        this(null, null, null, null);
-    }
+    public HObject() { this(null, null, null, null); }
 
     /**
      * Constructs an instance of a data object with specific name and path.
@@ -165,7 +163,8 @@ public abstract class HObject implements Serializable
      * @param thePath
      *            the group path of the data object, e.g. "/arrays".
      */
-    public HObject(FileFormat theFile, String theName, String thePath) {
+    public HObject(FileFormat theFile, String theName, String thePath)
+    {
         this(theFile, theName, thePath, null);
     }
 
@@ -185,9 +184,10 @@ public abstract class HObject implements Serializable
      *            the ids of the data object.
      */
     @Deprecated
-    public HObject(FileFormat theFile, String theName, String thePath, long[] oid) {
+    public HObject(FileFormat theFile, String theName, String thePath, long[] oid)
+    {
         this.fileFormat = theFile;
-        this.oid = oid;
+        this.oid        = oid;
 
         if (fileFormat != null)
             this.filename = fileFormat.getFilePath();
@@ -208,7 +208,8 @@ public abstract class HObject implements Serializable
      * @param msg
      *            the debug message to print
      */
-    protected final void debug(Object msg) {
+    protected final void debug(Object msg)
+    {
         System.out.println("*** " + this.getClass().getName() + ": " + msg);
     }
 
@@ -221,27 +222,21 @@ public abstract class HObject implements Serializable
      *
      * @return The full path (path + name) of the file.
      */
-    public final String getFile() {
-        return filename;
-    }
+    public final String getFile() { return filename; }
 
     /**
      * Returns the name of the object. For example, "Raster Image #2".
      *
      * @return The name of the object.
      */
-    public final String getName() {
-        return name;
-    }
+    public final String getName() { return name; }
 
     /**
      * Returns the name of the target object that is linked to.
      *
      * @return The name of the object that is linked to.
      */
-    public final String getLinkTargetObjName() {
-        return linkTargetObjName;
-    }
+    public final String getLinkTargetObjName() { return linkTargetObjName; }
 
     /**
      * Sets the name of the target object that is linked to.
@@ -249,9 +244,7 @@ public abstract class HObject implements Serializable
      * @param targetObjName
      *            The new name of the object.
      */
-    public final void setLinkTargetObjName(String targetObjName) {
-        linkTargetObjName = targetObjName;
-    }
+    public final void setLinkTargetObjName(String targetObjName) { linkTargetObjName = targetObjName; }
 
     /**
      * Returns the full name (group path + object name) of the object. For
@@ -259,18 +252,14 @@ public abstract class HObject implements Serializable
      *
      * @return The full name (group path + object name) of the object.
      */
-    public final String getFullName() {
-        return fullName;
-    }
+    public final String getFullName() { return fullName; }
 
     /**
      * Returns the group path of the object. For example, "/Images".
      *
      * @return The group path of the object.
      */
-    public final String getPath() {
-        return path;
-    }
+    public final String getPath() { return path; }
 
     /**
      * Sets the name of the object.
@@ -282,7 +271,8 @@ public abstract class HObject implements Serializable
      *
      * @throws Exception if name is root or contains separator
      */
-    public void setName(String newName) throws Exception {
+    public void setName(String newName) throws Exception
+    {
         if (newName == null)
             throw new IllegalArgumentException("The new name is NULL");
 
@@ -296,7 +286,8 @@ public abstract class HObject implements Serializable
             newName = newName.substring(0, newName.length() - 2);
 
         if (newName.contains(HObject.SEPARATOR))
-            throw new IllegalArgumentException("The new name contains the SEPARATOR character: " + HObject.SEPARATOR);
+            throw new IllegalArgumentException("The new name contains the SEPARATOR character: " +
+                                               HObject.SEPARATOR);
 
         name = newName;
     }
@@ -314,7 +305,8 @@ public abstract class HObject implements Serializable
      *
      * @throws Exception if a failure occurred
      */
-    public void setPath(String newPath) throws Exception {
+    public void setPath(String newPath) throws Exception
+    {
         if (newPath == null)
             newPath = "/";
 
@@ -331,7 +323,8 @@ public abstract class HObject implements Serializable
      *
      * @throws Exception if a failure occurred
      */
-    public void setFullname(String thePath, String theName) throws Exception {
+    public void setFullname(String thePath, String theName) throws Exception
+    {
         // file name is packed in the full path
         if ((theName == null) && (thePath != null)) {
             if (thePath.equals(SEPARATOR)) {
@@ -400,7 +393,8 @@ public abstract class HObject implements Serializable
      *
      * @return the full name of the object.
      */
-    public String createFullname(String thePath, String theName) {
+    public String createFullname(String thePath, String theName)
+    {
         String theFullName;
 
         if (thePath != null) {
@@ -458,7 +452,8 @@ public abstract class HObject implements Serializable
      *
      * @return the file identifier of of the file containing the object.
      */
-    public final long getFID() {
+    public final long getFID()
+    {
         if (fileFormat != null)
             return fileFormat.getFID();
         else
@@ -470,9 +465,7 @@ public abstract class HObject implements Serializable
      *
      * @return The file that contains the object.
      */
-    public final FileFormat getFileFormat() {
-        return fileFormat;
-    }
+    public final FileFormat getFileFormat() { return fileFormat; }
 
     /**
      * Returns a cloned copy of the object identifier.
@@ -482,7 +475,8 @@ public abstract class HObject implements Serializable
      *
      * @return the cloned copy of the object OID.
      */
-    public final long[] getOID() {
+    public final long[] getOID()
+    {
         if (oid == null) {
             return null;
         }
@@ -504,7 +498,8 @@ public abstract class HObject implements Serializable
      *
      * @return true if the ID of the object equals the given OID; otherwise, returns false.
      */
-    public final boolean equalsOID(long[] theID) {
+    public final boolean equalsOID(long[] theID)
+    {
         if ((theID == null) || (oid == null))
             return false;
 
@@ -514,7 +509,7 @@ public abstract class HObject implements Serializable
         if (n1 == 0 || n2 == 0)
             return false;
 
-        int n = Math.min(n1, n2);
+        int n             = Math.min(n1, n2);
         boolean isMatched = (theID[0] == oid[0]);
 
         for (int i = 1; isMatched && (i < n); i++)
@@ -536,11 +531,14 @@ public abstract class HObject implements Serializable
      * @return The name of the object.
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
         if (this instanceof Group)
-            if (((Group) this).isRoot() && this.getFileFormat() != null) return this.getFileFormat().getName();
+            if (((Group)this).isRoot() && this.getFileFormat() != null)
+                return this.getFileFormat().getName();
 
-        if (name != null) return name;
+        if (name != null)
+            return name;
 
         return super.toString();
     }
@@ -553,9 +551,10 @@ public abstract class HObject implements Serializable
      *
      * @return true if the object is equal by OID
      */
-    public boolean equals(HObject obj) {
+    public boolean equals(HObject obj)
+    {
         // Cast down to Object to avoid infinite recursion
-        if (this.equals((Object) obj))
+        if (this.equals((Object)obj))
             return true;
 
         // comparing the state of OID with
@@ -564,7 +563,8 @@ public abstract class HObject implements Serializable
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         if (obj == null)
             return false;
 
@@ -577,8 +577,9 @@ public abstract class HObject implements Serializable
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         // We are returning the OID as a hashcode value.
-        return (int) oid[0];
+        return (int)oid[0];
     }
 }

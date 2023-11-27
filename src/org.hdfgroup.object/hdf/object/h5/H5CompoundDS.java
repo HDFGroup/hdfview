@@ -24,8 +24,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import hdf.object.Attribute;
+import hdf.object.CompoundDS;
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
+import hdf.object.Utils;
+import hdf.object.h5.H5Datatype;
+import hdf.object.h5.H5MetaDataContainer;
+import hdf.object.h5.H5ReferenceType;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
@@ -37,40 +47,32 @@ import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.hdf5lib.structs.H5O_token_t;
 
-import hdf.object.Attribute;
-import hdf.object.CompoundDS;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
-import hdf.object.Utils;
-
-import hdf.object.h5.H5Datatype;
-import hdf.object.h5.H5MetaDataContainer;
-import hdf.object.h5.H5ReferenceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The H5CompoundDS class defines an HDF5 dataset of compound datatypes.
  *
- * An HDF5 dataset is an object composed of a collection of data elements, or raw data, and metadata that stores a
- * description of the data elements, data layout, and all other information necessary to write, read, and interpret the
- * stored data.
+ * An HDF5 dataset is an object composed of a collection of data elements, or raw data, and metadata that
+ * stores a description of the data elements, data layout, and all other information necessary to write, read,
+ * and interpret the stored data.
  *
- * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of one or more
- * atomic types or small arrays of such types. Each member of a compound type has a name which is unique within that
- * type, and a byte offset that determines the first byte (smallest byte address) of that member in a compound datum.
+ * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of
+ * one or more atomic types or small arrays of such types. Each member of a compound type has a name which is
+ * unique within that type, and a byte offset that determines the first byte (smallest byte address) of that
+ * member in a compound datum.
  *
  * For more information on HDF5 datasets and datatypes, read
  * <a href="https://hdfgroup.github.io/hdf5/_h5_d__u_g.html#sec_dataset">HDF5 Datasets in HDF5 User Guide</a>
- * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+ * Guide</a>
  *
- * There are two basic types of compound datasets: simple compound data and nested compound data. Members of a simple
- * compound dataset have atomic datatypes. Members of a nested compound dataset are compound or array of compound data.
+ * There are two basic types of compound datasets: simple compound data and nested compound data. Members of a
+ * simple compound dataset have atomic datatypes. Members of a nested compound dataset are compound or array
+ * of compound data.
  *
- * Since Java does not understand C structures, we cannot directly read/write compound data values as in the following C
- * example.
+ * Since Java does not understand C structures, we cannot directly read/write compound data values as in the
+ * following C example.
  *
  * <pre>
  * typedef struct s1_t {
@@ -84,16 +86,15 @@ import hdf.object.h5.H5ReferenceType;
  *     H5Dread(..., s1);
  * </pre>
  *
- * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by fields
- * instead of compound structure. As for the example above, the java.util.Vector object has three elements: int[LENGTH],
- * float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of int, float and double, we will be
- * able to read/write the compound data by field.
+ * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by
+ * fields instead of compound structure. As for the example above, the java.util.Vector object has three
+ * elements: int[LENGTH], float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of
+ * int, float and double, we will be able to read/write the compound data by field.
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H5CompoundDS extends CompoundDS implements MetaDataContainer
-{
+public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
     private static final long serialVersionUID = -5968625125574032736L;
 
     private static final Logger log = LoggerFactory.getLogger(H5CompoundDS.class);
@@ -131,7 +132,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @param thePath
      *            the full path of the data object, e.g. "/arrays/".
      */
-    public H5CompoundDS(FileFormat theFile, String theName, String thePath) {
+    public H5CompoundDS(FileFormat theFile, String theName, String thePath)
+    {
         this(theFile, theName, thePath, null);
     }
 
@@ -149,7 +151,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      *            the oid of the data object.
      */
     @Deprecated
-    public H5CompoundDS(FileFormat theFile, String theName, String thePath, long[] oid) {
+    public H5CompoundDS(FileFormat theFile, String theName, String thePath, long[] oid)
+    {
         super(theFile, theName, thePath, oid);
         objMetadata = new H5MetaDataContainer(theFile, theName, thePath, this);
 
@@ -158,12 +161,14 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                 // retrieve the object ID
                 byte[] refBuf = null;
                 try {
-                    refBuf = H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
+                    refBuf =
+                        H5.H5Rcreate_object(theFile.getFID(), this.getFullName(), HDF5Constants.H5P_DEFAULT);
                     this.oid = HDFNativeData.byteToLong(refBuf);
                     log.trace("constructor REF {} to OID {}", refBuf, this.oid);
                 }
                 catch (Exception ex) {
-                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(), this.getFullName());
+                    log.debug("constructor ID {} for {} failed H5Rcreate_object", theFile.getFID(),
+                              this.getFullName());
                 }
                 finally {
                     if (refBuf != null)
@@ -172,7 +177,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             }
             log.trace("constructor OID {}", this.oid);
             try {
-                objInfo = H5.H5Oget_info_by_name(theFile.getFID(), this.getFullName(), HDF5Constants.H5O_INFO_BASIC, HDF5Constants.H5P_DEFAULT);
+                objInfo = H5.H5Oget_info_by_name(theFile.getFID(), this.getFullName(),
+                                                 HDF5Constants.H5O_INFO_BASIC, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
                 objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
@@ -180,7 +186,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
         }
         else {
             this.oid = null;
-            objInfo = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
+            objInfo  = new H5O_info_t(-1L, null, 0, 0, 0L, 0L, 0L, 0L, 0L);
         }
     }
 
@@ -190,7 +196,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.HObject#open()
      */
     @Override
-    public long open() {
+    public long open()
+    {
         long did = HDF5Constants.H5I_INVALID_HID;
 
         if (getFID() < 0)
@@ -215,7 +222,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.HObject#close(int)
      */
     @Override
-    public void close(long did) {
+    public void close(long did)
+    {
         if (did >= 0) {
             try {
                 H5.H5Fflush(did, HDF5Constants.H5F_SCOPE_LOCAL);
@@ -279,16 +287,17 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * </pre>
      */
     @Override
-    public void init() {
+    public void init()
+    {
         if (inited) {
             resetSelection();
             log.trace("init(): Dataset already initialized");
             return; // already called. Initialize only once
         }
 
-        long did = HDF5Constants.H5I_INVALID_HID;
-        long tid = HDF5Constants.H5I_INVALID_HID;
-        long sid = HDF5Constants.H5I_INVALID_HID;
+        long did     = HDF5Constants.H5I_INVALID_HID;
+        long tid     = HDF5Constants.H5I_INVALID_HID;
+        long sid     = HDF5Constants.H5I_INVALID_HID;
         flatNameList = new Vector<>();
         flatTypeList = new Vector<>();
 
@@ -299,8 +308,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             try {
                 pid = H5.H5Dget_create_plist(did);
                 try {
-                    int nfiles = H5.H5Pget_external_count(pid);
-                    isExternal = (nfiles > 0);
+                    int nfiles     = H5.H5Pget_external_count(pid);
+                    isExternal     = (nfiles > 0);
                     int layoutType = H5.H5Pget_layout(pid);
                     if (isVirtual = (layoutType == HDF5Constants.H5D_VIRTUAL)) {
                         try {
@@ -323,7 +332,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                             log.debug("init(): vds count error: ", err);
                         }
                     }
-                    log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal, isVirtual);
+                    log.trace("init(): pid={} nfiles={} isExternal={} isVirtual={}", pid, nfiles, isExternal,
+                              isVirtual);
                 }
                 catch (Exception ex) {
                     log.debug("init(): check if it is an external or virtual dataset: ", ex);
@@ -342,8 +352,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             }
 
             try {
-                sid = H5.H5Dget_space(did);
-                rank = H5.H5Sget_simple_extent_ndims(sid);
+                sid        = H5.H5Dget_space(did);
+                rank       = H5.H5Sget_simple_extent_ndims(sid);
                 space_type = H5.H5Sget_simple_extent_type(sid);
                 if (space_type == HDF5Constants.H5S_NULL)
                     isNULL = true;
@@ -355,14 +365,14 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                 if (rank == 0) {
                     // a scalar data point
                     isScalar = true;
-                    rank = 1;
-                    dims = new long[] { 1 };
+                    rank     = 1;
+                    dims     = new long[] {1};
                     log.trace("init(): rank is a scalar data point");
                 }
                 else {
                     isScalar = false;
-                    dims = new long[rank];
-                    maxDims = new long[rank];
+                    dims     = new long[rank];
+                    maxDims  = new long[rank];
                     H5.H5Sget_simple_extent_dims(sid, dims, maxDims);
                     log.trace("init(): rank={}, dims={}, maxDims={}", rank, dims, maxDims);
                 }
@@ -382,11 +392,13 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                     else
                         datatype = new H5Datatype(getFileFormat(), tid);
 
-                    log.trace("init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}", tid,
-                            datatype.isText(), datatype.isVLEN(), ((H5Datatype) datatype).isEnum(), datatype.isUnsigned(),
-                            ((H5Datatype) datatype).isStdRef(), ((H5Datatype) datatype).isRegRef());
+                    log.trace(
+                        "init(): tid={} has isText={} : isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}",
+                        tid, datatype.isText(), datatype.isVLEN(), ((H5Datatype)datatype).isEnum(),
+                        datatype.isUnsigned(), ((H5Datatype)datatype).isStdRef(),
+                        ((H5Datatype)datatype).isRegRef());
 
-                    H5Datatype.extractCompoundInfo((H5Datatype) datatype, "", flatNameList, flatTypeList);
+                    H5Datatype.extractCompoundInfo((H5Datatype)datatype, "", flatNameList, flatTypeList);
                 }
                 catch (Exception ex) {
                     log.debug("init(): failed to create datatype for dataset: ", ex);
@@ -397,32 +409,32 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                 numberOfMembers = flatNameList.size();
                 log.trace("init(): numberOfMembers={}", numberOfMembers);
 
-                memberNames = new String[numberOfMembers];
-                memberTypes = new Datatype[numberOfMembers];
-                memberOrders = new int[numberOfMembers];
+                memberNames      = new String[numberOfMembers];
+                memberTypes      = new Datatype[numberOfMembers];
+                memberOrders     = new int[numberOfMembers];
                 isMemberSelected = new boolean[numberOfMembers];
-                memberDims = new Object[numberOfMembers];
+                memberDims       = new Object[numberOfMembers];
 
                 for (int i = 0; i < numberOfMembers; i++) {
                     isMemberSelected[i] = true;
-                    memberOrders[i] = 1;
-                    memberDims[i] = null;
+                    memberOrders[i]     = 1;
+                    memberDims[i]       = null;
 
                     try {
                         memberTypes[i] = flatTypeList.get(i);
                         log.trace("init()[{}]: memberTypes[{}]={}", i, i, memberTypes[i].getDescription());
 
                         if (memberTypes[i].isArray()) {
-                            long mdim[] = memberTypes[i].getArrayDims();
-                            int idim[] = new int[mdim.length];
+                            long mdim[]      = memberTypes[i].getArrayDims();
+                            int idim[]       = new int[mdim.length];
                             int arrayNpoints = 1;
 
                             for (int j = 0; j < idim.length; j++) {
-                                idim[j] = (int) mdim[j];
+                                idim[j] = (int)mdim[j];
                                 arrayNpoints *= idim[j];
                             }
 
-                            memberDims[i] = idim;
+                            memberDims[i]   = idim;
                             memberOrders[i] = arrayNpoints;
                         }
                     }
@@ -445,9 +457,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             }
             catch (HDF5Exception ex) {
                 numberOfMembers = 0;
-                memberNames = null;
-                memberTypes = null;
-                memberOrders = null;
+                memberNames     = null;
+                memberTypes     = null;
+                memberOrders    = null;
                 log.debug("init(): ", ex);
             }
             finally {
@@ -464,7 +476,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
             close(did);
 
-            startDims = new long[rank];
+            startDims    = new long[rank];
             selectedDims = new long[rank];
 
             resetSelection();
@@ -479,7 +491,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      *
      * @return true if it has any attributes, false otherwise.
      */
-    public long[] getToken() {
+    public long[] getToken()
+    {
         H5O_token_t token = objInfo.token;
         return HDFNativeData.byteToLong(token.data);
     }
@@ -490,7 +503,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @return true if it has any attributes, false otherwise.
      */
     @Override
-    public boolean hasAttribute() {
+    public boolean hasAttribute()
+    {
         objInfo.num_attrs = objMetadata.getObjectAttributeSize();
 
         if (objInfo.num_attrs < 0) {
@@ -508,7 +522,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                 finally {
                     close(did);
                 }
-                objMetadata.setObjectAttributeSize((int) objInfo.num_attrs);
+                objMetadata.setObjectAttributeSize((int)objInfo.num_attrs);
             }
             else {
                 log.debug("hasAttribute(): could not open dataset");
@@ -525,7 +539,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @return the datatype of the data object.
      */
     @Override
-    public Datatype getDatatype() {
+    public Datatype getDatatype()
+    {
         if (!inited)
             init();
 
@@ -536,7 +551,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             did = open();
             if (did >= 0) {
                 try {
-                    tid = H5.H5Dget_type(did);
+                    tid             = H5.H5Dget_type(did);
                     int nativeClass = H5.H5Tget_class(tid);
                     if (nativeClass == HDF5Constants.H5T_REFERENCE) {
                         long lsize = 1;
@@ -589,7 +604,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * The list should be empty after this call returns.
      */
     @Override
-    public void clear() {
+    public void clear()
+    {
         super.clear();
         objMetadata.clear();
     }
@@ -600,7 +616,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.Dataset#readBytes()
      */
     @Override
-    public byte[] readBytes() throws HDF5Exception {
+    public byte[] readBytes() throws HDF5Exception
+    {
         byte[] theData = null;
 
         if (!isInited())
@@ -610,10 +627,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
         if (did >= 0) {
             long fspace = HDF5Constants.H5I_INVALID_HID;
             long mspace = HDF5Constants.H5I_INVALID_HID;
-            long tid = HDF5Constants.H5I_INVALID_HID;
+            long tid    = HDF5Constants.H5I_INVALID_HID;
 
             try {
-                long[] lsize = { 1 };
+                long[] lsize = {1};
                 for (int j = 0; j < selectedDims.length; j++)
                     lsize[0] *= selectedDims[j];
 
@@ -623,9 +640,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                 // set the rectangle selection
                 // HDF5 bug: for scalar dataset, H5Sselect_hyperslab gives core dump
                 if (rank * dims[0] > 1)
-                    H5.H5Sselect_hyperslab(fspace, HDF5Constants.H5S_SELECT_SET, startDims, selectedStride, selectedDims, null); // set block to 1
+                    H5.H5Sselect_hyperslab(fspace, HDF5Constants.H5S_SELECT_SET, startDims, selectedStride,
+                                           selectedDims, null); // set block to 1
 
-                tid = H5.H5Dget_type(did);
+                tid       = H5.H5Dget_type(did);
                 long size = H5.H5Tget_size(tid) * lsize[0];
                 log.trace("readBytes(): size = {}", size);
 
@@ -634,7 +652,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
                 theData = new byte[(int)size];
 
-                log.trace("readBytes(): H5Dread: did={} tid={} fspace={} mspace={}", did, tid, fspace, mspace);
+                log.trace("readBytes(): H5Dread: did={} tid={} fspace={} mspace={}", did, tid, fspace,
+                          mspace);
                 H5.H5Dread(did, tid, mspace, fspace, HDF5Constants.H5P_DEFAULT, theData);
             }
             catch (Exception ex) {
@@ -759,7 +778,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      *             if object can not be read
      */
     @Override
-    public Object read() throws Exception {
+    public Object read() throws Exception
+    {
         Object readData = null;
 
         if (!isInited())
@@ -789,7 +809,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      *             If there is an error at the HDF5 library level.
      */
     @Override
-    public void write(Object buf) throws Exception {
+    public void write(Object buf) throws Exception
+    {
         if (this.getFileFormat().isReadOnly())
             throw new Exception("cannot write to compound dataset in file opened as read-only");
 
@@ -810,7 +831,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * regular types.
      */
     @Override
-    protected Object convertByteMember(final Datatype dtype, byte[] byteData) {
+    protected Object convertByteMember(final Datatype dtype, byte[] byteData)
+    {
         Object theObj = null;
         log.debug("convertByteMember(): dtype={} byteData={}", dtype, byteData);
 
@@ -822,9 +844,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
         return theObj;
     }
 
-    private Object compoundDatasetCommonIO(H5File.IO_TYPE ioType, Object writeBuf) throws Exception {
-        H5Datatype dsDatatype = (H5Datatype) getDatatype();
-        Object theData = null;
+    private Object compoundDatasetCommonIO(H5File.IO_TYPE ioType, Object writeBuf) throws Exception
+    {
+        H5Datatype dsDatatype = (H5Datatype)getDatatype();
+        Object theData        = null;
 
         if (numberOfMembers <= 0) {
             log.debug("compoundDatasetCommonIO(): Dataset contains no members");
@@ -857,17 +880,19 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
         long did = open();
         if (did >= 0) {
-            long[] spaceIDs = { HDF5Constants.H5I_INVALID_HID, HDF5Constants.H5I_INVALID_HID }; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
+            long[] spaceIDs = {HDF5Constants.H5I_INVALID_HID,
+                               HDF5Constants.H5I_INVALID_HID}; // spaceIDs[0]=mspace, spaceIDs[1]=fspace
 
             try {
                 /*
                  * NOTE: this call sets up a hyperslab selection in the file according to the
                  * current selection in the dataset object.
                  */
-                long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(did, dims, startDims,
-                        selectedStride, selectedDims, spaceIDs);
+                long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(
+                    did, dims, startDims, selectedStride, selectedDims, spaceIDs);
 
-                theData = compoundTypeIO(ioType, did, spaceIDs, (int) totalSelectedSpacePoints, dsDatatype, writeBuf, new int[]{0});
+                theData = compoundTypeIO(ioType, did, spaceIDs, (int)totalSelectedSpacePoints, dsDatatype,
+                                         writeBuf, new int[] {0});
             }
             finally {
                 if (HDF5Constants.H5S_ALL != spaceIDs[0]) {
@@ -875,7 +900,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                         H5.H5Sclose(spaceIDs[0]);
                     }
                     catch (Exception ex) {
-                        log.debug("compoundDatasetCommonIO(): H5Sclose(spaceIDs[0] {}) failure: ", spaceIDs[0], ex);
+                        log.debug(
+                            "compoundDatasetCommonIO(): H5Sclose(spaceIDs[0] {}) failure: ", spaceIDs[0], ex);
                     }
                 }
 
@@ -884,7 +910,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                         H5.H5Sclose(spaceIDs[1]);
                     }
                     catch (Exception ex) {
-                        log.debug("compoundDatasetCommonIO(): H5Sclose(spaceIDs[1] {}) failure: ", spaceIDs[1], ex);
+                        log.debug(
+                            "compoundDatasetCommonIO(): H5Sclose(spaceIDs[1] {}) failure: ", spaceIDs[1], ex);
                     }
                 }
 
@@ -907,24 +934,26 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * generated from H5Datatype.extractCompoundInfo() at dataset init time.
      */
     private Object compoundTypeIO(H5File.IO_TYPE ioType, long did, long[] spaceIDs, int nSelPoints,
-            final H5Datatype cmpdType, Object writeBuf, int[] globalMemberIndex) {
+                                  final H5Datatype cmpdType, Object writeBuf, int[] globalMemberIndex)
+    {
         Object theData = null;
 
         if (cmpdType.isArray()) {
             log.trace("compoundTypeIO(): ARRAY type");
 
             long[] arrayDims = cmpdType.getArrayDims();
-            int arrSize = nSelPoints;
+            int arrSize      = nSelPoints;
             for (int i = 0; i < arrayDims.length; i++)
                 arrSize *= arrayDims[i];
-            theData = compoundTypeIO(ioType, did, spaceIDs, arrSize, (H5Datatype) cmpdType.getDatatypeBase(), writeBuf, globalMemberIndex);
+            theData = compoundTypeIO(ioType, did, spaceIDs, arrSize, (H5Datatype)cmpdType.getDatatypeBase(),
+                                     writeBuf, globalMemberIndex);
         }
         else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
             /*
              * TODO: true variable-length support.
              */
             String[] errVal = new String[nSelPoints];
-            String errStr = "*UNSUPPORTED*";
+            String errStr   = "*UNSUPPORTED*";
 
             for (int j = 0; j < nSelPoints; j++)
                 errVal[j] = errStr;
@@ -937,28 +966,30 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                 baseType = baseType.getDatatypeBase();
             }
 
-            List<Object> fakeVlenData = (List<Object>) H5Datatype.allocateArray((H5Datatype) baseType, nSelPoints);
+            List<Object> fakeVlenData =
+                (List<Object>)H5Datatype.allocateArray((H5Datatype)baseType, nSelPoints);
             fakeVlenData.add(errVal);
 
             theData = fakeVlenData;
         }
         else if (cmpdType.isCompound()) {
             List<Object> memberDataList = null;
-            List<Datatype> typeList = cmpdType.getCompoundMemberTypes();
+            List<Datatype> typeList     = cmpdType.getCompoundMemberTypes();
 
-            log.trace("compoundTypeIO(): {} {} members:", (ioType == H5File.IO_TYPE.READ) ? "read" : "write", typeList.size());
+            log.trace("compoundTypeIO(): {} {} members:", (ioType == H5File.IO_TYPE.READ) ? "read" : "write",
+                      typeList.size());
 
             if (ioType == H5File.IO_TYPE.READ)
-                memberDataList = (List<Object>) H5Datatype.allocateArray(cmpdType, nSelPoints);
+                memberDataList = (List<Object>)H5Datatype.allocateArray(cmpdType, nSelPoints);
 
             try {
                 for (int i = 0, writeListIndex = 0; i < typeList.size(); i++) {
                     H5Datatype memberType = null;
-                    String memberName = null;
-                    Object memberData = null;
+                    String memberName     = null;
+                    Object memberData     = null;
 
                     try {
-                        memberType = (H5Datatype) typeList.get(i);
+                        memberType = (H5Datatype)typeList.get(i);
                     }
                     catch (Exception ex) {
                         log.debug("compoundTypeIO(): get member {} failure: ", i, ex);
@@ -991,13 +1022,17 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                         }
                     }
 
-                    log.trace("compoundTypeIO(): member[{}]({}) is type {}", i, memberName, memberType.getDescription());
+                    log.trace("compoundTypeIO(): member[{}]({}) is type {}", i, memberName,
+                              memberType.getDescription());
 
                     if (ioType == H5File.IO_TYPE.READ) {
                         try {
                             if (memberType.isCompound())
-                                memberData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType, writeBuf, globalMemberIndex);
-                            else if (memberType.isArray() /* || (memberType.isVLEN() && !memberType.isVarStr()) */) {
+                                memberData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType,
+                                                            writeBuf, globalMemberIndex);
+                            else if (
+                                memberType
+                                    .isArray() /* || (memberType.isVLEN() && !memberType.isVarStr()) */) {
                                 /*
                                  * Recursively detect any nested array/vlen of compound types.
                                  */
@@ -1017,15 +1052,18 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                                      */
                                     globalMemberIndex[0]++;
 
-                                    memberData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType, writeBuf, globalMemberIndex);
+                                    memberData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType,
+                                                                writeBuf, globalMemberIndex);
                                 }
                                 else {
-                                    memberData = readSingleCompoundMember(did, spaceIDs, nSelPoints, memberType, memberName);
+                                    memberData = readSingleCompoundMember(did, spaceIDs, nSelPoints,
+                                                                          memberType, memberName);
                                     globalMemberIndex[0]++;
                                 }
                             }
                             else {
-                                memberData = readSingleCompoundMember(did, spaceIDs, nSelPoints, memberType, memberName);
+                                memberData = readSingleCompoundMember(did, spaceIDs, nSelPoints, memberType,
+                                                                      memberName);
                                 globalMemberIndex[0]++;
                             }
                         }
@@ -1037,7 +1075,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
                         if (memberData == null) {
                             String[] errVal = new String[nSelPoints];
-                            String errStr = "*ERROR*";
+                            String errStr   = "*ERROR*";
 
                             for (int j = 0; j < nSelPoints; j++)
                                 errVal[j] = errStr;
@@ -1052,7 +1090,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                             /*
                              * TODO: currently doesn't correctly handle non-selected compound members.
                              */
-                            memberData = ((List<?>) writeBuf).get(writeListIndex++);
+                            memberData = ((List<?>)writeBuf).get(writeListIndex++);
                         }
                         catch (Exception ex) {
                             log.debug("compoundTypeIO(): get member[{}] data failure: ", i, ex);
@@ -1068,11 +1106,13 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
                         try {
                             if (memberType.isCompound()) {
-                                List<?> nestedList = (List<?>) ((List<?>) writeBuf).get(writeListIndex++);
-                                compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType, nestedList, globalMemberIndex);
+                                List<?> nestedList = (List<?>)((List<?>)writeBuf).get(writeListIndex++);
+                                compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType, nestedList,
+                                               globalMemberIndex);
                             }
                             else {
-                                writeSingleCompoundMember(did, spaceIDs, nSelPoints, memberType, memberName, memberData);
+                                writeSingleCompoundMember(did, spaceIDs, nSelPoints, memberType, memberName,
+                                                          memberData);
                                 globalMemberIndex[0]++;
                             }
                         }
@@ -1099,9 +1139,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * compound datatype and inserting the single field into that datatype.
      */
     private Object readSingleCompoundMember(long dsetID, long[] spaceIDs, int nSelPoints,
-            final H5Datatype memberType, String memberName) throws Exception {
-        H5Datatype dsDatatype = (H5Datatype) this.getDatatype();
-        Object memberData = null;
+                                            final H5Datatype memberType, String memberName) throws Exception
+    {
+        H5Datatype dsDatatype = (H5Datatype)this.getDatatype();
+        Object memberData     = null;
 
         try {
             memberData = H5Datatype.allocateArray(memberType, nSelPoints);
@@ -1126,8 +1167,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                 compTid = dsDatatype.createCompoundFieldType(memberName);
             }
             catch (HDF5Exception ex) {
-                log.debug("readSingleCompoundMember(): unable to create compound field type for member of type {}: ",
-                        memberType.getDescription(), ex);
+                log.debug(
+                    "readSingleCompoundMember(): unable to create compound field type for member of type {}: ",
+                    memberType.getDescription(), ex);
                 memberData = null;
             }
 
@@ -1136,25 +1178,35 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
              */
             try {
                 if (memberType.isVarStr()) {
-                    log.trace("readSingleCompoundMember(): H5DreadVL did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
-                            dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                    log.trace(
+                        "readSingleCompoundMember(): H5DreadVL did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                        dsetID, compTid,
+                        (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                        (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                    H5.H5Dread_VLStrings(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) memberData);
+                    H5.H5Dread_VLStrings(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                                         (Object[])memberData);
                 }
-                else if (memberType.isVLEN() || (memberType.isArray() && memberType.getDatatypeBase().isVLEN())) {
-                    log.trace("readSingleCompoundMember(): H5DreadVL did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
-                            dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                else if (memberType.isVLEN() ||
+                         (memberType.isArray() && memberType.getDatatypeBase().isVLEN())) {
+                    log.trace(
+                        "readSingleCompoundMember(): H5DreadVL did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                        dsetID, compTid,
+                        (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                        (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                    H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (Object[]) memberData);
+                    H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                                 (Object[])memberData);
                 }
                 else {
-                    log.trace("readSingleCompoundMember(): H5Dread did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
-                            dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                    log.trace(
+                        "readSingleCompoundMember(): H5Dread did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                        dsetID, compTid,
+                        (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                        (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                    H5.H5Dread(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, memberData);
+                    H5.H5Dread(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                               memberData);
                 }
             }
             catch (HDF5DataFiltersException exfltr) {
@@ -1184,7 +1236,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                  * compounds and arrays of compounds), we must manually convert the byte[] into
                  * something usable.
                  */
-                memberData = convertByteMember(memberType, (byte[]) memberData);
+                memberData = convertByteMember(memberType, (byte[])memberData);
             }
         }
 
@@ -1196,8 +1248,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * compound datatype and inserting the single field into that datatype.
      */
     private void writeSingleCompoundMember(long dsetID, long[] spaceIDs, int nSelPoints,
-            final H5Datatype memberType, String memberName, Object theData) throws Exception {
-        H5Datatype dsDatatype = (H5Datatype) this.getDatatype();
+                                           final H5Datatype memberType, String memberName, Object theData)
+        throws Exception
+    {
+        H5Datatype dsDatatype = (H5Datatype)this.getDatatype();
 
         /*
          * Check for any unsupported datatypes before attempting to write this compound
@@ -1216,24 +1270,26 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             if (memberType.isUnsigned()) {
                 // Check if we need to convert unsigned integer data from Java-style
                 // to C-style integers
-                long tsize = memberType.getDatatypeSize();
+                long tsize   = memberType.getDatatypeSize();
                 String cname = theData.getClass().getName();
-                char dname = cname.charAt(cname.lastIndexOf('[') + 1);
-                boolean doIntConversion = (((tsize == 1) && (dname == 'S'))
-                        || ((tsize == 2) && (dname == 'I')) || ((tsize == 4) && (dname == 'J')));
+                char dname   = cname.charAt(cname.lastIndexOf('[') + 1);
+                boolean doIntConversion =
+                    (((tsize == 1) && (dname == 'S')) || ((tsize == 2) && (dname == 'I')) ||
+                     ((tsize == 4) && (dname == 'J')));
 
                 if (doIntConversion) {
-                    log.trace("writeSingleCompoundMember(): converting integer data to unsigned C-type integers");
+                    log.trace(
+                        "writeSingleCompoundMember(): converting integer data to unsigned C-type integers");
                     tmpData = convertToUnsignedC(theData, null);
                 }
             }
             else if (memberType.isString() && (Array.get(theData, 0) instanceof String)) {
                 log.trace("writeSingleCompoundMember(): converting string array to byte array");
-                tmpData = stringToByte((String[]) theData, (int) memberType.getDatatypeSize());
+                tmpData = stringToByte((String[])theData, (int)memberType.getDatatypeSize());
             }
             else if (memberType.isEnum() && (Array.get(theData, 0) instanceof String)) {
                 log.trace("writeSingleCompoundMember(): converting enum names to values");
-                tmpData = memberType.convertEnumNameToValue((String[]) theData);
+                tmpData = memberType.convertEnumNameToValue((String[])theData);
             }
         }
         catch (Exception ex) {
@@ -1255,8 +1311,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             compTid = dsDatatype.createCompoundFieldType(memberName);
         }
         catch (HDF5Exception ex) {
-            log.debug("writeSingleCompoundMember(): unable to create compound field type for member of type {}: ",
-                    memberType.getDescription(), ex);
+            log.debug(
+                "writeSingleCompoundMember(): unable to create compound field type for member of type {}: ",
+                memberType.getDescription(), ex);
         }
 
         /*
@@ -1264,16 +1321,19 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
          */
         try {
             if (memberType.isVarStr()) {
-                log.trace("writeSingleCompoundMember(): H5Dwrite_string did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
-                        dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                log.trace(
+                    "writeSingleCompoundMember(): H5Dwrite_string did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                    dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                H5.H5Dwrite_string(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, (String[]) tmpData);
+                H5.H5Dwrite_string(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                                   (String[])tmpData);
             }
             else {
-                log.trace("writeSingleCompoundMember(): H5Dwrite did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
-                        dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
-                                (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+                log.trace(
+                    "writeSingleCompoundMember(): H5Dwrite did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                    dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                    (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
                 // BUG!!! does not write nested compound data and no
                 // exception was caught. Need to check if it is a java
@@ -1300,7 +1360,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @return the converted data buffer.
      */
     @Override
-    public Object convertFromUnsignedC() {
+    public Object convertFromUnsignedC()
+    {
         throw new UnsupportedOperationException("H5CompoundDS:convertFromUnsignedC Unsupported operation.");
     }
 
@@ -1314,7 +1375,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @return the converted data buffer.
      */
     @Override
-    public Object convertToUnsignedC() {
+    public Object convertToUnsignedC()
+    {
         throw new UnsupportedOperationException("H5CompoundDS:convertToUnsignedC Unsupported operation.");
     }
 
@@ -1329,8 +1391,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      *             if the metadata can not be retrieved
      */
     @Override
-    public List<Attribute> getMetadata() throws HDF5Exception {
-        int gmIndexType = 0;
+    public List<Attribute> getMetadata() throws HDF5Exception
+    {
+        int gmIndexType  = 0;
         int gmIndexOrder = 0;
 
         try {
@@ -1361,7 +1424,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @throws HDF5Exception
      *             if the metadata can not be retrieved
      */
-    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception {
+    public List<Attribute> getMetadata(int... attrPropList) throws HDF5Exception
+    {
         if (!isInited())
             init();
 
@@ -1373,7 +1437,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
         }
 
         if (objMetadata.getAttributeList() == null) {
-            long did = HDF5Constants.H5I_INVALID_HID;
+            long did  = HDF5Constants.H5I_INVALID_HID;
             long pcid = HDF5Constants.H5I_INVALID_HID;
             long paid = HDF5Constants.H5I_INVALID_HID;
 
@@ -1381,11 +1445,11 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             if (did >= 0) {
                 try {
                     // get the compression and chunk information
-                    pcid = H5.H5Dget_create_plist(did);
-                    paid = H5.H5Dget_access_plist(did);
+                    pcid             = H5.H5Dget_create_plist(did);
+                    paid             = H5.H5Dget_access_plist(did);
                     long storageSize = H5.H5Dget_storage_size(did);
-                    int nfilt = H5.H5Pget_nfilters(pcid);
-                    int layoutType = H5.H5Pget_layout(pcid);
+                    int nfilt        = H5.H5Pget_nfilters(pcid);
+                    int layoutType   = H5.H5Pget_layout(pcid);
 
                     storageLayout.setLength(0);
                     compression.setLength(0);
@@ -1406,7 +1470,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                             if (datumSize < 0) {
                                 long tmptid = HDF5Constants.H5I_INVALID_HID;
                                 try {
-                                    tmptid = H5.H5Dget_type(did);
+                                    tmptid    = H5.H5Dget_type(did);
                                     datumSize = H5.H5Tget_size(tmptid);
                                 }
                                 finally {
@@ -1414,7 +1478,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                                         H5.H5Tclose(tmptid);
                                     }
                                     catch (Exception ex2) {
-                                        log.debug("getMetadata(): H5Tclose(tmptid {}) failure: ", tmptid, ex2);
+                                        log.debug("getMetadata(): H5Tclose(tmptid {}) failure: ", tmptid,
+                                                  ex2);
                                     }
                                 }
                             }
@@ -1426,7 +1491,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                             /* compression ratio = uncompressed size / compressed size */
 
                             if (storageSize != 0) {
-                                double ratio = (double) uncompSize / (double) storageSize;
+                                double ratio     = (double)uncompSize / (double)storageSize;
                                 DecimalFormat df = new DecimalFormat();
                                 df.setMinimumFractionDigits(3);
                                 df.setMaximumFractionDigits(3);
@@ -1465,9 +1530,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                                     try {
                                         H5.H5Pget_virtual_vspace(pcid, next);
                                         H5.H5Pget_virtual_srcspace(pcid, next);
-                                        String fname = H5.H5Pget_virtual_filename(pcid, next);
+                                        String fname    = H5.H5Pget_virtual_filename(pcid, next);
                                         String dsetname = H5.H5Pget_virtual_dsetname(pcid, next);
-                                        storageLayout.append("\n").append(fname).append(" : ").append(dsetname);
+                                        storageLayout.append("\n").append(fname).append(" : ").append(
+                                            dsetname);
                                     }
                                     catch (Exception err) {
                                         log.debug("getMetadata(): vds space[{}] error: ", next, err);
@@ -1486,13 +1552,13 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                         storageLayout.append("NONE");
                     }
 
-                    int[] flags = { 0, 0 };
-                    long[] cdNelmts = { 20 };
-                    int[] cdValues = new int[(int) cdNelmts[0]];
-                    String[] cdName = { "", "" };
+                    int[] flags     = {0, 0};
+                    long[] cdNelmts = {20};
+                    int[] cdValues  = new int[(int)cdNelmts[0]];
+                    String[] cdName = {"", ""};
                     log.trace("getMetadata(): {} filters in pipeline", nfilt);
-                    int filter = -1;
-                    int[] filterConfig = { 1 };
+                    int filter         = -1;
+                    int[] filterConfig = {1};
 
                     filters.setLength(0);
 
@@ -1509,10 +1575,12 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
                             try {
                                 cdNelmts[0] = 20;
-                                cdValues = new int[(int) cdNelmts[0]];
-                                cdValues = new int[(int) cdNelmts[0]];
-                                filter = H5.H5Pget_filter(pcid, i, flags, cdNelmts, cdValues, 120, cdName, filterConfig);
-                                log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cdName[0], cdNelmts[0]);
+                                cdValues    = new int[(int)cdNelmts[0]];
+                                cdValues    = new int[(int)cdNelmts[0]];
+                                filter = H5.H5Pget_filter(pcid, i, flags, cdNelmts, cdValues, 120, cdName,
+                                                          filterConfig);
+                                log.trace("getMetadata(): filter[{}] is {} has {} elements ", i, cdName[0],
+                                          cdNelmts[0]);
                                 for (int j = 0; j < cdNelmts[0]; j++)
                                     log.trace("getMetadata(): filter[{}] element {} = {}", i, j, cdValues[j]);
                             }
@@ -1556,13 +1624,17 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                                 }
                                 if (flag == HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)
                                     compression.append(": H5Z_FILTER_CONFIG_DECODE_ENABLED");
-                                else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED)
-                                        || (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED
-                                                + HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)))
+                                else if ((flag == HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED) ||
+                                         (flag >= (HDF5Constants.H5Z_FILTER_CONFIG_ENCODE_ENABLED +
+                                                   HDF5Constants.H5Z_FILTER_CONFIG_DECODE_ENABLED)))
                                     compression.append(": H5Z_FILTER_CONFIG_ENCODE_ENABLED");
                             }
                             else {
-                                filters.append("USERDEFINED ").append(cdName[0]).append("(").append(filter).append("): ");
+                                filters.append("USERDEFINED ")
+                                    .append(cdName[0])
+                                    .append("(")
+                                    .append(filter)
+                                    .append("): ");
                                 for (int j = 0; j < cdNelmts[0]; j++) {
                                     if (j > 0)
                                         filters.append(", ");
@@ -1582,7 +1654,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
                     storage.append("SIZE: ").append(storageSize);
 
                     try {
-                        int[] at = { 0 };
+                        int[] at = {0};
                         H5.H5Pget_alloc_time(pcid, at);
                         storage.append(", allocation time: ");
                         if (at[0] == HDF5Constants.H5D_ALLOC_TIME_EARLY)
@@ -1645,7 +1717,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      *             if the metadata can not be written
      */
     @Override
-    public void writeMetadata(Object info) throws Exception {
+    public void writeMetadata(Object info) throws Exception
+    {
         try {
             objMetadata.writeMetadata(info);
         }
@@ -1665,7 +1738,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      *             if the metadata can not be removed
      */
     @Override
-    public void removeMetadata(Object info) throws HDF5Exception {
+    public void removeMetadata(Object info) throws HDF5Exception
+    {
         try {
             objMetadata.removeMetadata(info);
         }
@@ -1674,7 +1748,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             return;
         }
 
-        Attribute attr = (Attribute) info;
+        Attribute attr = (Attribute)info;
         log.trace("removeMetadata(): {}", attr.getAttributeName());
         long did = open();
         if (did >= 0) {
@@ -1700,7 +1774,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      *             if the metadata can not be updated
      */
     @Override
-    public void updateMetadata(Object info) throws HDF5Exception {
+    public void updateMetadata(Object info) throws HDF5Exception
+    {
         try {
             objMetadata.updateMetadata(info);
         }
@@ -1716,7 +1791,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.HObject#setName(java.lang.String)
      */
     @Override
-    public void setName(String newName) throws Exception {
+    public void setName(String newName) throws Exception
+    {
         if (newName == null)
             throw new IllegalArgumentException("The new name is NULL");
 
@@ -1727,7 +1803,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
     /**
      * @deprecated Not for public use in the future. <br>
      *             Using
-     *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[], long[][], Object)}
+     *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[],
+     * long[][], Object)}
      *
      * @param name
      *            the name of the dataset to create.
@@ -1752,27 +1829,30 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      */
     @Deprecated
     public static Dataset create(String name, Group pgroup, long[] dims, String[] memberNames,
-            Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception {
-        if ((pgroup == null) || (name == null) || (dims == null) || (memberNames == null)
-                || (memberDatatypes == null) || (memberSizes == null)) {
+                                 Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception
+    {
+        if ((pgroup == null) || (name == null) || (dims == null) || (memberNames == null) ||
+            (memberDatatypes == null) || (memberSizes == null)) {
             return null;
         }
 
-        int nMembers = memberNames.length;
-        int memberRanks[] = new int[nMembers];
+        int nMembers        = memberNames.length;
+        int memberRanks[]   = new int[nMembers];
         long memberDims[][] = new long[nMembers][1];
         for (int i = 0; i < nMembers; i++) {
-            memberRanks[i] = 1;
+            memberRanks[i]   = 1;
             memberDims[i][0] = memberSizes[i];
         }
 
-        return H5CompoundDS.create(name, pgroup, dims, memberNames, memberDatatypes, memberRanks, memberDims, data);
+        return H5CompoundDS.create(name, pgroup, dims, memberNames, memberDatatypes, memberRanks, memberDims,
+                                   data);
     }
 
     /**
      * @deprecated Not for public use in the future. <br>
      *             Using
-     *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[], long[][], Object)}
+     *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[],
+     * long[][], Object)}
      *
      * @param name
      *            the name of the dataset to create.
@@ -1799,9 +1879,11 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      */
     @Deprecated
     public static Dataset create(String name, Group pgroup, long[] dims, String[] memberNames,
-            Datatype[] memberDatatypes, int[] memberRanks, long[][] memberDims, Object data) throws Exception {
-        return H5CompoundDS.create(name, pgroup, dims, null, null, -1, memberNames, memberDatatypes, memberRanks,
-                memberDims, data);
+                                 Datatype[] memberDatatypes, int[] memberRanks, long[][] memberDims,
+                                 Object data) throws Exception
+    {
+        return H5CompoundDS.create(name, pgroup, dims, null, null, -1, memberNames, memberDatatypes,
+                                   memberRanks, memberDims, data);
     }
 
     /**
@@ -1848,7 +1930,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      *     mdtypes[0] = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
      *     mdtypes[1] = new H5Datatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
      *     mdtypes[2] = new H5Datatype(Datatype.CLASS_STRING, STR_LEN, Datatype.NATIVE, Datatype.NATIVE);
-     *     dset = file.createCompoundDS(&quot;/CompoundDS&quot;, pgroup, DIMs, null, CHUNKs, 9, mnames, mdtypes, null, data);
+     *     dset = file.createCompoundDS(&quot;/CompoundDS&quot;, pgroup, DIMs, null, CHUNKs, 9, mnames,
+     * mdtypes, null, data);
      * }
      * catch (Exception ex) {
      *     failed(message, ex, file);
@@ -1885,23 +1968,25 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @throws Exception
      *             if there is a failure.
      */
-    public static Dataset create(String name, Group pgroup, long[] dims, long[] maxdims, long[] chunks, int gzip,
-            String[] memberNames, Datatype[] memberDatatypes, int[] memberRanks, long[][] memberDims, Object data) throws Exception {
+    public static Dataset create(String name, Group pgroup, long[] dims, long[] maxdims, long[] chunks,
+                                 int gzip, String[] memberNames, Datatype[] memberDatatypes,
+                                 int[] memberRanks, long[][] memberDims, Object data) throws Exception
+    {
         H5CompoundDS dataset = null;
-        String fullPath = null;
-        long did = HDF5Constants.H5I_INVALID_HID;
-        long plist = HDF5Constants.H5I_INVALID_HID;
-        long sid = HDF5Constants.H5I_INVALID_HID;
-        long tid = HDF5Constants.H5I_INVALID_HID;
+        String fullPath      = null;
+        long did             = HDF5Constants.H5I_INVALID_HID;
+        long plist           = HDF5Constants.H5I_INVALID_HID;
+        long sid             = HDF5Constants.H5I_INVALID_HID;
+        long tid             = HDF5Constants.H5I_INVALID_HID;
 
-        if ((pgroup == null) || (name == null) || (dims == null) || ((gzip > 0) && (chunks == null))
-                || (memberNames == null) || (memberDatatypes == null) || (memberRanks == null)
-                || (memberDims == null)) {
+        if ((pgroup == null) || (name == null) || (dims == null) || ((gzip > 0) && (chunks == null)) ||
+            (memberNames == null) || (memberDatatypes == null) || (memberRanks == null) ||
+            (memberDims == null)) {
             log.debug("create(): one or more parameters are null");
             return null;
         }
 
-        H5File file = (H5File) pgroup.getFileFormat();
+        H5File file = (H5File)pgroup.getFileFormat();
         if (file == null) {
             log.debug("create(): parent group FileFormat is null");
             return null;
@@ -1919,9 +2004,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
         fullPath = path + name;
 
-        int typeSize = 0;
-        int nMembers = memberNames.length;
-        long[] mTypes = new long[nMembers];
+        int typeSize   = 0;
+        int nMembers   = memberNames.length;
+        long[] mTypes  = new long[nMembers];
         int memberSize = 1;
         for (int i = 0; i < nMembers; i++) {
             memberSize = 1;
@@ -2001,7 +2086,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             // figure out creation properties
             plist = HDF5Constants.H5P_DEFAULT;
 
-            tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, typeSize);
+            tid        = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, typeSize);
             int offset = 0;
             for (int i = 0; i < nMembers; i++) {
                 H5.H5Tinsert(tid, memberNames[i], offset, mTypes[i]);
@@ -2022,7 +2107,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
             long fid = file.getFID();
 
-            did = H5.H5Dcreate(fid, fullPath, tid, sid, HDF5Constants.H5P_DEFAULT, plist, HDF5Constants.H5P_DEFAULT);
+            did     = H5.H5Dcreate(fid, fullPath, tid, sid, HDF5Constants.H5P_DEFAULT, plist,
+                                   HDF5Constants.H5P_DEFAULT);
             dataset = new H5CompoundDS(file, name, path);
         }
         finally {
@@ -2081,7 +2167,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.Dataset#isString(long)
      */
     @Override
-    public boolean isString(long tid) {
+    public boolean isString(long tid)
+    {
         boolean b = false;
         try {
             b = (HDF5Constants.H5T_STRING == H5.H5Tget_class(tid));
@@ -2099,7 +2186,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.Dataset#getSize(long)
      */
     @Override
-    public long getSize(long tid) {
+    public long getSize(long tid)
+    {
         return H5Datatype.getDatatypeSize(tid);
     }
 
@@ -2109,7 +2197,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.Dataset#isVirtual()
      */
     @Override
-    public boolean isVirtual() {
+    public boolean isVirtual()
+    {
         return isVirtual;
     }
 
@@ -2119,8 +2208,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.Dataset#getVirtualFilename(int)
      */
     @Override
-    public String getVirtualFilename(int index) {
-        if(isVirtual)
+    public String getVirtualFilename(int index)
+    {
+        if (isVirtual)
             return virtualNameList.get(index);
         else
             return null;
@@ -2132,8 +2222,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.Dataset#getVirtualMaps()
      */
     @Override
-    public int getVirtualMaps() {
-        if(isVirtual)
+    public int getVirtualMaps()
+    {
+        if (isVirtual)
             return virtualNameList.size();
         else
             return -1;
@@ -2145,7 +2236,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
      * @see hdf.object.Dataset#toString(String delimiter, int maxItems)
      */
     @Override
-    public String toString(String delimiter, int maxItems) {
+    public String toString(String delimiter, int maxItems)
+    {
         Object theData = originalBuf;
         if (theData == null) {
             log.debug("toString: value is null");
@@ -2170,16 +2262,16 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
 
         // value is an array
         StringBuilder sb = new StringBuilder();
-        int n = Array.getLength(theData);
+        int n            = Array.getLength(theData);
         if ((maxItems > 0) && (n > maxItems))
             n = maxItems;
 
-        log.trace("toString: isStdRef={} Array.getLength={}", ((H5Datatype) getDatatype()).isStdRef(), n);
-        if (((H5Datatype) getDatatype()).isStdRef()) {
+        log.trace("toString: isStdRef={} Array.getLength={}", ((H5Datatype)getDatatype()).isStdRef(), n);
+        if (((H5Datatype)getDatatype()).isStdRef()) {
             String cname = valClass.getName();
-            char dname = cname.charAt(cname.lastIndexOf('[') + 1);
+            char dname   = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: isStdRef with cname={} dname={}", cname, dname);
-            String ref_str = ((H5ReferenceType) getDatatype()).getObjectReferenceName((byte[])theData);
+            String ref_str = ((H5ReferenceType)getDatatype()).getObjectReferenceName((byte[])theData);
             log.trace("toString: ref_str={}", ref_str);
             return ref_str;
         }
@@ -2187,5 +2279,4 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer
             return super.toString(delimiter, maxItems);
         }
     }
-
 }
