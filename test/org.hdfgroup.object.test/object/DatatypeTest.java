@@ -30,12 +30,12 @@ public class DatatypeTest {
 
     private Datatype[] baseTypes = null;
     private int[] classes        = {Datatype.CLASS_BITFIELD, Datatype.CLASS_CHAR,   Datatype.CLASS_COMPOUND,
-                                    Datatype.CLASS_ENUM,     Datatype.CLASS_FLOAT,  Datatype.CLASS_INTEGER,
-                                    Datatype.CLASS_NO_CLASS, Datatype.CLASS_OPAQUE, Datatype.CLASS_REFERENCE,
-                                    Datatype.CLASS_STRING,   Datatype.CLASS_VLEN};
+                             Datatype.CLASS_ENUM,     Datatype.CLASS_FLOAT,  Datatype.CLASS_INTEGER,
+                             Datatype.CLASS_NO_CLASS, Datatype.CLASS_OPAQUE, Datatype.CLASS_REFERENCE,
+                             Datatype.CLASS_STRING,   Datatype.CLASS_VLEN};
     private int[] signs          = {Datatype.SIGN_2, Datatype.SIGN_NONE, Datatype.NATIVE};
     private int[] orders  = {Datatype.ORDER_BE, Datatype.ORDER_LE, Datatype.ORDER_NONE, Datatype.ORDER_VAX,
-                             Datatype.NATIVE};
+                            Datatype.NATIVE};
     private int n_classes = 11;
     private int n_signs   = 3;
     private int n_orders  = 5;

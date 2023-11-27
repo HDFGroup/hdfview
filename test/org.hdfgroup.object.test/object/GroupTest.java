@@ -246,7 +246,7 @@ public class GroupTest {
     {
         log.debug("testGetMemberList");
         String objs[]   = {"a_link_to_the_image", "dataset_comp", "dataset_int",   "datatype_float",
-                           "datatype_int",        "datatype_str", "datatype_uint", "g00"};
+                         "datatype_int",        "datatype_str", "datatype_uint", "g00"};
         List memberList = testGroup.getMemberList();
         Iterator it     = memberList.iterator();
         int position    = 0;

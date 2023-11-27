@@ -15,4 +15,5 @@ import org.junit.runners.Suite;
                      CompoundDSTest.class, DatasetTest.class, ScalarDSTest.class, AttributeTest.class,
                      DatatypeTest.class, FileFormatTest.class, GroupTest.class, HObjectTest.class})
 
-public class AllH5ObjectTests {}
+public class AllH5ObjectTests {
+}

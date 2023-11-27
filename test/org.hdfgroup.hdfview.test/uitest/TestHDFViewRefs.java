@@ -200,9 +200,9 @@ public class TestHDFViewRefs extends AbstractWindowTest {
     public void openTAttributeReference()
     {
         String[][] expectedData     = {{"trefer_attr.h5/Group1/Dataset1/Attr1 H5R_ATTR"},
-                                       {"trefer_attr.h5/Group1/Dataset2/Attr1 H5R_ATTR"},
-                                       {"trefer_attr.h5/Group1/Attr2 H5R_ATTR"},
-                                       {"trefer_attr.h5/Group1/Datatype1/Attr3 H5R_ATTR"}};
+                                   {"trefer_attr.h5/Group1/Dataset2/Attr1 H5R_ATTR"},
+                                   {"trefer_attr.h5/Group1/Attr2 H5R_ATTR"},
+                                   {"trefer_attr.h5/Group1/Datatype1/Attr3 H5R_ATTR"}};
         String[][] expectedAttrData = {{"0"}, {"3"}, {"6"}, {"9"}};
         SWTBotShell tableShell      = null;
         SWTBotShell tableAttrShell  = null;
@@ -310,9 +310,9 @@ public class TestHDFViewRefs extends AbstractWindowTest {
     public void openTObjectReference()
     {
         String[][] expectedData    = {{"trefer_obj.h5/Group1/Dataset1 H5O_TYPE_OBJ_REF"},
-                                      {"trefer_obj.h5/Group1/Dataset2 H5O_TYPE_OBJ_REF"},
-                                      {"trefer_obj.h5/Group1 H5O_TYPE_OBJ_REF"},
-                                      {"trefer_obj.h5/Group1/Datatype1 H5O_TYPE_OBJ_REF"}};
+                                   {"trefer_obj.h5/Group1/Dataset2 H5O_TYPE_OBJ_REF"},
+                                   {"trefer_obj.h5/Group1 H5O_TYPE_OBJ_REF"},
+                                   {"trefer_obj.h5/Group1/Datatype1 H5O_TYPE_OBJ_REF"}};
         String[][] expectedObjData = {{"0"}, {"3"}, {"6"}, {"9"}};
         SWTBotShell tableShell     = null;
         SWTBotShell tableObjShell  = null;

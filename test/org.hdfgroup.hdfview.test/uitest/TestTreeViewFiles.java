@@ -847,7 +847,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         String datasetname     = "CompoundIntSize";
         String newDatasetName  = "testcmpdname";
         String[] memberNames   = {"DU08BITS", "DU16BITS", "DU32BITS", "DU64BITS",
-                                  "DS08BITS", "DS16BITS", "DS32BITS", "DS64BITS"};
+                                "DS08BITS", "DS16BITS", "DS32BITS", "DS64BITS"};
         SWTBotShell tableShell = null;
 
         try {

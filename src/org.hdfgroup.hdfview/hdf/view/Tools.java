@@ -758,7 +758,7 @@ public final class Tools {
 
         DirectColorModel dcm = (DirectColorModel)ColorModel.getRGBdefault();
         theImage             = Toolkit.getDefaultToolkit().createImage(
-            new MemoryImageSource((int)w, (int)h, dcm, packedImageData, 0, (int)w));
+                        new MemoryImageSource((int)w, (int)h, dcm, packedImageData, 0, (int)w));
 
         return theImage;
     }

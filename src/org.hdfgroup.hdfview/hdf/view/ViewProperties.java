@@ -1234,11 +1234,11 @@ public class ViewProperties extends PreferenceStore {
         // add default module.
         log.trace("load user properties: add default modules");
         String[] moduleKeys    = {"module.treeview", "module.metadataview", "module.tableview",
-                                  "module.imageview", "module.paletteview"};
+                               "module.imageview", "module.paletteview"};
         ArrayList[] moduleList = {moduleListTreeView, moduleListMetaDataView, moduleListTableView,
                                   moduleListImageView, moduleListPaletteView};
         String[] moduleNames   = {DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT,
-                                  DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT};
+                                DEFAULT_MODULE_TEXT, DEFAULT_MODULE_TEXT};
 
         // add default implementation of modules
         log.trace("load user properties: modules");

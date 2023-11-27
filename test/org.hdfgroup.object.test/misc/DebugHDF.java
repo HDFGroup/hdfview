@@ -216,9 +216,9 @@ public class DebugHDF {
         ref_buf[0] = H5.H5Rcreate_object(file.getFID(), grp.getFullName(), HDF5Constants.H5P_DEFAULT);
         ref_buf[1] = H5.H5Rcreate_object(file.getFID(), ds.getFullName(), HDF5Constants.H5P_DEFAULT);
         ds         = file.createScalarDS(
-            dname, null,
-            new H5Datatype(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE),
-            new long[] {2}, null, null, 0, ref_buf);
+                    dname, null,
+                    new H5Datatype(Datatype.CLASS_REFERENCE, Datatype.NATIVE, Datatype.NATIVE, Datatype.NATIVE),
+                    new long[] {2}, null, null, 0, ref_buf);
 
         // create ref attributes
         Datatype attr_dtype =
@@ -1811,7 +1811,7 @@ public class DebugHDF {
     {
         int buf[]      = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         long tids[]    = {HDF5Constants.H5T_NATIVE_INT32, HDF5Constants.H5T_NATIVE_UINT16,
-                          HDF5Constants.H5T_STD_I32BE};
+                       HDF5Constants.H5T_STD_I32BE};
         String names[] = {"/int32", "/uint16", "/i32be"};
 
         long fid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,

@@ -26,16 +26,16 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
     private static final String testFilename = "tattr2.h5";
     String[][] arrayExpectedData             = {{"\\[1, 2, 3\\]"}, {"\\[4, 5, 6\\]"}};
     String[][] array2DExpectedData           = {{"\\[1, 2, 3\\]", "\\[4, 5, 6\\]"},
-                                                {"\\[7, 8, 9\\]", "\\[10, 11, 12\\]"},
-                                                {"\\[13, 14, 15\\]", "\\[16, 17, 18\\]"}};
+                                      {"\\[7, 8, 9\\]", "\\[10, 11, 12\\]"},
+                                      {"\\[13, 14, 15\\]", "\\[16, 17, 18\\]"}};
     String[][] array3DPage1ExpectedData      = {{"\\[1, 2, 3\\]", "\\[7, 8, 9\\]", "\\[13, 14, 15\\]"},
-                                                {"\\[19, 20, 21\\]", "\\[25, 26, 27\\]", "\\[31, 32, 33\\]"},
-                                                {"\\[37, 38, 39\\]", "\\[43, 44, 45\\]", "\\[49, 50, 51\\]"},
-                                                {"\\[55, 56, 57\\]", "\\[61, 62, 63\\]", "\\[67, 68, 69\\]"}};
+                                           {"\\[19, 20, 21\\]", "\\[25, 26, 27\\]", "\\[31, 32, 33\\]"},
+                                           {"\\[37, 38, 39\\]", "\\[43, 44, 45\\]", "\\[49, 50, 51\\]"},
+                                           {"\\[55, 56, 57\\]", "\\[61, 62, 63\\]", "\\[67, 68, 69\\]"}};
     String[][] array3DPage2ExpectedData      = {{"\\[4, 5, 6\\]", "\\[10, 11, 12\\]", "\\[16, 17, 18\\]"},
-                                                {"\\[22, 23, 24\\]", "\\[28, 29, 30\\]", "\\[34, 35, 36\\]"},
-                                                {"\\[40, 41, 42\\]", "\\[46, 47, 48\\]", "\\[52, 53, 54\\]"},
-                                                {"\\[58, 59, 60\\]", "\\[64, 65, 66\\]", "\\[70, 71, 72\\]"}};
+                                           {"\\[22, 23, 24\\]", "\\[28, 29, 30\\]", "\\[34, 35, 36\\]"},
+                                           {"\\[40, 41, 42\\]", "\\[46, 47, 48\\]", "\\[52, 53, 54\\]"},
+                                           {"\\[58, 59, 60\\]", "\\[64, 65, 66\\]", "\\[70, 71, 72\\]"}};
     String[][] bitfieldExpectedData          = {{"01"}, {"02"}};
     String[][] bitfield2DExpectedData        = {{"01", "02"}, {"03", "04"}, {"05", "06"}};
     String[][] bitfield3DPage1ExpectedData   = {
@@ -79,8 +79,8 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         {"02", "04", "06"}, {"08", "0A", "0C"}, {"0E", "10", "12"}, {"14", "16", "18"}};
     String[][] referenceExpectedData        = {{"/dset H5O_TYPE_OBJ_REF"}, {"/dset H5O_TYPE_OBJ_REF"}};
     String[][] reference2DExpectedData      = {{"/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF"},
-                                               {"/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF"},
-                                               {"/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF"}};
+                                          {"/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF"},
+                                          {"/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF"}};
     String[][] reference3DPage1ExpectedData = {
         {"/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF"},
         {"/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF", "/dset H5O_TYPE_OBJ_REF"},

@@ -35,16 +35,16 @@ public class TestH5MemoryLeak {
 
     /** Name of test datasets */
     private static final String DNAMES[]                  = {"/dataset_byte",
-                                                             "/dataset_int",
-                                                             "/dataset_float",
-                                                             "/dataset_str",
-                                                             "/dataset_enum",
-                                                             "/dataset_image",
-                                                             "/dataset_comp",
-                                                             NAME_GROUP + "/dataset_int",
-                                                             NAME_GROUP_SUB + "/dataset_float",
-                                                             NAME_GROUP + "/dataset_comp",
-                                                             "/dataset_str_vlen"};
+                                            "/dataset_int",
+                                            "/dataset_float",
+                                            "/dataset_str",
+                                            "/dataset_enum",
+                                            "/dataset_image",
+                                            "/dataset_comp",
+                                            NAME_GROUP + "/dataset_int",
+                                            NAME_GROUP_SUB + "/dataset_float",
+                                            NAME_GROUP + "/dataset_comp",
+                                            "/dataset_str_vlen"};
     private static final String NAME_DATASET_CHAR         = DNAMES[0];
     private static final String NAME_DATASET_INT          = DNAMES[1];
     private static final String NAME_DATASET_FLOAT        = DNAMES[2];
@@ -84,7 +84,7 @@ public class TestH5MemoryLeak {
 
     // compound names and datatypes
     private static final String[] COMPOUND_MEMBER_NAMES         = {"int32", "float32", "string", "uint32",
-                                                                   "vlstring"};
+                                                           "vlstring"};
     private static final H5Datatype[] COMPOUND_MEMBER_DATATYPES = {null, null, null, null, null};
 
     /**

@@ -4299,7 +4299,7 @@ public class DefaultImageView implements ImageView {
             else {
                 ImageFilter filter = new BrightnessFilter(blevel, clevel);
                 image              = Tools.toBufferedImage(
-                    toolkit.createImage(new FilteredImageSource(imageProducer, filter)));
+                                 toolkit.createImage(new FilteredImageSource(imageProducer, filter)));
                 imageComponent.setImage(image);
                 zoomTo(zoomFactor);
             }
