@@ -86,7 +86,7 @@ jobs:
 
   call-workflow-ant:
     needs: [get-base-names, call-workflow-tarball]
-    uses: ./.github/workflows/cmake-ctest.yml
+    uses: ./.github/workflows/ant.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_hdf: ${{ needs.get-base-names.outputs.hdf4-name }}
