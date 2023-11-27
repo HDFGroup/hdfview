@@ -42,8 +42,6 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        #version: 'tags/hdf-4_2_16-2'
-        #file: 'hdf-4_2_16-2-win_vs2022.zip'
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf }}-win_vs2022.zip'
 
@@ -81,8 +79,6 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        #version: 'tags/1.14.2'
-        #file: 'hdf5-1_14_2-win_vs2022.zip'
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf5 }}-win_vs2022.zip'
 
@@ -197,8 +193,6 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        #version: 'tags/hdf-4_2_16-2'
-        #file: 'hdf-4_2_16-2-ubuntu-2204.tar.gz'
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf }}-ubuntu-2204.tar.gz'
 
@@ -226,8 +220,6 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        #version: 'tags/1.14.2'
-        #file: 'hdf5-1_14_2-ubuntu-2204.tar.gz'
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf5 }}-ubuntu-2204.tar.gz'
 
