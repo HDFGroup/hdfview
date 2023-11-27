@@ -90,7 +90,7 @@ jobs:
       - name: Get published binary (Windows)
         uses: actions/download-artifact@v3
         with:
-              name: zip-vs2022-binary
+              name: zip-win-vs2022-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (MacOS)

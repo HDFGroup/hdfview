@@ -165,7 +165,7 @@ jobs:
     - name: Save published binary (Win)
       uses: actions/upload-artifact@v3
       with:
-            name: zip-win-2022-binary
+            name: zip-win-vs2022-binary
             path: ${{ github.workspace }}/hdfsrc/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
