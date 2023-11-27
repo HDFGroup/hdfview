@@ -104,6 +104,11 @@ jobs:
               name: tgz-ubuntu-2204-binary
               path: ${{ github.workspace }}
 
+      - name: List files for the space
+        run: |
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}/hdfview
+
       - name: Store snapshot name
         run: |
           echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
@@ -120,7 +125,7 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Release tag
