@@ -22,6 +22,15 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.view.DefaultFileFilter;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
+import hdf.hdf5lib.H5;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,14 +57,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.hdf5lib.H5;
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.view.DefaultFileFilter;
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-
 /**
  * NewLinkDialog shows a message dialog requesting user input for creating
  * new links.
@@ -67,34 +68,34 @@ public class NewLinkDialog extends Dialog {
 
     private static final Logger log = LoggerFactory.getLogger(NewLinkDialog.class);
 
-    private Shell         shell;
+    private Shell shell;
 
-    private Font          curFont;
+    private Font curFont;
 
-    private Text          nameField;
+    private Text nameField;
 
-    private Combo         parentChoice;
+    private Combo parentChoice;
 
-    private CCombo        targetObject;
+    private CCombo targetObject;
 
-    private String        currentDir;
+    private String currentDir;
 
-    private Text          targetFile;
+    private Text targetFile;
 
-    private Button        targetFileButton;
+    private Button targetFileButton;
 
-    private Button        hardLink, softLink, externalLink;
+    private Button hardLink, softLink, externalLink;
 
     /** a list of current groups */
-    private List<Group>   groupList;
+    private List<Group> groupList;
 
     /** a list of current objects */
-    private List<?>       objList;
+    private List<?> objList;
 
-    private HObject       newObject;
-    private Group         parentGroup;
+    private HObject newObject;
+    private Group parentGroup;
 
-    private FileFormat    fileFormat;
+    private FileFormat fileFormat;
 
     private final List<?> fileList;
 
@@ -110,35 +111,34 @@ public class NewLinkDialog extends Dialog {
      * @param files
      *            the list of all files open in the TreeView
      */
-    public NewLinkDialog(Shell parent, Group pGroup, List<?> objs, List<FileFormat> files) {
+    public NewLinkDialog(Shell parent, Group pGroup, List<?> objs, List<FileFormat> files)
+    {
         super(parent, SWT.APPLICATION_MODAL);
 
         try {
-            curFont = new Font(
-                    Display.getCurrent(),
-                    ViewProperties.getFontType(),
-                    ViewProperties.getFontSize(),
-                    SWT.NORMAL);
+            curFont = new Font(Display.getCurrent(), ViewProperties.getFontType(),
+                               ViewProperties.getFontSize(), SWT.NORMAL);
         }
         catch (Exception ex) {
             curFont = null;
         }
 
-        newObject = null;
+        newObject   = null;
         parentGroup = pGroup;
-        objList = objs;
+        objList     = objs;
 
         fileFormat = pGroup.getFileFormat();
         currentDir = ViewProperties.getWorkDir();
-        fileList = files;
+        fileList   = files;
     }
 
     /**
      * Open the NewLinkDialog for adding a new link.
      */
-    public void open() {
+    public void open()
+    {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell        = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Link...");
         shell.setImages(ViewProperties.getHdfIcons());
@@ -155,7 +155,7 @@ public class NewLinkDialog extends Dialog {
 
         nameField = new Text(content, SWT.SINGLE | SWT.BORDER);
         nameField.setFont(curFont);
-        GridData fieldData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        GridData fieldData     = new GridData(SWT.FILL, SWT.FILL, true, false);
         fieldData.minimumWidth = 300;
         nameField.setLayoutData(fieldData);
 
@@ -168,7 +168,8 @@ public class NewLinkDialog extends Dialog {
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 parentGroup = groupList.get(parentChoice.getSelectionIndex());
             }
         });
@@ -187,25 +188,28 @@ public class NewLinkDialog extends Dialog {
         helpButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         helpButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                final String msg = "The Type of Link specifies which type of link the user wants to create. \n"
-                        + "It could be hard, soft or external links. \n\n"
-                        + "Hard Link: \n"
-                        + "Hard Link creates a hard link to a pre-existing object in an HDF5 file. \n"
-                        + "The target object must already exist in the file.\n"
-                        + "The HDF5 library keeps a count of all hard links pointing to an object. \n\n"
-                        + "Soft Link: \n"
-                        + "Soft Link creates a new soft link to an object in an HDF5 file. \n"
-                        + "Soft links are only for use only if the target object is in the current file. \n"
-                        + "Unlike hard links, a soft link in an HDF5 file is allowed to dangle, \n"
-                        + "meaning that the target object need not exist at the time that the link is created.\n"
-                        + "The HDF5 library does not keep a count of soft links.  \n\n"
-                        + "External Link: \n"
-                        + "External Link creates a new soft link to an external object, which is an \n"
-                        + "object in a different HDF5 file from the location of the link. \n"
-                        + "External links are allowed to dangle like soft links. \n\n"
-                        + "Soft links and external links are also known as symbolic links as they use "
-                        + "a name to point to an object; hard links employ an object's address in the file.  \n\n\n";
+            public void widgetSelected(SelectionEvent e)
+            {
+                final String msg =
+                    "The Type of Link specifies which type of link the user wants to create. \n"
+                    + "It could be hard, soft or external links. \n\n"
+                    + "Hard Link: \n"
+                    + "Hard Link creates a hard link to a pre-existing object in an HDF5 file. \n"
+                    + "The target object must already exist in the file.\n"
+                    + "The HDF5 library keeps a count of all hard links pointing to an object. \n\n"
+                    + "Soft Link: \n"
+                    + "Soft Link creates a new soft link to an object in an HDF5 file. \n"
+                    + "Soft links are only for use only if the target object is in the current file. \n"
+                    + "Unlike hard links, a soft link in an HDF5 file is allowed to dangle, \n"
+                    + "meaning that the target object need not exist at the time that the link is created.\n"
+                    + "The HDF5 library does not keep a count of soft links.  \n\n"
+                    + "External Link: \n"
+                    + "External Link creates a new soft link to an external object, which is an \n"
+                    + "object in a different HDF5 file from the location of the link. \n"
+                    + "External links are allowed to dangle like soft links. \n\n"
+                    + "Soft links and external links are also known as symbolic links as they use "
+                    +
+                    "a name to point to an object; hard links employ an object's address in the file.  \n\n\n";
 
                 Tools.showInformation(shell, "Help", msg);
             }
@@ -221,12 +225,14 @@ public class NewLinkDialog extends Dialog {
         hardLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         hardLink.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 targetFile.setEnabled(false);
                 targetFileButton.setEnabled(false);
                 targetObject.setEnabled(true);
                 targetObject.setEditable(false);
-                targetObject.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+                targetObject.setBackground(
+                    Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 
                 targetObject.removeAll();
                 retrieveObjects(fileFormat);
@@ -241,7 +247,8 @@ public class NewLinkDialog extends Dialog {
         softLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         softLink.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 targetFile.setEnabled(false);
                 targetFileButton.setEnabled(false);
                 targetObject.setEnabled(true);
@@ -261,7 +268,8 @@ public class NewLinkDialog extends Dialog {
         externalLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
         externalLink.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 targetFile.setEnabled(true);
                 targetFileButton.setEnabled(true);
                 targetObject.setEnabled(true);
@@ -275,11 +283,11 @@ public class NewLinkDialog extends Dialog {
         label.setFont(curFont);
         label.setText("Target File: ");
 
-        Composite fileComposite = new Composite(content, SWT.NONE);
-        GridLayout layout = new GridLayout(2, false);
+        Composite fileComposite  = new Composite(content, SWT.NONE);
+        GridLayout layout        = new GridLayout(2, false);
         layout.horizontalSpacing = 0;
-        layout.marginHeight = 0;
-        layout.marginWidth = 0;
+        layout.marginHeight      = 0;
+        layout.marginWidth       = 0;
         fileComposite.setLayout(layout);
         fileComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -289,11 +297,13 @@ public class NewLinkDialog extends Dialog {
         targetFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         targetFile.addTraverseListener(new TraverseListener() {
             @Override
-            public void keyTraversed(TraverseEvent e) {
+            public void keyTraversed(TraverseEvent e)
+            {
                 if (e.detail == SWT.TRAVERSE_RETURN) {
                     String filename = targetFile.getText();
 
-                    if (filename == null || filename.length() <= 0) return;
+                    if (filename == null || filename.length() <= 0)
+                        return;
 
                     File chosenFile = new File(filename);
 
@@ -308,18 +318,20 @@ public class NewLinkDialog extends Dialog {
                         currentDir = chosenFile.getParent();
                     }
 
-                    //Check if the target File is not the current file.
+                    // Check if the target File is not the current file.
                     String currentFileName = fileFormat.getAbsolutePath();
-                    if(currentFileName.equals(chosenFile.getAbsolutePath())) {
-                        Tools.showError(shell, "Traverse",
-                                "Please select a file other than the current file for external links.");
+                    if (currentFileName.equals(chosenFile.getAbsolutePath())) {
+                        Tools.showError(
+                            shell, "Traverse",
+                            "Please select a file other than the current file for external links.");
                         targetFile.setText("");
                         return;
                     }
 
                     getTargetFileObjs();
 
-                    if(targetObject.getItemCount() > 0) targetObject.select(0);
+                    if (targetObject.getItemCount() > 0)
+                        targetObject.select(0);
                 }
             }
         });
@@ -331,9 +343,10 @@ public class NewLinkDialog extends Dialog {
         targetFileButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
         targetFileButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 String filename = null;
-                filename = openTargetFile();
+                filename        = openTargetFile();
 
                 if (filename == null) {
                     return;
@@ -342,7 +355,8 @@ public class NewLinkDialog extends Dialog {
                 targetFile.setText(filename);
                 getTargetFileObjs();
 
-                if(targetObject.getItemCount() > 0) targetObject.select(0);
+                if (targetObject.getItemCount() > 0)
+                    targetObject.select(0);
             }
         });
 
@@ -356,17 +370,17 @@ public class NewLinkDialog extends Dialog {
         targetObject.setEditable(false);
         targetObject.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 
-        groupList = new ArrayList<>(objList.size());
-        Object obj = null;
+        groupList            = new ArrayList<>(objList.size());
+        Object obj           = null;
         Iterator<?> iterator = objList.iterator();
-        String fullName = null;
+        String fullName      = null;
         int idx_root = -1, idx = -1;
         while (iterator.hasNext()) {
             obj = iterator.next();
             idx++;
 
             if (obj instanceof Group) {
-                Group g = (Group) obj;
+                Group g = (Group)obj;
                 groupList.add(g);
                 if (g.isRoot()) {
                     fullName = HObject.SEPARATOR;
@@ -378,7 +392,7 @@ public class NewLinkDialog extends Dialog {
                 parentChoice.add(fullName);
             }
             else {
-                fullName = ((HObject) obj).getPath() + ((HObject) obj).getName();
+                fullName = ((HObject)obj).getPath() + ((HObject)obj).getName();
             }
 
             targetObject.add(fullName);
@@ -391,15 +405,14 @@ public class NewLinkDialog extends Dialog {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName()
-                    + HObject.SEPARATOR));
+            parentChoice.select(
+                parentChoice.indexOf(parentGroup.getPath() + parentGroup.getName() + HObject.SEPARATOR));
         }
 
         // Dummy label to take up space as dialog is resized
         label = new Label(content, SWT.LEFT);
         label.setFont(curFont);
         label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-
 
         // Create the Ok/Cancel button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);
@@ -412,7 +425,8 @@ public class NewLinkDialog extends Dialog {
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = createLink();
 
                 if (newObject != null) {
@@ -427,10 +441,11 @@ public class NewLinkDialog extends Dialog {
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = null;
                 shell.dispose();
-                ((Vector<Group>) groupList).setSize(0);
+                ((Vector<Group>)groupList).setSize(0);
             }
         });
 
@@ -441,15 +456,17 @@ public class NewLinkDialog extends Dialog {
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+            public void widgetDisposed(DisposeEvent e)
+            {
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
+        Point shellSize        = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
@@ -461,10 +478,11 @@ public class NewLinkDialog extends Dialog {
                 display.sleep();
     }
 
-    private HObject createLink() {
-        String name = null;
+    private HObject createLink()
+    {
+        String name  = null;
         Group pgroup = null;
-        HObject obj = null;
+        HObject obj  = null;
 
         name = nameField.getText().trim();
         if ((name == null) || (name.length() < 1)) {
@@ -488,8 +506,7 @@ public class NewLinkDialog extends Dialog {
         }
 
         if (hardLink.getSelection()) {
-            HObject targetObj = (HObject) objList.get(targetObject
-                    .getSelectionIndex());
+            HObject targetObj = (HObject)objList.get(targetObject.getSelectionIndex());
 
             if (targetObj == null) {
                 shell.getDisplay().beep();
@@ -497,7 +514,7 @@ public class NewLinkDialog extends Dialog {
                 return null;
             }
 
-            if ((targetObj instanceof Group) && ((Group) targetObj).isRoot()) {
+            if ((targetObj instanceof Group) && ((Group)targetObj).isRoot()) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Create", "Cannot make a link to the root group.");
                 return null;
@@ -512,9 +529,9 @@ public class NewLinkDialog extends Dialog {
                 return null;
             }
         }
-        else if (softLink.getSelection()){
+        else if (softLink.getSelection()) {
             String target_name = targetObject.getText();
-            if (target_name.length() < 1)  {
+            if (target_name.length() < 1) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Create", "Target object name is not specified.");
                 return null;
@@ -552,7 +569,7 @@ public class NewLinkDialog extends Dialog {
                 }
             }
 
-            if ((targetObj instanceof Group) && ((Group) targetObj).isRoot()) {
+            if ((targetObj instanceof Group) && ((Group)targetObj).isRoot()) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Create", "Cannot make a link to the root group.");
                 return null;
@@ -571,10 +588,10 @@ public class NewLinkDialog extends Dialog {
                 return null;
             }
         }
-        else if (externalLink.getSelection()){
-            String TargetFileName = targetFile.getText();
+        else if (externalLink.getSelection()) {
+            String TargetFileName       = targetFile.getText();
             FileFormat TargetFileFormat = null;
-            int fileAccessID = FileFormat.FILE_CREATE_OPEN;
+            int fileAccessID            = FileFormat.FILE_CREATE_OPEN;
 
             File TargetFile = new File(TargetFileName);
 
@@ -584,7 +601,7 @@ public class NewLinkDialog extends Dialog {
             FileFormat h5format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
             try {
                 TargetFileFormat = h5format.createInstance(TargetFileName, fileAccessID);
-                TargetFileFormat.open(); //open the file
+                TargetFileFormat.open(); // open the file
             }
             catch (Exception ex) {
                 log.debug("external link:", ex);
@@ -592,7 +609,7 @@ public class NewLinkDialog extends Dialog {
             }
 
             HObject targetObj = null;
-            try{
+            try {
                 targetObj = TargetFileFormat.get(targetObject.getText());
             }
             catch (Exception ex) {
@@ -607,10 +624,10 @@ public class NewLinkDialog extends Dialog {
             }
 
             String tFileObj = null;
-            if(targetObj==null){
+            if (targetObj == null) {
                 String tObj = null;
-                tObj = targetObject.getText();
-                if (tObj.length() < 1)  {
+                tObj        = targetObject.getText();
+                if (tObj.length() < 1) {
                     shell.getDisplay().beep();
                     Tools.showError(shell, "Create", "Target object name not specified.");
                     return null;
@@ -619,9 +636,9 @@ public class NewLinkDialog extends Dialog {
             }
 
             try {
-                if(targetObj !=null)
+                if (targetObj != null)
                     obj = fileFormat.createLink(pgroup, name, targetObj, Group.LINK_TYPE_EXTERNAL);
-                else if(tFileObj!=null)
+                else if (tFileObj != null)
                     obj = fileFormat.createLink(pgroup, name, tFileObj, Group.LINK_TYPE_EXTERNAL);
             }
             catch (Exception ex) {
@@ -635,7 +652,8 @@ public class NewLinkDialog extends Dialog {
         return obj;
     }
 
-    private String openTargetFile() {
+    private String openTargetFile()
+    {
         FileDialog fchooser = new FileDialog(shell, SWT.OPEN);
         fchooser.setFilterPath(currentDir);
 
@@ -644,7 +662,8 @@ public class NewLinkDialog extends Dialog {
         fchooser.setFilterNames(new String[] {"All Files", filter.getDescription()});
         fchooser.setFilterIndex(1);
 
-        if(fchooser.open() == null) return null;
+        if (fchooser.open() == null)
+            return null;
 
         File chosenFile = new File(fchooser.getFilterPath() + File.separator + fchooser.getFileName());
 
@@ -659,10 +678,11 @@ public class NewLinkDialog extends Dialog {
             currentDir = chosenFile.getParent();
         }
 
-        //Check if the target File is not the current file.
+        // Check if the target File is not the current file.
         String currentFileName = fileFormat.getAbsolutePath();
-        if(currentFileName.equals(chosenFile.getAbsolutePath())) {
-            Tools.showError(shell, "Open", "Please select a file other than the current file for external links.");
+        if (currentFileName.equals(chosenFile.getAbsolutePath())) {
+            Tools.showError(shell, "Open",
+                            "Please select a file other than the current file for external links.");
             targetFile.setText("");
             return null;
         }
@@ -670,18 +690,18 @@ public class NewLinkDialog extends Dialog {
         return chosenFile.getAbsolutePath();
     }
 
-    //Function to check if the target File is open in TreeView
+    // Function to check if the target File is open in TreeView
     private boolean isFileOpen(String filename)
     {
-        boolean isOpen = false;
+        boolean isOpen     = false;
         FileFormat theFile = null;
 
         Iterator<?> iterator = fileList.iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             theFile = (FileFormat)iterator.next();
             if (theFile.getFilePath().equals(filename)) {
                 isOpen = true;
-                if(!theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))){
+                if (!theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
                     targetObject.setEnabled(false);
                 }
                 retrieveObjects(theFile);
@@ -692,12 +712,14 @@ public class NewLinkDialog extends Dialog {
         return isOpen;
     }
 
-    private List<HObject> getAllUserObjectsBreadthFirst(FileFormat file) {
-        if (file == null) return null;
+    private List<HObject> getAllUserObjectsBreadthFirst(FileFormat file)
+    {
+        if (file == null)
+            return null;
 
         ArrayList<HObject> breadthFirstObjects = new ArrayList<>();
-        Queue<HObject> currentChildren = new LinkedList<>();
-        HObject currentObject = file.getRootObject();
+        Queue<HObject> currentChildren         = new LinkedList<>();
+        HObject currentObject                  = file.getRootObject();
 
         if (currentObject == null) {
             log.debug("getAllUserObjectsBreadthFirst(): file root object is null");
@@ -707,16 +729,17 @@ public class NewLinkDialog extends Dialog {
         breadthFirstObjects.add(file.getRootObject()); // Add the root object to the list first
 
         // Add all root object children to a Queue
-        currentChildren.addAll(((Group) currentObject).getMemberList());
+        currentChildren.addAll(((Group)currentObject).getMemberList());
 
-        while(!currentChildren.isEmpty()) {
+        while (!currentChildren.isEmpty()) {
             currentObject = currentChildren.remove();
             breadthFirstObjects.add(currentObject);
 
-            if(currentObject instanceof Group) {
-                if(((Group) currentObject).getNumberOfMembersInFile() <= 0) continue;
+            if (currentObject instanceof Group) {
+                if (((Group)currentObject).getNumberOfMembersInFile() <= 0)
+                    continue;
 
-                currentChildren.addAll(((Group) currentObject).getMemberList());
+                currentChildren.addAll(((Group)currentObject).getMemberList());
             }
         }
 
@@ -724,8 +747,9 @@ public class NewLinkDialog extends Dialog {
     }
 
     // Retrieves the list of objects from the file
-    private void retrieveObjects(FileFormat file) {
-        HObject obj = null;
+    private void retrieveObjects(FileFormat file)
+    {
+        HObject obj                  = null;
         List<HObject> userObjectList = getAllUserObjectsBreadthFirst(file);
         Iterator<HObject> iterator;
         String fullName = null;
@@ -740,7 +764,7 @@ public class NewLinkDialog extends Dialog {
             obj = iterator.next();
 
             if (obj instanceof Group) {
-                Group g = (Group) obj;
+                Group g = (Group)obj;
                 if (g.isRoot()) {
                     fullName = HObject.SEPARATOR;
                 }
@@ -760,13 +784,14 @@ public class NewLinkDialog extends Dialog {
     }
 
     // Retrieves objects from Target File.
-    private void getTargetFileObjs(){
+    private void getTargetFileObjs()
+    {
         FileFormat fileFormatC = null;
-        int fileAccessID = FileFormat.FILE_CREATE_OPEN;
-        String filename = null;
-        filename = targetFile.getText();
+        int fileAccessID       = FileFormat.FILE_CREATE_OPEN;
+        String filename        = null;
+        filename               = targetFile.getText();
 
-        if (filename == null || filename.length()<1) {
+        if (filename == null || filename.length() < 1) {
             return;
         }
 
@@ -785,7 +810,7 @@ public class NewLinkDialog extends Dialog {
         FileFormat h5format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         try {
             fileFormatC = h5format.createInstance(filename, fileAccessID);
-            fileFormatC.open(); //open the file
+            fileFormatC.open(); // open the file
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
@@ -806,12 +831,8 @@ public class NewLinkDialog extends Dialog {
     }
 
     /** @return the new dataset created. */
-    public HObject getObject() {
-        return newObject;
-    }
+    public HObject getObject() { return newObject; }
 
     /** @return the parent group of the new dataset. */
-    public Group getParentGroup() {
-        return parentGroup;
-    }
+    public Group getParentGroup() { return parentGroup; }
 }

@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * @version 2.4 9/4/2007
  */
 public abstract class FileFormat extends File {
-    private static final long                    serialVersionUID   = -4700692313888420796L;
+    private static final long serialVersionUID = -4700692313888420796L;
 
     private static final Logger log = LoggerFactory.getLogger(FileFormat.class);
 
@@ -65,7 +65,7 @@ public abstract class FileFormat extends File {
      * to the regular value, indicates this file has no existing state.
      *
      */
-    public static final int                      OPEN_NEW           = 1;
+    public static final int OPEN_NEW = 1;
 
     /**
      * File access flag for read-only permission. With this access flag,
@@ -73,7 +73,7 @@ public abstract class FileFormat extends File {
      *
      * @see #createInstance(String, int )
      */
-    public static final int                      READ               = 2;
+    public static final int READ = 2;
 
     /**
      * File access flag for read/write permission. With this access flag,
@@ -83,7 +83,7 @@ public abstract class FileFormat extends File {
      *
      * @see #createInstance(String, int)
      */
-    public static final int                      WRITE              = 4;
+    public static final int WRITE = 4;
 
     /**
      * File access flag for creating/truncating with read-write permission. If
@@ -94,7 +94,7 @@ public abstract class FileFormat extends File {
      *
      * @see #createInstance(String, int )
      */
-    public static final int                      CREATE             = 8;
+    public static final int CREATE = 8;
 
     /**
      * File access flag for multi-read-only permission. With this access flag,
@@ -102,7 +102,7 @@ public abstract class FileFormat extends File {
      *
      * @see #createInstance(String, int )
      */
-    public static final int                      MULTIREAD          = 80;
+    public static final int MULTIREAD = 80;
 
     /***************************************************************************
      * File creation flags used in calls to createFile( String, flag );
@@ -115,7 +115,7 @@ public abstract class FileFormat extends File {
      *
      * @see #createFile(String, int )
      */
-    public static final int                      FILE_CREATE_DELETE = 10;
+    public static final int FILE_CREATE_DELETE = 10;
 
     /**
      * Flag for creating/opening a file. If the file already exists, it will be
@@ -124,7 +124,7 @@ public abstract class FileFormat extends File {
      *
      * @see #createFile(String, int )
      */
-    public static final int                      FILE_CREATE_OPEN   = 20;
+    public static final int FILE_CREATE_OPEN = 20;
 
     /**
      * Flag to indicate if the earliest version of library is used when creating
@@ -132,28 +132,27 @@ public abstract class FileFormat extends File {
      *
      * @see #createFile(String, int )
      */
-    public static final int                      FILE_CREATE_EARLY_LIB   = 40;
-
+    public static final int FILE_CREATE_EARLY_LIB = 40;
 
     /***************************************************************************
      * Keys and fields related to supported file formats.
      **************************************************************************/
 
     /** Key for HDF4 file format. */
-    public static final String                   FILE_TYPE_HDF4     = "HDF4";
+    public static final String FILE_TYPE_HDF4 = "HDF4";
 
     /** Key for HDF5 file format. */
-    public static final String                   FILE_TYPE_HDF5     = "HDF5";
+    public static final String FILE_TYPE_HDF5 = "HDF5";
 
     /** Key for NetCDF file format. */
-    public static final String                   FILE_TYPE_NC3      = "NetCDF3";
+    public static final String FILE_TYPE_NC3 = "NetCDF3";
 
     /**
      * A separator that separates file name and object name.
      *
      * @see hdf.object.FileFormat#getHObject(String)
      */
-    public static final String                   FILE_OBJ_SEP       = "://";
+    public static final String FILE_OBJ_SEP = "://";
 
     /**
      * FileList keeps a list of supported FileFormats. This list can be updated
@@ -173,7 +172,7 @@ public abstract class FileFormat extends File {
      * FileList, but is provided as a convenience for applications who may
      * choose to process only those files with recognized extensions.
      */
-    private static String extensions         = "hdf, h4, hdf5, h5, nc, fits";
+    private static String extensions = "hdf, h4, hdf5, h5, nc, fits";
 
     /***************************************************************************
      * Sizing information and class metadata
@@ -187,26 +186,26 @@ public abstract class FileFormat extends File {
      * starting with the <i>start_members</i> -th object. The implementing class
      * has freedom in its interpretation of how to "count" objects in the file.
      */
-    private int                                  max_members        = 10000;      // 10,000 by default
+    private int max_members = 10000; // 10,000 by default
     /**
      * The start number for max_members .
      */
-    private int                                  start_members      = 0;          // 0 by default
+    private int start_members = 0; // 0 by default
 
     /**
      * File identifier. -1 indicates the file is not open.
      */
-    protected long                                fid                = -1;
+    protected long fid = -1;
 
     /**
      * The absolute pathname (path+name) of the file.
      */
-    protected String                             fullFileName       = null;
+    protected String fullFileName = null;
 
     /**
      * Flag indicating if the file access is read-only.
      */
-    protected boolean                            isReadOnly         = false;
+    protected boolean isReadOnly = false;
 
     /***************************************************************************
      * Class initialization method
@@ -216,13 +215,14 @@ public abstract class FileFormat extends File {
      * By default, HDF4 and HDF5 file formats are added to the supported formats
      * list.
      */
-    static {
+    static
+    {
         // add HDF4 to default modules
         if (FileFormat.getFileFormat(FILE_TYPE_HDF4) == null) {
             try {
                 @SuppressWarnings("rawtypes")
-                Class fileclass = Class.forName("hdf.object.h4.H4File");
-                FileFormat fileformat = (FileFormat) fileclass.newInstance();
+                Class fileclass       = Class.forName("hdf.object.h4.H4File");
+                FileFormat fileformat = (FileFormat)fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat(FILE_TYPE_HDF4, fileformat);
                     log.debug("FILE_TYPE_HDF4 file format added");
@@ -237,8 +237,8 @@ public abstract class FileFormat extends File {
         if (FileFormat.getFileFormat(FILE_TYPE_HDF5) == null) {
             try {
                 @SuppressWarnings("rawtypes")
-                Class fileclass = Class.forName("hdf.object.h5.H5File");
-                FileFormat fileformat = (FileFormat) fileclass.newInstance();
+                Class fileclass       = Class.forName("hdf.object.h5.H5File");
+                FileFormat fileformat = (FileFormat)fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat(FILE_TYPE_HDF5, fileformat);
                     log.debug("FILE_TYPE_HDF5 file format added");
@@ -253,8 +253,8 @@ public abstract class FileFormat extends File {
         if (FileFormat.getFileFormat(FILE_TYPE_NC3) == null) {
             try {
                 @SuppressWarnings("rawtypes")
-                Class fileclass = Class.forName("hdf.object.nc2.NC2File");
-                FileFormat fileformat = (FileFormat) fileclass.newInstance();
+                Class fileclass       = Class.forName("hdf.object.nc2.NC2File");
+                FileFormat fileformat = (FileFormat)fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat(FILE_TYPE_NC3, fileformat);
                     log.debug("NetCDF3 file format added");
@@ -269,8 +269,8 @@ public abstract class FileFormat extends File {
         if (FileFormat.getFileFormat("FITS") == null) {
             try {
                 @SuppressWarnings("rawtypes")
-                Class fileclass = Class.forName("hdf.object.fits.FitsFile");
-                FileFormat fileformat = (FileFormat) fileclass.newInstance();
+                Class fileclass       = Class.forName("hdf.object.fits.FitsFile");
+                FileFormat fileformat = (FileFormat)fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat("FITS", fileformat);
                     log.debug("Fits file format added");
@@ -280,7 +280,6 @@ public abstract class FileFormat extends File {
                 log.debug("FITS instance failure: ", err);
             }
         }
-
     }
 
     /***************************************************************************
@@ -311,7 +310,8 @@ public abstract class FileFormat extends File {
      * @see #createInstance(String, int)
      * @see #getInstance(String)
      */
-    public FileFormat(String filename) {
+    public FileFormat(String filename)
+    {
         super(filename);
 
         fullFileName = filename;
@@ -364,7 +364,8 @@ public abstract class FileFormat extends File {
      * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
-    public static final void addFileFormat(String key, FileFormat fileformat) {
+    public static final void addFileFormat(String key, FileFormat fileformat)
+    {
         if ((fileformat == null) || (key == null))
             return;
 
@@ -394,9 +395,7 @@ public abstract class FileFormat extends File {
      * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
-    public static final FileFormat getFileFormat(String key) {
-        return FileList.get(key);
-    }
+    public static final FileFormat getFileFormat(String key) { return FileList.get(key); }
 
     /**
      * Returns an Enumeration of keys for all supported formats.
@@ -411,8 +410,9 @@ public abstract class FileFormat extends File {
      * @see #removeFileFormat(String)
      */
     @SuppressWarnings("rawtypes")
-    public static final Enumeration getFileFormatKeys() {
-        return ((Hashtable) FileList).keys();
+    public static final Enumeration getFileFormatKeys()
+    {
+        return ((Hashtable)FileList).keys();
     }
 
     /**
@@ -431,16 +431,17 @@ public abstract class FileFormat extends File {
      * @see #removeFileFormat(String)
      */
     @SuppressWarnings("rawtypes")
-    public static final FileFormat[] getFileFormats() {
+    public static final FileFormat[] getFileFormats()
+    {
         int n = FileList.size();
         if (n <= 0)
             return null;
 
-        int i = 0;
-        FileFormat[] fileformats = new FileFormat[n];
-        Enumeration<?> local_enum = ((Hashtable) FileList).elements();
+        int i                     = 0;
+        FileFormat[] fileformats  = new FileFormat[n];
+        Enumeration<?> local_enum = ((Hashtable)FileList).elements();
         while (local_enum.hasMoreElements())
-            fileformats[i++] = (FileFormat) local_enum.nextElement();
+            fileformats[i++] = (FileFormat)local_enum.nextElement();
 
         return fileformats;
     }
@@ -465,9 +466,7 @@ public abstract class FileFormat extends File {
      * @see #getFileFormatKeys()
      * @see #getFileFormats()
      */
-    public static final FileFormat removeFileFormat(String key) {
-        return FileList.remove(key);
-    }
+    public static final FileFormat removeFileFormat(String key) { return FileList.remove(key); }
 
     /**
      * Adds file extension(s) to the list of file extensions for supported file
@@ -489,12 +488,13 @@ public abstract class FileFormat extends File {
      * @see #addFileFormat(String,FileFormat)
      * @see #getFileExtensions()
      */
-    public static final void addFileExtension(String extension) {
+    public static final void addFileExtension(String extension)
+    {
         if ((extensions == null) || (extensions.length() <= 0))
             extensions = extension;
 
         StringTokenizer currentExt = new StringTokenizer(extensions, ",");
-        Vector<String> tokens = new Vector<>(currentExt.countTokens() + 5);
+        Vector<String> tokens      = new Vector<>(currentExt.countTokens() + 5);
 
         while (currentExt.hasMoreTokens())
             tokens.add(currentExt.nextToken().trim().toLowerCase());
@@ -525,9 +525,7 @@ public abstract class FileFormat extends File {
      * @return A list of file extensions for all supported file formats.
      * @see #addFileExtension(String)
      */
-    public static final String getFileExtensions() {
-        return extensions;
-    }
+    public static final String getFileExtensions() { return extensions; }
 
     /**
      * Creates a FileFormat instance for the specified file.
@@ -558,19 +556,20 @@ public abstract class FileFormat extends File {
      * @see #getFileFormats()
      */
     @SuppressWarnings("rawtypes")
-    public static final FileFormat getInstance(String filename) throws Exception {
+    public static final FileFormat getInstance(String filename) throws Exception
+    {
         if ((filename == null) || (filename.length() <= 0))
             throw new IllegalArgumentException("Invalid file name: " + filename);
 
         if (!(new File(filename)).exists())
             throw new IllegalArgumentException("File " + filename + " does not exist.");
 
-        FileFormat fileFormat = null;
+        FileFormat fileFormat  = null;
         FileFormat knownFormat = null;
-        Enumeration<?> elms = ((Hashtable) FileList).elements();
+        Enumeration<?> elms    = ((Hashtable)FileList).elements();
 
         while (elms.hasMoreElements()) {
-            knownFormat = (FileFormat) elms.nextElement();
+            knownFormat = (FileFormat)elms.nextElement();
             if (knownFormat.isThisType(filename)) {
                 try {
                     fileFormat = knownFormat.createInstance(filename, WRITE);
@@ -650,7 +649,8 @@ public abstract class FileFormat extends File {
      * FileFormat h4F = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
      * FileFormat h5F = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
      * boolean isH4 = h4F.isThisType(&quot;test.h5&quot;); // false
-     *                                                                                                                                                                                   boolean isH5 = h5F.isThisType(&quot;test.h5&quot;); // true
+     *                                                                                                                                                                                   boolean
+     * isH5 = h5F.isThisType(&quot;test.h5&quot;); // true
      * </pre>
      *
      * @param filename
@@ -710,7 +710,8 @@ public abstract class FileFormat extends File {
      *
      * @return the FileFormat instance.
      */
-    public FileFormat createFile(String filename, int createFlag) throws Exception {
+    public FileFormat createFile(String filename, int createFlag) throws Exception
+    {
         // If the implementing subclass doesn't have this method then that
         // format doesn't support File Creation and we throw an exception.
         throw new UnsupportedOperationException("FileFormat FileFormat.createFile(...) is not implemented.");
@@ -800,18 +801,14 @@ public abstract class FileFormat extends File {
      * @return The full path (file path + file name) of the associated file, or
      *         <code>null</code> if there is no associated file.
      */
-    public final String getFilePath() {
-        return fullFileName;
-    }
+    public final String getFilePath() { return fullFileName; }
 
     /**
      * Returns file identifier of open file associated with this instance.
      *
      * @return The file identifer, or -1 if there is no file open.
      */
-    public final long getFID() {
-        return fid;
-    }
+    public final long getFID() { return fid; }
 
     /**
      * Returns true if the file access is read-only.
@@ -831,9 +828,7 @@ public abstract class FileFormat extends File {
      * @see #getInstance(String)
      * @see #open()
      */
-    public final boolean isReadOnly() {
-        return isReadOnly;
-    }
+    public final boolean isReadOnly() { return isReadOnly; }
 
     /**
      * Sets the maximum number of objects to be loaded into memory.
@@ -852,9 +847,7 @@ public abstract class FileFormat extends File {
      * @see #getMaxMembers()
      * @see #setStartMembers(int)
      */
-    public final void setMaxMembers(int n) {
-        max_members = n;
-    }
+    public final void setMaxMembers(int n) { max_members = n; }
 
     /**
      * Returns the maximum number of objects that can be loaded into memory.
@@ -862,8 +855,9 @@ public abstract class FileFormat extends File {
      * @return The maximum number of objects that can be loaded into memory.
      * @see #setMaxMembers(int)
      */
-    public final int getMaxMembers() {
-        if (max_members<0)
+    public final int getMaxMembers()
+    {
+        if (max_members < 0)
             return Integer.MAX_VALUE; // load the whole file
 
         return max_members;
@@ -880,9 +874,7 @@ public abstract class FileFormat extends File {
      * @see #getStartMembers()
      * @see #setMaxMembers(int)
      */
-    public final void setStartMembers(int idx) {
-        start_members = idx;
-    }
+    public final void setStartMembers(int idx) { start_members = idx; }
 
     /**
      * Returns the index of the starting object to be loaded into memory.
@@ -890,9 +882,7 @@ public abstract class FileFormat extends File {
      * @return The index of the starting object to be loaded into memory.
      * @see #setStartMembers(int)
      */
-    public final int getStartMembers() {
-        return start_members;
-    }
+    public final int getStartMembers() { return start_members; }
 
     /**
      * Returns the number of objects in memory.
@@ -929,12 +919,13 @@ public abstract class FileFormat extends File {
      * @see #getStartMembers()
      * @see #setStartMembers(int)
      */
-    public final int getNumberOfMembers() {
+    public final int getNumberOfMembers()
+    {
         HObject rootObject = getRootObject();
 
         // Account for root object
         if (rootObject != null)
-            return ((Group) rootObject).depthFirstMemberList().size() + 1;
+            return ((Group)rootObject).depthFirstMemberList().size() + 1;
 
         return 0;
     }
@@ -1095,10 +1086,12 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception {
+    public Datatype createNamedDatatype(Datatype tnative, String name) throws Exception
+    {
         // If the implementing subclass doesn't have this method then that
         // format doesn't support Named Datatypes and we throw an exception.
-        throw new UnsupportedOperationException("Datatype FileFormat.createNamedDatatype(...) is not implemented.");
+        throw new UnsupportedOperationException(
+            "Datatype FileFormat.createNamedDatatype(...) is not implemented.");
     }
 
     // REVIEW DOCS for createDatatype(). Check and document exceptions.
@@ -1180,7 +1173,9 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing
      *             class.
      */
-    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
+    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase)
+        throws Exception
+    {
         // Derived classes must override this function to use base type option
         return createDatatype(tclass, tsize, torder, tsign);
     }
@@ -1232,9 +1227,9 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public abstract Dataset createScalarDS(String name, Group pgroup, Datatype type,
-            long[] dims, long[] maxdims, long[] chunks,
-            int gzip, Object fillValue, Object data) throws Exception;
+    public abstract Dataset createScalarDS(String name, Group pgroup, Datatype type, long[] dims,
+                                           long[] maxdims, long[] chunks, int gzip, Object fillValue,
+                                           Object data) throws Exception;
 
     /**
      * Creates a new dataset in a file with/without chunking/compression.
@@ -1260,9 +1255,9 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public Dataset createScalarDS(String name, Group pgroup, Datatype type,
-            long[] dims, long[] maxdims, long[] chunks,
-            int gzip, Object data) throws Exception {
+    public Dataset createScalarDS(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
+                                  long[] chunks, int gzip, Object data) throws Exception
+    {
         return createScalarDS(name, pgroup, type, dims, maxdims, chunks, gzip, null, data);
     }
 
@@ -1327,13 +1322,15 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing
      *             class.
      */
-    public Dataset createCompoundDS(String name, Group pgroup,
-            long[] dims, long[] maxdims, long[] chunks,
-            int gzip, String[] memberNames, Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception {
+    public Dataset createCompoundDS(String name, Group pgroup, long[] dims, long[] maxdims, long[] chunks,
+                                    int gzip, String[] memberNames, Datatype[] memberDatatypes,
+                                    int[] memberSizes, Object data) throws Exception
+    {
         // If the implementing subclass doesn't have this method then that
         // format doesn't support Compound DataSets and we throw an
         // exception.
-        throw new UnsupportedOperationException("Dataset FileFormat.createCompoundDS(...) is not implemented.");
+        throw new UnsupportedOperationException(
+            "Dataset FileFormat.createCompoundDS(...) is not implemented.");
     }
 
     /**
@@ -1352,7 +1349,8 @@ public abstract class FileFormat extends File {
      * int ncomp = 3; // RGB true color image
      * int interlace = ScalarDS.INTERLACE_PIXEL;
      * Object data = null; // no initial data values
-     * Dataset d = (H5File) file.createScalarDS(name, pgroup, dtype, dims, maxdims, chunks, gzip, ncomp, interlace, data);
+     * Dataset d = (H5File) file.createScalarDS(name, pgroup, dtype, dims, maxdims, chunks, gzip, ncomp,
+     * interlace, data);
      * </pre>
      *
      * @param name
@@ -1388,9 +1386,9 @@ public abstract class FileFormat extends File {
      *             The exceptions thrown vary depending on the implementing
      *             class.
      */
-    public abstract Dataset createImage(String name, Group pgroup, Datatype type,
-            long[] dims, long[] maxdims, long[] chunks,
-            int gzip, int ncomp, int interlace, Object data) throws Exception;
+    public abstract Dataset createImage(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
+                                        long[] chunks, int gzip, int ncomp, int interlace, Object data)
+        throws Exception;
 
     // REVIEW DOCS for createImage(). Check and document exceptions.
 
@@ -1439,7 +1437,8 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public HObject createLink(Group parentGroup, String name, HObject currentObj, int type) throws Exception {
+    public HObject createLink(Group parentGroup, String name, HObject currentObj, int type) throws Exception
+    {
         return createLink(parentGroup, name, currentObj);
     }
 
@@ -1463,7 +1462,8 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public HObject createLink(Group parentGroup, String name, String currentObj, int type) throws Exception {
+    public HObject createLink(Group parentGroup, String name, String currentObj, int type) throws Exception
+    {
         return createLink(parentGroup, name, currentObj);
     }
 
@@ -1530,7 +1530,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public abstract void delete(HObject obj) throws Exception;
+    public abstract void delete(HObject obj)throws Exception;
 
     // REVIEW DOCS for delete(). Check and document exceptions.
 
@@ -1580,7 +1580,8 @@ public abstract class FileFormat extends File {
      * @throws Exception if file cannot be created
      */
     @Deprecated
-    public final FileFormat create(String fileName) throws Exception {
+    public final FileFormat create(String fileName) throws Exception
+    {
         return createFile(fileName, FileFormat.FILE_CREATE_DELETE);
     }
 
@@ -1601,13 +1602,15 @@ public abstract class FileFormat extends File {
      * @throws Exception if the file cannot be opened
      */
     @Deprecated
-    public final FileFormat open(String pathname, int access) throws Exception {
+    public final FileFormat open(String pathname, int access) throws Exception
+    {
         return createInstance(pathname, access);
     }
 
     /**
      * @deprecated As of 2.4, replaced by
-     *             {@link #createCompoundDS(String, Group, long[], long[], long[], int, String[], Datatype[], int[], Object)}
+     *             {@link #createCompoundDS(String, Group, long[], long[], long[], int, String[], Datatype[],
+     * int[], Object)}
      *
      *             The replacement method has additional parameters:
      *             <code>maxdims, chunks,</code> and <code>gzip</code>. To mimic
@@ -1637,9 +1640,12 @@ public abstract class FileFormat extends File {
      * @throws Exception if the dataset cannot be created
      */
     @Deprecated
-    public final Dataset createCompoundDS(String name, Group pgroup, long[] dims,
-            String[] memberNames, Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception {
-        return createCompoundDS(name, pgroup, dims, null, null, -1, memberNames, memberDatatypes, memberSizes, data);
+    public final Dataset createCompoundDS(String name, Group pgroup, long[] dims, String[] memberNames,
+                                          Datatype[] memberDatatypes, int[] memberSizes, Object data)
+        throws Exception
+    {
+        return createCompoundDS(name, pgroup, dims, null, null, -1, memberNames, memberDatatypes, memberSizes,
+                                data);
     }
 
     /**
@@ -1658,7 +1664,8 @@ public abstract class FileFormat extends File {
      * @throws Exception if object can not be copied
      */
     @Deprecated
-    public final HObject copy(HObject srcObj, Group dstGroup) throws Exception {
+    public final HObject copy(HObject srcObj, Group dstGroup) throws Exception
+    {
         return copy(srcObj, dstGroup, null);
     }
 
@@ -1683,7 +1690,8 @@ public abstract class FileFormat extends File {
      * @throws Exception if the object can not be found
      */
     @Deprecated
-    public static final HObject getHObject(String fullPath) throws Exception {
+    public static final HObject getHObject(String fullPath) throws Exception
+    {
         if ((fullPath == null) || (fullPath.length() <= 0))
             return null;
 
@@ -1692,13 +1700,13 @@ public abstract class FileFormat extends File {
 
         if (idx > 0) {
             filename = fullPath.substring(0, idx);
-            path = fullPath.substring(idx + FILE_OBJ_SEP.length());
+            path     = fullPath.substring(idx + FILE_OBJ_SEP.length());
             if ((path == null) || (path.length() == 0))
                 path = "/";
         }
         else {
             filename = fullPath;
-            path = "/";
+            path     = "/";
         }
 
         return FileFormat.getHObject(filename, path);
@@ -1736,14 +1744,15 @@ public abstract class FileFormat extends File {
      * @throws Exception if the object can not be found
      */
     @Deprecated
-    public static final HObject getHObject(String filename, String path) throws Exception {
+    public static final HObject getHObject(String filename, String path) throws Exception
+    {
         if ((filename == null) || (filename.length() <= 0))
             throw new IllegalArgumentException("Invalid file name. " + filename);
 
         if (!(new File(filename)).exists())
             throw new IllegalArgumentException("File does not exists");
 
-        HObject obj = null;
+        HObject obj     = null;
         FileFormat file = FileFormat.getInstance(filename);
 
         if (file != null) {
@@ -1765,7 +1774,8 @@ public abstract class FileFormat extends File {
      *
      * @return the object that has the given OID; otherwise returns null
      */
-    public static final HObject findObject(FileFormat file, long[] oid) {
+    public static final HObject findObject(FileFormat file, long[] oid)
+    {
         if ((file == null) || (oid == null)) {
             log.debug("findObject(): file is null or oid is null");
             return null;
@@ -1779,7 +1789,7 @@ public abstract class FileFormat extends File {
             return null;
         }
 
-        Iterator<HObject> member_it = ((Group) theRoot).breadthFirstMemberList().iterator();
+        Iterator<HObject> member_it = ((Group)theRoot).breadthFirstMemberList().iterator();
         while (member_it.hasNext()) {
             theObj = member_it.next();
             if (theObj.equalsOID(oid))
@@ -1799,7 +1809,8 @@ public abstract class FileFormat extends File {
      *
      * @return the object that has the given path; otherwise returns null
      */
-    public static final HObject findObject(FileFormat file, String path) {
+    public static final HObject findObject(FileFormat file, String path)
+    {
         log.trace("findObject({}): start", path);
 
         if ((file == null) || (path == null)) {
@@ -1821,10 +1832,10 @@ public abstract class FileFormat extends File {
             return theRoot;
         }
 
-        Iterator<HObject> member_it = ((Group) theRoot).breadthFirstMemberList().iterator();
-        HObject theObj = null;
+        Iterator<HObject> member_it = ((Group)theRoot).breadthFirstMemberList().iterator();
+        HObject theObj              = null;
         while (member_it.hasNext()) {
-            theObj = member_it.next();
+            theObj          = member_it.next();
             String fullPath = theObj.getFullName() + "/";
 
             if (path.equals(fullPath) && theObj.getPath() != null)
@@ -1854,8 +1865,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public long open(int... indexList) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:open.");
+    public long open(int... indexList) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:open.");
     }
 
     /**
@@ -1882,8 +1895,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public Group createGroup(String name, Group pgroup, long... gplist) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:createGroup.");
+    public Group createGroup(String name, Group pgroup, long... gplist) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:createGroup.");
     }
 
     /***
@@ -1906,8 +1921,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public long createGcpl(int creationorder, int maxcompact, int mindense) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:createGcpl.");
+    public long createGcpl(int creationorder, int maxcompact, int mindense) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:createGcpl.");
     }
 
     /**
@@ -1928,8 +1945,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public HObject createLink(Group linkGroup, String name, Object currentObj) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:createLink.");
+    public HObject createLink(Group linkGroup, String name, Object currentObj) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:createLink.");
     }
 
     /**
@@ -1945,8 +1964,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void exportDataset(String file_export_name, Dataset object, int binary_order) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:exportDataset.");
+    public void exportDataset(String file_export_name, Dataset object, int binary_order) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:exportDataset.");
     }
 
     /**
@@ -1962,8 +1983,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void renameAttribute(HObject obj, String oldAttrName, String newAttrName) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:renameAttribute.");
+    public void renameAttribute(HObject obj, String oldAttrName, String newAttrName) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:renameAttribute.");
     }
 
     /**
@@ -1977,8 +2000,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void setNewLibBounds(String lowStr, String highStr) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setNewLibBounds.");
+    public void setNewLibBounds(String lowStr, String highStr) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:setNewLibBounds.");
     }
 
     /**
@@ -1992,8 +2017,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void setLibBounds(String lowStr, String highStr) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setLibBounds.");
+    public void setLibBounds(String lowStr, String highStr) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:setLibBounds.");
     }
 
     /**
@@ -2004,8 +2031,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public int[] getLibBounds() throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getLibBounds.");
+    public int[] getLibBounds() throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:getLibBounds.");
     }
 
     /**
@@ -2014,8 +2043,10 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void initLibBounds() throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:initLibBounds.");
+    public void initLibBounds() throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:initLibBounds.");
     }
 
     /**
@@ -2026,11 +2057,14 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public String getLibBoundsDescription() throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getLibBoundsDescription.");
+    public String getLibBoundsDescription() throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:getLibBoundsDescription.");
     }
 
-    /** @return the int value of the index type value.
+    /**
+     * @return the int value of the index type value.
      *
      * @param strtype
      *            The name of the index type.
@@ -2038,11 +2072,14 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public static int getIndexTypeValue(String strtype) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexTypeValue.");
+    public static int getIndexTypeValue(String strtype) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:getIndexTypeValue.");
     }
 
-    /** @return the int value of the index type.
+    /**
+     * @return the int value of the index type.
      *
      * @param strtype
      *            The name of the index type.
@@ -2050,11 +2087,14 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public int getIndexType(String strtype) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexType.");
+    public int getIndexType(String strtype) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:getIndexType.");
     }
 
-    /** set the int value of the index type.
+    /**
+     * set the int value of the index type.
      *
      * @param indexType
      *            The value of the index type.
@@ -2062,11 +2102,14 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void setIndexType(int indexType) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setIndexType.");
+    public void setIndexType(int indexType) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:setIndexType.");
     }
 
-    /** @return the int value of the index order value.
+    /**
+     * @return the int value of the index order value.
      *
      * @param strorder
      *            The name of the index order.
@@ -2074,11 +2117,14 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public static int getIndexOrderValue(String strorder) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexOrderValue.");
+    public static int getIndexOrderValue(String strorder) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:getIndexOrderValue.");
     }
 
-    /** @return the int value of the index order.
+    /**
+     * @return the int value of the index order.
      *
      * @param strorder
      *            The name of the index order.
@@ -2086,11 +2132,14 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public int getIndexOrder(String strorder) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:getIndexOrder.");
+    public int getIndexOrder(String strorder) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:getIndexOrder.");
     }
 
-    /** set the int value of the index order.
+    /**
+     * set the int value of the index order.
      *
      * @param indexOrder
      *            The index order.
@@ -2098,7 +2147,9 @@ public abstract class FileFormat extends File {
      * @throws Exception
      *             The exceptions thrown vary depending on the implementing class.
      */
-    public void setIndexOrder(int indexOrder) throws Exception {
-        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement FileFormat:setIndexOrder.");
+    public void setIndexOrder(int indexOrder) throws Exception
+    {
+        throw new UnsupportedOperationException(
+            "Unsupported operation. Subclasses must implement FileFormat:setIndexOrder.");
     }
 }

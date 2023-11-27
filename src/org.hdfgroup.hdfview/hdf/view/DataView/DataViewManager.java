@@ -25,13 +25,15 @@ import hdf.view.TreeView.TreeView;
  * @version 2.4 9/6/2007
  */
 public abstract interface DataViewManager {
-    /** Data content is displayed, add the dataview to the main windows
+    /**
+     * Data content is displayed, add the dataview to the main windows
      * @param dataView
      *            the dataView whose presence in the main view is to be added.
      */
     public abstract void addDataView(DataView dataView);
 
-    /** Data content is closed, remove the dataview from the main window
+    /**
+     * Data content is closed, remove the dataview from the main window
      * @param dataView
      *            the dataView whose presence in the main view is to be removed.
      */
@@ -75,5 +77,4 @@ public abstract interface DataViewManager {
      *            -- true: start timer, false stop timer.
      */
     public abstract void executeTimer(boolean toggleTimer);
-
 }

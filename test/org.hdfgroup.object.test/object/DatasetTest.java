@@ -11,17 +11,18 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
+import hdf.object.Dataset;
+import hdf.object.FileFormat;
+import hdf.object.h5.H5File;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Dataset;
-import hdf.object.FileFormat;
-import hdf.object.h5.H5File;
 
 /**
  * @author rsinha
@@ -29,27 +30,29 @@ import hdf.object.h5.H5File;
  */
 public class DatasetTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatasetTest.class);
-    private static final H5File H5FILE = new H5File();
+    private static final H5File H5FILE        = new H5File();
 
     private H5File testFile = null;
-    String[] dsetNames = {
-            H5TestFile.NAME_DATASET_INT, H5TestFile.NAME_DATASET_FLOAT, H5TestFile.NAME_DATASET_CHAR,
-            H5TestFile.NAME_DATASET_STR, H5TestFile.NAME_DATASET_ENUM,
-            H5TestFile.NAME_DATASET_COMPOUND,
-            H5TestFile.NAME_DATASET_IMAGE };
+    String[] dsetNames      = {H5TestFile.NAME_DATASET_INT,  H5TestFile.NAME_DATASET_FLOAT,
+                          H5TestFile.NAME_DATASET_CHAR, H5TestFile.NAME_DATASET_STR,
+                          H5TestFile.NAME_DATASET_ENUM, H5TestFile.NAME_DATASET_COMPOUND,
+                          H5TestFile.NAME_DATASET_IMAGE};
     private Dataset[] dSets = new Dataset[dsetNames.length];
 
-    protected void closeFile() {
+    protected void closeFile()
+    {
         if (testFile != null) {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {}
+            catch (final Exception ex) {
+            }
             testFile = null;
         }
     }
 
-    protected void checkObjCount(long fileid) {
+    protected void checkObjCount(long fileid)
+    {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
@@ -61,7 +64,8 @@ public class DatasetTest {
     }
 
     @BeforeClass
-    public static void createFile() throws Exception {
+    public static void createFile() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -80,7 +84,8 @@ public class DatasetTest {
     }
 
     @AfterClass
-    public static void checkIDs() throws Exception {
+    public static void checkIDs() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -93,7 +98,8 @@ public class DatasetTest {
 
     @SuppressWarnings("deprecation")
     @Before
-    public void openFiles() throws Exception {
+    public void openFiles() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -103,7 +109,7 @@ public class DatasetTest {
             ex.printStackTrace();
         }
         try {
-            testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.READ);
+            testFile = (H5File)H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.READ);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -112,7 +118,7 @@ public class DatasetTest {
 
         for (int i = 0; i < dSets.length; i++) {
             try {
-                dSets[i] = (Dataset) testFile.get(dsetNames[i]);
+                dSets[i] = (Dataset)testFile.get(dsetNames[i]);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -122,7 +128,8 @@ public class DatasetTest {
     }
 
     @After
-    public void removeFiles() throws Exception {
+    public void removeFiles() throws Exception
+    {
         if (testFile != null) {
             closeFile();
         }
@@ -153,7 +160,8 @@ public class DatasetTest {
      * </ul>
      */
     @Test
-    public void testMetadataAssociatedWithDataset() {
+    public void testMetadataAssociatedWithDataset()
+    {
         log.debug("testMetadataAssociatedWithDataset");
         log.debug("loop: Number of IDs still open: " + H5.getOpenIDCount());
         for (int i = 0; i < dsetNames.length; i++) {
@@ -170,13 +178,13 @@ public class DatasetTest {
             assertEquals(dSets[i].getHeight(), H5TestFile.DIM1);
             assertEquals(dSets[i].getRank(), H5TestFile.RANK);
             long[] array = new long[2];
-            array[0] = 50;
-            array[1] = 10;
+            array[0]     = 50;
+            array[1]     = 10;
             assertTrue(Arrays.equals(dSets[i].getSelectedDims(), array));
             int[] arrayInt = new int[3];
-            arrayInt[0] = 0;
-            arrayInt[1] = 1;
-            arrayInt[2] = 2;
+            arrayInt[0]    = 0;
+            arrayInt[1]    = 1;
+            arrayInt[2]    = 2;
             assertTrue(Arrays.equals(dSets[i].getSelectedIndex(), arrayInt));
             array[0] = 0;
             array[1] = 0;
@@ -203,23 +211,24 @@ public class DatasetTest {
      * </ul>
      */
     @Test
-    public void testConvertFromUnsignedC() {
+    public void testConvertFromUnsignedC()
+    {
         log.debug("testConvertFromUnsignedC");
-        byte[] int8 = { -1, -128, 127, 0 };
-        short[] int16 = { -1, -32768, 32767, 0 };
-        int[] int32 = { -1, -2147483648, 2147483647, 0 };
+        byte[] int8   = {-1, -128, 127, 0};
+        short[] int16 = {-1, -32768, 32767, 0};
+        int[] int32   = {-1, -2147483648, 2147483647, 0};
 
-        short[] uint8 = { 255, 128, 127, 0 };
-        int[] uint16 = { 65535, 32768, 32767, 0 };
-        long[] uint32 = { 4294967295L, 2147483648L, 2147483647, 0 };
+        short[] uint8 = {255, 128, 127, 0};
+        int[] uint16  = {65535, 32768, 32767, 0};
+        long[] uint32 = {4294967295L, 2147483648L, 2147483647, 0};
 
-        short[] expected8 = (short[]) Dataset.convertFromUnsignedC(int8, null);
+        short[] expected8 = (short[])Dataset.convertFromUnsignedC(int8, null);
         assertTrue(Arrays.equals(expected8, uint8));
 
-        int[] expected16 = (int[]) Dataset.convertFromUnsignedC(int16, null);
+        int[] expected16 = (int[])Dataset.convertFromUnsignedC(int16, null);
         assertTrue(Arrays.equals(expected16, uint16));
 
-        long[] expected32 = (long[]) Dataset.convertFromUnsignedC(int32, null);
+        long[] expected32 = (long[])Dataset.convertFromUnsignedC(int32, null);
         assertTrue(Arrays.equals(expected32, uint32));
     }
 }

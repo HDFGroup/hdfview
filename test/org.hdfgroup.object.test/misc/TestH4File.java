@@ -18,10 +18,8 @@ import java.util.List;
 
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
-
 import hdf.object.Group;
 import hdf.object.HObject;
-
 import hdf.object.h4.H4CompoundAttribute;
 import hdf.object.h4.H4File;
 import hdf.object.h4.H4GRImage;
@@ -35,17 +33,17 @@ import hdf.object.h4.H4Vdata;
  * @version 1.3.0 10/26/2001
  * @author Peter X. Cao
  */
-public class TestH4File
-{
+public class TestH4File {
     /**
      * Test tree structure of the HDF4 file.
      *
-     * Tested for regular file: c:\winnt\profiles\xcao\desktop\hdf_files\amortest000171999.hdf Tested with a large file
-     * (over 700MB, over 800 datasets) at \\Eirene\sdt\mcgrath\EOS-Data\MODIS\L3\MOD08_E3.A2000337.002.2001037044240.hdf
-     * it takes about 5 seconds to retrieve the tree structure through the network. Accessing local file can be a lot of
-     * faster.
+     * Tested for regular file: c:\winnt\profiles\xcao\desktop\hdf_files\amortest000171999.hdf Tested with a
+     * large file (over 700MB, over 800 datasets) at
+     * \\Eirene\sdt\mcgrath\EOS-Data\MODIS\L3\MOD08_E3.A2000337.002.2001037044240.hdf it takes about 5 seconds
+     * to retrieve the tree structure through the network. Accessing local file can be a lot of faster.
      */
-    private static void testTree(String fileName) {
+    private static void testTree(String fileName)
+    {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_WRITE);
 
         long t0 = System.currentTimeMillis();
@@ -71,19 +69,21 @@ public class TestH4File
         }
     }
 
-    private static void printNode(HObject node, String indent) {
+    private static void printNode(HObject node, String indent)
+    {
         System.out.println(indent + node);
 
-        int n = ((Group) node).breadthFirstMemberList().size();
+        int n = ((Group)node).breadthFirstMemberList().size();
         for (int i = 0; i < n; i++)
-            printNode(((Group) node).getMember(i), indent + "    ");
+            printNode(((Group)node).getMember(i), indent + "    ");
     }
 
     /**
      * Test H4Group.
      */
     @SuppressWarnings("rawtypes")
-    private static void testH4Group(String fileName) {
+    private static void testH4Group(String fileName)
+    {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_WRITE);
 
         try {
@@ -94,19 +94,19 @@ public class TestH4File
         }
 
         HObject root = h4file.getRootObject();
-        H4Group g = null;
+        H4Group g    = null;
         HObject node = null;
         if (root != null) {
-            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            Iterator<HObject> nodes = ((Group)root).depthFirstMemberList().iterator();
             while (nodes.hasNext()) {
                 node = nodes.next();
                 if (node instanceof H4Group) {
-                    g = (H4Group) node;
+                    g = (H4Group)node;
                     System.out.println(g);
 
                     // test H4CompoundDS attributes
                     H4CompoundAttribute attr = null;
-                    List info = null;
+                    List info                = null;
                     try {
                         info = g.getMetadata();
                     }
@@ -118,12 +118,12 @@ public class TestH4File
 
                     int n = info.size();
                     for (int i = 0; i < n; i++) {
-                        attr = (H4CompoundAttribute) info.get(i);
+                        attr = (H4CompoundAttribute)info.get(i);
                         System.out.println(attr);
                     }
                 } // if (obj instanceof H4Group
-            } // while (nodes.hasMoreElements())
-        } // if (root != null)
+            }     // while (nodes.hasMoreElements())
+        }         // if (root != null)
 
         try {
             h4file.close();
@@ -137,7 +137,8 @@ public class TestH4File
      * Test H4SDS.
      */
     @SuppressWarnings("rawtypes")
-    private static void testH4SDS(String fileName) {
+    private static void testH4SDS(String fileName)
+    {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_READ);
 
         try {
@@ -148,19 +149,19 @@ public class TestH4File
         }
 
         HObject root = h4file.getRootObject();
-        H4SDS sds = null;
+        H4SDS sds    = null;
         HObject node = null;
         if (root != null) {
-            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            Iterator<HObject> nodes = ((Group)root).depthFirstMemberList().iterator();
             while (nodes.hasNext()) {
                 node = nodes.next();
                 if (node instanceof H4SDS) {
-                    sds = (H4SDS) node;
+                    sds = (H4SDS)node;
                     System.out.println(sds);
 
                     // test H4CompoundDS attributes
                     H4CompoundAttribute attr = null;
-                    List info = null;
+                    List info                = null;
                     try {
                         info = sds.getMetadata();
                     }
@@ -172,7 +173,7 @@ public class TestH4File
                     if (info != null) {
                         n = info.size();
                         for (int i = 0; i < n; i++) {
-                            attr = (H4CompoundAttribute) info.get(i);
+                            attr = (H4CompoundAttribute)info.get(i);
                             System.out.println(attr);
                         }
                     }
@@ -188,7 +189,7 @@ public class TestH4File
 
                     if ((data != null) && data.getClass().isArray()) {
                         // print out the first 1000 data points
-                        n = Math.min(Array.getLength(data), 1000);
+                        n                = Math.min(Array.getLength(data), 1000);
                         StringBuilder sb = new StringBuilder();
                         for (int j = 0; j < n; j++) {
                             sb.append(Array.get(data, j));
@@ -197,8 +198,8 @@ public class TestH4File
                         System.out.println(sb.toString());
                     }
                 } // if (obj instanceof H4Group
-            } // while (nodes.hasMoreElements())
-        } // if (root != null)
+            }     // while (nodes.hasMoreElements())
+        }         // if (root != null)
 
         try {
             h4file.close();
@@ -212,7 +213,8 @@ public class TestH4File
      * Test H4Vdata.
      */
     @SuppressWarnings("rawtypes")
-    private static void testH4Vdata(String fileName) {
+    private static void testH4Vdata(String fileName)
+    {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_READ);
 
         try {
@@ -222,20 +224,20 @@ public class TestH4File
             System.out.println(ex);
         }
 
-        HObject root = h4file.getRootObject();
+        HObject root  = h4file.getRootObject();
         H4Vdata vdata = null;
-        HObject node = null;
+        HObject node  = null;
         if (root != null) {
-            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            Iterator<HObject> nodes = ((Group)root).depthFirstMemberList().iterator();
             while (nodes.hasNext()) {
                 node = nodes.next();
                 if (node instanceof H4Vdata) {
-                    vdata = (H4Vdata) node;
+                    vdata = (H4Vdata)node;
                     System.out.println(vdata);
 
                     // test H4CompoundDS attributes
                     H4CompoundAttribute attr = null;
-                    List info = null;
+                    List info                = null;
                     try {
                         info = vdata.getMetadata();
                     }
@@ -247,7 +249,7 @@ public class TestH4File
                     if (info != null) {
                         n = info.size();
                         for (int i = 0; i < n; i++) {
-                            attr = (H4CompoundAttribute) info.get(i);
+                            attr = (H4CompoundAttribute)info.get(i);
                             System.out.println(attr);
                         }
                     }
@@ -256,7 +258,7 @@ public class TestH4File
                     if (vdata.isInited())
                         vdata.init();
 
-                    n = vdata.getMemberCount();
+                    n              = vdata.getMemberCount();
                     String[] names = vdata.getMemberNames();
                     for (int i = 0; i < n; i++)
                         System.out.println(names[i]);
@@ -265,14 +267,14 @@ public class TestH4File
                     List list = null;
 
                     try {
-                        list = (List) vdata.read();
+                        list = (List)vdata.read();
                     }
                     catch (Exception ex) {
                         System.out.println(ex);
                     }
 
                     if (list != null) {
-                        n = list.size();
+                        n            = list.size();
                         Object mdata = null;
                         for (int i = 0; i < n; i++) {
                             mdata = list.get(i);
@@ -287,10 +289,10 @@ public class TestH4File
                                 System.out.println(sb.toString());
                             }
                         } // (int i=0; i<n; i++)
-                    } // (list != null)
-                } // if (obj instanceof H4Vdata
-            } // while (nodes.hasMoreElements())
-        } // if (root != null)
+                    }     // (list != null)
+                }         // if (obj instanceof H4Vdata
+            }             // while (nodes.hasMoreElements())
+        }                 // if (root != null)
 
         try {
             h4file.close();
@@ -304,7 +306,8 @@ public class TestH4File
      * Test H4GRImage.
      */
     @SuppressWarnings("rawtypes")
-    private static void testH4GRImage(String fileName) {
+    private static void testH4GRImage(String fileName)
+    {
         H4File h4file = new H4File(fileName, HDFConstants.DFACC_READ);
 
         try {
@@ -314,20 +317,20 @@ public class TestH4File
             System.out.println(ex);
         }
 
-        HObject root = h4file.getRootObject();
+        HObject root  = h4file.getRootObject();
         H4GRImage sds = null;
-        HObject node = null;
+        HObject node  = null;
         if (root != null) {
-            Iterator<HObject> nodes = ((Group) root).depthFirstMemberList().iterator();
+            Iterator<HObject> nodes = ((Group)root).depthFirstMemberList().iterator();
             while (nodes.hasNext()) {
                 node = nodes.next();
                 if (node instanceof H4GRImage) {
-                    sds = (H4GRImage) node;
+                    sds = (H4GRImage)node;
                     System.out.println(sds);
 
                     // test H4CompoundDS attributes
                     H4CompoundAttribute attr = null;
-                    List info = null;
+                    List info                = null;
                     try {
                         info = sds.getMetadata();
                     }
@@ -339,7 +342,7 @@ public class TestH4File
                     if (info != null) {
                         n = info.size();
                         for (int i = 0; i < n; i++) {
-                            attr = (H4CompoundAttribute) info.get(i);
+                            attr = (H4CompoundAttribute)info.get(i);
                             System.out.println(attr);
                         }
                     }
@@ -353,10 +356,9 @@ public class TestH4File
                         System.out.println(ex);
                     }
 
-                    if ((data != null)
-                            && data.getClass().isArray()) {
+                    if ((data != null) && data.getClass().isArray()) {
                         // print out the first 1000 data points
-                        n = Math.min(Array.getLength(data), 1000);
+                        n                = Math.min(Array.getLength(data), 1000);
                         StringBuilder sb = new StringBuilder();
                         for (int j = 0; j < n; j++) {
                             sb.append(Array.get(data, j));
@@ -365,8 +367,8 @@ public class TestH4File
                         System.out.println(sb.toString());
                     }
                 } // if (obj instanceof H4Group
-            } // while (nodes.hasMoreElements())
-        } // if (root != null)
+            }     // while (nodes.hasMoreElements())
+        }         // if (root != null)
 
         try {
             h4file.close();
@@ -376,7 +378,8 @@ public class TestH4File
         }
     }
 
-    public static void main(String[] argv) {
+    public static void main(String[] argv)
+    {
         int argc = argv.length;
 
         if (argc <= 0) {
@@ -385,5 +388,4 @@ public class TestH4File
 
         TestH4File.testTree(argv[0]);
     }
-
 }

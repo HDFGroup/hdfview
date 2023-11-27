@@ -1,0 +1,109 @@
+name: hdfview release build
+
+on:
+  workflow_dispatch:
+    inputs:
+      use_tag:
+        description: 'HDFView Release version tag'
+        type: string
+        required: false
+        default: snapshot
+      use_tag4:
+        description: 'HDF Release version tag'
+        type: string
+        required: false
+        default: snapshot
+      use_tag5:
+        description: 'HDF5 Release version tag'
+        type: string
+        required: false
+        default: snapshot
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel.
+jobs:
+  log-the-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      rel_tag: ${{ steps.get-tag-name.outputs.RELEASE_TAG }}
+      rel4_tag: ${{ steps.get-tag-name.outputs.RELEASE4_TAG }}
+      rel5_tag: ${{ steps.get-tag-name.outputs.RELEASE5_TAG }}
+    steps:
+    - name: Get tag name
+      id: get-tag-name
+      env:
+        TAG: ${{ inputs.use_tag }}
+        TAG4: ${{ inputs.use_tag4 }}
+        TAG5: ${{ inputs.use_tag5 }}
+      run: |
+          echo "RELEASE_TAG=$TAG" >> $GITHUB_OUTPUT
+          echo "RELEASE4_TAG=$TAG4" >> $GITHUB_OUTPUT
+          echo "RELEASE5_TAG=$TAG5" >> $GITHUB_OUTPUT
+
+  create-files-ant:
+    needs: log-the-inputs
+    runs-on: ubuntu-latest
+    outputs:
+      file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
+    steps:
+      - name: Set file base name
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ needs.log-the-inputs.outputs.rel_tag }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v3
+        with:
+          path: hdfsrc
+
+      - name: Zip Folder
+        run: |
+              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
+              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
+
+      - name: List files in the repository
+        run: |
+              ls -l ${{ github.workspace }}
+              ls $GITHUB_WORKSPACE
+
+      # Save files created by release script
+      - name: Save tgz-tarball
+        uses: actions/upload-artifact@v3
+        with:
+              name: tgz-tarball
+              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save zip-tarball
+        uses: actions/upload-artifact@v3
+        with:
+              name: zip-tarball
+              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  call-workflow-ant:
+    needs: [log-the-inputs, create-files-ant]
+    uses: ./.github/workflows/ant.yml
+    with:
+      use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
+      use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
+      file_base: ${{ needs.create-files-ant.outputs.file_base }}
+
+  call-workflow-release:
+    needs: [log-the-inputs, create-files-ant, call-workflow-ant]
+    permissions:
+      contents: write # In order to allow tag creation
+    uses: ./.github/workflows/release-files.yml
+    with:
+      file_base: ${{ needs.create-files-ant.outputs.file_base }}
+      file_branch: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      file_sha: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_environ: release
+

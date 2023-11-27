@@ -14,6 +14,13 @@
 
 package hdf.view.MetaDataView;
 
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.h5.H5Link;
+import hdf.view.DataView.DataViewManager;
+import hdf.view.Tools;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
@@ -26,20 +33,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.h5.H5Link;
-import hdf.view.Tools;
-import hdf.view.DataView.DataViewManager;
-
 /**
  *
  * The metadata view interface for displaying link metadata information
  */
 public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultLinkMetaDataView.class);
+    private static final org.slf4j.Logger log =
+        org.slf4j.LoggerFactory.getLogger(DefaultLinkMetaDataView.class);
 
     /**
      *The metadata view interface for displaying link metadata information
@@ -51,15 +52,18 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
      * @param theObj
      *        the object to display the metadata info
      */
-    public DefaultLinkMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
+    public DefaultLinkMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj)
+    {
         super(parentComposite, viewer, theObj);
     }
 
     @Override
-    protected void addObjectSpecificContent() {
+    protected void addObjectSpecificContent()
+    {
         /* For HDF5 links, add a box to allow changing of the link target */
         if (dataObject.getLinkTargetObjName() != null) {
-            org.eclipse.swt.widgets.Group linkTargetGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
+            org.eclipse.swt.widgets.Group linkTargetGroup =
+                new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
             linkTargetGroup.setFont(curFont);
             linkTargetGroup.setText("Link Target Info");
             linkTargetGroup.setLayout(new GridLayout(2, false));
@@ -93,7 +97,8 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
             linkTarget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
             linkTarget.addTraverseListener(new TraverseListener() {
                 @Override
-                public void keyTraversed(TraverseEvent e) {
+                public void keyTraversed(TraverseEvent e)
+                {
                     if (e.detail == SWT.TRAVERSE_RETURN) {
                         changeLinkTarget(linkTarget.getText());
                     }
@@ -101,17 +106,19 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
             });
             linkTarget.addListener(SWT.FocusOut, new Listener() {
                 @Override
-                public void handleEvent(Event arg0) {
+                public void handleEvent(Event arg0)
+                {
                     changeLinkTarget(linkTarget.getText());
                 }
             });
         }
     }
 
-    private void changeLinkTarget(String linkTargetName) {
+    private void changeLinkTarget(String linkTargetName)
+    {
         Group pgroup = null;
         try {
-            pgroup = (Group) dataObject.getFileFormat().get(dataObject.getPath());
+            pgroup = (Group)dataObject.getFileFormat().get(dataObject.getPath());
         }
         catch (Exception ex) {
             log.debug("addObjectSpecificContent(): parent group get failure:", ex);
@@ -120,7 +127,8 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
         if (pgroup == null) {
             log.debug("addObjectSpecificContent(): parent group is null");
             display.beep();
-            Tools.showError(display.getShells()[0], "Select", "Parent group is null.\nLink target change failed.");
+            Tools.showError(display.getShells()[0], "Select",
+                            "Parent group is null.\nLink target change failed.");
             return;
         }
 
@@ -130,9 +138,11 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
         int linkType = Group.LINK_TYPE_SOFT;
         if (dataObject.getLinkTargetObjName().contains(FileFormat.FILE_OBJ_SEP))
             linkType = Group.LINK_TYPE_EXTERNAL;
-        else if ((linkTargetName != null) && (linkTargetName.equals("/"))) { // do not allow to link to the root
+        else if ((linkTargetName != null) &&
+                 (linkTargetName.equals("/"))) { // do not allow to link to the root
             display.beep();
-            Tools.showError(display.getShells()[0], "Select", "Link to root not allowed.\nLink target change failed.");
+            Tools.showError(display.getShells()[0], "Select",
+                            "Link to root not allowed.\nLink target change failed.");
             return;
         }
 
@@ -141,7 +151,8 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
             return;
 
         // invalid name
-        if (linkTargetName == null || linkTargetName.length() < 1) return;
+        if (linkTargetName == null || linkTargetName.length() < 1)
+            return;
 
         try {
             dataObject.getFileFormat().createLink(pgroup, dataObject.getName(), linkTargetName, linkType);
@@ -155,7 +166,6 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
         }
 
         Tools.showInformation(display.getShells()[0], "Link target changed.",
-                "Reload file to display changes.");
+                              "Reload file to display changes.");
     }
-
 }

@@ -45,7 +45,8 @@ public abstract interface ImageView extends DataView {
     /** @return the image displayed in this imageView */
     public abstract Image getImage();
 
-    /** Sets the image
+    /**
+     * Sets the image
      *
      * @param img the image to view
      */
@@ -54,7 +55,8 @@ public abstract interface ImageView extends DataView {
     /** @return the palette of the image */
     public abstract byte[][] getPalette();
 
-    /** Sets the image palette
+    /**
+     * Sets the image palette
      *
      * @param palette the palette for the image to view
      */
@@ -62,5 +64,4 @@ public abstract interface ImageView extends DataView {
 
     /** @return the byte array of the image data */
     public abstract byte[] getImageByteData();
-
 }

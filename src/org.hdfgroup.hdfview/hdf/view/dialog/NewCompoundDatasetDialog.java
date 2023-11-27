@@ -19,6 +19,15 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import hdf.object.CompoundDS;
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.h5.H5CompoundDS;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,17 +59,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.CompoundDS;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.Group;
-import hdf.object.HObject;
-
-import hdf.object.h5.H5CompoundDS;
-
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-
 /**
  * NewCompoundDatasetDialog shows a message dialog requesting user input for creating
  * a new HDF4/5 compound dataset.
@@ -72,38 +70,38 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
     private static final Logger log = LoggerFactory.getLogger(NewCompoundDatasetDialog.class);
 
-    private static final String[] DATATYPE_NAMES   = {
-        "byte (8-bit)", // 0
-        "short (16-bit)", // 1
-        "int (32-bit)", // 2
-        "unsigned byte (8-bit)", // 3
+    private static final String[] DATATYPE_NAMES = {
+        "byte (8-bit)",            // 0
+        "short (16-bit)",          // 1
+        "int (32-bit)",            // 2
+        "unsigned byte (8-bit)",   // 3
         "unsigned short (16-bit)", // 4
-        "unsigned int (32-bit)", // 5
-        "long (64-bit)", // 6
-        "float", // 7
-        "double", // 8
-        "string", // 9
-        "enum", // 10
-        "unsigned long (64-bit)" // 11
+        "unsigned int (32-bit)",   // 5
+        "long (64-bit)",           // 6
+        "float",                   // 7
+        "double",                  // 8
+        "string",                  // 9
+        "enum",                    // 10
+        "unsigned long (64-bit)"   // 11
     };
 
-    private Combo                 parentChoice, nFieldBox, templateChoice;
+    private Combo parentChoice, nFieldBox, templateChoice;
 
     /** A list of current groups */
-    private Vector<Group>         groupList;
-    private Vector<CompoundDS>    compoundDSList;
+    private Vector<Group> groupList;
+    private Vector<CompoundDS> compoundDSList;
 
-    private int                   numberOfMembers;
+    private int numberOfMembers;
 
-    private Table                 table;
+    private Table table;
 
-    private TableEditor[][]       editors;
+    private TableEditor[][] editors;
 
-    private Text                  nameField, currentSizeField, maxSizeField, chunkSizeField;
+    private Text nameField, currentSizeField, maxSizeField, chunkSizeField;
 
-    private Combo                 compressionLevel, rankChoice;
-    private Button                checkCompression;
-    private Button                checkContiguous, checkChunked;
+    private Combo compressionLevel, rankChoice;
+    private Button checkCompression;
+    private Button checkContiguous, checkChunked;
 
     /**
      * Constructs a NewCompoundDatasetDialog with specified list of possible parent
@@ -116,31 +114,32 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
      * @param objs
      *            the list of all objects.
      */
-    public NewCompoundDatasetDialog(Shell parent, Group pGroup, List<?> objs) {
+    public NewCompoundDatasetDialog(Shell parent, Group pGroup, List<?> objs)
+    {
         super(parent, pGroup, objs);
 
         numberOfMembers = 2;
 
-        groupList = new Vector<>(objs.size());
+        groupList      = new Vector<>(objs.size());
         compoundDSList = new Vector<>(objs.size());
     }
 
     /**
      * Open the NewCompoundDatasetDialog for adding a new compound dataset.
      */
-    public void open() {
+    public void open()
+    {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell        = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Compound Dataset...");
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, false));
 
-
         // Create Name/Parent Group/Import field region
         Composite fieldComposite = new Composite(shell, SWT.NONE);
-        GridLayout layout = new GridLayout(2, false);
-        layout.verticalSpacing = 0;
+        GridLayout layout        = new GridLayout(2, false);
+        layout.verticalSpacing   = 0;
         fieldComposite.setLayout(layout);
         fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -161,18 +160,19 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 parentObj = groupList.get(parentChoice.getSelectionIndex());
             }
         });
 
-        Object obj = null;
+        Object obj           = null;
         Iterator<?> iterator = objList.iterator();
 
         while (iterator.hasNext()) {
             obj = iterator.next();
             if (obj instanceof Group) {
-                Group g = (Group) obj;
+                Group g = (Group)obj;
                 groupList.add(g);
                 if (g.isRoot()) {
                     parentChoice.add(HObject.SEPARATOR);
@@ -182,15 +182,16 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 }
             }
             else if (obj instanceof CompoundDS) {
-                compoundDSList.add((CompoundDS) obj);
+                compoundDSList.add((CompoundDS)obj);
             }
         }
 
-        if (((Group) parentObj).isRoot()) {
+        if (((Group)parentObj).isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentObj.getPath() + parentObj.getName() + HObject.SEPARATOR));
+            parentChoice.select(
+                parentChoice.indexOf(parentObj.getPath() + parentObj.getName() + HObject.SEPARATOR));
         }
 
         label = new Label(fieldComposite, SWT.LEFT);
@@ -202,26 +203,28 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         templateChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         templateChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 CompoundDS dset = null;
-                String name = templateChoice.getItem(templateChoice.getSelectionIndex());
+                String name     = templateChoice.getItem(templateChoice.getSelectionIndex());
 
                 log.trace("templateChoice start name={}", name);
                 for (CompoundDS ds : compoundDSList)
                     if (ds.getName().equals(name))
                         dset = ds;
 
-                if (dset == null) return;
+                if (dset == null)
+                    return;
 
                 if (!dset.isInited())
                     dset.init();
 
                 int rank = dset.getRank();
                 rankChoice.select(rank - 1);
-                long[] dims = dset.getDims();
+                long[] dims           = dset.getDims();
                 final String[] mNames = dset.getMemberNames();
-                int[] mOrders = dset.getMemberOrders();
-                Datatype[] mTypes = dset.getMemberTypes();
+                int[] mOrders         = dset.getMemberOrders();
+                Datatype[] mTypes     = dset.getMemberTypes();
 
                 String sizeStr = String.valueOf(dims[0]);
                 for (int i = 1; i < rank; i++) {
@@ -247,12 +250,13 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
                 String compression = dset.getCompression();
                 if (compression != null) {
-                    int clevel = -1;
+                    int clevel   = -1;
                     int comp_pos = Dataset.COMPRESSION_GZIP_TXT.length();
-                    int idx = compression.indexOf(Dataset.COMPRESSION_GZIP_TXT);
+                    int idx      = compression.indexOf(Dataset.COMPRESSION_GZIP_TXT);
                     if (idx >= 0) {
                         try {
-                            clevel = Integer.parseInt(compression.substring(idx + comp_pos, idx + comp_pos +1));
+                            clevel =
+                                Integer.parseInt(compression.substring(idx + comp_pos, idx + comp_pos + 1));
                         }
                         catch (NumberFormatException ex) {
                             clevel = -1;
@@ -267,16 +271,16 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 nFieldBox.select(dset.getMemberCount() - 1);
                 nFieldBox.notifyListeners(SWT.Selection, new Event());
                 for (int i = 0; i < numberOfMembers; i++) {
-                    ((Text) editors[i][0].getEditor()).setText(mNames[i]);
+                    ((Text)editors[i][0].getEditor()).setText(mNames[i]);
 
                     log.trace("mNames[{}] = {}", i, mNames[i]);
                     int typeIdx = -1;
-                    int tclass = mTypes[i].getDatatypeClass();
-                    long tsize = mTypes[i].getDatatypeSize();
+                    int tclass  = mTypes[i].getDatatypeClass();
+                    long tsize  = mTypes[i].getDatatypeSize();
                     int tsigned = mTypes[i].getDatatypeSign();
                     if (tclass == Datatype.CLASS_ARRAY) {
-                        tclass = mTypes[i].getDatatypeBase().getDatatypeClass();
-                        tsize = mTypes[i].getDatatypeBase().getDatatypeSize();
+                        tclass  = mTypes[i].getDatatypeBase().getDatatypeClass();
+                        tsize   = mTypes[i].getDatatypeBase().getDatatypeSize();
                         tsigned = mTypes[i].getDatatypeBase().getDatatypeSign();
                     }
                     if (tclass == Datatype.CLASS_CHAR) {
@@ -340,31 +344,30 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                     }
                     log.trace("typeIdx={}", typeIdx);
 
-                    CCombo typeCombo = ((CCombo) editors[i][1].getEditor());
+                    CCombo typeCombo = ((CCombo)editors[i][1].getEditor());
                     typeCombo.select(typeIdx);
                     typeCombo.notifyListeners(SWT.Selection, new Event());
 
-                    //TODO: Array size is wrong for enums and for array types. Array types such as 8x8
-                    // show as size 64, not 8x8
+                    // TODO: Array size is wrong for enums and for array types. Array types such as 8x8
+                    //  show as size 64, not 8x8
                     if (tclass == Datatype.CLASS_STRING) {
-                        ((Text) editors[i][2].getEditor()).setText(String.valueOf(tsize));
+                        ((Text)editors[i][2].getEditor()).setText(String.valueOf(tsize));
                     }
                     else if (tclass == Datatype.CLASS_ENUM) {
-                        ((Text) editors[i][2].getEditor()).setText(mTypes[i].getEnumMembersAsString());
+                        ((Text)editors[i][2].getEditor()).setText(mTypes[i].getEnumMembersAsString());
                         table.getItem(i).setText(2, mTypes[i].getEnumMembersAsString());
                     }
                     else {
-                        ((Text) editors[i][2].getEditor()).setText(String.valueOf(mOrders[i]));
+                        ((Text)editors[i][2].getEditor()).setText(String.valueOf(mOrders[i]));
                     }
                 } //  (int i=0; i<numberOfMembers; i++)
             }
         });
 
         Iterator<CompoundDS> it = compoundDSList.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             templateChoice.add(it.next().getName());
         }
-
 
         // Create Dataspace region
         org.eclipse.swt.widgets.Group dataspaceGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
@@ -390,10 +393,11 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         rankChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                int rank = rankChoice.getSelectionIndex() + 1;
+            public void widgetSelected(SelectionEvent e)
+            {
+                int rank              = rankChoice.getSelectionIndex() + 1;
                 String currentSizeStr = "1";
-                String maxSizeStr = "0";
+                String maxSizeStr     = "0";
 
                 for (int i = 1; i < rank; i++) {
                     currentSizeStr += " x 1";
@@ -404,8 +408,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 maxSizeField.setText(maxSizeStr);
 
                 String currentStr = currentSizeField.getText();
-                int idx = currentStr.lastIndexOf('x');
-                String chunkStr = "1";
+                int idx           = currentStr.lastIndexOf('x');
+                String chunkStr   = "1";
 
                 if (rank <= 1) {
                     chunkStr = currentStr;
@@ -437,7 +441,6 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         maxSizeField.setFont(curFont);
         maxSizeField.setText("0");
 
-
         // Create Data Layout/Compression region
         org.eclipse.swt.widgets.Group layoutGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
         layoutGroup.setLayout(new GridLayout(7, false));
@@ -455,7 +458,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         checkContiguous.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkContiguous.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 chunkSizeField.setEnabled(false);
             }
         });
@@ -474,12 +478,13 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         checkChunked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkChunked.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 chunkSizeField.setEnabled(true);
 
                 String currentStr = currentSizeField.getText();
-                int idx = currentStr.lastIndexOf('x');
-                String chunkStr = "1";
+                int idx           = currentStr.lastIndexOf('x');
+                String chunkStr   = "1";
 
                 int rank = rankChoice.getSelectionIndex() + 1;
                 if (rank <= 1) {
@@ -518,14 +523,15 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         checkCompression.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkCompression.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 boolean isCompressed = checkCompression.getSelection();
 
                 if (isCompressed) {
                     if (!checkChunked.getSelection()) {
                         String currentStr = currentSizeField.getText();
-                        int idx = currentStr.lastIndexOf('x');
-                        String chunkStr = "1";
+                        int idx           = currentStr.lastIndexOf('x');
+                        String chunkStr   = "1";
 
                         int rank = rankChoice.getSelectionIndex() + 1;
                         if (rank <= 1) {
@@ -581,7 +587,6 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         label.setFont(curFont);
         label.setText("");
 
-
         // Create Properties region
         org.eclipse.swt.widgets.Group propertiesGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
         propertiesGroup.setLayout(new GridLayout(2, false));
@@ -598,14 +603,17 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         nFieldBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         nFieldBox.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 updateMemberTableItems();
             }
         });
         nFieldBox.addTraverseListener(new TraverseListener() {
             @Override
-            public void keyTraversed(TraverseEvent e) {
-                if (e.detail == SWT.TRAVERSE_RETURN) updateMemberTableItems();
+            public void keyTraversed(TraverseEvent e)
+            {
+                if (e.detail == SWT.TRAVERSE_RETURN)
+                    updateMemberTableItems();
             }
         });
 
@@ -621,7 +629,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
         editors = new TableEditor[nFieldBox.getItemCount()][3];
 
-        String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
+        String[] colNames = {"Name", "Datatype", "Array size / String length / Enum names"};
 
         TableColumn column = new TableColumn(table, SWT.NONE);
         column.setText(colNames[0]);
@@ -634,22 +642,23 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
         for (int i = 0; i < 2; i++) {
             TableEditor[] editor = addMemberTableItem(table);
-            editors[i][0] = editor[0];
-            editors[i][1] = editor[1];
-            editors[i][2] = editor[2];
+            editors[i][0]        = editor[0];
+            editors[i][1]        = editor[1];
+            editors[i][2]        = editor[2];
         }
 
-        for(int i = 0; i < table.getColumnCount(); i++) {
+        for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumn(i).pack();
         }
 
         // Last table column always expands to fill remaining table size
         table.addListener(SWT.Resize, new Listener() {
             @Override
-            public void handleEvent(Event e) {
-                Table table = (Table) e.widget;
-                Rectangle area = table.getClientArea();
-                int columnCount = table.getColumnCount();
+            public void handleEvent(Event e)
+            {
+                Table table            = (Table)e.widget;
+                Rectangle area         = table.getClientArea();
+                int columnCount        = table.getColumnCount();
                 int totalGridLineWidth = (columnCount - 1) * table.getGridLineWidth();
 
                 int totalColumnWidth = 0;
@@ -667,7 +676,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         // Disable table selection highlighting
         table.addListener(SWT.EraseItem, new Listener() {
             @Override
-            public void handleEvent(Event e) {
+            public void handleEvent(Event e)
+            {
                 if ((e.detail & SWT.SELECTED) != 0) {
                     e.detail &= ~SWT.SELECTED;
                 }
@@ -685,7 +695,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 try {
                     newObject = createCompoundDS();
                 }
@@ -705,7 +716,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = null;
                 shell.dispose();
                 (groupList).setSize(0);
@@ -725,15 +737,17 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+            public void widgetDisposed(DisposeEvent e)
+            {
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
+        Point shellSize        = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
@@ -745,13 +759,14 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 display.sleep();
     }
 
-    private HObject createCompoundDS() throws Exception {
+    private HObject createCompoundDS() throws Exception
+    {
         HObject obj = null;
         long dims[], maxdims[], chunks[];
         int rank;
 
         maxdims = chunks = null;
-        String dname = nameField.getText();
+        String dname     = nameField.getText();
         if ((dname == null) || (dname.length() <= 0)) {
             throw new IllegalArgumentException("Dataset name is empty");
         }
@@ -766,20 +781,20 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
             return null;
         }
 
-        String[] mNames = new String[n];
+        String[] mNames       = new String[n];
         Datatype[] mDatatypes = new Datatype[n];
-        int[] mOrders = new int[n];
+        int[] mOrders         = new int[n];
 
         for (int i = 0; i < n; i++) {
-            String name = (String) table.getItem(i).getData("MemberName");
+            String name = (String)table.getItem(i).getData("MemberName");
             if ((name == null) || (name.length() <= 0)) {
                 throw new IllegalArgumentException("Member name is empty");
             }
             mNames[i] = name;
             log.trace("createCompoundDS member[{}] name = {}", i, mNames[i]);
 
-            int order = 1;
-            String orderStr = (String) table.getItem(i).getData("MemberSize");
+            int order       = 1;
+            String orderStr = (String)table.getItem(i).getData("MemberSize");
             if (orderStr != null) {
                 try {
                     order = Integer.parseInt(orderStr);
@@ -790,7 +805,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
             }
             mOrders[i] = order;
 
-            String typeName = (String) table.getItem(i).getData("MemberType");
+            String typeName = (String)table.getItem(i).getData("MemberType");
             log.trace("createCompoundDS type[{}] name = {}", i, typeName);
             Datatype type = null;
             if (DATATYPE_NAMES[0].equals(typeName)) {
@@ -803,13 +818,16 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[3].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
+                type =
+                    fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else if (DATATYPE_NAMES[4].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.SIGN_NONE);
+                type =
+                    fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else if (DATATYPE_NAMES[5].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
+                type =
+                    fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else if (DATATYPE_NAMES[6].equals(typeName)) {
                 type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.NATIVE);
@@ -821,7 +839,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 type = fileFormat.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[9].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE, Datatype.NATIVE);
+                type =
+                    fileFormat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[10].equals(typeName)) { // enum
                 type = fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
@@ -835,7 +854,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 }
             }
             else if (DATATYPE_NAMES[11].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.SIGN_NONE);
+                type =
+                    fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else {
                 throw new IllegalArgumentException("Invalid data type.");
@@ -848,12 +868,13 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Create", "Number of values in the current dimension size is less than " + rank);
+            Tools.showError(shell, "Create",
+                            "Number of values in the current dimension size is less than " + rank);
             return null;
         }
 
-        long l = 0;
-        dims = new long[rank];
+        long l       = 0;
+        dims         = new long[rank];
         String token = null;
         for (int i = 0; i < rank; i++) {
             token = st.nextToken().trim();
@@ -878,11 +899,12 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         st = new StringTokenizer(maxSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Create", "Number of values in the max dimension size is less than " + rank);
+            Tools.showError(shell, "Create",
+                            "Number of values in the max dimension size is less than " + rank);
             return null;
         }
 
-        l = 0;
+        l       = 0;
         maxdims = new long[rank];
         for (int i = 0; i < rank; i++) {
             token = st.nextToken().trim();
@@ -916,9 +938,9 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 return null;
             }
 
-            l = 0;
+            l      = 0;
             chunks = new long[rank];
-            token = null;
+            token  = null;
             for (int i = 0; i < rank; i++) {
                 token = st.nextToken().trim();
                 try {
@@ -926,7 +948,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 }
                 catch (NumberFormatException ex) {
                     shell.getDisplay().beep();
-                    Tools.showError(shell, "Create", "Invalid chunk dimension size: " + chunkSizeField.getText());
+                    Tools.showError(shell, "Create",
+                                    "Invalid chunk dimension size: " + chunkSizeField.getText());
                     return null;
                 }
 
@@ -947,16 +970,21 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
             if (tchunksize >= tdimsize) {
                 shell.getDisplay().beep();
-                if(!Tools.showConfirm(shell, "Create", "Chunk size is equal/greater than the current size. "
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
+                if (!Tools.showConfirm(shell, "Create",
+                                       "Chunk size is equal/greater than the current size. "
+                                           + "\nAre you sure you want to set chunk size to " +
+                                           chunkSizeField.getText() + "?")) {
                     return null;
                 }
             }
 
             if (tchunksize == 1) {
                 shell.getDisplay().beep();
-                if(!Tools.showConfirm(shell, "Create", "Chunk size is one, which may cause large memory overhead for large dataset."
-                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?")) {
+                if (!Tools.showConfirm(
+                        shell, "Create",
+                        "Chunk size is one, which may cause large memory overhead for large dataset."
+                            + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() +
+                            "?")) {
                     return null;
                 }
             }
@@ -969,15 +997,18 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         }
 
         if (checkChunked.getSelection()) {
-            obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, chunks, gzip, mNames, mDatatypes, mOrders, null);
+            obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, chunks, gzip, mNames, mDatatypes,
+                                              mOrders, null);
         }
         else {
-            obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, null, -1, mNames, mDatatypes, mOrders, null);
+            obj = fileFormat.createCompoundDS(dname, pgroup, dims, maxdims, null, -1, mNames, mDatatypes,
+                                              mOrders, null);
         }
         return obj;
     }
 
-    private void updateMemberTableItems() {
+    private void updateMemberTableItems()
+    {
         int n = 0;
 
         try {
@@ -992,22 +1023,23 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
             return;
         }
 
-        if(n > numberOfMembers) {
+        if (n > numberOfMembers) {
             try {
                 for (int i = numberOfMembers; i < n; i++) {
                     TableEditor[] editor = addMemberTableItem(table);
-                    editors[i][0] = editor[0];
-                    editors[i][1] = editor[1];
-                    editors[i][2] = editor[2];
+                    editors[i][0]        = editor[0];
+                    editors[i][1]        = editor[1];
+                    editors[i][2]        = editor[2];
                 }
             }
             catch (Exception ex) {
                 log.debug("Error adding member table items: ", ex);
                 return;
             }
-        } else {
+        }
+        else {
             try {
-                for(int i = numberOfMembers - 1; i >= n; i--) {
+                for (int i = numberOfMembers - 1; i >= n; i--) {
                     table.remove(i);
                 }
             }
@@ -1021,25 +1053,28 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         numberOfMembers = n;
     }
 
-    private TableEditor[] addMemberTableItem(Table table) {
-        final TableItem item = new TableItem(table, SWT.NONE);
+    private TableEditor[] addMemberTableItem(Table table)
+    {
+        final TableItem item       = new TableItem(table, SWT.NONE);
         final TableEditor[] editor = new TableEditor[3];
 
-        for (int i = 0; i < editor.length; i++) editor[i] = new TableEditor(table);
+        for (int i = 0; i < editor.length; i++)
+            editor[i] = new TableEditor(table);
 
         final Text nameText = new Text(table, SWT.SINGLE | SWT.BORDER);
         nameText.setFont(curFont);
 
-        editor[0].grabHorizontal = true;
-        editor[0].grabVertical = true;
+        editor[0].grabHorizontal      = true;
+        editor[0].grabVertical        = true;
         editor[0].horizontalAlignment = SWT.LEFT;
-        editor[0].verticalAlignment = SWT.TOP;
+        editor[0].verticalAlignment   = SWT.TOP;
         editor[0].setEditor(nameText, item, 0);
 
         nameText.addModifyListener(new ModifyListener() {
             @Override
-            public void modifyText(ModifyEvent e) {
-                Text text = (Text) e.widget;
+            public void modifyText(ModifyEvent e)
+            {
+                Text text = (Text)e.widget;
                 item.setData("MemberName", text.getText());
             }
         });
@@ -1048,16 +1083,17 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         typeCombo.setFont(curFont);
         typeCombo.setItems(DATATYPE_NAMES);
 
-        editor[1].grabHorizontal = true;
-        editor[1].grabVertical = true;
+        editor[1].grabHorizontal      = true;
+        editor[1].grabVertical        = true;
         editor[1].horizontalAlignment = SWT.LEFT;
-        editor[1].verticalAlignment = SWT.TOP;
+        editor[1].verticalAlignment   = SWT.TOP;
         editor[1].setEditor(typeCombo, item, 1);
 
         typeCombo.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                CCombo combo = (CCombo) e.widget;
+            public void widgetSelected(SelectionEvent e)
+            {
+                CCombo combo = (CCombo)e.widget;
                 item.setData("MemberType", combo.getItem(combo.getSelectionIndex()));
             }
         });
@@ -1065,16 +1101,17 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         final Text sizeText = new Text(table, SWT.SINGLE | SWT.BORDER);
         sizeText.setFont(curFont);
 
-        editor[2].grabHorizontal = true;
-        editor[2].grabVertical = true;
+        editor[2].grabHorizontal      = true;
+        editor[2].grabVertical        = true;
         editor[2].horizontalAlignment = SWT.LEFT;
-        editor[2].verticalAlignment = SWT.TOP;
+        editor[2].verticalAlignment   = SWT.TOP;
         editor[2].setEditor(sizeText, item, 2);
 
         sizeText.addModifyListener(new ModifyListener() {
             @Override
-            public void modifyText(ModifyEvent e) {
-                Text text = (Text) e.widget;
+            public void modifyText(ModifyEvent e)
+            {
+                Text text = (Text)e.widget;
                 item.setData("MemberSize", text.getText());
             }
         });
@@ -1085,7 +1122,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
         item.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
+            public void widgetDisposed(DisposeEvent e)
+            {
                 editor[0].dispose();
                 editor[1].dispose();
                 editor[2].dispose();

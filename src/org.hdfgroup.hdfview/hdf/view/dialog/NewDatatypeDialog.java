@@ -18,6 +18,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import hdf.object.Datatype;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -37,12 +43,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.Datatype;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-
 /**
  * NewDatatypeDialog shows a message dialog requesting user input for creating a
  * new HDF5 datatype.
@@ -52,13 +52,13 @@ import hdf.view.ViewProperties;
  */
 public class NewDatatypeDialog extends NewDataObjectDialog {
 
-    private Combo             parentChoice;
+    private Combo parentChoice;
 
     /** TextField for entering the name of the object */
-    protected Text            nameField;
+    protected Text nameField;
 
     /** a list of current groups */
-    private List<Group>       groupList;
+    private List<Group> groupList;
 
     /**
      * Constructs a NewDatatypeDialog with specified list of possible parent
@@ -71,21 +71,19 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
      * @param objs
      *            the list of all objects.
      */
-    public NewDatatypeDialog(Shell parent, Group pGroup, List<?> objs) {
-        super(parent, pGroup, objs);
-    }
+    public NewDatatypeDialog(Shell parent, Group pGroup, List<?> objs) { super(parent, pGroup, objs); }
 
     /**
      * Open the NewDatatypeDialog for adding a new datatype.
      */
-    public void open() {
+    public void open()
+    {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell        = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Datatype...");
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, false));
-
 
         // Create Datatype name / Parent group region
         Composite fieldComposite = new Composite(shell, SWT.NONE);
@@ -101,7 +99,8 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
         nameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         nameField.addTraverseListener(new TraverseListener() {
             @Override
-            public void keyTraversed(TraverseEvent e) {
+            public void keyTraversed(TraverseEvent e)
+            {
                 if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS) {
                     e.doit = true;
                 }
@@ -117,18 +116,19 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
         parentChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         parentChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 parentObj = groupList.get(parentChoice.getSelectionIndex());
             }
         });
 
-        groupList = new Vector<>(objList.size());
-        Object obj = null;
+        groupList            = new Vector<>(objList.size());
+        Object obj           = null;
         Iterator<?> iterator = objList.iterator();
         while (iterator.hasNext()) {
             obj = iterator.next();
             if (obj instanceof Group) {
-                Group g = (Group) obj;
+                Group g = (Group)obj;
                 groupList.add(g);
                 if (g.isRoot()) {
                     parentChoice.add(HObject.SEPARATOR);
@@ -139,11 +139,12 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
             }
         }
 
-        if (((Group) parentObj).isRoot()) {
+        if (((Group)parentObj).isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
         }
         else {
-            parentChoice.select(parentChoice.indexOf(parentObj.getPath() + parentObj.getName() + HObject.SEPARATOR));
+            parentChoice.select(
+                parentChoice.indexOf(parentObj.getPath() + parentObj.getName() + HObject.SEPARATOR));
         }
 
         // Create Datatype settings region
@@ -160,7 +161,8 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = createNewDatatype();
 
                 if (newObject != null) {
@@ -175,27 +177,30 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = null;
                 shell.dispose();
             }
         });
 
-        //Control[] controls = new Control[] { okButton, cancelButton };
-        //shell.setTabList(controls);
+        // Control[] controls = new Control[] { okButton, cancelButton };
+        // shell.setTabList(controls);
         shell.pack();
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+            public void widgetDisposed(DisposeEvent e)
+            {
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
+        Point shellSize        = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
@@ -212,8 +217,9 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
      *
      * @return the new object created.
      */
-    public Datatype createNewDatatype() {
-        String name = null;
+    public Datatype createNewDatatype()
+    {
+        String name  = null;
         Group pgroup = null;
 
         name = nameField.getText().trim();

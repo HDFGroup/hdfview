@@ -7,6 +7,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import hdf.object.FileFormat;
+import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
+import hdf.object.h5.H5File;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -17,38 +25,33 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.FileFormat;
-import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
-import hdf.object.h5.H5File;
-
 /**
  * @author Rishi R. Sinha
  *
  */
-public class HObjectTest
-{
-    private static final Logger log = LoggerFactory.getLogger(HObjectTest.class);
+public class HObjectTest {
+    private static final Logger log    = LoggerFactory.getLogger(HObjectTest.class);
     private static final H5File H5FILE = new H5File();
-    private static final String GNAME = H5TestFile.NAME_GROUP;
+    private static final String GNAME  = H5TestFile.NAME_GROUP;
 
     private H5File testFile = null;
     private HObject testObj = null;
     private long[] testOID;
 
-    protected void closeFile() {
+    protected void closeFile()
+    {
         if (testFile != null) {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {}
+            catch (final Exception ex) {
+            }
             testFile = null;
         }
     }
 
-    protected void checkObjCount(long fileid) {
+    protected void checkObjCount(long fileid)
+    {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
@@ -61,7 +64,8 @@ public class HObjectTest
     }
 
     @BeforeClass
-    public static void createFile() throws Exception {
+    public static void createFile() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -80,7 +84,8 @@ public class HObjectTest
     }
 
     @AfterClass
-    public static void checkIDs() throws Exception {
+    public static void checkIDs() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -89,11 +94,11 @@ public class HObjectTest
         catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     @Before
-    public void openFiles() throws Exception {
+    public void openFiles() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -115,7 +120,8 @@ public class HObjectTest
     }
 
     @After
-    public void removeFiles() throws Exception {
+    public void removeFiles() throws Exception
+    {
         if (testFile != null) {
             closeFile();
         }
@@ -138,7 +144,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testGetFile() {
+    public void testGetFile()
+    {
         log.debug("testGetFile");
         String fullFileName = testObj.getFile();
         if (!fullFileName.endsWith(H5TestFile.NAME_FILE_H5))
@@ -154,7 +161,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testGetName() {
+    public void testGetName()
+    {
         log.debug("testGetName");
         if (!testObj.getName().equals(GNAME.substring(1)))
             fail("GetName returns wrong name");
@@ -169,7 +177,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testGetFullName() {
+    public void testGetFullName()
+    {
         log.debug("testGetFullName");
         if (!testObj.getFullName().equals(GNAME))
             fail("GetFullName returns wrong name");
@@ -184,7 +193,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testGetPath() {
+    public void testGetPath()
+    {
         log.debug("testGetPath");
         if (!testObj.getPath().equals("/"))
             fail("GetPath returns wrong path");
@@ -201,7 +211,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testSetName() {
+    public void testSetName()
+    {
         log.debug("testSetName");
         final String newName = "/tmpName";
 
@@ -210,13 +221,15 @@ public class HObjectTest
         try {
             testObj.setName(null);
         }
-        catch (final Exception ex) {} // Expected - intentional
+        catch (final Exception ex) {
+        } // Expected - intentional
 
         // set to an existing name
         try {
             testObj.setName(H5TestFile.NAME_DATASET_FLOAT);
         }
-        catch (final Exception ex) {} // Expected - intentional
+        catch (final Exception ex) {
+        } // Expected - intentional
         H5.H5error_on();
 
         try {
@@ -277,13 +290,15 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testSetPath() {
+    public void testSetPath()
+    {
         log.debug("testSetPath");
         String path = testObj.getPath();
         try {
             testObj.setPath(null);
         }
-        catch (Exception e) {}
+        catch (Exception e) {
+        }
 
         if (!path.equals(testObj.getPath()))
             fail("testPath changed the path name even though null was passed to it.");
@@ -313,7 +328,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testOpen() {
+    public void testOpen()
+    {
         log.debug("testOpen");
         long gid = -1;
 
@@ -339,7 +355,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testClose() {
+    public void testClose()
+    {
         log.debug("testClose");
         testOpen();
     }
@@ -353,7 +370,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testGetFID() {
+    public void testGetFID()
+    {
         log.debug("testGetFID");
         assertEquals(testObj.getFID(), testFile.getFID());
     }
@@ -368,7 +386,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testEqualsOID() {
+    public void testEqualsOID()
+    {
         log.debug("testEqualsOID");
         assertNotNull(testObj);
         assertTrue(testObj.equalsOID(testOID));
@@ -384,7 +403,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testGetFileFormat() {
+    public void testGetFileFormat()
+    {
         log.debug("testGetFileFormat");
         assertNotNull(testObj.getFileFormat());
         assertEquals(testObj.getFileFormat(), testFile);
@@ -400,7 +420,8 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testGetOID() {
+    public void testGetOID()
+    {
         log.debug("testGetOID");
         assertNotNull(testObj.getOID());
         assertTrue(testObj.equalsOID(testOID));
@@ -416,15 +437,16 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testHasAttribute() {
+    public void testHasAttribute()
+    {
         log.debug("testHasAttribute");
         try {
-            assertTrue(((MetaDataContainer) testFile.get(H5TestFile.NAME_DATASET_IMAGE)).hasAttribute());
+            assertTrue(((MetaDataContainer)testFile.get(H5TestFile.NAME_DATASET_IMAGE)).hasAttribute());
         }
         catch (Exception e) {
             fail("get() fails.");
         }
-        assertFalse(((MetaDataContainer) testObj).hasAttribute());
+        assertFalse(((MetaDataContainer)testObj).hasAttribute());
     }
 
     /**
@@ -436,9 +458,9 @@ public class HObjectTest
      * </ul>
      */
     @Test
-    public void testToString() {
+    public void testToString()
+    {
         log.debug("testToString");
         assertEquals(testObj.toString(), GNAME.substring(1));
     }
-
 }

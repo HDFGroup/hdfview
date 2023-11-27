@@ -13,14 +13,14 @@
 
 package hdf.view.TreeView;
 
+import hdf.view.DataView.DataViewManager;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.eclipse.swt.widgets.Composite;
-
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-import hdf.view.DataView.DataViewManager;
 
 /**
  * A simple Factory class which returns concrete instances of the default
@@ -34,10 +34,11 @@ public class DefaultTreeViewFactory extends TreeViewFactory {
     private static final Logger log = LoggerFactory.getLogger(DefaultTreeViewFactory.class);
 
     @Override
-    public TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException {
+    public TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException
+    {
         String dataViewName = null;
-        Object[] initargs = { parent, viewer };
-        TreeView theView = null;
+        Object[] initargs   = {parent, viewer};
+        TreeView theView    = null;
 
         dataViewName = ViewProperties.DEFAULT_TREEVIEW_NAME;
 
@@ -53,10 +54,11 @@ public class DefaultTreeViewFactory extends TreeViewFactory {
             theClass = null;
         }
 
-        if (theClass == null) throw new ClassNotFoundException();
+        if (theClass == null)
+            throw new ClassNotFoundException();
 
         try {
-            theView = (TreeView) Tools.newInstance(theClass, initargs);
+            theView = (TreeView)Tools.newInstance(theClass, initargs);
 
             log.trace("getTreeView(): returning TreeView instance {}", theView);
         }
@@ -67,5 +69,4 @@ public class DefaultTreeViewFactory extends TreeViewFactory {
 
         return theView;
     }
-
 }

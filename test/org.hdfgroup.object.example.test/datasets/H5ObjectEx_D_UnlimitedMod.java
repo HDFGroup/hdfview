@@ -10,8 +10,6 @@
  ************************************************************/
 package datasets;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -20,31 +18,35 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5ObjectEx_D_UnlimitedMod {
-    private static String FILENAME = "H5ObjectEx_D_UnlimitedMod.h5";
-    private static String DATASETNAME = "DS1";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 7;
-    private static final int EDIM_X = 6;
-    private static final int EDIM_Y = 10;
-    private static final int CHUNK_X = 4;
-    private static final int CHUNK_Y = 4;
-    private static final int RANK = 2;
-    private static final int NDIMS = 2;
+    private static String FILENAME         = "H5ObjectEx_D_UnlimitedMod.h5";
+    private static String DATASETNAME      = "DS1";
+    private static final int DIM_X         = 4;
+    private static final int DIM_Y         = 7;
+    private static final int EDIM_X        = 6;
+    private static final int EDIM_Y        = 10;
+    private static final int CHUNK_X       = 4;
+    private static final int CHUNK_Y       = 4;
+    private static final int RANK          = 2;
+    private static final int NDIMS         = 2;
     private static final int DATATYPE_SIZE = 4;
 
-    private static void writeUnlimited() {
-        H5File file = null;
-        Dataset dset = null;
-        long file_id = -1;
-        long dcpl_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long type_id = -1;
-        long[] dims = { DIM_X, DIM_Y };
-        long[] chunk_dims = { CHUNK_X, CHUNK_Y };
-        long[] maxdims = { HDF5Constants.H5S_UNLIMITED, HDF5Constants.H5S_UNLIMITED };
-        int[][] dset_data = new int[DIM_X][DIM_Y];
+    private static void writeUnlimited()
+    {
+        H5File file        = null;
+        Dataset dset       = null;
+        long file_id       = -1;
+        long dcpl_id       = -1;
+        long dataspace_id  = -1;
+        long dataset_id    = -1;
+        long type_id       = -1;
+        long[] dims        = {DIM_X, DIM_Y};
+        long[] chunk_dims  = {CHUNK_X, CHUNK_Y};
+        long[] maxdims     = {HDF5Constants.H5S_UNLIMITED, HDF5Constants.H5S_UNLIMITED};
+        int[][] dset_data  = new int[DIM_X][DIM_Y];
         H5Datatype typeInt = null;
 
         // Initialize the dataset.
@@ -54,7 +56,7 @@ public class H5ObjectEx_D_UnlimitedMod {
 
         // Create a new file using default properties.
         try {
-            file = new H5File(FILENAME, FileFormat.CREATE);
+            file    = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -63,7 +65,8 @@ public class H5ObjectEx_D_UnlimitedMod {
 
         // Create datatype
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
+            typeInt =
+                new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -72,7 +75,7 @@ public class H5ObjectEx_D_UnlimitedMod {
         // Create dataspace with unlimited dimensions.
         try {
             dataspace_id = H5.H5Screate_simple(RANK, dims, maxdims);
-            type_id = typeInt.createNative();
+            type_id      = typeInt.createNative();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -98,11 +101,10 @@ public class H5ObjectEx_D_UnlimitedMod {
         // Create the unlimited dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME,
-                        type_id, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
-            dset = new H5ScalarDS(file, DATASETNAME, "/");
-            Group pgroup = (Group) file.get("/");
+                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, type_id, dataspace_id,
+                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+            dset         = new H5ScalarDS(file, DATASETNAME, "/");
+            Group pgroup = (Group)file.get("/");
             pgroup.addToMemberList(dset);
         }
         catch (Exception e) {
@@ -159,13 +161,14 @@ public class H5ObjectEx_D_UnlimitedMod {
         }
     }
 
-    private static void extendUnlimited() {
-        H5File file = null;
-        H5ScalarDS dset = null;
+    private static void extendUnlimited()
+    {
+        H5File file       = null;
+        H5ScalarDS dset   = null;
         long dataspace_id = -1;
-        long dataset_id = -1;
-        long[] dims = { DIM_X, DIM_Y };
-        long[] extdims = { EDIM_X, EDIM_Y };
+        long dataset_id   = -1;
+        long[] dims       = {DIM_X, DIM_Y};
+        long[] extdims    = {EDIM_X, EDIM_Y};
         int[] dset_data;
         int[][] extend_dset_data = new int[EDIM_X][EDIM_Y];
 
@@ -180,7 +183,7 @@ public class H5ObjectEx_D_UnlimitedMod {
 
         // Open an existing dataset.
         try {
-            dset = (H5ScalarDS) file.get(DATASETNAME);
+            dset       = (H5ScalarDS)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -207,12 +210,12 @@ public class H5ObjectEx_D_UnlimitedMod {
         }
 
         // Allocate array of pointers to rows.
-        dset_data = new int[(int) dims[0]*(int) dims[1]];
+        dset_data = new int[(int)dims[0] * (int)dims[1]];
 
         // Read the data using the default properties.
         try {
             dset.init();
-            dset_data = (int[]) dset.getData();
+            dset_data = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -223,7 +226,7 @@ public class H5ObjectEx_D_UnlimitedMod {
         for (int indx = 0; indx < DIM_X; indx++) {
             System.out.print(" [ ");
             for (int jndx = 0; jndx < DIM_Y; jndx++)
-                System.out.print(dset_data[indx*DIM_Y+jndx] + " ");
+                System.out.print(dset_data[indx * DIM_Y + jndx] + " ");
             System.out.println("]");
         }
         System.out.println();
@@ -276,12 +279,13 @@ public class H5ObjectEx_D_UnlimitedMod {
         }
     }
 
-    private static void readUnlimited() {
-        H5File file = null;
-        H5ScalarDS dset = null;
+    private static void readUnlimited()
+    {
+        H5File file       = null;
+        H5ScalarDS dset   = null;
         long dataspace_id = -1;
-        long dataset_id = -1;
-        long[] dims = { DIM_X, DIM_Y };
+        long dataset_id   = -1;
+        long[] dims       = {DIM_X, DIM_Y};
         int[] dset_data;
 
         // Open an existing file.
@@ -295,7 +299,7 @@ public class H5ObjectEx_D_UnlimitedMod {
 
         // Open an existing dataset.
         try {
-            dset = (H5ScalarDS) file.get(DATASETNAME);
+            dset       = (H5ScalarDS)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -319,12 +323,12 @@ public class H5ObjectEx_D_UnlimitedMod {
             e.printStackTrace();
         }
         // Allocate array of pointers to rows.
-        dset_data = new int[(int) dims[0]*(int) dims[1]];
+        dset_data = new int[(int)dims[0] * (int)dims[1]];
 
         // Read the data using the default properties.
         try {
             dset.init();
-            dset_data = (int[]) dset.getData();
+            dset_data = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -335,7 +339,7 @@ public class H5ObjectEx_D_UnlimitedMod {
         for (int indx = 0; indx < dims[0]; indx++) {
             System.out.print(" [ ");
             for (int jndx = 0; jndx < dims[1]; jndx++)
-                System.out.print(dset_data[(int) (indx*dims[1]+jndx)] + " ");
+                System.out.print(dset_data[(int)(indx * dims[1] + jndx)] + " ");
             System.out.println("]");
         }
         System.out.println();
@@ -366,10 +370,10 @@ public class H5ObjectEx_D_UnlimitedMod {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_D_UnlimitedMod.writeUnlimited();
         H5ObjectEx_D_UnlimitedMod.extendUnlimited();
         H5ObjectEx_D_UnlimitedMod.readUnlimited();
     }
-
 }

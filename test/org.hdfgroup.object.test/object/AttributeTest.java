@@ -9,6 +9,17 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
 
+import hdf.object.Attribute;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.h5.H5Datatype;
+import hdf.object.h5.H5File;
+import hdf.object.h5.H5Group;
+import hdf.object.h5.H5ScalarAttr;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -18,41 +29,33 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.Attribute;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.h5.H5Datatype;
-import hdf.object.h5.H5File;
-import hdf.object.h5.H5Group;
-import hdf.object.h5.H5ScalarAttr;
-
 /**
  * @author Rishi R. Sinha
  *
  */
-public class AttributeTest
-{
-    private static final Logger log = LoggerFactory.getLogger(AttributeTest.class);
+public class AttributeTest {
+    private static final Logger log    = LoggerFactory.getLogger(AttributeTest.class);
     private static final H5File H5FILE = new H5File();
 
-    private H5File testFile = null;
-    private H5Group testGroup = null;
-    private Attribute strAttr = null;
+    private H5File testFile        = null;
+    private H5Group testGroup      = null;
+    private Attribute strAttr      = null;
     private Attribute arrayIntAttr = null;
 
-    protected void closeFile() {
+    protected void closeFile()
+    {
         if (testFile != null) {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {}
+            catch (final Exception ex) {
+            }
             testFile = null;
         }
     }
 
-    protected void checkObjCount(long fileid) {
+    protected void checkObjCount(long fileid)
+    {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
@@ -64,7 +67,8 @@ public class AttributeTest
     }
 
     @BeforeClass
-    public static void createFile() throws Exception {
+    public static void createFile() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -83,7 +87,8 @@ public class AttributeTest
     }
 
     @AfterClass
-    public static void checkIDs() throws Exception {
+    public static void checkIDs() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -94,9 +99,10 @@ public class AttributeTest
         }
     }
 
-    @SuppressWarnings({ "deprecation", "rawtypes" })
+    @SuppressWarnings({"deprecation", "rawtypes"})
     @Before
-    public void openFiles() throws Exception {
+    public void openFiles() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -106,7 +112,7 @@ public class AttributeTest
             ex.printStackTrace();
         }
         try {
-            testFile = (H5File) H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+            testFile = (H5File)H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -114,13 +120,13 @@ public class AttributeTest
         assertNotNull(testFile);
 
         try {
-            testGroup = (H5Group) testFile.get(H5TestFile.NAME_GROUP_ATTR);
+            testGroup = (H5Group)testFile.get(H5TestFile.NAME_GROUP_ATTR);
             assertNotNull(testGroup);
             List testAttrs = testGroup.getMetadata();
             assertNotNull(testAttrs);
-            strAttr = (Attribute) testAttrs.get(1);
+            strAttr = (Attribute)testAttrs.get(1);
             assertNotNull(strAttr);
-            arrayIntAttr = (Attribute) testAttrs.get(0);
+            arrayIntAttr = (Attribute)testAttrs.get(0);
             assertNotNull(arrayIntAttr);
         }
         catch (Exception ex) {
@@ -129,7 +135,8 @@ public class AttributeTest
     }
 
     @After
-    public void removeFiles() throws Exception {
+    public void removeFiles() throws Exception
+    {
         if (testFile != null) {
             closeFile();
         }
@@ -144,7 +151,8 @@ public class AttributeTest
     }
 
     /**
-     * Test method for {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype, long[])} .
+     * Test method for {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype,
+     * long[])} .
      *
      * Here we test:
      * <ul>
@@ -154,15 +162,17 @@ public class AttributeTest
      *
      */
     @Test
-    public void testAttributeStringDatatypeLongArray() {
+    public void testAttributeStringDatatypeLongArray()
+    {
         log.debug("testAttributeStringDatatypeLongArray");
-        long[] attrDims = { 1 };
-        String attrName = "CLASS";
-        String[] classValue = { "IMAGE" };
+        long[] attrDims     = {1};
+        String attrName     = "CLASS";
+        String[] classValue = {"IMAGE"};
 
         Datatype attrType = null;
         try {
-            attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+            attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE,
+                                      Datatype.NATIVE);
         }
         catch (Exception ex) {
             fail("new H5Datatype failed. " + ex);
@@ -176,7 +186,8 @@ public class AttributeTest
 
     /**
      * Test method for
-     * {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype, long[], java.lang.Object)}
+     * {@link hdf.object.h5.H5ScalarAttr#H5ScalarAttr(java.lang.String, hdf.object.Datatype, long[],
+     * java.lang.Object)}
      *
      * Here we test:
      * <ul>
@@ -184,15 +195,17 @@ public class AttributeTest
      * </ul>
      */
     @Test
-    public void testAttributeStringDatatypeLongArrayObject() {
+    public void testAttributeStringDatatypeLongArrayObject()
+    {
         log.debug("testAttributeStringDatatypeLongArrayObject");
-        long[] attrDims = { 1 };
-        String attrName = "CLASS";
-        String[] classValue = { "IMAGE" };
+        long[] attrDims     = {1};
+        String attrName     = "CLASS";
+        String[] classValue = {"IMAGE"};
 
         Datatype attrType = null;
         try {
-            attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+            attrType = new H5Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE,
+                                      Datatype.NATIVE);
         }
         catch (Exception ex) {
             fail("new H5Datatype failed. " + ex);
@@ -213,11 +226,12 @@ public class AttributeTest
      * </ul>
      */
     @Test
-    public void testGetData() {
+    public void testGetData()
+    {
         log.debug("testGetData");
 
         try {
-            assertEquals(((String[]) strAttr.getAttributeData())[0], "String attribute.");
+            assertEquals(((String[])strAttr.getAttributeData())[0], "String attribute.");
         }
         catch (Exception ex) {
             log.trace("testGetData(): getAttributeData() failure:", ex);
@@ -229,7 +243,8 @@ public class AttributeTest
         }
 
         try {
-            assertTrue(Arrays.equals((int[]) arrayIntAttr.getAttributeData(), new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }));
+            assertTrue(Arrays.equals((int[])arrayIntAttr.getAttributeData(),
+                                     new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
         }
         catch (Exception ex) {
             log.trace("testGetData(): getAttributeData() failure:", ex);
@@ -251,13 +266,14 @@ public class AttributeTest
      * </ul>
      */
     @Test
-    public void testSetData() {
+    public void testSetData()
+    {
         String[] prevValue = null;
 
         log.debug("testSetData");
 
         try {
-            prevValue = (String[]) strAttr.getAttributeData();
+            prevValue = (String[])strAttr.getAttributeData();
         }
         catch (Exception ex) {
             log.trace("testSetData(): getAttributeData() failure:", ex);
@@ -287,7 +303,7 @@ public class AttributeTest
         int[] intPrevValue = null;
 
         try {
-            intPrevValue = (int[]) arrayIntAttr.getAttributeData();
+            intPrevValue = (int[])arrayIntAttr.getAttributeData();
         }
         catch (Exception ex) {
             log.trace("testSetData(): getAttributeData() failure:", ex);
@@ -298,10 +314,11 @@ public class AttributeTest
             fail("Out of memory");
         }
 
-        arrayIntAttr.setAttributeData(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        arrayIntAttr.setAttributeData(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
 
         try {
-            assertTrue(Arrays.equals((int[]) arrayIntAttr.getAttributeData(), new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+            assertTrue(Arrays.equals((int[])arrayIntAttr.getAttributeData(),
+                                     new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
         }
         catch (Exception ex) {
             log.trace("testSetData(): getAttributeData() failure:", ex);
@@ -324,7 +341,8 @@ public class AttributeTest
      * </ul>
      */
     @Test
-    public void testGetName() {
+    public void testGetName()
+    {
         log.debug("testGetName");
         assertTrue(strAttr.getAttributeName().equals("strAttr"));
         assertTrue(arrayIntAttr.getAttributeName().equals("arrayInt"));
@@ -339,7 +357,8 @@ public class AttributeTest
      * </ul>
      */
     @Test
-    public void testGetRank() {
+    public void testGetRank()
+    {
         log.debug("testGetRank");
         assertEquals(strAttr.getAttributeRank(), 1);
         assertEquals(arrayIntAttr.getAttributeRank(), 1);
@@ -350,11 +369,13 @@ public class AttributeTest
      *
      * Here we test:
      * <ul>
-     * <li>Getting the dimensionalities for the two attributes (the string attribute and the int array attribute).
+     * <li>Getting the dimensionalities for the two attributes (the string attribute and the int array
+     * attribute).
      * </ul>
      */
     @Test
-    public void testGetDataDims() {
+    public void testGetDataDims()
+    {
         log.debug("testGetDataDims");
         assertEquals(strAttr.getAttributeDims()[0], 1);
         assertEquals(arrayIntAttr.getAttributeDims()[0], 10);
@@ -369,10 +390,11 @@ public class AttributeTest
      * </ul>
      */
     @Test
-    public void testGetType() {
+    public void testGetType()
+    {
         log.debug("testGetType");
-        assertTrue(strAttr.getAttributeDatatype().getDescription()
-                .equals("String, length = 20, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII"));
+        assertTrue(strAttr.getAttributeDatatype().getDescription().equals(
+            "String, length = 20, padding = H5T_STR_NULLTERM, cset = H5T_CSET_ASCII"));
         assertTrue(arrayIntAttr.getAttributeDatatype().getDescription().equals("32-bit integer"));
     }
 
@@ -385,7 +407,8 @@ public class AttributeTest
      * </ul>
      */
     @Test
-    public void testIsUnsigned() {
+    public void testIsUnsigned()
+    {
         log.debug("testIsUnsigned");
         assertFalse(strAttr.getAttributeDatatype().isUnsigned());
         assertFalse(arrayIntAttr.getAttributeDatatype().isUnsigned());
@@ -400,10 +423,10 @@ public class AttributeTest
      * </ul>
      */
     @Test
-    public void testToStringString() {
+    public void testToStringString()
+    {
         log.debug("testToStringString");
         assertTrue(strAttr.toAttributeString(",").equals("String attribute."));
         assertTrue(arrayIntAttr.toAttributeString(",").equals("1,2,3,4,5,6,7,8,9,10"));
     }
-
 }

@@ -8,39 +8,41 @@
 
 package datatypes;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
-public class H5ObjectEx_T_OpaqueAttribute {
-    private static String FILENAME = "H5ObjectEx_T_OpaqueAttribute.h5";
-    private static String DATASETNAME = "DS1";
-    private static String ATTRIBUTENAME = "A1";
-    private static final int DIM0 = 4;
-    private static final int LEN = 7;
-    private static final int RANK = 1;
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 
-    private static void CreateDataset() {
-        H5File file = null;
-        H5ScalarDS dset = null;
-        long dataspace_id = -1;
-        long datatype_id = -1;
-        long dataset_id = -1;
-        long attribute_id = -1;
-        long[] dims = { DIM0 };
-        byte[] dset_data = new byte[DIM0 * LEN];
-        byte[] str_data = { 'O', 'P', 'A', 'Q', 'U', 'E' };
+public class H5ObjectEx_T_OpaqueAttribute {
+    private static String FILENAME      = "H5ObjectEx_T_OpaqueAttribute.h5";
+    private static String DATASETNAME   = "DS1";
+    private static String ATTRIBUTENAME = "A1";
+    private static final int DIM0       = 4;
+    private static final int LEN        = 7;
+    private static final int RANK       = 1;
+
+    private static void CreateDataset()
+    {
+        H5File file        = null;
+        H5ScalarDS dset    = null;
+        long dataspace_id  = -1;
+        long datatype_id   = -1;
+        long dataset_id    = -1;
+        long attribute_id  = -1;
+        long[] dims        = {DIM0};
+        byte[] dset_data   = new byte[DIM0 * LEN];
+        byte[] str_data    = {'O', 'P', 'A', 'Q', 'U', 'E'};
         H5Datatype typeInt = null;
 
         // Initialize data.
         for (int indx = 0; indx < DIM0; indx++) {
             for (int jndx = 0; jndx < LEN - 1; jndx++)
                 dset_data[jndx + indx * LEN] = str_data[jndx];
-            dset_data[LEN - 1 + indx * LEN] = (byte) (indx + '0');
+            dset_data[LEN - 1 + indx * LEN] = (byte)(indx + '0');
         }
 
         // Create a new file using default properties.
@@ -62,7 +64,7 @@ public class H5ObjectEx_T_OpaqueAttribute {
 
         // Create dataset with a scalar dataspace.
         try {
-            dset = (H5ScalarDS) file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
+            dset = (H5ScalarDS)file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -94,7 +96,7 @@ public class H5ObjectEx_T_OpaqueAttribute {
         try {
             if ((dataset_id >= 0) && (datatype_id >= 0) && (dataspace_id >= 0))
                 attribute_id = H5.H5Acreate(dataset_id, ATTRIBUTENAME, datatype_id, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -150,18 +152,18 @@ public class H5ObjectEx_T_OpaqueAttribute {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    private static void ReadDataset() {
-        H5File file = null;
-        H5ScalarDS dset = null;
-        long datatype_id = -1;
+    private static void ReadDataset()
+    {
+        H5File file       = null;
+        H5ScalarDS dset   = null;
+        long datatype_id  = -1;
         long dataspace_id = -1;
-        long dataset_id = -1;
+        long dataset_id   = -1;
         long attribute_id = -1;
-        long type_len = -1;
-        long[] dims = { DIM0 };
+        long type_len     = -1;
+        long[] dims       = {DIM0};
         byte[] dset_data;
         String tag_name = null;
 
@@ -176,7 +178,7 @@ public class H5ObjectEx_T_OpaqueAttribute {
 
         // Open an existing dataset.
         try {
-            dset = (H5ScalarDS) file.get(DATASETNAME);
+            dset       = (H5ScalarDS)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -186,7 +188,7 @@ public class H5ObjectEx_T_OpaqueAttribute {
         try {
             if (dataset_id >= 0)
                 attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                                                  HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -223,7 +225,7 @@ public class H5ObjectEx_T_OpaqueAttribute {
         }
 
         // Allocate buffer.
-        dset_data = new byte[(int) (dims[0] * type_len)];
+        dset_data = new byte[(int)(dims[0] * type_len)];
 
         // Read data.
         try {
@@ -239,7 +241,7 @@ public class H5ObjectEx_T_OpaqueAttribute {
         for (int indx = 0; indx < dims[0]; indx++) {
             System.out.print(ATTRIBUTENAME + "[" + indx + "]: ");
             for (int jndx = 0; jndx < type_len; jndx++) {
-                char temp = (char) dset_data[jndx + indx * (int)type_len];
+                char temp = (char)dset_data[jndx + indx * (int)type_len];
                 System.out.print(temp);
             }
             System.out.println("");
@@ -289,7 +291,8 @@ public class H5ObjectEx_T_OpaqueAttribute {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_T_OpaqueAttribute.CreateDataset();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have

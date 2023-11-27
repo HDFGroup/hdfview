@@ -1,0 +1,19 @@
+---
+BasedOnStyle:  LLVM
+AlignConsecutiveAssignments: true
+BraceWrapping:
+  AfterFunction:   true
+  BeforeCatch:     true
+  BeforeElse:      true
+  BeforeLambdaBody: false
+  BeforeWhile:     false
+BreakBeforeBraces: Stroustrup
+BreakAfterJavaFieldAnnotations: true
+BreakStringLiterals: true
+ColumnLimit:     110
+IndentWidth:     4
+---
+Language:      Java
+BreakAfterJavaFieldAnnotations: true
+JavaImportGroups: ['java', 'hdf', 'hdf.hdf5lib', 'org', 'org.slf4j', 'org.eclipse']
+...

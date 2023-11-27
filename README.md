@@ -1,4 +1,4 @@
-HDFView version 3.3.1 currently under development
+HDFView version 3.3.2 currently under development
 
 ![HDF5 Logo](src/HDFView.png)
 

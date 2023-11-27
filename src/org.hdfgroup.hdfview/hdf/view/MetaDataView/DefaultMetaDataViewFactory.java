@@ -14,19 +14,19 @@
 
 package hdf.view.MetaDataView;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.eclipse.swt.widgets.Composite;
-
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5Link;
+import hdf.view.DataView.DataViewManager;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
-import hdf.view.DataView.DataViewManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.eclipse.swt.widgets.Composite;
 
 /**
  * A simple Factory class which returns concrete instances of the default
@@ -41,9 +41,11 @@ public class DefaultMetaDataViewFactory extends MetaDataViewFactory {
     private static final Logger log = LoggerFactory.getLogger(DefaultMetaDataViewFactory.class);
 
     @Override
-    public MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj) throws ClassNotFoundException {
-        String dataViewName = null;
-        Object[] initargs = { parentObj, viewer, theObj };
+    public MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj)
+        throws ClassNotFoundException
+    {
+        String dataViewName  = null;
+        Object[] initargs    = {parentObj, viewer, theObj};
         MetaDataView theView = null;
 
         if (theObj instanceof Group)
@@ -65,14 +67,16 @@ public class DefaultMetaDataViewFactory extends MetaDataViewFactory {
             theClass = Class.forName(dataViewName);
         }
         catch (Exception ex) {
-            log.debug("getMetaDataView(): unable to load default MetaDataView class by name({})", dataViewName);
+            log.debug("getMetaDataView(): unable to load default MetaDataView class by name({})",
+                      dataViewName);
             theClass = null;
         }
 
-        if (theClass == null) throw new ClassNotFoundException();
+        if (theClass == null)
+            throw new ClassNotFoundException();
 
         try {
-            theView = (MetaDataView) Tools.newInstance(theClass, initargs);
+            theView = (MetaDataView)Tools.newInstance(theClass, initargs);
 
             log.trace("getMetaDataView(): returning MetaDataView instance {}", theView);
         }
@@ -83,5 +87,4 @@ public class DefaultMetaDataViewFactory extends MetaDataViewFactory {
 
         return theView;
     }
-
 }

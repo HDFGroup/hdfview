@@ -33,13 +33,13 @@ import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 
 /**
- * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group or named
- * datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group
+ * or named datatype.
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * For more details on attributes, read <a href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5
- * Attributes in HDF5 User Guide</a>
+ * For more details on attributes, read <a
+ * href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
  *
@@ -65,7 +65,8 @@ import hdf.object.ScalarDS;
  * </pre>
  *
  *
- * For an atomic datatype, the value of an H4ScalarAttribute will be a 1D array of integers, floats and strings.
+ * For an atomic datatype, the value of an H4ScalarAttribute will be a 1D array of integers, floats and
+ * strings.
  *
  * @see hdf.object.Datatype
  *
@@ -79,7 +80,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4ScalarAttribute.class);
 
     /** The HObject to which this NC2Attribute is attached, Attribute interface */
-    protected HObject         parentObject;
+    protected HObject parentObject;
 
     /** additional information and properties for the attribute, Attribute interface */
     private transient Map<String, Object> properties;
@@ -101,7 +102,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * String[] classValue = { &quot;IMAGE&quot; };
      * Datatype attrType = null;
      * try {
-     *     attrType = new H4Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     *     attrType = new H4Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE,
+     * Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
      * Attribute attr = new Attribute(attrName, attrType, attrDims);
@@ -119,7 +121,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @see hdf.object.Datatype
      */
-    public H4ScalarAttribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims) {
+    public H4ScalarAttribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims)
+    {
         this(parentObj, attrName, attrType, attrDims, null);
     }
 
@@ -140,7 +143,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * String[] classValue = { &quot;IMAGE&quot; };
      * Datatype attrType = null;
      * try {
-     *     attrType = new H4Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE, Datatype.NATIVE);
+     *     attrType = new H4Datatype(Datatype.CLASS_STRING, classValue[0].length() + 1, Datatype.NATIVE,
+     * Datatype.NATIVE);
      * }
      * catch (Exception ex) {}
      * Attribute attr = new Attribute(attrName, attrType, attrDims, classValue);
@@ -159,10 +163,12 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @see hdf.object.Datatype
      */
-    @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
-    public H4ScalarAttribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
+    @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+    public H4ScalarAttribute(HObject parentObj, String attrName, Datatype attrType, long[] attrDims,
+                             Object attrValue)
+    {
         super((parentObj == null) ? null : parentObj.getFileFormat(), attrName,
-                (parentObj == null) ? null : parentObj.getFullName(), null);
+              (parentObj == null) ? null : parentObj.getFullName(), null);
 
         log.trace("H4ScalarAttribute: start {}", parentObj);
         this.parentObject = parentObj;
@@ -172,27 +178,27 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
         datatype = attrType;
 
         if (attrValue != null) {
-            data = attrValue;
-            originalBuf = attrValue;
+            data         = attrValue;
+            originalBuf  = attrValue;
             isDataLoaded = true;
         }
         properties = new HashMap();
 
         if (attrDims == null) {
             rank = 1;
-            dims = new long[] { 1 };
+            dims = new long[] {1};
         }
         else {
             dims = attrDims;
             rank = dims.length;
         }
 
-        selectedDims = new long[rank];
-        startDims = new long[rank];
+        selectedDims   = new long[rank];
+        startDims      = new long[rank];
         selectedStride = new long[rank];
 
-        log.trace("attrName={}, attrType={}, attrValue={}, rank={}, isUnsigned={}",
-                attrName, getDatatype().getDescription(), data, rank, getDatatype().isUnsigned());
+        log.trace("attrName={}, attrType={}, attrValue={}, rank={}, isUnsigned={}", attrName,
+                  getDatatype().getDescription(), data, rank, getDatatype().isUnsigned());
 
         resetSelection();
     }
@@ -203,13 +209,14 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * @see hdf.object.HObject#open()
      */
     @Override
-    public long open() {
+    public long open()
+    {
         if (parentObject == null) {
             log.debug("open(): attribute's parent object is null");
             return -1;
         }
 
-        long aid = -1;
+        long aid    = -1;
         long pObjID = -1;
 
         try {
@@ -242,7 +249,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * @see hdf.object.HObject#close(int)
      */
     @Override
-    public void close(long aid) {
+    public void close(long aid)
+    {
         if (aid >= 0) {
             if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                 log.trace("close(): FILE_TYPE_HDF4");
@@ -254,7 +262,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
     }
 
     @Override
-    public void init() {
+    public void init()
+    {
         if (inited) {
             resetSelection();
             log.trace("init(): Attribute already inited");
@@ -292,7 +301,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *             if memory is exhausted
      */
     @Override
-    public Object read() throws Exception, OutOfMemoryError {
+    public Object read() throws Exception, OutOfMemoryError
+    {
         if (!inited)
             init();
 
@@ -311,7 +321,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *             if data can not be written
      */
     @Override
-    public void write(Object buf) throws Exception {
+    public void write(Object buf) throws Exception
+    {
         log.trace("function of dataset: write(Object) start");
         if (!buf.equals(data))
             setData(buf);
@@ -323,7 +334,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
             return;
         }
 
-        ((MetaDataContainer) getParentObject()).writeMetadata(this);
+        ((MetaDataContainer)getParentObject()).writeMetadata(this);
     }
 
     /*
@@ -331,7 +342,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * @see hdf.object.Dataset#copy(hdf.object.Group, java.lang.String, long[], java.lang.Object)
      */
     @Override
-    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
+    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("copy operation unsupported for H4.");
     }
@@ -341,7 +353,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * @see hdf.object.Dataset#readBytes()
      */
     @Override
-    public byte[] readBytes() throws Exception {
+    public byte[] readBytes() throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("readBytes operation unsupported for H4.");
     }
@@ -353,9 +366,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @return the HObject to which this Attribute is currently "attached".
      */
-    public HObject getParentObject() {
-        return parentObject;
-    }
+    public HObject getParentObject() { return parentObject; }
 
     /**
      * Sets the HObject to which this Attribute is "attached".
@@ -363,9 +374,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * @param pObj
      *            the new HObject to which this Attribute is "attached".
      */
-    public void setParentObject(HObject pObj) {
-        parentObject = pObj;
-    }
+    public void setParentObject(HObject pObj) { parentObject = pObj; }
 
     /**
      * set a property for the attribute.
@@ -373,9 +382,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * @param key the attribute Map key
      * @param value the attribute Map value
      */
-    public void setProperty(String key, Object value) {
-        properties.put(key, value);
-    }
+    public void setProperty(String key, Object value) { properties.put(key, value); }
 
     /**
      * get a property for a given key.
@@ -384,27 +391,21 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @return the property
      */
-    public Object getProperty(String key) {
-        return properties.get(key);
-    }
+    public Object getProperty(String key) { return properties.get(key); }
 
     /**
      * get all property keys.
      *
      * @return the Collection of property keys
      */
-    public Collection<String> getPropertyKeys() {
-        return properties.keySet();
-    }
+    public Collection<String> getPropertyKeys() { return properties.keySet(); }
 
     /**
      * Returns the name of the object. For example, "Raster Image #2".
      *
      * @return The name of the object.
      */
-    public final String getAttributeName() {
-        return getName();
-    }
+    public final String getAttributeName() { return getName(); }
 
     /**
      * Retrieves the attribute data from the file.
@@ -414,18 +415,14 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * @throws Exception
      *             if the data can not be retrieved
      */
-    public final Object getAttributeData() throws Exception, OutOfMemoryError {
-        return getData();
-    }
+    public final Object getAttributeData() throws Exception, OutOfMemoryError { return getData(); }
 
     /**
      * Returns the datatype of the attribute.
      *
      * @return the datatype of the attribute.
      */
-    public final Datatype getAttributeDatatype() {
-        return getDatatype();
-    }
+    public final Datatype getAttributeDatatype() { return getDatatype(); }
 
     /**
      * Returns the space type for the attribute. It returns a
@@ -434,9 +431,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @return the space type for the attribute.
      */
-    public final int getAttributeSpaceType() {
-        return getSpaceType();
-    }
+    public final int getAttributeSpaceType() { return getSpaceType(); }
 
     /**
      * Returns the rank (number of dimensions) of the attribute. It returns a
@@ -445,9 +440,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @return the number of dimensions of the attribute.
      */
-    public final int getAttributeRank() {
-        return getRank();
-    }
+    public final int getAttributeRank() { return getRank(); }
 
     /**
      * Returns the selected size of the rows and columns of the attribute. It returns a
@@ -456,9 +449,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @return the selected size of the rows and colums of the attribute.
      */
-    public final int getAttributePlane() {
-        return (int)getWidth() * (int)getHeight();
-    }
+    public final int getAttributePlane() { return (int)getWidth() * (int)getHeight(); }
 
     /**
      * Returns the array that contains the dimension sizes of the data value of
@@ -467,24 +458,21 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @return the dimension sizes of the attribute.
      */
-    public final long[] getAttributeDims() {
-        return getDims();
-    }
+    public final long[] getAttributeDims() { return getDims(); }
 
     /**
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     @Override
-    public boolean isAttributeNULL() {
+    public boolean isAttributeNULL()
+    {
         return isNULL();
     }
 
     /**
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
-    public boolean isAttributeScalar() {
-        return isScalar();
-    }
+    public boolean isAttributeScalar() { return isScalar(); }
 
     /**
      * Not for public use in the future.
@@ -495,18 +483,14 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @param d  the object data -must be an array of Objects
      */
-    public void setAttributeData(Object d) {
-        setData(d);
-    }
+    public void setAttributeData(Object d) { setData(d); }
 
     /**
      * Writes the memory buffer of this dataset to file.
      *
      * @throws Exception if buffer can not be written
      */
-    public void writeAttribute() throws Exception {
-        write();
-    }
+    public void writeAttribute() throws Exception { write(); }
 
     /**
      * Writes the given data buffer into this attribute in a file.
@@ -520,9 +504,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      * @throws Exception
      *             If there is an error at the library level.
      */
-    public void writeAttribute(Object buf) throws Exception {
-        write(buf);
-    }
+    public void writeAttribute(Object buf) throws Exception { write(buf); }
 
     /**
      * Returns a string representation of the data value. For
@@ -540,9 +522,7 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @return the string representation of the data values.
      */
-    public String toAttributeString(String delimiter) {
-        return toString(delimiter, -1);
-    }
+    public String toAttributeString(String delimiter) { return toString(delimiter, -1); }
 
     /**
      * Returns a string representation of the data value. For
@@ -562,7 +542,5 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
      *
      * @return the string representation of the data values.
      */
-    public String toAttributeString(String delimiter, int maxItems) {
-        return toString(delimiter, maxItems);
-    }
+    public String toAttributeString(String delimiter, int maxItems) { return toString(delimiter, maxItems); }
 }

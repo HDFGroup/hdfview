@@ -10,48 +10,45 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5Group;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.structs.H5O_info_t;
+
 public class H5ObjectEx_G_Iterate {
-    private static String FILENAME = "examples/groups/h5ex_g_iterate.h5";
+    private static String FILENAME    = "examples/groups/h5ex_g_iterate.h5";
     private static String DATASETNAME = "/";
 
     enum H5O_type {
-        H5O_TYPE_UNKNOWN(-1), // Unknown object type
-        H5O_TYPE_GROUP(0), // Object is a group
-        H5O_TYPE_DATASET(1), // Object is a dataset
+        H5O_TYPE_UNKNOWN(-1),       // Unknown object type
+        H5O_TYPE_GROUP(0),          // Object is a group
+        H5O_TYPE_DATASET(1),        // Object is a dataset
         H5O_TYPE_NAMED_DATATYPE(2), // Object is a named data type
-        H5O_TYPE_NTYPES(3); // Number of different object types
+        H5O_TYPE_NTYPES(3);         // Number of different object types
         private static final Map<Integer, H5O_type> lookup = new HashMap<>();
 
-        static {
+        static
+        {
             for (H5O_type s : EnumSet.allOf(H5O_type.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5O_type(int layout_type) {
-            this.code = layout_type;
-        }
+        H5O_type(int layout_type) { this.code = layout_type; }
 
-        public int getCode() {
-            return this.code;
-        }
+        public int getCode() { return this.code; }
 
-        public static H5O_type get(int code) {
-            return lookup.get(code);
-        }
+        public static H5O_type get(int code) { return lookup.get(code); }
     }
 
-    private static void do_iterate() {
-        H5File      file = null;
-        long         o_id = -1;
+    private static void do_iterate()
+    {
+        H5File file = null;
+        long o_id   = -1;
 
         // Open a file using default properties.
         try {
@@ -65,16 +62,16 @@ public class H5ObjectEx_G_Iterate {
         System.out.println("Objects in root group:");
         try {
             int objType;
-            H5O_info_t  info;
-            HObject obj = null;
-            H5Group grp = (H5Group)file.get(DATASETNAME);
+            H5O_info_t info;
+            HObject obj              = null;
+            H5Group grp              = (H5Group)file.get(DATASETNAME);
             List<HObject> memberList = grp.getMemberList();
-            Iterator<HObject> it = memberList.iterator();
+            Iterator<HObject> it     = memberList.iterator();
             while (it.hasNext()) {
-                obj = it.next();
+                obj  = it.next();
                 o_id = obj.open();
                 if (o_id >= 0) {
-                    info = H5.H5Oget_info(o_id);
+                    info    = H5.H5Oget_info(o_id);
                     objType = info.type;
 
                     // Get type of the object and display its name and type.
@@ -108,7 +105,5 @@ public class H5ObjectEx_G_Iterate {
         }
     }
 
-    public static void main(String[] args) {
-        H5ObjectEx_G_Iterate.do_iterate();
-    }
+    public static void main(String[] args) { H5ObjectEx_G_Iterate.do_iterate(); }
 }

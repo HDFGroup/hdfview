@@ -6,11 +6,11 @@ package intro;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5File;
 
-
 public class H5Object_CreateFile {
     static final String FILENAME = "H5Object_CreateFile.h5";
 
-    private static void CreateFile() {
+    private static void CreateFile()
+    {
         H5File file = null;
 
         // Create a new file using default properties.
@@ -29,11 +29,7 @@ public class H5Object_CreateFile {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
-        H5Object_CreateFile.CreateFile();
-    }
-
+    public static void main(String[] args) { H5Object_CreateFile.CreateFile(); }
 }

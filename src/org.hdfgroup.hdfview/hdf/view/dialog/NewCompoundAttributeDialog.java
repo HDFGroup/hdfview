@@ -19,6 +19,15 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import hdf.object.Attribute;
+import hdf.object.Datatype;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.h5.H5CompoundAttr;
+import hdf.object.h5.H5Datatype;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,16 +59,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.Attribute;
-import hdf.object.Datatype;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.h5.H5CompoundAttr;
-import hdf.object.h5.H5Datatype;
-
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-
 /**
  * NewCompoundAttributeDialog shows a message dialog requesting user input for creating
  * a new HDF5 compound attribute.
@@ -71,34 +70,34 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
 
     private static final Logger log = LoggerFactory.getLogger(NewCompoundAttributeDialog.class);
 
-    private static final String[] DATATYPE_NAMES   = {
-        "byte (8-bit)", // 0
-        "short (16-bit)", // 1
-        "int (32-bit)", // 2
-        "unsigned byte (8-bit)", // 3
+    private static final String[] DATATYPE_NAMES = {
+        "byte (8-bit)",            // 0
+        "short (16-bit)",          // 1
+        "int (32-bit)",            // 2
+        "unsigned byte (8-bit)",   // 3
         "unsigned short (16-bit)", // 4
-        "unsigned int (32-bit)", // 5
-        "long (64-bit)", // 6
-        "float", // 7
-        "double", // 8
-        "string", // 9
-        "enum", // 10
-        "unsigned long (64-bit)" // 11
+        "unsigned int (32-bit)",   // 5
+        "long (64-bit)",           // 6
+        "float",                   // 7
+        "double",                  // 8
+        "string",                  // 9
+        "enum",                    // 10
+        "unsigned long (64-bit)"   // 11
     };
 
-    private Combo                 nFieldBox, templateChoice;
+    private Combo nFieldBox, templateChoice;
 
-    private Vector<H5CompoundAttr>  compoundAttrList;
+    private Vector<H5CompoundAttr> compoundAttrList;
 
-    private int                   numberOfMembers;
+    private int numberOfMembers;
 
-    private Table                 table;
+    private Table table;
 
-    private TableEditor[][]       editors;
+    private TableEditor[][] editors;
 
-    private Text                  nameField, currentSizeField;
+    private Text nameField, currentSizeField;
 
-    private Combo                 rankChoice;
+    private Combo rankChoice;
 
     /**
      * Constructs a NewCompoundAttributeDialog with specified list of possible parent
@@ -111,7 +110,8 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
      * @param objs
      *            the list of all objects.
      */
-    public NewCompoundAttributeDialog(Shell parent, HObject pObject, List<HObject> objs) {
+    public NewCompoundAttributeDialog(Shell parent, HObject pObject, List<HObject> objs)
+    {
         super(parent, pObject, objs);
 
         numberOfMembers = 2;
@@ -122,19 +122,19 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
     /**
      * Open the NewCompoundAttributeDialog for adding a new compound attribute.
      */
-    public void open() {
+    public void open()
+    {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell        = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
         shell.setText("New Compound Attribute...");
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, false));
 
-
         // Create Name/Parent Object/Import field region
         Composite fieldComposite = new Composite(shell, SWT.NONE);
-        GridLayout layout = new GridLayout(2, false);
-        layout.verticalSpacing = 0;
+        GridLayout layout        = new GridLayout(2, false);
+        layout.verticalSpacing   = 0;
         fieldComposite.setLayout(layout);
         fieldComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -171,8 +171,9 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         rankChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         rankChoice.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                int rank = rankChoice.getSelectionIndex() + 1;
+            public void widgetSelected(SelectionEvent e)
+            {
+                int rank                     = rankChoice.getSelectionIndex() + 1;
                 StringBuilder currentSizeStr = new StringBuilder("1");
 
                 for (int i = 1; i < rank; i++) {
@@ -182,7 +183,7 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
                 currentSizeField.setText(currentSizeStr.toString());
 
                 String currentStr = currentSizeField.getText();
-                int idx = currentStr.lastIndexOf('x');
+                int idx           = currentStr.lastIndexOf('x');
             }
         });
 
@@ -212,14 +213,17 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         nFieldBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         nFieldBox.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 updateMemberTableItems();
             }
         });
         nFieldBox.addTraverseListener(new TraverseListener() {
             @Override
-            public void keyTraversed(TraverseEvent e) {
-                if (e.detail == SWT.TRAVERSE_RETURN) updateMemberTableItems();
+            public void keyTraversed(TraverseEvent e)
+            {
+                if (e.detail == SWT.TRAVERSE_RETURN)
+                    updateMemberTableItems();
             }
         });
 
@@ -235,7 +239,7 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
 
         editors = new TableEditor[nFieldBox.getItemCount()][3];
 
-        String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
+        String[] colNames = {"Name", "Datatype", "Array size / String length / Enum names"};
 
         TableColumn column = new TableColumn(table, SWT.NONE);
         column.setText(colNames[0]);
@@ -248,22 +252,23 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
 
         for (int i = 0; i < 2; i++) {
             TableEditor[] editor = addMemberTableItem(table);
-            editors[i][0] = editor[0];
-            editors[i][1] = editor[1];
-            editors[i][2] = editor[2];
+            editors[i][0]        = editor[0];
+            editors[i][1]        = editor[1];
+            editors[i][2]        = editor[2];
         }
 
-        for(int i = 0; i < table.getColumnCount(); i++) {
+        for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumn(i).pack();
         }
 
         // Last table column always expands to fill remaining table size
         table.addListener(SWT.Resize, new Listener() {
             @Override
-            public void handleEvent(Event e) {
-                Table table = (Table) e.widget;
-                Rectangle area = table.getClientArea();
-                int columnCount = table.getColumnCount();
+            public void handleEvent(Event e)
+            {
+                Table table            = (Table)e.widget;
+                Rectangle area         = table.getClientArea();
+                int columnCount        = table.getColumnCount();
                 int totalGridLineWidth = (columnCount - 1) * table.getGridLineWidth();
 
                 int totalColumnWidth = 0;
@@ -281,7 +286,8 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         // Disable table selection highlighting
         table.addListener(SWT.EraseItem, new Listener() {
             @Override
-            public void handleEvent(Event e) {
+            public void handleEvent(Event e)
+            {
                 if ((e.detail & SWT.SELECTED) != 0) {
                     e.detail &= ~SWT.SELECTED;
                 }
@@ -299,7 +305,8 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (createAttribute()) {
                     shell.dispose();
                 }
@@ -312,7 +319,8 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 newObject = null;
                 shell.dispose();
             }
@@ -328,15 +336,17 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+            public void widgetDisposed(DisposeEvent e)
+            {
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
+        Point shellSize        = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
                           (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
@@ -349,9 +359,10 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean createAttribute() {
+    private boolean createAttribute()
+    {
         String attrName = null;
-        int rank = -1;
+        int rank        = -1;
         long[] dims;
 
         attrName = nameField.getText();
@@ -370,20 +381,20 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
             return false;
         }
 
-        String[] mNames = new String[n];
+        String[] mNames       = new String[n];
         Datatype[] mDatatypes = new Datatype[n];
-        int[] mOrders = new int[n];
+        int[] mOrders         = new int[n];
 
         for (int i = 0; i < n; i++) {
-            String name = (String) table.getItem(i).getData("MemberName");
+            String name = (String)table.getItem(i).getData("MemberName");
             if ((name == null) || (name.length() <= 0)) {
                 throw new IllegalArgumentException("Member name is empty");
             }
             mNames[i] = name;
             log.trace("createCompoundAttribute member[{}] name = {}", i, mNames[i]);
 
-            int order = 1;
-            String orderStr = (String) table.getItem(i).getData("MemberSize");
+            int order       = 1;
+            String orderStr = (String)table.getItem(i).getData("MemberSize");
             if (orderStr != null) {
                 try {
                     order = Integer.parseInt(orderStr);
@@ -394,42 +405,53 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
             }
             mOrders[i] = order;
 
-            String typeName = (String) table.getItem(i).getData("MemberType");
+            String typeName = (String)table.getItem(i).getData("MemberType");
             log.trace("createCompoundAttribute type[{}] name = {}", i, typeName);
             Datatype type = null;
             try {
                 if (DATATYPE_NAMES[0].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
                 }
                 else if (DATATYPE_NAMES[1].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.NATIVE);
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
                 }
                 else if (DATATYPE_NAMES[2].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
                 }
                 else if (DATATYPE_NAMES[3].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE,
+                                                     Datatype.SIGN_NONE);
                 }
                 else if (DATATYPE_NAMES[4].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.SIGN_NONE);
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE,
+                                                     Datatype.SIGN_NONE);
                 }
                 else if (DATATYPE_NAMES[5].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE,
+                                                     Datatype.SIGN_NONE);
                 }
                 else if (DATATYPE_NAMES[6].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.NATIVE);
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
                 }
                 else if (DATATYPE_NAMES[7].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
+                    type =
+                        fileFormat.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
                 }
                 else if (DATATYPE_NAMES[8].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
+                    type =
+                        fileFormat.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
                 }
                 else if (DATATYPE_NAMES[9].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE, Datatype.NATIVE);
+                    type = fileFormat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
                 }
                 else if (DATATYPE_NAMES[10].equals(typeName)) { // enum
-                    type = fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
+                    type =
+                        fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
                     if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
                         shell.getDisplay().beep();
                         Tools.showError(shell, "Create", "Invalid member values: " + orderStr);
@@ -440,7 +462,8 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
                     }
                 }
                 else if (DATATYPE_NAMES[11].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.SIGN_NONE);
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE,
+                                                     Datatype.SIGN_NONE);
                 }
                 else {
                     throw new IllegalArgumentException("Invalid data type.");
@@ -459,13 +482,14 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             shell.getDisplay().beep();
-            Tools.showError(shell, "Create", "Number of values in the current dimension size is less than " + rank);
+            Tools.showError(shell, "Create",
+                            "Number of values in the current dimension size is less than " + rank);
             return false;
         }
 
-        long lsize = 1; // The total size
-        long l = 0;
-        dims = new long[rank];
+        long lsize   = 1; // The total size
+        long l       = 0;
+        dims         = new long[rank];
         String token = null;
         for (int i = 0; i < rank; i++) {
             token = st.nextToken().trim();
@@ -493,8 +517,8 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         try {
             H5Datatype datatype = (H5Datatype)createNewDatatype(null);
 
-            attr = (Attribute)new H5CompoundAttr(parentObj, attrName, datatype, dims);
-            Object value = H5Datatype.allocateArray(datatype, (int) lsize);
+            attr         = (Attribute) new H5CompoundAttr(parentObj, attrName, datatype, dims);
+            Object value = H5Datatype.allocateArray(datatype, (int)lsize);
             attr.setAttributeData(value);
 
             log.trace("writeMetadata() via write()");
@@ -511,7 +535,8 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         return true;
     }
 
-    private void updateMemberTableItems() {
+    private void updateMemberTableItems()
+    {
         int n = 0;
 
         try {
@@ -526,13 +551,13 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
             return;
         }
 
-        if(n > numberOfMembers) {
+        if (n > numberOfMembers) {
             try {
                 for (int i = numberOfMembers; i < n; i++) {
                     TableEditor[] editor = addMemberTableItem(table);
-                    editors[i][0] = editor[0];
-                    editors[i][1] = editor[1];
-                    editors[i][2] = editor[2];
+                    editors[i][0]        = editor[0];
+                    editors[i][1]        = editor[1];
+                    editors[i][2]        = editor[2];
                 }
             }
             catch (Exception ex) {
@@ -542,7 +567,7 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         }
         else {
             try {
-                for(int i = numberOfMembers - 1; i >= n; i--) {
+                for (int i = numberOfMembers - 1; i >= n; i--) {
                     table.remove(i);
                 }
             }
@@ -556,25 +581,28 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         numberOfMembers = n;
     }
 
-    private TableEditor[] addMemberTableItem(Table table) {
-        final TableItem item = new TableItem(table, SWT.NONE);
+    private TableEditor[] addMemberTableItem(Table table)
+    {
+        final TableItem item       = new TableItem(table, SWT.NONE);
         final TableEditor[] editor = new TableEditor[3];
 
-        for (int i = 0; i < editor.length; i++) editor[i] = new TableEditor(table);
+        for (int i = 0; i < editor.length; i++)
+            editor[i] = new TableEditor(table);
 
         final Text nameText = new Text(table, SWT.SINGLE | SWT.BORDER);
         nameText.setFont(curFont);
 
-        editor[0].grabHorizontal = true;
-        editor[0].grabVertical = true;
+        editor[0].grabHorizontal      = true;
+        editor[0].grabVertical        = true;
         editor[0].horizontalAlignment = SWT.LEFT;
-        editor[0].verticalAlignment = SWT.TOP;
+        editor[0].verticalAlignment   = SWT.TOP;
         editor[0].setEditor(nameText, item, 0);
 
         nameText.addModifyListener(new ModifyListener() {
             @Override
-            public void modifyText(ModifyEvent e) {
-                Text text = (Text) e.widget;
+            public void modifyText(ModifyEvent e)
+            {
+                Text text = (Text)e.widget;
                 item.setData("MemberName", text.getText());
             }
         });
@@ -583,16 +611,17 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         typeCombo.setFont(curFont);
         typeCombo.setItems(DATATYPE_NAMES);
 
-        editor[1].grabHorizontal = true;
-        editor[1].grabVertical = true;
+        editor[1].grabHorizontal      = true;
+        editor[1].grabVertical        = true;
         editor[1].horizontalAlignment = SWT.LEFT;
-        editor[1].verticalAlignment = SWT.TOP;
+        editor[1].verticalAlignment   = SWT.TOP;
         editor[1].setEditor(typeCombo, item, 1);
 
         typeCombo.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                CCombo combo = (CCombo) e.widget;
+            public void widgetSelected(SelectionEvent e)
+            {
+                CCombo combo = (CCombo)e.widget;
                 item.setData("MemberType", combo.getItem(combo.getSelectionIndex()));
             }
         });
@@ -600,16 +629,17 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         final Text sizeText = new Text(table, SWT.SINGLE | SWT.BORDER);
         sizeText.setFont(curFont);
 
-        editor[2].grabHorizontal = true;
-        editor[2].grabVertical = true;
+        editor[2].grabHorizontal      = true;
+        editor[2].grabVertical        = true;
         editor[2].horizontalAlignment = SWT.LEFT;
-        editor[2].verticalAlignment = SWT.TOP;
+        editor[2].verticalAlignment   = SWT.TOP;
         editor[2].setEditor(sizeText, item, 2);
 
         sizeText.addModifyListener(new ModifyListener() {
             @Override
-            public void modifyText(ModifyEvent e) {
-                Text text = (Text) e.widget;
+            public void modifyText(ModifyEvent e)
+            {
+                Text text = (Text)e.widget;
                 item.setData("MemberSize", text.getText());
             }
         });
@@ -620,7 +650,8 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
 
         item.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
+            public void widgetDisposed(DisposeEvent e)
+            {
                 editor[0].dispose();
                 editor[1].dispose();
                 editor[2].dispose();

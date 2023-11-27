@@ -8,8 +8,6 @@
  ************************************************************/
 package datasets;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -18,26 +16,30 @@ import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5ObjectEx_D_External {
-    private static String FILENAME = "H5ObjectEx_D_External.h5";
-    private static String EXTERNALNAME = "H5ObjectEx_D_External.data";
-    private static String DATASETNAME = "DS1";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 7;
-    private static final int RANK = 2;
+    private static String FILENAME         = "H5ObjectEx_D_External.h5";
+    private static String EXTERNALNAME     = "H5ObjectEx_D_External.data";
+    private static String DATASETNAME      = "DS1";
+    private static final int DIM_X         = 4;
+    private static final int DIM_Y         = 7;
+    private static final int RANK          = 2;
     private static final int NAME_BUF_SIZE = 32;
     private static final int DATATYPE_SIZE = 4;
 
-    private static void writeExternal() {
-        H5File file = null;
-        Dataset dset = null;
-        long file_id = -1;
-        long dcpl_id = -1;
-        long filespace_id = -1;
-        long dataset_id = -1;
-        long type_id = -1;
-        long[] dims = { DIM_X, DIM_Y };
-        int[][] dset_data = new int[DIM_X][DIM_Y];
+    private static void writeExternal()
+    {
+        H5File file        = null;
+        Dataset dset       = null;
+        long file_id       = -1;
+        long dcpl_id       = -1;
+        long filespace_id  = -1;
+        long dataset_id    = -1;
+        long type_id       = -1;
+        long[] dims        = {DIM_X, DIM_Y};
+        int[][] dset_data  = new int[DIM_X][DIM_Y];
         H5Datatype typeInt = null;
 
         // Initialize the dataset.
@@ -47,7 +49,7 @@ public class H5ObjectEx_D_External {
 
         // Create a new file using default properties.
         try {
-            file = new H5File(FILENAME, FileFormat.CREATE);
+            file    = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -56,7 +58,8 @@ public class H5ObjectEx_D_External {
 
         // Create datatype.
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
+            typeInt =
+                new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -66,7 +69,7 @@ public class H5ObjectEx_D_External {
         // size to be the current size.
         try {
             filespace_id = H5.H5Screate_simple(RANK, dims, null);
-            type_id = typeInt.createNative();
+            type_id      = typeInt.createNative();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -83,8 +86,7 @@ public class H5ObjectEx_D_External {
         // set the external file.
         try {
             if (dcpl_id >= 0)
-                H5.H5Pset_external(dcpl_id, EXTERNALNAME, 0,
-                        HDF5Constants.H5F_UNLIMITED);
+                H5.H5Pset_external(dcpl_id, EXTERNALNAME, 0, HDF5Constants.H5F_UNLIMITED);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -93,10 +95,10 @@ public class H5ObjectEx_D_External {
         // Create the HDF5Constants.dataset.
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME,
-                        type_id, filespace_id, HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
-            dset = new H5ScalarDS(file, DATASETNAME, "/");
-            Group pgroup = (Group) file.get("/");
+                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, type_id, filespace_id,
+                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+            dset         = new H5ScalarDS(file, DATASETNAME, "/");
+            Group pgroup = (Group)file.get("/");
             pgroup.addToMemberList(dset);
         }
         catch (Exception e) {
@@ -154,13 +156,14 @@ public class H5ObjectEx_D_External {
         }
     }
 
-    private static void readExternal() {
-        H5File file = null;
-        Dataset dset = null;
-        long dcpl_id = -1;
+    private static void readExternal()
+    {
+        H5File file     = null;
+        Dataset dset    = null;
+        long dcpl_id    = -1;
         long dataset_id = -1;
-        int[] dset_data = new int[DIM_X*DIM_Y];
-        String[] Xname = new String[1];
+        int[] dset_data = new int[DIM_X * DIM_Y];
+        String[] Xname  = new String[1];
 
         // Open file using the default properties.
         try {
@@ -173,7 +176,7 @@ public class H5ObjectEx_D_External {
 
         // Open dataset using the default properties.
         try {
-            dset = (Dataset) file.get(DATASETNAME);
+            dset       = (Dataset)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -203,7 +206,7 @@ public class H5ObjectEx_D_External {
         // Read the data using the default properties.
         try {
             dset.init();
-            dset_data = (int[]) dset.getData();
+            dset_data = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -214,7 +217,7 @@ public class H5ObjectEx_D_External {
         for (int indx = 0; indx < DIM_X; indx++) {
             System.out.print(" [ ");
             for (int jndx = 0; jndx < DIM_Y; jndx++)
-                System.out.print(dset_data[indx*DIM_Y+jndx] + " ");
+                System.out.print(dset_data[indx * DIM_Y + jndx] + " ");
             System.out.println("]");
         }
         System.out.println();
@@ -245,9 +248,9 @@ public class H5ObjectEx_D_External {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_D_External.writeExternal();
         H5ObjectEx_D_External.readExternal();
     }
-
 }
