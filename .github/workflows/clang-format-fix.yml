@@ -25,7 +25,7 @@ jobs:
     - name: Fix Java formatting issues detected by clang-format
       uses: DoozyX/clang-format-lint-action@v0.13
       with:
-        source: '../src ./test'
+        source: './src ./test'
         extensions: 'java'
         clangFormatVersion: 13
         inplace: True
