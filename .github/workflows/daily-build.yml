@@ -1,6 +1,5 @@
 name: hdfview daily build
 
-# Controls when the action will run. Triggers the workflow on a schedule
 on:
   workflow_dispatch:
     inputs:
@@ -91,9 +90,7 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_hdf: ${{ needs.get-base-names.outputs.hdf4-name }}
       use_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
-      #use_tag: snapshot
-      #use_environ: snapshots
-    if: ${{ ((needs.get-base-names.outputs.run-environ == 'snapshots') && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore'))) || (needs.get-base-names.outputs.run-environ  == 'release') }}
+    if: ${{ ((needs.get-base-names.outputs.run-environ == 'snapshots') && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore'))) }}
 
   call-workflow-release:
     needs: [get-base-names, call-workflow-tarball, call-workflow-ant]
@@ -104,7 +101,7 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
-      use_tag: ${{ needs.get-base-names.outputs.run-environ }}
+      use_tag: snapshot
       use_environ: ${{ needs.get-base-names.outputs.run-environ }}
-    if: ${{ ((needs.get-base-names.outputs.run-environ == 'snapshots') && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore'))) || (needs.get-base-names.outputs.run-environ  == 'release') }}
+    if: ${{ ((needs.get-base-names.outputs.run-environ == 'snapshots') && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore'))) }}
 
