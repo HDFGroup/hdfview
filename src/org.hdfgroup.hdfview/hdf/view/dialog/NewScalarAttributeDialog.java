@@ -485,7 +485,7 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
 
     /**
      * Get the new attribute created.
-     * 
+     *
      * @return the new attribute created.
      */
     public Attribute getAttribute() { return (Attribute)newObject; }

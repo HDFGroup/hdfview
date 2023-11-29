@@ -230,7 +230,7 @@ public class NC2File extends FileFormat {
 
     /**
      * Get the NetCDF file.
-     * 
+     *
      * @return the NetCDF file.
      */
     public NetcdfFile getNetcdfFile() { return ncFile; }

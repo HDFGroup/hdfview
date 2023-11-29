@@ -1270,14 +1270,14 @@ public abstract class DefaultBaseTableView implements TableView {
 
     /**
      * Get the selection layer
-     * 
+     *
      * @return the selection layer
      */
     public SelectionLayer getSelectionLayer() { return selectionLayer; }
 
     /**
      * Get the data layer
-     * 
+     *
      * @return the data layer
      */
     public DataLayer getDataLayer() { return dataLayer; }

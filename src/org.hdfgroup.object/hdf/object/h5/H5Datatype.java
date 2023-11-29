@@ -1168,9 +1168,9 @@ public class H5Datatype extends Datatype {
 
     /**
      * Get the memory datatype identifier from the datatype file identifier.
-     * 
+     *
      * @param tid the datatype file identification.
-     * 
+     *
      * @return the memory datatype identifier if successful, and negative otherwise.
      */
     public static long toNative(long tid)

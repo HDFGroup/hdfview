@@ -27,14 +27,14 @@ public abstract interface HelpView {
 
     /**
      * Get the HelpView's label, which is displayed in the HDFView help menu.
-     * 
+     *
      * @return the HelpView's label
      */
     public abstract String getLabel();
 
     /**
      * Get the action command for this HelpView.
-     * 
+     *
      * @return the action command for this HelpView.
      */
     public abstract String getActionCommand();

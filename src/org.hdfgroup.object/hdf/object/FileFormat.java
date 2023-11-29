@@ -2065,9 +2065,9 @@ public abstract class FileFormat extends File {
 
     /**
      * Get the value of the index type value.
-     * 
+     *
      * @param strtype The name of the index type.
-     * 
+     *
      * @return the int value of the index type value.
      *
      * @throws Exception The exceptions thrown vary depending on the implementing class.
@@ -2080,7 +2080,7 @@ public abstract class FileFormat extends File {
 
     /**
      * Get the value of the index type.
-     * 
+     *
      * @param strtype The name of the index type.
      *
      * @return the int value of the index type.
@@ -2110,7 +2110,7 @@ public abstract class FileFormat extends File {
 
     /**
      * Get the value of the index order value.
-     * 
+     *
      * @param strorder The name of the index order.
      *
      * @return the int value of the index order value.
@@ -2125,7 +2125,7 @@ public abstract class FileFormat extends File {
 
     /**
      * Get the value of the index order.
-     * 
+     *
      * @param strorder The name of the index order.
      *
      * @return the int value of the index order.

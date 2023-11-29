@@ -23,28 +23,28 @@ public class HDFVersions {
 
     /**
      * Get the property to track the current versions of java
-     * 
+     *
      * @return the property to track the current versions of java
      */
     public static String getPropertyVersionJava() { return props.getProperty("JAVA_VERSION"); }
 
     /**
      * Get the property to track the current versions of hdf4
-     * 
+     *
      * @return the property to track the current versions of hdf4
      */
     public static String getPropertyVersionHDF4() { return props.getProperty("HDF4_VERSION"); }
 
     /**
      * Get the property to track the current versions of hdf5
-     * 
+     *
      * @return the property to track the current versions of hdf5
      */
     public static String getPropertyVersionHDF5() { return props.getProperty("HDF5_VERSION"); }
 
     /**
      * Get the property to track the current versions of hdfview
-     * 
+     *
      * @return the property to track the current versions of hdfview
      */
     public static String getPropertyVersionView() { return props.getProperty("HDFVIEW_VERSION"); }

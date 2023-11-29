@@ -26,28 +26,28 @@ import hdf.view.DataView.DataView;
 public abstract interface TableView extends DataView {
     /**
      * Get the table
-     * 
+     *
      * @return the table
      */
     public abstract Object getTable();
 
     /**
      * Get the array of selected data
-     * 
+     *
      * @return array of selected data
      */
     public abstract Object getSelectedData();
 
     /**
      * Get the array of selected column count
-     * 
+     *
      * @return array of selected column count
      */
     public abstract int getSelectedColumnCount();
 
     /**
      * Get the array of selected row count
-     * 
+     *
      * @return array of selected row count
      */
     public abstract int getSelectedRowCount();

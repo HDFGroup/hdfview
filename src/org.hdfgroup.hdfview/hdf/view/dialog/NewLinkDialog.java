@@ -832,14 +832,14 @@ public class NewLinkDialog extends Dialog {
 
     /**
      * Get the new dataset created.
-     * 
+     *
      * @return the new dataset created.
      */
     public HObject getObject() { return newObject; }
 
     /**
      * Get the parent group of the new dataset.
-     * 
+     *
      * @return the parent group of the new dataset.
      */
     public Group getParentGroup() { return parentGroup; }

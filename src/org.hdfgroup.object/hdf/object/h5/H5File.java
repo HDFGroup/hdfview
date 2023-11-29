@@ -3169,7 +3169,7 @@ public class H5File extends FileFormat {
 
     /**
      * Get the value of the index type value.
-     * 
+     *
      * @return the int value of the index type value.
      *
      * @param strtype The name of the index type.
@@ -3187,7 +3187,7 @@ public class H5File extends FileFormat {
 
     /**
      * Get the value of the index order.
-     * 
+     *
      * @return the int value of the index order.
      *
      * @param strorder The name of the index order.
@@ -3208,7 +3208,7 @@ public class H5File extends FileFormat {
     @Override
     /**
      * Get the value of the index type.
-     * 
+     *
      * @return the int value of the index type.
      *
      * @param strtype The name of the index type.
@@ -3227,7 +3227,7 @@ public class H5File extends FileFormat {
 
     /**
      * Get the current value of the index type.
-     * 
+     *
      * @return the current value of the index type.
      */
     public int getIndexType() { return indexType; }
@@ -3247,7 +3247,7 @@ public class H5File extends FileFormat {
     @Override
     /**
      * Get the value of the index order value.
-     * 
+     *
      * @return the int value of the index order value.
      *
      * @param strorder The name of the index order.
@@ -3270,7 +3270,7 @@ public class H5File extends FileFormat {
 
     /**
      * Get the current value of the index order.
-     * 
+     *
      * @return the current value of the index order.
      */
     public int getIndexOrder() { return indexOrder; }

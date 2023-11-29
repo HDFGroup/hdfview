@@ -69,7 +69,7 @@ public abstract interface DataViewManager {
 
     /**
      * Get the current TreeView
-     * 
+     *
      * @return the current TreeView
      */
     public abstract TreeView getTreeView();

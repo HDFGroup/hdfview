@@ -34,7 +34,7 @@ public abstract interface DataView {
 
     /**
      * Get the data object displayed in this data viewer
-     * 
+     *
      * @return the data object displayed in this data viewer
      */
     public abstract HObject getDataObject();

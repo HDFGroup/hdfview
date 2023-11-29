@@ -1488,7 +1488,8 @@ public abstract class Dataset extends HObject implements DataFormat {
      *
      * @param theData   The Object data
      * @param theType   The type of the data in the Object
-     * @param delimiter The delimiter used to separate individual data points. It can be a comma, semicolon, tab or
+     * @param delimiter The delimiter used to separate individual data points. It can be a comma, semicolon,
+     *     tab or
      *                  space. For example, toString(",") will separate data by commas.
      * @param count     The maximum number of Array values to return
      *

@@ -541,14 +541,14 @@ public class NewDataObjectDialog extends Dialog {
 
     /**
      * Get the new object created.
-     * 
+     *
      * @return the new object created.
      */
     public HObject getObject() { return newObject; }
 
     /**
      * Get the parent group of the new dataset.
-     * 
+     *
      * @return the parent group of the new dataset.
      */
     public Group getParentGroup() { return (Group)parentObj; }

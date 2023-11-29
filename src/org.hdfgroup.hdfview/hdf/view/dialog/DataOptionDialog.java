@@ -702,21 +702,21 @@ public class DataOptionDialog extends Dialog {
 
     /**
      * Check if the display option is image
-     * 
+     *
      * @return true if the display option is image.
      */
     public boolean isImageDisplay() { return isImageDisplay; }
 
     /**
      * Check if the index starts with 0
-     * 
+     *
      * @return true if the index starts with 0.
      */
     public boolean isIndexBase1() { return isIndexBase1; }
 
     /**
      * Get the bitmask value
-     * 
+     *
      * @return the bitmask.
      */
     public BitSet getBitmask()
@@ -742,7 +742,7 @@ public class DataOptionDialog extends Dialog {
 
     /**
      * Get the name of the datatview
-     * 
+     *
      * @return the name of the selected dataview
      */
     public String getDataViewName() { return dataViewName; }
@@ -756,7 +756,7 @@ public class DataOptionDialog extends Dialog {
 
     /**
      * Check if only the bitmask should be applied
-     * 
+     *
      * @return if it only apply bitmask.
      */
     public boolean isApplyBitmaskOnly() { return isApplyBitmaskOnly; }
@@ -770,7 +770,7 @@ public class DataOptionDialog extends Dialog {
 
     /**
      * Check if the data selection is cancelled
-     * 
+     *
      * @return true if the data selection is cancelled.
      */
     public boolean isCancelled() { return isSelectionCancelled; }
