@@ -124,15 +124,15 @@ public class ViewProperties extends PreferenceStore {
      * Used to create different DataViews for a given HObject.
      */
     public static enum DataViewType {
-        /** */
+        /** table type */
         TABLE,
-        /** */
+        /** image type */
         IMAGE,
-        /** */
+        /** palette type */
         PALETTE,
-        /** */
+        /** metadata type */
         METADATA,
-        /** */
+        /** treeview type */
         TREEVIEW
     }
 
@@ -140,27 +140,27 @@ public class ViewProperties extends PreferenceStore {
      * Property keys control how the data is displayed.
      */
     public static enum DATA_VIEW_KEY {
-        /** */
+        /** data is char */
         CHAR,
-        /** */
+        /** data is converted to byte */
         CONVERTBYTE,
-        /** */
+        /** data is transposed */
         TRANSPOSED,
-        /** */
+        /** data is read only */
         READONLY,
-        /** */
+        /** data is object */
         OBJECT,
-        /** */
+        /** data is bitmask */
         BITMASK,
-        /** */
+        /** data is bitmask op */
         BITMASKOP,
-        /** */
+        /** data is border */
         BORDER,
-        /** */
+        /** data is info */
         INFO,
-        /** */
+        /** data is index based 1 */
         INDEXBASE1,
-        /** */
+        /** data is view name */
         VIEW_NAME
     }
 
@@ -168,9 +168,9 @@ public class ViewProperties extends PreferenceStore {
      * Property keys control how the data is displayed.
      */
     public static enum BITMASK_OP {
-        /** */
+        /** use bitmask and */
         AND,
-        /** */
+        /** use bitmask extract */
         EXTRACT
     }
 
@@ -212,12 +212,6 @@ public class ViewProperties extends PreferenceStore {
 
     private static ClassLoader extClassLoader = null;
 
-    /** default plugin directory */
-    private static String pluginDir = System.getProperty("user.dir") + "/plugin";
-
-    /** a list of plugin paths */
-    private static ArrayList<String> pluginPaths = new ArrayList<>(50);
-
     /** a list of srb accounts */
     private static ArrayList<String[]> srbAccountList = new ArrayList<>(5);
 
@@ -255,7 +249,7 @@ public class ViewProperties extends PreferenceStore {
     private static ArrayList<String> paletteList = new ArrayList<>(5);
 
     /** a list of plugin paths */
-    private static ArrayList<String[]> pluginPathList = new ArrayList<>(5);
+    private static ArrayList<String> pluginPathList = new ArrayList<>(5);
 
     /** flag to indicate if enum data is converted to strings */
     private static boolean convertEnum = true;
@@ -332,8 +326,6 @@ public class ViewProperties extends PreferenceStore {
         setDefault("work.dir", getWorkDir());
 
         setUsersGuide(rootDir + usersGuide);
-
-        setPluginDir(rootDir + "/plugin");
 
         setDefault("users.guide", viewRoot + "/UsersGuide/index.html");
         setDefault("image.contrast", false);
@@ -557,160 +549,368 @@ public class ViewProperties extends PreferenceStore {
         return extClassLoader;
     }
 
-    /** @return the Folder Close Icon */
+    /**
+     * Get the Folder Close Icon
+     * 
+     * @return the Folder Close Icon
+     */
     public static Image getFoldercloseIcon() { return foldercloseIcon; }
 
-    /** @return the Folder Close with Attribute Icon */
+    /**
+     * Get the Folder Close with Attribute Icon
+     * 
+     * @return the Folder Close with Attribute Icon
+     */
     public static Image getFoldercloseIconA() { return foldercloseIconA; }
 
-    /** @return the Folder Open Icon */
+    /**
+     * Get the Folder Open Icon
+     * 
+     * @return the Folder Open Icon
+     */
     public static Image getFolderopenIcon() { return folderopenIcon; }
 
-    /** @return the Folder Open with Attribute Icon */
+    /**
+     * Get the Folder Open with Attribute Icon
+     * 
+     * @return the Folder Open with Attribute Icon
+     */
     public static Image getFolderopenIconA() { return folderopenIconA; }
 
-    /** @return the HDF Icon */
+    /**
+     * Get the HDF Icon
+     * 
+     * @return the HDF Icon
+     */
     public static Image getHdfIcon() { return hdfIcons[1]; }
 
-    /** @return the HDF Icons */
+    /**
+     * Get the HDF Icons
+     * 
+     * @return the HDF Icons
+     */
     public static Image[] getHdfIcons() { return hdfIcons; }
 
-    /** @return the HDF4 Icon */
+    /**
+     * Get the HDF4 Icon
+     * 
+     * @return the HDF4 Icon
+     */
     public static Image getH4Icon() { return h4Icon; }
 
-    /** @return the read-only HDF4 Icon */
+    /**
+     * Get the read-only HDF4 Icon
+     * 
+     * @return the read-only HDF4 Icon
+     */
     public static Image getH4IconR() { return h4IconR; }
 
-    /** @return the HDF5 Icon */
+    /**
+     * Get the HDF5 Icon
+     * 
+     * @return the HDF5 Icon
+     */
     public static Image getH5Icon() { return h5Icon; }
 
-    /** @return the read-only HDF5 Icon */
+    /**
+     * Get the read-only HDF5 Icon
+     * 
+     * @return the read-only HDF5 Icon
+     */
     public static Image getH5IconR() { return h5IconR; }
 
-    /** @return the netcdf Icon */
+    /**
+     * Get the netcdf Icon
+     * 
+     * @return the netcdf Icon
+     */
     public static Image getNC3Icon() { return ncIcon; }
 
-    /** @return the read-only netcdf Icon */
+    /**
+     * Get the read-only netcdf Icon
+     * 
+     * @return the read-only netcdf Icon
+     */
     public static Image getNC3IconR() { return ncIconR; }
 
-    /** @return the Dataset Icon */
+    /**
+     * Get the Dataset Icon
+     * 
+     * @return the Dataset Icon
+     */
     public static Image getDatasetIcon() { return datasetIcon; }
 
-    /** @return the Dataset with Attribute Icon */
+    /**
+     * Get the Dataset with Attribute Icon
+     * 
+     * @return the Dataset with Attribute Icon
+     */
     public static Image getDatasetIconA() { return datasetIconA; }
 
-    /** @return the Datatype Icon */
+    /**
+     * Get the Datatype Icon
+     * 
+     * @return the Datatype Icon
+     */
     public static Image getDatatypeIcon() { return datatypeIcon; }
 
-    /** @return the Datatype with Attribute Icon */
+    /**
+     * Get the Datatype with Attribute Icon
+     * 
+     * @return the Datatype with Attribute Icon
+     */
     public static Image getDatatypeIconA() { return datatypeIconA; }
 
-    /** @return the Link Icon */
+    /**
+     * Get the Link Icon
+     * 
+     * @return the Link Icon
+     */
     public static Image getLinkIcon() { return linkIcon; }
 
-    /** @return the File Open Icon */
+    /**
+     * Get the File Open Icon
+     * 
+     * @return the File Open Icon
+     */
     public static Image getFileopenIcon() { return fileopenIcon; }
 
-    /** @return the File Save Icon */
+    /**
+     * Get the File Save Icon
+     * 
+     * @return the File Save Icon
+     */
     public static Image getFilesaveIcon() { return filesaveIcon; }
 
-    /** @return the File New Icon */
+    /**
+     * Get the File New Icon
+     * 
+     * @return the File New Icon
+     */
     public static Image getFilenewIcon() { return filenewIcon; }
 
-    /** @return the File Close Icon */
+    /**
+     * Get the File Close Icon
+     * 
+     * @return the File Close Icon
+     */
     public static Image getFilecloseIcon() { return filecloseIcon; }
 
-    /** @return the Palette Icon */
+    /**
+     * Get the Palette Icon
+     * 
+     * @return the Palette Icon
+     */
     public static Image getPaletteIcon() { return paletteIcon; }
 
-    /** @return the Bright Icon */
+    /**
+     * Get the Bright Icon
+     * 
+     * @return the Bright Icon
+     */
     public static Image getBrightIcon() { return brightIcon; }
 
-    /** @return the Autocontrast Icon */
+    /**
+     * Get the Autocontrast Icon
+     * 
+     * @return the Autocontrast Icon
+     */
     public static Image getAutocontrastIcon() { return autocontrastIcon; }
 
-    /** @return the Image Icon */
+    /**
+     * Get the Image Icon
+     * 
+     * @return the Image Icon
+     */
     public static Image getImageIcon() { return imageIcon; }
 
-    /** @return the Table Icon */
+    /**
+     * Get the Table Icon
+     * 
+     * @return the Table Icon
+     */
     public static Image getTableIcon() { return tableIcon; }
 
-    /** @return the Text Icon */
+    /**
+     * Get the Text Icon
+     * 
+     * @return the Text Icon
+     */
     public static Image getTextIcon() { return textIcon; }
 
-    /** @return the Image with Attribute Icon */
+    /**
+     * Get the Image with Attribute Icon
+     * 
+     * @return the Image with Attribute Icon
+     */
     public static Image getImageIconA() { return imageIconA; }
 
-    /** @return the Table with Attribute Icon */
+    /**
+     * Get the Table with Attribute Icon
+     * 
+     * @return the Table with Attribute Icon
+     */
     public static Image getTableIconA() { return tableIconA; }
 
-    /** @return the Text with Attribute Icon */
+    /**
+     * Get the Text with Attribute Icon
+     * 
+     * @return the Text with Attribute Icon
+     **/
     public static Image getTextIconA() { return textIconA; }
 
-    /** @return the Zoom In Icon */
+    /**
+     * Get the Zoom In Icon
+     * 
+     * @return the Zoom In Icon
+     */
     public static Image getZoominIcon() { return zoominIcon; }
 
-    /** @return the Zoom Out Icon */
+    /**
+     * Get the Zoom Out Icon
+     * 
+     * @return the Zoom Out Icon
+     */
     public static Image getZoomoutIcon() { return zoomoutIcon; }
 
-    /** @return the Blank Icon */
+    /**
+     * Get the Blank Icon
+     * 
+     * @return the Blank Icon
+     */
     public static Image getBlankIcon() { return blankIcon; }
 
-    /** @return the Help Icon */
+    /**
+     * Get the Help Icon
+     * 
+     * @return the Help Icon
+     */
     public static Image getHelpIcon() { return helpIcon; }
 
-    /** @return the Copy Icon */
+    /**
+     * Get the Copy Icon
+     * 
+     * @return the Copy Icon
+     */
     public static Image getCopyIcon() { return copyIcon; }
 
-    /** @return the Cut Icon */
+    /**
+     * Get the Cut Icon
+     * 
+     * @return the Cut Icon
+     */
     public static Image getCutIcon() { return cutIcon; }
 
-    /** @return the Paste Icon */
+    /**
+     * Getthe Paste Icon
+     * 
+     * @return the Paste Icon
+     */
     public static Image getPasteIcon() { return pasteIcon; }
 
-    /** @return the HDFView Icon */
+    /**
+     * Get the HDFView Icon
+     * 
+     * @return the HDFView Icon
+     */
     public static Image getHDFViewIcon() { return hdfviewIcon; }
 
-    /** @return the Large HDF Icon */
+    /**
+     * Get the Large HDF Icon
+     * 
+     * @return the Large HDF Icon
+     */
     public static Image getLargeHdfIcon() { return hdfIcons[2]; }
 
-    /** @return the Previous Icon */
+    /**
+     * Get the Previous Icon
+     * 
+     * @return the Previous Icon
+     */
     public static Image getPreviousIcon() { return previousIcon; }
 
-    /** @return the Next Icon */
+    /**
+     * Get the Next Icon
+     * 
+     * @return the Next Icon
+     */
     public static Image getNextIcon() { return nextIcon; }
 
-    /** @return the First Icon */
+    /**
+     * Get the First Icon
+     * 
+     * @return the First Icon
+     */
     public static Image getFirstIcon() { return firstIcon; }
 
-    /** @return the Last Icon */
+    /**
+     * Get the Last Icon
+     * 
+     * @return the Last Icon
+     */
     public static Image getLastIcon() { return lastIcon; }
 
-    /** @return the Chart Icon */
+    /**
+     * Get the Chart Icon
+     * 
+     * @return the Chart Icon
+     */
     public static Image getChartIcon() { return chartIcon; }
 
-    /** @return the Animation Icon */
+    /**
+     * Get the Animation Icon
+     * 
+     * @return the Animation Icon
+     */
     public static Image getAnimationIcon() { return animationIcon; }
 
-    /** @return the Apps Icon */
+    /**
+     * Get the Apps Icon
+     * 
+     * @return the Apps Icon
+     */
     public static Image getAppsIcon() { return iconAPPS; }
 
-    /** @return the Url Icon */
+    /**
+     * Get the Url Icon
+     * 
+     * @return the Url Icon
+     */
     public static Image getUrlIcon() { return iconURL; }
 
-    /** @return the Video Icon */
+    /**
+     * Get the Video Icon
+     * 
+     * @return the Video Icon
+     */
     public static Image getVideoIcon() { return iconVIDEO; }
 
-    /** @return the Xls Icon */
+    /**
+     * Get the Xls Icon
+     * 
+     * @return the Xls Icon
+     */
     public static Image getXlsIcon() { return iconXLS; }
 
-    /** @return the Pdf Icon */
+    /**
+     * Get the Pdf Icon
+     * 
+     * @return the Pdf Icon
+     */
     public static Image getPdfIcon() { return iconPDF; }
 
-    /** @return the Audio Icon */
+    /**
+     * Get the Audio Icon
+     * 
+     * @return the Audio Icon
+     */
     public static Image getAudioIcon() { return iconAUDIO; }
 
-    /** @return the Question Icon */
+    /**
+     * Get the Question Icon
+     * 
+     * @return the Question Icon
+     */
     public static Image getQuestionIcon() { return questionIcon; }
 
     /** Load the Icons */
@@ -1367,10 +1567,6 @@ public class ViewProperties extends PreferenceStore {
         if (!isDefault("work.dir"))
             setWorkDir(propVal);
 
-        propVal = getString("plugin.dir");
-        if (!isDefault("plugin.dir"))
-            setPluginDir(propVal);
-
         propVal = getString("file.extension");
         if (!isDefault("file.extension")) {
             setFileExtension(propVal);
@@ -1481,9 +1677,6 @@ public class ViewProperties extends PreferenceStore {
 
         if (workDir != null)
             setValue("work.dir", workDir);
-
-        if (pluginDir != null)
-            setValue("plugin.dir", pluginDir);
 
         if (fileExt != null)
             setValue("file.extension", fileExt);
@@ -1609,13 +1802,25 @@ public class ViewProperties extends PreferenceStore {
         super.save();
     }
 
-    /** @return the name of the user property file */
+    /**
+     * Get the name of the user property file
+     * 
+     * @return the name of the user property file
+     */
     public static String getPropertyFile() { return propertyFile; }
 
-    /** @return the root directory where the HDFView is installed. */
+    /**
+     * Get the root directory where the HDFView is installed.
+     * 
+     * @return the root directory where the HDFView is installed.
+     */
     public static String getViewRoot() { return rootDir; }
 
-    /** @return the default work directory, where the open file starts. */
+    /**
+     * Get the default work directory, where the open file starts.
+     * 
+     * @return the default work directory, where the open file starts.
+     */
     public static String getWorkDir()
     {
         String workPath = workDir;
@@ -1631,41 +1836,53 @@ public class ViewProperties extends PreferenceStore {
         return workPath;
     }
 
-    /** @return the default plugin directory. */
-    public static String getPluginDir()
-    {
-        String pluginPath = pluginDir;
-        log.trace("getPluginDir: pluginDir={}", pluginDir);
-        if (pluginPath == null) {
-            pluginPath = System.getProperty("hdfview.plugindir");
-            log.trace("getPluginDir: hdfview.plugindir={}", pluginPath);
-            if (pluginPath == null) {
-                pluginPath = System.getProperty("user.dir") + "/plugin";
-            }
-        }
-        log.trace("getPluginDir: final pluginPath={}", pluginPath);
-        return pluginPath;
-    }
-
-    /** @return the maximum number of the most recent file */
+    /**
+     * Get the maximum number of the most recent file
+     * 
+     * @return the maximum number of the most recent file
+     */
     public static int getMaxRecentFiles() { return MAX_RECENT_FILES; }
 
-    /** @return the path of the HDFView users guide */
+    /**
+     * Get the path of the HDFView users guide
+     * 
+     * @return the path of the HDFView users guide
+     */
     public static String getUsersGuide() { return usersGuide; };
 
-    /** @return the delimiter of data values */
+    /**
+     * Get the delimiter of data values
+     * 
+     * @return the delimiter of data values
+     */
     public static String getDataDelimiter() { return delimiter; }
 
-    /** @return the image origin */
+    /**
+     * Get the image origin
+     * 
+     * @return the image origin
+     */
     public static String getImageOrigin() { return origin; }
 
-    /** @return the default index type for display */
+    /**
+     * Get the default index type for display
+     * 
+     * @return the default index type for display
+     */
     public static String getIndexType() { return indexType; }
 
-    /** @return the default index order for display */
+    /**
+     * Get the default index order for display
+     * 
+     * @return the default index order for display
+     */
     public static String getIndexOrder() { return indexOrder; }
 
-    /** @return the timer refresh size */
+    /**
+     * Get the timer refresh size
+     * 
+     * @return the timer refresh size
+     */
     public static int getTimerRefresh() { return timerRefresh; }
 
     /**
@@ -1676,13 +1893,25 @@ public class ViewProperties extends PreferenceStore {
      */
     public static void setTimerRefresh(int trefresh) { timerRefresh = trefresh; }
 
-    /** @return the font size */
+    /**
+     * Get the font size
+     * 
+     * @return the font size
+     */
     public static int getFontSize() { return fontSize; }
 
-    /** @return the font type */
+    /**
+     * Get the font type
+     * 
+     * @return the font type
+     */
     public static String getFontType() { return fontType; }
 
-    /** @return the file extensions of supported file formats */
+    /**
+     * Get the file extensions of supported file formats
+     * 
+     * @return the file extensions of supported file formats
+     */
     public static String getFileExtension() { return fileExt; }
 
     /**
@@ -1713,37 +1942,84 @@ public class ViewProperties extends PreferenceStore {
         }
     }
 
-    /** @return the path of the H5toH5 converter */
+    /**
+     * Get the path of the H5toH5 converter
+     * 
+     * @return the path of the H5toH5 converter
+     */
     public static String getH4toH5() { return h4toh5; }
 
-    /** @return the list of most recent files */
+    /**
+     * Get the list of most recent files
+     * 
+     * @return the list of most recent files
+     */
     public static List<String> getMRF() { return recentFiles; }
 
-    /** @return the list of palette files */
+    /**
+     * Get the list of palette files
+     * 
+     * @return the list of palette files
+     */
     public static List<String> getPaletteList() { return paletteList; }
 
-    /** @return the plugin path list */
-    public static List<String[]> getPluginPaths() { return pluginPathList; }
+    /**
+     * Get the plugin path list
+     * 
+     * @return the plugin path list
+     */
+    public static String[] getPluginPaths()
+    {
+        return pluginPathList.toArray(new String[0]);
+    }
 
-    /** @return the SRB account list */
+    /**
+     * Get the SRB account list
+     * 
+     * @return the SRB account list
+     */
     public static List<String[]> getSrbAccount() { return srbAccountList; }
 
-    /** @return a list of treeview modules */
+    /**
+     * Get a list of treeview modules
+     * 
+     * @return a list of treeview modules
+     */
     public static List<String> getTreeViewList() { return moduleListTreeView; }
 
-    /** @return a list of metadataview modules */
+    /**
+     * Get a list of metadataview modules
+     * 
+     * @return a list of metadataview modules
+     */
     public static List<String> getMetaDataViewList() { return moduleListMetaDataView; }
 
-    /** @return a list of tableview modules */
+    /**
+     * Get a list of tableview modules
+     * 
+     * @return a list of tableview modules
+     */
     public static List<String> getTableViewList() { return moduleListTableView; }
 
-    /** @return a list of imageview modules */
+    /**
+     * Get a list of imageview modules
+     * 
+     * @return a list of imageview modules
+     */
     public static List<String> getImageViewList() { return moduleListImageView; }
 
-    /** @return a list of paletteview modules */
+    /**
+     * Get a list of paletteview modules
+     * 
+     * @return a list of paletteview modules
+     */
     public static List<String> getPaletteViewList() { return moduleListPaletteView; }
 
-    /** @return a list of helpview modules */
+    /**
+     * Get a list of helpview modules
+     * 
+     * @return a list of helpview modules
+     */
     public static List<String> getHelpViewList() { return moduleListHelpView; }
 
     /**
@@ -1793,22 +2069,81 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * set the path of the default plugin directory
-     *
-     * @param plDir the default plugin directory
+     * Load the paths of the default plugin directories
+     * 
+     * @return the array of paths
      */
-    public static void setPluginDir(String plDir)
+    public static String[] loadPluginPaths()
     {
-        log.trace("ViewProperties:setPluginDir plDir={}", plDir);
-        pluginDir = plDir;
+        try {
+            log.trace("ViewProperties:loadPluginPaths");
+            pluginPathList = H5Plugins.getPluginPaths();
+        }
+        catch (Exception err) {
+        }
+        return getPluginPaths();
     }
 
     /**
-     * Sets the list of plugin paths.
+     * Inserts the plugin path.
      *
-     * @param pluginPathsList The list of plugin paths.
+     * @param pluginPath The plugin path.
+     * @param pathIndex  The index to insert the plugin path.
      */
-    public static void setPluginPaths(ArrayList<String> pluginPathsList) { pluginPaths = pluginPathsList; }
+    public static void insertPluginPath(String pluginPath, int pathIndex)
+    {
+        try {
+            H5Plugins.insertPluginPath(pluginPath, pathIndex);
+            pluginPathList = H5Plugins.getPluginPaths();
+        }
+        catch (Exception err) {
+        }
+    }
+
+    /**
+     * Prepends the plugin path.
+     *
+     * @param pluginPath The plugin path.
+     */
+    public static void prependPluginPath(String pluginPath)
+    {
+        try {
+            H5Plugins.prependPluginPath(pluginPath);
+            pluginPathList = H5Plugins.getPluginPaths();
+        }
+        catch (Exception err) {
+        }
+    }
+
+    /**
+     * Appends the plugin path.
+     *
+     * @param pluginPath The plugin path.
+     */
+    public static void appendPluginPath(String pluginPath)
+    {
+        try {
+            H5Plugins.appendPluginPath(pluginPath);
+            pluginPathList = H5Plugins.getPluginPaths();
+        }
+        catch (Exception err) {
+        }
+    }
+
+    /**
+     * Removes the plugin path.
+     *
+     * @param pathIndex  The index to remove the plugin path.
+     */
+    public static void deletePluginPath(int pathIndex)
+    {
+        try {
+            H5Plugins.deletePluginPath(pathIndex);
+            pluginPathList = H5Plugins.getPluginPaths();
+        }
+        catch (Exception err) {
+        }
+    }
 
     /**
      * set the file extension
@@ -1996,7 +2331,9 @@ public class ViewProperties extends PreferenceStore {
     public static void setLateLib(String vers) { LateLib = vers; }
 
     /**
-     * @return the convertEnum
+     * Check if the enum value is to be converted
+     * 
+     * @return true if the enum value is to be converted
      */
     public static boolean isConvertEnum() { return convertEnum; }
 
@@ -2008,13 +2345,16 @@ public class ViewProperties extends PreferenceStore {
     public static boolean showRegRefValues() { return showRegRefValues; }
 
     /**
-     * @return the isIndexBase1
+     * Check if the data index starts at 1
+     * 
+     * @return true if the data index starts at 1
      */
     public static boolean isIndexBase1() { return isIndexBase1; }
 
     /**
-     * @param convertEnum
-     *            the convertEnum to set
+     * Set enum data to be converted
+     * 
+     * @param convertEnum true to set enum data conversion
      */
     public static void setConvertEnum(boolean convertEnum) { ViewProperties.convertEnum = convertEnum; }
 

@@ -18,6 +18,9 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,5 +54,72 @@ public final class H5Plugins {
         log.trace("getTotalPluginPaths(): total plugin paths {}", totalPaths);
 
         return totalPaths;
+    }
+
+    /**
+     * Get the list of paths for the HDF5 library.
+     *
+     * @return list of plugin paths
+     *
+     * @throws HDF5Exception If there is an error at the HDF5 library level.
+     */
+    public static final ArrayList<String> getPluginPaths() throws HDF5Exception
+    {
+        ArrayList<String> pathList = new ArrayList<>(5);
+        totalPaths = H5.H5PLsize();
+        log.trace("getPluginPaths(): total plugin paths {}", totalPaths);
+        for (int indx = 0; indx < totalPaths; indx++)
+            pathList.add(H5.H5PLget(indx));
+
+        return pathList;
+    }
+
+    /**
+     * Replaces the plugin path.
+     *
+     * @param pluginPath The plugin path.
+     * @param pathIndex  The index to replace the plugin path.
+     */
+    public static void replacePluginPath(String pluginPath, int pathIndex) throws HDF5Exception {
+        H5.H5PLreplace(pluginPath, pathIndex);
+    }
+
+    /**
+     * Inserts the plugin path.
+     *
+     * @param pluginPath The plugin path.
+     * @param pathIndex  The index to insert the plugin path.
+     */
+    public static void insertPluginPath(String pluginPath, int pathIndex) throws HDF5Exception {
+        H5.H5PLinsert(pluginPath, pathIndex);
+    }
+
+    /**
+     * Removes the plugin path.
+     *
+     * @param pathIndex  The index to remove the plugin path.
+     */
+    public static void deletePluginPath(int pathIndex) throws HDF5Exception {
+        H5.H5PLremove(pathIndex);
+    }
+
+    /**
+     * Prepend the plugin path.
+     *
+     * @param pluginPath The plugin path.
+     */
+    public static void prependPluginPath(String pluginPath) throws HDF5Exception
+    {
+        H5.H5PLprepend(pluginPath);
+    }
+
+    /**
+     * Append the plugin path.
+     *
+     * @param pluginPath The plugin path.
+     */
+    public static void appendPluginPath(String pluginPath) throws HDF5Exception
+    {
+        H5.H5PLappend(pluginPath);
     }
 }
