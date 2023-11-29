@@ -565,7 +565,9 @@ public class DataProviderFactory {
         public final void setIsValueChanged(boolean isChanged) { isValueChanged = isChanged; }
 
         /**
-         * @return if the datavalue has chaged
+         * Check if the datavalue has changed
+         * 
+         * @return if the datavalue has changed
          */
         public final boolean getIsValueChanged() { return isValueChanged; }
 

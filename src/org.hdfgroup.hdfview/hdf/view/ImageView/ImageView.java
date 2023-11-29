@@ -33,16 +33,32 @@ public abstract interface ImageView extends DataView {
      */
     public abstract Rectangle getSelectedArea();
 
-    /** @return true if the image is a truecolor image. */
+    /**
+     * Check if the image is a truecolor image.
+     * 
+     * @return true if the image is a truecolor image.
+     */
     public abstract boolean isTrueColor();
 
-    /** @return true if the image interlace is plane interlace. */
+    /**
+     * Check if the image interlace is plane interlace.
+     * 
+     * @return true if the image interlace is plane interlace.
+     */
     public abstract boolean isPlaneInterlace();
 
-    /** @return array of selected data */
+    /**
+     * Get the array of selected data
+     * 
+     * @return array of selected data
+     */
     public abstract Object getSelectedData();
 
-    /** @return the image displayed in this imageView */
+    /**
+     * Get the image displayed in this imageView
+     * 
+     * @return the image displayed in this imageView
+     */
     public abstract Image getImage();
 
     /**
@@ -52,7 +68,11 @@ public abstract interface ImageView extends DataView {
      */
     public abstract void setImage(Image img);
 
-    /** @return the palette of the image */
+    /**
+     * Get the palette of the image
+     * 
+     * @return the palette of the image
+     */
     public abstract byte[][] getPalette();
 
     /**
@@ -62,6 +82,10 @@ public abstract interface ImageView extends DataView {
      */
     public abstract void setPalette(byte[][] palette);
 
-    /** @return the byte array of the image data */
+    /**
+     * Get the byte array of the image data
+     * 
+     * @return the byte array of the image data
+     */
     public abstract byte[] getImageByteData();
 }

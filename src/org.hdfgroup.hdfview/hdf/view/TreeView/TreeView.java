@@ -123,6 +123,8 @@ public abstract interface TreeView {
     public abstract FileFormat getSelectedFile();
 
     /**
+     * Get the current selected object in the tree
+     * 
      * @return the current selected object in the tree.
      */
     public abstract HObject getCurrentObject();
@@ -153,16 +155,22 @@ public abstract interface TreeView {
     public abstract TreeItem addObject(HObject newObject, Group parentGroup);
 
     /**
+     * Get the Tree which holds the file structure
+     * 
      * @return the Tree which holds the file structure.
      */
     public abstract Tree getTree();
 
     /**
+     * Get the list of currently open files
+     * 
      * @return the list of currently open files.
      */
     public abstract List<FileFormat> getCurrentFiles();
 
     /**
+     * Get the tree item that contains the given data object.
+     * 
      * @param obj the object to find
      *
      * @return the tree item that contains the given data object.

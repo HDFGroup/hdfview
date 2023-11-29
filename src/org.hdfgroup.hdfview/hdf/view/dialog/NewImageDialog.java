@@ -168,7 +168,7 @@ public class NewImageDialog extends NewDataObjectDialog {
         checkIndex = new Button(typeComposite, SWT.RADIO);
         checkIndex.setFont(curFont);
         checkIndex.setText("Indexed colormap");
-        checkIndex.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkIndex.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkIndex.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
@@ -183,7 +183,7 @@ public class NewImageDialog extends NewDataObjectDialog {
         checkTrueColor = new Button(typeComposite, SWT.RADIO);
         checkTrueColor.setFont(curFont);
         checkTrueColor.setText("24-bit truecolor");
-        checkTrueColor.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkTrueColor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         checkTrueColor.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
@@ -204,12 +204,12 @@ public class NewImageDialog extends NewDataObjectDialog {
         checkInterlacePixel = new Button(layoutComposite, SWT.RADIO);
         checkInterlacePixel.setFont(curFont);
         checkInterlacePixel.setText("Pixel interlace");
-        checkInterlacePixel.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkInterlacePixel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkInterlacePlane = new Button(layoutComposite, SWT.RADIO);
         checkInterlacePlane.setFont(curFont);
         checkInterlacePlane.setText("Plane interlace");
-        checkInterlacePlane.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkInterlacePlane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         // Create Ok/Cancel button region
         Composite buttonComposite = new Composite(shell, SWT.NONE);

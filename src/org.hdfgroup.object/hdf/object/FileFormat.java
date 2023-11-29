@@ -2064,13 +2064,13 @@ public abstract class FileFormat extends File {
     }
 
     /**
+     * Get the value of the index type value.
+     * 
+     * @param strtype The name of the index type.
+     * 
      * @return the int value of the index type value.
      *
-     * @param strtype
-     *            The name of the index type.
-     *
-     * @throws Exception
-     *             The exceptions thrown vary depending on the implementing class.
+     * @throws Exception The exceptions thrown vary depending on the implementing class.
      */
     public static int getIndexTypeValue(String strtype) throws Exception
     {
@@ -2079,13 +2079,13 @@ public abstract class FileFormat extends File {
     }
 
     /**
+     * Get the value of the index type.
+     * 
+     * @param strtype The name of the index type.
+     *
      * @return the int value of the index type.
      *
-     * @param strtype
-     *            The name of the index type.
-     *
-     * @throws Exception
-     *             The exceptions thrown vary depending on the implementing class.
+     * @throws Exception The exceptions thrown vary depending on the implementing class.
      */
     public int getIndexType(String strtype) throws Exception
     {
@@ -2109,13 +2109,13 @@ public abstract class FileFormat extends File {
     }
 
     /**
+     * Get the value of the index order value.
+     * 
+     * @param strorder The name of the index order.
+     *
      * @return the int value of the index order value.
      *
-     * @param strorder
-     *            The name of the index order.
-     *
-     * @throws Exception
-     *             The exceptions thrown vary depending on the implementing class.
+     * @throws Exception The exceptions thrown vary depending on the implementing class.
      */
     public static int getIndexOrderValue(String strorder) throws Exception
     {
@@ -2124,13 +2124,13 @@ public abstract class FileFormat extends File {
     }
 
     /**
+     * Get the value of the index order.
+     * 
+     * @param strorder The name of the index order.
+     *
      * @return the int value of the index order.
      *
-     * @param strorder
-     *            The name of the index order.
-     *
-     * @throws Exception
-     *             The exceptions thrown vary depending on the implementing class.
+     * @throws Exception The exceptions thrown vary depending on the implementing class.
      */
     public int getIndexOrder(String strorder) throws Exception
     {

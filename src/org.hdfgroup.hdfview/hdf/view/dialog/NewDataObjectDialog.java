@@ -539,9 +539,17 @@ public class NewDataObjectDialog extends Dialog {
         return datatype;
     }
 
-    /** @return the new object created. */
+    /**
+     * Get the new object created.
+     * 
+     * @return the new object created.
+     */
     public HObject getObject() { return newObject; }
 
-    /** @return the parent group of the new dataset. */
+    /**
+     * Get the parent group of the new dataset.
+     * 
+     * @return the parent group of the new dataset.
+     */
     public Group getParentGroup() { return (Group)parentObj; }
 }

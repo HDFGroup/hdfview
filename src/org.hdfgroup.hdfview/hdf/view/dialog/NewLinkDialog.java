@@ -222,7 +222,7 @@ public class NewLinkDialog extends Dialog {
         hardLink = new Button(typeComposite, SWT.RADIO);
         hardLink.setFont(curFont);
         hardLink.setText("Hard Link");
-        hardLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        hardLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         hardLink.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
@@ -244,7 +244,7 @@ public class NewLinkDialog extends Dialog {
         softLink = new Button(typeComposite, SWT.RADIO);
         softLink.setFont(curFont);
         softLink.setText("Soft Link");
-        softLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        softLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         softLink.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
@@ -265,7 +265,7 @@ public class NewLinkDialog extends Dialog {
         externalLink = new Button(typeComposite, SWT.RADIO);
         externalLink.setFont(curFont);
         externalLink.setText("External Link");
-        externalLink.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        externalLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         externalLink.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
@@ -830,9 +830,17 @@ public class NewLinkDialog extends Dialog {
         }
     }
 
-    /** @return the new dataset created. */
+    /**
+     * Get the new dataset created.
+     * 
+     * @return the new dataset created.
+     */
     public HObject getObject() { return newObject; }
 
-    /** @return the parent group of the new dataset. */
+    /**
+     * Get the parent group of the new dataset.
+     * 
+     * @return the parent group of the new dataset.
+     */
     public Group getParentGroup() { return parentGroup; }
 }

@@ -123,11 +123,15 @@ public interface Attribute {
     int getAttributePlane();
 
     /**
+     * Check if attribute's dataspace is a NULL
+     *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     boolean isAttributeNULL();
 
     /**
+     * Check if attribute is a single scalar point
+     *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
     boolean isAttributeScalar();
@@ -135,11 +139,10 @@ public interface Attribute {
     /**
      * Not for public use in the future.
      *
-     * setData() is not safe to use because it changes memory buffer
-     * of the dataset object. Dataset operations such as write/read
-     * will fail if the buffer type or size is changed.
+     * setAttributeData() is not safe to use because it changes memory buffer of the dataset object. Dataset operations
+     * such as write/read will fail if the buffer type or size is changed.
      *
-     * @param d  the object data -must be an array of Objects
+     * @param d the object data -must be an array of Objects
      */
     void setAttributeData(Object d);
 

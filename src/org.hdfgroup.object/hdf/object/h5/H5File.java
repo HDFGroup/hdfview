@@ -3168,10 +3168,11 @@ public class H5File extends FileFormat {
     }
 
     /**
+     * Get the value of the index type value.
+     * 
      * @return the int value of the index type value.
      *
-     * @param strtype
-     *            The name of the index type.
+     * @param strtype The name of the index type.
      */
     public static int getIndexTypeValue(String strtype)
     {
@@ -3185,10 +3186,11 @@ public class H5File extends FileFormat {
     }
 
     /**
+     * Get the value of the index order.
+     * 
      * @return the int value of the index order.
      *
-     * @param strorder
-     *            The name of the index order.
+     * @param strorder The name of the index order.
      */
     public static int getIndexOrderValue(String strorder)
     {
@@ -3205,10 +3207,11 @@ public class H5File extends FileFormat {
 
     @Override
     /**
+     * Get the value of the index type.
+     * 
      * @return the int value of the index type.
      *
-     * @param strtype
-     *            The name of the index type.
+     * @param strtype The name of the index type.
      */
     public int getIndexType(String strtype)
     {
@@ -3222,7 +3225,11 @@ public class H5File extends FileFormat {
         return getIndexType();
     }
 
-    /** @return the current value of the index type. */
+    /**
+     * Get the current value of the index type.
+     * 
+     * @return the current value of the index type.
+     */
     public int getIndexType() { return indexType; }
 
     @Override
@@ -3239,10 +3246,11 @@ public class H5File extends FileFormat {
 
     @Override
     /**
+     * Get the value of the index order value.
+     * 
      * @return the int value of the index order value.
      *
-     * @param strorder
-     *            The name of the index order.
+     * @param strorder The name of the index order.
      */
     public int getIndexOrder(String strorder)
     {
@@ -3260,7 +3268,11 @@ public class H5File extends FileFormat {
         return getIndexOrder();
     }
 
-    /** @return the current value of the index order. */
+    /**
+     * Get the current value of the index order.
+     * 
+     * @return the current value of the index order.
+     */
     public int getIndexOrder() { return indexOrder; }
 
     @Override

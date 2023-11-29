@@ -1167,8 +1167,10 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * @param tid
-     *            the datatype identification disk.
+     * Get the memory datatype identifier from the datatype file identifier.
+     * 
+     * @param tid the datatype file identification.
+     * 
      * @return the memory datatype identifier if successful, and negative otherwise.
      */
     public static long toNative(long tid)
@@ -2457,10 +2459,9 @@ public class H5Datatype extends Datatype {
     /**
      * Gets the dataset reference type for a 1.10 reference.
      *
-     * @param container
-     *                  the dataset/attribute with the reference
-     * @param refarr
-     *                  the reference datatype data to be checked.
+     * @param container the dataset/attribute with the reference
+     * @param obj_type  the dataset/attribute object type
+     * @param refarr    the reference datatype data to be checked.
      *
      * @return the dataset reference type.
      */

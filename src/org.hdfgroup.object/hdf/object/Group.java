@@ -207,6 +207,8 @@ public abstract class Group extends HObject implements MetaDataContainer {
     }
 
     /**
+     * Get the members of this Group in breadth-first order.
+     * 
      * @return the members of this Group in breadth-first order.
      */
     public List<HObject> breadthFirstMemberList()
@@ -229,6 +231,8 @@ public abstract class Group extends HObject implements MetaDataContainer {
     }
 
     /**
+     * Get the members of this Group in depth-first order.
+     * 
      * @return the members of this Group in depth-first order.
      */
     public List<HObject> depthFirstMemberList()
@@ -288,7 +292,11 @@ public abstract class Group extends HObject implements MetaDataContainer {
         }
     }
 
-    /** @return the parent group. */
+    /**
+     * Get the parent group.
+     * 
+     * @return the parent group.
+     */
     public final Group getParent() { return parent; }
 
     /**
@@ -317,7 +325,9 @@ public abstract class Group extends HObject implements MetaDataContainer {
 
     /**
      * Get the HObject at the specified index in this Group's member list.
+     * 
      * @param idx The index of the HObject to get.
+     * 
      * @return The HObject at the specified index.
      */
     public HObject getMember(int idx)

@@ -48,6 +48,8 @@ public class NC2Group extends Group {
     protected ucar.nc2.Group netCDFGroup;
 
     /**
+     * Get the corresponding netcdf Group for this group.
+     * 
      * @return the corresponding netcdf Group for this group.
      */
     public ucar.nc2.Group getNetCDFGroup() { return netCDFGroup; }
@@ -110,6 +112,8 @@ public class NC2Group extends Group {
     public boolean hasAttribute() { return false; }
 
     /**
+     * Get if this group has an attached dimension.
+     * 
      * @return true if this group has an attached dimension.
      */
     public boolean hasDimension() { return false; }
