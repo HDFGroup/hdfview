@@ -551,364 +551,364 @@ public class ViewProperties extends PreferenceStore {
 
     /**
      * Get the Folder Close Icon
-     * 
+     *
      * @return the Folder Close Icon
      */
     public static Image getFoldercloseIcon() { return foldercloseIcon; }
 
     /**
      * Get the Folder Close with Attribute Icon
-     * 
+     *
      * @return the Folder Close with Attribute Icon
      */
     public static Image getFoldercloseIconA() { return foldercloseIconA; }
 
     /**
      * Get the Folder Open Icon
-     * 
+     *
      * @return the Folder Open Icon
      */
     public static Image getFolderopenIcon() { return folderopenIcon; }
 
     /**
      * Get the Folder Open with Attribute Icon
-     * 
+     *
      * @return the Folder Open with Attribute Icon
      */
     public static Image getFolderopenIconA() { return folderopenIconA; }
 
     /**
      * Get the HDF Icon
-     * 
+     *
      * @return the HDF Icon
      */
     public static Image getHdfIcon() { return hdfIcons[1]; }
 
     /**
      * Get the HDF Icons
-     * 
+     *
      * @return the HDF Icons
      */
     public static Image[] getHdfIcons() { return hdfIcons; }
 
     /**
      * Get the HDF4 Icon
-     * 
+     *
      * @return the HDF4 Icon
      */
     public static Image getH4Icon() { return h4Icon; }
 
     /**
      * Get the read-only HDF4 Icon
-     * 
+     *
      * @return the read-only HDF4 Icon
      */
     public static Image getH4IconR() { return h4IconR; }
 
     /**
      * Get the HDF5 Icon
-     * 
+     *
      * @return the HDF5 Icon
      */
     public static Image getH5Icon() { return h5Icon; }
 
     /**
      * Get the read-only HDF5 Icon
-     * 
+     *
      * @return the read-only HDF5 Icon
      */
     public static Image getH5IconR() { return h5IconR; }
 
     /**
      * Get the netcdf Icon
-     * 
+     *
      * @return the netcdf Icon
      */
     public static Image getNC3Icon() { return ncIcon; }
 
     /**
      * Get the read-only netcdf Icon
-     * 
+     *
      * @return the read-only netcdf Icon
      */
     public static Image getNC3IconR() { return ncIconR; }
 
     /**
      * Get the Dataset Icon
-     * 
+     *
      * @return the Dataset Icon
      */
     public static Image getDatasetIcon() { return datasetIcon; }
 
     /**
      * Get the Dataset with Attribute Icon
-     * 
+     *
      * @return the Dataset with Attribute Icon
      */
     public static Image getDatasetIconA() { return datasetIconA; }
 
     /**
      * Get the Datatype Icon
-     * 
+     *
      * @return the Datatype Icon
      */
     public static Image getDatatypeIcon() { return datatypeIcon; }
 
     /**
      * Get the Datatype with Attribute Icon
-     * 
+     *
      * @return the Datatype with Attribute Icon
      */
     public static Image getDatatypeIconA() { return datatypeIconA; }
 
     /**
      * Get the Link Icon
-     * 
+     *
      * @return the Link Icon
      */
     public static Image getLinkIcon() { return linkIcon; }
 
     /**
      * Get the File Open Icon
-     * 
+     *
      * @return the File Open Icon
      */
     public static Image getFileopenIcon() { return fileopenIcon; }
 
     /**
      * Get the File Save Icon
-     * 
+     *
      * @return the File Save Icon
      */
     public static Image getFilesaveIcon() { return filesaveIcon; }
 
     /**
      * Get the File New Icon
-     * 
+     *
      * @return the File New Icon
      */
     public static Image getFilenewIcon() { return filenewIcon; }
 
     /**
      * Get the File Close Icon
-     * 
+     *
      * @return the File Close Icon
      */
     public static Image getFilecloseIcon() { return filecloseIcon; }
 
     /**
      * Get the Palette Icon
-     * 
+     *
      * @return the Palette Icon
      */
     public static Image getPaletteIcon() { return paletteIcon; }
 
     /**
      * Get the Bright Icon
-     * 
+     *
      * @return the Bright Icon
      */
     public static Image getBrightIcon() { return brightIcon; }
 
     /**
      * Get the Autocontrast Icon
-     * 
+     *
      * @return the Autocontrast Icon
      */
     public static Image getAutocontrastIcon() { return autocontrastIcon; }
 
     /**
      * Get the Image Icon
-     * 
+     *
      * @return the Image Icon
      */
     public static Image getImageIcon() { return imageIcon; }
 
     /**
      * Get the Table Icon
-     * 
+     *
      * @return the Table Icon
      */
     public static Image getTableIcon() { return tableIcon; }
 
     /**
      * Get the Text Icon
-     * 
+     *
      * @return the Text Icon
      */
     public static Image getTextIcon() { return textIcon; }
 
     /**
      * Get the Image with Attribute Icon
-     * 
+     *
      * @return the Image with Attribute Icon
      */
     public static Image getImageIconA() { return imageIconA; }
 
     /**
      * Get the Table with Attribute Icon
-     * 
+     *
      * @return the Table with Attribute Icon
      */
     public static Image getTableIconA() { return tableIconA; }
 
     /**
      * Get the Text with Attribute Icon
-     * 
+     *
      * @return the Text with Attribute Icon
      **/
     public static Image getTextIconA() { return textIconA; }
 
     /**
      * Get the Zoom In Icon
-     * 
+     *
      * @return the Zoom In Icon
      */
     public static Image getZoominIcon() { return zoominIcon; }
 
     /**
      * Get the Zoom Out Icon
-     * 
+     *
      * @return the Zoom Out Icon
      */
     public static Image getZoomoutIcon() { return zoomoutIcon; }
 
     /**
      * Get the Blank Icon
-     * 
+     *
      * @return the Blank Icon
      */
     public static Image getBlankIcon() { return blankIcon; }
 
     /**
      * Get the Help Icon
-     * 
+     *
      * @return the Help Icon
      */
     public static Image getHelpIcon() { return helpIcon; }
 
     /**
      * Get the Copy Icon
-     * 
+     *
      * @return the Copy Icon
      */
     public static Image getCopyIcon() { return copyIcon; }
 
     /**
      * Get the Cut Icon
-     * 
+     *
      * @return the Cut Icon
      */
     public static Image getCutIcon() { return cutIcon; }
 
     /**
      * Getthe Paste Icon
-     * 
+     *
      * @return the Paste Icon
      */
     public static Image getPasteIcon() { return pasteIcon; }
 
     /**
      * Get the HDFView Icon
-     * 
+     *
      * @return the HDFView Icon
      */
     public static Image getHDFViewIcon() { return hdfviewIcon; }
 
     /**
      * Get the Large HDF Icon
-     * 
+     *
      * @return the Large HDF Icon
      */
     public static Image getLargeHdfIcon() { return hdfIcons[2]; }
 
     /**
      * Get the Previous Icon
-     * 
+     *
      * @return the Previous Icon
      */
     public static Image getPreviousIcon() { return previousIcon; }
 
     /**
      * Get the Next Icon
-     * 
+     *
      * @return the Next Icon
      */
     public static Image getNextIcon() { return nextIcon; }
 
     /**
      * Get the First Icon
-     * 
+     *
      * @return the First Icon
      */
     public static Image getFirstIcon() { return firstIcon; }
 
     /**
      * Get the Last Icon
-     * 
+     *
      * @return the Last Icon
      */
     public static Image getLastIcon() { return lastIcon; }
 
     /**
      * Get the Chart Icon
-     * 
+     *
      * @return the Chart Icon
      */
     public static Image getChartIcon() { return chartIcon; }
 
     /**
      * Get the Animation Icon
-     * 
+     *
      * @return the Animation Icon
      */
     public static Image getAnimationIcon() { return animationIcon; }
 
     /**
      * Get the Apps Icon
-     * 
+     *
      * @return the Apps Icon
      */
     public static Image getAppsIcon() { return iconAPPS; }
 
     /**
      * Get the Url Icon
-     * 
+     *
      * @return the Url Icon
      */
     public static Image getUrlIcon() { return iconURL; }
 
     /**
      * Get the Video Icon
-     * 
+     *
      * @return the Video Icon
      */
     public static Image getVideoIcon() { return iconVIDEO; }
 
     /**
      * Get the Xls Icon
-     * 
+     *
      * @return the Xls Icon
      */
     public static Image getXlsIcon() { return iconXLS; }
 
     /**
      * Get the Pdf Icon
-     * 
+     *
      * @return the Pdf Icon
      */
     public static Image getPdfIcon() { return iconPDF; }
 
     /**
      * Get the Audio Icon
-     * 
+     *
      * @return the Audio Icon
      */
     public static Image getAudioIcon() { return iconAUDIO; }
 
     /**
      * Get the Question Icon
-     * 
+     *
      * @return the Question Icon
      */
     public static Image getQuestionIcon() { return questionIcon; }
@@ -1804,21 +1804,21 @@ public class ViewProperties extends PreferenceStore {
 
     /**
      * Get the name of the user property file
-     * 
+     *
      * @return the name of the user property file
      */
     public static String getPropertyFile() { return propertyFile; }
 
     /**
      * Get the root directory where the HDFView is installed.
-     * 
+     *
      * @return the root directory where the HDFView is installed.
      */
     public static String getViewRoot() { return rootDir; }
 
     /**
      * Get the default work directory, where the open file starts.
-     * 
+     *
      * @return the default work directory, where the open file starts.
      */
     public static String getWorkDir()
@@ -1838,49 +1838,49 @@ public class ViewProperties extends PreferenceStore {
 
     /**
      * Get the maximum number of the most recent file
-     * 
+     *
      * @return the maximum number of the most recent file
      */
     public static int getMaxRecentFiles() { return MAX_RECENT_FILES; }
 
     /**
      * Get the path of the HDFView users guide
-     * 
+     *
      * @return the path of the HDFView users guide
      */
     public static String getUsersGuide() { return usersGuide; };
 
     /**
      * Get the delimiter of data values
-     * 
+     *
      * @return the delimiter of data values
      */
     public static String getDataDelimiter() { return delimiter; }
 
     /**
      * Get the image origin
-     * 
+     *
      * @return the image origin
      */
     public static String getImageOrigin() { return origin; }
 
     /**
      * Get the default index type for display
-     * 
+     *
      * @return the default index type for display
      */
     public static String getIndexType() { return indexType; }
 
     /**
      * Get the default index order for display
-     * 
+     *
      * @return the default index order for display
      */
     public static String getIndexOrder() { return indexOrder; }
 
     /**
      * Get the timer refresh size
-     * 
+     *
      * @return the timer refresh size
      */
     public static int getTimerRefresh() { return timerRefresh; }
@@ -1895,21 +1895,21 @@ public class ViewProperties extends PreferenceStore {
 
     /**
      * Get the font size
-     * 
+     *
      * @return the font size
      */
     public static int getFontSize() { return fontSize; }
 
     /**
      * Get the font type
-     * 
+     *
      * @return the font type
      */
     public static String getFontType() { return fontType; }
 
     /**
      * Get the file extensions of supported file formats
-     * 
+     *
      * @return the file extensions of supported file formats
      */
     public static String getFileExtension() { return fileExt; }
@@ -1944,80 +1944,77 @@ public class ViewProperties extends PreferenceStore {
 
     /**
      * Get the path of the H5toH5 converter
-     * 
+     *
      * @return the path of the H5toH5 converter
      */
     public static String getH4toH5() { return h4toh5; }
 
     /**
      * Get the list of most recent files
-     * 
+     *
      * @return the list of most recent files
      */
     public static List<String> getMRF() { return recentFiles; }
 
     /**
      * Get the list of palette files
-     * 
+     *
      * @return the list of palette files
      */
     public static List<String> getPaletteList() { return paletteList; }
 
     /**
      * Get the plugin path list
-     * 
+     *
      * @return the plugin path list
      */
-    public static String[] getPluginPaths()
-    {
-        return pluginPathList.toArray(new String[0]);
-    }
+    public static String[] getPluginPaths() { return pluginPathList.toArray(new String[0]); }
 
     /**
      * Get the SRB account list
-     * 
+     *
      * @return the SRB account list
      */
     public static List<String[]> getSrbAccount() { return srbAccountList; }
 
     /**
      * Get a list of treeview modules
-     * 
+     *
      * @return a list of treeview modules
      */
     public static List<String> getTreeViewList() { return moduleListTreeView; }
 
     /**
      * Get a list of metadataview modules
-     * 
+     *
      * @return a list of metadataview modules
      */
     public static List<String> getMetaDataViewList() { return moduleListMetaDataView; }
 
     /**
      * Get a list of tableview modules
-     * 
+     *
      * @return a list of tableview modules
      */
     public static List<String> getTableViewList() { return moduleListTableView; }
 
     /**
      * Get a list of imageview modules
-     * 
+     *
      * @return a list of imageview modules
      */
     public static List<String> getImageViewList() { return moduleListImageView; }
 
     /**
      * Get a list of paletteview modules
-     * 
+     *
      * @return a list of paletteview modules
      */
     public static List<String> getPaletteViewList() { return moduleListPaletteView; }
 
     /**
      * Get a list of helpview modules
-     * 
+     *
      * @return a list of helpview modules
      */
     public static List<String> getHelpViewList() { return moduleListHelpView; }
@@ -2070,7 +2067,7 @@ public class ViewProperties extends PreferenceStore {
 
     /**
      * Load the paths of the default plugin directories
-     * 
+     *
      * @return the array of paths
      */
     public static String[] loadPluginPaths()
@@ -2332,7 +2329,7 @@ public class ViewProperties extends PreferenceStore {
 
     /**
      * Check if the enum value is to be converted
-     * 
+     *
      * @return true if the enum value is to be converted
      */
     public static boolean isConvertEnum() { return convertEnum; }
@@ -2346,14 +2343,14 @@ public class ViewProperties extends PreferenceStore {
 
     /**
      * Check if the data index starts at 1
-     * 
+     *
      * @return true if the data index starts at 1
      */
     public static boolean isIndexBase1() { return isIndexBase1; }
 
     /**
      * Set enum data to be converted
-     * 
+     *
      * @param convertEnum true to set enum data conversion
      */
     public static void setConvertEnum(boolean convertEnum) { ViewProperties.convertEnum = convertEnum; }

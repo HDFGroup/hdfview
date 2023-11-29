@@ -48,8 +48,8 @@ import org.eclipse.swt.widgets.Text;
 public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private static final Logger log = LoggerFactory.getLogger(UserOptionsHDFPage.class);
 
-    private Text   fileExtField;
-    private Combo  pluginCombo;
+    private Text fileExtField;
+    private Combo pluginCombo;
     private Button clearTextButton, deleteTextButton, insertTextButton;
     private Button checkConvertEnum, checkShowRegRefValues, helpButton;
     private Button checkNativeOrder, checkDecOrder, checkIncOrder;
@@ -73,8 +73,8 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private static String indexOrder;
 
     /** Path to plugins */
-    private String  pluginDir           = null;
-    private int     pluginDirIndex      = -1;
+    private String pluginDir            = null;
+    private int pluginDirIndex          = -1;
     private boolean isPluginListChanged = false;
 
     /** a list of plugin paths */
@@ -185,10 +185,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      *
      * @return true if the plugin directory changed.
      */
-    public boolean isPluginListChanged()
-    {
-        return isPluginListChanged;
-    }
+    public boolean isPluginListChanged() { return isPluginListChanged; }
 
     /**
      * Loads all stored values in the <code>FieldEditor</code>s.
@@ -198,8 +195,8 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         getPreferenceStore();
 
         try {
-            curFont = new Font(Display.getCurrent(), ViewProperties.getFontType(), ViewProperties.getFontSize(),
-                    SWT.NORMAL);
+            curFont = new Font(Display.getCurrent(), ViewProperties.getFontType(),
+                               ViewProperties.getFontSize(), SWT.NORMAL);
         }
         catch (Exception ex) {
             curFont = null;
@@ -243,7 +240,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         pluginCombo.setText("");
         pluginCombo.deselectAll();
         pluginDirIndex = -1;
-        pluginDir = null;
+        pluginDir      = null;
     }
 
     /**
@@ -443,7 +440,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         pluginDirectoryGroup.setText("Plugin Paths");
 
         pluginPathList = ViewProperties.loadPluginPaths();
-        pluginCombo = new Combo(pluginDirectoryGroup, SWT.BORDER | SWT.SINGLE);
+        pluginCombo    = new Combo(pluginDirectoryGroup, SWT.BORDER | SWT.SINGLE);
         pluginCombo.setFont(curFont);
         pluginCombo.setItems(pluginPathList);
         pluginCombo.setVisibleItemCount(pluginPathList.length);
@@ -466,7 +463,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
             public void widgetSelected(SelectionEvent e)
             {
                 pluginDirIndex = pluginCombo.getSelectionIndex();
-                pluginDir = pluginCombo.getItem(pluginDirIndex);
+                pluginDir      = pluginCombo.getItem(pluginDirIndex);
             }
         });
 
@@ -511,7 +508,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                 pluginCombo.setText("");
                 pluginCombo.deselectAll();
                 pluginDirIndex = -1;
-                pluginDir = null;
+                pluginDir      = null;
             }
         });
 
@@ -541,7 +538,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                 pluginCombo.setText("");
                 pluginCombo.deselectAll();
                 pluginDirIndex = -1;
-                pluginDir = null;
+                pluginDir      = null;
             }
         });
 
@@ -557,7 +554,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                 pluginCombo.setText("");
                 pluginCombo.deselectAll();
                 pluginDirIndex = -1;
-                pluginDir = null;
+                pluginDir      = null;
             }
         });
 

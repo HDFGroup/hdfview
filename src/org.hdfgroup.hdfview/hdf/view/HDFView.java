@@ -1379,35 +1379,35 @@ public class HDFView implements DataViewManager {
 
     /**
      * Get a list of treeview implementations.
-     * 
+     *
      * @return a list of treeview implementations.
      */
     public static final List<String> getListOfTreeViews() { return treeViews; }
 
     /**
      * Get a list of imageview implementations.
-     * 
+     *
      * @return a list of imageview implementations.
      */
     public static final List<String> getListOfImageViews() { return imageViews; }
 
     /**
      * Get a list of tableview implementations.
-     * 
+     *
      * @return a list of tableview implementations.
      */
     public static final List<?> getListOfTableViews() { return tableViews; }
 
     /**
      * Get a list of metaDataview implementations.
-     * 
+     *
      * @return a list of metaDataview implementations.
      */
     public static final List<?> getListOfMetaDataViews() { return metaDataViews; }
 
     /**
      * Get a list of paletteview implementations.
-     * 
+     *
      * @return a list of paletteview implementations.
      */
     public static final List<?> getListOfPaletteViews() { return paletteViews; }
@@ -1420,7 +1420,7 @@ public class HDFView implements DataViewManager {
 
     /**
      * Get the combobox associated with a URL entry.
-     * 
+     *
      * @return the combobox associated with a URL entry.
      */
     public Combo getUrlBar() { return urlBar; }
