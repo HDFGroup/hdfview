@@ -20,7 +20,6 @@ import java.util.Vector;
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
-
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Dataset;
@@ -28,7 +27,6 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.MetaDataContainer;
-
 import hdf.object.h4.H4CompoundAttribute;
 
 /**
@@ -90,32 +88,30 @@ import hdf.object.h4.H4CompoundAttribute;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H4Vdata extends CompoundDS implements MetaDataContainer
-{
+public class H4Vdata extends CompoundDS implements MetaDataContainer {
     private static final long serialVersionUID = -5978700886955419959L;
 
-    private static final org.slf4j.Logger       log = org.slf4j.LoggerFactory.getLogger(H4Vdata.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4Vdata.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
      * instance of H4CompoundAttribute.
      */
     @SuppressWarnings("rawtypes")
-    private List                                attributeList;
+    private List attributeList;
 
     /**
      * Number of records of this Vdata table.
      */
-    private int                                 numberOfRecords;
+    private int numberOfRecords;
 
     /**
      * The data types of the members of the compound dataset.
      */
-    private long[]                              memberTIDs;
+    private long[] memberTIDs;
 
     /** the number of attributes */
-    private int                                 nAttributes = -1;
-
+    private int nAttributes = -1;
 
     /**
      * Creates an H4Vdata object with specific name and path.
@@ -124,9 +120,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      * @param name the name of this H4Vdata.
      * @param path the full path of this H4Vdata.
      */
-    public H4Vdata(FileFormat theFile, String name, String path) {
-        this(theFile, name, path, null);
-    }
+    public H4Vdata(FileFormat theFile, String name, String path) { this(theFile, name, path, null); }
 
     /**
      * Creates an H4Vdata object with specific name, path and oid.
@@ -137,11 +131,12 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      * @param oid the unique identifier of this data object.
      */
     @SuppressWarnings("deprecation")
-    public H4Vdata(FileFormat theFile, String name, String path, long[] oid) {
-        super (theFile, name, path, oid);
+    public H4Vdata(FileFormat theFile, String name, String path, long[] oid)
+    {
+        super(theFile, name, path, oid);
         numberOfRecords = 0;
         numberOfMembers = 0;
-        memberOrders = null;
+        memberOrders    = null;
     }
 
     /*
@@ -149,7 +144,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      * @see hdf.object.DataFormat#hasAttribute()
      */
     @Override
-    public boolean hasAttribute() {
+    public boolean hasAttribute()
+    {
         if (nAttributes < 0) {
             long id = open();
 
@@ -178,7 +174,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      * @return the datatype of the data object.
      */
     @Override
-    public Datatype getDatatype() {
+    public Datatype getDatatype()
+    {
         if (!inited)
             init();
 
@@ -201,13 +198,15 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      * @return the fill values for the data object.
      */
     @Override
-    public Object getFillValue() {
+    public Object getFillValue()
+    {
         return null;
     }
 
     // Implementing Dataset
     @Override
-    public byte[] readBytes() throws HDFException {
+    public byte[] readBytes() throws HDFException
+    {
         byte[] theData = null;
 
         if (!isInited())
@@ -225,8 +224,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
         }
 
         String allNames = memberNames[0];
-        for (int i=0; i<numberOfMembers; i++)
-            allNames += ","+memberNames[i];
+        for (int i = 0; i < numberOfMembers; i++)
+            allNames += "," + memberNames[i];
 
         try {
             // moves the access pointer to the start position
@@ -235,8 +234,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
             HDFLibrary.VSsetfields(id, allNames);
             int[] recordSize = {0};
             HDFLibrary.VSQueryvsize(id, recordSize);
-            int size =recordSize[0] * (int)selectedDims[0];
-            theData = new byte[size];
+            int size = recordSize[0] * (int)selectedDims[0];
+            theData  = new byte[size];
             HDFLibrary.VSread(id, theData, (int)selectedDims[0], HDFConstants.FULL_INTERLACE);
         }
         catch (Exception ex) {
@@ -269,9 +268,10 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      * @throws OutOfMemoryError
      *             if memory is exhausted
      */
-    @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
+    @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
     @Override
-    public Object read() throws HDFException {
+    public Object read() throws HDFException
+    {
         List list = null;
 
         if (!isInited())
@@ -294,7 +294,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
         HDFLibrary.HXsetdir(getFileFormat().getParent());
 
         Object member_data = null;
-        for (int i=0; i<numberOfMembers; i++) {
+        for (int i = 0; i < numberOfMembers; i++) {
             if (!isMemberSelected[i])
                 continue;
 
@@ -310,14 +310,15 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
                 continue;
             }
 
-            int n = memberOrders[i]*(int)selectedDims[0];
+            int n = memberOrders[i] * (int)selectedDims[0];
 
             member_data = H4Datatype.allocateArray(memberTIDs[i], n);
 
-            log.trace("read(): index={} isMemberSelected[i]={} memberOrders[i]={} array size={}", i, isMemberSelected[i], memberOrders[i], n);
+            log.trace("read(): index={} isMemberSelected[i]={} memberOrders[i]={} array size={}", i,
+                      isMemberSelected[i], memberOrders[i], n);
             if (member_data == null) {
                 String[] nullValues = new String[n];
-                for (int j=0; j<n; j++)
+                for (int j = 0; j < n; j++)
                     nullValues[j] = "*ERROR*";
                 list.add(nullValues);
                 continue;
@@ -326,18 +327,19 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
             try {
                 HDFLibrary.VSread(id, member_data, (int)selectedDims[0], HDFConstants.FULL_INTERLACE);
                 if ((memberTIDs[i] == HDFConstants.DFNT_CHAR) ||
-                        (memberTIDs[i] ==  HDFConstants.DFNT_UCHAR8)) {
+                    (memberTIDs[i] == HDFConstants.DFNT_UCHAR8)) {
                     // convert characters to string
                     log.trace("read(): convert characters to string");
                     member_data = Dataset.byteToString((byte[])member_data, memberOrders[i]);
                     try {
-                        memberTypes[i] = new H4Datatype(Datatype.CLASS_STRING, memberOrders[i], Datatype.NATIVE, Datatype.NATIVE);
+                        memberTypes[i] = new H4Datatype(Datatype.CLASS_STRING, memberOrders[i],
+                                                        Datatype.NATIVE, Datatype.NATIVE);
                     }
                     catch (Exception ex) {
                         log.debug("read(): failed to create datatype for member[{}]: ", i, ex);
                         memberTypes[i] = null;
                     }
-                    memberOrders[i] = 1; //one String
+                    memberOrders[i] = 1; // one String
                 }
                 else if (H4Datatype.isUnsigned(memberTIDs[i])) {
                     // convert unsigned integer to appropriate Java integer
@@ -347,7 +349,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
             }
             catch (HDFException ex) {
                 String[] nullValues = new String[n];
-                for (int j=0; j<n; j++)
+                for (int j = 0; j < n; j++)
                     nullValues[j] = "*ERROR*";
                 list.add(nullValues);
                 continue;
@@ -372,12 +374,13 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      *             if data can not be written
      */
     @Override
-    public void write(Object buf) throws HDFException {
-        //For writing to a vdata, VSsetfields can only be called once, to set
-        //up the fields in a vdata. Once the vdata fields are set, they may
-        //not be changed. Thus, to update some fields of a record after the
-        //first write, the user must read all the fields to a buffer, update
-        //the buffer, then write the entire record back to the vdata.
+    public void write(Object buf) throws HDFException
+    {
+        // For writing to a vdata, VSsetfields can only be called once, to set
+        // up the fields in a vdata. Once the vdata fields are set, they may
+        // not be changed. Thus, to update some fields of a record after the
+        // first write, the user must read all the fields to a buffer, update
+        // the buffer, then write the entire record back to the vdata.
         log.trace("write(): disabled");
         /*
         if (buf == null || numberOfMembers <= 0 || !(buf instanceof List))
@@ -445,7 +448,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      * @return the converted data buffer.
      */
     @Override
-    public Object convertFromUnsignedC() {
+    public Object convertFromUnsignedC()
+    {
         throw new UnsupportedOperationException("H4Vdata:convertFromUnsignedC Unsupported operation.");
     }
 
@@ -459,7 +463,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      * @return the converted data buffer.
      */
     @Override
-    public Object convertToUnsignedC() {
+    public Object convertToUnsignedC()
+    {
         throw new UnsupportedOperationException("H4Vdata:convertToUnsignedC Unsupported operation.");
     }
 
@@ -476,7 +481,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public List getMetadata() throws HDFException {
+    public List getMetadata() throws HDFException
+    {
         if (attributeList != null) {
             log.trace("getMetdata(): attributeList != null");
             return attributeList;
@@ -498,10 +504,10 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
                 return attributeList;
             }
 
-            attributeList = new Vector(n, 5);
-            boolean b = false;
+            attributeList     = new Vector(n, 5);
+            boolean b         = false;
             String[] attrName = new String[1];
-            int[] attrInfo = new int[5];
+            int[] attrInfo    = new int[5];
 
             // _HDF_VDATA (or -1) to specify the vdata attribute
             int nleft = n;
@@ -524,7 +530,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
                         continue;
 
                     long[] attrDims = {attrInfo[1]};
-                    H4CompoundAttribute attr = new H4CompoundAttribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                    H4CompoundAttribute attr =
+                        new H4CompoundAttribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                     if (j >= 0)
                         attr.setProperty("field", memberNames[j]);
                     attributeList.add(attr);
@@ -548,7 +555,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
 
                     if (buf != null) {
                         if ((attrInfo[0] == HDFConstants.DFNT_CHAR) ||
-                                (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
+                            (attrInfo[0] == HDFConstants.DFNT_UCHAR8)) {
                             buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                         }
 
@@ -556,7 +563,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
                         nleft--;
                     }
                 } //  (int i=0; i<n; i++)
-            } //  (int j=-1; j<numberOfMembers; j++)
+            }     //  (int j=-1; j<numberOfMembers; j++)
         }
         catch (Exception ex) {
             log.debug("getMetadata(): failure: ", ex);
@@ -590,7 +597,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void writeMetadata(Object info) throws Exception {
+    public void writeMetadata(Object info) throws Exception
+    {
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an H4Attribute");
@@ -621,7 +629,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      *             if the metadata can not be removed
      */
     @Override
-    public void removeMetadata(Object info) throws HDFException {
+    public void removeMetadata(Object info) throws HDFException
+    {
         log.trace("removeMetadata(): disabled");
     }
 
@@ -635,13 +644,15 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      *             if the metadata can not be updated
      */
     @Override
-    public void updateMetadata(Object info) throws Exception {
+    public void updateMetadata(Object info) throws Exception
+    {
         log.trace("updateMetadata(): disabled");
     }
 
     // Implementing DataFormat
     @Override
-    public long open() {
+    public long open()
+    {
         // try to open with write permission
         long vsid = -1;
         try {
@@ -669,7 +680,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
 
     // Implementing DataFormat
     @Override
-    public void close(long vsid) {
+    public void close(long vsid)
+    {
         try {
             HDFLibrary.VSdetach(vsid);
         }
@@ -682,7 +694,8 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      * Initializes the H4Vdata such as dimension sizes of this dataset.
      */
     @Override
-    public void init() {
+    public void init()
+    {
         if (inited) {
             log.trace("init(): Already initialized");
             return; // already called. Initialize only once
@@ -712,19 +725,19 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
 
         // a Vdata table is an one dimension array of records.
         // each record has the same fields
-        rank = 1;
-        dims = new long[1];
-        dims[0] = numberOfRecords;
-        selectedDims = new long[1];
-        selectedDims[0] = numberOfRecords;
+        rank             = 1;
+        dims             = new long[1];
+        dims[0]          = numberOfRecords;
+        selectedDims     = new long[1];
+        selectedDims[0]  = numberOfRecords;
         selectedIndex[0] = 0;
-        startDims = new long[1];
-        startDims[0] = 0;
+        startDims        = new long[1];
+        startDims[0]     = 0;
 
-        memberNames = new String[numberOfMembers];
-        memberTIDs = new long[numberOfMembers];
-        memberTypes = new Datatype[numberOfMembers];
-        memberOrders = new int[numberOfMembers];
+        memberNames      = new String[numberOfMembers];
+        memberTIDs       = new long[numberOfMembers];
+        memberTypes      = new Datatype[numberOfMembers];
+        memberOrders     = new int[numberOfMembers];
         isMemberSelected = new boolean[numberOfMembers];
 
         try {
@@ -739,7 +752,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
             isMemberSelected[i] = true;
             try {
                 memberNames[i] = HDFLibrary.VFfieldname(id, i);
-                memberTIDs[i] = HDFLibrary.VFfieldtype(id, i);
+                memberTIDs[i]  = HDFLibrary.VFfieldtype(id, i);
                 try {
                     memberTypes[i] = new H4Datatype(memberTIDs[i]);
                 }
@@ -748,9 +761,11 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
                     memberTypes[i] = null;
                 }
                 // mask off the litend bit
-                memberTIDs[i] = memberTIDs[i] & (~HDFConstants.DFNT_LITEND);
+                memberTIDs[i]   = memberTIDs[i] & (~HDFConstants.DFNT_LITEND);
                 memberOrders[i] = HDFLibrary.VFfieldorder(id, i);
-                log.trace("init():{}> isMemberSelected[i]={} memberNames[i]={} memberTIDs[i]={} memberOrders[i]={}", i, isMemberSelected[i], memberNames[i], memberTIDs[i], memberOrders[i]);
+                log.trace(
+                    "init():{}> isMemberSelected[i]={} memberNames[i]={} memberTIDs[i]={} memberOrders[i]={}",
+                    i, isMemberSelected[i], memberNames[i], memberTIDs[i], memberOrders[i]);
 
                 /*
                  * NOTE: An ugly workaround to get HDF4 "compound" datatypes to work correctly.
@@ -776,29 +791,23 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      *
      * @return the number of records
      */
-    public int getRecordCount() {
-        return numberOfRecords;
-    }
+    public int getRecordCount() { return numberOfRecords; }
 
     /**
      * Returns the number of fields.
      *
      * @return the number of fields
      */
-    public int getFieldCount() {
-        return numberOfMembers;
-    }
+    public int getFieldCount() { return numberOfMembers; }
 
     /**
      * Returns the orders of fields
      *
      * @return the orders of fields
      */
-    public int[] getFieldOrders() {
-        return memberOrders;
-    }
+    public int[] getFieldOrders() { return memberOrders; }
 
-    //Implementing DataFormat
+    // Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
      *
@@ -813,12 +822,14 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer
      *             if the metadata can not be retrieved
      */
     @SuppressWarnings("rawtypes")
-    public List getMetadata(int... attrPropList) throws Exception {
+    public List getMetadata(int... attrPropList) throws Exception
+    {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
 
     @Override
-    public Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception {
+    public Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception
+    {
         throw new UnsupportedOperationException("Writing a vdata to a new dataset is not implemented.");
     }
 }

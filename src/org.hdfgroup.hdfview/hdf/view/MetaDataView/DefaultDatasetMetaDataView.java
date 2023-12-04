@@ -16,6 +16,14 @@ package hdf.view.MetaDataView;
 
 import java.lang.reflect.Array;
 
+import hdf.object.CompoundDS;
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.HObject;
+import hdf.object.ScalarDS;
+import hdf.view.DataView.DataViewManager;
+import hdf.view.Tools;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,14 +40,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-
-import hdf.object.CompoundDS;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.HObject;
-import hdf.object.ScalarDS;
-import hdf.view.Tools;
-import hdf.view.DataView.DataViewManager;
 
 /**
  *
@@ -59,12 +59,14 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
      * @param theObj
      *        the object to display the metadata info
      */
-    public DefaultDatasetMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj) {
+    public DefaultDatasetMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj)
+    {
         super(parentComposite, viewer, theObj);
     }
 
     @Override
-    protected void addObjectSpecificContent() {
+    protected void addObjectSpecificContent()
+    {
 
         super.addObjectSpecificContent();
 
@@ -72,12 +74,13 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         Label label;
         Text text;
 
-        Dataset d = (Dataset) dataObject;
+        Dataset d = (Dataset)dataObject;
         if (!d.isInited()) {
             d.init();
         }
 
-        org.eclipse.swt.widgets.Group datasetInfoGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
+        org.eclipse.swt.widgets.Group datasetInfoGroup =
+            new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
         datasetInfoGroup.setFont(curFont);
         datasetInfoGroup.setText("Dataset Dataspace and Datatype");
         datasetInfoGroup.setLayout(new GridLayout(2, false));
@@ -110,15 +113,15 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             label.setText("Dimension Size(s): ");
 
             // Set Dimension Size
-            String dimStr = null;
+            String dimStr    = null;
             String maxDimStr = null;
-            long dims[] = d.getDims();
-            long maxDims[] = d.getMaxDims();
+            long dims[]      = d.getDims();
+            long maxDims[]   = d.getMaxDims();
             if (dims != null) {
-                String[] dimNames = d.getDimNames();
+                String[] dimNames   = d.getDimNames();
                 boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
-                StringBuilder sb = new StringBuilder();
-                StringBuilder sb2 = new StringBuilder();
+                StringBuilder sb    = new StringBuilder();
+                StringBuilder sb2   = new StringBuilder();
 
                 sb.append(dims[0]);
                 if (hasDimNames) {
@@ -142,9 +145,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                         sb2.append("Unlimited");
                     else
                         sb2.append(maxDims[i]);
-
                 }
-                dimStr = sb.toString();
+                dimStr    = sb.toString();
                 maxDimStr = sb2.toString();
             }
 
@@ -170,7 +172,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         label.setFont(curFont);
         label.setText("Data Type: ");
 
-        Datatype t = d.getDatatype();
+        Datatype t  = d.getDatatype();
         String type = (t == null) ? "null" : t.getDescription();
         if (d instanceof CompoundDS) {
             if (isH4) {
@@ -182,7 +184,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                  * the fully-qualified type, minus the compound members, since we already show
                  * the Compound datatype's members in a table.
                  */
-                int bracketIndex = type.indexOf('{');
+                int bracketIndex     = type.indexOf('{');
                 int lastBracketIndex = type.lastIndexOf('}');
                 if (bracketIndex >= 0 && lastBracketIndex >= 0) {
                     type = type.replace(type.substring(bracketIndex, lastBracketIndex + 1), "");
@@ -205,7 +207,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
          * Dataset storage layout, compression, filters, storage type, fill value, etc.
          * section
          */
-        org.eclipse.swt.widgets.Group datasetLayoutGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
+        org.eclipse.swt.widgets.Group datasetLayoutGroup =
+            new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
         datasetLayoutGroup.setFont(curFont);
         datasetLayoutGroup.setText("Miscellaneous Dataset Information");
         datasetLayoutGroup.setLayout(new GridLayout(2, false));
@@ -219,7 +222,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         label = new Label(datasetLayoutGroup, SWT.RIGHT);
         label.setFont(curFont);
         labelInfo = d.getStorageLayout();
-        if (labelInfo == null) labelInfo = "UNKNOWN";
+        if (labelInfo == null)
+            labelInfo = "UNKNOWN";
         label.setText(labelInfo);
 
         /* Dataset Compression section */
@@ -230,7 +234,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         label = new Label(datasetLayoutGroup, SWT.RIGHT);
         label.setFont(curFont);
         labelInfo = d.getCompression();
-        if (labelInfo == null) labelInfo = "UNKNOWN";
+        if (labelInfo == null)
+            labelInfo = "UNKNOWN";
         label.setText(labelInfo);
 
         /* Dataset filters section */
@@ -241,7 +246,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         label = new Label(datasetLayoutGroup, SWT.RIGHT);
         label.setFont(curFont);
         labelInfo = d.getFilters();
-        if (labelInfo == null) labelInfo = "UNKNOWN";
+        if (labelInfo == null)
+            labelInfo = "UNKNOWN";
         label.setText(labelInfo);
 
         /* Dataset extra storage information section */
@@ -252,7 +258,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         label = new Label(datasetLayoutGroup, SWT.RIGHT);
         label.setFont(curFont);
         labelInfo = d.getStorage();
-        if (labelInfo == null) labelInfo = "UNKNOWN";
+        if (labelInfo == null)
+            labelInfo = "UNKNOWN";
         label.setText(labelInfo);
 
         /* Dataset fill value info section */
@@ -260,12 +267,13 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         label.setFont(curFont);
         label.setText("Fill value: ");
 
-        Object fillValue = null;
+        Object fillValue     = null;
         String fillValueInfo = "NONE";
-        if (d instanceof ScalarDS) fillValue = ((ScalarDS) d).getFillValue();
+        if (d instanceof ScalarDS)
+            fillValue = ((ScalarDS)d).getFillValue();
         if (fillValue != null) {
             if (fillValue.getClass().isArray()) {
-                int len = Array.getLength(fillValue);
+                int len       = Array.getLength(fillValue);
                 fillValueInfo = Array.get(fillValue, 0).toString();
                 for (int i = 1; i < len; i++) {
                     fillValueInfo += ", ";
@@ -287,7 +295,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         showDataOptionButton.setEnabled(!d.isNULL());
         showDataOptionButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 try {
                     viewManager.getTreeView().setDefaultDisplayMode(false);
                     viewManager.getTreeView().showDataContent(dataObject);
@@ -306,7 +315,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
         if (d instanceof CompoundDS) {
             log.trace("addObjectSpecificContent(): add member table for Compound Datatype Dataset");
 
-            CompoundDS compound = (CompoundDS) d;
+            CompoundDS compound = (CompoundDS)d;
 
             int n = compound.getMemberCount();
             log.trace("addObjectSpecificContent(): number of compound members={}", n);
@@ -316,7 +325,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             label.setText("");
             label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
-            org.eclipse.swt.widgets.Group compoundMembersGroup = new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
+            org.eclipse.swt.widgets.Group compoundMembersGroup =
+                new org.eclipse.swt.widgets.Group(generalObjectInfoPane, SWT.NONE);
             compoundMembersGroup.setFont(curFont);
             compoundMembersGroup.setText("Compound Dataset Members");
             compoundMembersGroup.setLayout(new FillLayout(SWT.VERTICAL));
@@ -327,7 +337,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             memberTable.setHeaderVisible(true);
             memberTable.setFont(curFont);
 
-            String[] columnNames = { "Name", "Type", "Array Size" };
+            String[] columnNames = {"Name", "Type", "Array Size"};
 
             for (int i = 0; i < columnNames.length; i++) {
                 TableColumn column = new TableColumn(memberTable, SWT.NONE);
@@ -336,10 +346,10 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             }
 
             if (n > 0) {
-                String rowData[][] = new String[n][3];
+                String rowData[][]   = new String[n][3];
                 final String names[] = compound.getMemberNames();
-                Datatype types[] = compound.getMemberTypes();
-                int orders[] = compound.getMemberOrders();
+                Datatype types[]     = compound.getMemberTypes();
+                int orders[]         = compound.getMemberOrders();
 
                 for (int i = 0; i < n; i++) {
                     rowData[i][0] = new String(names[i]);
@@ -358,7 +368,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                     }
                     else {
                         String mStr = String.valueOf(mDims[0]);
-                        int m = mDims.length;
+                        int m       = mDims.length;
                         for (int j = 1; j < m; j++) {
                             mStr += " x " + mDims[j];
                         }
@@ -389,5 +399,4 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             datasetLayoutGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
         }
     }
-
 }

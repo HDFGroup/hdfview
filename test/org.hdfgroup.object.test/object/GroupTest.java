@@ -8,6 +8,15 @@ import static org.junit.Assert.fail;
 import java.util.Iterator;
 import java.util.List;
 
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.h5.H5File;
+import hdf.object.h5.H5Group;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -17,36 +26,30 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.h5.H5File;
-import hdf.object.h5.H5Group;
-
 /**
  * @author Rishi R Sinha
  *
  */
-public class GroupTest
-{
+public class GroupTest {
     private static final Logger log = LoggerFactory.getLogger(GroupTest.class);
 
     private H5File testFile = null;
     private Group testGroup = null;
 
-    protected void closeFile() {
+    protected void closeFile()
+    {
         if (testFile != null) {
             try {
                 testFile.close();
             }
-            catch (final Exception ex) {}
+            catch (final Exception ex) {
+            }
             testFile = null;
         }
     }
 
-    protected void checkObjCount(long fileid) {
+    protected void checkObjCount(long fileid)
+    {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
@@ -58,7 +61,8 @@ public class GroupTest
     }
 
     @BeforeClass
-    public static void createFile() throws Exception {
+    public static void createFile() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -77,7 +81,8 @@ public class GroupTest
     }
 
     @AfterClass
-    public static void checkIDs() throws Exception {
+    public static void checkIDs() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -86,12 +91,12 @@ public class GroupTest
         catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
     @SuppressWarnings("deprecation")
     @Before
-    public void openFiles() throws Exception {
+    public void openFiles() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -101,14 +106,15 @@ public class GroupTest
             ex.printStackTrace();
         }
         H5File H5FILE = new H5File();
-        testFile = (H5File) H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+        testFile      = (H5File)H5FILE.open(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
         assertNotNull(testFile);
-        testGroup = (Group) testFile.get(H5TestFile.NAME_GROUP);
+        testGroup = (Group)testFile.get(H5TestFile.NAME_GROUP);
         assertNotNull(testGroup);
     }
 
     @After
-    public void removeFiles() throws Exception {
+    public void removeFiles() throws Exception
+    {
         if (testFile != null) {
             closeFile();
         }
@@ -132,7 +138,8 @@ public class GroupTest
      * </ul>
      */
     @Test
-    public void testClear() {
+    public void testClear()
+    {
         log.debug("testClear");
         testGroup.clear();
         assertEquals(testGroup.getMemberList().size(), 0);
@@ -158,7 +165,8 @@ public class GroupTest
      * </ul>
      */
     @Test
-    public void testAddToMemberList() {
+    public void testAddToMemberList()
+    {
         log.debug("testAddToMemberList");
         int previous_size = testGroup.getMemberList().size();
         testGroup.addToMemberList(null);
@@ -200,10 +208,11 @@ public class GroupTest
      */
     @SuppressWarnings("rawtypes")
     @Test
-    public void testRemoveFromMemberList() {
+    public void testRemoveFromMemberList()
+    {
         log.debug("testRemoveFromMemberList");
         int previous_size = testGroup.getMemberList().size();
-        List memberList = testGroup.getMemberList();
+        List memberList   = testGroup.getMemberList();
 
         H5.H5error_off();
         testGroup.removeFromMemberList(null);
@@ -217,7 +226,7 @@ public class GroupTest
         H5.H5error_on();
 
         Iterator it = memberList.iterator();
-        HObject obj = (HObject) it.next();
+        HObject obj = (HObject)it.next();
         testGroup.removeFromMemberList(obj);
 
         if (memberList.size() != previous_size - 1)
@@ -233,15 +242,16 @@ public class GroupTest
      */
     @SuppressWarnings("rawtypes")
     @Test
-    public void testGetMemberList() {
+    public void testGetMemberList()
+    {
         log.debug("testGetMemberList");
-        String objs[] = { "a_link_to_the_image", "dataset_comp", "dataset_int", "datatype_float", "datatype_int",
-                "datatype_str", "datatype_uint", "g00" };
+        String objs[]   = {"a_link_to_the_image", "dataset_comp", "dataset_int",   "datatype_float",
+                         "datatype_int",        "datatype_str", "datatype_uint", "g00"};
         List memberList = testGroup.getMemberList();
-        Iterator it = memberList.iterator();
-        int position = 0;
+        Iterator it     = memberList.iterator();
+        int position    = 0;
         while (it.hasNext()) {
-            HObject obj = (HObject) it.next();
+            HObject obj = (HObject)it.next();
             assertEquals(objs[position++], obj.getName());
         }
     }
@@ -254,7 +264,8 @@ public class GroupTest
      * </ul>
      */
     @Test
-    public void testGetParent() {
+    public void testGetParent()
+    {
         log.debug("testGetParent");
         assertEquals(testGroup.getParent().getName(), "/");
     }
@@ -267,7 +278,8 @@ public class GroupTest
      * </ul>
      */
     @Test
-    public void testIsRoot() {
+    public void testIsRoot()
+    {
         log.debug("testIsRoot");
         assertFalse(testGroup.isRoot());
     }
@@ -280,9 +292,9 @@ public class GroupTest
      * <ul>
      */
     @Test
-    public void testGetNumberOfMembersInFile() {
+    public void testGetNumberOfMembersInFile()
+    {
         log.debug("testGetNumberOfMembersInFile");
         assertEquals(testGroup.getNumberOfMembersInFile(), 8);
     }
-
 }

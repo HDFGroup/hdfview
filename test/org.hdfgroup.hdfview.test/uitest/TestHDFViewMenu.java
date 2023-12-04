@@ -1,11 +1,14 @@
 package uitest;
 
-import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
+
 import java.io.File;
+
+import org.junit.Test;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -17,12 +20,12 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.junit.Test;
 
 //@RunWith(SWTBotJunit4ClassRunner.class)
 public class TestHDFViewMenu extends AbstractWindowTest {
     @Test
-    public void verifyOpenButtonEnabled() {
+    public void verifyOpenButtonEnabled()
+    {
         try {
             boolean status = bot.toolbarButtonWithTooltip("Open").isEnabled();
             assertTrue("verifyOpenButtonEnabled() open button not enabled ", status);
@@ -38,7 +41,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyCloseButtonEnabled() {
+    public void verifyCloseButtonEnabled()
+    {
         try {
             boolean status = bot.toolbarButtonWithTooltip("Close").isEnabled();
             assertTrue("verifyCloseButtonEnabled() close button not enabled", status);
@@ -54,7 +58,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyHelpButtonEnabled() {
+    public void verifyHelpButtonEnabled()
+    {
         try {
             boolean status = bot.toolbarButtonWithTooltip("Help").isEnabled();
             assertTrue("verifyHelpButtonEnabled() help button not enabled", status);
@@ -70,7 +75,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyHDF4ButtonEnabled() {
+    public void verifyHDF4ButtonEnabled()
+    {
         try {
             boolean status = bot.toolbarButtonWithTooltip("HDF4 Library Version").isEnabled();
             assertTrue("verifyHDF4ButtonEnabled() HDF4 button not enabled", status);
@@ -86,7 +92,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyHDF5ButtonEnabled() {
+    public void verifyHDF5ButtonEnabled()
+    {
         try {
             boolean status = bot.toolbarButtonWithTooltip("HDF5 Library Version").isEnabled();
             assertTrue("verifyHDF5ButtonEnabled() HDF5 button not enabled", status);
@@ -102,7 +109,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyTextInLabelWhenClickingHDF4Button() {
+    public void verifyTextInLabelWhenClickingHDF4Button()
+    {
         try {
             bot.toolbarButtonWithTooltip("HDF4 Library Version").click();
 
@@ -111,8 +119,9 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
             String val = botshell.bot().label(1).getText();
-            assertTrue(constructWrongValueMessage("verifyTextInLabelWhenClickingHDF4Button()", "wrong label text", HDF4VERSION, val),
-                    val.equals(HDF4VERSION));
+            assertTrue(constructWrongValueMessage("verifyTextInLabelWhenClickingHDF4Button()",
+                                                  "wrong label text", HDF4VERSION, val),
+                       val.equals(HDF4VERSION));
             botshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(botshell));
         }
@@ -127,7 +136,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyTextInLabelWhenClickingHDF5Button() {
+    public void verifyTextInLabelWhenClickingHDF5Button()
+    {
         try {
             bot.toolbarButtonWithTooltip("HDF5 Library Version").click();
 
@@ -136,8 +146,9 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
             String val = botshell.bot().label(1).getText();
-            assertTrue(constructWrongValueMessage("verifyTextInLabelWhenClickingHDF5Button()", "wrong label text", HDF5VERSION, val),
-                    val.equals(HDF5VERSION));
+            assertTrue(constructWrongValueMessage("verifyTextInLabelWhenClickingHDF5Button()",
+                                                  "wrong label text", HDF5VERSION, val),
+                       val.equals(HDF5VERSION));
 
             botshell.bot().label(HDF5VERSION);
             botshell.bot().button("   &OK   ").click();
@@ -154,9 +165,10 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyButtonOpen() {
+    public void verifyButtonOpen()
+    {
         String filename = "testopenbutton.hdf";
-        File hdfFile = createFile(filename);
+        File hdfFile    = createFile(filename);
 
         try {
             closeFile(hdfFile, false);
@@ -182,12 +194,13 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyButtonClose() {
+    public void verifyButtonClose()
+    {
         String filename = "closebutton.hdf";
-        File hdfFile = createFile(filename);
+        File hdfFile    = createFile(filename);
 
         try {
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             checkFileTree(filetree, "verifyButtonClose()", 1, filename);
@@ -221,9 +234,10 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyMenuOpen() {
+    public void verifyMenuOpen()
+    {
         String filename = "testopenfile.hdf";
-        File hdf_file = createFile(filename);
+        File hdf_file   = createFile(filename);
 
         try {
             closeFile(hdf_file, false);
@@ -240,16 +254,17 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             String val = text.getText();
             assertTrue(constructWrongValueMessage("verifyMenuOpen()", "wrong file name", filename, val),
-                    val.equals(filename));
+                       val.equals(filename));
 
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
 
             SWTBotTree filetree = bot.tree();
-            assertTrue(constructWrongValueMessage("verifyMenuOpen()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
+            assertTrue(constructWrongValueMessage("verifyMenuOpen()", "filetree wrong row count", "1",
+                                                  String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 1);
             assertTrue("verifyMenuOpen() filetree is missing file '" + filename + "'",
-                    filetree.getAllItems()[0].getText().compareTo(filename) == 0);
+                       filetree.getAllItems()[0].getText().compareTo(filename) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -270,9 +285,10 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyMenuOpenReadOnly() {
+    public void verifyMenuOpenReadOnly()
+    {
         String filename = "testopenrofile.h5";
-        File hdf_file = createFile(filename);
+        File hdf_file   = createFile(filename);
 
         try {
             closeFile(hdf_file, false);
@@ -288,26 +304,35 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             text.setText(filename);
 
             String val = text.getText();
-            assertTrue(constructWrongValueMessage("verifyMenuOpenReadOnly()", "wrong file name", filename, val),
-                    val.equals(filename));
+            assertTrue(
+                constructWrongValueMessage("verifyMenuOpenReadOnly()", "wrong file name", filename, val),
+                val.equals(filename));
 
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
 
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
-            assertTrue(constructWrongValueMessage("verifyMenuOpenReadOnly()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
-            assertTrue("verifyMenuOpenReadOnly() filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
+            assertTrue(constructWrongValueMessage("verifyMenuOpenReadOnly()", "filetree wrong row count", "1",
+                                                  String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 1);
+            assertTrue("verifyMenuOpenReadOnly() filetree is missing file '" + filename + "'",
+                       items[0].getText().compareTo(filename) == 0);
 
             items[0].click();
 
-            assertFalse("verifyMenuOpenReadOnly() error: New Menu Item is enabled.", items[0].contextMenu().contextMenu("New").isEnabled());
-            assertFalse("verifyMenuOpenReadOnly() error: Cut Menu Item is enabled.", items[0].contextMenu().contextMenu("Cut").isEnabled());
-            assertFalse("verifyMenuOpenReadOnly() error: Paste Menu Item is enabled.", items[0].contextMenu().contextMenu("Paste").isEnabled());
-            assertFalse("verifyMenuOpenReadOnly() error: Delete Menu Item is enabled.", items[0].contextMenu().contextMenu("Delete").isEnabled());
-            assertFalse("verifyMenuOpenReadOnly() error: Rename Menu Item is enabled.", items[0].contextMenu().contextMenu("Rename").isEnabled());
-            assertFalse("verifyMenuOpenReadOnly() error: Set Lib Version Bounds Menu Item is enabled.", items[0].contextMenu().contextMenu("Set Lib version bounds").isEnabled());
+            assertFalse("verifyMenuOpenReadOnly() error: New Menu Item is enabled.",
+                        items[0].contextMenu().contextMenu("New").isEnabled());
+            assertFalse("verifyMenuOpenReadOnly() error: Cut Menu Item is enabled.",
+                        items[0].contextMenu().contextMenu("Cut").isEnabled());
+            assertFalse("verifyMenuOpenReadOnly() error: Paste Menu Item is enabled.",
+                        items[0].contextMenu().contextMenu("Paste").isEnabled());
+            assertFalse("verifyMenuOpenReadOnly() error: Delete Menu Item is enabled.",
+                        items[0].contextMenu().contextMenu("Delete").isEnabled());
+            assertFalse("verifyMenuOpenReadOnly() error: Rename Menu Item is enabled.",
+                        items[0].contextMenu().contextMenu("Rename").isEnabled());
+            assertFalse("verifyMenuOpenReadOnly() error: Set Lib Version Bounds Menu Item is enabled.",
+                        items[0].contextMenu().contextMenu("Set Lib version bounds").isEnabled());
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -328,9 +353,10 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyMenuNewHDF4() {
+    public void verifyMenuNewHDF4()
+    {
         String filename = "testfile.hdf";
-        File hdf_file = null;
+        File hdf_file   = null;
 
         try {
             SWTBotMenu fileMenuItem = bot.menu().menu("File");
@@ -349,15 +375,17 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             String val = text.getText();
             assertTrue(constructWrongValueMessage("verifyMenuNewHDF4()", "wrong file name", filename, val),
-                    val.equals(filename));
+                       val.equals(filename));
 
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
 
             SWTBotTree filetree = bot.tree();
-            assertTrue(constructWrongValueMessage("verifyMenuNewHDF4()", "filetree wrong row count", "1", val),
-                    filetree.visibleRowCount() == 1);
-            assertTrue("verifyMenuNewHDF4() filetree is missing file '" + filename + "'", filetree.getAllItems()[0].getText().compareTo(filename) == 0);
+            assertTrue(
+                constructWrongValueMessage("verifyMenuNewHDF4()", "filetree wrong row count", "1", val),
+                filetree.visibleRowCount() == 1);
+            assertTrue("verifyMenuNewHDF4() filetree is missing file '" + filename + "'",
+                       filetree.getAllItems()[0].getText().compareTo(filename) == 0);
             assertTrue("verifyMenuNewHDF4() file '" + hdf_file + "' not created", hdf_file.exists());
         }
         catch (Exception ex) {
@@ -379,9 +407,10 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyMenuNewHDF5() {
+    public void verifyMenuNewHDF5()
+    {
         String filename = "testfile.h5";
-        File hdf_file = null;
+        File hdf_file   = null;
 
         try {
             SWTBotMenu fileMenuItem = bot.menu().menu("File");
@@ -400,15 +429,17 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             String val = text.getText();
             assertTrue(constructWrongValueMessage("verifyMenuNewHDF5()", "wrong file name", filename, val),
-                    val.equals(filename));
+                       val.equals(filename));
 
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
 
             SWTBotTree filetree = bot.tree();
-            assertTrue(constructWrongValueMessage("verifyMenuNewHDF5()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
-            assertTrue("verifyMenuNewHDF5() filetree is missing file '" + filename + "'", filetree.getAllItems()[0].getText().compareTo(filename) == 0);
+            assertTrue(constructWrongValueMessage("verifyMenuNewHDF5()", "filetree wrong row count", "1",
+                                                  String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 1);
+            assertTrue("verifyMenuNewHDF5() filetree is missing file '" + filename + "'",
+                       filetree.getAllItems()[0].getText().compareTo(filename) == 0);
             assertTrue("verifyMenuNewHDF5() file '" + hdf_file + "' not created", hdf_file.exists());
         }
         catch (Exception ex) {
@@ -430,9 +461,10 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyMenuClose() {
+    public void verifyMenuClose()
+    {
         String filename = "closefile.hdf";
-        File hdfFile = createFile(filename);
+        File hdfFile    = createFile(filename);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -470,16 +502,19 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyMenuCloseAll() {
-        String filename = "closeallfiles.hdf";
+    public void verifyMenuCloseAll()
+    {
+        String filename  = "closeallfiles.hdf";
         String filename2 = "closeallfiles.h5";
-        File hdf4File = createFile(filename);
+        File hdf4File    = createFile(filename);
         try {
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
-            assertTrue(constructWrongValueMessage("verifyMenuCloseAll()", "filetree wrong row count", "1", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 1);
-            assertTrue("verifyMenuCloseAll() HDF filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
+            assertTrue(constructWrongValueMessage("verifyMenuCloseAll()", "filetree wrong row count", "1",
+                                                  String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 1);
+            assertTrue("verifyMenuCloseAll() HDF filetree is missing file '" + filename + "'",
+                       items[0].getText().compareTo(filename) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -492,12 +527,15 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
         File hdf5File = createFile(filename2);
         try {
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
-            assertTrue(constructWrongValueMessage("verifyMenuCloseAll()", "filetree wrong row count", "2", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 2);
-            assertTrue("verifyMenuCloseAll() HDF filetree is missing file '" + filename + "'", items[0].getText().compareTo(filename) == 0);
-            assertTrue("verifyMenuCloseAll() HDF5 filetree is missing file '" + filename2 + "'", items[1].getText().compareTo(filename2) == 0);
+            assertTrue(constructWrongValueMessage("verifyMenuCloseAll()", "filetree wrong row count", "2",
+                                                  String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 2);
+            assertTrue("verifyMenuCloseAll() HDF filetree is missing file '" + filename + "'",
+                       items[0].getText().compareTo(filename) == 0);
+            assertTrue("verifyMenuCloseAll() HDF5 filetree is missing file '" + filename2 + "'",
+                       items[1].getText().compareTo(filename2) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -562,13 +600,14 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyMenuSave() {
-        String filename = "testsavefile.h5";
+    public void verifyMenuSave()
+    {
+        String filename  = "testsavefile.h5";
         String groupname = "grouptestname";
-        File hdf_file = createFile(filename);
+        File hdf_file    = createFile(filename);
 
         try {
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].click();
@@ -586,7 +625,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             Display.getDefault().syncExec(new Runnable() {
                 @Override
-                public void run() {
+                public void run()
+                {
                     shell.forceActive();
                 }
             });
@@ -599,7 +639,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             openFile(filename, FILE_MODE.READ_ONLY);
 
             SWTBotTreeItem group = bot.tree().getAllItems()[0].getNode(0);
-            assertTrue("verifyMenuSave() filetree is missing group '" + groupname + "'", group.getText().compareTo(groupname) == 0);
+            assertTrue("verifyMenuSave() filetree is missing group '" + groupname + "'",
+                       group.getText().compareTo(groupname) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -620,18 +661,19 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyMenuSaveAs() {
-        String filename = "testsaveasfile.h5";
+    public void verifyMenuSaveAs()
+    {
+        String filename         = "testsaveasfile.h5";
         String save_to_filename = "testsaveasfile2.h5";
-        String groupname = "grouptestname";
+        String groupname        = "grouptestname";
 
-        File hdfFile = createFile(filename);
+        File hdfFile     = createFile(filename);
         File hdfSaveFile = new File(workDir, save_to_filename);
         if (hdfSaveFile.exists())
             hdfSaveFile.delete();
 
         try {
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
             items[0].click();
@@ -649,7 +691,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
 
             Display.getDefault().syncExec(new Runnable() {
                 @Override
-                public void run() {
+                public void run()
+                {
                     shell.forceActive();
                 }
             });
@@ -665,8 +708,9 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             text.setText(save_to_filename);
 
             String val = text.getText();
-            assertTrue(constructWrongValueMessage("verifyMenuSaveAs()", "wrong file name", save_to_filename, val),
-                    val.equals(save_to_filename));
+            assertTrue(
+                constructWrongValueMessage("verifyMenuSaveAs()", "wrong file name", save_to_filename, val),
+                val.equals(save_to_filename));
 
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(shell));
@@ -678,7 +722,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             openFile(save_to_filename, FILE_MODE.READ_ONLY);
 
             SWTBotTreeItem group = bot.tree().getAllItems()[0].getNode(0);
-            assertTrue("verifyMenuSaveAs() filetree is missing group '" + groupname + "'", group.getText().compareTo(groupname) == 0);
+            assertTrue("verifyMenuSaveAs() filetree is missing group '" + groupname + "'",
+                       group.getText().compareTo(groupname) == 0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -707,18 +752,20 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyMenuWindowCloseAll() {
+    public void verifyMenuWindowCloseAll()
+    {
         String filename = "hdf5_test.h5";
-        File hdfFile = null;
+        File hdfFile    = null;
 
         try {
             hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
 
-            SWTBotTree filetree = bot.tree();
+            SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "filetree wrong row count", "6", String.valueOf(filetree.visibleRowCount())),
-                    filetree.visibleRowCount() == 6);
+            assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "filetree wrong row count",
+                                                  "6", String.valueOf(filetree.visibleRowCount())),
+                       filetree.visibleRowCount() == 6);
             assertTrue("verifyMenuWindowCloseAll() too many shells open", bot.shells().length == 1);
 
             filetree.expandNode(filename, true);
@@ -756,20 +803,23 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             // stabilize before checking how many shells are open
             bot.sleep(1000);
 
-            assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "too many or missing shells", "8", String.valueOf(bot.shells().length)),
-                    bot.shells().length == 8);
+            assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "too many or missing shells",
+                                                  "8", String.valueOf(bot.shells().length)),
+                       bot.shells().length == 8);
 
             Display.getDefault().syncExec(new Runnable() {
                 @Override
-                public void run() {
+                public void run()
+                {
                     shell.forceActive();
                 }
             });
 
             bot.menu().menu("Window").menu("Close All").click();
 
-            assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "too many or missing shells", "1", String.valueOf(bot.shells().length)),
-                    bot.shells().length == 1);
+            assertTrue(constructWrongValueMessage("verifyMenuWindowCloseAll()", "too many or missing shells",
+                                                  "1", String.valueOf(bot.shells().length)),
+                       bot.shells().length == 1);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -790,7 +840,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyTextInLabelWhenClickingHDF4Help() {
+    public void verifyTextInLabelWhenClickingHDF4Help()
+    {
         try {
             // Test that the Help->HDF4 Library Version MenuItem works correctly
             SWTBotMenu fileMenuItem = bot.menu().menu("Help");
@@ -801,8 +852,9 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
             String val = botshell.bot().label(1).getText();
-            assertTrue(constructWrongValueMessage("verifyTextInLabelWhenClickingHDF4Help()", "wrong label text", HDF4VERSION, val),
-                    val.equals(HDF4VERSION));
+            assertTrue(constructWrongValueMessage("verifyTextInLabelWhenClickingHDF4Help()",
+                                                  "wrong label text", HDF4VERSION, val),
+                       val.equals(HDF4VERSION));
             botshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(botshell));
         }
@@ -817,7 +869,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyTextInLabelWhenClickingHDF5Help() {
+    public void verifyTextInLabelWhenClickingHDF5Help()
+    {
         try {
             // Test that the Help->HDF5 Library Version MenuItem works correctly
             SWTBotMenu fileMenuItem = bot.menu().menu("Help");
@@ -828,8 +881,9 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellIsActive("HDF Library Version"));
 
             String val = botshell.bot().label(1).getText();
-            assertTrue(constructWrongValueMessage("verifyTextInLabelWhenClickingHDF5Help()", "wrong label text", HDF5VERSION, val),
-                    val.equals(HDF5VERSION));
+            assertTrue(constructWrongValueMessage("verifyTextInLabelWhenClickingHDF5Help()",
+                                                  "wrong label text", HDF5VERSION, val),
+                       val.equals(HDF5VERSION));
 
             botshell.bot().label(HDF5VERSION);
             botshell.bot().button("   &OK   ").click();
@@ -846,7 +900,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyTextInLabelWhenClickingJavaHelp() {
+    public void verifyTextInLabelWhenClickingJavaHelp()
+    {
         try {
             SWTBotMenu fileMenuItem = bot.menu().menu("Help");
             fileMenuItem.menu("Java Version").click();
@@ -855,7 +910,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("HDFView Java Version"));
 
-                    //("Compiled at jdk 1.7.*\\sRunning at.*");
+            //("Compiled at jdk 1.7.*\\sRunning at.*");
             botshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(botshell));
         }
@@ -870,7 +925,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyTextInLabelWhenClickingAboutHelp() {
+    public void verifyTextInLabelWhenClickingAboutHelp()
+    {
         try {
             SWTBotMenu fileMenuItem = bot.menu().menu("Help");
             fileMenuItem.menu("About...").click();
@@ -879,7 +935,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("About HDFView"));
 
-                    //("HDF Viewer, Version " + VERSION + "\\sFor.*\\s\\sCopyright.*2006 The HDF Group.\\sAll rights reserved.");
+            //("HDF Viewer, Version " + VERSION + "\\sFor.*\\s\\sCopyright.*2006 The HDF Group.\\sAll rights
+            // reserved.");
             botshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(botshell));
         }
@@ -894,7 +951,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyTextInLabelWhenClickingSupportedFileFormatsHelp() {
+    public void verifyTextInLabelWhenClickingSupportedFileFormatsHelp()
+    {
         try {
             SWTBotMenu fileMenuItem = bot.menu().menu("Help");
             fileMenuItem.menu("Supported File Formats").click();
@@ -902,7 +960,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             SWTBotShell botshell = bot.shell("Supported File Formats");
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Supported File Formats"));
-                    //("\\sSupported File Formats: \\s.*Fits\\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
+            //("\\sSupported File Formats: \\s.*Fits\\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
             botshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(botshell));
         }
@@ -917,10 +975,11 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyRegisterFileFormatTools() {
+    public void verifyRegisterFileFormatTools()
+    {
         try {
             SWTBotMenu toolsMenuItem = bot.menu().menu("Tools");
-            SWTBotMenu helpMenuItem = bot.menu().menu("Help");
+            SWTBotMenu helpMenuItem  = bot.menu().menu("Help");
 
             toolsMenuItem.menu("Unregister File Format").click();
 
@@ -937,13 +996,13 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell = bot.shell("Supported File Formats");
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Supported File Formats"));
-                    //("\\sSupported File Formats: \\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s"));
+            //("\\sSupported File Formats: \\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s"));
             botshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(botshell));
 
             toolsMenuItem.menu("Register File Format").click();
 
-            botshell= bot.shell("Register a file format");
+            botshell = bot.shell("Register a file format");
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Register a file format"));
 
@@ -956,7 +1015,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell = bot.shell("Supported File Formats");
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Supported File Formats"));
-                    //("\\sSupported File Formats: \\s.*Fits\\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
+            //("\\sSupported File Formats: \\s.*Fits\\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
             botshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(botshell));
         }
@@ -971,10 +1030,11 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyUnregisterFileFormatTools() {
+    public void verifyUnregisterFileFormatTools()
+    {
         try {
             SWTBotMenu toolsMenuItem = bot.menu().menu("Tools");
-            SWTBotMenu helpMenuItem = bot.menu().menu("Help");
+            SWTBotMenu helpMenuItem  = bot.menu().menu("Help");
 
             toolsMenuItem.menu("Unregister File Format").click();
 
@@ -991,7 +1051,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             botshell = bot.shell("Supported File Formats");
             botshell.activate();
             bot.waitUntil(Conditions.shellIsActive("Supported File Formats"));
-                    //("\\sSupported File Formats: \\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
+            //("\\sSupported File Formats: \\s.*HDF5\\s.*NetCDF\\s.*HDF4\\s\\s");
             botshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(botshell));
         }
@@ -1006,7 +1066,8 @@ public class TestHDFViewMenu extends AbstractWindowTest {
     }
 
     @Test
-    public void verifyUserOptionsDialog() {
+    public void verifyUserOptionsDialog()
+    {
         try {
             SWTBotMenu fileMenuItem = bot.menu().menu("Tools");
             fileMenuItem.menu("User Options").click();
@@ -1018,7 +1079,7 @@ public class TestHDFViewMenu extends AbstractWindowTest {
             SWTBotRadio rwButton = botshell.bot().radio("Read/Write");
             assertTrue(rwButton.isEnabled());
 
-            //botshell.bot().button("Restore Defaults").click();
+            // botshell.bot().button("Restore Defaults").click();
 
             botshell.bot().button("Cancel").click();
         }

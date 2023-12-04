@@ -14,15 +14,15 @@
 
 package hdf.view.PaletteView;
 
+import hdf.view.DataView.DataViewManager;
+import hdf.view.ImageView.ImageView;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.eclipse.swt.widgets.Shell;
-
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-import hdf.view.DataView.DataViewManager;
-import hdf.view.ImageView.ImageView;
 
 /**
  * A simple Factory class which returns concrete instances of the default
@@ -36,7 +36,9 @@ public class DefaultPaletteViewFactory extends PaletteViewFactory {
     private static final Logger log = LoggerFactory.getLogger(DefaultPaletteViewFactory.class);
 
     @Override
-    public PaletteView getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView) throws ClassNotFoundException {
+    public PaletteView getPaletteView(Shell parent, DataViewManager viewer, ImageView theImageView)
+        throws ClassNotFoundException
+    {
         String dataViewName = null;
         Object[] initargs;
         PaletteView theView = null;
@@ -55,12 +57,13 @@ public class DefaultPaletteViewFactory extends PaletteViewFactory {
             theClass = null;
         }
 
-        if (theClass == null) throw new ClassNotFoundException();
+        if (theClass == null)
+            throw new ClassNotFoundException();
 
         try {
-            initargs = new Object[] { parent, viewer, theImageView };
+            initargs = new Object[] {parent, viewer, theImageView};
 
-            theView = (PaletteView) Tools.newInstance(theClass, initargs);
+            theView = (PaletteView)Tools.newInstance(theClass, initargs);
 
             log.trace("getPaletteView(): returning PaletteView instance {}", theView);
         }
@@ -71,5 +74,4 @@ public class DefaultPaletteViewFactory extends PaletteViewFactory {
 
         return theView;
     }
-
 }

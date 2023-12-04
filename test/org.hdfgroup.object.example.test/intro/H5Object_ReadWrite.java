@@ -9,21 +9,21 @@ import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 
-
 public class H5Object_ReadWrite {
-    private static String FILENAME = "H5Object_ReadWrite.h5";
-    private static String DATASETNAME = "dset";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 6;
+    private static String FILENAME         = "H5Object_ReadWrite.h5";
+    private static String DATASETNAME      = "dset";
+    private static final int DIM_X         = 4;
+    private static final int DIM_Y         = 6;
     private static final int DATATYPE_SIZE = 4;
 
-    private static void ReadWriteDataset() {
-        H5File file = null;
-        Dataset dset = null;
-        int[][] dset_data = new int[DIM_X][DIM_Y];
-        int[] dset_data_read = new int[DIM_X*DIM_Y];
-        long[] dims = { DIM_X, DIM_Y };
-        H5Datatype typeInt = null;
+    private static void ReadWriteDataset()
+    {
+        H5File file          = null;
+        Dataset dset         = null;
+        int[][] dset_data    = new int[DIM_X][DIM_Y];
+        int[] dset_data_read = new int[DIM_X * DIM_Y];
+        long[] dims          = {DIM_X, DIM_Y};
+        H5Datatype typeInt   = null;
 
         // Initialize the dataset.
         for (int indx = 0; indx < DIM_X; indx++)
@@ -41,7 +41,8 @@ public class H5Object_ReadWrite {
 
         // Create the datatype.
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_BE, Datatype.NATIVE);
+            typeInt =
+                new H5Datatype(Datatype.CLASS_INTEGER, DATATYPE_SIZE, Datatype.ORDER_BE, Datatype.NATIVE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -49,9 +50,7 @@ public class H5Object_ReadWrite {
 
         // Create the dataset.
         try {
-            dset = file.createScalarDS("/" + DATASETNAME, null, typeInt,
-                    dims, null, null, 0,
-                    dset_data);
+            dset = file.createScalarDS("/" + DATASETNAME, null, typeInt, dims, null, null, 0, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -59,7 +58,7 @@ public class H5Object_ReadWrite {
 
         try {
             dset.init();
-            dset_data_read = (int[]) dset.getData();
+            dset_data_read = (int[])dset.getData();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -74,8 +73,5 @@ public class H5Object_ReadWrite {
         }
     }
 
-    public static void main(String[] args) {
-        H5Object_ReadWrite.ReadWriteDataset();
-    }
-
+    public static void main(String[] args) { H5Object_ReadWrite.ReadWriteDataset(); }
 }

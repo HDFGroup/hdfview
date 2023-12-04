@@ -17,26 +17,24 @@ package hdf.object.h4;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import hdf.hdflib.HDFChunkInfo;
 import hdf.hdflib.HDFCompInfo;
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFDeflateCompInfo;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
-
 import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.object.ScalarDS;
 import hdf.object.MetaDataContainer;
-
+import hdf.object.ScalarDS;
 import hdf.object.h4.H4ScalarAttribute;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * H4GRImage describes an HDF4 general raster(GR) image and operations performed on
@@ -105,35 +103,33 @@ import hdf.object.h4.H4ScalarAttribute;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class H4GRImage extends ScalarDS implements MetaDataContainer
-{
+public class H4GRImage extends ScalarDS implements MetaDataContainer {
     private static final long serialVersionUID = 1029672744963360976L;
 
-    private static final Logger   log = LoggerFactory.getLogger(H4GRImage.class);
+    private static final Logger log = LoggerFactory.getLogger(H4GRImage.class);
 
     /**
      * The list of attributes of this data object. Members of the list are
      * instance of H4ScalarAttribute.
      */
     @SuppressWarnings("rawtypes")
-    private List                            attributeList;
+    private List attributeList;
 
     /**
      * The GR interface identifier obtained from GRstart(fid)
      */
-    private long                            grid;
+    private long grid;
 
     /**
      * The number of components in the raster image
      */
-    private int                             ncomp;
+    private int ncomp;
 
     /** the datatype identifier */
-    private long                            datatypeID = -1;
+    private long datatypeID = -1;
 
     /** the number of attributes */
-    private int                             nAttributes = -1;
-
+    private int nAttributes = -1;
 
     /**
      * Creates a H4GRImage object with specific name and path.
@@ -142,9 +138,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      * @param name the name of this H4GRImage.
      * @param path the full path of this H4GRImage.
      */
-    public H4GRImage(FileFormat theFile, String name, String path) {
-        this(theFile, name, path, null);
-    }
+    public H4GRImage(FileFormat theFile, String name, String path) { this(theFile, name, path, null); }
 
     /**
      * Creates a H4GRImage object with specific name, path, and object ID.
@@ -155,12 +149,13 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      * @param oid the unique identifier of this data object.
      */
     @SuppressWarnings("deprecation")
-    public H4GRImage(FileFormat theFile, String name, String path, long[] oid) {
-        super (theFile, name, path, oid);
+    public H4GRImage(FileFormat theFile, String name, String path, long[] oid)
+    {
+        super(theFile, name, path, oid);
         palette = null;
         isImage = isImageDisplay = true;
-        unsignedConverted = false;
-        grid = ((H4File)getFileFormat()).getGRAccessID();
+        unsignedConverted        = false;
+        grid                     = ((H4File)getFileFormat()).getGRAccessID();
     }
 
     /*
@@ -168,7 +163,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      * @see hdf.object.DataFormat#hasAttribute()
      */
     @Override
-    public boolean hasAttribute() {
+    public boolean hasAttribute()
+    {
         if (nAttributes < 0) {
             grid = ((H4File)getFileFormat()).getGRAccessID();
 
@@ -176,8 +172,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
 
             if (id >= 0) {
                 String[] objName = {""};
-                int[] grInfo = new int[4]; //ncomp, data_type, interlace, and num_attrs
-                int[] idims = new int[2];
+                int[] grInfo     = new int[4]; // ncomp, data_type, interlace, and num_attrs
+                int[] idims      = new int[2];
                 try {
                     HDFLibrary.GRgetiminfo(id, objName, grInfo, idims);
                     nAttributes = grInfo[3];
@@ -198,14 +194,15 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
 
     // To do: Implementing Dataset
     @Override
-    public Dataset copy(Group pgroup, String dname, long[] dims, Object buff) throws Exception {
+    public Dataset copy(Group pgroup, String dname, long[] dims, Object buff) throws Exception
+    {
         log.trace("copy(): start: parentGroup={} datasetName={}", pgroup, dname);
 
         Dataset dataset = null;
-        long srcdid = -1;
-        long dstdid = -1;
-        String path = null;
-        int[] count = null;
+        long srcdid     = -1;
+        long dstdid     = -1;
+        String path     = null;
+        int[] count     = null;
 
         if (pgroup == null) {
             log.debug("copy(): Parent group is null - exit");
@@ -215,7 +212,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         if (pgroup.isRoot())
             path = HObject.SEPARATOR;
         else
-            path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
+            path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
 
         srcdid = open();
         if (srcdid < 0) {
@@ -224,15 +221,15 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         }
 
         if (dims != null) {
-            count = new int[2];
+            count    = new int[2];
             count[0] = (int)dims[0];
             count[1] = (int)dims[1];
         }
 
-        int[] grInfo = new int[4]; //ncomp, data_type, interlace and num_attrs
+        int[] grInfo = new int[4]; // ncomp, data_type, interlace and num_attrs
         try {
             String[] tmpName = {""};
-            int[] tmpDims = new int[2];
+            int[] tmpDims    = new int[2];
             HDFLibrary.GRgetiminfo(srcdid, tmpName, grInfo, tmpDims);
             if (count == null)
                 count = tmpDims;
@@ -241,12 +238,12 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
             log.debug("copy(): GRgetiminfo failure: ", ex);
         }
 
-        ncomp = grInfo[0];
-        long tid = grInfo[1];
-        int interlace = grInfo[2];
+        ncomp                  = grInfo[0];
+        long tid               = grInfo[1];
+        int interlace          = grInfo[2];
         int numberOfAttributes = grInfo[3];
-        dstdid = HDFLibrary.GRcreate( ((H4File)pgroup.getFileFormat()).getGRAccessID(),
-                dname, ncomp, tid, interlace, count);
+        dstdid = HDFLibrary.GRcreate(((H4File)pgroup.getFileFormat()).getGRAccessID(), dname, ncomp, tid,
+                                     interlace, count);
         if (dstdid < 0) {
             log.debug("copy(): Invalid dest dataset ID - exit");
             return null;
@@ -262,7 +259,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         // read data from the source dataset
         int[] start = {0, 0};
         if ((buff == null) && (count != null)) {
-            buff = new byte[count[0]*count[1] * HDFLibrary.DFKNTsize(tid)];
+            buff = new byte[count[0] * count[1] * HDFLibrary.DFKNTsize(tid)];
             HDFLibrary.GRreadimage(srcdid, start, null, count, buff);
         }
 
@@ -270,12 +267,12 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         HDFLibrary.GRwriteimage(dstdid, start, null, count, buff);
 
         // copy palette
-        long pid = HDFLibrary.GRgetlutid(srcdid, 0);
+        long pid      = HDFLibrary.GRgetlutid(srcdid, 0);
         int[] palInfo = new int[4];
 
         HDFLibrary.GRgetlutinfo(pid, palInfo);
-        palInfo[1] = HDFConstants.DFNT_UINT8; // support unsigned byte only. Other type does not work
-        int palSize = palInfo[0]*palInfo[3];
+        palInfo[1]     = HDFConstants.DFNT_UINT8; // support unsigned byte only. Other type does not work
+        int palSize    = palInfo[0] * palInfo[3];
         byte[] palBuff = new byte[palSize];
         HDFLibrary.GRreadlut(pid, palBuff);
         pid = HDFLibrary.GRgetlutid(dstdid, 0);
@@ -286,7 +283,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         copyAttribute(srcdid, dstdid, numberOfAttributes);
 
         long[] oid = {HDFConstants.DFTAG_RIG, ref};
-        dataset = new H4GRImage(pgroup.getFileFormat(), dname, path, oid);
+        dataset    = new H4GRImage(pgroup.getFileFormat(), dname, path, oid);
 
         pgroup.addToMemberList(dataset);
 
@@ -309,7 +306,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      * @return the datatype of the data object.
      */
     @Override
-    public Datatype getDatatype() {
+    public Datatype getDatatype()
+    {
         if (!inited)
             init();
 
@@ -328,7 +326,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
 
     // Implementing Dataset
     @Override
-    public byte[] readBytes() throws HDFException {
+    public byte[] readBytes() throws HDFException
+    {
         byte[] theData = null;
 
         if (!isInited())
@@ -343,16 +342,16 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         try {
             // set the interlacing scheme for reading image data
             HDFLibrary.GRreqimageil(id, interlace);
-            int datasize = (int)(getWidth()*getHeight()*ncomp);
-            int size = HDFLibrary.DFKNTsize(datatypeID)*datasize;
-            theData = new byte[size];
-            int[] start = {(int)startDims[0], (int)startDims[1]};
+            int datasize = (int)(getWidth() * getHeight() * ncomp);
+            int size     = HDFLibrary.DFKNTsize(datatypeID) * datasize;
+            theData      = new byte[size];
+            int[] start  = {(int)startDims[0], (int)startDims[1]};
             int[] select = {(int)selectedDims[0], (int)selectedDims[1]};
 
             int[] stride = null;
             if (selectedStride != null) {
                 stride = new int[rank];
-                for (int i=0; i<rank; i++)
+                for (int i = 0; i < rank; i++)
                     stride[i] = (int)selectedStride[i];
             }
 
@@ -387,10 +386,12 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      *             if object can not be read
      */
     @Override
-    public Object read() throws HDFException {
+    public Object read() throws HDFException
+    {
         Object theData = null;
 
-        if (!isInited()) init();
+        if (!isInited())
+            init();
 
         long id = open();
         if (id < 0) {
@@ -401,7 +402,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         try {
             // set the interlacing scheme for reading image data
             HDFLibrary.GRreqimageil(id, interlace);
-            int datasize = (int)(getWidth()*getHeight()*ncomp);
+            int datasize = (int)(getWidth() * getHeight() * ncomp);
 
             theData = H4Datatype.allocateArray(datatypeID, datasize);
 
@@ -409,13 +410,13 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
                 // assume external data files are located in the same directory as the main file.
                 HDFLibrary.HXsetdir(getFileFormat().getParent());
 
-                int[] start = {(int)startDims[0], (int)startDims[1]};
+                int[] start  = {(int)startDims[0], (int)startDims[1]};
                 int[] select = {(int)selectedDims[0], (int)selectedDims[1]};
 
                 int[] stride = null;
                 if (selectedStride != null) {
                     stride = new int[rank];
-                    for (int i=0; i<rank; i++)
+                    for (int i = 0; i < rank; i++)
                         stride[i] = (int)selectedStride[i];
                 }
 
@@ -429,7 +430,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
             close(id);
         }
 
-        if ( (rank >1) && (selectedIndex[1]>selectedIndex[0]))
+        if ((rank > 1) && (selectedIndex[1] > selectedIndex[0]))
             isDefaultImageOrder = false;
         else
             isDefaultImageOrder = true;
@@ -450,7 +451,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      */
     @SuppressWarnings("deprecation")
     @Override
-    public void write(Object buf) throws HDFException {
+    public void write(Object buf) throws HDFException
+    {
         if (buf == null) {
             log.debug("write(): buf is null - exit");
             return;
@@ -463,16 +465,16 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         }
 
         int[] select = new int[rank];
-        int[] start = new int[rank];
-        for (int i=0; i<rank; i++) {
+        int[] start  = new int[rank];
+        for (int i = 0; i < rank; i++) {
             select[i] = (int)selectedDims[i];
-            start[i] = (int)startDims[i];
+            start[i]  = (int)startDims[i];
         }
 
         int[] stride = null;
         if (selectedStride != null) {
             stride = new int[rank];
-            for (int i=0; i<rank; i++) {
+            for (int i = 0; i < rank; i++) {
                 stride[i] = (int)selectedStride[i];
             }
         }
@@ -508,29 +510,30 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public List getMetadata() throws HDFException {
+    public List getMetadata() throws HDFException
+    {
         if (attributeList != null) {
             log.trace("getMetadata(): attributeList != null - exit");
             return attributeList;
         }
 
-        long id = open();
+        long id          = open();
         String[] objName = {""};
-        int[] grInfo = new int[4]; //ncomp, data_type, interlace, and num_attrs
-        int[] idims = new int[2];
+        int[] grInfo     = new int[4]; // ncomp, data_type, interlace, and num_attrs
+        int[] idims      = new int[2];
         try {
             HDFLibrary.GRgetiminfo(id, objName, grInfo, idims);
             // mask off the litend bit
             grInfo[1] = grInfo[1] & (~HDFConstants.DFNT_LITEND);
-            int n = grInfo[3];
+            int n     = grInfo[3];
 
-            if ((attributeList == null) && (n>0))
+            if ((attributeList == null) && (n > 0))
                 attributeList = new Vector(n, 5);
 
-            boolean b = false;
+            boolean b         = false;
             String[] attrName = new String[1];
-            int[] attrInfo = {0, 0}; // data_type, length
-            for (int i=0; i<n; i++) {
+            int[] attrInfo    = {0, 0}; // data_type, length
+            for (int i = 0; i < n; i++) {
                 attrName[0] = "";
                 try {
                     b = HDFLibrary.GRattrinfo(id, i, attrName, attrInfo);
@@ -546,7 +549,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
                     continue;
 
                 long[] attrDims = {attrInfo[1]};
-                H4ScalarAttribute attr = new H4ScalarAttribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
+                H4ScalarAttribute attr =
+                    new H4ScalarAttribute(this, attrName[0], new H4Datatype(attrInfo[0]), attrDims);
                 attributeList.add(attr);
 
                 Object buf = null;
@@ -568,7 +572,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
 
                 if (buf != null) {
                     if ((attrInfo[0] == HDFConstants.DFNT_CHAR) ||
-                        (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
+                        (attrInfo[0] == HDFConstants.DFNT_UCHAR8)) {
                         buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                     }
 
@@ -606,7 +610,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void writeMetadata(Object info) throws Exception {
+    public void writeMetadata(Object info) throws Exception
+    {
         // only attribute metadata is supported.
         if (!(info instanceof Attribute)) {
             log.debug("writeMetadata(): Object not an H4ScalarAttribute - exit");
@@ -638,7 +643,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      *             if the metadata can not be removed
      */
     @Override
-    public void removeMetadata(Object info) throws HDFException {
+    public void removeMetadata(Object info) throws HDFException
+    {
         log.trace("removeMetadata(): disabled");
     }
 
@@ -652,19 +658,21 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      *             if the metadata can not be updated
      */
     @Override
-    public void updateMetadata(Object info) throws Exception {
+    public void updateMetadata(Object info) throws Exception
+    {
         log.trace("updateMetadata(): disabled");
     }
 
     // Implementing HObject.
     @Override
-    public long open() {
-        log.trace("open(): start: for file={} with ref={}", getFID(), (short) oid[1]);
+    public long open()
+    {
+        log.trace("open(): start: for file={} with ref={}", getFID(), (short)oid[1]);
 
         long id = -1;
         try {
             int index = HDFLibrary.GRreftoindex(grid, (short)oid[1]);
-            id = HDFLibrary.GRselect(grid, index);
+            id        = HDFLibrary.GRselect(grid, index);
         }
         catch (HDFException ex) {
             log.debug("open(): failure: ", ex);
@@ -676,27 +684,33 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
 
     // Implementing HObject.
     @Override
-    public void close(long grid) {
-        try { HDFLibrary.GRendaccess(grid); }
-        catch (HDFException ex) {log.debug("close(): failure: ", ex);}
+    public void close(long grid)
+    {
+        try {
+            HDFLibrary.GRendaccess(grid);
+        }
+        catch (HDFException ex) {
+            log.debug("close(): failure: ", ex);
+        }
     }
 
     // Implementing Dataset.
     @Override
-    public void init() {
+    public void init()
+    {
         if (inited) {
             log.trace("init(): Already initialized");
             return; // already called. Initialize only once
         }
 
-        long id = open();
+        long id          = open();
         String[] objName = {""};
-        int[] grInfo = new int[4]; //ncomp, data_type, interlace and num_attrs
-        int[] idims = new int[2];
+        int[] grInfo     = new int[4]; // ncomp, data_type, interlace and num_attrs
+        int[] idims      = new int[2];
         try {
             HDFLibrary.GRgetiminfo(id, objName, grInfo, idims);
             // mask off the litend bit
-            grInfo[1] = grInfo[1] & (~HDFConstants.DFNT_LITEND);
+            grInfo[1]  = grInfo[1] & (~HDFConstants.DFNT_LITEND);
             datatypeID = grInfo[1];
 
             // get compression information
@@ -729,7 +743,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
             // get chunk information
             try {
                 HDFChunkInfo chunkInfo = new HDFChunkInfo();
-                int[] cflag = {HDFConstants.HDF_NONE};
+                int[] cflag            = {HDFConstants.HDF_NONE};
                 HDFLibrary.GRgetchunkinfo(id, chunkInfo, cflag);
 
                 storageLayout.setLength(0);
@@ -740,7 +754,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
                 }
                 else {
                     chunkSize = new long[rank];
-                    for (int i=0; i<rank; i++)
+                    for (int i = 0; i < rank; i++)
                         chunkSize[i] = chunkInfo.chunk_lengths[i];
 
                     storageLayout.append("CHUNKED: ").append(chunkSize[0]);
@@ -761,23 +775,23 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
             close(id);
         }
 
-        ncomp = grInfo[0];
+        ncomp       = grInfo[0];
         isTrueColor = (ncomp >= 3);
-        interlace = grInfo[2];
-        rank = 2; // support only two dimensional raster image
+        interlace   = grInfo[2];
+        rank        = 2; // support only two dimensional raster image
 
         // data in HDF4 GR image is arranged as dim[0]=width, dim[1]=height.
         // other image data is arranged as dim[0]=height, dim[1]=width.
         selectedIndex[0] = 1;
         selectedIndex[1] = 0;
 
-        dims = new long[rank];
-        startDims = new long[rank];
+        dims         = new long[rank];
+        startDims    = new long[rank];
         selectedDims = new long[rank];
-        for (int i=0; i<rank; i++) {
-            startDims[i] = 0;
+        for (int i = 0; i < rank; i++) {
+            startDims[i]    = 0;
             selectedDims[i] = idims[i];
-            dims[i] = idims[i];
+            dims[i]         = idims[i];
         }
     }
 
@@ -788,7 +802,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      * @see hdf.object.ScalarDS#readPalette(int)
      */
     @Override
-    public byte[][] readPalette(int idx) {
+    public byte[][] readPalette(int idx)
+    {
         return getPalette();
     }
 
@@ -797,14 +812,16 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      * @see hdf.object.ScalarDS#NumberOfPalettes()
      */
     @Override
-    public int getNumberOfPalettes() {
+    public int getNumberOfPalettes()
+    {
         if (palette != null)
             return 1;
         return 0;
     }
 
     @Override
-    public byte[][] getPalette() {
+    public byte[][] getPalette()
+    {
         if (palette != null) {
             log.trace("getPalette(): palette != null - exit");
             return palette;
@@ -817,8 +834,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         }
 
         // get palette info.
-        long lutid  = -1;
-        int[] lutInfo = new int[4]; //ncomp, datatype, interlace, num_entries
+        long lutid    = -1;
+        int[] lutInfo = new int[4]; // ncomp, datatype, interlace, num_entries
         try {
             // find the first palette.
             // Todo: get all the palettes
@@ -841,8 +858,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         }
 
         // read palette data
-        boolean b = false;
-        byte[] pal = new byte[3*256];
+        boolean b  = false;
+        byte[] pal = new byte[3 * 256];
         try {
             HDFLibrary.GRreqlutil(id, lutInfo[2]);
             b = HDFLibrary.GRreadlut(lutid, pal);
@@ -861,17 +878,17 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         palette = new byte[3][256];
         if (lutInfo[2] == HDFConstants.MFGR_INTERLACE_PIXEL) {
             // color conponents are arranged in RGB, RGB, RGB, ...
-            for (int i=0; i<256; i++) {
-                palette[0][i] = pal[i*3];
-                palette[1][i] = pal[i*3+1];
-                palette[2][i] = pal[i*3+2];
+            for (int i = 0; i < 256; i++) {
+                palette[0][i] = pal[i * 3];
+                palette[1][i] = pal[i * 3 + 1];
+                palette[2][i] = pal[i * 3 + 2];
             }
         }
         else {
-            for (int i=0; i<256; i++) {
+            for (int i = 0; i < 256; i++) {
                 palette[0][i] = pal[i];
-                palette[1][i] = pal[256+i];
-                palette[2][i] = pal[512+i];
+                palette[1][i] = pal[256 + i];
+                palette[2][i] = pal[512 + i];
             }
         }
 
@@ -885,9 +902,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      *
      * @return the number of components
      */
-    public int getComponentCount() {
-        return ncomp;
-    }
+    public int getComponentCount() { return ncomp; }
 
     /**
      * Creates a new image.
@@ -907,15 +922,15 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      *
      * @throws Exception if the image can not be created
      */
-    public static H4GRImage create(String name, Group pgroup, Datatype type,
-            long[] dims, long[] maxdims, long[] chunks, int gzip, int ncomp, int interlace, Object data) throws Exception {
-        log.trace("create(): start: name={} parentGroup={} type={} gzip={} ncomp={} interlace={}", name, pgroup, type, gzip, ncomp, interlace);
+    public static H4GRImage create(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
+                                   long[] chunks, int gzip, int ncomp, int interlace, Object data)
+        throws Exception
+    {
+        log.trace("create(): start: name={} parentGroup={} type={} gzip={} ncomp={} interlace={}", name,
+                  pgroup, type, gzip, ncomp, interlace);
 
         H4GRImage dataset = null;
-        if ((name == null) ||
-            (pgroup == null) ||
-            (dims == null) ||
-            ((gzip>0) && (chunks==null))) {
+        if ((name == null) || (pgroup == null) || (dims == null) || ((gzip > 0) && (chunks == null))) {
             log.debug("create(): one or more parameters are null - exit");
             return null;
         }
@@ -928,17 +943,17 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
 
         String path = HObject.SEPARATOR;
         if (!pgroup.isRoot())
-            path = pgroup.getPath()+pgroup.getName()+HObject.SEPARATOR;
+            path = pgroup.getPath() + pgroup.getName() + HObject.SEPARATOR;
         if (interlace == ScalarDS.INTERLACE_PLANE)
             interlace = HDFConstants.MFGR_INTERLACE_COMPONENT;
         else
             interlace = HDFConstants.MFGR_INTERLACE_PIXEL;
 
-        int rank = 2;
-        int[] idims = new int[rank];
+        int rank       = 2;
+        int[] idims    = new int[rank];
         int[] imaxdims = new int[rank];
-        int[] start = new int[rank];
-        for (int i=0; i<rank; i++) {
+        int[] start    = new int[rank];
+        for (int i = 0; i < rank; i++) {
             idims[i] = (int)dims[i];
             if (maxdims != null)
                 imaxdims[i] = (int)maxdims[i];
@@ -950,28 +965,28 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         int[] ichunks = null;
         if (chunks != null) {
             ichunks = new int[rank];
-            for (int i=0; i<rank; i++)
+            for (int i = 0; i < rank; i++)
                 ichunks[i] = (int)chunks[i];
         }
 
         long grid = -1;
         long vgid = -1;
-        long gid = (file).getGRAccessID();
-        long tid = type.createNative();
+        long gid  = (file).getGRAccessID();
+        long tid  = type.createNative();
 
-        if(tid >= 0) {
+        if (tid >= 0) {
             try {
                 grid = HDFLibrary.GRcreate(gid, name, ncomp, tid, interlace, idims);
             }
             catch (Exception ex) {
                 log.debug("create(): exit with failure: ", ex);
-                throw (ex);
+                throw(ex);
             }
         }
 
         if (grid < 0) {
             log.debug("create(): Invalid GR ID - exit");
-            throw (new HDFException("Unable to create the new dataset."));
+            throw(new HDFException("Unable to create the new dataset."));
         }
 
         if ((grid > 0) && (data != null))
@@ -985,9 +1000,9 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
 
         if (gzip > 0) {
             // set compression
-            int compType = HDFConstants.COMP_CODE_DEFLATE;
+            int compType                = HDFConstants.COMP_CODE_DEFLATE;
             HDFDeflateCompInfo compInfo = new HDFDeflateCompInfo();
-            compInfo.level = gzip;
+            compInfo.level              = gzip;
             HDFLibrary.GRsetcompress(grid, compType, compInfo);
         }
 
@@ -1000,7 +1015,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
                 if (grid > 0)
                     HDFLibrary.GRendaccess(grid);
                 log.debug("create(): Invalid VG ID - exit");
-                throw (new HDFException("Unable to open the parent group."));
+                throw(new HDFException("Unable to open the parent group."));
             }
 
             HDFLibrary.Vaddtagref(vgid, HDFConstants.DFTAG_RI, ref);
@@ -1017,7 +1032,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         }
 
         long[] oid = {HDFConstants.DFTAG_NDG, ref};
-        dataset = new H4GRImage(file, name, path, oid);
+        dataset    = new H4GRImage(file, name, path, oid);
 
         if (dataset != null)
             pgroup.addToMemberList(dataset);
@@ -1028,8 +1043,10 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
     /**
      * copy attributes from one GR image to another GR image
      */
-    private void copyAttribute(long srcdid, long dstdid, int numberOfAttributes) {
-        log.trace("copyAttribute(): start: srcdid={} dstdid={} numAttributes={}", srcdid, dstdid, numberOfAttributes);
+    private void copyAttribute(long srcdid, long dstdid, int numberOfAttributes)
+    {
+        log.trace("copyAttribute(): start: srcdid={} dstdid={} numAttributes={}", srcdid, dstdid,
+                  numberOfAttributes);
 
         if (numberOfAttributes <= 0) {
             log.debug("copyAttribute(): numberOfAttributes={}", numberOfAttributes);
@@ -1037,10 +1054,10 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         }
 
         try {
-            boolean b = false;
+            boolean b         = false;
             String[] attrName = new String[1];
-            int[] attrInfo = {0, 0};
-            for (int i=0; i<numberOfAttributes; i++) {
+            int[] attrInfo    = {0, 0};
+            for (int i = 0; i < numberOfAttributes; i++) {
                 attrName[0] = "";
                 try {
                     b = HDFLibrary.GRattrinfo(srcdid, i, attrName, attrInfo);
@@ -1077,7 +1094,7 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
         }
     }
 
-    //Implementing DataFormat
+    // Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
      *
@@ -1092,7 +1109,8 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer
      *             if the metadata can not be retrieved
      */
     @SuppressWarnings("rawtypes")
-    public List getMetadata(int... attrPropList) throws Exception {
+    public List getMetadata(int... attrPropList) throws Exception
+    {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
 }

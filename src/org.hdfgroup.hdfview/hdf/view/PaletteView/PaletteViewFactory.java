@@ -16,8 +16,6 @@ package hdf.view.PaletteView;
 
 import java.util.HashMap;
 
-import org.eclipse.swt.widgets.Composite;
-
 import hdf.object.HObject;
 import hdf.view.DataView.DataViewFactory;
 import hdf.view.DataView.DataViewManager;
@@ -25,6 +23,8 @@ import hdf.view.ImageView.ImageView;
 import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.TableView.TableView;
 import hdf.view.TreeView.TreeView;
+
+import org.eclipse.swt.widgets.Composite;
 
 /**
  * This class extends DataViewFactory so that at runtime it can be determined
@@ -38,24 +38,31 @@ public abstract class PaletteViewFactory extends DataViewFactory {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public final TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException, UnsupportedOperationException {
+    public final TableView getTableView(DataViewManager viewer, HashMap dataPropertiesMap)
+        throws ClassNotFoundException, UnsupportedOperationException
+    {
         throw new UnsupportedOperationException("PaletteViewFactory does not implement getTableView()");
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public final ImageView getImageView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException, UnsupportedOperationException {
+    public final ImageView getImageView(DataViewManager viewer, HashMap dataPropertiesMap)
+        throws ClassNotFoundException, UnsupportedOperationException
+    {
         throw new UnsupportedOperationException("PaletteViewFactory does not implement getImageView()");
     }
 
     @Override
-    public final MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj) throws ClassNotFoundException, UnsupportedOperationException {
+    public final MetaDataView getMetaDataView(Composite parentObj, DataViewManager viewer, HObject theObj)
+        throws ClassNotFoundException, UnsupportedOperationException
+    {
         throw new UnsupportedOperationException("PaletteViewFactory does not implement getMetaDataView()");
     }
 
     @Override
-    public final TreeView getTreeView(Composite parent, DataViewManager viewer) throws ClassNotFoundException, UnsupportedOperationException {
+    public final TreeView getTreeView(Composite parent, DataViewManager viewer)
+        throws ClassNotFoundException, UnsupportedOperationException
+    {
         throw new UnsupportedOperationException("PaletteViewFactory does not implement getTreeView()");
     }
-
 }

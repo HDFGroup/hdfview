@@ -17,12 +17,12 @@ package hdf.view.ImageView;
 import java.util.BitSet;
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import hdf.view.DataView.DataViewManager;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
-import hdf.view.DataView.DataViewManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple Factory class which returns concrete instances of the default
@@ -35,19 +35,21 @@ public class DefaultImageViewFactory extends ImageViewFactory {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultImageViewFactory.class);
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public ImageView getImageView(DataViewManager viewer, HashMap dataPropertiesMap) throws ClassNotFoundException {
+    public ImageView getImageView(DataViewManager viewer, HashMap dataPropertiesMap)
+        throws ClassNotFoundException
+    {
         String dataViewName = null;
-        Object[] initargs = { viewer, dataPropertiesMap };
-        ImageView theView = null;
+        Object[] initargs   = {viewer, dataPropertiesMap};
+        ImageView theView   = null;
 
         /*
          * If the name of a specific ImageView class to use has been passed in via the
          * data options map, retrieve its name now, otherwise use the default ImageView
          * class.
          */
-        dataViewName = (String) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
+        dataViewName = (String)dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.VIEW_NAME);
         if (dataViewName == null || dataViewName.equals(ViewProperties.DEFAULT_MODULE_TEXT)) {
             dataViewName = ViewProperties.DEFAULT_IMAGEVIEW_NAME;
         }
@@ -64,16 +66,18 @@ public class DefaultImageViewFactory extends ImageViewFactory {
             theClass = null;
         }
 
-        if (theClass == null) throw new ClassNotFoundException();
+        if (theClass == null)
+            throw new ClassNotFoundException();
 
         /* Add some data display properties if using the default ImageView */
         if (dataViewName.startsWith(ViewProperties.DEFAULT_IMAGEVIEW_NAME)) {
-            BitSet bitmask = (BitSet) dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
-            dataPropertiesMap.put(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE, Boolean.valueOf((bitmask != null)));
+            BitSet bitmask = (BitSet)dataPropertiesMap.get(ViewProperties.DATA_VIEW_KEY.BITMASK);
+            dataPropertiesMap.put(ViewProperties.DATA_VIEW_KEY.CONVERTBYTE,
+                                  Boolean.valueOf((bitmask != null)));
         }
 
         try {
-            theView = (ImageView) Tools.newInstance(theClass, initargs);
+            theView = (ImageView)Tools.newInstance(theClass, initargs);
 
             log.trace("getImageView(): returning ImageView instance {}", theView);
         }
@@ -84,5 +88,4 @@ public class DefaultImageViewFactory extends ImageViewFactory {
 
         return theView;
     }
-
 }

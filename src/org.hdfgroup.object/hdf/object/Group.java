@@ -66,7 +66,6 @@ public abstract class Group extends HObject implements MetaDataContainer {
     /** The value of CRT_ORDER_INDEXED */
     public static final int CRT_ORDER_INDEXED = 2;
 
-
     /**
      * Constructs an instance of the group with specific name, path and parent
      * group. An HDF data object must have a name. The path is the group path
@@ -86,7 +85,8 @@ public abstract class Group extends HObject implements MetaDataContainer {
      * @param grpParent
      *            the parent of this group.
      */
-    public Group(FileFormat theFile, String grpName, String grpPath, Group grpParent) {
+    public Group(FileFormat theFile, String grpName, String grpPath, Group grpParent)
+    {
         this(theFile, grpName, grpPath, grpParent, null);
     }
 
@@ -106,7 +106,8 @@ public abstract class Group extends HObject implements MetaDataContainer {
      *            the oid of this group.
      */
     @Deprecated
-    public Group(FileFormat theFile, String grpName, String grpPath, Group grpParent, long[] oid) {
+    public Group(FileFormat theFile, String grpName, String grpPath, Group grpParent, long[] oid)
+    {
         super(theFile, grpName, grpPath, oid);
 
         this.parent = grpParent;
@@ -117,9 +118,10 @@ public abstract class Group extends HObject implements MetaDataContainer {
      * the destructor will clear memory space, the function is usually not
      * needed.
      */
-    public void clear() {
+    public void clear()
+    {
         if (memberList != null)
-            ((Vector<HObject>) memberList).setSize(0);
+            ((Vector<HObject>)memberList).setSize(0);
     }
 
     /**
@@ -128,9 +130,10 @@ public abstract class Group extends HObject implements MetaDataContainer {
      * @param object
      *            the HObject to be added to the member list.
      */
-    public void addToMemberList(HObject object) {
+    public void addToMemberList(HObject object)
+    {
         if (memberList == null) {
-            int size = Math.min(getNumberOfMembersInFile(), this.getFileFormat().getMaxMembers());
+            int size   = Math.min(getNumberOfMembersInFile(), this.getFileFormat().getMaxMembers());
             memberList = new Vector<>(size + 5);
         }
 
@@ -145,7 +148,8 @@ public abstract class Group extends HObject implements MetaDataContainer {
      *            the HObject (Group or Dataset) to be removed from the member
      *            list.
      */
-    public void removeFromMemberList(HObject object) {
+    public void removeFromMemberList(HObject object)
+    {
         if (memberList != null)
             memberList.remove(object);
     }
@@ -156,11 +160,12 @@ public abstract class Group extends HObject implements MetaDataContainer {
      *
      * @return the list of members of this group.
      */
-    public List<HObject> getMemberList() {
+    public List<HObject> getMemberList()
+    {
         FileFormat theFile = this.getFileFormat();
 
         if ((memberList == null) && (theFile != null)) {
-            int size = Math.min(getNumberOfMembersInFile(), this.getFileFormat().getMaxMembers());
+            int size   = Math.min(getNumberOfMembersInFile(), this.getFileFormat().getMaxMembers());
             memberList = new Vector<>(size + 5); // avoid infinite loop search for groups without members
 
             // find the memberList from the file by checking the group path and
@@ -176,19 +181,20 @@ public abstract class Group extends HObject implements MetaDataContainer {
             }
 
             HObject root = theFile.getRootObject();
-            if (root == null) return memberList;
+            if (root == null)
+                return memberList;
 
-            Iterator<HObject> it = ((Group) root).depthFirstMemberList().iterator();
-            Group g = null;
-            Object uObj = null;
+            Iterator<HObject> it = ((Group)root).depthFirstMemberList().iterator();
+            Group g              = null;
+            Object uObj          = null;
             while (it.hasNext()) {
                 uObj = it.next();
 
                 if (uObj instanceof Group) {
-                    g = (Group) uObj;
+                    g = (Group)uObj;
                     if (g.getPath() != null) { // add this check to get rid of null exception
-                        if ((this.isRoot() && g.isRoot()) || (this.getPath().equals(g.getPath()) &&
-                                        g.getName().endsWith(this.getName()))) {
+                        if ((this.isRoot() && g.isRoot()) ||
+                            (this.getPath().equals(g.getPath()) && g.getName().endsWith(this.getName()))) {
                             memberList = g.getMemberList();
                             break;
                         }
@@ -203,19 +209,20 @@ public abstract class Group extends HObject implements MetaDataContainer {
     /**
      * @return the members of this Group in breadth-first order.
      */
-    public List<HObject> breadthFirstMemberList() {
+    public List<HObject> breadthFirstMemberList()
+    {
         Vector<HObject> members = new Vector<>();
-        Queue<HObject> queue = new LinkedList<>();
-        HObject currentObj = this;
+        Queue<HObject> queue    = new LinkedList<>();
+        HObject currentObj      = this;
 
-        queue.addAll(((Group) currentObj).getMemberList());
+        queue.addAll(((Group)currentObj).getMemberList());
 
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             currentObj = queue.remove();
             members.add(currentObj);
 
-            if(currentObj instanceof Group && ((Group) currentObj).getNumberOfMembersInFile() > 0)
-                queue.addAll(((Group) currentObj).getMemberList());
+            if (currentObj instanceof Group && ((Group)currentObj).getNumberOfMembersInFile() > 0)
+                queue.addAll(((Group)currentObj).getMemberList());
         }
 
         return members;
@@ -224,23 +231,24 @@ public abstract class Group extends HObject implements MetaDataContainer {
     /**
      * @return the members of this Group in depth-first order.
      */
-    public List<HObject> depthFirstMemberList() {
+    public List<HObject> depthFirstMemberList()
+    {
         Vector<HObject> members = new Vector<>();
-        Stack<HObject> stack = new Stack<>();
-        HObject currentObj = this;
+        Stack<HObject> stack    = new Stack<>();
+        HObject currentObj      = this;
 
         // Push elements onto the stack in reverse order
-        List<HObject> list = ((Group) currentObj).getMemberList();
-        for(int i = list.size() - 1; i >= 0; i--)
+        List<HObject> list = ((Group)currentObj).getMemberList();
+        for (int i = list.size() - 1; i >= 0; i--)
             stack.push(list.get(i));
 
-        while(!stack.empty()) {
+        while (!stack.empty()) {
             currentObj = stack.pop();
             members.add(currentObj);
 
-            if(currentObj instanceof Group && ((Group) currentObj).getNumberOfMembersInFile() > 0) {
-                list = ((Group) currentObj).getMemberList();
-                for(int i = list.size() - 1; i >= 0; i--)
+            if (currentObj instanceof Group && ((Group)currentObj).getNumberOfMembersInFile() > 0) {
+                list = ((Group)currentObj).getMemberList();
+                for (int i = list.size() - 1; i >= 0; i--)
                     stack.push(list.get(i));
             }
         }
@@ -263,14 +271,15 @@ public abstract class Group extends HObject implements MetaDataContainer {
      * @throws Exception if the name can not be set
      */
     @Override
-    public void setName(String newName) throws Exception {
+    public void setName(String newName) throws Exception
+    {
         if (newName == null)
             throw new IllegalArgumentException("The new name is NULL");
 
         super.setName(newName);
 
         if (memberList != null) {
-            int n = memberList.size();
+            int n          = memberList.size();
             HObject theObj = null;
             for (int i = 0; i < n; i++) {
                 theObj = memberList.get(i);
@@ -280,18 +289,14 @@ public abstract class Group extends HObject implements MetaDataContainer {
     }
 
     /** @return the parent group. */
-    public final Group getParent() {
-        return parent;
-    }
+    public final Group getParent() { return parent; }
 
     /**
      * Checks if it is a root group.
      *
      * @return true if the group is a root group; otherwise, returns false.
      */
-    public final boolean isRoot() {
-        return (parent == null);
-    }
+    public final boolean isRoot() { return (parent == null); }
 
     /**
      * Returns the total number of members of this group in file.
@@ -308,17 +313,16 @@ public abstract class Group extends HObject implements MetaDataContainer {
      *
      * @return Total number of members of this group in the file.
      */
-    public int getNumberOfMembersInFile() {
-        return nMembersInFile;
-    }
+    public int getNumberOfMembersInFile() { return nMembersInFile; }
 
     /**
      * Get the HObject at the specified index in this Group's member list.
      * @param idx The index of the HObject to get.
      * @return The HObject at the specified index.
      */
-    public HObject getMember(int idx) {
-        if(memberList.size() <= 0 || idx >= memberList.size())
+    public HObject getMember(int idx)
+    {
+        if (memberList.size() <= 0 || idx >= memberList.size())
             return null;
 
         return memberList.get(idx);

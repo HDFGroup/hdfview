@@ -9,79 +9,77 @@
 
 package datatypes;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.FileFormat;
-import hdf.object.h5.H5File;
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import hdf.object.FileFormat;
+import hdf.object.h5.H5File;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5ObjectEx_T_Commit {
-    private static String FILENAME = "H5ObjectEx_T_Commit.h5";
-    private static String DATATYPENAME = "Sensor_Type";
-    protected static final int INTEGERSIZE = 4;
-    protected static final int DOUBLESIZE = 8;
+    private static String FILENAME           = "H5ObjectEx_T_Commit.h5";
+    private static String DATATYPENAME       = "Sensor_Type";
+    protected static final int INTEGERSIZE   = 4;
+    protected static final int DOUBLESIZE    = 8;
     protected final static int MAXSTRINGSIZE = 80;
 
     // Values for the various classes of datatypes
     enum H5T_class {
-        H5T_NO_CLASS(HDF5Constants.H5T_NO_CLASS), // error
-        H5T_INTEGER(HDF5Constants.H5T_INTEGER), // integer types
-        H5T_FLOAT(HDF5Constants.H5T_FLOAT), // floating-point types
-        H5T_TIME(HDF5Constants.H5T_TIME), // date and time types
-        H5T_STRING(HDF5Constants.H5T_STRING), // character string types
-        H5T_BITFIELD(HDF5Constants.H5T_BITFIELD), // bit field types
-        H5T_OPAQUE(HDF5Constants.H5T_OPAQUE), // opaque types
-        H5T_COMPOUND(HDF5Constants.H5T_COMPOUND), // compound types
+        H5T_NO_CLASS(HDF5Constants.H5T_NO_CLASS),   // error
+        H5T_INTEGER(HDF5Constants.H5T_INTEGER),     // integer types
+        H5T_FLOAT(HDF5Constants.H5T_FLOAT),         // floating-point types
+        H5T_TIME(HDF5Constants.H5T_TIME),           // date and time types
+        H5T_STRING(HDF5Constants.H5T_STRING),       // character string types
+        H5T_BITFIELD(HDF5Constants.H5T_BITFIELD),   // bit field types
+        H5T_OPAQUE(HDF5Constants.H5T_OPAQUE),       // opaque types
+        H5T_COMPOUND(HDF5Constants.H5T_COMPOUND),   // compound types
         H5T_REFERENCE(HDF5Constants.H5T_REFERENCE), // reference types
-        H5T_ENUM(HDF5Constants.H5T_ENUM), // enumeration types
-        H5T_VLEN(HDF5Constants.H5T_VLEN), // Variable-Length types
-        H5T_ARRAY(HDF5Constants.H5T_ARRAY), // Array types
-        H5T_NCLASSES(11); // this must be last
+        H5T_ENUM(HDF5Constants.H5T_ENUM),           // enumeration types
+        H5T_VLEN(HDF5Constants.H5T_VLEN),           // Variable-Length types
+        H5T_ARRAY(HDF5Constants.H5T_ARRAY),         // Array types
+        H5T_NCLASSES(11);                           // this must be last
 
         private static final Map<Integer, H5T_class> lookup = new HashMap<Integer, H5T_class>();
 
-        static {
+        static
+        {
             for (H5T_class s : EnumSet.allOf(H5T_class.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5T_class(int layout_type) {
-            this.code = layout_type;
-        }
+        H5T_class(int layout_type) { this.code = layout_type; }
 
-        public int getCode() {
-            return this.code;
-        }
+        public int getCode() { return this.code; }
 
-        public static H5T_class get(int code) {
-            return lookup.get(code);
-        }
+        public static H5T_class get(int code) { return lookup.get(code); }
     }
 
     // The supporting Sensor_Datatype class.
     private static class Sensor_Datatype {
         static int numberMembers = 4;
-        static int[] memberDims = { 1, 1, 1, 1 };
+        static int[] memberDims  = {1, 1, 1, 1};
 
-        String[] memberNames = { "Serial number", "Location", "Temperature (F)", "Pressure (inHg)" };
-        long[] memberFileTypes = { HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1, HDF5Constants.H5T_IEEE_F64BE,
-                HDF5Constants.H5T_IEEE_F64BE };
-        static int[] memberStorage = { INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE };
+        String[] memberNames       = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
+        long[] memberFileTypes     = {HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
+                                  HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
+        static int[] memberStorage = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
 
         // Data size is the storage size for the members not the object.
-        static int getDataSize() {
+        static int getDataSize()
+        {
             int data_size = 0;
             for (int indx = 0; indx < numberMembers; indx++)
                 data_size += memberStorage[indx] * memberDims[indx];
             return data_size;
         }
 
-        static int getOffset(int memberItem) {
+        static int getOffset(int memberItem)
+        {
             int data_offset = 0;
             for (int indx = 0; indx < memberItem; indx++)
                 data_offset += memberStorage[indx];
@@ -89,16 +87,17 @@ public class H5ObjectEx_T_Commit {
         }
     }
 
-    private static void CreateDataType() {
-        H5File file = null;
-        long file_id = -1;
-        long strtype_id = -1;
-        long filetype_id = -1;
+    private static void CreateDataType()
+    {
+        H5File file               = null;
+        long file_id              = -1;
+        long strtype_id           = -1;
+        long filetype_id          = -1;
         Sensor_Datatype datatypes = new Sensor_Datatype();
 
         // Create a new file using default properties.
         try {
-            file = new H5File(FILENAME, FileFormat.CREATE);
+            file    = new H5File(FILENAME, FileFormat.CREATE);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -126,7 +125,8 @@ public class H5ObjectEx_T_Commit {
                     long type_id = datatypes.memberFileTypes[indx];
                     if (type_id == HDF5Constants.H5T_C_S1)
                         type_id = strtype_id;
-                    H5.H5Tinsert(filetype_id, datatypes.memberNames[indx], Sensor_Datatype.getOffset(indx), type_id);
+                    H5.H5Tinsert(filetype_id, datatypes.memberNames[indx], Sensor_Datatype.getOffset(indx),
+                                 type_id);
                 }
             }
         }
@@ -137,8 +137,8 @@ public class H5ObjectEx_T_Commit {
         // Commit the compound datatype to the file, creating a named datatype.
         try {
             if ((file_id >= 0) && (filetype_id >= 0))
-                H5.H5Tcommit(file_id, DATATYPENAME, filetype_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                H5.H5Tcommit(file_id, DATATYPENAME, filetype_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -171,15 +171,16 @@ public class H5ObjectEx_T_Commit {
         }
     }
 
-    private static void ReadDataType() {
-        H5File file = null;
-        long file_id = -1;
+    private static void ReadDataType()
+    {
+        H5File file      = null;
+        long file_id     = -1;
         int typeclass_id = -1;
         long filetype_id = -1;
 
         // Open an existing file.
         try {
-            file = new H5File(FILENAME, FileFormat.READ);
+            file    = new H5File(FILENAME, FileFormat.READ);
             file_id = file.open();
         }
         catch (Exception e) {
@@ -240,7 +241,8 @@ public class H5ObjectEx_T_Commit {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_T_Commit.CreateDataType();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -248,5 +250,4 @@ public class H5ObjectEx_T_Commit {
         // data using malloc().
         H5ObjectEx_T_Commit.ReadDataType();
     }
-
 }

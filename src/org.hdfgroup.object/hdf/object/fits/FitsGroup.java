@@ -30,8 +30,7 @@ import hdf.object.Group;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class FitsGroup extends Group
-{
+public class FitsGroup extends Group {
     private static final long serialVersionUID = 4993155577664991838L;
 
     /**
@@ -52,17 +51,16 @@ public class FitsGroup extends Group
      * @param parent the parent of this group.
      * @param theID the unique identifier of this data object.
      */
-    public FitsGroup(FileFormat fileFormat, String name, String path, Group parent, long[] theID) {
-        super (fileFormat, name, path, parent, ((theID == null) ? DEFAULT_OID : theID));
+    public FitsGroup(FileFormat fileFormat, String name, String path, Group parent, long[] theID)
+    {
+        super(fileFormat, name, path, parent, ((theID == null) ? DEFAULT_OID : theID));
     }
 
     /*
      * (non-Javadoc)
      * @see hdf.object.DataFormat#hasAttribute()
      */
-    public boolean hasAttribute () {
-        return false;
-    }
+    public boolean hasAttribute() { return false; }
 
     // Implementing DataFormat
     /**
@@ -75,7 +73,8 @@ public class FitsGroup extends Group
      * @throws Exception
      *             if the metadata can not be retrieved
      */
-    public List getMetadata() throws Exception {
+    public List getMetadata() throws Exception
+    {
         if (!isRoot())
             return null; // there is only one group in the file: the root
 
@@ -102,7 +101,8 @@ public class FitsGroup extends Group
      * @throws Exception
      *             if the metadata can not be written
      */
-    public void writeMetadata(Object info) throws Exception {
+    public void writeMetadata(Object info) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
@@ -116,7 +116,8 @@ public class FitsGroup extends Group
      * @throws Exception
      *             if the metadata can not be removed
      */
-    public void removeMetadata(Object info) throws Exception {
+    public void removeMetadata(Object info) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
@@ -130,14 +131,16 @@ public class FitsGroup extends Group
      * @throws Exception
      *             if the metadata can not be updated
      */
-    public void updateMetadata(Object info) throws Exception {
+    public void updateMetadata(Object info) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
     // Implementing DataFormat
     @Override
-    public long open() {
+    public long open()
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
@@ -149,7 +152,8 @@ public class FitsGroup extends Group
      *        the group identifier
      */
     @Override
-    public void close(long gid) {
+    public void close(long gid)
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
@@ -167,12 +171,13 @@ public class FitsGroup extends Group
      * @throws Exception
      *            if there is an error
      */
-    public static FitsGroup create(String name, Group pgroup) throws Exception {
+    public static FitsGroup create(String name, Group pgroup) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for FITS.");
     }
 
-    //Implementing DataFormat
+    // Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
      *
@@ -186,8 +191,8 @@ public class FitsGroup extends Group
      * @throws Exception
      *             if the metadata can not be retrieved
      */
-    public List getMetadata(int... attrPropList) throws Exception {
+    public List getMetadata(int... attrPropList) throws Exception
+    {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
-
 }

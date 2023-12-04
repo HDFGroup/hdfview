@@ -17,9 +17,6 @@ package hdf.object.nc2;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -28,15 +25,19 @@ import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ucar.ma2.DataType;
 import ucar.nc2.Variable;
 
 /**
- * NC2Dataset describes an multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
- * float, double and string, and operations performed on the scalar dataset
+ * NC2Dataset describes an multi-dimension array of HDF5 scalar or atomic data types, such as byte, int,
+ * short, long, float, double and string, and operations performed on the scalar dataset
  *
  * The library predefines a modest number of datatypes. For details, read
- * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User Guide</a>
+ * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
+ * Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -44,20 +45,21 @@ import ucar.nc2.Variable;
 public class NC2Dataset extends ScalarDS implements MetaDataContainer {
     private static final long serialVersionUID = -6031051694304457461L;
 
-    private static final Logger   log = LoggerFactory.getLogger(NC2Dataset.class);
+    private static final Logger log = LoggerFactory.getLogger(NC2Dataset.class);
 
-    /** tag for netCDF datasets.
+    /**
+     * tag for netCDF datasets.
      *  HDF4 library supports netCDF version 2.3.2. It only supports SDS APIs.
      */
     // magic number for netCDF: "C(67) D(68) F(70) '\001'"
-    public static final int                 DFTAG_NDG_NETCDF = 67687001;
+    public static final int DFTAG_NDG_NETCDF = 67687001;
 
     /**
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
      */
     @SuppressWarnings("rawtypes")
-    private List                            attributeList;
+    private List attributeList;
 
     /** the native dataset */
     private Variable nativeDataset;
@@ -72,10 +74,11 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      * @param oid
      *            the unique identifier of this data object.
      */
-    public NC2Dataset(FileFormat fileFormat, Variable ncDataset, long[] oid) {
+    public NC2Dataset(FileFormat fileFormat, Variable ncDataset, long[] oid)
+    {
         super(fileFormat, ncDataset.getName(), HObject.SEPARATOR, oid);
         unsignedConverted = false;
-        nativeDataset = ncDataset;
+        nativeDataset     = ncDataset;
     }
 
     /**
@@ -84,20 +87,23 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      * @return true if it has any attributes, false otherwise.
      */
     @Override
-    public boolean hasAttribute() {
+    public boolean hasAttribute()
+    {
         return false;
     }
 
     // Implementing Dataset
     @Override
-    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception {
+    public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // implementing Dataset
     @Override
-    public byte[] readBytes() throws Exception {
+    public byte[] readBytes() throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -123,18 +129,19 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      *             if memory is exhausted
      */
     @Override
-    public Object read() throws Exception {
+    public Object read() throws Exception
+    {
         Object theData = null;
 
         if (nativeDataset == null)
             return null;
 
         int[] origin = new int[rank];
-        int[] shape = new int[rank];
+        int[] shape  = new int[rank];
 
         for (int i = 0; i < rank; i++) {
-            origin[i] = (int) startDims[i];
-            shape[i] = (int) selectedDims[i];
+            origin[i] = (int)startDims[i];
+            shape[i]  = (int)selectedDims[i];
             log.trace("read(): origin-shape [{}]={}-{}", i, origin[i], shape[i]);
         }
 
@@ -152,16 +159,16 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
             return null;
 
         if (oneD.getClass().getName().startsWith("[C")) {
-            char[] charA = (char[]) oneD;
-            int nCols = (int) getWidth();
-            int nRows = (int) getHeight();
+            char[] charA = (char[])oneD;
+            int nCols    = (int)getWidth();
+            int nRows    = (int)getHeight();
 
             String[] strA = new String[nRows];
             String allStr = new String(charA);
 
             int indx0 = 0;
             for (int i = 0; i < nRows; i++) {
-                indx0 = i * nCols;
+                indx0   = i * nCols;
                 strA[i] = allStr.substring(indx0, indx0 + nCols);
             }
             theData = strA;
@@ -184,7 +191,8 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      *             if data can not be written
      */
     @Override
-    public void write(Object buf) throws Exception {
+    public void write(Object buf) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -201,7 +209,8 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      *             if the metadata can not be retrieved
      */
     @Override
-    public List getMetadata() throws Exception {
+    public List getMetadata() throws Exception
+    {
         if (attributeList != null)
             return attributeList;
 
@@ -212,11 +221,11 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
         if (ncAttrList == null)
             return (attributeList = null);
 
-        int n = ncAttrList.size();
-        attributeList = new Vector(n);
+        int n                     = ncAttrList.size();
+        attributeList             = new Vector(n);
         ucar.nc2.Attribute ncAttr = null;
         for (int i = 0; i < n; i++) {
-            ncAttr = (ucar.nc2.Attribute) ncAttrList.get(i);
+            ncAttr = (ucar.nc2.Attribute)ncAttrList.get(i);
             log.trace("getMetadata(): Attribute[{}]:{}", i, ncAttr.toString());
             attributeList.add(NC2File.convertAttribute(this, ncAttr));
         }
@@ -242,24 +251,26 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      * @throws Exception
      *             if the metadata can not be written
      */
-   @Override
-    public void writeMetadata(Object info) throws Exception {
+    @Override
+    public void writeMetadata(Object info) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // implementing DataFormat
-   /**
-    * Deletes an existing piece of metadata from this object.
-    *
-    * @param info
-    *            the metadata to delete.
-    *
-    * @throws Exception
-    *             if the metadata can not be removed
-    */
+    /**
+     * Deletes an existing piece of metadata from this object.
+     *
+     * @param info
+     *            the metadata to delete.
+     *
+     * @throws Exception
+     *             if the metadata can not be removed
+     */
     @Override
-    public void removeMetadata(Object info) throws Exception {
+    public void removeMetadata(Object info) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -274,34 +285,38 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      *             if the metadata can not be updated
      */
     @Override
-    public void updateMetadata(Object info) throws Exception {
+    public void updateMetadata(Object info) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     // Implementing HObject
     @Override
-    public long open() {
+    public long open()
+    {
         return -1;
     }
 
     // Implementing HObject
     @Override
-    public void close(long did) {
+    public void close(long did)
+    {
     }
 
     /**
      * Retrieve and initialize dimensions and member information.
      */
     @Override
-    public void init() {
+    public void init()
+    {
         if (nativeDataset == null)
             return;
 
         if (inited)
             return; // already called. Initialize only once
 
-        isText = nativeDataset.getDataType().equals(DataType.STRING);
+        isText         = nativeDataset.getDataType().equals(DataType.STRING);
         boolean isChar = nativeDataset.getDataType().equals(DataType.CHAR);
 
         rank = nativeDataset.getRank();
@@ -310,39 +325,39 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
         if (rank == 0) {
             // a scalar data point
             isScalar = true;
-            rank = 1;
-            dims = new long[] { 1 };
+            rank     = 1;
+            dims     = new long[] {1};
         }
         else {
             isScalar = false;
-            dims = new long[rank];
+            dims     = new long[rank];
             for (int i = 0; i < rank; i++)
                 dims[i] = (nativeDataset.getDimension(i).getLength());
         }
 
-        startDims = new long[rank];
+        startDims    = new long[rank];
         selectedDims = new long[rank];
         for (int i = 0; i < rank; i++) {
-            startDims[i] = 0;
+            startDims[i]    = 0;
             selectedDims[i] = 1;
         }
 
         if (rank == 1) {
             selectedIndex[0] = 0;
-            selectedDims[0] = dims[0];
+            selectedDims[0]  = dims[0];
         }
         else if (rank == 2) {
             selectedIndex[0] = 0;
             selectedIndex[1] = 1;
-            selectedDims[0] = dims[0];
-            selectedDims[1] = dims[1];
+            selectedDims[0]  = dims[0];
+            selectedDims[1]  = dims[1];
         }
         else if (rank > 2) {
             selectedIndex[0] = 0;
             selectedIndex[1] = 1;
             selectedIndex[2] = 2;
-            selectedDims[0] = dims[0];
-            selectedDims[1] = dims[1];
+            selectedDims[0]  = dims[0];
+            selectedDims[1]  = dims[1];
         }
 
         if ((rank > 1) && isText)
@@ -375,9 +390,10 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      *
      * @throws Exception
      *            if there is an error
-    */
-    public static NC2Dataset create(String name, Group pgroup, Datatype type,
-            long[] dims, long[] maxdims, long[] chunks, int gzip, Object data) throws Exception {
+     */
+    public static NC2Dataset create(String name, Group pgroup, Datatype type, long[] dims, long[] maxdims,
+                                    long[] chunks, int gzip, Object data) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -388,8 +404,9 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      *
      * @return the datatype of the data object.
      */
-   @Override
-    public Datatype getDatatype() {
+    @Override
+    public Datatype getDatatype()
+    {
         if (datatype == null) {
             try {
                 datatype = new NC2Datatype(nativeDataset.getDataType());
@@ -409,12 +426,13 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      *            the new name of the object.
      */
     @Override
-    public void setName(String newName) throws Exception {
+    public void setName(String newName) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
-    //Implementing DataFormat
+    // Implementing DataFormat
     /**
      * Retrieves the object's metadata, such as attributes, from the file.
      *
@@ -428,7 +446,8 @@ public class NC2Dataset extends ScalarDS implements MetaDataContainer {
      * @throws Exception
      *             if the metadata can not be retrieved
      */
-    public List getMetadata(int... attrPropList) throws Exception {
+    public List getMetadata(int... attrPropList) throws Exception
+    {
         throw new UnsupportedOperationException("getMetadata(int... attrPropList) is not supported");
     }
 }

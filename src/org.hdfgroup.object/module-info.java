@@ -1,5 +1,6 @@
 /** the hdf object module */
-module org.hdfgroup.object {
+module org.hdfgroup.object
+{
     exports hdf.object;
     exports hdf.object.fits;
     exports hdf.object.h4;

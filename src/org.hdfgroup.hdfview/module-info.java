@@ -1,5 +1,6 @@
 /** the hdfview module */
-module org.hdfgroup.hdfview {
+module org.hdfgroup.hdfview
+{
     exports hdf;
     exports hdf.view;
     exports hdf.view.TreeView;

@@ -10,9 +10,6 @@ package datatypes;
 
 import java.text.DecimalFormat;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
@@ -20,22 +17,26 @@ import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarAttr;
 import hdf.object.h5.H5ScalarDS;
 
-public class H5ObjectEx_T_FloatAttribute {
-    private static String FILENAME = "H5ObjectEx_T_FloatAttribute.h5";
-    private static String DATASETNAME = "DS1";
-    private static String ATTRIBUTENAME = "A1";
-    private static final int DIM0 = 4;
-    private static final int DIM1 = 7;
-    private static final int RANK = 2;
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
 
-    private static void CreateDataset() {
-        H5File file = null;
-        H5ScalarDS dset = null;
-        long dataset_id = -1;
-        long attribute_id = -1;
-        long[] dims = { DIM0, DIM1 };
+public class H5ObjectEx_T_FloatAttribute {
+    private static String FILENAME      = "H5ObjectEx_T_FloatAttribute.h5";
+    private static String DATASETNAME   = "DS1";
+    private static String ATTRIBUTENAME = "A1";
+    private static final int DIM0       = 4;
+    private static final int DIM1       = 7;
+    private static final int RANK       = 2;
+
+    private static void CreateDataset()
+    {
+        H5File file          = null;
+        H5ScalarDS dset      = null;
+        long dataset_id      = -1;
+        long attribute_id    = -1;
+        long[] dims          = {DIM0, DIM1};
         double[][] dset_data = new double[DIM0][DIM1];
-        H5Datatype typeInt = null;
+        H5Datatype typeInt   = null;
         H5Datatype typeFloat = null;
 
         // Initialize data.
@@ -55,7 +56,7 @@ public class H5ObjectEx_T_FloatAttribute {
 
         // Create the base datatypes.
         try {
-            typeInt = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.NATIVE);
+            typeInt   = new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.ORDER_LE, Datatype.NATIVE);
             typeFloat = new H5Datatype(Datatype.CLASS_FLOAT, 8, Datatype.ORDER_LE, Datatype.NATIVE);
         }
         catch (Exception e) {
@@ -64,7 +65,7 @@ public class H5ObjectEx_T_FloatAttribute {
 
         // Create dataset with a scalar dataspace.
         try {
-            dset = (H5ScalarDS) file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
+            dset = (H5ScalarDS)file.createScalarDS(DATASETNAME, null, typeInt, dims, null, null, 0, null);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -84,7 +85,7 @@ public class H5ObjectEx_T_FloatAttribute {
         try {
             if (dataset_id >= 0)
                 attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                                                  HDF5Constants.H5P_DEFAULT);
             if (attribute_id >= 0)
                 H5.H5Awrite(attribute_id, HDF5Constants.H5T_NATIVE_DOUBLE, dset_data);
         }
@@ -118,13 +119,14 @@ public class H5ObjectEx_T_FloatAttribute {
         }
     }
 
-    private static void ReadDataset() {
-        H5File file = null;
-        H5ScalarDS dset = null;
+    private static void ReadDataset()
+    {
+        H5File file       = null;
+        H5ScalarDS dset   = null;
         long dataspace_id = -1;
-        long dataset_id = -1;
+        long dataset_id   = -1;
         long attribute_id = -1;
-        long[] dims = { DIM0, DIM1 };
+        long[] dims       = {DIM0, DIM1};
         double[][] dset_data;
 
         // Open an existing file.
@@ -138,7 +140,7 @@ public class H5ObjectEx_T_FloatAttribute {
 
         // Open an existing dataset.
         try {
-            dset = (H5ScalarDS) file.get(DATASETNAME);
+            dset       = (H5ScalarDS)file.get(DATASETNAME);
             dataset_id = dset.open();
         }
         catch (Exception e) {
@@ -148,7 +150,7 @@ public class H5ObjectEx_T_FloatAttribute {
         try {
             if (dataset_id >= 0)
                 attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                                                  HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -173,7 +175,7 @@ public class H5ObjectEx_T_FloatAttribute {
 
         // Allocate array of pointers to two-dimensional arrays (the
         // elements of the dataset.
-        dset_data = new double[(int) dims[0]][(int) (dims[1])];
+        dset_data = new double[(int)dims[0]][(int)(dims[1])];
 
         // Read data.
         try {
@@ -231,7 +233,8 @@ public class H5ObjectEx_T_FloatAttribute {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5ObjectEx_T_FloatAttribute.CreateDataset();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -239,5 +242,4 @@ public class H5ObjectEx_T_FloatAttribute {
         // data using malloc().
         H5ObjectEx_T_FloatAttribute.ReadDataset();
     }
-
 }

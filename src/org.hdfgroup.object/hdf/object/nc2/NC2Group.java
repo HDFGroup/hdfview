@@ -18,11 +18,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import hdf.object.FileFormat;
 import hdf.object.Group;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ucar.nc2.NetcdfFile;
 
@@ -37,8 +37,7 @@ import ucar.nc2.NetcdfFile;
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
  */
-public class NC2Group extends Group
-{
+public class NC2Group extends Group {
     private static final long serialVersionUID = -1261533010442193447L;
 
     private static final Logger log = LoggerFactory.getLogger(NC2Group.class);
@@ -51,9 +50,7 @@ public class NC2Group extends Group
     /**
      * @return the corresponding netcdf Group for this group.
      */
-    public ucar.nc2.Group getNetCDFGroup() {
-        return netCDFGroup;
-    }
+    public ucar.nc2.Group getNetCDFGroup() { return netCDFGroup; }
 
     /**
      * Set the corresponding netcdf Group for this group.
@@ -61,9 +58,7 @@ public class NC2Group extends Group
      * @param netCDFGroup
      *        the ucar.nc2.Group to associate to this group
      */
-    public void setNetCDFGroup(ucar.nc2.Group netCDFGroup) {
-        this.netCDFGroup = netCDFGroup;
-    }
+    public void setNetCDFGroup(ucar.nc2.Group netCDFGroup) { this.netCDFGroup = netCDFGroup; }
 
     /**
      * The list of attributes of this data object. Members of the list are
@@ -75,11 +70,13 @@ public class NC2Group extends Group
     private List netcdfTypedefList;
     /** The list of netcdf dimensions of this data object. Members of the list are instance of ucar.nc2.*. */
     private List netcdfDimensionList;
-    /** The list of netcdf attributes of this data object. Members of the list are * instance of ucar.nc2.*. */
+    /**
+     * The list of netcdf attributes of this data object. Members of the list are * instance of ucar.nc2.*.
+     */
     private List netcdfAttributeList;
 
     /** The default object ID for NC2 objects */
-    private static final long[] DEFAULT_OID = { 0 };
+    private static final long[] DEFAULT_OID = {0};
 
     /**
      * Constructs an NC2 group with specific name, path, and parent.
@@ -95,7 +92,8 @@ public class NC2Group extends Group
      * @param theID
      *            the unique identifier of this data object.
      */
-    public NC2Group(FileFormat fileFormat, String name, String path, Group parent, long[] theID) {
+    public NC2Group(FileFormat fileFormat, String name, String path, Group parent, long[] theID)
+    {
         super(fileFormat, name, path, parent, ((theID == null) ? DEFAULT_OID : theID));
         ucar.nc2.Group parentGroup = null;
         if (parent != null)
@@ -109,16 +107,12 @@ public class NC2Group extends Group
      *
      * @return true if it has any attributes, false otherwise.
      */
-    public boolean hasAttribute() {
-        return false;
-    }
+    public boolean hasAttribute() { return false; }
 
     /**
      * @return true if this group has an attached dimension.
      */
-    public boolean hasDimension() {
-        return false;
-    }
+    public boolean hasDimension() { return false; }
 
     // Implementing DataFormat
     /**
@@ -132,13 +126,14 @@ public class NC2Group extends Group
      *             if the metadata can not be retrieved
      */
     @SuppressWarnings("rawtypes")
-    public List getMetadata() throws Exception {
+    public List getMetadata() throws Exception
+    {
         if (attributeList != null)
             return attributeList;
 
-        NC2File theFile = (NC2File)getFileFormat();
+        NC2File theFile   = (NC2File)getFileFormat();
         NetcdfFile ncFile = theFile.getNetcdfFile();
-        if (!isRoot() && (netCDFGroup !=null)) {
+        if (!isRoot() && (netCDFGroup != null)) {
             netcdfDimensionList = netCDFGroup.getDimensions();
 
             netcdfTypedefList = netCDFGroup.getEnumTypedefs();
@@ -160,7 +155,7 @@ public class NC2Group extends Group
 
             ucar.nc2.Attribute netcdfAttr = null;
             for (int i = 0; i < n; i++) {
-                netcdfAttr = (ucar.nc2.Attribute) netcdfAttributeList.get(i);
+                netcdfAttr = (ucar.nc2.Attribute)netcdfAttributeList.get(i);
                 log.trace("getMetadata(): Attribute[{}]:{}", i, netcdfAttr.toString());
                 attributeList.add(NC2File.convertAttribute(this, netcdfAttr));
             }
@@ -178,7 +173,8 @@ public class NC2Group extends Group
      * @throws Exception
      *            if there is an error
      */
-    public void writeMetadata(Object info) throws Exception {
+    public void writeMetadata(Object info) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -192,7 +188,8 @@ public class NC2Group extends Group
      * @throws Exception
      *            if there is an error
      */
-    public void removeMetadata(Object info) throws Exception {
+    public void removeMetadata(Object info) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -207,7 +204,8 @@ public class NC2Group extends Group
      * @throws Exception
      *            if there is an error
      */
-    public void updateMetadata(Object info) throws Exception {
+    public void updateMetadata(Object info) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -219,7 +217,8 @@ public class NC2Group extends Group
      * @return the group identifier if successful.
      */
     @Override
-    public long open() {
+    public long open()
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -231,7 +230,8 @@ public class NC2Group extends Group
      *            the identifier of the group to close.
      */
     @Override
-    public void close(long gid) {
+    public void close(long gid)
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -249,7 +249,8 @@ public class NC2Group extends Group
      * @throws Exception
      *            if there is an error
      */
-    public static NC2Group create(String name, Group pgroup) throws Exception {
+    public static NC2Group create(String name, Group pgroup) throws Exception
+    {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
@@ -268,11 +269,12 @@ public class NC2Group extends Group
      *             if the metadata can not be retrieved
      */
     @SuppressWarnings("rawtypes")
-    public List getMetadata(int... attrPropList) throws Exception {
-        int hdfType = 0;
-        int attrType = 0;
-        int dimType = 0;
-        int enumType = 0;
+    public List getMetadata(int... attrPropList) throws Exception
+    {
+        int hdfType     = 0;
+        int attrType    = 0;
+        int dimType     = 0;
+        int enumType    = 0;
         List returnList = null;
 
         // use 0 to skip or 1 select in attrPropList to get the list
@@ -306,8 +308,9 @@ public class NC2Group extends Group
      *
      * @return the attribute string.
      */
-    public String netcdfAttributeString(int index) {
-        ucar.nc2.Attribute netcdfAttr = (ucar.nc2.Attribute) netcdfAttributeList.get(index);
+    public String netcdfAttributeString(int index)
+    {
+        ucar.nc2.Attribute netcdfAttr = (ucar.nc2.Attribute)netcdfAttributeList.get(index);
         log.trace("netcdfAttributeString(): netcdfAttribute[{}]:{}", index, netcdfAttr.toString());
         String returnStr = netcdfAttr.toString();
         return returnStr;
@@ -321,18 +324,19 @@ public class NC2Group extends Group
      *
      * @return the Dimension string.
      */
-    public String netcdfDimensionString(int index) {
-        ucar.nc2.Dimension netcdfDim = (ucar.nc2.Dimension) netcdfDimensionList.get(index);
+    public String netcdfDimensionString(int index)
+    {
+        ucar.nc2.Dimension netcdfDim = (ucar.nc2.Dimension)netcdfDimensionList.get(index);
         log.trace("netcdfDimensionString(): netcdfDimension[{}]:{}", index, netcdfDim.toString());
         StringBuilder objDimensionStr = new StringBuilder(netcdfDim.getShortName());
         if (netcdfDim.isShared())
             objDimensionStr.append("[SHARED]");
         if (netcdfDim.isUnlimited())
             objDimensionStr.append(" = UNLIMITED");
-          else if (netcdfDim.isVariableLength())
-              objDimensionStr.append(" = UNKNOWN");
-          else
-              objDimensionStr.append(" = " + netcdfDim.getLength());
+        else if (netcdfDim.isVariableLength())
+            objDimensionStr.append(" = UNKNOWN");
+        else
+            objDimensionStr.append(" = " + netcdfDim.getLength());
         return objDimensionStr.toString();
     }
 
@@ -344,20 +348,20 @@ public class NC2Group extends Group
      *
      * @return the EnumTypedef string.
      */
-    public String netcdfTypedefString(int index) {
-        ucar.nc2.EnumTypedef netcdfType = (ucar.nc2.EnumTypedef) netcdfTypedefList.get(index);
+    public String netcdfTypedefString(int index)
+    {
+        ucar.nc2.EnumTypedef netcdfType = (ucar.nc2.EnumTypedef)netcdfTypedefList.get(index);
         log.trace("netcdfEnumTypedefString(): netcdfTypedef[{}]:{}", index, netcdfType.toString());
         StringBuilder objEnumTypedefStr = new StringBuilder(netcdfType.getShortName() + " {");
-        int count = 0;
-        List<Object> keyset = Arrays.asList(netcdfType.getMap().keySet().toArray());
+        int count                       = 0;
+        List<Object> keyset             = Arrays.asList(netcdfType.getMap().keySet().toArray());
         for (Object key : keyset) {
-          String s = netcdfType.getMap().get(key);
-          if (0 < count++)
-              objEnumTypedefStr.append(", ");
-          objEnumTypedefStr.append("'" + s + "' = " + key);
+            String s = netcdfType.getMap().get(key);
+            if (0 < count++)
+                objEnumTypedefStr.append(", ");
+            objEnumTypedefStr.append("'" + s + "' = " + key);
         }
         objEnumTypedefStr.append(" }");
         return objEnumTypedefStr.toString();
     }
-
 }

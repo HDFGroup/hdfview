@@ -5,18 +5,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import hdf.object.CompoundDS;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.h5.H5File;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.object.CompoundDS;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.h5.H5File;
 
 /**
  * @author rsinha
@@ -24,12 +25,13 @@ import hdf.object.h5.H5File;
  */
 public class CompoundDSTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompoundDSTest.class);
-    private static final H5File H5FILE = new H5File();
+    private static final H5File H5FILE        = new H5File();
 
-    private H5File testFile = null;
+    private H5File testFile   = null;
     private CompoundDS testDS = null;
 
-    protected void closeFile() {
+    protected void closeFile()
+    {
         if (testFile != null) {
             try {
                 testFile.close();
@@ -40,7 +42,8 @@ public class CompoundDSTest {
         }
     }
 
-    protected void checkObjCount(long fileid) {
+    protected void checkObjCount(long fileid)
+    {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
@@ -52,7 +55,8 @@ public class CompoundDSTest {
     }
 
     @BeforeClass
-    public static void createFile() throws Exception {
+    public static void createFile() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -71,7 +75,8 @@ public class CompoundDSTest {
     }
 
     @AfterClass
-    public static void checkIDs() throws Exception {
+    public static void checkIDs() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -83,7 +88,8 @@ public class CompoundDSTest {
     }
 
     @Before
-    public void openFiles() throws Exception {
+    public void openFiles() throws Exception
+    {
         try {
             int openID = H5.getOpenIDCount();
             if (openID > 0)
@@ -93,7 +99,7 @@ public class CompoundDSTest {
             ex.printStackTrace();
         }
         try {
-            testFile = (H5File) H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
+            testFile = (H5File)H5FILE.createInstance(H5TestFile.NAME_FILE_H5, FileFormat.WRITE);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -101,7 +107,7 @@ public class CompoundDSTest {
         assertNotNull(testFile);
 
         try {
-            testDS = (CompoundDS) testFile.get(H5TestFile.NAME_DATASET_COMPOUND);
+            testDS = (CompoundDS)testFile.get(H5TestFile.NAME_DATASET_COMPOUND);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -111,7 +117,8 @@ public class CompoundDSTest {
     }
 
     @After
-    public void removeFiles() throws Exception {
+    public void removeFiles() throws Exception
+    {
         if (testFile != null) {
             closeFile();
         }
@@ -136,29 +143,32 @@ public class CompoundDSTest {
      * </ul>
      */
     @Test
-    public void testFieldsHaveCorrectNameTypeOrderAndDims() {
+    public void testFieldsHaveCorrectNameTypeOrderAndDims()
+    {
         log.debug("testFieldsHaveCorrectNameTypeOrderAndDims");
         int correctMemberCount = H5TestFile.COMPOUND_MEMBER_NAMES.length;
         assertEquals(testDS.getMemberCount(), correctMemberCount);
         String[] names = testDS.getMemberNames();
         for (int i = 0; i < correctMemberCount; i++) {
             if (!names[i].equals(H5TestFile.COMPOUND_MEMBER_NAMES[i])) {
-                fail("Member Name at position " + i + " should be " + H5TestFile.COMPOUND_MEMBER_NAMES[i]
-                        + ", while getMemberNames returns " + names[i]);
+                fail("Member Name at position " + i + " should be " + H5TestFile.COMPOUND_MEMBER_NAMES[i] +
+                     ", while getMemberNames returns " + names[i]);
             }
         }
         Datatype[] types = testDS.getMemberTypes();
         for (int i = 0; i < correctMemberCount; i++) {
-            if (!types[i].getDescription().startsWith(H5TestFile.COMPOUND_MEMBER_DATATYPES[i].getDescription())) {
-                fail("Member Type at position " + i + " should be "
-                        + H5TestFile.COMPOUND_MEMBER_DATATYPES[i].getDescription() + ", while getMemberTypes returns " + types[i].getDescription());
+            if (!types[i].getDescription().startsWith(
+                    H5TestFile.COMPOUND_MEMBER_DATATYPES[i].getDescription())) {
+                fail("Member Type at position " + i + " should be " +
+                     H5TestFile.COMPOUND_MEMBER_DATATYPES[i].getDescription() +
+                     ", while getMemberTypes returns " + types[i].getDescription());
             }
         }
         int[] orders = testDS.getMemberOrders();
         for (int i = 0; i < correctMemberCount; i++) {
             if (orders[i] != 1) {
-                fail("Member Order at position " + i + " should be " + 1 + ", while getMemberOrders returns "
-                        + orders[i]);
+                fail("Member Order at position " + i + " should be " + 1 +
+                     ", while getMemberOrders returns " + orders[i]);
             }
         }
         for (int i = 0; i < correctMemberCount; i++) {
@@ -176,11 +186,12 @@ public class CompoundDSTest {
      * </ul>
      */
     @Test
-    public void testSelectionDeselectionCountWorks() {
+    public void testSelectionDeselectionCountWorks()
+    {
         log.debug("testSelectionDeselectionCountWorks");
         if (testDS.getSelectedMemberCount() != H5TestFile.COMPOUND_MEMBER_NAMES.length) {
-            fail("Right after init getSelectedMemberCount returns" + testDS.getSelectedMemberCount()
-            + ", when it should return " + H5TestFile.COMPOUND_MEMBER_NAMES.length);
+            fail("Right after init getSelectedMemberCount returns" + testDS.getSelectedMemberCount() +
+                 ", when it should return " + H5TestFile.COMPOUND_MEMBER_NAMES.length);
         }
 
         testDS.setAllMemberSelection(false);
@@ -192,18 +203,21 @@ public class CompoundDSTest {
 
         for (int i = 0; i < testDS.getMemberCount(); i++) {
             testDS.selectMember(i);
-            int[] orders = testDS.getSelectedMemberOrders();
+            int[] orders     = testDS.getSelectedMemberOrders();
             Datatype[] types = testDS.getMemberTypes();
             for (int j = 0; j <= i; j++) {
                 if (!testDS.isMemberSelected(j)) {
                     fail("Member " + j + " was selected while isMemberSelected says it wasnt.");
                 }
                 if (orders[j] != 1) {
-                    fail("Member Order at position " + j + " should be " + 1 + ", while getMemberOrders returns " + orders[j]);
+                    fail("Member Order at position " + j + " should be " + 1 +
+                         ", while getMemberOrders returns " + orders[j]);
                 }
-                if (!types[j].getDescription().startsWith(H5TestFile.COMPOUND_MEMBER_DATATYPES[j].getDescription())) {
-                    fail("Member Type at position " + i + " should be " + H5TestFile.COMPOUND_MEMBER_DATATYPES[j].getDescription() + ", while getMemberTypes returns "
-                            + types[j].getDescription());
+                if (!types[j].getDescription().startsWith(
+                        H5TestFile.COMPOUND_MEMBER_DATATYPES[j].getDescription())) {
+                    fail("Member Type at position " + i + " should be " +
+                         H5TestFile.COMPOUND_MEMBER_DATATYPES[j].getDescription() +
+                         ", while getMemberTypes returns " + types[j].getDescription());
                 }
             }
         }

@@ -5,25 +5,25 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.junit.Test;
+
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
-import org.junit.Test;
 
 import uitest.AbstractWindowTest;
 
 public class TestNCTreeView extends AbstractWindowTest {
 
     @Test
-    public void testRoy_attributes() {
-        String[][] expectedData =
-            {   { "" },
-                { "" } };
-        SWTBotShell tableShell = null;
-        String filename = "Roy.nc";
-        String groupname = "/";
-        String datasetName = "";
-        File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
+    public void testRoy_attributes()
+    {
+        String[][] expectedData = {{""}, {""}};
+        SWTBotShell tableShell  = null;
+        String filename         = "Roy.nc";
+        String groupname        = "/";
+        String datasetName      = "";
+        File hdfFile            = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -35,7 +35,8 @@ public class TestNCTreeView extends AbstractWindowTest {
             tabItem.activate();
 
             String val = bot.textWithLabel("Name: ").getText();
-            assertTrue(constructWrongValueMessage("testRoy_attributes()", "wrong name", groupname, val), val.equals(groupname)); // Test group name
+            assertTrue(constructWrongValueMessage("testRoy_attributes()", "wrong name", groupname, val),
+                       val.equals(groupname)); // Test group name
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -57,11 +58,12 @@ public class TestNCTreeView extends AbstractWindowTest {
         }
     }
     @Test
-    public void testRoy() {
+    public void testRoy()
+    {
         SWTBotShell tableShell = null;
-        String filename = "Roy.nc";
-        String datasetName = "/";
-        File hdfFile = openFile(filename, FILE_MODE.READ_ONLY);
+        String filename        = "Roy.nc";
+        String datasetName     = "/";
+        File hdfFile           = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
@@ -73,7 +75,8 @@ public class TestNCTreeView extends AbstractWindowTest {
             tabItem.activate();
 
             String val = bot.textWithLabel("Name: ").getText();
-            assertTrue(constructWrongValueMessage("testRoy()", "wrong name", datasetName, val), val.equals(datasetName)); // Test dataset name
+            assertTrue(constructWrongValueMessage("testRoy()", "wrong name", datasetName, val),
+                       val.equals(datasetName)); // Test dataset name
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -94,5 +97,4 @@ public class TestNCTreeView extends AbstractWindowTest {
             }
         }
     }
-
 }

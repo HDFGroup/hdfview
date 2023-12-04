@@ -29,6 +29,20 @@ import java.util.BitSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import hdf.object.CompoundDS;
+import hdf.object.DataFormat;
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.HObject;
+import hdf.object.ScalarDS;
+import hdf.view.HDFView;
+import hdf.view.ImageView.DefaultImageView;
+import hdf.view.ImageView.DefaultImageView.FlipFilter;
+import hdf.view.ImageView.DefaultImageView.Rotate90Filter;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,20 +77,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hdf.object.CompoundDS;
-import hdf.object.DataFormat;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.HObject;
-import hdf.object.ScalarDS;
-import hdf.view.HDFView;
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-import hdf.view.ImageView.DefaultImageView;
-import hdf.view.ImageView.DefaultImageView.FlipFilter;
-import hdf.view.ImageView.DefaultImageView.Rotate90Filter;
-
 /**
  * DataOptionDialog is an dialog window used to select display options. Display options include
  * selection of subset, display type (image, text, or spreadsheet).
@@ -88,76 +88,75 @@ public class DataOptionDialog extends Dialog {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataOptionDialog.class);
 
-    private Shell               shell;
+    private Shell shell;
 
-    private Font                curFont;
+    private Font curFont;
 
     /** the rank of the dataset/image */
-    private int                 rank;
+    private int rank;
 
     /** the starting point of selected subset */
-    private long[]              start;
+    private long[] start;
 
     /** the sizes of all dimensions */
-    private long[]              dims;
+    private long[] dims;
 
     /** the selected sizes of all dimensions */
-    private long[]              selected;
+    private long[] selected;
 
     /** the stride */
-    private long[]              stride;
+    private long[] stride;
 
     /** the indices of the selected dimensions. */
-    private int[]               selectedIndex;
-    private int[]               currentIndex;
+    private int[] selectedIndex;
+    private int[] currentIndex;
 
-    private BitSet              bitmask;
+    private BitSet bitmask;
 
-    private Button              spreadsheetButton;
-    private Button              imageButton;
-    private Button              base1Button;
-    private Button              base0Button;
-    private Button              charCheckbox;
-    private Button              bitmaskHelp;
-    private Button              applyBitmaskButton;
-    private Button              extractBitButton;
-    private Button[]            bitmaskButtons;
+    private Button spreadsheetButton;
+    private Button imageButton;
+    private Button base1Button;
+    private Button base0Button;
+    private Button charCheckbox;
+    private Button bitmaskHelp;
+    private Button applyBitmaskButton;
+    private Button extractBitButton;
+    private Button[] bitmaskButtons;
 
-    private Combo               choiceTableView;
-    private Combo               choiceImageView;
-    private Combo               choicePalette;
-    private Combo               transposeChoice;
-    private Combo[]             choices;
+    private Combo choiceTableView;
+    private Combo choiceImageView;
+    private Combo choicePalette;
+    private Combo transposeChoice;
+    private Combo[] choices;
 
-    private boolean             isSelectionCancelled;
-    private boolean             isTrueColorImage;
-    private boolean             isH5;
-    private boolean             isImageDisplay = false;
-    private boolean             isDisplayTypeChar = false;
-    private boolean             isTransposed = false;
-    private boolean             isIndexBase1 = false;
-    private boolean             isApplyBitmaskOnly = false;
+    private boolean isSelectionCancelled;
+    private boolean isTrueColorImage;
+    private boolean isH5;
+    private boolean isImageDisplay     = false;
+    private boolean isDisplayTypeChar  = false;
+    private boolean isTransposed       = false;
+    private boolean isIndexBase1       = false;
+    private boolean isApplyBitmaskOnly = false;
 
-    private String              dataViewName;
+    private String dataViewName;
 
-    private Label[]             maxLabels;
+    private Label[] maxLabels;
 
-    private Text[]              startFields;
-    private Text[]              endFields;
-    private Text[]              strideFields;
+    private Text[] startFields;
+    private Text[] endFields;
+    private Text[] strideFields;
 
-    private Text                dataRangeField;
-    private Text                fillValueField;
+    private Text dataRangeField;
+    private Text fillValueField;
 
-    private List                fieldList;
+    private List fieldList;
 
-    private PreviewNavigator    navigator;
+    private PreviewNavigator navigator;
 
-    private int                 numberOfPalettes;
+    private int numberOfPalettes;
 
     /** the selected dataset/image */
-    private DataFormat          dataObject;
-
+    private DataFormat dataObject;
 
     /**
      * Constructs a DataOptionDialog with the given HDFView.
@@ -167,61 +166,63 @@ public class DataOptionDialog extends Dialog {
      * @param dataObject
      *            the data object associated with this dialog
      */
-    public DataOptionDialog(Shell parent, DataFormat dataObject) {
+    public DataOptionDialog(Shell parent, DataFormat dataObject)
+    {
         super(parent, SWT.APPLICATION_MODAL);
 
-        if (dataObject == null) return;
+        if (dataObject == null)
+            return;
 
         this.dataObject = dataObject;
 
         try {
-            curFont = new Font(
-                    Display.getCurrent(),
-                    ViewProperties.getFontType(),
-                    ViewProperties.getFontSize(),
-                    SWT.NORMAL);
+            curFont = new Font(Display.getCurrent(), ViewProperties.getFontType(),
+                               ViewProperties.getFontSize(), SWT.NORMAL);
         }
         catch (Exception ex) {
             curFont = null;
         }
 
         isSelectionCancelled = true;
-        isTrueColorImage = false;
-        bitmask = null;
-        numberOfPalettes = 1;
+        isTrueColorImage     = false;
+        bitmask              = null;
+        numberOfPalettes     = 1;
 
         if (!dataObject.isInited())
             dataObject.init();
 
         if (isH5 && (dataObject instanceof ScalarDS))
-            numberOfPalettes = ((ScalarDS) dataObject).getNumberOfPalettes();
+            numberOfPalettes = ((ScalarDS)dataObject).getNumberOfPalettes();
 
-        rank = dataObject.getRank();
-        dims = dataObject.getDims();
-        selected = dataObject.getSelectedDims();
-        start = dataObject.getStartDims();
+        rank          = dataObject.getRank();
+        dims          = dataObject.getDims();
+        selected      = dataObject.getSelectedDims();
+        start         = dataObject.getStartDims();
         selectedIndex = dataObject.getSelectedIndex();
-        stride = dataObject.getStride();
-        currentIndex = new int[Math.min(3, rank)];
+        stride        = dataObject.getStride();
+        currentIndex  = new int[Math.min(3, rank)];
 
-        maxLabels = new Label[3];
-        startFields = new Text[3];
-        endFields = new Text[3];
+        maxLabels    = new Label[3];
+        startFields  = new Text[3];
+        endFields    = new Text[3];
         strideFields = new Text[3];
-        choices = new Combo[3];
+        choices      = new Combo[3];
 
-        isH5 = ((HObject) dataObject).getFileFormat().isThisType(
-                FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
+        isH5 = ((HObject)dataObject)
+                   .getFileFormat()
+                   .isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
     }
 
     /**
      * Open the DataOptionDialoDialog used to select display options for an object.
      */
-    public void open() {
+    public void open()
+    {
         Shell parent = getParent();
-        shell = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+        shell        = new Shell(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
         shell.setFont(curFont);
-        shell.setText("Dataset Selection - " + ((HObject) dataObject).getPath() + ((HObject) dataObject).getName());
+        shell.setText("Dataset Selection - " + ((HObject)dataObject).getPath() +
+                      ((HObject)dataObject).getName());
         shell.setImages(ViewProperties.getHdfIcons());
         shell.setLayout(new GridLayout(1, true));
 
@@ -243,9 +244,10 @@ public class DataOptionDialog extends Dialog {
         okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 // set palette for image view
-                if(imageButton != null) {
+                if (imageButton != null) {
                     if ((dataObject instanceof ScalarDS) && imageButton.getSelection()) {
                         setPalette();
                     }
@@ -257,9 +259,9 @@ public class DataOptionDialog extends Dialog {
                     return;
                 }
 
-                if(imageButton != null) {
+                if (imageButton != null) {
                     if (dataObject instanceof ScalarDS) {
-                        ((ScalarDS) dataObject).setIsImageDisplay(imageButton.getSelection());
+                        ((ScalarDS)dataObject).setIsImageDisplay(imageButton.getSelection());
                     }
                 }
 
@@ -275,7 +277,8 @@ public class DataOptionDialog extends Dialog {
         cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
         cancelButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 shell.notifyListeners(SWT.Close, null);
 
                 shell.dispose();
@@ -289,13 +292,14 @@ public class DataOptionDialog extends Dialog {
         shell.setMinimumSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
         org.eclipse.swt.graphics.Rectangle parentBounds = parent.getBounds();
-        Point shellSize = shell.getSize();
+        Point shellSize                                 = shell.getSize();
         shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                          (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
         shell.addListener(SWT.Close, new Listener() {
             @Override
-            public void handleEvent(Event e) {
+            public void handleEvent(Event e)
+            {
                 if (imageButton == null) {
                     isImageDisplay = false;
                 }
@@ -342,8 +346,10 @@ public class DataOptionDialog extends Dialog {
 
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
-                if (curFont != null) curFont.dispose();
+            public void widgetDisposed(DisposeEvent e)
+            {
+                if (curFont != null)
+                    curFont.dispose();
             }
         });
 
@@ -352,13 +358,13 @@ public class DataOptionDialog extends Dialog {
         // Prevent SWT from selecting TableView button by
         // default if dataset is an image
         if (dataObject instanceof ScalarDS) {
-            if (((ScalarDS) dataObject).isImageDisplay()) {
+            if (((ScalarDS)dataObject).isImageDisplay()) {
                 spreadsheetButton.setSelection(false);
             }
         }
 
         Display display = parent.getDisplay();
-        while(!shell.isDisposed()) {
+        while (!shell.isDisposed()) {
             if (!display.readAndDispatch())
                 display.sleep();
         }
@@ -367,14 +373,15 @@ public class DataOptionDialog extends Dialog {
     /**
      * Set the initial state of all the variables
      */
-    private void init() {
+    private void init()
+    {
         // set the imagebutton state
         boolean isImage = false;
 
         if (dataObject instanceof ScalarDS) {
             if (!dataObject.getDatatype().isText()) {
-                ScalarDS sd = (ScalarDS) dataObject;
-                isImage = sd.isImageDisplay();
+                ScalarDS sd      = (ScalarDS)dataObject;
+                isImage          = sd.isImageDisplay();
                 isTrueColorImage = sd.isTrueColor();
                 // compound datasets don't have data range or fill values
                 // (JAVA-1825)
@@ -383,23 +390,23 @@ public class DataOptionDialog extends Dialog {
             }
         }
 
-        if(choiceTableView != null) {
+        if (choiceTableView != null) {
             choiceTableView.setEnabled(!isImage);
         }
 
-        if(choiceImageView != null) {
+        if (choiceImageView != null) {
             choiceImageView.setEnabled(isImage);
         }
 
-        if(imageButton != null) {
+        if (imageButton != null) {
             imageButton.setSelection(isImage);
         }
 
-        if(choicePalette != null) {
+        if (choicePalette != null) {
             choicePalette.setEnabled(isImage && !isTrueColorImage);
         }
 
-        int n = Math.min(3, rank);
+        int n       = Math.min(3, rank);
         long endIdx = 0;
         for (int i = 0; i < n; i++) {
             choices[i].setEnabled(true);
@@ -409,7 +416,7 @@ public class DataOptionDialog extends Dialog {
             maxLabels[i].setEnabled(true);
 
             int idx = selectedIndex[i];
-            endIdx = start[idx] + selected[idx] * stride[idx];
+            endIdx  = start[idx] + selected[idx] * stride[idx];
             if (endIdx >= dims[idx]) {
                 endIdx = dims[idx];
             }
@@ -428,15 +435,14 @@ public class DataOptionDialog extends Dialog {
         }
 
         if (rank > 1) {
-            transposeChoice.setEnabled((choices[0].getSelectionIndex() > choices[1]
-                    .getSelectionIndex()));
+            transposeChoice.setEnabled((choices[0].getSelectionIndex() > choices[1].getSelectionIndex()));
 
             if (rank > 2) {
                 endFields[2].setEnabled(false);
                 strideFields[2].setEnabled(false);
 
                 if (isTrueColorImage && imageButton != null) {
-                    if(imageButton.getSelection()) {
+                    if (imageButton.getSelection()) {
                         choices[0].setEnabled(false);
                         choices[1].setEnabled(false);
                         choices[2].setEnabled(false);
@@ -459,42 +465,43 @@ public class DataOptionDialog extends Dialog {
         // reset show char button
         Datatype dtype = dataObject.getDatatype();
         if (dtype.isChar() || dtype.isInteger()) {
-            int tsize = (int) dtype.getDatatypeSize();
+            int tsize = (int)dtype.getDatatypeSize();
 
-            if(charCheckbox != null) {
+            if (charCheckbox != null) {
                 charCheckbox.setEnabled((tsize == 1) && spreadsheetButton.getSelection());
             }
 
-            if(extractBitButton != null) {
+            if (extractBitButton != null) {
                 extractBitButton.setEnabled(tsize <= 8);
             }
 
-            if(applyBitmaskButton != null) {
+            if (applyBitmaskButton != null) {
                 applyBitmaskButton.setEnabled(tsize <= 8);
             }
         }
         else {
-            if(charCheckbox != null) {
+            if (charCheckbox != null) {
                 charCheckbox.setEnabled(false);
                 charCheckbox.setSelection(false);
             }
 
-            if(extractBitButton != null) {
+            if (extractBitButton != null) {
                 extractBitButton.setEnabled(false);
             }
 
-            if(applyBitmaskButton != null) {
+            if (applyBitmaskButton != null) {
                 applyBitmaskButton.setEnabled(false);
             }
         }
     }
 
-    private void setPalette() {
+    private void setPalette()
+    {
         if (!(dataObject instanceof ScalarDS)) {
             return;
         }
 
-        byte[][] pal = null;
+        byte[][] pal  = null;
         int palChoice = choicePalette.getSelectionIndex();
 
         if (palChoice == 0) {
@@ -521,17 +528,18 @@ public class DataOptionDialog extends Dialog {
         }
         else if ((palChoice > 0) && (palChoice <= numberOfPalettes)) {
             // multiple palettes attached
-            pal = ((ScalarDS) dataObject).readPalette(palChoice - 1);
+            pal = ((ScalarDS)dataObject).readPalette(palChoice - 1);
         }
 
-        ((ScalarDS) dataObject).setPalette(pal);
+        ((ScalarDS)dataObject).setPalette(pal);
     }
 
-    private boolean setSelection() {
-        long[] n0 = { 0, 0, 0 }; // start
-        long[] n1 = { 0, 0, 0 }; // end
-        long[] n2 = { 1, 1, 1 }; // stride
-        int[] sIndex = { 0, 1, 2 };
+    private boolean setSelection()
+    {
+        long[] n0      = {0, 0, 0}; // start
+        long[] n1      = {0, 0, 0}; // end
+        long[] n2      = {1, 1, 1}; // stride
+        int[] sIndex   = {0, 1, 2};
         boolean retVal = true;
 
         int n = Math.min(3, rank);
@@ -576,10 +584,9 @@ public class DataOptionDialog extends Dialog {
         } //  (int i=0; i<n; i++)
 
         if (dataObject instanceof CompoundDS) {
-            CompoundDS d = (CompoundDS) dataObject;
+            CompoundDS d               = (CompoundDS)dataObject;
             int[] selectedFieldIndices = fieldList.getSelectionIndices();
-            if ((selectedFieldIndices == null)
-                    || (selectedFieldIndices.length < 1)) {
+            if ((selectedFieldIndices == null) || (selectedFieldIndices.length < 1)) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Set", "No member/field is selected.");
                 return false;
@@ -591,7 +598,7 @@ public class DataOptionDialog extends Dialog {
             }
         }
         else {
-            ScalarDS ds = (ScalarDS) dataObject;
+            ScalarDS ds = (ScalarDS)dataObject;
 
             if (!ds.getDatatype().isText()) {
                 StringTokenizer st = new StringTokenizer(dataRangeField.getText(), ",");
@@ -622,7 +629,7 @@ public class DataOptionDialog extends Dialog {
         // reset selected size
         for (int i = 0; i < rank; i++) {
             selected[i] = 1;
-            stride[i] = 1;
+            stride[i]   = 1;
         }
 
         // find no error, set selection the the dataset object
@@ -639,14 +646,14 @@ public class DataOptionDialog extends Dialog {
                 return false;
             }
 
-            selectedIndex[i] = sIndex[i];
-            start[selectedIndex[i]] = n0[i];
-            selected[selectedIndex[i]] = (int) selectedSize;
-            stride[selectedIndex[i]] = n2[i];
+            selectedIndex[i]           = sIndex[i];
+            start[selectedIndex[i]]    = n0[i];
+            selected[selectedIndex[i]] = (int)selectedSize;
+            stride[selectedIndex[i]]   = n2[i];
         }
 
         if ((rank > 2) && isTrueColorImage && imageButton.getSelection()) {
-            start[selectedIndex[2]] = 0;
+            start[selectedIndex[2]]    = 0;
             selected[selectedIndex[2]] = 3;
         }
 
@@ -658,8 +665,9 @@ public class DataOptionDialog extends Dialog {
         return retVal;
     }
 
-    private void setBitmask() {
-        boolean isAll = true;
+    private void setBitmask()
+    {
+        boolean isAll     = true;
         boolean isNothing = true;
 
         if (bitmaskButtons == null) {
@@ -674,7 +682,7 @@ public class DataOptionDialog extends Dialog {
 
         int len = bitmaskButtons.length;
         for (int i = 0; i < len; i++) {
-            isAll = (isAll && bitmaskButtons[i].getSelection());
+            isAll     = (isAll && bitmaskButtons[i].getSelection());
             isNothing = (isNothing && !bitmaskButtons[i].getSelection());
         }
 
@@ -693,19 +701,16 @@ public class DataOptionDialog extends Dialog {
     }
 
     /** @return true if the display option is image. */
-    public boolean isImageDisplay() {
-        return isImageDisplay;
-    }
+    public boolean isImageDisplay() { return isImageDisplay; }
 
     /** @return true if the index starts with 0. */
-    public boolean isIndexBase1() {
-        return isIndexBase1;
-    }
+    public boolean isIndexBase1() { return isIndexBase1; }
 
     /**
      * @return the bitmask.
      */
-    public BitSet getBitmask() {
+    public BitSet getBitmask()
+    {
         if (bitmask == null)
             return null;
 
@@ -714,7 +719,7 @@ public class DataOptionDialog extends Dialog {
             return null;
 
         boolean isAllSelected = true;
-        int size = bitmask.size();
+        int size              = bitmask.size();
         for (int i = 0; i < size; i++)
             isAllSelected = (bitmask.get(i) && isAllSelected);
 
@@ -726,39 +731,30 @@ public class DataOptionDialog extends Dialog {
     }
 
     /** @return the name of the selected dataview */
-    public String getDataViewName() {
-        return dataViewName;
-    }
+    public String getDataViewName() { return dataViewName; }
 
     /**
      *
      * @return true if display the data as characters; otherwise, display as numbers.
      */
-    public boolean isDisplayTypeChar() {
-        return isDisplayTypeChar;
-    }
+    public boolean isDisplayTypeChar() { return isDisplayTypeChar; }
 
     /**
      * @return if it only apply bitmask.
      */
-    public boolean isApplyBitmaskOnly() {
-        return isApplyBitmaskOnly;
-    }
+    public boolean isApplyBitmaskOnly() { return isApplyBitmaskOnly; }
 
     /**
      *
      * @return true if transpose the data in 2D table; otherwise, do not transpose the data.
      */
-    public boolean isTransposed() {
-        return isTransposed;
-    }
+    public boolean isTransposed() { return isTransposed; }
 
     /** @return true if the data selection is cancelled. */
-    public boolean isCancelled() {
-        return isSelectionCancelled;
-    }
+    public boolean isCancelled() { return isSelectionCancelled; }
 
-    private void createScalarDSContents() {
+    private void createScalarDSContents()
+    {
         // Create display type region
         org.eclipse.swt.widgets.Group displayAsGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
         displayAsGroup.setFont(curFont);
@@ -777,7 +773,8 @@ public class DataOptionDialog extends Dialog {
         spreadsheetButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         spreadsheetButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 imageButton.setSelection(!spreadsheetButton.getSelection());
                 choicePalette.setEnabled(false);
                 choiceImageView.setEnabled(false);
@@ -786,7 +783,7 @@ public class DataOptionDialog extends Dialog {
                 fillValueField.setEnabled(false);
                 Datatype dtype = dataObject.getDatatype();
                 charCheckbox.setEnabled((dtype.isChar() || dtype.isInteger()) &&
-                        (dtype.getDatatypeSize() == 1));
+                                        (dtype.getDatatypeSize() == 1));
             }
         });
 
@@ -796,8 +793,8 @@ public class DataOptionDialog extends Dialog {
         charCheckbox.setSelection(false);
         charCheckbox.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 
-        if (dataObject.getDatatype().isChar()
-                || (dataObject.getDatatype().isInteger() && dataObject.getDatatype().getDatatypeSize() == 1)) {
+        if (dataObject.getDatatype().isChar() ||
+            (dataObject.getDatatype().isInteger() && dataObject.getDatatype().getDatatypeSize() == 1)) {
             charCheckbox.setEnabled(false);
         }
 
@@ -811,7 +808,6 @@ public class DataOptionDialog extends Dialog {
         choiceTableView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         choiceTableView.select(0);
 
-
         Composite imageComposite = new Composite(displayAsGroup, SWT.BORDER);
         imageComposite.setLayout(new GridLayout(4, false));
         imageComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -822,7 +818,8 @@ public class DataOptionDialog extends Dialog {
         imageButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         imageButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 spreadsheetButton.setSelection(!imageButton.getSelection());
                 choicePalette.setEnabled(!isTrueColorImage);
                 dataRangeField.setEnabled(true);
@@ -841,13 +838,13 @@ public class DataOptionDialog extends Dialog {
         choicePalette.add("Select palette");
 
         if (dataObject instanceof ScalarDS) {
-            String paletteName = ((ScalarDS) dataObject).getPaletteName(0);
+            String paletteName = ((ScalarDS)dataObject).getPaletteName(0);
             if (paletteName == null) {
                 paletteName = "Default";
             }
             choicePalette.add(paletteName);
             for (int i = 2; i <= numberOfPalettes; i++) {
-                paletteName = ((ScalarDS) dataObject).getPaletteName(i - 1);
+                paletteName = ((ScalarDS)dataObject).getPaletteName(i - 1);
                 choicePalette.add(paletteName);
             }
         }
@@ -870,12 +867,12 @@ public class DataOptionDialog extends Dialog {
 
         String minmaxStr = "min, max";
 
-        double[] minmax = ((ScalarDS) dataObject).getImageDataRange();
+        double[] minmax = ((ScalarDS)dataObject).getImageDataRange();
         if (minmax != null) {
             if (dataObject.getDatatype().isFloat())
                 minmaxStr = minmax[0] + "," + minmax[1];
             else
-                minmaxStr = ((long) minmax[0]) + "," + ((long) minmax[1]);
+                minmaxStr = ((long)minmax[0]) + "," + ((long)minmax[1]);
         }
 
         dataRangeField.setText(minmaxStr);
@@ -900,8 +897,8 @@ public class DataOptionDialog extends Dialog {
 
         String fillStr = "val1, val2, ...";
 
-        java.util.List<Number> fillValue = ((ScalarDS) dataObject).getFilteredImageValues();
-        int n = fillValue.size();
+        java.util.List<Number> fillValue = ((ScalarDS)dataObject).getFilteredImageValues();
+        int n                            = fillValue.size();
         if (n > 0) {
             fillStr = fillValue.get(0).toString();
             for (int i = 1; i < n; i++) {
@@ -928,7 +925,7 @@ public class DataOptionDialog extends Dialog {
         base1Button.setText("1-based");
         base1Button.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 
-        if(ViewProperties.isIndexBase1()) {
+        if (ViewProperties.isIndexBase1()) {
             base0Button.setSelection(false);
             base1Button.setSelection(true);
         }
@@ -936,7 +933,6 @@ public class DataOptionDialog extends Dialog {
             base0Button.setSelection(true);
             base1Button.setSelection(false);
         }
-
 
         // Create Bitmask region
         org.eclipse.swt.widgets.Group bitmaskGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
@@ -952,41 +948,44 @@ public class DataOptionDialog extends Dialog {
         extractBitButton.setSelection(false);
         extractBitButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 boolean selected = extractBitButton.getSelection();
 
-                if(selected) {
-                    if(applyBitmaskButton.getSelection()) {
+                if (selected) {
+                    if (applyBitmaskButton.getSelection()) {
                         applyBitmaskButton.setSelection(false);
                     }
 
-                    if(!bitmaskButtons[0].getEnabled()) {
-                        for(int i = 0; i < bitmaskButtons.length; i++) {
+                    if (!bitmaskButtons[0].getEnabled()) {
+                        for (int i = 0; i < bitmaskButtons.length; i++) {
                             bitmaskButtons[i].setEnabled(true);
                         }
                     }
 
                     int n = 0;
 
-                    if(bitmaskButtons[0].getSelection()) n = 1;
+                    if (bitmaskButtons[0].getSelection())
+                        n = 1;
 
-                    for(int i = 1; i < bitmaskButtons.length; i++) {
-                        if(bitmaskButtons[i].getSelection() && !bitmaskButtons[i - 1].getSelection()) {
+                    for (int i = 1; i < bitmaskButtons.length; i++) {
+                        if (bitmaskButtons[i].getSelection() && !bitmaskButtons[i - 1].getSelection()) {
                             n++;
                         }
                     }
 
-                    if(n > 1) {
+                    if (n > 1) {
                         extractBitButton.setSelection(false);
                         applyBitmaskButton.setSelection(true);
 
-                        Tools.showError(shell, "Select",
-                                "Selecting non-adjacent bits is only allowed \nfor the \"Apply Bitmask\" option.");
+                        Tools.showError(
+                            shell, "Select",
+                            "Selecting non-adjacent bits is only allowed \nfor the \"Apply Bitmask\" option.");
                         return;
                     }
                 }
                 else {
-                    for(int i = 0; i < bitmaskButtons.length; i++) {
+                    for (int i = 0; i < bitmaskButtons.length; i++) {
                         bitmaskButtons[i].setEnabled(false);
                     }
                 }
@@ -1000,17 +999,18 @@ public class DataOptionDialog extends Dialog {
         bitmaskHelp.setEnabled(false);
         bitmaskHelp.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 String msg = ""
-                        + "\"Apply Bitmask\" applies bitwise \"AND\" to the original data.\n"
-                        + "For example, bits 2, 3, and 4 are selected for the bitmask\n"
-                        + "         10010101 (data)\n"
-                        + "AND 00011100 (mask)  \n"
-                        + "  =     00010100 (result) ==> the decimal value is 20. \n"
-                        + "\n"
-                        + "\"Extract Bit(s)\" removes all the bits from the result above where\n"
-                        + "their corresponding bits in the bitmask are 0. \nFor the same example above, "
-                        + "the result is \n101 ==> the decimal value is 5.\n\n";
+                             + "\"Apply Bitmask\" applies bitwise \"AND\" to the original data.\n"
+                             + "For example, bits 2, 3, and 4 are selected for the bitmask\n"
+                             + "         10010101 (data)\n"
+                             + "AND 00011100 (mask)  \n"
+                             + "  =     00010100 (result) ==> the decimal value is 20. \n"
+                             + "\n"
+                             + "\"Extract Bit(s)\" removes all the bits from the result above where\n"
+                             + "their corresponding bits in the bitmask are 0. \nFor the same example above, "
+                             + "the result is \n101 ==> the decimal value is 5.\n\n";
 
                 Tools.showInformation(shell, "Help", msg);
             }
@@ -1023,18 +1023,19 @@ public class DataOptionDialog extends Dialog {
         applyBitmaskButton.setSelection(false);
         applyBitmaskButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                if(extractBitButton.getSelection()) {
+            public void widgetSelected(SelectionEvent e)
+            {
+                if (extractBitButton.getSelection()) {
                     extractBitButton.setSelection(false);
                 }
                 else if (!applyBitmaskButton.getSelection()) {
-                    for(int i = 0; i < bitmaskButtons.length; i++) {
+                    for (int i = 0; i < bitmaskButtons.length; i++) {
                         bitmaskButtons[i].setEnabled(false);
                     }
                 }
                 else {
-                    if(!bitmaskButtons[0].getEnabled()) {
-                        for(int i = 0; i < bitmaskButtons.length; i++) {
+                    if (!bitmaskButtons[0].getEnabled()) {
+                        for (int i = 0; i < bitmaskButtons.length; i++) {
                             bitmaskButtons[i].setEnabled(true);
                         }
                     }
@@ -1057,48 +1058,50 @@ public class DataOptionDialog extends Dialog {
                 baseType = baseType.getDatatypeBase();
             }
 
-            tsize = (int) baseType.getDatatypeSize();
+            tsize = (int)baseType.getDatatypeSize();
         }
         else {
-            tsize = (int) dataObject.getDatatype().getDatatypeSize();
+            tsize = (int)dataObject.getDatatype().getDatatypeSize();
         }
 
-        bitmaskButtons = (tsize >= 0 && !dataObject.getDatatype().isText()) ? new Button[8 * tsize] : new Button[0];
+        bitmaskButtons =
+            (tsize >= 0 && !dataObject.getDatatype().isText()) ? new Button[8 * tsize] : new Button[0];
 
         for (int i = 0; i < bitmaskButtons.length; i++) {
             bitmaskButtons[i] = new Button(buttonComposite, SWT.RADIO);
             bitmaskButtons[i].setFont(curFont);
             bitmaskButtons[i].setText(String.valueOf(bitmaskButtons.length - i - 1));
             bitmaskButtons[i].setEnabled(false);
-            bitmaskButtons[i].addSelectionListener(
-                new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        if(extractBitButton.getSelection()) {
-                            Button source = (Button) e.widget;
+            bitmaskButtons[i].addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e)
+                {
+                    if (extractBitButton.getSelection()) {
+                        Button source = (Button)e.widget;
 
-                            // Don't allow non-adjacent selection of bits when extracting bits
-                            int n = 0;
+                        // Don't allow non-adjacent selection of bits when extracting bits
+                        int n = 0;
 
-                            if(bitmaskButtons[0].getSelection()) n = 1;
+                        if (bitmaskButtons[0].getSelection())
+                            n = 1;
 
-                            for(int i = 1; i < bitmaskButtons.length; i++) {
-                                if(bitmaskButtons[i].getSelection() && !bitmaskButtons[i - 1].getSelection()) {
-                                    n++;
-                                }
+                        for (int i = 1; i < bitmaskButtons.length; i++) {
+                            if (bitmaskButtons[i].getSelection() && !bitmaskButtons[i - 1].getSelection()) {
+                                n++;
                             }
+                        }
 
-                            if(n > 1) {
-                                Tools.showError(shell, "Select",
-                                        "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.");
+                        if (n > 1) {
+                            Tools.showError(
+                                shell, "Select",
+                                "Please select contiguous bits \nwhen the \"Show Value of Selected Bits\" option is checked.");
 
-                                source.setSelection(false);
-                                return;
-                            }
+                            source.setSelection(false);
+                            return;
                         }
                     }
                 }
-            );
+            });
         }
 
         if (dataObject.getDatatype().isChar() || (dataObject.getDatatype().isInteger() && tsize <= 8)) {
@@ -1106,7 +1109,6 @@ public class DataOptionDialog extends Dialog {
             applyBitmaskButton.setEnabled(true);
             bitmaskHelp.setEnabled(true);
         }
-
 
         // Create Dimension/Subset selection region
         org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(shell, SWT.NONE);
@@ -1116,9 +1118,9 @@ public class DataOptionDialog extends Dialog {
         dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         int h = 1, w = 1;
-        h = (int) dims[selectedIndex[0]];
+        h = (int)dims[selectedIndex[0]];
         if (rank > 1) {
-            w = (int) dims[selectedIndex[1]];
+            w = (int)dims[selectedIndex[1]];
         }
 
         if (rank > 1) {
@@ -1131,7 +1133,8 @@ public class DataOptionDialog extends Dialog {
         createDimSubSelectionComposite(dimSubGroup);
     }
 
-    private void createCompoundDSContents() {
+    private void createCompoundDSContents()
+    {
         Composite content = new Composite(shell, SWT.NONE);
         content.setLayout(new GridLayout(2, false));
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -1142,7 +1145,7 @@ public class DataOptionDialog extends Dialog {
         membersGroup.setLayout(new GridLayout(1, true));
         membersGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 
-        final String[] names = ((CompoundDS) dataObject).getMemberNames();
+        final String[] names = ((CompoundDS)dataObject).getMemberNames();
         String[] columnNames = new String[names.length];
         for (int i = 0; i < names.length; i++) {
             columnNames[i] = new String(names[i]);
@@ -1153,9 +1156,9 @@ public class DataOptionDialog extends Dialog {
         fieldList.setItems(columnNames);
         fieldList.selectAll();
 
-        GridData data = new GridData(SWT.FILL, SWT.FILL, false, true);
+        GridData data   = new GridData(SWT.FILL, SWT.FILL, false, true);
         data.heightHint = fieldList.getItemHeight() * 10;
-        data.widthHint = fieldList.computeSize(SWT.DEFAULT, SWT.DEFAULT).x + 10;
+        data.widthHint  = fieldList.computeSize(SWT.DEFAULT, SWT.DEFAULT).x + 10;
         fieldList.setLayoutData(data);
 
         org.eclipse.swt.widgets.Group dimSubGroup = new org.eclipse.swt.widgets.Group(content, SWT.NONE);
@@ -1181,8 +1184,9 @@ public class DataOptionDialog extends Dialog {
         choiceTableView.select(0);
     }
 
-    private void createDimSubSelectionComposite(Composite parent) {
-        String[] dimNames = ((Dataset) dataObject).getDimNames();
+    private void createDimSubSelectionComposite(Composite parent)
+    {
+        String[] dimNames = ((Dataset)dataObject).getDimNames();
 
         Composite selectionComposite = new Composite(parent, SWT.BORDER);
         selectionComposite.setLayout(new GridLayout(6, true));
@@ -1201,7 +1205,8 @@ public class DataOptionDialog extends Dialog {
             transposeChoice.select(0);
         }
         else {
-            new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            new Label(selectionComposite, SWT.RIGHT)
+                .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         }
 
         Label label = new Label(selectionComposite, SWT.RIGHT);
@@ -1224,7 +1229,6 @@ public class DataOptionDialog extends Dialog {
         label.setText("Max Size");
         label.setLayoutData(new GridData(SWT.CENTER, SWT.END, true, true));
 
-
         // Create Height selection row
         label = new Label(selectionComposite, SWT.RIGHT);
         label.setFont(curFont);
@@ -1236,8 +1240,9 @@ public class DataOptionDialog extends Dialog {
         choices[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         choices[0].addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                Combo source = (Combo) e.widget;
+            public void widgetSelected(SelectionEvent e)
+            {
+                Combo source = (Combo)e.widget;
 
                 processComboBoxEvent(source);
             }
@@ -1274,7 +1279,6 @@ public class DataOptionDialog extends Dialog {
         maxLabels[0].setText("1");
         maxLabels[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-
         // Create Width selection row
         label = new Label(selectionComposite, SWT.RIGHT);
         label.setFont(curFont);
@@ -1286,8 +1290,9 @@ public class DataOptionDialog extends Dialog {
         choices[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         choices[1].addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                Combo source = (Combo) e.widget;
+            public void widgetSelected(SelectionEvent e)
+            {
+                Combo source = (Combo)e.widget;
 
                 processComboBoxEvent(source);
             }
@@ -1324,7 +1329,6 @@ public class DataOptionDialog extends Dialog {
         maxLabels[1].setText("1");
         maxLabels[1].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-
         // Create Depth selection row
         label = new Label(selectionComposite, SWT.RIGHT);
         label.setFont(curFont);
@@ -1336,8 +1340,9 @@ public class DataOptionDialog extends Dialog {
         choices[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         choices[2].addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
-                Combo source = (Combo) e.widget;
+            public void widgetSelected(SelectionEvent e)
+            {
+                Combo source = (Combo)e.widget;
 
                 processComboBoxEvent(source);
             }
@@ -1374,7 +1379,6 @@ public class DataOptionDialog extends Dialog {
         maxLabels[2].setText("1");
         maxLabels[2].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-
         // Create row for Dims and reset button
         new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -1385,42 +1389,40 @@ public class DataOptionDialog extends Dialog {
         dimsButton.setEnabled((rank > 3));
         dimsButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (rank < 4) {
                     return;
                 }
 
-                int idx = 0;
+                int idx                = 0;
                 Vector<Object> choice4 = new Vector<>(rank);
-                int[] choice4Index = new int[rank - 3];
+                int[] choice4Index     = new int[rank - 3];
                 for (int i = 0; i < rank; i++) {
-                    if ((i != currentIndex[0]) && (i != currentIndex[1])
-                            && (i != currentIndex[2])) {
+                    if ((i != currentIndex[0]) && (i != currentIndex[1]) && (i != currentIndex[2])) {
                         choice4.add(choices[0].getItem(i));
                         choice4Index[idx++] = i;
                     }
                 }
 
-                String msg = "Select slice location for dimension(s):\n\""
-                        + choice4.get(0) + " [0 .. " + (dims[choice4Index[0]] - 1)
-                        + "]\"";
+                String msg = "Select slice location for dimension(s):\n\"" + choice4.get(0) + " [0 .. " +
+                             (dims[choice4Index[0]] - 1) + "]\"";
                 String initValue = String.valueOf(start[choice4Index[0]]);
-                int n = choice4.size();
+                int n            = choice4.size();
                 for (int i = 1; i < n; i++) {
-                    msg += " x \"" + choice4.get(i) + " [0 .. "
-                            + (dims[choice4Index[i]] - 1) + "]\"";
+                    msg += " x \"" + choice4.get(i) + " [0 .. " + (dims[choice4Index[i]] - 1) + "]\"";
                     initValue += " x " + String.valueOf(start[choice4Index[i]]);
                 }
 
                 String result = new InputDialog(shell, shell.getText(), msg, initValue).open();
-                if ((result == null) || ((result = result.trim()) == null)
-                        || (result.length() < 1)) {
+                if ((result == null) || ((result = result.trim()) == null) || (result.length() < 1)) {
                     return;
                 }
 
                 StringTokenizer st = new StringTokenizer(result, "x");
                 if (st.countTokens() < n) {
-                    Tools.showError(shell, "Select", "Number of dimension(s) is less than " + n + "\n" + result);
+                    Tools.showError(shell, "Select",
+                                    "Number of dimension(s) is less than " + n + "\n" + result);
                     return;
                 }
 
@@ -1436,11 +1438,11 @@ public class DataOptionDialog extends Dialog {
 
                     if ((start4[i] < 0) || (start4[i] >= dims[choice4Index[i]])) {
                         Tools.showError(shell, "Select",
-                                "Slice location is out of range.\n" + start4[i] + " >= " + dims[choice4Index[i]]);
+                                        "Slice location is out of range.\n" + start4[i] +
+                                            " >= " + dims[choice4Index[i]]);
 
                         return;
                     }
-
                 }
 
                 for (int i = 0; i < n; i++) {
@@ -1459,7 +1461,8 @@ public class DataOptionDialog extends Dialog {
         resetButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         resetButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 int n = startFields.length;
 
                 for (int i = 0; i < n; i++) {
@@ -1473,7 +1476,6 @@ public class DataOptionDialog extends Dialog {
 
         new Label(selectionComposite, SWT.RIGHT).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-
         for (int i = 0; i < 3; i++) {
             // Disable the selection components
             // init() will set them appropriately
@@ -1485,7 +1487,8 @@ public class DataOptionDialog extends Dialog {
         }
     }
 
-    private void processComboBoxEvent(Combo source) {
+    private void processComboBoxEvent(Combo source)
+    {
         int theSelectedChoice = -1;
 
         int n = Math.min(3, rank);
@@ -1508,11 +1511,9 @@ public class DataOptionDialog extends Dialog {
 
         // reset the selected dimension choice
         startFields[theSelectedChoice].setText("0");
-        endFields[theSelectedChoice].setText(String
-                .valueOf(dims[theIndex] - 1));
+        endFields[theSelectedChoice].setText(String.valueOf(dims[theIndex] - 1));
         strideFields[theSelectedChoice].setText("1");
-        maxLabels[theSelectedChoice]
-                .setText(String.valueOf(dims[theIndex]));
+        maxLabels[theSelectedChoice].setText(String.valueOf(dims[theIndex]));
 
         // if the selected choice selects the dimension that is selected by
         // other dimension choice, exchange the dimensions
@@ -1523,12 +1524,9 @@ public class DataOptionDialog extends Dialog {
             else if (theIndex == choices[i].getSelectionIndex()) {
                 choices[i].select(currentIndex[theSelectedChoice]);
                 startFields[i].setText("0");
-                endFields[i]
-                        .setText(String
-                                .valueOf(dims[currentIndex[theSelectedChoice]] - 1));
+                endFields[i].setText(String.valueOf(dims[currentIndex[theSelectedChoice]] - 1));
                 strideFields[i].setText("1");
-                maxLabels[i].setText(String
-                        .valueOf(dims[currentIndex[theSelectedChoice]]));
+                maxLabels[i].setText(String.valueOf(dims[currentIndex[theSelectedChoice]]));
             }
         }
 
@@ -1550,8 +1548,8 @@ public class DataOptionDialog extends Dialog {
                 transposeChoice.setEnabled(true);
 
             long dims[] = dataObject.getDims();
-            int w = (int) dims[wIdx];
-            int h = (int) dims[hIdx];
+            int w       = (int)dims[wIdx];
+            int h       = (int)dims[hIdx];
 
             if (navigator != null) {
                 navigator.setDimensionSize(w, h);
@@ -1564,22 +1562,25 @@ public class DataOptionDialog extends Dialog {
         }
     }
 
-    /** PreviewNavigator draws a selection rectangle for selecting a subset
-     *  of the data to be displayed. */
+    /**
+     * PreviewNavigator draws a selection rectangle for selecting a subset
+     *  of the data to be displayed.
+     */
     private class PreviewNavigator extends Canvas {
-        private final int         NAVIGATOR_SIZE   = 150;
-        private int               dimX, dimY, x, y;
-        private double            r;
-        private Point             startPosition; // mouse clicked position
-        private Rectangle         selectedArea;
-        private Image             previewImage     = null;
-        private String            selStr;
+        private final int NAVIGATOR_SIZE = 150;
+        private int dimX, dimY, x, y;
+        private double r;
+        private Point startPosition; // mouse clicked position
+        private Rectangle selectedArea;
+        private Image previewImage = null;
+        private String selStr;
 
-        private PreviewNavigator(Composite parent, int style, int w, int h) {
+        private PreviewNavigator(Composite parent, int style, int w, int h)
+        {
             super(parent, style);
 
-            GridData data = new GridData(SWT.FILL, SWT.FILL, false, true);
-            data.widthHint = NAVIGATOR_SIZE;
+            GridData data   = new GridData(SWT.FILL, SWT.FILL, false, true);
+            data.widthHint  = NAVIGATOR_SIZE;
             data.heightHint = NAVIGATOR_SIZE;
             this.setLayoutData(data);
 
@@ -1587,13 +1588,13 @@ public class DataOptionDialog extends Dialog {
             dimY = h;
             if (dimX > dimY) {
                 x = NAVIGATOR_SIZE;
-                r = dimX / (double) x;
-                y = (int) (dimY / r);
+                r = dimX / (double)x;
+                y = (int)(dimY / r);
             }
             else {
                 y = NAVIGATOR_SIZE;
-                r = dimY / (double) y;
-                x = (int) (dimX / r);
+                r = dimY / (double)y;
+                x = (int)(dimX / r);
             }
 
             selectedArea = new Rectangle();
@@ -1619,19 +1620,21 @@ public class DataOptionDialog extends Dialog {
 
             this.addMouseListener(new MouseListener() {
                 @Override
-                public void mouseDoubleClick(MouseEvent e) {
-
+                public void mouseDoubleClick(MouseEvent e)
+                {
                 }
 
                 @Override
-                public void mouseDown(MouseEvent e) {
+                public void mouseDown(MouseEvent e)
+                {
                     startPosition = new Point(e.x, e.y);
                     selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
                 }
 
                 @Override
-                public void mouseUp(MouseEvent e) {
-                    if(startPosition.x == e.x && startPosition.y == e.y) {
+                public void mouseUp(MouseEvent e)
+                {
+                    if (startPosition.x == e.x && startPosition.y == e.y) {
                         selectedArea.setBounds(startPosition.x, startPosition.y, 0, 0);
                         redraw();
                     }
@@ -1640,8 +1643,9 @@ public class DataOptionDialog extends Dialog {
 
             this.addMouseMoveListener(new MouseMoveListener() {
                 @Override
-                public void mouseMove(MouseEvent e) {
-                    if(e.stateMask == SWT.BUTTON1 || e.stateMask == SWT.BUTTON3) {
+                public void mouseMove(MouseEvent e)
+                {
+                    if (e.stateMask == SWT.BUTTON1 || e.stateMask == SWT.BUTTON3) {
                         Point p0 = startPosition;
                         Point p1 = new Point(e.x, e.y);
 
@@ -1668,13 +1672,14 @@ public class DataOptionDialog extends Dialog {
 
             this.addPaintListener(new PaintListener() {
                 @Override
-                public void paintControl(PaintEvent e) {
+                public void paintControl(PaintEvent e)
+                {
                     GC gc = e.gc;
 
                     gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLUE));
 
                     if (previewImage != null) {
-                        gc.drawImage(convertBufferedImageToSWTImage((BufferedImage) previewImage), 0, 0);
+                        gc.drawImage(convertBufferedImageToSWTImage((BufferedImage)previewImage), 0, 0);
                     }
                     else {
                         gc.fillRectangle(0, 0, x, y);
@@ -1687,30 +1692,32 @@ public class DataOptionDialog extends Dialog {
                         gc.drawRectangle(selectedArea.x, selectedArea.y, w, h);
                     }
 
-                    org.eclipse.swt.graphics.Rectangle bounds = ((Canvas) e.widget).getBounds();
-                    Point textSize = gc.stringExtent(selStr);
+                    org.eclipse.swt.graphics.Rectangle bounds = ((Canvas)e.widget).getBounds();
+                    Point textSize                            = gc.stringExtent(selStr);
                     gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
-                    gc.drawString(selStr, (bounds.width / 2) - (textSize.x / 2), bounds.height - textSize.y - 4);
+                    gc.drawString(selStr, (bounds.width / 2) - (textSize.x / 2),
+                                  bounds.height - textSize.y - 4);
                 }
             });
         }
 
-        private Image createPreviewImage ( ) throws Exception {
+        private Image createPreviewImage() throws Exception
+        {
             if ((rank <= 1) || !(dataObject instanceof ScalarDS)) {
                 return null;
             }
 
             Image preImage = null;
-            ScalarDS sd = (ScalarDS) dataObject;
+            ScalarDS sd    = (ScalarDS)dataObject;
 
             if (sd.getDatatype().isText()) {
                 return null;
             }
 
             // backup the selection
-            long[] strideBackup = new long[rank];
-            long[] selectedBackup = new long[rank];
-            long[] startBackup = new long[rank];
+            long[] strideBackup       = new long[rank];
+            long[] selectedBackup     = new long[rank];
+            long[] startBackup        = new long[rank];
             int[] selectedIndexBackup = new int[3];
             System.arraycopy(stride, 0, strideBackup, 0, rank);
             System.arraycopy(selected, 0, selectedBackup, 0, rank);
@@ -1719,8 +1726,8 @@ public class DataOptionDialog extends Dialog {
 
             // set the selection for preview
             for (int i = 0; i < rank; i++) {
-                start[i] = 0;
-                stride[i] = 1;
+                start[i]    = 0;
+                stride[i]   = 1;
                 selected[i] = 1;
             }
 
@@ -1728,10 +1735,11 @@ public class DataOptionDialog extends Dialog {
                 try {
                     selectedIndex[0] = choices[0].getSelectionIndex();
                     selectedIndex[1] = choices[1].getSelectionIndex();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                 }
             }
-            long steps = (long) Math.ceil(r);
+            long steps                 = (long)Math.ceil(r);
             selected[selectedIndex[0]] = (dims[selectedIndex[0]] / steps);
             selected[selectedIndex[1]] = (dims[selectedIndex[1]] / steps);
             stride[selectedIndex[0]] = stride[selectedIndex[1]] = steps;
@@ -1744,30 +1752,28 @@ public class DataOptionDialog extends Dialog {
             }
 
             if (isTrueColorImage && (start.length > 2)) {
-                start[selectedIndex[2]] = 0;
+                start[selectedIndex[2]]    = 0;
                 selected[selectedIndex[2]] = 3;
-                stride[selectedIndex[2]] = 1;
+                stride[selectedIndex[2]]   = 1;
             }
 
             // update the ratio of preview image size to the real dataset
-            y = (int) selected[selectedIndex[0]];
-            x = (int) selected[selectedIndex[1]];
-            r = Math.min((double) dims[selectedIndex[0]]
-                    / (double) selected[selectedIndex[0]],
-                    (double) dims[selectedIndex[1]]
-                            / (double) selected[selectedIndex[1]]);
+            y = (int)selected[selectedIndex[0]];
+            x = (int)selected[selectedIndex[1]];
+            r = Math.min((double)dims[selectedIndex[0]] / (double)selected[selectedIndex[0]],
+                         (double)dims[selectedIndex[1]] / (double)selected[selectedIndex[1]]);
 
             try {
                 Object data = sd.read();
-                int h = (int)sd.getHeight();
-                int w = (int)sd.getWidth();
+                int h       = (int)sd.getHeight();
+                int w       = (int)sd.getWidth();
 
-                byte[] bData = Tools.getBytes(data, sd.getImageDataRange(), w, h, false, sd.getFilteredImageValues(), null);
+                byte[] bData = Tools.getBytes(data, sd.getImageDataRange(), w, h, false,
+                                              sd.getFilteredImageValues(), null);
 
                 if (isTrueColorImage) {
                     boolean isPlaneInterlace = (sd.getInterlace() == ScalarDS.INTERLACE_PLANE);
-                    preImage = Tools.createTrueColorImage(bData,
-                            isPlaneInterlace, w, h);
+                    preImage                 = Tools.createTrueColorImage(bData, isPlaneInterlace, w, h);
                 }
                 else {
                     byte[][] imagePalette = sd.getPalette();
@@ -1775,10 +1781,9 @@ public class DataOptionDialog extends Dialog {
                         imagePalette = Tools.createGrayPalette();
                     }
 
-                    if ((isH5 || (rank > 2))
-                            && (selectedIndex[0] > selectedIndex[1])) {
+                    if ((isH5 || (rank > 2)) && (selectedIndex[0] > selectedIndex[1])) {
                         // transpose data
-                        int n = bData.length;
+                        int n         = bData.length;
                         byte[] bData2 = new byte[n];
                         for (int i = 0; i < h; i++) {
                             for (int j = 0; j < w; j++) {
@@ -1789,7 +1794,7 @@ public class DataOptionDialog extends Dialog {
                     if (!isH5 && !sd.isDefaultImageOrder() && (selectedIndex[1] > selectedIndex[0])) {
                         // transpose data for hdf4 images where selectedIndex[1]
                         // > selectedIndex[0]
-                        int n = bData.length;
+                        int n         = bData.length;
                         byte[] bData2 = new byte[n];
                         for (int i = 0; i < h; i++) {
                             for (int j = 0; j < w; j++) {
@@ -1811,53 +1816,55 @@ public class DataOptionDialog extends Dialog {
             return preImage;
         }
 
-        private void updateSelection (int x0, int y0, int w, int h) {
+        private void updateSelection(int x0, int y0, int w, int h)
+        {
             int i0 = 0, i1 = 0;
 
-            i0 = (int) (y0 * r);
+            i0 = (int)(y0 * r);
             if (i0 > dims[currentIndex[0]]) {
-                i0 = (int) dims[currentIndex[0]];
+                i0 = (int)dims[currentIndex[0]];
             }
             startFields[0].setText(String.valueOf(i0));
 
-            i1 = (int) ((y0 + h) * r);
+            i1 = (int)((y0 + h) * r);
 
             if (i1 < i0) {
                 i1 = i0;
             }
             endFields[0].setText(String.valueOf(i1));
 
-            selStr = String.valueOf((int) (h * r));
+            selStr = String.valueOf((int)(h * r));
 
             if (rank > 1) {
-                i0 = (int) (x0 * r);
+                i0 = (int)(x0 * r);
                 if (i0 > dims[currentIndex[1]]) {
-                    i0 = (int) dims[currentIndex[1]];
+                    i0 = (int)dims[currentIndex[1]];
                 }
                 startFields[1].setText(String.valueOf(i0));
 
-                i1 = (int) ((x0 + w) * r);
+                i1 = (int)((x0 + w) * r);
                 if (i1 < i0) {
                     i1 = i0;
                 }
                 endFields[1].setText(String.valueOf(i1));
 
-                selStr += " x " + ((int) (w * r));
+                selStr += " x " + ((int)(w * r));
             }
         }
 
-        private void setDimensionSize (int w, int h) {
+        private void setDimensionSize(int w, int h)
+        {
             dimX = w;
             dimY = h;
             if (dimX > dimY) {
                 x = NAVIGATOR_SIZE;
-                r = dimX / (double) x;
-                y = (int) (dimY / r);
+                r = dimX / (double)x;
+                y = (int)(dimY / r);
             }
             else {
                 y = NAVIGATOR_SIZE;
-                r = dimY / (double) y;
-                x = (int) (dimX / r);
+                r = dimY / (double)y;
+                x = (int)(dimX / r);
             }
 
             selectedArea.setSize(0, 0);
@@ -1871,12 +1878,14 @@ public class DataOptionDialog extends Dialog {
             this.redraw();
         }
 
-        private boolean applyImageFilter(ImageFilter filter) {
-            boolean status = true;
+        private boolean applyImageFilter(ImageFilter filter)
+        {
+            boolean status              = true;
             ImageProducer imageProducer = previewImage.getSource();
 
             try {
-                previewImage = Tools.toBufferedImage(Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(imageProducer, filter)));
+                previewImage = Tools.toBufferedImage(
+                    Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(imageProducer, filter)));
             }
             catch (Exception err) {
                 shell.getDisplay().beep();
@@ -1887,12 +1896,12 @@ public class DataOptionDialog extends Dialog {
             return status;
         }
 
-        private void flip(int direction) {
-            applyImageFilter(new FlipFilter(direction));
-        }
+        private void flip(int direction) { applyImageFilter(new FlipFilter(direction)); }
 
-        private void rotate(int direction) {
-            if (!(direction == DefaultImageView.ROTATE_CW_90 || direction == DefaultImageView.ROTATE_CCW_90)) return;
+        private void rotate(int direction)
+        {
+            if (!(direction == DefaultImageView.ROTATE_CW_90 || direction == DefaultImageView.ROTATE_CCW_90))
+                return;
 
             applyImageFilter(new Rotate90Filter(direction));
         }
@@ -1904,22 +1913,22 @@ public class DataOptionDialog extends Dialog {
          *
          * @return the Image
          */
-        private org.eclipse.swt.graphics.Image convertBufferedImageToSWTImage(BufferedImage image) {
+        private org.eclipse.swt.graphics.Image convertBufferedImageToSWTImage(BufferedImage image)
+        {
             Display display = this.getDisplay();
 
             if (image.getColorModel() instanceof DirectColorModel) {
-                DirectColorModel colorModel = (DirectColorModel) image
-                        .getColorModel();
-                PaletteData palette = new PaletteData(colorModel.getRedMask(),
-                        colorModel.getGreenMask(), colorModel.getBlueMask());
-                ImageData data = new ImageData(image.getWidth(),
-                        image.getHeight(), colorModel.getPixelSize(),
-                        palette);
+                DirectColorModel colorModel = (DirectColorModel)image.getColorModel();
+                PaletteData palette = new PaletteData(colorModel.getRedMask(), colorModel.getGreenMask(),
+                                                      colorModel.getBlueMask());
+                ImageData data =
+                    new ImageData(image.getWidth(), image.getHeight(), colorModel.getPixelSize(), palette);
 
                 for (int y = 0; y < data.height; y++) {
                     for (int x = 0; x < data.width; x++) {
                         int rgb = image.getRGB(x, y);
-                        int pixel = palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
+                        int pixel =
+                            palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
                         data.setPixel(x, y, pixel);
                         if (colorModel.hasAlpha()) {
                             data.setAlpha(x, y, (rgb >> 24) & 0xFF);
@@ -1930,27 +1939,24 @@ public class DataOptionDialog extends Dialog {
                 return new org.eclipse.swt.graphics.Image(display, data);
             }
             else if (image.getColorModel() instanceof IndexColorModel) {
-                IndexColorModel colorModel = (IndexColorModel) image
-                        .getColorModel();
-                int size = colorModel.getMapSize();
-                byte[] reds = new byte[size];
-                byte[] greens = new byte[size];
-                byte[] blues = new byte[size];
+                IndexColorModel colorModel = (IndexColorModel)image.getColorModel();
+                int size                   = colorModel.getMapSize();
+                byte[] reds                = new byte[size];
+                byte[] greens              = new byte[size];
+                byte[] blues               = new byte[size];
                 colorModel.getReds(reds);
                 colorModel.getGreens(greens);
                 colorModel.getBlues(blues);
                 RGB[] rgbs = new RGB[size];
                 for (int i = 0; i < rgbs.length; i++) {
-                    rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF,
-                            blues[i] & 0xFF);
+                    rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF, blues[i] & 0xFF);
                 }
                 PaletteData palette = new PaletteData(rgbs);
-                ImageData data = new ImageData(image.getWidth(),
-                        image.getHeight(), colorModel.getPixelSize(),
-                        palette);
+                ImageData data =
+                    new ImageData(image.getWidth(), image.getHeight(), colorModel.getPixelSize(), palette);
                 data.transparentPixel = colorModel.getTransparentPixel();
                 WritableRaster raster = image.getRaster();
-                int[] pixelArray = new int[1];
+                int[] pixelArray      = new int[1];
                 for (int y = 0; y < data.height; y++) {
                     for (int x = 0; x < data.width; x++) {
                         raster.getPixel(x, y, pixelArray);
@@ -1961,15 +1967,15 @@ public class DataOptionDialog extends Dialog {
                 return new org.eclipse.swt.graphics.Image(display, data);
             }
             else if (image.getColorModel() instanceof ComponentColorModel) {
-                ComponentColorModel colorModel = (ComponentColorModel) image.getColorModel();
-                //ASSUMES: 3 BYTE BGR IMAGE TYPE
-                PaletteData palette = new PaletteData(0x0000FF, 0x00FF00,0xFF0000);
-                ImageData data = new ImageData(image.getWidth(), image.getHeight(),
-                        colorModel.getPixelSize(), palette);
-                //This is valid because we are using a 3-byte Data model with no transparent pixels
+                ComponentColorModel colorModel = (ComponentColorModel)image.getColorModel();
+                // ASSUMES: 3 BYTE BGR IMAGE TYPE
+                PaletteData palette = new PaletteData(0x0000FF, 0x00FF00, 0xFF0000);
+                ImageData data =
+                    new ImageData(image.getWidth(), image.getHeight(), colorModel.getPixelSize(), palette);
+                // This is valid because we are using a 3-byte Data model with no transparent pixels
                 data.transparentPixel = -1;
                 WritableRaster raster = image.getRaster();
-                int[] pixelArray = new int[3];
+                int[] pixelArray      = new int[3];
                 for (int y = 0; y < data.height; y++) {
                     for (int x = 0; x < data.width; x++) {
                         raster.getPixel(x, y, pixelArray);

@@ -2,25 +2,27 @@ package misc;
 
 import java.util.Vector;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5File;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class TestH5Table {
 
-    public static void main(final String[] args) {
-        long dim1=1000, dim2=50;
+    public static void main(final String[] args)
+    {
+        long dim1 = 1000, dim2 = 50;
 
-        if (args.length > 1)
-        {
+        if (args.length > 1) {
             try {
                 dim1 = Long.parseLong(args[0]);
                 dim2 = Long.parseLong(args[1]);
-            } catch (final Exception ex) {
+            }
+            catch (final Exception ex) {
                 ex.printStackTrace();
                 System.exit(0);
             }
@@ -28,7 +30,8 @@ public class TestH5Table {
 
         try {
             testTable(dim1, dim2);
-        } catch (final Exception ex) {
+        }
+        catch (final Exception ex) {
             ex.printStackTrace();
             System.exit(0);
         }
@@ -37,31 +40,31 @@ public class TestH5Table {
     /**
      * Test the performance of reading a small table data.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static final void testTable(final long dim1, final long dim2) throws Exception
     {
-        long nObjs = 0; // number of object left open
-        Dataset dset =null;
-        long t0=0, t1=0, time=0, nbytes=0, readKBS=0, writeKBS=0;
+        long nObjs   = 0; // number of object left open
+        Dataset dset = null;
+        long t0 = 0, t1 = 0, time = 0, nbytes = 0, readKBS = 0, writeKBS = 0;
         final String dname = "/table";
 
-        final String[] COMPOUND_MEMBER_NAMES = {"int32", "float32"};
+        final String[] COMPOUND_MEMBER_NAMES         = {"int32", "float32"};
         final H5Datatype[] COMPOUND_MEMBER_DATATYPES = {
             new H5Datatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE),
             new H5Datatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE)};
 
-        final long DIM1 = dim1;
-        final long DIM2 = dim2;
-        final long[] DIMs = {DIM1, DIM2};
-        final int DIM_SIZE = (int)(DIM1*DIM2);
+        final long DIM1    = dim1;
+        final long DIM2    = dim2;
+        final long[] DIMs  = {DIM1, DIM2};
+        final int DIM_SIZE = (int)(DIM1 * DIM2);
 
-        final int[] DATA_INT = new int[DIM_SIZE];
+        final int[] DATA_INT     = new int[DIM_SIZE];
         final float[] DATA_FLOAT = new float[DIM_SIZE];
-        final Vector DATA_COMP = new Vector(2);
+        final Vector DATA_COMP   = new Vector(2);
 
-        for (int i=0; i<DIM_SIZE; i++) {
-            DATA_INT[i] = i;
-            DATA_FLOAT[i] = i+i/100.0f;
+        for (int i = 0; i < DIM_SIZE; i++) {
+            DATA_INT[i]   = i;
+            DATA_FLOAT[i] = i + i / 100.0f;
         }
         DATA_COMP.add(0, DATA_INT);
         DATA_COMP.add(1, DATA_FLOAT);
@@ -70,16 +73,17 @@ public class TestH5Table {
         file.open();
 
         try {
-            dset = file.createCompoundDS(dname, null, DIMs, null, null, -1,
-                    COMPOUND_MEMBER_NAMES, COMPOUND_MEMBER_DATATYPES, null, DATA_COMP);
-        } catch (final Exception ex) {
-            System.out.println("file.createCompoundDS() failed. "+ ex);
+            dset = file.createCompoundDS(dname, null, DIMs, null, null, -1, COMPOUND_MEMBER_NAMES,
+                                         COMPOUND_MEMBER_DATATYPES, null, DATA_COMP);
+        }
+        catch (final Exception ex) {
+            System.out.println("file.createCompoundDS() failed. " + ex);
         }
 
         try {
-            time = 0;
-            nbytes = (DIM_SIZE*8L*1000000L);
-            dset = (Dataset)file.get(dname);
+            time   = 0;
+            nbytes = (DIM_SIZE * 8L * 1000000L);
+            dset   = (Dataset)file.get(dname);
             dset.clearData();
             collectGarbage();
 
@@ -87,50 +91,56 @@ public class TestH5Table {
             t0 = System.nanoTime();
             try {
                 dset.getData();
-            } catch (final Exception ex) {
-                 System.out.println("dset.getData() failed. "+ ex);
             }
-            t1 = System.nanoTime();
-            time = (t1-t0);
-            readKBS = (nbytes)/time;
+            catch (final Exception ex) {
+                System.out.println("dset.getData() failed. " + ex);
+            }
+            t1      = System.nanoTime();
+            time    = (t1 - t0);
+            readKBS = (nbytes) / time;
 
             // test writing
             t0 = System.nanoTime();
             try {
                 dset.write();
-            } catch (final Exception ex) {
-                 System.out.println("dset.write() failed. "+ ex);
             }
-            t1 = System.nanoTime();
-            time = (t1-t0);
-            writeKBS = (nbytes)/time;
-            System.out.println("\nReading/writing a "+DIM1+"x"+DIM2+" table [KB/S]: \t"+ readKBS+"\t"+writeKBS);
+            catch (final Exception ex) {
+                System.out.println("dset.write() failed. " + ex);
+            }
+            t1       = System.nanoTime();
+            time     = (t1 - t0);
+            writeKBS = (nbytes) / time;
+            System.out.println("\nReading/writing a " + DIM1 + "x" + DIM2 + " table [KB/S]: \t" + readKBS +
+                               "\t" + writeKBS);
 
             try {
                 nObjs = H5.H5Fget_obj_count(file.getFID(), HDF5Constants.H5F_OBJ_ALL);
-            } catch (final Exception ex) {
-                 System.out.println("H5.H5Fget_obj_count() failed. "+ ex);
+            }
+            catch (final Exception ex) {
+                System.out.println("H5.H5Fget_obj_count() failed. " + ex);
             }
 
             try {
                 file.close();
-            } catch (final Exception ex) {
-                System.out.println("file.close() failed. "+ ex);
             }
-        } finally {
+            catch (final Exception ex) {
+                System.out.println("file.close() failed. " + ex);
+            }
+        }
+        finally {
             // delete the testing file
             file.deleteOnExit();
         }
     }
 
-    private static void collectGarbage() {
+    private static void collectGarbage()
+    {
         try {
             System.gc();
             Thread.sleep(100);
         }
-        catch (final Exception ex){
+        catch (final Exception ex) {
             ex.printStackTrace();
         }
     }
 }
-

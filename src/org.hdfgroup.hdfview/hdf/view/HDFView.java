@@ -25,6 +25,30 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
+import hdf.HDFVersions;
+import hdf.object.DataFormat;
+import hdf.object.FileFormat;
+import hdf.object.HObject;
+import hdf.view.DataView.DataView;
+import hdf.view.DataView.DataViewFactory;
+import hdf.view.DataView.DataViewFactoryProducer;
+import hdf.view.DataView.DataViewManager;
+import hdf.view.HelpView.HelpView;
+import hdf.view.MetaDataView.MetaDataView;
+import hdf.view.TableView.TableView;
+import hdf.view.TreeView.DefaultTreeView;
+import hdf.view.TreeView.TreeView;
+import hdf.view.ViewProperties.DataViewType;
+import hdf.view.dialog.ImageConversionDialog;
+import hdf.view.dialog.InputDialog;
+import hdf.view.dialog.UserOptionsDialog;
+import hdf.view.dialog.UserOptionsGeneralPage;
+import hdf.view.dialog.UserOptionsHDFPage;
+import hdf.view.dialog.UserOptionsNode;
+import hdf.view.dialog.UserOptionsViewModulesPage;
+
+import hdf.hdf5lib.H5;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,147 +94,128 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
-import hdf.HDFVersions;
-import hdf.object.DataFormat;
-import hdf.object.FileFormat;
-import hdf.object.HObject;
-import hdf.view.ViewProperties.DataViewType;
-import hdf.view.DataView.DataView;
-import hdf.view.DataView.DataViewFactory;
-import hdf.view.DataView.DataViewFactoryProducer;
-import hdf.view.DataView.DataViewManager;
-import hdf.view.HelpView.HelpView;
-import hdf.view.MetaDataView.MetaDataView;
-import hdf.view.TableView.TableView;
-import hdf.view.TreeView.DefaultTreeView;
-import hdf.view.TreeView.TreeView;
-import hdf.view.dialog.ImageConversionDialog;
-import hdf.view.dialog.InputDialog;
-import hdf.view.dialog.UserOptionsDialog;
-import hdf.view.dialog.UserOptionsGeneralPage;
-import hdf.view.dialog.UserOptionsHDFPage;
-import hdf.view.dialog.UserOptionsNode;
-import hdf.view.dialog.UserOptionsViewModulesPage;
-
-
 /**
- * HDFView is the main class of this HDF visual tool. It is used to layout the graphical components of the hdfview. The
- * major GUI components of the HDFView include Menubar, Toolbar, TreeView, ContentView, and MessageArea.
+ * HDFView is the main class of this HDF visual tool. It is used to layout the graphical components of the
+ * hdfview. The major GUI components of the HDFView include Menubar, Toolbar, TreeView, ContentView, and
+ * MessageArea.
  *
- * The HDFView is designed in such a way that it does not have direct access to the HDF library. All the HDF library
- * access is done through HDF objects. Therefore, the HDFView package depends on the object package but not the library
- * package. The source code of the view package (hdf.view) should be compiled with the library package (hdf.hdflib and
- * hdf.hdf5lib).
+ * The HDFView is designed in such a way that it does not have direct access to the HDF library. All the HDF
+ * library access is done through HDF objects. Therefore, the HDFView package depends on the object package
+ * but not the library package. The source code of the view package (hdf.view) should be compiled with the
+ * library package (hdf.hdflib and hdf.hdf5lib).
  *
  * @author Jordan T. Henderson
  * @version 2.4 2015
  */
-public class HDFView implements DataViewManager
-{
+public class HDFView implements DataViewManager {
     private static final Logger log = LoggerFactory.getLogger(HDFView.class);
 
-    private static Display             display;
-    private static Shell               mainWindow;
+    private static Display display;
+    private static Shell mainWindow;
 
     /* Determines whether HDFView is being executed for GUI testing */
-    private boolean                    isTesting = false;
+    private boolean isTesting = false;
 
     /* The directory where HDFView is installed */
-    private String                     rootDir;
+    private String rootDir;
 
     /* The initial directory where HDFView looks for files */
-    private String                     startDir;
+    private String startDir;
 
     /* The current working directory */
-    private String                     currentDir;
+    private String currentDir;
 
     /* The current working file */
-    private String                     currentFile = null;
+    private String currentFile = null;
 
     /* The view properties */
-    private ViewProperties             props;
+    private ViewProperties props;
 
     /* A list of tree view implementations. */
-    private static List<String>        treeViews;
+    private static List<String> treeViews;
 
     /* A list of image view implementations. */
-    private static List<String>        imageViews;
+    private static List<String> imageViews;
 
     /* A list of tree table implementations. */
-    private static List<?>             tableViews;
+    private static List<?> tableViews;
 
     /* A list of metadata view implementations. */
-    private static List<?>             metaDataViews;
+    private static List<?> metaDataViews;
 
     /* A list of palette view implementations. */
-    private static List<?>             paletteViews;
+    private static List<?> paletteViews;
 
     /* A list of help view implementations. */
-    private static List<?>             helpViews;
+    private static List<?> helpViews;
 
     /* The list of GUI components related to NetCDF3 */
-    private final List<MenuItem>       n3GUIs = new ArrayList<>();
+    private final List<MenuItem> n3GUIs = new ArrayList<>();
 
     /* The list of GUI components related to HDF4 */
-    private final List<MenuItem>       h4GUIs = new ArrayList<>();
+    private final List<MenuItem> h4GUIs = new ArrayList<>();
 
     /* The list of GUI components related to HDF5 */
-    private final List<MenuItem>       h5GUIs = new ArrayList<>();
+    private final List<MenuItem> h5GUIs = new ArrayList<>();
 
     /* The list of GUI components related to editing */
-    //private final List<?>            editGUIs;
+    // private final List<?>            editGUIs;
 
     /* GUI component: the TreeView */
-    private TreeView                   treeView = null;
+    private TreeView treeView = null;
 
-    private static final String        JAVA_VERSION = HDFVersions.getPropertyVersionJava();
-    private static final String        HDF4_VERSION = HDFVersions.getPropertyVersionHDF4();
-    private static final String        HDF5_VERSION = HDFVersions.getPropertyVersionHDF5();
-    private static final String        HDFVIEW_VERSION = HDFVersions.getPropertyVersionView();
-    private static final String        HDFVIEW_USERSGUIDE_URL = "https://portal.hdfgroup.org/display/HDFVIEW/HDFView+3.x+User%27s+Guide";
-    private static final String        JAVA_COMPILER = "jdk " + JAVA_VERSION;
-    private static final String        JAVA_VER_INFO = "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
+    private static final String JAVA_VERSION    = HDFVersions.getPropertyVersionJava();
+    private static final String HDF4_VERSION    = HDFVersions.getPropertyVersionHDF4();
+    private static final String HDF5_VERSION    = HDFVersions.getPropertyVersionHDF5();
+    private static final String HDFVIEW_VERSION = HDFVersions.getPropertyVersionView();
+    private static final String HDFVIEW_USERSGUIDE_URL =
+        "https://portal.hdfgroup.org/display/HDFVIEW/HDFView+3.x+User%27s+Guide";
+    private static final String JAVA_COMPILER = "jdk " + JAVA_VERSION;
+    private static final String JAVA_VER_INFO =
+        "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
 
-    private static final String        ABOUT_HDFVIEW = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
-            + "For " + System.getProperty("os.name") + "\n\n"
-            + "Copyright " + '\u00a9' + " 2006 The HDF Group.\n"
-            + "All rights reserved.";
+    private static final String ABOUT_HDFVIEW = "HDF Viewer, "
+                                                + "Version " + ViewProperties.VERSION + "\n"
+                                                + "For " + System.getProperty("os.name") + "\n\n"
+                                                + "Copyright " + '\u00a9' + " 2006 The HDF Group.\n"
+                                                + "All rights reserved.";
 
     /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
-    private ToolBar                    toolBar;
+    private ToolBar toolBar;
 
     /* GUI component: The text area for showing status messages */
-    private Text                       status;
+    private Text status;
 
     /* GUI component: The area for object view */
     private ScrolledComposite treeArea;
 
     /* GUI component: The area for quick general view */
-    private ScrolledComposite          generalArea;
+    private ScrolledComposite generalArea;
 
     /* GUI component: To add and display URLs */
-    private Combo                      urlBar;
+    private Combo urlBar;
 
-    private Button                     recentFilesButton;
-    private Button                     clearTextButton;
+    private Button recentFilesButton;
+    private Button clearTextButton;
 
     /* GUI component: A list of current data windows */
-    private Menu                       windowMenu;
+    private Menu windowMenu;
 
     /* GUI component: File menu on the menubar */
-    //private final Menu               fileMenu;
+    // private final Menu               fileMenu;
 
     /* The font to be used for display text on all Controls */
-    private Font                       currentFont;
+    private Font currentFont;
 
-    private UserOptionsDialog          userOptionDialog;
+    private UserOptionsDialog userOptionDialog;
 
     /** State of refresh. */
     public boolean viewerState = false;
 
     /** Timer for refresh functions. */
     private final Runnable timer = new Runnable() {
-        public void run() {
+        public void run()
+        {
             // refresh each table displaying data
             Shell[] shellList = display.getShells();
             if (shellList != null) {
@@ -218,7 +223,7 @@ public class HDFView implements DataViewManager
                     if (shellList[i].equals(mainWindow))
                         showMetaData(treeView.getCurrentObject());
                     else {
-                        DataView view = (DataView) shellList[i].getData();
+                        DataView view = (DataView)shellList[i].getData();
                         if ((view != null) && (view instanceof TableView)) {
                             HObject obj = view.getDataObject();
                             if (obj == null || obj.getFileFormat() == null || !(obj instanceof DataFormat))
@@ -248,16 +253,17 @@ public class HDFView implements DataViewManager
      * @param start_dir
      *            the starting directory for file searches
      */
-    public HDFView(String root, String start_dir) {
+    public HDFView(String root, String start_dir)
+    {
         log.debug("Root is {}", root);
 
         if (display == null || display.isDisposed())
             display = new Display();
 
-        rootDir = root;
+        rootDir  = root;
         startDir = start_dir;
 
-        //editGUIs = new Vector<Object>();
+        // editGUIs = new Vector<Object>();
 
         props = new ViewProperties(rootDir, startDir);
         try {
@@ -281,26 +287,25 @@ public class HDFView implements DataViewManager
         log.info("Current directory is {}", currentDir);
 
         try {
-            currentFont = new Font(
-                    display,
-                    ViewProperties.getFontType(),
-                    ViewProperties.getFontSize(),
-                    SWT.NORMAL);
+            currentFont =
+                new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
         }
         catch (Exception ex) {
             currentFont = null;
         }
 
-        treeViews = ViewProperties.getTreeViewList();
+        if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5) != null)
+            H5.H5PLappend(ViewProperties.getPluginDir());
+
+        treeViews     = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
-        tableViews = ViewProperties.getTableViewList();
-        imageViews = ViewProperties.getImageViewList();
-        paletteViews = ViewProperties.getPaletteViewList();
-        helpViews = ViewProperties.getHelpViewList();
+        tableViews    = ViewProperties.getTableViewList();
+        imageViews    = ViewProperties.getImageViewList();
+        paletteViews  = ViewProperties.getPaletteViewList();
+        helpViews     = ViewProperties.getHelpViewList();
 
         log.debug("Constructor exit");
     }
-
 
     /**
      * Creates HDFView with a given size, and opens the given files in the viewer.
@@ -319,16 +324,17 @@ public class HDFView implements DataViewManager
      * @return
      *            the newly-created HDFView Shell
      */
-    public Shell openMainWindow(List<File> flist, int width, int height, int x, int y) {
+    public Shell openMainWindow(List<File> flist, int width, int height, int x, int y)
+    {
         log.debug("openMainWindow enter current directory is {}", currentDir);
 
         // Initialize all GUI components
         mainWindow = createMainWindow();
 
         try {
-            Font font = null;
+            Font font    = null;
             String fType = ViewProperties.getFontType();
-            int fSize = ViewProperties.getFontSize();
+            int fSize    = ViewProperties.getFontSize();
 
             try {
                 font = new Font(display, fType, fSize, SWT.NORMAL);
@@ -349,13 +355,13 @@ public class HDFView implements DataViewManager
         // opening any files
         mainWindow.pack();
 
-        int nfiles = flist.size();
+        int nfiles   = flist.size();
         File theFile = null;
         for (int i = 0; i < nfiles; i++) {
             theFile = flist.get(i);
 
             if (theFile.isFile()) {
-                currentDir = theFile.getParentFile().getAbsolutePath();
+                currentDir  = theFile.getParentFile().getAbsolutePath();
                 currentFile = theFile.getAbsolutePath();
 
                 try {
@@ -369,7 +375,8 @@ public class HDFView implements DataViewManager
                     try {
                         urlBar.remove(currentFile);
                     }
-                    catch (Exception ex) {}
+                    catch (Exception ex) {
+                    }
 
                     // first entry is always the workdir
                     urlBar.add(currentFile, 1);
@@ -397,15 +404,15 @@ public class HDFView implements DataViewManager
 
         // Set size of main window
         // float inset = 0.17f; // for UG only.
-        float inset = 0.04f;
+        float inset  = 0.04f;
         Point winDim = new Point(width, height);
 
         // If given height and width are too small, adjust accordingly
         if (height <= 300)
-            winDim.y = (int) ((1 - 2 * inset) * mainWindow.getSize().y);
+            winDim.y = (int)((1 - 2 * inset) * mainWindow.getSize().y);
 
         if (width <= 300)
-            winDim.x = (int) (0.9 * mainWindow.getSize().y);
+            winDim.x = (int)(0.9 * mainWindow.getSize().y);
 
         mainWindow.setLocation(x, y);
         mainWindow.setSize(winDim.x + 200, winDim.y);
@@ -417,10 +424,11 @@ public class HDFView implements DataViewManager
     }
 
     /** switch processing to the main application window */
-    public void runMainWindow() {
+    public void runMainWindow()
+    {
         log.debug("runMainWindow enter");
 
-        while(!mainWindow.isDisposed()) {
+        while (!mainWindow.isDisposed()) {
             // ===================================================
             // Wrap each event dispatch in an exception handler
             // so that if any event causes an exception it does
@@ -454,7 +462,8 @@ public class HDFView implements DataViewManager
      * ||========================================||
      * </pre>
      */
-    private Shell createMainWindow() {
+    private Shell createMainWindow()
+    {
         // Create a new display window
         final Shell shell = new Shell(display);
         shell.setImages(ViewProperties.getHdfIcons());
@@ -463,13 +472,15 @@ public class HDFView implements DataViewManager
         shell.setLayout(new GridLayout(3, false));
         shell.addDisposeListener(new DisposeListener() {
             @Override
-            public void widgetDisposed(DisposeEvent e) {
+            public void widgetDisposed(DisposeEvent e)
+            {
                 ViewProperties.setRecentFiles(new ArrayList<>(Arrays.asList(urlBar.getItems())));
 
                 try {
                     props.save();
                 }
-                catch (Exception ex) {}
+                catch (Exception ex) {
+                }
 
                 closeAllWindows();
 
@@ -482,7 +493,7 @@ public class HDFView implements DataViewManager
 
                         for (int i = 0; i < files.length; i++) {
                             try {
-                                treeView.closeFile((FileFormat) files[i]);
+                                treeView.closeFile((FileFormat)files[i]);
                             }
                             catch (Exception ex) {
                                 continue;
@@ -490,7 +501,8 @@ public class HDFView implements DataViewManager
                         }
                     }
                 }
-                catch (Exception ex) {}
+                catch (Exception ex) {
+                }
 
                 if (currentFont != null)
                     currentFont.dispose();
@@ -507,7 +519,8 @@ public class HDFView implements DataViewManager
         return shell;
     }
 
-    private void createMenuBar(final Shell shell) {
+    private void createMenuBar(final Shell shell)
+    {
         Menu menu = new Menu(shell, SWT.BAR);
         shell.setMenuBar(menu);
 
@@ -522,7 +535,8 @@ public class HDFView implements DataViewManager
         item.setAccelerator(SWT.MOD1 + 'O');
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 openLocalFile(null, -1);
             }
         });
@@ -537,7 +551,8 @@ public class HDFView implements DataViewManager
         item.setText("Read-Only");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 openLocalFile(null, FileFormat.READ);
             }
         });
@@ -546,7 +561,8 @@ public class HDFView implements DataViewManager
         item.setText("SWMR Read-Only");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 openLocalFile(null, FileFormat.READ | FileFormat.MULTIREAD);
             }
         });
@@ -555,7 +571,8 @@ public class HDFView implements DataViewManager
         item.setText("Read/Write");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 openLocalFile(null, FileFormat.WRITE);
             }
         });
@@ -573,7 +590,8 @@ public class HDFView implements DataViewManager
         h4GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (currentDir != null)
                     currentDir += File.separator;
                 else
@@ -597,13 +615,13 @@ public class HDFView implements DataViewManager
                     filename = currentDir.concat(new InputDialog(mainWindow, "Enter a file name", "").open());
                 }
 
-                if(filename == null)
+                if (filename == null)
                     return;
 
                 try {
                     log.trace("HDFView create hdf4 file");
-                    FileFormat theFile = Tools.createNewFile(filename, currentDir,
-                            FileFormat.FILE_TYPE_HDF4, getTreeView().getCurrentFiles());
+                    FileFormat theFile = Tools.createNewFile(filename, currentDir, FileFormat.FILE_TYPE_HDF4,
+                                                             getTreeView().getCurrentFiles());
 
                     if (theFile == null)
                         return;
@@ -642,7 +660,8 @@ public class HDFView implements DataViewManager
         h5GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (currentDir != null)
                     currentDir += File.separator;
                 else
@@ -666,13 +685,13 @@ public class HDFView implements DataViewManager
                     filename = currentDir.concat(new InputDialog(mainWindow, "Enter a file name", "").open());
                 }
 
-                if(filename == null)
+                if (filename == null)
                     return;
 
                 try {
                     log.trace("HDFView create hdf5 file");
-                    FileFormat theFile = Tools.createNewFile(filename, currentDir,
-                            FileFormat.FILE_TYPE_HDF5, getTreeView().getCurrentFiles());
+                    FileFormat theFile = Tools.createNewFile(filename, currentDir, FileFormat.FILE_TYPE_HDF5,
+                                                             getTreeView().getCurrentFiles());
 
                     if (theFile == null)
                         return;
@@ -712,7 +731,8 @@ public class HDFView implements DataViewManager
         item.setText("&Close");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 closeFile(treeView.getSelectedFile());
             }
         });
@@ -721,7 +741,8 @@ public class HDFView implements DataViewManager
         item.setText("Close &All");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 closeAllWindows();
 
                 List<FileFormat> files = treeView.getCurrentFiles();
@@ -750,7 +771,8 @@ public class HDFView implements DataViewManager
         item.setText("&Save");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (treeView.getCurrentFiles().isEmpty()) {
                     Tools.showError(mainWindow, "Save", "No files currently open.");
                     return;
@@ -770,7 +792,8 @@ public class HDFView implements DataViewManager
         item.setText("S&ave As");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 if (treeView.getCurrentFiles().isEmpty()) {
                     Tools.showError(mainWindow, "Save", "No files currently open.");
                     return;
@@ -798,7 +821,8 @@ public class HDFView implements DataViewManager
         item.setAccelerator(SWT.MOD1 + 'Q');
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 mainWindow.dispose();
             }
         });
@@ -813,7 +837,8 @@ public class HDFView implements DataViewManager
         item.setText("&Cascade");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 cascadeWindows();
             }
         });
@@ -822,7 +847,8 @@ public class HDFView implements DataViewManager
         item.setText("&Tile");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 tileWindows();
             }
         });
@@ -833,7 +859,8 @@ public class HDFView implements DataViewManager
         item.setText("Close &All");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 closeAllWindows();
             }
         });
@@ -856,7 +883,8 @@ public class HDFView implements DataViewManager
         item.setText("HDF4");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 convertFile(Tools.FILE_TYPE_IMAGE, FileFormat.FILE_TYPE_HDF4);
             }
         });
@@ -866,7 +894,8 @@ public class HDFView implements DataViewManager
         item.setText("HDF5");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 convertFile(Tools.FILE_TYPE_IMAGE, FileFormat.FILE_TYPE_HDF5);
             }
         });
@@ -878,13 +907,14 @@ public class HDFView implements DataViewManager
         item.setText("User &Options");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 // Create the preference manager
                 PreferenceManager mgr = new PreferenceManager();
 
                 // Create the nodes
-                UserOptionsNode one = new UserOptionsNode("general", new UserOptionsGeneralPage());
-                UserOptionsNode two = new UserOptionsNode("hdf", new UserOptionsHDFPage());
+                UserOptionsNode one   = new UserOptionsNode("general", new UserOptionsGeneralPage());
+                UserOptionsNode two   = new UserOptionsNode("hdf", new UserOptionsHDFPage());
                 UserOptionsNode three = new UserOptionsNode("modules", new UserOptionsViewModulesPage());
 
                 // Add the nodes
@@ -902,16 +932,20 @@ public class HDFView implements DataViewManager
                 // Open the dialog
                 userOptionDialog.open();
 
-                // TODO: this functionality is currently broken because isWorkDirChanged() is not exposed correctly.
-                // if (userOptionDialog.isWorkDirChanged())
-                // this will always overwrite the currentDir until isWorkDirChanged() is fixed
+                // TODO: this functionality is currently broken because isWorkDirChanged() is not exposed
+                // correctly. if (userOptionDialog.isWorkDirChanged()) this will always overwrite the
+                // currentDir until isWorkDirChanged() is fixed
                 currentDir = ViewProperties.getWorkDir();
 
-                //if (userOptionDialog.isFontChanged()) {
+                if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5) != null)
+                    H5.H5PLappend(ViewProperties.getPluginDir());
+
+                // if (userOptionDialog.isFontChanged()) {
                 Font font = null;
 
                 try {
-                    font = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(), SWT.NORMAL);
+                    font = new Font(display, ViewProperties.getFontType(), ViewProperties.getFontSize(),
+                                    SWT.NORMAL);
                 }
                 catch (Exception ex) {
                     font = null;
@@ -928,7 +962,8 @@ public class HDFView implements DataViewManager
         item.setText("&Register File Format");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 registerFileFormat();
             }
         });
@@ -937,7 +972,8 @@ public class HDFView implements DataViewManager
         item.setText("&Unregister File Format");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 unregisterFileFormat();
             }
         });
@@ -952,7 +988,8 @@ public class HDFView implements DataViewManager
         item.setText("&User's Guide");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 org.eclipse.swt.program.Program.launch(HDFVIEW_USERSGUIDE_URL);
             }
         });
@@ -960,10 +997,10 @@ public class HDFView implements DataViewManager
         if ((helpViews != null) && !helpViews.isEmpty()) {
             int n = helpViews.size();
             for (int i = 0; i < n; i++) {
-                HelpView theView = (HelpView) helpViews.get(i);
-                item = new MenuItem(helpMenu, SWT.PUSH);
+                HelpView theView = (HelpView)helpViews.get(i);
+                item             = new MenuItem(helpMenu, SWT.PUSH);
                 item.setText(theView.getLabel());
-                //item.setActionCommand(theView.getActionCommand());
+                // item.setActionCommand(theView.getActionCommand());
             }
         }
 
@@ -974,7 +1011,8 @@ public class HDFView implements DataViewManager
         h4GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4).open();
             }
         });
@@ -984,7 +1022,8 @@ public class HDFView implements DataViewManager
         h5GUIs.add(item);
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5).open();
             }
         });
@@ -993,7 +1032,8 @@ public class HDFView implements DataViewManager
         item.setText("&Java Version");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 new JavaVersionDialog(mainWindow).open();
             }
         });
@@ -1004,7 +1044,8 @@ public class HDFView implements DataViewManager
         item.setText("Supported Fi&le Formats");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 new SupportedFileFormatsDialog(mainWindow).open();
             }
         });
@@ -1015,7 +1056,8 @@ public class HDFView implements DataViewManager
         item.setText("&About...");
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 new AboutDialog(mainWindow).open();
             }
         });
@@ -1025,7 +1067,8 @@ public class HDFView implements DataViewManager
         log.info("Menubar created");
     }
 
-    private void createToolbar(final Shell shell) {
+    private void createToolbar(final Shell shell)
+    {
         toolBar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT);
         toolBar.setFont(Display.getCurrent().getSystemFont());
         toolBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
@@ -1035,7 +1078,8 @@ public class HDFView implements DataViewManager
         openItem.setImage(ViewProperties.getFileopenIcon());
         openItem.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 openLocalFile(null, -1);
             }
         });
@@ -1047,7 +1091,8 @@ public class HDFView implements DataViewManager
         closeItem.setToolTipText("Close");
         closeItem.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 closeFile(treeView.getSelectedFile());
             }
         });
@@ -1059,18 +1104,19 @@ public class HDFView implements DataViewManager
         helpItem.setToolTipText("Help");
         helpItem.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 String ugPath = ViewProperties.getUsersGuide();
 
-                if(ugPath == null || !ugPath.startsWith("http://")) {
-                    String sep = File.separator;
+                if (ugPath == null || !ugPath.startsWith("http://")) {
+                    String sep   = File.separator;
                     File tmpFile = new File(ugPath);
 
-                    if(!(tmpFile.exists())) {
-                        ugPath = rootDir + sep + "UsersGuide" + sep + "index.html";
+                    if (!(tmpFile.exists())) {
+                        ugPath  = rootDir + sep + "UsersGuide" + sep + "index.html";
                         tmpFile = new File(ugPath);
 
-                        if(!(tmpFile.exists()))
+                        if (!(tmpFile.exists()))
                             ugPath = HDFVIEW_USERSGUIDE_URL;
 
                         ViewProperties.setUsersGuide(ugPath);
@@ -1093,12 +1139,13 @@ public class HDFView implements DataViewManager
         hdf4Item.setToolTipText("HDF4 Library Version");
         hdf4Item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF4).open();
             }
         });
 
-        if(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4) == null)
+        if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4) == null)
             hdf4Item.setEnabled(false);
 
         new ToolItem(toolBar, SWT.SEPARATOR).setWidth(4);
@@ -1108,12 +1155,13 @@ public class HDFView implements DataViewManager
         hdf5Item.setToolTipText("HDF5 Library Version");
         hdf5Item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 new LibraryVersionDialog(shell, FileFormat.FILE_TYPE_HDF5).open();
             }
         });
 
-        if(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5) == null)
+        if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5) == null)
             hdf5Item.setEnabled(false);
 
         // Make the toolbar as wide as the window and as
@@ -1124,7 +1172,8 @@ public class HDFView implements DataViewManager
         log.info("Toolbar created");
     }
 
-    private void createUrlToolbar(final Shell shell) {
+    private void createUrlToolbar(final Shell shell)
+    {
         // Recent Files button
         recentFilesButton = new Button(shell, SWT.PUSH);
         recentFilesButton.setFont(currentFont);
@@ -1133,7 +1182,8 @@ public class HDFView implements DataViewManager
         recentFilesButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         recentFilesButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 urlBar.setListVisible(true);
             }
         });
@@ -1147,13 +1197,15 @@ public class HDFView implements DataViewManager
         urlBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         urlBar.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.keyCode == SWT.CR) {
+            public void keyPressed(KeyEvent e)
+            {
+                if (e.keyCode == SWT.CR) {
                     String filename = urlBar.getText();
                     if (filename == null || filename.length() < 1 || filename.equals(currentFile))
                         return;
 
-                    if (!(filename.startsWith("http://") || filename.startsWith("https://") || filename.startsWith("ftp://"))) {
+                    if (!(filename.startsWith("http://") || filename.startsWith("https://") ||
+                          filename.startsWith("ftp://"))) {
                         openLocalFile(filename, -1);
                     }
                     else {
@@ -1167,13 +1219,15 @@ public class HDFView implements DataViewManager
         });
         urlBar.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 String filename = urlBar.getText();
                 if (filename == null || filename.length() < 1 || filename.equals(currentFile)) {
                     return;
                 }
 
-                if (!(filename.startsWith("http://") || filename.startsWith("https://") || filename.startsWith("ftp://"))) {
+                if (!(filename.startsWith("http://") || filename.startsWith("https://") ||
+                      filename.startsWith("ftp://"))) {
                     openLocalFile(filename, -1);
                 }
                 else {
@@ -1192,7 +1246,8 @@ public class HDFView implements DataViewManager
         clearTextButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         clearTextButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 urlBar.setText("");
                 urlBar.deselectAll();
             }
@@ -1201,7 +1256,8 @@ public class HDFView implements DataViewManager
         log.info("URL Toolbar created");
     }
 
-    private void createContentArea(final Shell shell) {
+    private void createContentArea(final Shell shell)
+    {
         SashForm content = new SashForm(shell, SWT.VERTICAL);
         content.setSashWidth(10);
         content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
@@ -1236,40 +1292,47 @@ public class HDFView implements DataViewManager
 
         contentArea.addListener(SWT.Resize, new Listener() {
             @Override
-            public void handleEvent(Event arg0) {
+            public void handleEvent(Event arg0)
+            {
                 generalArea.setMinHeight(contentArea.getSize().y - 2);
             }
         });
 
         // Add drag and drop support for opening files
-        DropTarget target = new DropTarget(treeArea, DND.DROP_COPY);
+        DropTarget target               = new DropTarget(treeArea, DND.DROP_COPY);
         final FileTransfer fileTransfer = FileTransfer.getInstance();
-        target.setTransfer(new Transfer[] { fileTransfer });
+        target.setTransfer(new Transfer[] {fileTransfer});
         target.addDropListener(new DropTargetListener() {
             @Override
-            public void dragEnter(DropTargetEvent e) {
+            public void dragEnter(DropTargetEvent e)
+            {
                 e.detail = DND.DROP_COPY;
             }
             @Override
-            public void dragOver(DropTargetEvent e) {
+            public void dragOver(DropTargetEvent e)
+            {
                 // Intentional
             }
             @Override
-            public void dragOperationChanged(DropTargetEvent e) {
+            public void dragOperationChanged(DropTargetEvent e)
+            {
                 // Intentional
             }
             @Override
-            public void dragLeave(DropTargetEvent e) {
+            public void dragLeave(DropTargetEvent e)
+            {
                 // Intentional
             }
             @Override
-            public void dropAccept(DropTargetEvent e) {
+            public void dropAccept(DropTargetEvent e)
+            {
                 // Intentional
             }
             @Override
-            public void drop(DropTargetEvent e) {
+            public void drop(DropTargetEvent e)
+            {
                 if (fileTransfer.isSupportedType(e.currentDataType)) {
-                    String[] files = (String[]) e.data;
+                    String[] files = (String[])e.data;
                     for (int i = 0; i < files.length; i++)
                         openLocalFile(files[i], -1);
                 }
@@ -1279,8 +1342,8 @@ public class HDFView implements DataViewManager
         showStatus("HDFView root - " + rootDir);
         showStatus("User property file - " + ViewProperties.getPropertyFile());
 
-        content.setWeights(new int[] { 9, 1 });
-        contentArea.setWeights(new int[] { 1, 3 });
+        content.setWeights(new int[] {9, 1});
+        contentArea.setWeights(new int[] {1, 3});
 
         DataViewFactory treeViewFactory = null;
         try {
@@ -1320,49 +1383,38 @@ public class HDFView implements DataViewManager
     /**
      * @return a list of treeview implementations.
      */
-    public static final List<String> getListOfTreeViews() {
-        return treeViews;
-    }
+    public static final List<String> getListOfTreeViews() { return treeViews; }
 
     /**
      * @return a list of imageview implementations.
      */
-    public static final List<String> getListOfImageViews() {
-        return imageViews;
-    }
+    public static final List<String> getListOfImageViews() { return imageViews; }
 
     /**
      * @return a list of tableview implementations.
      */
-    public static final List<?> getListOfTableViews() {
-        return tableViews;
-    }
+    public static final List<?> getListOfTableViews() { return tableViews; }
 
     /**
      * @return a list of metaDataview implementations.
      */
-    public static final List<?> getListOfMetaDataViews() {
-        return metaDataViews;
-    }
+    public static final List<?> getListOfMetaDataViews() { return metaDataViews; }
 
     /**
      * @return a list of paletteview implementations.
      */
-    public static final List<?> getListOfPaletteViews() {
-        return paletteViews;
-    }
+    public static final List<?> getListOfPaletteViews() { return paletteViews; }
 
     @Override
-    public TreeView getTreeView() {
+    public TreeView getTreeView()
+    {
         return treeView;
     }
 
     /**
      * @return the combobox associated with a URL entry.
      */
-    public Combo getUrlBar() {
-        return urlBar;
-    }
+    public Combo getUrlBar() { return urlBar; }
 
     /**
      * Start stop a timer.
@@ -1371,7 +1423,8 @@ public class HDFView implements DataViewManager
      *            -- true: start timer, false stop timer.
      */
     @Override
-    public final void executeTimer(boolean toggleTimer) {
+    public final void executeTimer(boolean toggleTimer)
+    {
         showStatus("toggleTimer: " + toggleTimer);
         viewerState = toggleTimer;
         if (viewerState)
@@ -1387,7 +1440,8 @@ public class HDFView implements DataViewManager
      *            the message to display.
      */
     @Override
-    public void showStatus(String msg) {
+    public void showStatus(String msg)
+    {
         if (status == null) {
             log.debug("showStatus(): status area is null");
             return;
@@ -1404,7 +1458,8 @@ public class HDFView implements DataViewManager
      *            the error message to display
      */
     @Override
-    public void showError(String errMsg) {
+    public void showError(String errMsg)
+    {
         if (status == null) {
             log.debug("showError(): status area is null");
             return;
@@ -1424,7 +1479,8 @@ public class HDFView implements DataViewManager
      * @param obj
      *            the object containing the metadata to show
      */
-    public void showMetaData(final HObject obj) {
+    public void showMetaData(final HObject obj)
+    {
         for (Control control : generalArea.getChildren())
             control.dispose();
         generalArea.setContent(null);
@@ -1470,7 +1526,8 @@ public class HDFView implements DataViewManager
      * @param theFile
      *        the file selected or specified
      */
-    public void closeFile(FileFormat theFile) {
+    public void closeFile(FileFormat theFile)
+    {
         if (theFile == null) {
             display.beep();
             Tools.showError(mainWindow, "Close", "Select a file to close");
@@ -1486,8 +1543,8 @@ public class HDFView implements DataViewManager
                 if (!(shellData instanceof DataView))
                     continue;
 
-                if ((DataView) shellData != null) {
-                    HObject obj = ((DataView) shellData).getDataObject();
+                if ((DataView)shellData != null) {
+                    HObject obj = ((DataView)shellData).getDataObject();
 
                     if (obj == null || obj.getFileFormat() == null)
                         continue;
@@ -1529,17 +1586,18 @@ public class HDFView implements DataViewManager
      * @param theFile
      *           The file to be updated.
      */
-    public void writeDataToFile(FileFormat theFile) {
+    public void writeDataToFile(FileFormat theFile)
+    {
         try {
             Shell[] openShells = display.getShells();
 
             if (openShells != null) {
                 for (int i = 0; i < openShells.length; i++) {
-                    DataView theView = (DataView) openShells[i].getData();
+                    DataView theView = (DataView)openShells[i].getData();
 
                     if (theView instanceof TableView) {
-                        TableView tableView = (TableView) theView;
-                        FileFormat file = tableView.getDataObject().getFileFormat();
+                        TableView tableView = (TableView)theView;
+                        FileFormat file     = tableView.getDataObject().getFileFormat();
                         if (file.equals(theFile))
                             tableView.updateValueInFile();
                     }
@@ -1553,7 +1611,8 @@ public class HDFView implements DataViewManager
     }
 
     @Override
-    public void addDataView(DataView dataView) {
+    public void addDataView(DataView dataView)
+    {
         if (dataView == null || dataView instanceof MetaDataView)
             return;
 
@@ -1573,22 +1632,24 @@ public class HDFView implements DataViewManager
             setEnabled(Arrays.asList(windowMenu.getItems()), true);
 
         HObject obj = dataView.getDataObject();
-        String fullPath = ((obj.getPath() == null) ? "" : obj.getPath()) + ((obj.getName() == null) ? "" : obj.getName());
+        String fullPath =
+            ((obj.getPath() == null) ? "" : obj.getPath()) + ((obj.getName() == null) ? "" : obj.getName());
 
         MenuItem item = new MenuItem(windowMenu, SWT.PUSH);
         item.setText(fullPath);
         item.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e)
+            {
                 Shell[] sList = display.getShells();
 
                 for (int i = 0; i < sList.length; i++) {
-                    DataView view = (DataView) sList[i].getData();
+                    DataView view = (DataView)sList[i].getData();
 
                     if (view != null) {
                         HObject obj = view.getDataObject();
 
-                        if (obj.getFullName().equals(((MenuItem) e.widget).getText()))
+                        if (obj.getFullName().equals(((MenuItem)e.widget).getText()))
                             showWindow(sList[i]);
                     }
                 }
@@ -1599,7 +1660,8 @@ public class HDFView implements DataViewManager
     }
 
     @Override
-    public void removeDataView(DataView dataView) {
+    public void removeDataView(DataView dataView)
+    {
         if (mainWindow.isDisposed())
             return;
 
@@ -1609,24 +1671,26 @@ public class HDFView implements DataViewManager
 
         MenuItem[] items = windowMenu.getItems();
         for (int i = 0; i < items.length; i++) {
-            if(items[i].getText().equals(obj.getFullName()))
+            if (items[i].getText().equals(obj.getFullName()))
                 items[i].dispose();
         }
 
         // Last window being closed
         if (display.getShells().length == 2)
-            for (MenuItem item : windowMenu.getItems()) item.setEnabled(false);
+            for (MenuItem item : windowMenu.getItems())
+                item.setEnabled(false);
     }
 
     @Override
-    public DataView getDataView(HObject dataObject) {
-        Shell[] openShells = display.getShells();
-        DataView view = null;
-        HObject currentObj = null;
+    public DataView getDataView(HObject dataObject)
+    {
+        Shell[] openShells             = display.getShells();
+        DataView view                  = null;
+        HObject currentObj             = null;
         FileFormat currentDataViewFile = null;
 
         for (int i = 0; i < openShells.length; i++) {
-            view = (DataView) openShells[i].getData();
+            view = (DataView)openShells[i].getData();
 
             if (view != null) {
                 currentObj = view.getDataObject();
@@ -1651,9 +1715,7 @@ public class HDFView implements DataViewManager
      *           Provides SWTBot native dialog compatibility
      *           workarounds if set to true.
      */
-    public void setTestState(boolean testing) {
-        isTesting = testing;
-    }
+    public void setTestState(boolean testing) { isTesting = testing; }
 
     /**
      * Get the testing state that determines if HDFView
@@ -1661,14 +1723,13 @@ public class HDFView implements DataViewManager
      *
      * @return true if HDFView is being executed for GUI testing.
      */
-    public boolean getTestState() {
-        return isTesting;
-    }
+    public boolean getTestState() { return isTesting; }
 
     /**
      * Set default UI fonts.
      */
-    private void updateFont(Font font) {
+    private void updateFont(Font font)
+    {
         if (currentFont != null)
             currentFont.dispose();
 
@@ -1709,7 +1770,7 @@ public class HDFView implements DataViewManager
             urlBar.select(0);
 
         if (treeView instanceof DefaultTreeView)
-            ((DefaultTreeView) treeView).updateFont(font);
+            ((DefaultTreeView)treeView).updateFont(font);
 
         Shell[] shellList = display.getShells();
         if (shellList != null) {
@@ -1728,10 +1789,12 @@ public class HDFView implements DataViewManager
      * @param name
      *               the name of the window to show.
      */
-    private void showWindow(final Shell shell) {
+    private void showWindow(final Shell shell)
+    {
         shell.getDisplay().asyncExec(new Runnable() {
             @Override
-            public void run() {
+            public void run()
+            {
                 shell.forceActive();
             }
         });
@@ -1740,7 +1803,8 @@ public class HDFView implements DataViewManager
     /**
      * Cascade all windows.
      */
-    private void cascadeWindows() {
+    private void cascadeWindows()
+    {
         Shell[] sList = display.getShells();
 
         // Return if main window (shell) is the only open shell
@@ -1750,8 +1814,8 @@ public class HDFView implements DataViewManager
         Shell shell = null;
 
         Rectangle bounds = Display.getCurrent().getPrimaryMonitor().getClientArea();
-        int w = Math.max(50, bounds.width - 100);
-        int h = Math.max(50, bounds.height - 100);
+        int w            = Math.max(50, bounds.width - 100);
+        int h            = Math.max(50, bounds.height - 100);
 
         int x = bounds.x;
         int y = bounds.y;
@@ -1768,25 +1832,26 @@ public class HDFView implements DataViewManager
     /**
      * Tile all windows.
      */
-    private void tileWindows() {
+    private void tileWindows()
+    {
         Shell[] sList = display.getShells();
 
         // Return if main window (shell) is the only open shell
         if (sList.length <= 1)
             return;
 
-        int x = 0;
-        int y = 0;
-        int idx = 0;
+        int x       = 0;
+        int y       = 0;
+        int idx     = 0;
         Shell shell = null;
 
-        int n = sList.length;
-        int cols = (int) Math.sqrt(n);
-        int rows = (int) Math.ceil((double) n / (double) cols);
+        int n    = sList.length;
+        int cols = (int)Math.sqrt(n);
+        int rows = (int)Math.ceil((double)n / (double)cols);
 
         Rectangle bounds = Display.getCurrent().getPrimaryMonitor().getClientArea();
-        int w = bounds.width / cols;
-        int h = bounds.height / rows;
+        int w            = bounds.width / cols;
+        int h            = bounds.height / rows;
 
         y = bounds.y;
         for (int i = 0; i < rows; i++) {
@@ -1810,17 +1875,20 @@ public class HDFView implements DataViewManager
     /**
      * Closes all windows.
      */
-    private void closeAllWindows() {
+    private void closeAllWindows()
+    {
         Shell[] sList = display.getShells();
 
         for (int i = 0; i < sList.length; i++) {
-            if (sList[i].equals(mainWindow)) continue;
+            if (sList[i].equals(mainWindow))
+                continue;
             sList[i].dispose();
         }
     }
 
     /* Enable and disable GUI components */
-    private static void setEnabled(List<MenuItem> list, boolean b) {
+    private static void setEnabled(List<MenuItem> list, boolean b)
+    {
         Iterator<MenuItem> it = list.iterator();
 
         while (it.hasNext())
@@ -1828,8 +1896,9 @@ public class HDFView implements DataViewManager
     }
 
     /** Open local file */
-    private void openLocalFile(String filename, int fileAccessID) {
-        log.trace("openLocalFile {},{}",filename, fileAccessID);
+    private void openLocalFile(String filename, int fileAccessID)
+    {
+        log.trace("openLocalFile {},{}", filename, fileAccessID);
 
         /*
          * If given a specific access mode, use it without changing it. If not given a
@@ -1848,16 +1917,16 @@ public class HDFView implements DataViewManager
         }
 
         String[] selectedFilenames = null;
-        File[] chosenFiles = null;
+        File[] chosenFiles         = null;
 
         if (filename != null) {
             File file = new File(filename);
-            if(!file.exists()) {
+            if (!file.exists()) {
                 Tools.showError(mainWindow, "Open", "File " + filename + " does not exist.");
                 return;
             }
 
-            if(file.isDirectory()) {
+            if (file.isDirectory()) {
                 currentDir = filename;
                 openLocalFile(null, -1);
             }
@@ -1895,8 +1964,8 @@ public class HDFView implements DataViewManager
             if (!isTesting) {
                 log.trace("openLocalFile filename is null");
                 FileDialog fChooser = new FileDialog(mainWindow, SWT.OPEN | SWT.MULTI);
-                String modeStr = "Read/Write";
-                boolean isSWMRFile = (FileFormat.MULTIREAD == (accessMode & FileFormat.MULTIREAD));
+                String modeStr      = "Read/Write";
+                boolean isSWMRFile  = (FileFormat.MULTIREAD == (accessMode & FileFormat.MULTIREAD));
                 if (isSWMRFile)
                     modeStr = "SWMR Read-only";
                 else if (accessMode == FileFormat.READ)
@@ -1912,16 +1981,18 @@ public class HDFView implements DataViewManager
                 fChooser.open();
 
                 selectedFilenames = fChooser.getFileNames();
-                if(selectedFilenames.length <= 0)
+                if (selectedFilenames.length <= 0)
                     return;
 
                 chosenFiles = new File[selectedFilenames.length];
-                for(int i = 0; i < chosenFiles.length; i++) {
-                    log.trace("openLocalFile selectedFilenames[{}]: {}",i,selectedFilenames[i]);
-                    chosenFiles[i] = new File(fChooser.getFilterPath() + File.separator + selectedFilenames[i]);
+                for (int i = 0; i < chosenFiles.length; i++) {
+                    log.trace("openLocalFile selectedFilenames[{}]: {}", i, selectedFilenames[i]);
+                    chosenFiles[i] =
+                        new File(fChooser.getFilterPath() + File.separator + selectedFilenames[i]);
 
-                    if(!chosenFiles[i].exists()) {
-                        Tools.showError(mainWindow, "Open", "File " + chosenFiles[i].getName() + " does not exist.");
+                    if (!chosenFiles[i].exists()) {
+                        Tools.showError(mainWindow, "Open",
+                                        "File " + chosenFiles[i].getName() + " does not exist.");
                         continue;
                     }
 
@@ -1941,7 +2012,8 @@ public class HDFView implements DataViewManager
                     urlBar.add(chosenFiles[i].getAbsolutePath(), 1);
                     urlBar.select(1);
 
-                    log.trace("openLocalFile treeView.openFile(accessMode={} chosenFiles[{}]: {}",accessMode,i,chosenFiles[i].getAbsolutePath());
+                    log.trace("openLocalFile treeView.openFile(accessMode={} chosenFiles[{}]: {}", accessMode,
+                              i, chosenFiles[i].getAbsolutePath());
                     try {
                         treeView.openFile(chosenFiles[i].getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                     }
@@ -1952,7 +2024,8 @@ public class HDFView implements DataViewManager
                         catch (Exception ex2) {
                             display.beep();
                             urlBar.deselectAll();
-                            Tools.showError(mainWindow, "Open", "Failed to open file " + selectedFilenames[i] + "\n" + ex2);
+                            Tools.showError(mainWindow, "Open",
+                                            "Failed to open file " + selectedFilenames[i] + "\n" + ex2);
                             currentFile = null;
                         }
                     }
@@ -1962,11 +2035,12 @@ public class HDFView implements DataViewManager
             }
             else {
                 // Prepend test file directory to filename
-                String fName = currentDir + File.separator + new InputDialog(mainWindow, "Enter a file name", "").open();
+                String fName =
+                    currentDir + File.separator + new InputDialog(mainWindow, "Enter a file name", "").open();
 
                 File chosenFile = new File(fName);
 
-                if(!chosenFile.exists()) {
+                if (!chosenFile.exists()) {
                     Tools.showError(mainWindow, "Open", "File " + chosenFile.getName() + " does not exist.");
                     return;
                 }
@@ -1987,7 +2061,8 @@ public class HDFView implements DataViewManager
                 urlBar.add(chosenFile.getAbsolutePath(), 1);
                 urlBar.select(1);
 
-                log.trace("openLocalFile treeView.openFile(chosenFile[{}]: {}", chosenFile.getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
+                log.trace("openLocalFile treeView.openFile(chosenFile[{}]: {}", chosenFile.getAbsolutePath(),
+                          accessMode + FileFormat.OPEN_NEW);
                 try {
                     treeView.openFile(chosenFile.getAbsolutePath(), accessMode + FileFormat.OPEN_NEW);
                 }
@@ -2009,13 +2084,14 @@ public class HDFView implements DataViewManager
     }
 
     /** Load remote file and save it to local temporary directory */
-    private String openRemoteFile(String urlStr) {
+    private String openRemoteFile(String urlStr)
+    {
         if (urlStr == null)
             return null;
 
         String localFile = null;
 
-        if(urlStr.startsWith("http://"))
+        if (urlStr.startsWith("http://"))
             localFile = urlStr.substring(7);
         else if (urlStr.startsWith("https://"))
             localFile = urlStr.substring(8);
@@ -2056,7 +2132,7 @@ public class HDFView implements DataViewManager
             try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile))) {
                 mainWindow.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
                 byte[] buff = new byte[512]; // set default buffer size to 512
-                int n = 0;
+                int n       = 0;
                 while ((n = in.read(buff)) > 0)
                     out.write(buff, 0, n);
             }
@@ -2077,19 +2153,20 @@ public class HDFView implements DataViewManager
         return localFile;
     }
 
-    private void convertFile(String typeFrom, String typeTo) {
-        ImageConversionDialog dialog = new ImageConversionDialog(mainWindow, typeFrom, typeTo,
-                currentDir, treeView.getCurrentFiles());
+    private void convertFile(String typeFrom, String typeTo)
+    {
+        ImageConversionDialog dialog =
+            new ImageConversionDialog(mainWindow, typeFrom, typeTo, currentDir, treeView.getCurrentFiles());
         dialog.open();
 
         if (dialog.isFileConverted()) {
             String filename = dialog.getConvertedFile();
-            File theFile = new File(filename);
+            File theFile    = new File(filename);
 
             if (!theFile.exists())
                 return;
 
-            currentDir = theFile.getParentFile().getAbsolutePath();
+            currentDir  = theFile.getParentFile().getAbsolutePath();
             currentFile = theFile.getAbsolutePath();
 
             try {
@@ -2112,13 +2189,15 @@ public class HDFView implements DataViewManager
         }
     }
 
-    private void registerFileFormat() {
+    private void registerFileFormat()
+    {
         String msg = "Register a new file format by \nKEY:FILE_FORMAT:FILE_EXTENSION\n"
-                + "where, KEY: the unique identifier for the file format"
-                + "\n           FILE_FORMAT: the full class name of the file format"
-                + "\n           FILE_EXTENSION: the file extension for the file format" + "\n\nFor example, "
-                + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
-                + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
+                     + "where, KEY: the unique identifier for the file format"
+                     + "\n           FILE_FORMAT: the full class name of the file format"
+                     + "\n           FILE_EXTENSION: the file extension for the file format"
+                     + "\n\nFor example, "
+                     + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
+                     + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
 
         // TODO:Add custom HDFLarge icon to dialog
         InputDialog dialog = new InputDialog(mainWindow, "Register a file format", msg, SWT.ICON_INFORMATION);
@@ -2132,21 +2211,22 @@ public class HDFView implements DataViewManager
         int idx2 = str.lastIndexOf(':');
 
         if ((idx1 < 0) || (idx2 <= idx1)) {
-            Tools.showError(mainWindow, "Register File Format", "Failed to register " + str
-                    + "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION");
+            Tools.showError(mainWindow, "Register File Format",
+                            "Failed to register " + str +
+                                "\n\nMust in the form of KEY:FILE_FORMAT:FILE_EXTENSION");
             return;
         }
 
-        String key = str.substring(0, idx1);
+        String key       = str.substring(0, idx1);
         String className = str.substring(idx1 + 1, idx2);
         String extension = str.substring(idx2 + 1);
 
         // Check if the file format has been registered or the key is taken.
-        String theKey = null;
-        String theClassName = null;
+        String theKey            = null;
+        String theClassName      = null;
         Enumeration<?> localEnum = FileFormat.getFileFormatKeys();
         while (localEnum.hasMoreElements()) {
-            theKey = (String) localEnum.nextElement();
+            theKey = (String)localEnum.nextElement();
             if (theKey.endsWith(key)) {
                 Tools.showError(mainWindow, "Register File Format", "Invalid key: " + key + " is taken.");
                 return;
@@ -2154,7 +2234,8 @@ public class HDFView implements DataViewManager
 
             theClassName = FileFormat.getFileFormat(theKey).getClass().getName();
             if (theClassName.endsWith(className)) {
-                Tools.showError(mainWindow, "Register File Format", "The file format has already been registered: " + className);
+                Tools.showError(mainWindow, "Register File Format",
+                                "The file format has already been registered: " + className);
                 return;
             }
         }
@@ -2180,7 +2261,7 @@ public class HDFView implements DataViewManager
         try {
             Object theObject = theClass.newInstance();
             if (theObject instanceof FileFormat)
-                FileFormat.addFileFormat(key, (FileFormat) theObject);
+                FileFormat.addFileFormat(key, (FileFormat)theObject);
         }
         catch (Exception ex) {
             Tools.showError(mainWindow, "Register File Format", "Failed to register " + str + "\n\n" + ex);
@@ -2188,15 +2269,16 @@ public class HDFView implements DataViewManager
         }
 
         if ((extension != null) && (extension.length() > 0)) {
-            extension = extension.trim();
+            extension  = extension.trim();
             String ext = ViewProperties.getFileExtension();
             ext += ", " + extension;
             ViewProperties.setFileExtension(ext);
         }
     }
 
-    private void unregisterFileFormat() {
-        Enumeration<?> keys = FileFormat.getFileFormatKeys();
+    private void unregisterFileFormat()
+    {
+        Enumeration<?> keys       = FileFormat.getFileFormatKeys();
         ArrayList<Object> keyList = new ArrayList<>();
 
         while (keys.hasMoreElements())
@@ -2210,11 +2292,11 @@ public class HDFView implements DataViewManager
         FileFormat.removeFileFormat(theKey);
     }
 
-    private class LibraryVersionDialog extends Dialog
-    {
+    private class LibraryVersionDialog extends Dialog {
         private String message;
 
-        public LibraryVersionDialog(Shell parent, String libType) {
+        public LibraryVersionDialog(Shell parent, String libType)
+        {
             super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 
             if (libType.equals(FileFormat.FILE_TYPE_HDF4))
@@ -2223,11 +2305,10 @@ public class HDFView implements DataViewManager
                 setMessage("HDF5 " + HDF5_VERSION);
         }
 
-        public void setMessage(String message) {
-            this.message = message;
-        }
+        public void setMessage(String message) { this.message = message; }
 
-        public void open() {
+        public void open()
+        {
             Shell dialog = new Shell(getParent(), getStyle());
             dialog.setFont(currentFont);
             dialog.setText("HDF Library Version");
@@ -2240,11 +2321,11 @@ public class HDFView implements DataViewManager
             dialog.setSize(computedSize.x + 50, computedSize.y + 50);
 
             // Center the window relative to the main HDFView window
-            Point winCenter = new Point(
-                    mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
-                    mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
+            Point winCenter = new Point(mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
+                                        mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
 
-            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2), winCenter.y - (dialog.getSize().y / 2));
+            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2),
+                               winCenter.y - (dialog.getSize().y / 2));
 
             dialog.open();
 
@@ -2255,7 +2336,8 @@ public class HDFView implements DataViewManager
             }
         }
 
-        private void createContents(final Shell shell) {
+        private void createContents(final Shell shell)
+        {
             shell.setLayout(new GridLayout(2, false));
 
             Image hdfImage = ViewProperties.getHDFViewIcon();
@@ -2273,9 +2355,9 @@ public class HDFView implements DataViewManager
             Composite buttonComposite = new Composite(shell, SWT.NONE);
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
             RowLayout buttonLayout = new RowLayout();
-            buttonLayout.center = true;
-            buttonLayout.justify = true;
-            buttonLayout.type = SWT.HORIZONTAL;
+            buttonLayout.center    = true;
+            buttonLayout.justify   = true;
+            buttonLayout.type      = SWT.HORIZONTAL;
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
@@ -2284,20 +2366,19 @@ public class HDFView implements DataViewManager
             shell.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     shell.dispose();
                 }
             });
         }
     }
 
-    private class JavaVersionDialog extends Dialog
-    {
-        public JavaVersionDialog(Shell parent) {
-            super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-        }
+    private class JavaVersionDialog extends Dialog {
+        public JavaVersionDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
 
-        public void open() {
+        public void open()
+        {
             final Shell dialog = new Shell(getParent(), getStyle());
             dialog.setFont(currentFont);
             dialog.setText("HDFView Java Version");
@@ -2317,9 +2398,9 @@ public class HDFView implements DataViewManager
             Composite buttonComposite = new Composite(dialog, SWT.NONE);
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
             RowLayout buttonLayout = new RowLayout();
-            buttonLayout.center = true;
-            buttonLayout.justify = true;
-            buttonLayout.type = SWT.HORIZONTAL;
+            buttonLayout.center    = true;
+            buttonLayout.justify   = true;
+            buttonLayout.type      = SWT.HORIZONTAL;
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
@@ -2328,7 +2409,8 @@ public class HDFView implements DataViewManager
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     dialog.dispose();
                 }
             });
@@ -2339,11 +2421,11 @@ public class HDFView implements DataViewManager
             dialog.setSize(computedSize.x + 50, computedSize.y + 50);
 
             // Center the window relative to the main HDFView window
-            Point winCenter = new Point(
-                    mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
-                    mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
+            Point winCenter = new Point(mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
+                                        mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
 
-            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2), winCenter.y - (dialog.getSize().y / 2));
+            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2),
+                               winCenter.y - (dialog.getSize().y / 2));
 
             dialog.open();
 
@@ -2355,13 +2437,14 @@ public class HDFView implements DataViewManager
         }
     }
 
-    private class SupportedFileFormatsDialog extends Dialog
-    {
-        public SupportedFileFormatsDialog(Shell parent) {
+    private class SupportedFileFormatsDialog extends Dialog {
+        public SupportedFileFormatsDialog(Shell parent)
+        {
             super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
         }
 
-        public void open() {
+        public void open()
+        {
             final Shell dialog = new Shell(getParent(), getStyle());
             dialog.setFont(currentFont);
             dialog.setText("Supported File Formats");
@@ -2388,9 +2471,9 @@ public class HDFView implements DataViewManager
             Composite buttonComposite = new Composite(dialog, SWT.NONE);
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
             RowLayout buttonLayout = new RowLayout();
-            buttonLayout.center = true;
-            buttonLayout.justify = true;
-            buttonLayout.type = SWT.HORIZONTAL;
+            buttonLayout.center    = true;
+            buttonLayout.justify   = true;
+            buttonLayout.type      = SWT.HORIZONTAL;
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
@@ -2399,7 +2482,8 @@ public class HDFView implements DataViewManager
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     dialog.dispose();
                 }
             });
@@ -2410,11 +2494,11 @@ public class HDFView implements DataViewManager
             dialog.setSize(computedSize.x + 50, computedSize.y + 50);
 
             // Center the window relative to the main HDFView window
-            Point winCenter = new Point(
-                    mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
-                    mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
+            Point winCenter = new Point(mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
+                                        mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
 
-            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2), winCenter.y - (dialog.getSize().y / 2));
+            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2),
+                               winCenter.y - (dialog.getSize().y / 2));
 
             dialog.open();
 
@@ -2426,13 +2510,11 @@ public class HDFView implements DataViewManager
         }
     }
 
-    private class AboutDialog extends Dialog
-    {
-        public AboutDialog(Shell parent) {
-            super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-        }
+    private class AboutDialog extends Dialog {
+        public AboutDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
 
-        public void open() {
+        public void open()
+        {
             final Shell dialog = new Shell(getParent(), getStyle());
             dialog.setFont(currentFont);
             dialog.setText("About HDFView");
@@ -2452,9 +2534,9 @@ public class HDFView implements DataViewManager
             Composite buttonComposite = new Composite(dialog, SWT.NONE);
             buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
             RowLayout buttonLayout = new RowLayout();
-            buttonLayout.center = true;
-            buttonLayout.justify = true;
-            buttonLayout.type = SWT.HORIZONTAL;
+            buttonLayout.center    = true;
+            buttonLayout.justify   = true;
+            buttonLayout.type      = SWT.HORIZONTAL;
             buttonComposite.setLayout(buttonLayout);
 
             Button okButton = new Button(buttonComposite, SWT.PUSH);
@@ -2463,7 +2545,8 @@ public class HDFView implements DataViewManager
             dialog.setDefaultButton(okButton);
             okButton.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     dialog.dispose();
                 }
             });
@@ -2474,11 +2557,11 @@ public class HDFView implements DataViewManager
             dialog.setSize(computedSize.x + 50, computedSize.y + 50);
 
             // Center the window relative to the main HDFView window
-            Point winCenter = new Point(
-                    mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
-                    mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
+            Point winCenter = new Point(mainWindow.getBounds().x + (mainWindow.getBounds().width / 2),
+                                        mainWindow.getBounds().y + (mainWindow.getBounds().height / 2));
 
-            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2), winCenter.y - (dialog.getSize().y / 2));
+            dialog.setLocation(winCenter.x - (dialog.getSize().x / 2),
+                               winCenter.y - (dialog.getSize().y / 2));
 
             dialog.open();
 
@@ -2490,19 +2573,20 @@ public class HDFView implements DataViewManager
         }
     }
 
-    private class UnregisterFileFormatDialog extends Dialog
-    {
+    private class UnregisterFileFormatDialog extends Dialog {
         private List<Object> keyList;
         private String formatChoice = null;
 
-        public UnregisterFileFormatDialog(Shell parent, int style, List<Object> keyList) {
+        public UnregisterFileFormatDialog(Shell parent, int style, List<Object> keyList)
+        {
             super(parent, style);
 
             this.keyList = keyList;
         }
 
-        public String open() {
-            Shell parent = getParent();
+        public String open()
+        {
+            Shell parent      = getParent();
             final Shell shell = new Shell(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
             shell.setFont(currentFont);
             shell.setText("Unregister a file format");
@@ -2514,7 +2598,6 @@ public class HDFView implements DataViewManager
             imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             imageLabel.setImage(hdfImage);
 
-
             final Combo formatChoiceCombo = new Combo(shell, SWT.SINGLE | SWT.DROP_DOWN | SWT.READ_ONLY);
             formatChoiceCombo.setFont(currentFont);
             formatChoiceCombo.setItems(keyList.toArray(new String[0]));
@@ -2522,7 +2605,8 @@ public class HDFView implements DataViewManager
             formatChoiceCombo.select(0);
             formatChoiceCombo.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     formatChoice = formatChoiceCombo.getItem(formatChoiceCombo.getSelectionIndex());
                 }
             });
@@ -2537,7 +2621,8 @@ public class HDFView implements DataViewManager
             okButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
             okButton.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     shell.dispose();
                 }
             });
@@ -2548,7 +2633,8 @@ public class HDFView implements DataViewManager
             cancelButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, true, false));
             cancelButton.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e)
+                {
                     shell.dispose();
                 }
             });
@@ -2559,14 +2645,14 @@ public class HDFView implements DataViewManager
             shell.setSize(computedSize.x + 50, computedSize.y + 50);
 
             Rectangle parentBounds = parent.getBounds();
-            Point shellSize = shell.getSize();
+            Point shellSize        = shell.getSize();
             shell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                    (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
+                              (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
             shell.open();
 
             Display openDisplay = parent.getDisplay();
-            while(!shell.isDisposed()) {
+            while (!shell.isDisposed()) {
                 if (!openDisplay.readAndDispatch())
                     openDisplay.sleep();
             }
@@ -2591,7 +2677,8 @@ public class HDFView implements DataViewManager
      *
      * @param args  the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         if (display == null || display.isDisposed())
             display = new Display();
 
@@ -2601,7 +2688,7 @@ public class HDFView implements DataViewManager
         String startDir = System.getProperty("user.dir");
         log.trace("main: rootDir = {}  startDir = {}", rootDir, startDir);
 
-        File tmpFile = null;
+        File tmpFile           = null;
         Monitor primaryMonitor = display.getPrimaryMonitor();
         Point margin = new Point(primaryMonitor.getBounds().width, primaryMonitor.getBounds().height);
 
@@ -2611,19 +2698,20 @@ public class HDFView implements DataViewManager
         int X = 0;
         int Y = 0;
 
-        for(int i = 0; i < args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             if ("-root".equalsIgnoreCase(args[i])) {
                 j--;
                 try {
                     j--;
                     tmpFile = new File(args[++i]);
 
-                    if(tmpFile.isDirectory())
+                    if (tmpFile.isDirectory())
                         rootDir = tmpFile.getPath();
-                    else if(tmpFile.isFile())
+                    else if (tmpFile.isFile())
                         rootDir = tmpFile.getParent();
                 }
-                catch (Exception ex) {}
+                catch (Exception ex) {
+                }
             }
             else if ("-start".equalsIgnoreCase(args[i])) {
                 j--;
@@ -2631,40 +2719,41 @@ public class HDFView implements DataViewManager
                     j--;
                     tmpFile = new File(args[++i]);
 
-                    if(tmpFile.isDirectory())
+                    if (tmpFile.isDirectory())
                         startDir = tmpFile.getPath();
-                    else if(tmpFile.isFile())
+                    else if (tmpFile.isFile())
                         startDir = tmpFile.getParent();
                 }
-                catch (Exception ex) {}
+                catch (Exception ex) {
+                }
             }
-            else if("-g".equalsIgnoreCase(args[i]) || "-geometry".equalsIgnoreCase(args[i])) {
+            else if ("-g".equalsIgnoreCase(args[i]) || "-geometry".equalsIgnoreCase(args[i])) {
                 j--;
                 // -geometry WIDTHxHEIGHT+XOFF+YOFF
                 try {
                     String geom = args[++i];
                     j--;
 
-                    int idx = 0;
+                    int idx  = 0;
                     int idx2 = geom.lastIndexOf('-');
                     int idx3 = geom.lastIndexOf('+');
 
                     idx = Math.max(idx2, idx3);
-                    if(idx > 0) {
+                    if (idx > 0) {
                         Y = Integer.parseInt(geom.substring(idx + 1));
 
-                        if(idx == idx2)
+                        if (idx == idx2)
                             Y = -Y;
 
                         geom = geom.substring(0, idx);
                         idx2 = geom.lastIndexOf('-');
                         idx3 = geom.lastIndexOf('+');
-                        idx = Math.max(idx2, idx3);
+                        idx  = Math.max(idx2, idx3);
 
-                        if(idx > 0) {
+                        if (idx > 0) {
                             X = Integer.parseInt(geom.substring(idx + 1));
 
-                            if(idx == idx2)
+                            if (idx == idx2)
                                 X = -X;
 
                             geom = geom.substring(0, idx);
@@ -2673,17 +2762,16 @@ public class HDFView implements DataViewManager
 
                     idx = geom.indexOf('x');
 
-                    if(idx > 0) {
+                    if (idx > 0) {
                         W = Integer.parseInt(geom.substring(0, idx));
                         H = Integer.parseInt(geom.substring(idx + 1));
                     }
-
                 }
                 catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
-            else if("-java.version".equalsIgnoreCase(args[i])) {
+            else if ("-java.version".equalsIgnoreCase(args[i])) {
                 /* Set icon to ViewProperties.getLargeHdfIcon() */
                 Tools.showInformation(mainWindow, "Java Version", JAVA_VER_INFO);
                 System.exit(0);
@@ -2692,14 +2780,15 @@ public class HDFView implements DataViewManager
 
         ArrayList<File> fList = new ArrayList<>();
 
-        if(j >= 0) {
-            for(int i = args.length - j; i < args.length; i++) {
+        if (j >= 0) {
+            for (int i = args.length - j; i < args.length; i++) {
                 tmpFile = new File(args[i]);
-                if(!tmpFile.isAbsolute())
+                if (!tmpFile.isAbsolute())
                     tmpFile = new File(rootDir, args[i]);
                 log.trace("main: filelist - file = {} ", tmpFile.getAbsolutePath());
-                log.trace("main: filelist - add file = {} exists={} isFile={} isDir={}", tmpFile, tmpFile.exists(), tmpFile.isFile(), tmpFile.isDirectory());
-                if(tmpFile.exists() && (tmpFile.isFile() || tmpFile.isDirectory())) {
+                log.trace("main: filelist - add file = {} exists={} isFile={} isDir={}", tmpFile,
+                          tmpFile.exists(), tmpFile.isFile(), tmpFile.isDirectory());
+                if (tmpFile.exists() && (tmpFile.isFile() || tmpFile.isDirectory())) {
                     log.trace("main: flist - add file = {}", tmpFile.getAbsolutePath());
                     fList.add(new File(tmpFile.getAbsolutePath()));
                 }
@@ -2707,13 +2796,14 @@ public class HDFView implements DataViewManager
         }
 
         final ArrayList<File> theFileList = fList;
-        final String the_rootDir = rootDir;
-        final String the_startDir = startDir;
+        final String the_rootDir          = rootDir;
+        final String the_startDir         = startDir;
         final int the_X = X, the_Y = Y, the_W = W, the_H = H;
 
         display.syncExec(new Runnable() {
             @Override
-            public void run() {
+            public void run()
+            {
                 HDFView app = new HDFView(the_rootDir, the_startDir);
 
                 // TODO: Look for a better solution to native dialog problem

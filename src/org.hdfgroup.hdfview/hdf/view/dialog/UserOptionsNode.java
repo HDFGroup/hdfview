@@ -35,9 +35,7 @@ public class UserOptionsNode extends PreferenceNode {
      *
      * @param id the node id
      */
-    public UserOptionsNode(String id) {
-        super(id);
-    }
+    public UserOptionsNode(String id) { super(id); }
 
     /**
      * Creates an <code>UserOptionsNode</code> with the given id,
@@ -53,8 +51,8 @@ public class UserOptionsNode extends PreferenceNode {
      * @param className the class name of the preference page; this class must
      *            implement <code>IPreferencePage</code>
      */
-    public UserOptionsNode(String id, String label,
-            ImageDescriptor image, String className) {
+    public UserOptionsNode(String id, String label, ImageDescriptor image, String className)
+    {
         super(id, label, image, className);
         this.classname = className;
     }
@@ -67,7 +65,5 @@ public class UserOptionsNode extends PreferenceNode {
      * @param id the node id
      * @param preferencePage the preference page
      */
-    public UserOptionsNode(String id, IPreferencePage preferencePage) {
-        super(id, preferencePage);
-    }
+    public UserOptionsNode(String id, IPreferencePage preferencePage) { super(id, preferencePage); }
 }
