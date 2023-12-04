@@ -700,13 +700,23 @@ public class DataOptionDialog extends Dialog {
         }
     }
 
-    /** @return true if the display option is image. */
+    /**
+     * Check if the display option is image
+     *
+     * @return true if the display option is image.
+     */
     public boolean isImageDisplay() { return isImageDisplay; }
 
-    /** @return true if the index starts with 0. */
+    /**
+     * Check if the index starts with 0
+     *
+     * @return true if the index starts with 0.
+     */
     public boolean isIndexBase1() { return isIndexBase1; }
 
     /**
+     * Get the bitmask value
+     *
      * @return the bitmask.
      */
     public BitSet getBitmask()
@@ -730,27 +740,39 @@ public class DataOptionDialog extends Dialog {
         return bitmask;
     }
 
-    /** @return the name of the selected dataview */
+    /**
+     * Get the name of the datatview
+     *
+     * @return the name of the selected dataview
+     */
     public String getDataViewName() { return dataViewName; }
 
     /**
+     * Check if the data should display as characters
      *
      * @return true if display the data as characters; otherwise, display as numbers.
      */
     public boolean isDisplayTypeChar() { return isDisplayTypeChar; }
 
     /**
+     * Check if only the bitmask should be applied
+     *
      * @return if it only apply bitmask.
      */
     public boolean isApplyBitmaskOnly() { return isApplyBitmaskOnly; }
 
     /**
+     * Check if the data in 2D table is to be transposed
      *
      * @return true if transpose the data in 2D table; otherwise, do not transpose the data.
      */
     public boolean isTransposed() { return isTransposed; }
 
-    /** @return true if the data selection is cancelled. */
+    /**
+     * Check if the data selection is cancelled
+     *
+     * @return true if the data selection is cancelled.
+     */
     public boolean isCancelled() { return isSelectionCancelled; }
 
     private void createScalarDSContents()
@@ -791,7 +813,7 @@ public class DataOptionDialog extends Dialog {
         charCheckbox.setFont(curFont);
         charCheckbox.setText("Show As &Char");
         charCheckbox.setSelection(false);
-        charCheckbox.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        charCheckbox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
         if (dataObject.getDatatype().isChar() ||
             (dataObject.getDatatype().isInteger() && dataObject.getDatatype().getDatatypeSize() == 1)) {
@@ -918,12 +940,12 @@ public class DataOptionDialog extends Dialog {
         base0Button = new Button(indexBaseGroup, SWT.RADIO);
         base0Button.setFont(curFont);
         base0Button.setText("0-based");
-        base0Button.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        base0Button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         base1Button = new Button(indexBaseGroup, SWT.RADIO);
         base1Button.setFont(curFont);
         base1Button.setText("1-based");
-        base1Button.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        base1Button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         if (ViewProperties.isIndexBase1()) {
             base0Button.setSelection(false);
@@ -944,7 +966,7 @@ public class DataOptionDialog extends Dialog {
         extractBitButton = new Button(bitmaskGroup, SWT.CHECK);
         extractBitButton.setFont(curFont);
         extractBitButton.setText("Show &Value of Selected Bits");
-        extractBitButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
+        extractBitButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         extractBitButton.setSelection(false);
         extractBitButton.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -1019,7 +1041,7 @@ public class DataOptionDialog extends Dialog {
         applyBitmaskButton = new Button(bitmaskGroup, SWT.CHECK);
         applyBitmaskButton.setFont(curFont);
         applyBitmaskButton.setText("&Apply Bitmask");
-        applyBitmaskButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
+        applyBitmaskButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         applyBitmaskButton.setSelection(false);
         applyBitmaskButton.addSelectionListener(new SelectionAdapter() {
             @Override

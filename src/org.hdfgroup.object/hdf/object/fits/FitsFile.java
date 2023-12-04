@@ -271,6 +271,8 @@ public class FitsFile extends FileFormat {
     }
 
     /**
+     * Get the Fits file.
+     *
      * @return the Fits file.
      */
     public Fits getFitsFile() { return fitsFile; }

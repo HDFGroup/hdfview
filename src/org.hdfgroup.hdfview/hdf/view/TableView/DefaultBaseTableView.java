@@ -1268,13 +1268,23 @@ public abstract class DefaultBaseTableView implements TableView {
         return selectionLayer.getSelectedColumnPositions().length;
     }
 
-    /** @return the selection layer */
+    /**
+     * Get the selection layer
+     *
+     * @return the selection layer
+     */
     public SelectionLayer getSelectionLayer() { return selectionLayer; }
 
-    /** @return the data layer */
+    /**
+     * Get the data layer
+     *
+     * @return the data layer
+     */
     public DataLayer getDataLayer() { return dataLayer; }
 
-    /** refresh the data table */
+    /**
+     * refresh the data table
+     */
     @Override
     public void refreshDataTable()
     {
@@ -2821,7 +2831,7 @@ public abstract class DefaultBaseTableView implements TableView {
             colButton = new Button(content, SWT.RADIO);
             colButton.setFont(curFont);
             colButton.setText("Column");
-            colButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+            colButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             colButton.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e)
@@ -2834,7 +2844,7 @@ public abstract class DefaultBaseTableView implements TableView {
             rowButton = new Button(content, SWT.RADIO);
             rowButton.setFont(curFont);
             rowButton.setText("Row");
-            rowButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+            rowButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
             rowButton.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e)

@@ -47,10 +47,11 @@ public interface DataFormat {
     Object getData() throws Exception, OutOfMemoryError;
 
     /**
+     * setData() is not safe to use because it changes memory buffer of the dataset object. Dataset operations
+     * such as write/read will fail if the buffer type or size is changed.
      *
      *
-     * @param data
-     *            the data to write.
+     * @param data the data to write.
      */
     void setData(Object data);
 
