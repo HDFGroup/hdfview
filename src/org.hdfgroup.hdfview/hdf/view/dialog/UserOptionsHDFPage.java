@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -46,7 +48,9 @@ import org.eclipse.swt.widgets.Text;
 public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private static final Logger log = LoggerFactory.getLogger(UserOptionsHDFPage.class);
 
-    private Text fileExtField, pluginField;
+    private Text fileExtField;
+    private Combo pluginCombo;
+    private Button clearTextButton, deleteTextButton, insertTextButton;
     private Button checkConvertEnum, checkShowRegRefValues, helpButton;
     private Button checkNativeOrder, checkDecOrder, checkIncOrder;
     private Button checkIndexName, checkIndexCreateOrder;
@@ -54,8 +58,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         early114LibVersion, earlyLateLibVersion;
     private Button lateLibVersion, late18LibVersion, late110LibVersion, late112LibVersion, late114LibVersion,
         lateLateLibVersion;
-    private Button checkCurrentUserDir, checkUserHomeDir;
-    private Button currentDirButton, userHomeButton;
+    private Button pluginDirButton;
 
     /** Default early libversion for files */
     private static String earlyLibVers;
@@ -70,8 +73,12 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private static String indexOrder;
 
     /** Path to plugins */
-    private String pluginDir;
-    private boolean isPluginDirChanged;
+    private String pluginDir            = null;
+    private int pluginDirIndex          = -1;
+    private boolean isPluginListChanged = false;
+
+    /** a list of plugin paths */
+    private static String[] pluginPathList;
 
     /**
      * Configuration page for HDF-specific application settings.
@@ -79,7 +86,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     public UserOptionsHDFPage()
     {
         super("HDF Settings");
-        isPluginDirChanged = false;
+        isPluginListChanged = false;
     }
 
     /**
@@ -170,20 +177,6 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         if (checkShowRegRefValues != null)
             ViewProperties.setShowRegRefValue(checkShowRegRefValues.getSelection());
 
-        if (pluginField != null) {
-            String pluginPath = pluginField.getText();
-            if (checkCurrentUserDir.getSelection())
-                pluginPath = System.getProperty("user.dir");
-            else if (checkUserHomeDir.getSelection())
-                pluginPath = System.getProperty("user.home");
-
-            if ((pluginPath != null) && (pluginPath.length() > 0)) {
-                pluginPath         = pluginPath.trim();
-                isPluginDirChanged = !pluginPath.equals(ViewProperties.getPluginDir());
-                ViewProperties.setPluginDir(pluginPath);
-            }
-        }
-
         return true;
     }
 
@@ -192,7 +185,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
      *
      * @return true if the plugin directory changed.
      */
-    public boolean isPluginDirChanged() { return isPluginDirChanged; }
+    public boolean isPluginListChanged() { return isPluginListChanged; }
 
     /**
      * Loads all stored values in the <code>FieldEditor</code>s.
@@ -200,6 +193,14 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     protected void load()
     {
         getPreferenceStore();
+
+        try {
+            curFont = new Font(Display.getCurrent(), ViewProperties.getFontType(),
+                               ViewProperties.getFontSize(), SWT.NORMAL);
+        }
+        catch (Exception ex) {
+            curFont = null;
+        }
 
         fileExtField.setText(ViewProperties.getFileExtension());
 
@@ -233,29 +234,13 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         checkDecOrder.setSelection(indexOrder.compareTo("H5_ITER_DEC") == 0);
         checkNativeOrder.setSelection(indexOrder.compareTo("H5_ITER_NATIVE") == 0);
 
-        pluginDir = ViewProperties.getPluginDir();
-        if (pluginDir == null)
-            pluginDir = rootDir;
-
-        pluginField.setText(pluginDir);
-
-        if (pluginDir.equals(System.getProperty("user.dir"))) {
-            checkCurrentUserDir.setSelection(true);
-            checkUserHomeDir.setSelection(false);
-            pluginField.setEnabled(false);
-        }
-        else if (pluginDir.equals(System.getProperty("user.home"))) {
-            checkCurrentUserDir.setSelection(false);
-            checkUserHomeDir.setSelection(true);
-            pluginField.setEnabled(false);
-        }
-        else {
-            checkCurrentUserDir.setSelection(false);
-            checkUserHomeDir.setSelection(false);
-            pluginField.setEnabled(true);
-        }
-
-        log.trace("UserOptionsHDFlPage: pluginDir={}", pluginDir);
+        pluginPathList = ViewProperties.loadPluginPaths();
+        pluginCombo.setItems(pluginPathList);
+        pluginCombo.setVisibleItemCount(pluginPathList.length);
+        pluginCombo.setText("");
+        pluginCombo.deselectAll();
+        pluginDirIndex = -1;
+        pluginDir      = null;
     }
 
     /**
@@ -270,11 +255,11 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     {
         shell               = parent.getShell();
         Composite composite = new Composite(parent, SWT.NONE);
-        composite.setLayout(new GridLayout(1, false));
+        composite.setLayout(new GridLayout());
 
         org.eclipse.swt.widgets.Group fileExtensionGroup =
             new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        fileExtensionGroup.setLayout(new GridLayout(2, true));
+        fileExtensionGroup.setLayout(new GridLayout(2, false));
         fileExtensionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         fileExtensionGroup.setFont(curFont);
         fileExtensionGroup.setText("File Extensions");
@@ -284,13 +269,13 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         label.setText("Extensions: ");
 
         fileExtField = new Text(fileExtensionGroup, SWT.SINGLE | SWT.BORDER);
-        fileExtField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        fileExtField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         fileExtField.setFont(curFont);
 
         org.eclipse.swt.widgets.Group defaultLibVersionGroup =
             new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         defaultLibVersionGroup.setLayout(new GridLayout());
-        defaultLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        defaultLibVersionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         defaultLibVersionGroup.setFont(curFont);
         defaultLibVersionGroup.setText("Default Lib Version");
 
@@ -304,32 +289,32 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         earlyLibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         earlyLibVersion.setFont(curFont);
         earlyLibVersion.setText("Earliest");
-        earlyLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        earlyLibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         early18LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         early18LibVersion.setFont(curFont);
         early18LibVersion.setText("v18");
-        early18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        early18LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         early110LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         early110LibVersion.setFont(curFont);
         early110LibVersion.setText("v110");
-        early110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        early110LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         early112LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         early112LibVersion.setFont(curFont);
         early112LibVersion.setText("v112");
-        early112LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        early112LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         early114LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         early114LibVersion.setFont(curFont);
         early114LibVersion.setText("v114");
-        early114LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        early114LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         earlyLateLibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         earlyLateLibVersion.setFont(curFont);
         earlyLateLibVersion.setText("Latest");
-        earlyLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        earlyLateLibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group lateLibVersionGroup =
             new org.eclipse.swt.widgets.Group(defaultLibVersionGroup, SWT.NONE);
@@ -341,36 +326,36 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         lateLibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         lateLibVersion.setFont(curFont);
         lateLibVersion.setText("Earliest");
-        lateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        lateLibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         late18LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         late18LibVersion.setFont(curFont);
         late18LibVersion.setText("v18");
-        late18LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        late18LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         late110LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         late110LibVersion.setFont(curFont);
         late110LibVersion.setText("v110");
-        late110LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        late110LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         late112LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         late112LibVersion.setFont(curFont);
         late112LibVersion.setText("v112");
-        late112LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        late112LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         late114LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         late114LibVersion.setFont(curFont);
         late114LibVersion.setText("v114");
-        late114LibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        late114LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         lateLateLibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         lateLateLibVersion.setFont(curFont);
         lateLateLibVersion.setText("Latest");
-        lateLateLibVersion.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        lateLateLibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group dataGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         dataGroup.setLayout(new GridLayout(4, false));
-        dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         dataGroup.setFont(curFont);
         dataGroup.setText("Data");
 
@@ -394,17 +379,17 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         checkConvertEnum = new Button(dataGroup, SWT.CHECK);
         checkConvertEnum.setFont(curFont);
         checkConvertEnum.setText("Convert Enum");
-        checkConvertEnum.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
+        checkConvertEnum.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkShowRegRefValues = new Button(dataGroup, SWT.CHECK);
         checkShowRegRefValues.setFont(curFont);
         checkShowRegRefValues.setText("Show RegRef Values");
-        checkShowRegRefValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        checkShowRegRefValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group displayIndexingGroup =
             new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         displayIndexingGroup.setLayout(new GridLayout());
-        displayIndexingGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        displayIndexingGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         displayIndexingGroup.setFont(curFont);
         displayIndexingGroup.setText("Display Indexing Options");
 
@@ -418,98 +403,164 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         checkIndexName = new Button(indexingTypeGroup, SWT.RADIO);
         checkIndexName.setFont(curFont);
         checkIndexName.setText("By Name");
-        checkIndexName.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkIndexName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkIndexCreateOrder = new Button(indexingTypeGroup, SWT.RADIO);
         checkIndexCreateOrder.setFont(curFont);
         checkIndexCreateOrder.setText("By Creation Order");
-        checkIndexCreateOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkIndexCreateOrder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group indexingOrderGroup =
             new org.eclipse.swt.widgets.Group(displayIndexingGroup, SWT.NONE);
         indexingOrderGroup.setLayout(new GridLayout(3, true));
-        indexingOrderGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        indexingOrderGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         indexingOrderGroup.setFont(curFont);
         indexingOrderGroup.setText("Indexing Order");
 
         checkIncOrder = new Button(indexingOrderGroup, SWT.RADIO);
         checkIncOrder.setFont(curFont);
         checkIncOrder.setText("Increments");
-        checkIncOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkIncOrder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkDecOrder = new Button(indexingOrderGroup, SWT.RADIO);
         checkDecOrder.setFont(curFont);
         checkDecOrder.setText("Decrements");
-        checkDecOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkDecOrder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkNativeOrder = new Button(indexingOrderGroup, SWT.RADIO);
         checkNativeOrder.setFont(curFont);
         checkNativeOrder.setText("Native");
-        checkNativeOrder.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+        checkNativeOrder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group pluginDirectoryGroup =
             new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         pluginDirectoryGroup.setLayout(new GridLayout(3, false));
         pluginDirectoryGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         pluginDirectoryGroup.setFont(curFont);
-        pluginDirectoryGroup.setText("Default Plugin Directory (*/plugin)");
+        pluginDirectoryGroup.setText("Plugin Paths");
 
-        checkCurrentUserDir = new Button(pluginDirectoryGroup, SWT.CHECK);
-        checkCurrentUserDir.setFont(curFont);
-        checkCurrentUserDir.setText("\"User Work\" or");
-        checkCurrentUserDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-        checkCurrentUserDir.addSelectionListener(new SelectionAdapter() {
+        pluginPathList = ViewProperties.loadPluginPaths();
+        pluginCombo    = new Combo(pluginDirectoryGroup, SWT.BORDER | SWT.SINGLE);
+        pluginCombo.setFont(curFont);
+        pluginCombo.setItems(pluginPathList);
+        pluginCombo.setVisibleItemCount(pluginPathList.length);
+        pluginCombo.deselectAll();
+        pluginCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+        pluginCombo.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e)
+            {
+                if (e.keyCode == SWT.CR) {
+                    String dirname = pluginCombo.getText();
+                    if (dirname == null || dirname.length() < 1 || dirname.equals(pluginDir))
+                        return;
+                    pluginCombo.setText(dirname);
+                }
+            }
+        });
+        pluginCombo.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
             {
-                boolean isCheckCurrentUserDirSelected = checkCurrentUserDir.getSelection();
-                if (isCheckCurrentUserDirSelected)
-                    checkUserHomeDir.setSelection(false);
-                pluginField.setEnabled(!isCheckCurrentUserDirSelected);
-                currentDirButton.setEnabled(!isCheckCurrentUserDirSelected);
+                pluginDirIndex = pluginCombo.getSelectionIndex();
+                pluginDir      = pluginCombo.getItem(pluginDirIndex);
             }
         });
 
-        checkUserHomeDir = new Button(pluginDirectoryGroup, SWT.CHECK);
-        checkUserHomeDir.setFont(curFont);
-        checkUserHomeDir.setText("\"User Home\" or");
-        checkUserHomeDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-        checkUserHomeDir.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                boolean isCheckUserHomeDirSelected = checkUserHomeDir.getSelection();
-                if (isCheckUserHomeDirSelected)
-                    checkCurrentUserDir.setSelection(false);
-                pluginField.setEnabled(!isCheckUserHomeDirSelected);
-                currentDirButton.setEnabled(!isCheckUserHomeDirSelected);
-            }
-        });
-
-        pluginField = new Text(pluginDirectoryGroup, SWT.SINGLE | SWT.BORDER);
-        pluginField.setFont(curFont);
-        pluginField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-        currentDirButton = new Button(pluginDirectoryGroup, SWT.PUSH);
-        currentDirButton.setFont(curFont);
-        currentDirButton.setText("Browse...");
-        currentDirButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-        currentDirButton.addSelectionListener(new SelectionAdapter() {
+        pluginDirButton = new Button(pluginDirectoryGroup, SWT.PUSH);
+        pluginDirButton.setFont(curFont);
+        pluginDirButton.setText("Browse...");
+        pluginDirButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.FILL, false, false));
+        pluginDirButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
             {
                 final DirectoryDialog dChooser = new DirectoryDialog(shell);
-                dChooser.setFilterPath(pluginDir);
-                dChooser.setText("Select a Base Directory");
+                dChooser.setFilterPath(System.getProperty("user.dir"));
+                dChooser.setText("Select a Directory");
 
                 String dir = dChooser.open();
 
                 if (dir == null)
                     return;
 
-                pluginField.setText(dir + "/plugin");
+                pluginCombo.setText(dir);
             }
         });
+
+        insertTextButton = new Button(pluginDirectoryGroup, SWT.PUSH);
+        insertTextButton.setFont(curFont);
+        insertTextButton.setToolTipText("Append current selection");
+        insertTextButton.setText("Add Path");
+        insertTextButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        insertTextButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                String dirname = pluginCombo.getText();
+                if (dirname == null || dirname.length() < 1) {
+                    return;
+                }
+                ViewProperties.appendPluginPath(dirname);
+                pluginPathList = ViewProperties.loadPluginPaths();
+                pluginCombo.setItems(pluginPathList);
+                pluginCombo.setVisibleItemCount(pluginPathList.length);
+                pluginCombo.setText("");
+                pluginCombo.deselectAll();
+                pluginDirIndex = -1;
+                pluginDir      = null;
+            }
+        });
+
+        deleteTextButton = new Button(pluginDirectoryGroup, SWT.PUSH);
+        deleteTextButton.setFont(curFont);
+        deleteTextButton.setToolTipText("Remove current selection");
+        deleteTextButton.setText("Remove Path");
+        deleteTextButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        deleteTextButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                String dirname = pluginCombo.getText();
+                if (dirname == null || dirname.length() < 1) {
+                    return;
+                }
+                String[] items = pluginCombo.getItems();
+                for (int idx = 0; idx < items.length; idx++) {
+                    if (items[idx].equals(dirname)) {
+                        pluginDirIndex = idx;
+                    }
+                }
+                ViewProperties.deletePluginPath(pluginDirIndex);
+                pluginPathList = ViewProperties.loadPluginPaths();
+                pluginCombo.setItems(pluginPathList);
+                pluginCombo.setVisibleItemCount(pluginPathList.length);
+                pluginCombo.setText("");
+                pluginCombo.deselectAll();
+                pluginDirIndex = -1;
+                pluginDir      = null;
+            }
+        });
+
+        clearTextButton = new Button(pluginDirectoryGroup, SWT.PUSH);
+        clearTextButton.setFont(curFont);
+        clearTextButton.setToolTipText("Clear current selection");
+        clearTextButton.setText("Clear Path Text");
+        clearTextButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        clearTextButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                pluginCombo.setText("");
+                pluginCombo.deselectAll();
+                pluginDirIndex = -1;
+                pluginDir      = null;
+            }
+        });
+
+        // shell.pack();
+
+        log.info("UserOptionsHDFPage: plugin combobox created");
 
         load();
         return composite;
