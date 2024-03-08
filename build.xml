@@ -1186,7 +1186,6 @@
                 <include name="hdf_java.dll" />
                 <include name="hdf.dll"/>
                 <include name="mfhdf.dll"/>
-                <include name="xdr.dll"/>
             </fileset>
             <fileset dir="${hdf5.lib.dir}">
                 <include name="hdf5_java.dll" />
@@ -1226,10 +1225,10 @@
                 <exclude name="slf4j*.jar" />
             </fileset>
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <filename regex="libhdf\.so(\.[0-9])$"/>
+                <filename regex="libhdf\.so(\.[0-9][0-9])$"/>
             </fileset>
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <filename regex="libmfhdf\.so(\.[0-9])$"/>
+                <filename regex="libmfhdf\.so(\.[0-9][0-9])$"/>
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
                 <include name="libhdf5_java.so" />
@@ -1276,11 +1275,11 @@
                 <exclude name="slf4j*.jar" />
             </fileset>
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <filename regex="libhdf(\.[0-9])(\.dylib)$"/>
+                <filename regex="libhdf(\.[0-9][0-9]?)(\.dylib)$"/>
                 <exclude name="*.a" />
             </fileset>
             <fileset dir="${hdf.lib.dir}" followsymlinks="true">
-                <filename regex="libmfhdf(\.[0-9])(\.dylib)$"/>
+                <filename regex="libmfhdf(\.[0-9][0-9]?)(\.dylib)$"/>
                 <exclude name="*.a" />
             </fileset>
             <fileset dir="${hdf5.lib.dir}" followsymlinks="true">
