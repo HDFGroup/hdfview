@@ -312,7 +312,7 @@ jobs:
     - name: Uncompress hdf4 binary (mac)
       run: |
           cd "${{ github.workspace }}/hdf4"
-          tar -zxvf ${{ github.workspace }}/hdf4/HDF-*-Linux.tar.gz --strip-components 1
+          tar -zxvf ${{ github.workspace }}/hdf4/HDF-*-Darwin.tar.gz --strip-components 1
 
     - name: set hdflib name
       id: set-hdflib-name
@@ -339,7 +339,7 @@ jobs:
     - name: Uncompress hdf5 binary (mac)
       run:  |
           cd "${{ github.workspace }}/hdf5"
-          tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Linux.tar.gz --strip-components 1
+          tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Darwin.tar.gz --strip-components 1
 
     - name: set hdf5lib name
       id: set-hdf5lib-name
