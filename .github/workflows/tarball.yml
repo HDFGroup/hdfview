@@ -111,7 +111,7 @@ jobs:
               ls $GITHUB_WORKSPACE
 
       - name: Create snapshot source file (tgz and zip)
-        id: create-files
+        id: create-snapshot-files
         if: ${{ (inputs.use_environ == 'snapshots') && (needs.check_commits.outputs.has_changes == 'true') }}
         run: |
               rename hdfsrc ${{ steps.set-file-base.outputs.FILE_BASE }}
@@ -120,7 +120,7 @@ jobs:
         shell: bash
 
       - name: Create release source file (tgz and zip)
-        id: create-files
+        id: create-release-files
         if: ${{ (inputs.use_environ == 'release') }}
         run: |
               zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
