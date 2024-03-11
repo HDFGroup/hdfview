@@ -97,7 +97,6 @@ jobs:
     uses: ./.github/workflows/ant.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      preset_name: ci-StdShar
       use_environ: snapshots
       use_hdf: ${{ needs.get-base-names.outputs.hdf4-name }}
       use_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
