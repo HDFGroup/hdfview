@@ -15,6 +15,10 @@
 
     <record name="antoutput.log" action="start" append="${build.antoutput.append}" loglevel="verbose" />
 
+    <property name="sign_state" value="sign" />
+    <condition property="sign.enable">
+        <equals arg1="${sign_state}" arg2="sign" />
+    </condition>
     <!-- MAC signing: -->
     <property name="sign.account" value="${env.SIGNER}" />
     <property name="login.keychain_key" value="${env.KEYCHAIN_PASSWD}" />
@@ -2015,7 +2019,7 @@
           MAC NOTARY FOR JPACKAGE
           ================================================================= -->
 
-    <target name="submit-notary-altool">
+    <target name="submit-notary-altool" if="sign.enable">
         <exec executable="/usr/bin/xcrun" failonerror="true">
             <redirector output="retUUID.txt" alwayslog="true"/>
             <arg value="altool"/>
@@ -2045,7 +2049,7 @@
         <echo>notarize-app:${retUUID}</echo>
     </target>
 
-    <target name="post-notary-altool">
+    <target name="post-notary-altool" if="sign.enable">
         <loadfile property="retUUID" srcfile="retUUID.txt">
             <filterchain>
                 <tokenfilter>
@@ -2074,7 +2078,7 @@
         <echo>notarize-info:${logInfo}</echo>
     </target>
 
-        <target name="zip-submit-notary-altool">
+        <target name="zip-submit-notary-altool" if="sign.enable">
             <exec executable="/usr/bin/xcrun" failonerror="true">
                 <redirector output="retUUID.txt" alwayslog="true"/>
                 <arg value="altool"/>
@@ -2104,7 +2108,7 @@
             <echo>notarize-app:${retUUID}</echo>
         </target>
 
-    <target name="submit-notary">
+    <target name="submit-notary" if="sign.enable">
         <exec executable="/usr/bin/xcrun" failonerror="true">
             <redirector output="retUUID.txt" alwayslog="true"/>
             <arg value="notarytool"/>
@@ -2131,7 +2135,7 @@
         <echo>notarize-app:${retUUID}</echo>
     </target>
 
-    <target name="post-notary">
+    <target name="post-notary" if="sign.enable">
         <loadfile property="retUUID" srcfile="retUUID.txt">
             <filterchain>
                 <tokenfilter>
@@ -2161,7 +2165,7 @@
 
     <!-- Staple the received notarization to the app -->
     <!-- run this after notarization is completed -->
-    <target name="staple-notary">
+    <target name="staple-notary" if="sign.enable">
         <echo message="*** Stapling notarization to Mac Build ***"/>
         <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
             <arg value="stapler"/>
@@ -2178,7 +2182,7 @@
         </exec>
     </target>
 
-        <target name="zip-submit-notary">
+        <target name="zip-submit-notary" if="sign.enable">
             <exec executable="/usr/bin/xcrun" failonerror="true">
                 <redirector output="retUUID.txt" alwayslog="true"/>
                 <arg value="notarytool"/>
@@ -2207,7 +2211,7 @@
 
     <!-- Staple the received notarization to the app -->
     <!-- run this after notarization is completed -->
-    <target name="zip-staple-notary">
+    <target name="zip-staple-notary" if="sign.enable">
         <echo message="*** Stapling notarization to Mac Build ***"/>
         <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
             <arg value="stapler"/>
