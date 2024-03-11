@@ -108,14 +108,13 @@ jobs:
       - name: List files in the repository
         run: |
               ls -l ${{ github.workspace }}
-              cd "$GITHUB_WORKSPACE/hdfsrc"
-              ls $GITHUB_WORKSPACE
+              ls $GITHUB_WORKSPACE/hdfsrc
 
       - name: Create snapshot source file (tgz and zip)
         id: create-snapshot-files
         if: ${{ (inputs.use_environ == 'snapshots') }}
         run: |
-              rename hdfsrc ${{ steps.set-file-base.outputs.FILE_BASE }}
+              ren hdfsrc ${{ steps.set-file-base.outputs.FILE_BASE }}
               zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./${{ steps.set-file-base.outputs.FILE_BASE }}
               tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./${{ steps.set-file-base.outputs.FILE_BASE }}
         shell: bash
