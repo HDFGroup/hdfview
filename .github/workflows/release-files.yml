@@ -113,7 +113,7 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip >> sha256sums.txt
-#          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz >> sha256sums.txt
 
       - name: Store snapshot name
         run: |

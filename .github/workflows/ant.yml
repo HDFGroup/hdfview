@@ -166,7 +166,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
             name: zip-win-vs2022-binary
-            path: ${{ github.workspace }}/hdfsrc/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
+            path: ${{ github.workspace }}/hdfsrc/build/dist/HDFView-99.99.99-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
@@ -271,7 +271,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
             name: tgz-ubuntu-2204-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+            path: ${{ github.workspace }}/build/dist/HDFView-99.99.99-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
@@ -376,7 +376,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
             name: tgz-ubuntu-2204-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin-x86_64.tar.gz
+            path: ${{ github.workspace }}/build/dist/HDFView-99.99.99-Darwin-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
