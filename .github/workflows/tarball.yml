@@ -110,8 +110,18 @@ jobs:
               ls -l ${{ github.workspace }}
               ls $GITHUB_WORKSPACE
 
-      - name: Create source file (tgz and zip)
+      - name: Create snapshot source file (tgz and zip)
         id: create-files
+        if: ${{ (inputs.use_environ == 'snapshots') && (needs.check_commits.outputs.has_changes == 'true') }}
+        run: |
+              rename hdfsrc ${{ steps.set-file-base.outputs.FILE_BASE }}
+              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./${{ steps.set-file-base.outputs.FILE_BASE }}
+              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./${{ steps.set-file-base.outputs.FILE_BASE }}
+        shell: bash
+
+      - name: Create release source file (tgz and zip)
+        id: create-files
+        if: ${{ (inputs.use_environ == 'release') }}
         run: |
               zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
               tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
