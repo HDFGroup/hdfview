@@ -126,7 +126,7 @@ jobs:
 
       # Get files created by release script
     - name: Get zip-tarball (Windows)
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
       with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -255,6 +255,21 @@ jobs:
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
       shell: bash
 
+      # Get files created by release script
+    - name: Get tgz-tarball (Linux)
+      uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+      with:
+            name: tgz-tarball
+            path: ${{ github.workspace }}
+
+    - name: List files for the space (Linux)
+      run: |
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}
+
+    - name: Uncompress source (Linux)
+      run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
     - name: Build with Ant
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
@@ -284,7 +299,7 @@ jobs:
   # mac (osx12) w/ clang + CMake
   #
     name: "mac gcc CMake"
-    runs-on: ubuntu-latest
+    runs-on: macos-13
     steps:
     - uses: actions/checkout@v3
 
@@ -359,6 +374,21 @@ jobs:
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
       shell: bash
+
+      # Get files created by release script
+    - name: Get tgz-tarball (mac)
+      uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+      with:
+            name: tgz-tarball
+            path: ${{ github.workspace }}
+
+    - name: List files for the space (mac)
+      run: |
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}
+
+    - name: Uncompress source (mac)
+      run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
     - name: Build with Ant
       env:
