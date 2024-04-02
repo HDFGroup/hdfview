@@ -37,7 +37,7 @@ For example,
 
      #hdf.lib.dir = ${env.HDFLIBS}/lib
      #hdf5.lib.dir = ${env.HDF5LIBS}/lib
-     hdf.lib.dir = /<MYPATH>/HDF_Group/HDF/4.2.X/lib
+     hdf.lib.dir = /<MYPATH>/HDF_Group/HDF/4.3.X/lib
      hdf5.lib.dir = /<MYPATH>/HDF_Group/HDF5/1.14.X/lib
 
 From the top HDFView source code directory run: /<path to ANT executable>/ant run
@@ -45,7 +45,7 @@ From the top HDFView source code directory run: /<path to ANT executable>/ant ru
 From the top HDFView source code directory run: /<path to ANT executable>/ant binaryPackage
 
 Go into the build/dist directory that gets created to find the HDFView distribution.
-For example, HDFView-3.3.0-Linux_64.tar.gz.
+For example, HDFView-3.3.99-Linux_64.tar.gz.
 
 Uncompress the HDFView binary and bring up HDFView by executing the bin/HDFView command.
 

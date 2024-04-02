@@ -26,11 +26,16 @@ public abstract interface HelpView {
     public abstract void show();
 
     /**
-     * @return the HelpView's label, which is displayed in the HDFView
-     * help menu.
+     * Get the HelpView's label, which is displayed in the HDFView help menu.
+     *
+     * @return the HelpView's label
      */
     public abstract String getLabel();
 
-    /** @return the action command for this HelpView. */
+    /**
+     * Get the action command for this HelpView.
+     *
+     * @return the action command for this HelpView.
+     */
     public abstract String getActionCommand();
 }

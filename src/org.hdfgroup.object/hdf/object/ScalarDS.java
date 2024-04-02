@@ -394,6 +394,8 @@ public abstract class ScalarDS extends Dataset {
     public List<Number> getFilteredImageValues() { return filteredImageValues; }
 
     /**
+     * Check if this dataset is a true color image.
+     *
      * @return true if this dataset is a true color image.
      *
      */

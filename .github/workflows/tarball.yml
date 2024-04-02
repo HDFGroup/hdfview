@@ -9,6 +9,11 @@ on:
         type: string
         required: false
         default: check
+      use_tag:
+        description: 'Release version tag'
+        type: string
+        required: false
+        default: snapshot
       use_environ:
         description: 'Environment to locate files'
         type: string
@@ -83,7 +88,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           path: hdfsrc
 
@@ -96,7 +101,7 @@ jobs:
       - name: Set file base name
         id: set-file-base
         run: |
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' && '${{ needs.check_commits.outputs.has_changes }}' == 'true' ]]
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
           then
             FILE_NAME_BASE=$(echo "HDFView-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
           else
@@ -108,10 +113,20 @@ jobs:
       - name: List files in the repository
         run: |
               ls -l ${{ github.workspace }}
-              ls $GITHUB_WORKSPACE
+              ls $GITHUB_WORKSPACE/hdfsrc
 
-      - name: Create source file (tgz and zip)
-        id: create-files
+      - name: Create snapshot source file (tgz and zip)
+        id: create-snapshot-files
+        if: ${{ (inputs.use_environ == 'snapshots') }}
+        run: |
+              mv hdfsrc ${{ steps.set-file-base.outputs.FILE_BASE }}
+              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./${{ steps.set-file-base.outputs.FILE_BASE }}
+              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./${{ steps.set-file-base.outputs.FILE_BASE }}
+        shell: bash
+
+      - name: Create release source file (tgz and zip)
+        id: create-release-files
+        if: ${{ (inputs.use_environ == 'release') }}
         run: |
               zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
               tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
@@ -124,15 +139,22 @@ jobs:
 
       # Save files created by release script
       - name: Save tgz-tarball
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
               name: tgz-tarball
               path: ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save zip-tarball
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
               name: zip-tarball
               path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+#      - name: Save NEWSLETTER
+#        uses: actions/upload-artifact@v4
+#        with:
+#              name: NEWSLETTER
+#              path: ./hdfsrc/release_docs/NEWSLETTER.txt
+#              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

@@ -4,7 +4,7 @@ The current HDFView products can be downloaded at:
 
 HDF Libraries
 =============================================================================
-This release was built and tested with HDF 4.2.x and HDF5 1.14.x.
+This release was built and tested with HDF 4.3.x and HDF5 1.14.x.
 
 Windows ONLY: HDFView built with VS 2015 will require that
 the Visual C++ Redistributable Packages be installed on your machine.
@@ -21,7 +21,7 @@ newest jpackage for distribution.
 
 Major Enhancements
 ==============================================================================
-    *
+    * Add User Option for editing the plugin path
 
     ***** Previous fixes *****
     * GH #121 Updated all icons with transparency

@@ -77,21 +77,21 @@ public final class Tools {
 
     private static final Logger log = LoggerFactory.getLogger(Tools.class);
 
-    /**  */
+    /** Maximum value or int8 */
     public static final long MAX_INT8 = 127;
-    /**  */
+    /** Maximum value or unsigned int8 */
     public static final long MAX_UINT8 = 255;
-    /**  */
+    /** Maximum value or int16 */
     public static final long MAX_INT16 = 32767;
-    /**  */
+    /** Maximum value or unsigned int16 */
     public static final long MAX_UINT16 = 65535;
-    /**  */
+    /** Maximum value or int32 */
     public static final long MAX_INT32 = 2147483647;
-    /**  */
+    /** Maximum value or unsigned int32 */
     public static final long MAX_UINT32 = 4294967295L;
-    /**  */
+    /** Maximum value or int64 */
     public static final long MAX_INT64 = 9223372036854775807L;
-    /**  */
+    /** Maximum value or unsigned int64 */
     public static final BigInteger MAX_UINT64 = new BigInteger("18446744073709551615");
 
     private static final int FLOAT_BUFFER_SIZE  = 524288;
