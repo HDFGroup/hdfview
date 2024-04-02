@@ -16,6 +16,11 @@ on:
         description: "The common base name of the source tarballs"
         required: true
         type: string
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
 
 permissions:
   contents: read
@@ -42,8 +47,17 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
+        version: 'hdf4.3.0'
+        file: '${{ inputs.use_hdf }}-win-vs2022_cl.zip'
+      if: ${{ (inputs.use_environ == 'release') }}
+
+    - name: Get hdf4 snapshot
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf }}-win-vs2022_cl.zip'
+      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: Uncompress gh binary (Win)
       run: 7z x ${{ github.workspace }}/${{ inputs.use_hdf }}-win-vs2022_cl.zip
@@ -79,8 +93,17 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot'
+        version: 'hdf5-1.14.4'
         file: '${{ inputs.use_hdf5 }}-win-vs2022_cl.zip'
+      if: ${{ (inputs.use_environ == 'release') }}
+
+    - name: Get hdf5 snapshot
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'HDFGroup/hdf5'
+        version: 'tags/snapshot-1.14'
+        file: '${{ inputs.use_hdf5 }}-win-vs2022_cl.zip'
+      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: Uncompress gh binary (Win)
       run: 7z x ${{ github.workspace }}/${{ inputs.use_hdf5 }}-win-vs2022_cl.zip
