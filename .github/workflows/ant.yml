@@ -246,7 +246,7 @@ jobs:
       run: |
         HDFDIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
         FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
-        echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
+        echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT        /hdfsrc/build
 
     - name: Get hdf5 release
       uses: dsaltares/fetch-gh-release-asset@master
@@ -367,7 +367,7 @@ jobs:
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
-    - name: Get hdf4 release
+    - name: Get hdf4 snapshot
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
@@ -403,11 +403,11 @@ jobs:
         file: '${{ inputs.use_hdf5 }}-osx12.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
-    - name: Get hdf5 release
+    - name: Get hdf5 snapshot
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot'
+        version: 'tags/snapshot-1.14'
         file: '${{ inputs.use_hdf5 }}-osx12.tar.gz'
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
