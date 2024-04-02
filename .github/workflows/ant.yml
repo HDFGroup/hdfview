@@ -180,7 +180,7 @@ jobs:
     - name: List files for the space (Windows)
       run: |
             Get-ChildItem -Path ${{ github.workspace }}/build/dist
-            Get-ChildItem -Path ${{ github.workspace }}/hdfsrc/build
+            Get-ChildItem -Path ${{ github.workspace }}
       shell: pwsh
 
     # Save files created by ctest script
