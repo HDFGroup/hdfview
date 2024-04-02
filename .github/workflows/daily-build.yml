@@ -27,16 +27,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
 
-    - name: Get hdf4 release base name
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf4'
-        version: 'tags/hdf4.3.0'
-        file: 'last-file.txt'
-
     - name: Read base-name file
       id: gethdf4base
-      run: echo "HDF4_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
+      run: echo "HDF4_NAME_BASE=hdf4.3.0" >> $GITHUB_OUTPUT
 
     - name: Get hdf5 release base name
       uses: dsaltares/fetch-gh-release-asset@master
