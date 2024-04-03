@@ -182,7 +182,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: zip-win-vs2022-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.SOURCE_BASE }}-win64.zip
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
@@ -308,7 +308,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.SOURCE_BASE }}-Linux-x86_64.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
@@ -435,7 +435,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-osx12-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
