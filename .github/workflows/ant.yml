@@ -13,10 +13,10 @@ on:
         required: true
         type: string
       snap_name:
-        description: 'The name in the source tarballs'
+        description: 'The version name of the binaries'
         type: string
         required: false
-        default: hdfsrc
+        default: HDFView-3.99.99
       file_base:
         description: "The common base name of the source tarballs"
         required: true
@@ -200,7 +200,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: zip-win-vs2022-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.SOURCE_BASE }}-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
@@ -209,7 +209,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: zip-win-vs2022-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.SOURCE_BASE }}-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -354,7 +354,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.SOURCE_BASE }}-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
@@ -362,7 +362,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.SOURCE_BASE }}-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -508,7 +508,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-osx12-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.SOURCE_BASE }}-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
@@ -517,7 +517,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-osx12-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.SOURCE_BASE }}-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
 
