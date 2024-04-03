@@ -68,6 +68,7 @@ jobs:
     uses: ./.github/workflows/tarball.yml
     with:
       use_ignore: ${{ needs.get-base-names.outputs.run-ignore }}
+      use_tag: snapshot
       use_environ: snapshots
 
   call-workflow-ant:
@@ -75,9 +76,9 @@ jobs:
     uses: ./.github/workflows/ant.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      use_environ: snapshots
       use_hdf: ${{ needs.get-base-names.outputs.hdf4-name }}
       use_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
+      use_environ: snapshots
 
   call-workflow-release:
     needs: [get-base-names, call-workflow-tarball, call-workflow-ant]
@@ -90,4 +91,5 @@ jobs:
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_tag: snapshot
       use_environ: snapshots
-    if: ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore'))
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
+

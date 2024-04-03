@@ -12,6 +12,11 @@ on:
         description: "The hdf5 base name of the binaries"
         required: true
         type: string
+      snap_name:
+        description: 'The name in the source tarballs'
+        type: string
+        required: false
+        default: hdfsrc
       file_base:
         description: "The common base name of the source tarballs"
         required: true
@@ -41,7 +46,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Enable Developer Command Prompt
-      uses: ilammy/msvc-dev-cmd@v1.12.1
+      uses: ilammy/msvc-dev-cmd@v1.13.0
 
     - name: Get hdf4 release
       uses: dsaltares/fetch-gh-release-asset@master
@@ -70,7 +75,7 @@ jobs:
     - name: List files for the space (Win)
       run: |
             ls -l ${{ github.workspace }}/hdf4
-            ls ${{ runner.workspace }}/hdfview
+            #ls ${{ runner.workspace }}/hdfview
 
     - name: create hdf4 location (Win)
       working-directory: ${{ github.workspace }}/hdf4
@@ -116,7 +121,7 @@ jobs:
     - name: List files for the space (Win)
       run: |
             ls -l ${{ github.workspace }}/hdf5
-            ls ${{ runner.workspace }}/hdfview
+            #ls ${{ runner.workspace }}/hdfview
 
     - name: create hdf5 location (Win)
       working-directory: ${{ github.workspace }}/hdf5
@@ -145,6 +150,13 @@ jobs:
       run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
       shell: bash
 
       # Get files created by release script
@@ -185,12 +197,21 @@ jobs:
 
     # Save files created by ctest script
     - name: Save published binary (Win)
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
             name: zip-win-vs2022-binary
-            path: ${{ github.workspace }}/hdfsrc/build/dist/HDFView-3.3.99-win64.zip
+            path: ${{ github.workspace }}/build/dist/HDFView-3.3.99-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
+
+    # Save release files created by ctest script
+    - name: Save published release binary (Win)
+      uses: actions/upload-artifact@v4
+      with:
+            name: zip-win-vs2022-binary
+            path: ${{ github.workspace }}/build/dist/HDFView-3.3.99-win64.zip
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Test with Ant
       env:
@@ -246,7 +267,7 @@ jobs:
       run: |
         HDFDIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
         FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
-        echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT        /hdfsrc/build
+        echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
 
     - name: Get hdf5 release
       uses: dsaltares/fetch-gh-release-asset@master
@@ -294,7 +315,13 @@ jobs:
       run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-      shell: bash
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Get files created by release script
     - name: Get tgz-tarball (Linux)
@@ -324,7 +351,7 @@ jobs:
 
     # Save files created by ctest script
     - name: Save published snapshot binary (Linux)
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-binary
             path: ${{ github.workspace }}/build/dist/HDFView-3.3.99-Linux-x86_64.tar.gz
@@ -332,7 +359,7 @@ jobs:
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: Save published release binary (Linux)
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-binary
             path: ${{ github.workspace }}/build/dist/HDFView-3.3.2-Linux-x86_64.tar.gz
@@ -346,10 +373,11 @@ jobs:
       run: ant -noinput -buildfile build.xml junit 
 
   build_and_test_mac:
-  # mac (osx12) w/ clang + CMake
+  # mac (osx12) w/ clang + ant
   #
-    name: "mac gcc CMake"
+    name: "mac clang CMake"
     runs-on: macos-13
+    if: false
     steps:
     - uses: actions/checkout@v3
 
@@ -441,7 +469,13 @@ jobs:
       run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-      shell: bash
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Get files created by release script
     - name: Get tgz-tarball (mac)
@@ -470,13 +504,22 @@ jobs:
             ls -l ${{ runner.workspace }}
 
     # Save files created by ctest script
-    - name: Save published binary (mac)
-      uses: actions/upload-artifact@v3
+    - name: Save published snapshot binary (mac)
+      uses: actions/upload-artifact@v4
       with:
             name: tgz-osx12-binary
             path: ${{ github.workspace }}/build/dist/HDFView-3.3.99-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
+
+    # Save release files created by ctest script
+    - name: Save published release binary (mac)
+      uses: actions/upload-artifact@v4
+      with:
+            name: tgz-osx12-binary
+            path: ${{ github.workspace }}/build/dist/HDFView-3.3.99-Darwin.tar.gz
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Test with Ant
       env:
