@@ -139,7 +139,7 @@ jobs:
             SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
-        shell: bash
+      shell: bash
 
       # Get files created by release script
     - name: Get zip-tarball (Windows)
