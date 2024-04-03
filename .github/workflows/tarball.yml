@@ -90,7 +90,7 @@ jobs:
     if: ${{ ((inputs.use_environ == 'snapshots') && ((needs.check_commits.outputs.has_changes == 'true') || (inputs.use_ignore == 'ignore'))) || (inputs.use_environ  == 'release') }}
     outputs:
       file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
-      source_base: ${{ steps.version.outputs.SOURCE_TAG }}
+      source_base: ${{ steps.version.outputs.TAG_VERSION }}
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
