@@ -171,6 +171,13 @@ jobs:
         ant -noinput -buildfile build.xml binaryPackage
       shell: bash
 
+    - name: Rename snapshot binary base name
+      id: ren-basename
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+      run: |
+        mv hdfview-${{ inputs.snap_name }}-win64.zip ${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
+      shell: bash
+
     - name: List files for the space (Windows)
       run: |
             Get-ChildItem -Path ${{ github.workspace }}/build/dist
@@ -182,7 +189,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: zip-win-vs2022-binary
-            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-win64.zip
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
@@ -298,6 +305,13 @@ jobs:
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml binaryPackage
 
+    - name: Rename snapshot binary base name
+      id: ren-basename
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+      run: |
+        mv hdfview-${{ inputs.snap_name }}-Linux-x86_64.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+      shell: bash
+
     - name: List files in the space (Linux)
       run: |
             ls ${{ github.workspace }}/build/dist
@@ -308,7 +322,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-binary
-            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Linux-x86_64.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
@@ -425,6 +439,13 @@ jobs:
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -Dsign_state=NOSIGN -noinput -buildfile build.xml binaryPackage
 
+    - name: Rename snapshot binary base name
+      id: ren-basename
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+      run: |
+        mv hdfview-${{ inputs.snap_name }}-Darwin.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+      shell: bash
+
     - name: List files in the space (mac)
       run: |
             ls ${{ github.workspace }}/build/dist
@@ -435,7 +456,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-osx12-binary
-            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Darwin.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
