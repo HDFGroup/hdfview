@@ -176,7 +176,7 @@ jobs:
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
         cd build/dist
-        mv hdfview-${{ inputs.snap_name }}-win64.zip ${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
+        mv ${{ inputs.snap_name }}-win64.zip ${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
       shell: bash
 
     - name: List files for the space (Windows)
@@ -311,7 +311,7 @@ jobs:
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
         cd build/dist
-        mv hdfview-${{ inputs.snap_name }}-Linux-x86_64.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+        mv ${{ inputs.snap_name }}-Linux-x86_64.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
       shell: bash
 
     - name: List files in the space (Linux)
@@ -446,7 +446,7 @@ jobs:
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
         cd build/dist
-        mv hdfview-${{ inputs.snap_name }}-Darwin.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+        mv ${{ inputs.snap_name }}-Darwin.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
       shell: bash
 
     - name: List files in the space (mac)
