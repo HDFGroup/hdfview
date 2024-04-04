@@ -114,7 +114,7 @@ jobs:
 
       - name: Create sha256 sums for files
         run: |
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz > sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip >> sha256sums.txt
