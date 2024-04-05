@@ -349,11 +349,13 @@ jobs:
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
       run: |
           # create variables
-          CERTIFICATE_PATH=/Users/runner/Library/Keychains/build_certificate.p12
-          KEYCHAIN_PATH=/Users/runner/Library/Keychains/login.keychain-db
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           # import certificate from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
           # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
           # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
@@ -458,6 +460,7 @@ jobs:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
         KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+        KEYCHAIN_NAME=app-signing
       run: ant -Dsign_state=NOSIGN -noinput -buildfile build.xml binaryPackage
 
     - name: Rename snapshot binary base name
