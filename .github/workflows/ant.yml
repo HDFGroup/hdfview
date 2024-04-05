@@ -354,13 +354,13 @@ jobs:
           # import certificate from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
           # create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
+          security -v create-keychain -p "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
+          security -v set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security -v unlock-keychain -p "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
           # import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
+          security -v import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security -v set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
+          security -v list-keychain -d user -s $KEYCHAIN_PATH
 
     - name: Set up JDK 19
       uses: actions/setup-java@v3
