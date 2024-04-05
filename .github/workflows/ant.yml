@@ -343,6 +343,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Install the Apple certificate and provisioning profile
+      shell: bash
       env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
           P12_PASSWORD: ${{ secrets.APPLE_CERTS_BASE64_PASSWORD }}
@@ -352,7 +353,7 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           # import certificate from secrets
-          base64 -i ${{ env.BUILD_CERTIFICATE_BASE64 }} --decode -o $CERTIFICATE_PATH
+          base64 -i "${{ env.BUILD_CERTIFICATE_BASE64 }}" --decode -o $CERTIFICATE_PATH
           ls -la $RUNNER_TEMP
           security -v verify-cert -c $CERTIFICATE_PATH
           # create temporary keychain
