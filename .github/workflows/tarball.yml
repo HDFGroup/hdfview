@@ -24,7 +24,7 @@ on:
         description: "Whether there were changes the previous day"
         value: ${{ jobs.check_commits.outputs.has_changes }}
       source_base:
-        description: "The common base name of the source tarballs"
+        description: "The common version name of the binaries"
         value: ${{ jobs.create_tarball.outputs.source_base }}
       file_base:
         description: "The common base name of the source tarballs"
