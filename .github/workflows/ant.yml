@@ -30,6 +30,11 @@ on:
 permissions:
   contents: read
 
+env:
+  BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+  P12_PASSWORD: ${{ secrets.APPLE_CERTS_BASE64_PASSWORD }}
+  KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+
 jobs:
   build_and_test_win:
   # Windows w/ MSVC + CMake
@@ -344,10 +349,6 @@ jobs:
 
     - name: Install the Apple certificate and provisioning profile
       shell: bash
-      env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
-          P12_PASSWORD: ${{ secrets.APPLE_CERTS_BASE64_PASSWORD }}
-          KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
       run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
