@@ -356,7 +356,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group workingDirectoryGroup =
             new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        workingDirectoryGroup.setLayout(new GridLayout(3, false));
+        workingDirectoryGroup.setLayout(new GridLayout(4, false));
         workingDirectoryGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         workingDirectoryGroup.setFont(curFont);
         workingDirectoryGroup.setText("Default Working Directory");
@@ -364,7 +364,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         checkCurrentUserDir = new Button(workingDirectoryGroup, SWT.CHECK);
         checkCurrentUserDir.setFont(curFont);
         checkCurrentUserDir.setText("\"User Work\" or");
-        checkCurrentUserDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        checkCurrentUserDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
         checkCurrentUserDir.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
@@ -380,7 +380,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         checkUserHomeDir = new Button(workingDirectoryGroup, SWT.CHECK);
         checkUserHomeDir.setFont(curFont);
         checkUserHomeDir.setText("\"User Home\" or");
-        checkUserHomeDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        checkUserHomeDir.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
         checkUserHomeDir.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
@@ -395,12 +395,12 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         workField = new Text(workingDirectoryGroup, SWT.SINGLE | SWT.BORDER);
         workField.setFont(curFont);
-        workField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        workField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 
         currentDirButton = new Button(workingDirectoryGroup, SWT.PUSH);
         currentDirButton.setFont(curFont);
         currentDirButton.setText("Browse...");
-        currentDirButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        currentDirButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
         currentDirButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
@@ -466,23 +466,23 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         org.eclipse.swt.widgets.Group fileAccessModeGroup =
             new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         fileAccessModeGroup.setLayout(new GridLayout(2, true));
-        fileAccessModeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        fileAccessModeGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         fileAccessModeGroup.setFont(curFont);
         fileAccessModeGroup.setText("Default File Access Mode");
 
         checkReadOnly = new Button(fileAccessModeGroup, SWT.RADIO);
         checkReadOnly.setFont(curFont);
         checkReadOnly.setText("Read Only");
-        checkReadOnly.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        checkReadOnly.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         rwButton = new Button(fileAccessModeGroup, SWT.RADIO);
         rwButton.setFont(curFont);
         rwButton.setText("Read/Write");
-        rwButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+        rwButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group textFontGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         textFontGroup.setLayout(new GridLayout(4, false));
-        textFontGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        textFontGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         textFontGroup.setFont(curFont);
         textFontGroup.setText("Text Font");
 
@@ -495,7 +495,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         fontSizeChoice           = new Combo(textFontGroup, SWT.SINGLE | SWT.READ_ONLY);
         fontSizeChoice.setFont(curFont);
         fontSizeChoice.setItems(fontSizeChoices);
-        fontSizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        fontSizeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         label = new Label(textFontGroup, SWT.RIGHT);
         label.setFont(curFont);
@@ -506,15 +506,16 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         fontTypeChoice = new Combo(textFontGroup, SWT.SINGLE | SWT.READ_ONLY);
         fontTypeChoice.setFont(curFont);
         fontTypeChoice.setItems(fontNames);
-        fontTypeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        fontTypeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group imageGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
-        imageGroup.setLayout(new GridLayout(5, false));
-        imageGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        imageGroup.setLayout(new GridLayout(6, false));
+        imageGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         imageGroup.setFont(curFont);
         imageGroup.setText("Image");
 
         helpButton = new Button(imageGroup, SWT.PUSH);
+        helpButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
         helpButton.setImage(ViewProperties.getHelpIcon());
         helpButton.setToolTipText("Help on Auto Contrast");
         helpButton.addSelectionListener(new SelectionAdapter() {
@@ -556,12 +557,14 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         checkAutoContrast = new Button(imageGroup, SWT.CHECK);
         checkAutoContrast.setFont(curFont);
         checkAutoContrast.setText("Autogain Image Contrast");
-        checkAutoContrast.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        checkAutoContrast.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         checkShowValues = new Button(imageGroup, SWT.CHECK);
         checkShowValues.setFont(curFont);
         checkShowValues.setText("Show Values");
-        checkShowValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        checkShowValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        label = new Label(imageGroup, SWT.NONE);
 
         label = new Label(imageGroup, SWT.RIGHT);
         label.setFont(curFont);
@@ -569,11 +572,11 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         imageOriginChoice = new Combo(imageGroup, SWT.SINGLE | SWT.READ_ONLY);
         imageOriginChoice.setFont(curFont);
-        imageOriginChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        imageOriginChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         org.eclipse.swt.widgets.Group dataGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         dataGroup.setLayout(new GridLayout(4, false));
-        dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         dataGroup.setFont(curFont);
         dataGroup.setText("Data");
 
@@ -606,7 +609,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         org.eclipse.swt.widgets.Group objectsGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         objectsGroup.setLayout(new GridLayout(5, true));
-        objectsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        objectsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         objectsGroup.setFont(curFont);
         objectsGroup.setText("Objects to Open");
 

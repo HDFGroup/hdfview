@@ -32,6 +32,10 @@ public abstract interface DataView {
     /** The image view type */
     public static final int DATAVIEW_IMAGE = 2;
 
-    /** @return the data object displayed in this data viewer */
+    /**
+     * Get the data object displayed in this data viewer
+     *
+     * @return the data object displayed in this data viewer
+     */
     public abstract HObject getDataObject();
 }

@@ -1375,11 +1375,15 @@ public abstract class Dataset extends HObject implements DataFormat {
     }
 
     /**
+     * Check if dataset's dataspace is a NULL
+     *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     public boolean isNULL() { return isNULL; }
 
     /**
+     * Check if dataset is a single scalar point
+     *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isScalar() { return isScalar; }
@@ -1479,6 +1483,18 @@ public abstract class Dataset extends HObject implements DataFormat {
         return toString(theData, getDatatype(), delimiter, n);
     }
 
+    /**
+     * Returns a string representation of the dataset object.
+     *
+     * @param theData   The Object data
+     * @param theType   The type of the data in the Object
+     * @param delimiter The delimiter used to separate individual data points. It can be a comma, semicolon,
+     *     tab or
+     *                  space. For example, toString(",") will separate data by commas.
+     * @param count     The maximum number of Array values to return
+     *
+     * @return the string representation of the dataset object.
+     */
     protected String toString(Object theData, Datatype theType, String delimiter, int count)
     {
         log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", theType.isEnum(),

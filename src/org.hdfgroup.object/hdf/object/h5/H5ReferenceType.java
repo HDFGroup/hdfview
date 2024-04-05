@@ -1056,10 +1056,10 @@ public class H5ReferenceType extends H5Datatype {
         public long typeSize;
 
         /**
-         *  Copy the individual reference array for further processing
+         * Copy the individual reference array for further processing
          *
-         * @param theArray
-         *            the reference datatype data to be copied.
+         * @param theArray    the reference datatype data to be copied.
+         * @param theTypeSize the size of the type for the array
          */
         H5ReferenceData(byte[] theArray, long theTypeSize)
         {

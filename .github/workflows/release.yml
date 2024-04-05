@@ -17,7 +17,7 @@ on:
         description: 'HDF5 Release version tag'
         type: string
         required: false
-        default: snapshot
+        default: snapshot-1.14
 
 permissions:
   contents: read
@@ -43,67 +43,32 @@ jobs:
           echo "RELEASE4_TAG=$TAG4" >> $GITHUB_OUTPUT
           echo "RELEASE5_TAG=$TAG5" >> $GITHUB_OUTPUT
 
-  create-files-ant:
+  call-workflow-tarball:
     needs: log-the-inputs
-    runs-on: ubuntu-latest
-    outputs:
-      file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
-    steps:
-      - name: Set file base name
-        id: set-file-base
-        run: |
-          FILE_NAME_BASE=$(echo "${{ needs.log-the-inputs.outputs.rel_tag }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-        shell: bash
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@v3
-        with:
-          path: hdfsrc
-
-      - name: Zip Folder
-        run: |
-              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
-              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
-
-      - name: List files in the repository
-        run: |
-              ls -l ${{ github.workspace }}
-              ls $GITHUB_WORKSPACE
-
-      # Save files created by release script
-      - name: Save tgz-tarball
-        uses: actions/upload-artifact@v3
-        with:
-              name: tgz-tarball
-              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: Save zip-tarball
-        uses: actions/upload-artifact@v3
-        with:
-              name: zip-tarball
-              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+    uses: ./.github/workflows/tarball.yml
+    with:
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_environ: release
 
   call-workflow-ant:
-    needs: [log-the-inputs, create-files-ant]
+    needs: [log-the-inputs, call-workflow-tarball]
     uses: ./.github/workflows/ant.yml
     with:
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
       file_base: ${{ needs.create-files-ant.outputs.file_base }}
+      snap_name: hdfview-${{ needs.call-workflow-tarball.outputs.source_base }}
+      use_environ: release
 
   call-workflow-release:
-    needs: [log-the-inputs, create-files-ant, call-workflow-ant]
+    needs: [log-the-inputs, call-workflow-tarball, call-workflow-ant]
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
     with:
-      file_base: ${{ needs.create-files-ant.outputs.file_base }}
-      file_branch: ${{ needs.log-the-inputs.outputs.rel_tag }}
-      file_sha: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
+      file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
 

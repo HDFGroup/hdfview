@@ -6,13 +6,14 @@ on:
     inputs:
       use_tag:
         description: 'Release version tag'
-        required: false
         type: string
-        default: snapshot
+        required: false
+        default: HDFView-3.3.99
       use_environ:
         description: 'Environment to locate files'
-        required: true
         type: string
+        required: true
+        default: snapshots
       file_base:
         description: "The common base name of the source tarballs"
         required: true
@@ -39,14 +40,16 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
 
-      - run: |
+      - name: Get Commit
+        if: ${{ (inputs.use_environ == 'snapshots') }}
+        run: |
           git checkout ${{ inputs.file_sha }}
 
-      - uses: rickstaa/action-create-tag@v1
+      - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         id: "tag_create"
         with:
           commit_sha: ${{ inputs.file_sha }}
@@ -74,20 +77,20 @@ jobs:
 
       # Get files created by tarball script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
 
       # Get files created by cmake-ctest script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: zip-win-vs2022-binary
               path: ${{ github.workspace }}
@@ -99,19 +102,41 @@ jobs:
 #              path: ${{ github.workspace }}
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: tgz-ubuntu-2204-binary
               path: ${{ github.workspace }}
+
+      - name: List files for the space
+        run: |
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}/hdfview
+
+      - name: Create sha256 sums for files
+        run: |
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz > sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip >> sha256sums.txt
 
       - name: Store snapshot name
         run: |
           echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
 
+#      - name: Get NEWSLETTER
+#        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+#        with:
+#              name: NEWSLETTER
+#              path: ${{ github.workspace }}
+#
+#      - name: Create description file
+#        run: |
+#          cat ${{ github.workspace }}/NEWSLETTER.txt > description.txt
+
       - name: PreRelease tag
         id: create_prerelease
         if: ${{ (inputs.use_environ == 'snapshots') }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
@@ -119,23 +144,22 @@ jobs:
               last-file.txt
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Release tag
         id: create_release
         if: ${{ (inputs.use_environ == 'release') }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: false
-          #body_path: ${{ github.workspace }}-CHANGELOG.txt
           files: |
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: List files for the space (Linux)

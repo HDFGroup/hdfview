@@ -67,7 +67,11 @@ public abstract interface DataViewManager {
      */
     public abstract void showError(String errMsg);
 
-    /** @return the current TreeView */
+    /**
+     * Get the current TreeView
+     *
+     * @return the current TreeView
+     */
     public abstract TreeView getTreeView();
 
     /**

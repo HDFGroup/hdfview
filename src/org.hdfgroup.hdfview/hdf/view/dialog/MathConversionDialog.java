@@ -429,6 +429,10 @@ public class MathConversionDialog extends Dialog {
         return y;
     }
 
-    /** @return true if the data is successfully converted. */
+    /**
+     * Check if the data is successfully converted.
+     *
+     * @return true if the data is successfully converted.
+     */
     public boolean isConverted() { return isConverted; }
 }

@@ -24,21 +24,41 @@ import hdf.view.DataView.DataView;
  * @version 2.4 9/6/2007
  */
 public abstract interface TableView extends DataView {
-    /** @return the table */
+    /**
+     * Get the table
+     *
+     * @return the table
+     */
     public abstract Object getTable();
 
-    /** @return array of selected data */
+    /**
+     * Get the array of selected data
+     *
+     * @return array of selected data
+     */
     public abstract Object getSelectedData();
 
-    /** @return array of selected column count */
+    /**
+     * Get the array of selected column count
+     *
+     * @return array of selected column count
+     */
     public abstract int getSelectedColumnCount();
 
-    /** @return array of selected row count */
+    /**
+     * Get the array of selected row count
+     *
+     * @return array of selected row count
+     */
     public abstract int getSelectedRowCount();
 
-    /** Write the change of a dataset into file. */
+    /**
+     * Write the change of a dataset into file.
+     */
     public abstract void updateValueInFile();
 
-    /** refresh the data table. */
+    /**
+     * refresh the data table.
+     */
     public abstract void refreshDataTable();
 }
