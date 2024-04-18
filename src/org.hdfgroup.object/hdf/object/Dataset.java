@@ -1598,7 +1598,7 @@ public abstract class Dataset extends HObject implements DataFormat {
             if (value == null)
                 strValue = "null";
             else
-                strValue = Float.toString(Float.float16ToFloat((short) value));
+                strValue = Float.toString(Float.float16ToFloat((short)value));
 
             // if (count > 0 && strValue.length() > count)
             // truncate the extra characters
@@ -1612,7 +1612,7 @@ public abstract class Dataset extends HObject implements DataFormat {
                 if (value == null)
                     strValue = "null";
                 else
-                    strValue = Float.toString(Float.float16ToFloat((short) value));
+                    strValue = Float.toString(Float.float16ToFloat((short)value));
 
                 if (count > 0 && strValue.length() > count)
                     // truncate the extra characters

@@ -865,14 +865,15 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                 }
                 else if (DATATYPE_NAMES[11].equals(typeName)) {
                     type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE,
-                            Datatype.SIGN_NONE);
+                                                     Datatype.SIGN_NONE);
                 }
                 else if (DATATYPE_NAMES[12].equals(typeName)) {
                     type =
                         fileFormat.createDatatype(Datatype.CLASS_FLOAT, 2, Datatype.NATIVE, Datatype.NATIVE);
                 }
                 else if (DATATYPE_NAMES[13].equals(typeName)) {
-                    type = fileFormat.createDatatype(Datatype.CLASS_FLOAT, 16, Datatype.NATIVE, Datatype.NATIVE);
+                    type =
+                        fileFormat.createDatatype(Datatype.CLASS_FLOAT, 16, Datatype.NATIVE, Datatype.NATIVE);
                 }
                 else {
                     throw new IllegalArgumentException("Invalid data type.");

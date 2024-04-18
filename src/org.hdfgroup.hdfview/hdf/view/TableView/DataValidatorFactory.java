@@ -641,20 +641,22 @@ public class DataValidatorFactory {
                             /*
                              * First try to parse as a larger type in order to catch a NumberFormatException
                              */
-                            Integer intValue = Integer.parseInt((String) newValue);
+                            Integer intValue = Integer.parseInt((String)newValue);
                             if (intValue < 0)
-                                throw new NumberFormatException("Invalid negative value for unsigned datatype");
+                                throw new NumberFormatException(
+                                    "Invalid negative value for unsigned datatype");
 
                             if (intValue > (Short.MAX_VALUE * 2) + 1)
-                                throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
+                                throw new NumberFormatException("Value out of range. Value:\"" + newValue +
+                                                                "\"");
                         }
                         else {
-                            Short.parseShort((String) newValue);
+                            Short.parseShort((String)newValue);
                         }
                     }
                     else {
                         /* Floating-point type */
-                        Float.parseFloat((String) newValue);
+                        Float.parseFloat((String)newValue);
                     }
                     break;
 
