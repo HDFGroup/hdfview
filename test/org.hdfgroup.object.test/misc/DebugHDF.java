@@ -1147,6 +1147,9 @@ public class DebugHDF {
         dtype = testFile.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
         testFile.createScalarDS("f64", root, dtype, dims2D, null, null, 0, data2);
 
+        dtype = testFile.createDatatype(Datatype.CLASS_FLOAT, 2, Datatype.NATIVE, Datatype.NATIVE);
+        testFile.createScalarDS("f16", root, dtype, dims2D, null, null, 0, data2);
+
         testFile.close();
     }
 
@@ -3380,6 +3383,10 @@ public class DebugHDF {
         dtype = testFile.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
         testFile.createScalarDS("3D float", g2, dtype, dims3D, null, null, 0, null);
 
+        // create 3D 16-bit (2 bytes) float16 dataset of 20 by 10 by 5
+        dtype = testFile.createDatatype(Datatype.CLASS_FLOAT, 2, Datatype.NATIVE, Datatype.NATIVE);
+        testFile.createScalarDS("3D float16", g2, dtype, dims3Dh, null, null, 0, null);
+
         // close file resource
         testFile.close();
     }
@@ -3434,6 +3441,10 @@ public class DebugHDF {
         // Create 3D 32-bit (4 bytes) float dataset of 20 by 10 by 5
         dtype = testFile.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
         testFile.createScalarDS("3D 32-bit float  20x10x5", g2, dtype, dims3D, null, null, 0, null);
+
+        // Create 3D 16-bit (2 bytes) float dataset of 20 by 10 by 5
+        dtype = testFile.createDatatype(Datatype.CLASS_FLOAT, 2, Datatype.NATIVE, Datatype.NATIVE);
+        testFile.createScalarDS("3D 16-bit float16  20x10x5", g2, dtype, dims3Dh, null, null, 0, null);
 
         // Create String dataset
         System.out.println("Just before call for STRINGS");

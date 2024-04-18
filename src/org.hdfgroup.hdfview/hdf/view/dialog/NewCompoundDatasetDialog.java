@@ -78,11 +78,13 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
         "unsigned short (16-bit)", // 4
         "unsigned int (32-bit)",   // 5
         "long (64-bit)",           // 6
-        "float",                   // 7
-        "double",                  // 8
+        "float (32-bit)",          // 7
+        "double (64-bit)",         // 8
         "string",                  // 9
         "enum",                    // 10
-        "unsigned long (64-bit)"   // 11
+        "unsigned long (64-bit)",  // 11
+        "float16 (16-bit)",        // 12
+        "long double (128-bit)"    // 13
     };
 
     private Combo parentChoice, nFieldBox, templateChoice;
@@ -808,59 +810,80 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
             String typeName = (String)table.getItem(i).getData("MemberType");
             log.trace("createCompoundDS type[{}] name = {}", i, typeName);
             Datatype type = null;
-            if (DATATYPE_NAMES[0].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
-            }
-            else if (DATATYPE_NAMES[1].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.NATIVE);
-            }
-            else if (DATATYPE_NAMES[2].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
-            }
-            else if (DATATYPE_NAMES[3].equals(typeName)) {
-                type =
-                    fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
-            }
-            else if (DATATYPE_NAMES[4].equals(typeName)) {
-                type =
-                    fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.SIGN_NONE);
-            }
-            else if (DATATYPE_NAMES[5].equals(typeName)) {
-                type =
-                    fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
-            }
-            else if (DATATYPE_NAMES[6].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.NATIVE);
-            }
-            else if (DATATYPE_NAMES[7].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
-            }
-            else if (DATATYPE_NAMES[8].equals(typeName)) {
-                type = fileFormat.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
-            }
-            else if (DATATYPE_NAMES[9].equals(typeName)) {
-                type =
-                    fileFormat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE, Datatype.NATIVE);
-            }
-            else if (DATATYPE_NAMES[10].equals(typeName)) { // enum
-                type = fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
-                if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
-                    shell.getDisplay().beep();
-                    Tools.showError(shell, "Create", "Invalid member values: " + orderStr);
-                    return null;
+            try {
+                if (DATATYPE_NAMES[0].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
+                }
+                else if (DATATYPE_NAMES[1].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
+                }
+                else if (DATATYPE_NAMES[2].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
+                }
+                else if (DATATYPE_NAMES[3].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE,
+                                                     Datatype.SIGN_NONE);
+                }
+                else if (DATATYPE_NAMES[4].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE,
+                                                     Datatype.SIGN_NONE);
+                }
+                else if (DATATYPE_NAMES[5].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE,
+                                                     Datatype.SIGN_NONE);
+                }
+                else if (DATATYPE_NAMES[6].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
+                }
+                else if (DATATYPE_NAMES[7].equals(typeName)) {
+                    type =
+                        fileFormat.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
+                }
+                else if (DATATYPE_NAMES[8].equals(typeName)) {
+                    type =
+                        fileFormat.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
+                }
+                else if (DATATYPE_NAMES[9].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE,
+                                                     Datatype.NATIVE);
+                }
+                else if (DATATYPE_NAMES[10].equals(typeName)) { // enum
+                    type =
+                        fileFormat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
+                    if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
+                        shell.getDisplay().beep();
+                        Tools.showError(shell, "Create", "Invalid member values: " + orderStr);
+                        return null;
+                    }
+                    else {
+                        type.setEnumMembers(orderStr);
+                    }
+                }
+                else if (DATATYPE_NAMES[11].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE,
+                            Datatype.SIGN_NONE);
+                }
+                else if (DATATYPE_NAMES[12].equals(typeName)) {
+                    type =
+                        fileFormat.createDatatype(Datatype.CLASS_FLOAT, 2, Datatype.NATIVE, Datatype.NATIVE);
+                }
+                else if (DATATYPE_NAMES[13].equals(typeName)) {
+                    type = fileFormat.createDatatype(Datatype.CLASS_FLOAT, 16, Datatype.NATIVE, Datatype.NATIVE);
                 }
                 else {
-                    type.setEnumMembers(orderStr);
+                    throw new IllegalArgumentException("Invalid data type.");
                 }
+                mDatatypes[i] = type;
             }
-            else if (DATATYPE_NAMES[11].equals(typeName)) {
-                type =
-                    fileFormat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.SIGN_NONE);
+            catch (Exception ex) {
+                Tools.showError(shell, "Create", ex.getMessage());
+                log.debug("createAttribute(): ", ex);
+                return null;
             }
-            else {
-                throw new IllegalArgumentException("Invalid data type.");
-            }
-            mDatatypes[i] = type;
         } //  (int i=0; i<n; i++)
 
         rank = rankChoice.getSelectionIndex() + 1;

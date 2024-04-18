@@ -710,8 +710,9 @@ public class DataDisplayConverterFactory {
         private static final Logger log = LoggerFactory.getLogger(NumericalDataDisplayConverter.class);
 
         private final StringBuilder buffer;
-        private final long typeSize;
-        private final boolean isUINT64;
+        private final long          typeSize;
+        private final boolean       isUINT64;
+        private final boolean       isFLT16;
 
         NumericalDataDisplayConverter(final Datatype dtype) throws Exception
         {
@@ -727,6 +728,7 @@ public class DataDisplayConverterFactory {
 
             typeSize = dtype.getDatatypeSize();
             isUINT64 = dtype.isUnsigned() && (typeSize == 8);
+            isFLT16 = dtype.isFloat() && (typeSize == 2);
         }
 
         @Override
@@ -761,7 +763,10 @@ public class DataDisplayConverterFactory {
                     buffer.append(numberFormat.format(value));
                 }
                 else {
-                    buffer.append(value.toString());
+                    if (isFLT16)
+                        buffer.append(Float.toString(Float.float16ToFloat((short) value)));
+                    else
+                        buffer.append(value.toString());
                 }
             }
             catch (Exception ex) {
