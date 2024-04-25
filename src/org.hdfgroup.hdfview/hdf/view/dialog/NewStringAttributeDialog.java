@@ -55,7 +55,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * NewStringAttributeDialog displays components for adding a new attribute.
+ * NewStringAttributeDialog displays components for adding a new attribute, not used for HDF5.
  *
  * @author Jordan T. Henderson
  * @version 2.4 1/7/2016
@@ -542,24 +542,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
             }
 
             if (tclass == Datatype.CLASS_FLOAT) {
-                if ((tsize == 2)) {
-                    float[] f = new float[arraySize];
-                    for (int j = 0; j < count; j++) {
-                        theToken = st.nextToken().trim();
-                        try {
-                            f[j] = Float.parseFloat(theToken);
-                        }
-                        catch (NumberFormatException ex) {
-                            Tools.showError(shell, "Create", ex.getMessage());
-                            return false;
-                        }
-                        if (Float.isInfinite(f[j]) || Float.isNaN(f[j])) {
-                            f[j] = 0;
-                        }
-                    }
-                    value = f;
-                }
-                else if ((tsize == 4) || (tsize == -1)) {
+                if ((tsize == 4) || (tsize == -1)) {
                     float[] f = new float[arraySize];
                     for (int j = 0; j < count; j++) {
                         theToken = st.nextToken().trim();
@@ -577,23 +560,6 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                     value = f;
                 }
                 else if (tsize == 8) {
-                    double[] d = new double[arraySize];
-                    for (int j = 0; j < count; j++) {
-                        theToken = st.nextToken().trim();
-                        try {
-                            d[j] = Double.parseDouble(theToken);
-                        }
-                        catch (NumberFormatException ex) {
-                            Tools.showError(shell, "Create", ex.getMessage());
-                            return false;
-                        }
-                        if (Double.isInfinite(d[j]) || Double.isNaN(d[j])) {
-                            d[j] = 0;
-                        }
-                    }
-                    value = d;
-                }
-                else if (tsize == 16) {
                     double[] d = new double[arraySize];
                     for (int j = 0; j < count; j++) {
                         theToken = st.nextToken().trim();
