@@ -382,7 +382,7 @@ public class DataProviderFactory {
          * index. This method is for facilitating this behavior.
          *
          * In general, all "container" DataProviders that have a "container" base
-         * DataProvider should call down into their base DataProvider(s) using this{},
+         * DataProvider should call down into their base DataProvider(s) using this
          * method, in order to ensure that buried CompoundDataProviders get handled
          * correctly. When their base DataProvider is not a "container" type, the method
          * setDataValue(index, Object, Object) should be used instead.
