@@ -376,19 +376,19 @@ public class DataProviderFactory {
         }
 
         /**
-         * When a CompoundDataProvider wants to pass a List of data down to a nested CompoundDataProvider, or when a
-         * top-level container DataProvider (such as an ArrayDataProvider) wants to hand data down to a base
-         * CompoundDataProvider, we need to pass down a List of data and the new value, plus a field and row index. This
-         * method is for facilitating this behavior.
+         * When a CompoundDataProvider wants to pass a List of data down to a nested CompoundDataProvider, or
+         * when a top-level container DataProvider (such as an ArrayDataProvider) wants to hand data down to a
+         * base CompoundDataProvider, we need to pass down a List of data and the new value, plus a field and
+         * row index. This method is for facilitating this behavior.
          *
-         * In general, all "container" DataProviders that have a "container" base DataProvider should call down into
-         * their base DataProvider(s) using this, method, in order to ensure that buried CompoundDataProviders get
-         * handled correctly. When their base DataProvider is not a "container" type, the method setDataValue(index,
-         * Object, Object) should be used instead.
+         * In general, all "container" DataProviders that have a "container" base DataProvider should call
+         * down into their base DataProvider(s) using this, method, in order to ensure that buried
+         * CompoundDataProviders get handled correctly. When their base DataProvider is not a "container"
+         * type, the method setDataValue(index, Object, Object) should be used instead.
          *
-         * For atomic type DataProviders, we treat this method as directly calling into setDataValue(index, Object,
-         * Object) using the passed rowIndex. However, this method should, in general, not be called by atomic type
-         * DataProviders.
+         * For atomic type DataProviders, we treat this method as directly calling into setDataValue(index,
+         * Object, Object) using the passed rowIndex. However, this method should, in general, not be called
+         * by atomic type DataProviders.
          *
          * @param columnIndex the column
          * @param rowIndex    the row
