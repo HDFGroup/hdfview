@@ -1691,7 +1691,7 @@ public class DataProviderFactory {
         {
             Object theValue = newValue;
             if (isFLT16)
-                theValue = Short.toString(Float.floatToFloat16(Float.parseFloat((String) newValue)));
+                theValue = Short.toString(Float.floatToFloat16(Float.parseFloat((String)newValue)));
 
             super.setDataValue(columnIndex, rowIndex, theValue);
         }
@@ -1710,7 +1710,7 @@ public class DataProviderFactory {
         {
             Object newbufObject = bufObject;
             if (isFLT16)
-                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String) newValue)));
+                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String)newValue)));
             setDataValue(rowIndex, newbufObject, newValue);
         }
 
@@ -1731,7 +1731,7 @@ public class DataProviderFactory {
         {
             Object newbufObject = bufObject;
             if (isFLT16)
-                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String) newValue)));
+                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String)newValue)));
             try {
                 setDataValue(index, newbufObject, newValue);
             }
