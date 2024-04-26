@@ -1682,7 +1682,7 @@ public class DataProviderFactory {
         }
 
         /**
-         * update the data value of a compound type.
+         * update the data value of a type.
          *
          * @param columnIndex the column
          * @param rowIndex    the row
@@ -1693,22 +1693,12 @@ public class DataProviderFactory {
         {
             Object theValue = newValue;
             if (isFLT16)
-                theValue = Short.toString(Float.floatToFloat16(Float.parseFloat((String)newValue)));
+                theValue = Short.toString(Float.floatToFloat16(Float.parseFloat((String) newValue)));
 
             super.setDataValue(columnIndex, rowIndex, theValue);
         }
 
         /**
-         * When a CompoundDataProvider wants to pass a List of data down to a nested CompoundDataProvider, or
-         * when a top-level container DataProvider (such as an ArrayDataProvider) wants to hand data down to a
-         * base CompoundDataProvider, we need to pass down a List of data and the new value, plus a field and
-         * row index. This method is for facilitating this behavior.
-         *
-         * In general, all "container" DataProviders that have a "container" base DataProvider should call
-         * down into their base DataProvider(s) using this{}, method, in order to ensure that buried
-         * CompoundDataProviders get handled correctly. When their base DataProvider is not a "container"
-         * type, the method setDataValue(index, Object, Object) should be used instead.
-         *
          * For atomic type DataProviders, we treat this method as directly calling into setDataValue(index,
          * Object, Object) using the passed rowIndex. However, this method should, in general, not be called
          * by atomic type DataProviders.
@@ -1722,7 +1712,7 @@ public class DataProviderFactory {
         {
             Object newbufObject = bufObject;
             if (isFLT16)
-                newbufObject = Float.float16ToFloat((short)bufObject);
+                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String) newValue)));
             setDataValue(rowIndex, newbufObject, newValue);
         }
 
@@ -1743,7 +1733,7 @@ public class DataProviderFactory {
         {
             Object newbufObject = bufObject;
             if (isFLT16)
-                newbufObject = Float.float16ToFloat((short)bufObject);
+                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String) newValue)));
             try {
                 setDataValue(index, newbufObject, newValue);
             }
