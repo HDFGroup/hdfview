@@ -1644,7 +1644,6 @@ public class DataProviderFactory {
 
             try {
                 if (isFLT16)
-                    //                  theValue = Float.toString(Float.float16ToFloat((short)theValue));
                     theValue = Float.float16ToFloat((short)theValue);
                 else if (isUINT64)
                     theValue = Tools.convertUINT64toBigInt(Long.valueOf((long)theValue));
@@ -1666,7 +1665,6 @@ public class DataProviderFactory {
 
             try {
                 if (isFLT16)
-                    //                    theValue = Float.toString(Float.float16ToFloat((short)theValue));
                     theValue = Float.float16ToFloat((short)theValue);
                 else if (isUINT64)
                     theValue = Tools.convertUINT64toBigInt(Long.valueOf((long)theValue));
