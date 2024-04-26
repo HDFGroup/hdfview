@@ -760,11 +760,16 @@ public class DataDisplayConverterFactory {
                         buffer.append(Tools.toBinaryString(Long.valueOf(value.toString()), (int)typeSize));
                 }
                 else if (numberFormat != null) {
-                    buffer.append(numberFormat.format(value));
+                    log.trace("canonicalToDisplayValue({}): numberFormat", value);
+                    if (isFLT16)
+                        buffer.append(numberFormat.format((float) value));
+                    else
+                        buffer.append(numberFormat.format(value));
                 }
                 else {
+                    log.trace("canonicalToDisplayValue({}): else", value);
                     if (isFLT16)
-                        buffer.append(Float.toString(Float.float16ToFloat((short)value)));
+                        buffer.append(Float.toString((float) value));
                     else
                         buffer.append(value.toString());
                 }
