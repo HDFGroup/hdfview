@@ -1691,9 +1691,9 @@ public class DataProviderFactory {
         }
 
         /**
-         * For atomic type DataProviders, we treat this method as directly calling into setDataValue(index, Object,
-         * Object) using the passed rowIndex. However, this method should, in general, not be called by atomic type
-         * DataProviders.
+         * For atomic type DataProviders, we treat this method as directly calling into setDataValue(index,
+         * Object, Object) using the passed rowIndex. However, this method should, in general, not be called
+         * by atomic type DataProviders.
          *
          * @param columnIndex the column
          * @param rowIndex    the row
@@ -1704,18 +1704,18 @@ public class DataProviderFactory {
         {
             Object newbufObject = bufObject;
             if (isFLT16)
-                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String) newValue)));
+                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String)newValue)));
             super.setDataValue(rowIndex, newbufObject, newValue);
         }
 
         /**
-         * When a parent HDFDataProvider (such as an ArrayDataProvider) wants to set a data value by routing the
-         * operation through its base HDFDataProvider, the parent HDFDataProvider will generally know the direct index
-         * to have the base provider use. This method is to facilitate this kind of behavior.
+         * When a parent HDFDataProvider (such as an ArrayDataProvider) wants to set a data value by routing
+         * the operation through its base HDFDataProvider, the parent HDFDataProvider will generally know the
+         * direct index to have the base provider use. This method is to facilitate this kind of behavior.
          *
-         * Note that this method takes two Object parameters, one which is the object that the method should set its
-         * data inside of and one which is the new value to set. This is to be able to nicely support nested compound
-         * DataProviders.
+         * Note that this method takes two Object parameters, one which is the object that the method should
+         * set its data inside of and one which is the new value to set. This is to be able to nicely support
+         * nested compound DataProviders.
          *
          * @param index     the index into the data array
          * @param bufObject the data object
@@ -1725,12 +1725,13 @@ public class DataProviderFactory {
         {
             Object newbufObject = bufObject;
             if (isFLT16)
-                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String) newValue)));
+                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String)newValue)));
             try {
                 super.setDataValue(index, newbufObject, newValue);
             }
             catch (Exception ex) {
-                log.debug("setDataValue({}, {})=({}): updateAtomicValue failure: ", index, newbufObject, newValue, ex);
+                log.debug("setDataValue({}, {})=({}): updateAtomicValue failure: ", index, newbufObject,
+                          newValue, ex);
             }
             log.trace("setDataValue({}, {})=({}): finish", index, newbufObject, newValue);
         }
