@@ -1687,7 +1687,7 @@ public class DataProviderFactory {
             try {
                 if (isFLT16) {
                     // must convert string from float to short first
-                    float fValue = Float.parseFloat((String) newValue);
+                    float fValue = Float.parseFloat((String)newValue);
                     short sValue = Float.floatToFloat16(fValue);
                     // setDataValue requires a String, so convert short to String
                     String strValue = Short.toString(sValue);
@@ -1721,7 +1721,7 @@ public class DataProviderFactory {
             try {
                 if (isFLT16) {
                     // must convert string from float to short first
-                    float fValue = Float.parseFloat((String) newValue);
+                    float fValue = Float.parseFloat((String)newValue);
                     short sValue = Float.floatToFloat16(fValue);
                     // setDataValue requires a String, so convert short to String
                     String strValue = Short.toString(sValue);
