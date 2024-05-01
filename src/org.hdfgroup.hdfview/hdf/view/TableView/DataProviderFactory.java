@@ -1683,29 +1683,23 @@ public class DataProviderFactory {
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue)
         {
-            Object theValue = newValue;
-            if (isFLT16)
-                theValue = Short.toString(Float.floatToFloat16(Float.parseFloat((String)newValue)));
-
-            super.setDataValue(columnIndex, rowIndex, theValue);
-        }
-
-        /**
-         * For atomic type DataProviders, we treat this method as directly calling into setDataValue(index,
-         * Object, Object) using the passed rowIndex. However, this method should, in general, not be called
-         * by atomic type DataProviders.
-         *
-         * @param columnIndex the column
-         * @param rowIndex    the row
-         * @param bufObject   the data object
-         * @param newValue    the new data object
-         */
-        public void setDataValue(int columnIndex, int rowIndex, Object bufObject, Object newValue)
-        {
-            Object newbufObject = bufObject;
-            if (isFLT16)
-                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String)newValue)));
-            super.setDataValue(rowIndex, newbufObject, newValue);
+            log.trace("setDataValue({}, {})=({}): start", rowIndex, columnIndex, newValue);
+            try {
+                if (isFLT16) {
+                    // must convert string from float to short first
+                    float fValue = Float.parseFloat((String) newValue);
+                    short sValue = Float.floatToFloat16(fValue);
+                    // setDataValue requires a String, so convert short to String
+                    String strValue = Short.toString(sValue);
+                    super.setDataValue(columnIndex, rowIndex, strValue);
+                }
+                else
+                    super.setDataValue(columnIndex, rowIndex, newValue);
+            }
+            catch (Exception ex) {
+                log.debug("setDataValue({}, {})=({}): failure: ", rowIndex, columnIndex, newValue, ex);
+                theValue = DataFactoryUtils.errStr;
+            }
         }
 
         /**
@@ -1723,17 +1717,24 @@ public class DataProviderFactory {
          */
         public void setDataValue(int index, Object bufObject, Object newValue)
         {
-            Object newbufObject = bufObject;
-            if (isFLT16)
-                newbufObject = Short.toString(Float.floatToFloat16(Float.parseFloat((String)newValue)));
+            log.trace("setDataValue({}: {})=({}): start", index, bufObject, newValue);
             try {
-                super.setDataValue(index, newbufObject, newValue);
+                if (isFLT16) {
+                    // must convert string from float to short first
+                    float fValue = Float.parseFloat((String) newValue);
+                    short sValue = Float.floatToFloat16(fValue);
+                    // setDataValue requires a String, so convert short to String
+                    String strValue = Short.toString(sValue);
+                    super.setDataValue(index, bufObject, strValue);
+                }
+                else
+                    super.setDataValue(index, bufObject, newValue);
             }
             catch (Exception ex) {
-                log.debug("setDataValue({}, {})=({}): updateAtomicValue failure: ", index, newbufObject,
+                log.debug("setDataValue({}, {})=({}): updateAtomicValue failure: ", index, bufObject,
                           newValue, ex);
             }
-            log.trace("setDataValue({}, {})=({}): finish", index, newbufObject, newValue);
+            log.trace("setDataValue({}, {})=({}): finish", index, bufObject, newValue);
         }
     }
 
