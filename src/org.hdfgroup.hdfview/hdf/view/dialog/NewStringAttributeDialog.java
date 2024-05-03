@@ -55,7 +55,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * NewStringAttributeDialog displays components for adding a new attribute.
+ * NewStringAttributeDialog displays components for adding a new attribute, not used for HDF5.
  *
  * @author Jordan T. Henderson
  * @version 2.4 1/7/2016

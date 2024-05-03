@@ -831,11 +831,11 @@
         </sequential>
     </macrodef>
 
-    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="jar, clean-junit-uitest, compile-test, ensure-test5-name, ensure-test4-name, jacoco">
+    <target name="runauitest" description="Runs the test you specify on the command line with -Dtest=" depends="deploy,jar, clean-junit-uitest, compile-test, ensure-test5-name, ensure-test4-name, jacoco">
         <mkdir dir="${report.dir}" />
 
         <run-ui-junit
-            rootdir="${basedir}/${uitestclasses.dir}"
+            rootdir="${basedir}/${jar.dir}"
             workdir="${basedir}/${uitestclasses.dir}/uitest"
             propfile="${basedir}/${uitestclasses.dir}/.hdfview${app.version}"
             includes="**/${uitestclasses.dir}/${test}.class"
@@ -851,7 +851,7 @@
         <mkdir dir="${report.dir}" />
 
         <run-ui-junit
-            rootdir="${basedir}/${uitestclasses.dir}"
+            rootdir="${basedir}/${jar.dir}"
             workdir="${basedir}/${uitestclasses.dir}/uitest"
             propfile="${basedir}/${uitestclasses.dir}/.hdfview${app.version}"
             includes="**/${uitestclasses.dir}/${test}.class"
@@ -865,7 +865,7 @@
 
         <!-- Run the top-level HDF4 UI tests -->
         <run-ui-junit
-            rootdir="${basedir}/${hdf4uitestclasses.dir}"
+            rootdir="${basedir}/${jar.dir}"
             workdir="${basedir}/${hdf4uitestclasses.dir}"
             propfile="${basedir}/${uitestclasses.dir}/.hdfview${app.version}"
             includes="**/${hdf4uitestclasses.dir}/${test}.class"
@@ -879,7 +879,7 @@
 
         <!-- Run the top-level HDF5 UI tests -->
         <run-ui-junit
-            rootdir="${basedir}/${hdf5uitestclasses.dir}"
+            rootdir="${basedir}/${jar.dir}"
             workdir="${basedir}/${hdf5uitestclasses.dir}"
             propfile="${basedir}/${uitestclasses.dir}/.hdfview${app.version}"
             includes="${hdf5uitestclasses.dir}/${test}.class"
@@ -891,7 +891,7 @@
         <mkdir dir="${report.dir}" />
 
         <run-ui-junit
-            rootdir="${basedir}/${testclasses.dir}"
+            rootdir="${basedir}/${jar.dir}"
             workdir="${basedir}/${testclasses.dir}/modules"
             includes="**/modules/*Test*"
             excludes="**/modules/*$*"
