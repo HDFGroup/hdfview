@@ -81,6 +81,7 @@ jobs:
       use_hdf: ${{ needs.get-base-names.outputs.hdf4-name }}
       use_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
       use_environ: snapshots
+    secrets: inherit
 
   call-workflow-release:
     needs: [get-base-names, call-workflow-tarball, call-workflow-ant]
