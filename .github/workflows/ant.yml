@@ -345,7 +345,6 @@ jobs:
   #
     name: "mac clang CMake"
     runs-on: macos-13
-    environment: stage
     #if: false
     steps:
     - uses: actions/checkout@v3
