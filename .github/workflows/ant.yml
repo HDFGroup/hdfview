@@ -345,6 +345,7 @@ jobs:
   #
     name: "mac clang CMake"
     runs-on: macos-13
+    environment: stage
     #if: false
     steps:
     - uses: actions/checkout@v3
@@ -360,17 +361,17 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           # import certificate from secrets
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n $BUILD_CERTIFICATE_BASE64 | base64 --decode -o $CERTIFICATE_PATH
           ls -la $RUNNER_TEMP
           security -v verify-cert -c $CERTIFICATE_PATH
           # create temporary keychain
-          security -v create-keychain -p "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
+          security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_PATH
           security -v list-keychains
           security -v set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security -v unlock-keychain -p "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
+          security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_PATH
           # import certificate to keychain
-          security -v import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security -v set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWD" $KEYCHAIN_PATH
+          security -v import $CERTIFICATE_PATH -P $P12_PASSWORD -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security -v set-key-partition-list -S apple-tool:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_PATH
           security -v list-keychain -d user -s $KEYCHAIN_PATH
 
     - name: Set up JDK 21
