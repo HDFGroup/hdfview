@@ -27,9 +27,12 @@ on:
         required: true
         default: snapshots
     secrets:
-        - APPLE_CERTS_BASE64
-        - APPLE_CERTS_BASE64_PASSWORD
-        - KEYCHAIN_PASSWD
+        APPLE_CERTS_BASE64:
+            required: true
+        APPLE_CERTS_BASE64_PASSWORD:
+            required: true
+        KEYCHAIN_PASSWD:
+            required: true
 
 permissions:
   contents: read
