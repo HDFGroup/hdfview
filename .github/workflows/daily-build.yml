@@ -81,8 +81,10 @@ jobs:
       use_hdf: ${{ needs.get-base-names.outputs.hdf4-name }}
       use_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
       use_environ: snapshots
-    secrets: inherit      # pass all secrets
-
+    secrets:      
+      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+      APPLE_CERTS_BASE64_PASSWORD: ${{ secrets.APPLE_CERTS_BASE64_PASSWORD }}
+      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
 
   call-workflow-release:
     needs: [get-base-names, call-workflow-tarball, call-workflow-ant]
