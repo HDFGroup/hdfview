@@ -361,7 +361,7 @@ jobs:
           KEYCHAIN_FILE=app-signing
           # import certificate from secrets
           echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
-          security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN
+          security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
           security -v list-keychain -d user -s $KEYCHAIN_FILE
           security -v list-keychains
           security -v set-keychain-settings -lut 21600 $KEYCHAIN_FILE
