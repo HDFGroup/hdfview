@@ -362,13 +362,13 @@ jobs:
           # import certificate from secrets
           echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
           security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_PATH
+          security -v list-keychain -d user -s app-signing
           security -v list-keychains
           security -v set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_PATH
           # import certificate to keychain
           security -v import $CERTIFICATE_PATH -P $P12_PASSWORD -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security -v set-key-partition-list -S apple-tool:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_PATH
-          security -v list-keychain -d user -s $KEYCHAIN_PATH
 
     - name: Set up JDK 21
       uses: actions/setup-java@v3
@@ -469,7 +469,10 @@ jobs:
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
         KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
         KEYCHAIN_NAME: app-signing
-      run: ant -Dsign_state=NOSIGN -noinput -buildfile build.xml binaryPackage
+        SIGNER: ${{ vars.SIGNER }}
+        NOTARY_USER: ${{ vars.NOTARY_USER }}
+        NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+      run: ant -noinput -buildfile build.xml binaryPackage
 
     - name: Rename snapshot binary base name
       id: ren-basename
