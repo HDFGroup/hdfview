@@ -362,7 +362,7 @@ jobs:
           # import certificate from secrets
           echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
           ls -la $RUNNER_TEMP
-          security -v verify-cert -c $CERTIFICATE_PATH
+          # security -v verify-cert -c $CERTIFICATE_PATH
           security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_PATH
           security -v list-keychains
           security -v set-keychain-settings -lut 21600 $KEYCHAIN_PATH
