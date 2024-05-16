@@ -1529,6 +1529,8 @@
             <arg value="org.hdfgroup.HDFView" />
             <arg value="--mac-signing-key-user-name" />
             <arg value="The HDF Group (${sign.account})" />
+            <arg value="--mac-signing-keychain" />
+            <arg value="${name.keychain_key}.keychain" />
         </exec>
     </target>
 
