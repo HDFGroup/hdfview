@@ -381,7 +381,8 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
-        file: '${{ inputs.use_hdf }}-osx12.tar.gz'
+        regex: true
+        file: '${{ inputs.use_hdf }}-osx.*\\.tar.gz'
 
     - name: List files for the space (mac)
       run: |
@@ -389,7 +390,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (mac)
-      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-osx12.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-osx.*\\.tar.gz
 
     - name: Uncompress hdf4 binary (mac)
       run: |
@@ -408,7 +409,8 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot'
-        file: '${{ inputs.use_hdf5 }}-osx.tar.gz'
+        regex: true
+        file: '${{ inputs.use_hdf5 }}-osx.*\\.tar.gz'
 
     - name: List files for the space (mac)
       run: |
@@ -416,7 +418,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (mac)
-      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf5 }}-osx.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf5 }}-osx.*\\.tar.gz
 
     - name: Uncompress hdf5 binary (mac)
       run:  |
