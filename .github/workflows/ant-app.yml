@@ -382,7 +382,7 @@ jobs:
         repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
         regex: true
-        file: '\$\{\{ inputs.use_hdf \}\}-osx.*\\.tar.gz'
+        file: '\\$\\{\\{ inputs.use_hdf \\}\\}-osx.*\\.tar.gz'
 
     - name: List files for the space (mac)
       run: |
@@ -410,7 +410,7 @@ jobs:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot'
         regex: true
-        file: '\$\{\{ inputs.use_hdf5 \}\}-osx.*\\.tar.gz'
+        file: '\\$\\{\\{ inputs.use_hdf5 \\}\\}-osx.*\\.tar.gz'
 
     - name: List files for the space (mac)
       run: |
