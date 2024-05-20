@@ -175,7 +175,7 @@ jobs:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: |
-        ant -noinput -buildfile build.xml binaryPackage
+        ant -noinput -buildfile build.xml binaryAppPackage
       shell: bash
 
     - name: Rename snapshot binary base name
@@ -183,7 +183,7 @@ jobs:
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
         cd build/dist
-        mv ${{ inputs.snap_name }}-win64.zip ${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
+        mv ${{ inputs.snap_name }}-win64.zip ${{ steps.set-file-base.outputs.FILE_BASE }}App-win64.zip
       shell: bash
 
     - name: List files for the space (Windows)
@@ -196,8 +196,8 @@ jobs:
     - name: Save published binary (Win)
       uses: actions/upload-artifact@v4
       with:
-            name: zip-win-vs2022-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
+            name: zip-win-vs2022-app-binary
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
@@ -311,14 +311,14 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-      run: ant -noinput -buildfile build.xml binaryPackage
+      run: ant -noinput -buildfile build.xml binaryAppPackage
 
     - name: Rename snapshot binary base name
       id: ren-basename
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
         cd build/dist
-        mv ${{ inputs.snap_name }}-Linux-x86_64.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+        mv ${{ inputs.snap_name }}-Linux-x86_64.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
       shell: bash
 
     - name: List files in the space (Linux)
@@ -330,8 +330,8 @@ jobs:
     - name: Save published binary (Linux)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-ubuntu-2204-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+            name: tgz-ubuntu-2204-app-binary
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
@@ -472,14 +472,14 @@ jobs:
         SIGNER: ${{ vars.SIGNER }}
         NOTARY_USER: ${{ vars.NOTARY_USER }}
         NOTARY_KEY: ${{ vars.NOTARY_KEY }}
-      run: ant -noinput -buildfile build.xml binaryPackage
+      run: ant -noinput -buildfile build.xml binaryAppPackage
 
     - name: Rename snapshot binary base name
       id: ren-basename
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
         cd build/dist
-        mv ${{ inputs.snap_name }}-Darwin.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+        mv ${{ inputs.snap_name }}-Darwin.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
       shell: bash
 
     - name: List files in the space (mac)
@@ -488,11 +488,11 @@ jobs:
             ls -l ${{ runner.workspace }}
 
     # Save files created by ctest script
-    - name: Save published binary (mac)
+    - name: Save published App-binary (mac)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-osx-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+            name: tgz-osx-app-binary
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
     - name: Test with Ant
