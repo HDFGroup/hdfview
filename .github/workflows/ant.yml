@@ -358,7 +358,7 @@ jobs:
       run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          KEYCHAIN_FILE=app-signing
+          KEYCHAIN_FILE=${{ vars.KEYCHAIN_NAME }}.keychain
           # import certificate from secrets
           echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > $CERTIFICATE_PATH
           security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
