@@ -22,7 +22,7 @@
     <!-- MAC signing: -->
     <property name="sign.account" value="${env.SIGNER}" />
     <property name="pass.keychain_key" value="${env.KEYCHAIN_PASSWD}" />
-    <property name="name.keychain_key" value="${env.KEYCHAIN_NAME}" />
+    <property name="name.keychain_key" value="${env.KEYCHAIN_NAME}.keychain" />
 
     <!-- MAC notary: -->
     <property name="notarize.account" value="${env.NOTARY_USER}" />
@@ -1530,7 +1530,7 @@
             <arg value="--mac-signing-key-user-name" />
             <arg value="The HDF Group (${sign.account})" />
             <arg value="--mac-signing-keychain" />
-            <arg value="${name.keychain_key}.keychain" />
+            <arg value="${name.keychain_key}" />
         </exec>
     </target>
 
