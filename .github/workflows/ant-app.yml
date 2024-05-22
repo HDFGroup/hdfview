@@ -486,7 +486,7 @@ jobs:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
         KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-        KEYCHAIN_NAME: app-signing
+        KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
         SIGNER: ${{ vars.SIGNER }}
         NOTARY_USER: ${{ vars.NOTARY_USER }}
         NOTARY_KEY: ${{ vars.NOTARY_KEY }}
