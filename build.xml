@@ -2122,7 +2122,6 @@
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
-            <arg value="--file"/>
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
         </exec>
         <loadfile property="retUUID" srcfile="retUUID.txt">
@@ -2196,7 +2195,6 @@
                 <arg value="--password"/>
                 <arg value="${notarize.keychain_key}"/>
                 <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
-                <arg value="--file"/>
                 <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
             </exec>
             <loadfile property="retUUID" srcfile="retUUID.txt">
