@@ -27,7 +27,7 @@
     <!-- MAC notary: -->
     <property name="notarize.account" value="${env.NOTARY_USER}" />
     <property name="notarize.keychain_key" value="${env.NOTARY_KEY}" />
-    <property name="notarize.altool" value="-altool" />
+    <property name="notarize.altool" value="" />
 
     <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
     <loadfile property="app.version" srcFile="${basedir}/VERSION">
