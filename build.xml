@@ -2023,8 +2023,8 @@
           ================================================================= -->
 
     <target name="submit-notary" if="sign.enable">
-        <exec executable="/usr/bin/xcrun" failonerror="true">
-            <redirector output="retUUID.txt" alwayslog="true"/>
+        <exec executable="/usr/bin/xcrun" failonerror="true"
+              outputproperty="retUUID.txt">
             <arg value="notarytool"/>
             <arg value="submit"/>
             <arg value="--wait"/>
@@ -2038,30 +2038,24 @@
             <arg value="${sign.account}"/>
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
         </exec>
-        <loadfile property="retUUID" srcfile="retUUID.txt">
+        <echo>notarize-app output:${retUUID.txt}</echo>
+        <sequential>
+        <echo message="@{retUUID.txt}" file="retUUID.txt.file" />
+        <loadfile property="retUUID" srcfile="retUUID.txt.file">
             <filterchain>
                 <tokenfilter>
                     <containsregex
-                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         pattern="id:\s*([0-9a-fA-F-]+)$"
                          replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
         </loadfile>
+        </sequential>
         <echo>notarize-app:${retUUID}</echo>
     </target>
 
     <target name="post-notary" if="sign.enable">
-        <loadfile property="retUUID" srcfile="retUUID.txt">
-            <filterchain>
-                <tokenfilter>
-                    <containsregex
-                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
-                         replace="\1" />
-                </tokenfilter>
-                <striplinebreaks/>
-            </filterchain>
-        </loadfile>
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
             <arg value="notarytool"/>
@@ -2101,6 +2095,7 @@
         </exec>
     </target>
 
+<<<<<<< Upstream, based on branch 'master-syn' of https://github.com/byrnHDF/hdfview.git
         <target name="zip-submit-notary" if="sign.enable">
             <exec executable="/usr/bin/xcrun" failonerror="true">
                 <redirector output="retUUID.txt" alwayslog="true"/>
@@ -2129,6 +2124,37 @@
             </loadfile>
             <echo>notarize-app:${retUUID}</echo>
         </target>
+=======
+    <target name="zip-submit-notary" if="sign.enable">
+        <exec executable="/usr/bin/xcrun" failonerror="true"
+              outputproperty="zipUUID.txt">
+            <arg value="notarytool"/>
+            <arg value="submit"/>
+            <arg value="--wait"/>
+            <arg value="--apple-id"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <arg value="--team-id"/>
+            <arg value="${sign.account}"/>
+            <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
+        </exec>
+        <echo>notarize-zip-app:${zipUUID.txt}</echo>
+        <sequential>
+        <echo message="@{zipUUID.txt}" file="zipUUID.txt.file" />
+        <loadfile property="zipUUID" srcfile="zipUUID.txt.file">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                        pattern="id:\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <echo>notarize-zip-app:${zipUUID}</echo>
+    </target>
+>>>>>>> 533cade correct regex for new output
 
     <!-- Staple the received notarization to the app -->
     <!-- run this after notarization is completed -->
