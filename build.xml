@@ -2042,7 +2042,7 @@
             <filterchain>
                 <tokenfilter>
                     <containsregex
-                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                         pattern="id\:\s*([0-9a-fA-F-]+)$"
                          replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
@@ -2056,7 +2056,7 @@
             <filterchain>
                 <tokenfilter>
                     <containsregex
-                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
+                        pattern="id\:\s*([0-9a-fA-F-]+)$"
                          replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
@@ -2101,6 +2101,7 @@
         </exec>
     </target>
 
+<<<<<<< Upstream, based on branch 'master-syn' of https://github.com/byrnHDF/hdfview.git
         <target name="zip-submit-notary" if="sign.enable">
             <exec executable="/usr/bin/xcrun" failonerror="true">
                 <redirector output="retUUID.txt" alwayslog="true"/>
@@ -2129,6 +2130,34 @@
             </loadfile>
             <echo>notarize-app:${retUUID}</echo>
         </target>
+=======
+    <target name="zip-submit-notary" if="sign.enable">
+        <exec executable="/usr/bin/xcrun" failonerror="true">
+            <redirector output="retUUID.txt" alwayslog="true"/>
+            <arg value="notarytool"/>
+            <arg value="submit"/>
+            <arg value="--wait"/>
+            <arg value="--apple-id"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <arg value="--team-id"/>
+            <arg value="${sign.account}"/>
+            <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
+        </exec>
+        <loadfile property="retUUID" srcfile="retUUID.txt">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex
+                        pattern="id\:\s*([0-9a-fA-F-]+)$"
+                         replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <echo>notarize-app:${retUUID}</echo>
+    </target>
+>>>>>>> 533cade correct regex for new output
 
     <!-- Staple the received notarization to the app -->
     <!-- run this after notarization is completed -->
