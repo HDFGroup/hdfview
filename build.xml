@@ -2022,95 +2022,6 @@
           MAC NOTARY FOR JPACKAGE
           ================================================================= -->
 
-    <target name="submit-notary-altool" if="sign.enable">
-        <exec executable="/usr/bin/xcrun" failonerror="true">
-            <redirector output="retUUID.txt" alwayslog="true"/>
-            <arg value="altool"/>
-            <arg value="--notarize-app"/>
-            <arg value="--type"/>
-            <arg value="osx"/>
-            <arg value="--primary-bundle-id"/>
-            <arg value="app.${ant.project.name}-${app.version}"/>
-            <arg value="--username"/>
-            <arg value="${notarize.account}"/>
-            <arg value="--password"/>
-            <arg value="${notarize.keychain_key}"/>
-            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
-            <arg value="--file"/>
-            <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
-        </exec>
-        <loadfile property="retUUID" srcfile="retUUID.txt">
-            <filterchain>
-                <tokenfilter>
-                    <containsregex
-                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
-                         replace="\1" />
-                </tokenfilter>
-                <striplinebreaks/>
-            </filterchain>
-        </loadfile>
-        <echo>notarize-app:${retUUID}</echo>
-    </target>
-
-    <target name="post-notary-altool" if="sign.enable">
-        <loadfile property="retUUID" srcfile="retUUID.txt">
-            <filterchain>
-                <tokenfilter>
-                    <containsregex
-                         pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
-                         replace="\1" />
-                </tokenfilter>
-                <striplinebreaks/>
-            </filterchain>
-        </loadfile>
-        <sleep minutes="10"/>
-        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
-            <redirector output="notary.txt" alwayslog="true"/>
-            <arg value="altool"/>
-            <arg value="--notarization-info"/>
-            <arg value="${retUUID}"/>
-            <arg value="--username"/>
-            <arg value="${notarize.account}"/>
-            <arg value="--password"/>
-            <arg value="${notarize.keychain_key}"/>
-            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
-        </exec>
-        <condition property="isnotarized">
-            <resourcecontains resource="notary.txt" substring="success"/>
-        </condition>
-        <echo>notarize-info:${logInfo}</echo>
-    </target>
-
-        <target name="zip-submit-notary-altool" if="sign.enable">
-            <exec executable="/usr/bin/xcrun" failonerror="true">
-                <redirector output="retUUID.txt" alwayslog="true"/>
-                <arg value="altool"/>
-                <arg value="--notarize-app"/>
-                <arg value="--type"/>
-                <arg value="osx"/>
-                <arg value="--primary-bundle-id"/>
-                <arg value="app.${ant.project.name}-${app.version}"/>
-                <arg value="--username"/>
-                <arg value="${notarize.account}"/>
-                <arg value="--password"/>
-                <arg value="${notarize.keychain_key}"/>
-                <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
-                <arg value="--file"/>
-                <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
-            </exec>
-            <loadfile property="retUUID" srcfile="retUUID.txt">
-                <filterchain>
-                    <tokenfilter>
-                        <containsregex
-                             pattern="RequestUUID\s*\=\s*([0-9a-fA-F-]+)$"
-                             replace="\1" />
-                    </tokenfilter>
-                    <striplinebreaks/>
-                </filterchain>
-            </loadfile>
-            <echo>notarize-app:${retUUID}</echo>
-        </target>
-
     <target name="submit-notary" if="sign.enable">
         <exec executable="/usr/bin/xcrun" failonerror="true">
             <redirector output="retUUID.txt" alwayslog="true"/>
@@ -2121,7 +2032,8 @@
             <arg value="${notarize.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
-            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+            <arg value="--team-id"/>
+            <arg value="${sign.account}"/>
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
         </exec>
         <loadfile property="retUUID" srcfile="retUUID.txt">
@@ -2152,12 +2064,13 @@
             <redirector output="notary.txt" alwayslog="true"/>
             <arg value="notarytool"/>
             <arg value="info"/>
-            <arg value="${retUUID}"/>
-            <arg value="--username"/>
+            <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
-            <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+            <arg value="--team-id"/>
+            <arg value="${sign.account}"/>
+            <arg value="${retUUID}"/>
         </exec>
         <condition property="isnotarized">
             <resourcecontains resource="notary.txt" substring="success"/>
@@ -2190,11 +2103,12 @@
                 <arg value="notarytool"/>
                 <arg value="submit"/>
                 <arg value="--wait"/>
-                <arg value="--username"/>
+                <arg value="--apple-id"/>
                 <arg value="${notarize.account}"/>
                 <arg value="--password"/>
                 <arg value="${notarize.keychain_key}"/>
-                <!-- <arg value="@keychain:${notarize.keychain_key}"/> -->
+                <arg value="--team-id"/>
+                <arg value="${sign.account}"/>
                 <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
             </exec>
             <loadfile property="retUUID" srcfile="retUUID.txt">
