@@ -2094,7 +2094,6 @@
             <arg value="${ant.project.name}-${app.version}.dmg"/>
         </exec>
     </target>
-
     <target name="zip-submit-notary" if="sign.enable">
         <exec executable="/usr/bin/xcrun" failonerror="true"
               outputproperty="zipUUID.txt">
