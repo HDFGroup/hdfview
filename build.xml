@@ -2030,6 +2030,8 @@
             <arg value="--wait"/>
             <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
+            <arg value="--team-id"/> 
+	    <arg value="${sign.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <arg value="--team-id"/>
@@ -2066,6 +2068,8 @@
             <arg value="info"/>
             <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
+	    <arg value="--team-id"/> 
+	    <arg value="${sign.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <arg value="--team-id"/>
@@ -2105,6 +2109,8 @@
                 <arg value="--wait"/>
                 <arg value="--apple-id"/>
                 <arg value="${notarize.account}"/>
+		<arg value="--team-id"/> 
+	        <arg value="${sign.account}"/>
                 <arg value="--password"/>
                 <arg value="${notarize.keychain_key}"/>
                 <arg value="--team-id"/>
