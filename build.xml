@@ -2048,7 +2048,7 @@
             <filterchain>
                 <tokenfilter>
                     <linetokenizer />
-                    <containsregex pattern="id:" />
+                    <containsregex pattern="id" />
                 </tokenfilter>
                 <tokenfilter>
                     <stringtokenizer delims=":- \r\n" suppressdelims="true" />
@@ -2122,7 +2122,7 @@
             <filterchain>
                 <tokenfilter>
                     <linetokenizer />
-                    <containsregex pattern="id:" />
+                    <containsregex pattern="id" />
                 </tokenfilter>
                 <tokenfilter>
                     <stringtokenizer delims=":- \r\n" suppressdelims="true" />
