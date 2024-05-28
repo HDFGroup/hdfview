@@ -2047,10 +2047,6 @@
             <concat>${retUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
-                    <linetokenizer />
-                    <containsregex pattern="id" />
-                </tokenfilter>
-                <tokenfilter>
                     <containsregex pattern="[0-9a-fA-F\-]+" />
                 </tokenfilter>
                 <striplinebreaks/>
@@ -2119,10 +2115,6 @@
         <loadresource property="zipUUID">
             <concat>${zipUUID.txt}</concat>
             <filterchain>
-                <tokenfilter>
-                    <linetokenizer />
-                    <containsregex pattern="id" />
-                </tokenfilter>
                 <tokenfilter>
                     <containsregex pattern="[0-9a-fA-F\-]+" />
                 </tokenfilter>
