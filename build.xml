@@ -2033,7 +2033,7 @@
             <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
             <arg value="--team-id"/> 
-	    <arg value="${sign.account}"/>
+            <arg value="${sign.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <arg value="--team-id"/>
@@ -2041,19 +2041,17 @@
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
         </exec>
         <echo>notarize-app output:${retUUID.txt}</echo>
-        <sequential>
-        <echo message="@{retUUID.txt}" file="retUUID.txt.file" />
-        <loadfile property="retUUID" srcfile="retUUID.txt.file">
+        <loadresource property="retUUID">
+            <concat>${retUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
-                    <containsregex
-                         pattern="id:\s*([0-9a-fA-F-]+)$"
+                    <replaceregex
+                         pattern="id:\s*([0-9a-fA-F\-]+)$"
                          replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
-        </loadfile>
-        </sequential>
+        </loadresource>
         <echo>notarize-app:${retUUID}</echo>
     </target>
 
@@ -2064,8 +2062,8 @@
             <arg value="info"/>
             <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
-	    <arg value="--team-id"/> 
-	    <arg value="${sign.account}"/>
+            <arg value="--team-id"/> 
+            <arg value="${sign.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <arg value="--team-id"/>
@@ -2112,20 +2110,18 @@
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
         </exec>
         <echo>notarize-zip-app:${zipUUID.txt}</echo>
-        <sequential>
-        <echo message="@{zipUUID.txt}" file="zipUUID.txt.file" />
-        <loadfile property="zipUUID" srcfile="zipUUID.txt.file">
+        <loadresource property="zipUUID">
+            <concat>${zipUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
-                    <containsregex
-                        pattern="id:\s*([0-9a-fA-F-]+)$"
+                    <replaceregex
+                        pattern="id:\s*([0-9a-fA-F\-]+)$"
                          replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
-        </loadfile>
+        </loadresource>
         <echo>notarize-zip-app:${zipUUID}</echo>
-        </sequential>
     </target>
 
     <!-- Staple the received notarization to the app -->
