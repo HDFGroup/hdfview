@@ -27,7 +27,6 @@
     <!-- MAC notary: -->
     <property name="notarize.account" value="${env.NOTARY_USER}" />
     <property name="notarize.keychain_key" value="${env.NOTARY_KEY}" />
-    <property name="notarize.altool" value="" />
 
     <!-- Get HDFView, HDF4, HDF5 and HDF-Java version information -->
     <loadfile property="app.version" srcFile="${basedir}/VERSION">
@@ -1789,10 +1788,13 @@
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
-        <antcall target="submit-notary${notarize.altool}" />
+        <echo message="xxxx Notarize dmg xxxx"/>
+        <antcall target="submit-notary" />
 
-        <antcall target="post-notary${notarize.altool}" />
+        <echo message="xxxx Get notary ID xxxx"/>
+        <antcall target="post-notary" />
 
+        <echo message="xxxx Staple notary ID xxxx"/>
         <antcall target="staple-notary" />
 
         <echo message="xxxx Package the mac dmg binary xxxx"/>
@@ -2094,6 +2096,7 @@
             <arg value="${ant.project.name}-${app.version}.dmg"/>
         </exec>
     </target>
+
     <target name="zip-submit-notary" if="sign.enable">
         <exec executable="/usr/bin/xcrun" failonerror="true"
               outputproperty="zipUUID.txt">
@@ -2229,9 +2232,9 @@
             <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
-        <antcall target="zip-submit-notary${notarize.altool}" />
+        <antcall target="zip-submit-notary" />
 
-        <antcall target="post-notary${notarize.altool}" />
+        <antcall target="post-notary" />
 
         <antcall target="zip-staple-notary" />
 
