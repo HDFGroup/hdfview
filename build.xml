@@ -2030,6 +2030,8 @@
             <arg value="notarytool"/>
             <arg value="submit"/>
             <arg value="--wait"/>
+            <arg value="--output-format"/>
+            <arg value="json"/>
             <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
             <arg value="--team-id"/> 
@@ -2104,6 +2106,8 @@
             <arg value="notarytool"/>
             <arg value="submit"/>
             <arg value="--wait"/>
+            <arg value="--output-format"/>
+            <arg value="json"/>
             <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
             <arg value="--password"/>
