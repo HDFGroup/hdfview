@@ -2051,7 +2051,6 @@
                     <containsregex pattern="id" />
                 </tokenfilter>
                 <tokenfilter>
-                    <stringtokenizer delims=":- \r\n" suppressdelims="true" />
                     <containsregex pattern="[0-9a-fA-F\-]+" />
                 </tokenfilter>
                 <striplinebreaks/>
@@ -2125,7 +2124,6 @@
                     <containsregex pattern="id" />
                 </tokenfilter>
                 <tokenfilter>
-                    <stringtokenizer delims=":- \r\n" suppressdelims="true" />
                     <containsregex pattern="[0-9a-fA-F\-]+" />
                 </tokenfilter>
                 <striplinebreaks/>
