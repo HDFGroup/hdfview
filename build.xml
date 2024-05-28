@@ -2034,8 +2034,6 @@
             <arg value="json"/>
             <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
-            <arg value="--team-id"/> 
-            <arg value="${sign.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <arg value="--team-id"/>
@@ -2047,7 +2045,7 @@
             <concat>${retUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
-                    <containsregex pattern="[0-9a-fA-F\-]+" />
+                    <containsregex pattern="[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
@@ -2062,8 +2060,6 @@
             <arg value="info"/>
             <arg value="--apple-id"/>
             <arg value="${notarize.account}"/>
-            <arg value="--team-id"/> 
-            <arg value="${sign.account}"/>
             <arg value="--password"/>
             <arg value="${notarize.keychain_key}"/>
             <arg value="--team-id"/>
@@ -2111,12 +2107,12 @@
             <arg value="${sign.account}"/>
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
         </exec>
-        <echo>notarize-zip-app:${zipUUID.txt}</echo>
+        <echo>notarize-zip-app output:${zipUUID.txt}</echo>
         <loadresource property="zipUUID">
             <concat>${zipUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
-                    <containsregex pattern="[0-9a-fA-F\-]+" />
+                    <containsregex pattern="[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
