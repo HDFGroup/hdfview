@@ -2045,7 +2045,8 @@
             <concat>${retUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
-                    <containsregex pattern="[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+" />
+                    <stringtokenizer/>
+                    <containsregex pattern="[0-9a-fA-F\-]+" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
@@ -2112,7 +2113,8 @@
             <concat>${zipUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
-                    <containsregex pattern="[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+" />
+                    <stringtokenizer/>
+                    <containsregex pattern="[0-9a-fA-F\-]+" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
