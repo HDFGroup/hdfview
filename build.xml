@@ -2025,8 +2025,8 @@
           ================================================================= -->
 
     <target name="submit-notary" if="sign.enable">
-        <exec executable="/usr/bin/xcrun" failonerror="true"
-              outputproperty="retUUID.txt">
+        <exec executable="/usr/bin/xcrun" failonerror="true">
+            <redirector output="retUUID.txt" alwayslog="true"/>
             <arg value="notarytool"/>
             <arg value="submit"/>
             <arg value="--wait"/>
@@ -2041,8 +2041,7 @@
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
         </exec>
         <echo>notarize-app output:${retUUID.txt}</echo>
-        <loadresource property="retUUID">
-            <concat>${retUUID.txt}</concat>
+        <loadfile property="retUUID" srcfile="retUUID.txt">
             <filterchain>
                 <tokenfilter>
                     <stringtokenizer/>
@@ -2050,7 +2049,7 @@
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
-        </loadresource>
+        </loadfile>
         <echo>notarize-app:${retUUID}</echo>
     </target>
 
@@ -2093,8 +2092,8 @@
     </target>
 
     <target name="zip-submit-notary" if="sign.enable">
-        <exec executable="/usr/bin/xcrun" failonerror="true"
-              outputproperty="zipUUID.txt">
+        <exec executable="/usr/bin/xcrun" failonerror="true">
+            <redirector output="zipUUID.txt" alwayslog="true"/>
             <arg value="notarytool"/>
             <arg value="submit"/>
             <arg value="--wait"/>
@@ -2109,8 +2108,7 @@
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
         </exec>
         <echo>notarize-zip-app output:${zipUUID.txt}</echo>
-        <loadresource property="zipUUID">
-            <concat>${zipUUID.txt}</concat>
+        <loadfile property="zipUUID" srcfile="zipUUID.txt">
             <filterchain>
                 <tokenfilter>
                     <stringtokenizer/>
@@ -2118,7 +2116,7 @@
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
-        </loadresource>
+        </loadfile>
         <echo>notarize-zip-app:${zipUUID}</echo>
     </target>
 
