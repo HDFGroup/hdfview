@@ -2046,7 +2046,7 @@
             <filterchain>
                 <tokenfilter>
                     <stringtokenizer delims="," />
-                    <containsregex pattern="^.*([0-9a-fA-F\-]+).*$" replace="\1" />
+                    <containsregex pattern="^.*([0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+).*$" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
@@ -2114,7 +2114,7 @@
             <filterchain>
                 <tokenfilter>
                     <stringtokenizer delims="," />
-                    <containsregex pattern="^.*([0-9a-fA-F\-]+).*$" replace="\1" />
+                    <containsregex pattern="^.*([0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+).*$" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
