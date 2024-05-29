@@ -2044,7 +2044,7 @@
         <loadfile property="retUUID" srcfile="retUUID.txt">
             <filterchain>
                 <tokenfilter>
-                    <stringtokenizer/>
+                    <stringtokenizer delims="," />
                     <containsregex pattern=".*([0-9a-fA-F\-]+)$" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
@@ -2111,7 +2111,7 @@
         <loadfile property="zipUUID" srcfile="zipUUID.txt">
             <filterchain>
                 <tokenfilter>
-                    <stringtokenizer/>
+                    <stringtokenizer delims="," />
                     <containsregex pattern=".*([0-9a-fA-F\-]+)$" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
