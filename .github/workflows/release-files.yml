@@ -96,7 +96,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: Get published binary (MacOS)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
               name: tgz-osx-binary
               path: ${{ github.workspace }}
@@ -115,7 +115,7 @@ jobs:
               path: ${{ github.workspace }}
       
       - name: Get published app binary (MacOS)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
               name: tgz-osx-app-binary
               path: ${{ github.workspace }}
