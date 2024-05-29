@@ -137,10 +137,10 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-osx.zip >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Darwin.zip >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz >> sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-osx.zip >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.zip >> sha256sums.txt
 
       - name: Store snapshot name
         run: |
@@ -169,10 +169,10 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-Darwin.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-osx.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Release tag
@@ -187,10 +187,10 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-Darwin.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-osx.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: List files for the space (Linux)
