@@ -2045,13 +2045,13 @@
             <concat>${retUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
-                    <stringtokenizer delims="," />
-                    <containsregex pattern="^.*([0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+).*$" replace="\1" />
+                    <stringtokenizer delims=",:" />
+                    <containsregex pattern="([0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+)" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
         </loadresource>
-        <echo>notarize-app:${retUUID}</echo>
+        <echo>*** notarize-app:${retUUID} ***</echo>
     </target>
 
     <target name="post-notary" if="sign.enable">
@@ -2070,7 +2070,7 @@
         <condition property="isnotarized">
             <resourcecontains resource="notary.txt" substring="success"/>
         </condition>
-        <echo>notarize-info:${logInfo}</echo>
+        <echo>*** notarize-info:${logInfo} ***</echo>
     </target>
 
     <!-- Staple the received notarization to the app -->
@@ -2113,13 +2113,13 @@
             <concat>${zipUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
-                    <stringtokenizer delims="," />
-                    <containsregex pattern="^.*([0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+).*$" replace="\1" />
+                    <stringtokenizer delims=",:" />
+                    <containsregex pattern="([0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+)" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
         </loadresource>
-        <echo>notarize-zip-app:${zipUUID}</echo>
+        <echo>*** notarize-zip-app:${zipUUID} ***</echo>
     </target>
 
     <!-- Staple the received notarization to the app -->
