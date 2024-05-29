@@ -1788,8 +1788,8 @@
             <arg value="${ant.project.name}-${app.version}.dmg" />
         </exec>
 
-        <echo message="xxxx Notarize dmg xxxx"/>
-        <antcall target="submit-notary" />
+        <!-- <echo message="xxxx Notarize dmg xxxx"/> -->
+        <!-- <antcall target="submit-notary" /> -->
 
         <echo message="xxxx Get notary ID xxxx"/>
         <antcall target="post-notary" />
@@ -2122,6 +2122,25 @@
         <echo>*** notarize-zip-app:${zipUUID} ***</echo>
     </target>
 
+    <target name="zip-post-notary" if="sign.enable">
+        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
+            <redirector output="notary.txt" alwayslog="true"/>
+            <arg value="notarytool"/>
+            <arg value="info"/>
+            <arg value="--apple-id"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <arg value="--team-id"/>
+            <arg value="${sign.account}"/>
+            <arg value="${zipUUID}"/>
+        </exec>
+        <condition property="isnotarized">
+            <resourcecontains resource="notary.txt" substring="success"/>
+        </condition>
+        <echo>*** zip-notarize-info:${logInfo} ***</echo>
+    </target>
+
     <!-- Staple the received notarization to the app -->
     <!-- run this after notarization is completed -->
     <target name="zip-staple-notary" if="sign.enable">
@@ -2228,7 +2247,7 @@
 
         <antcall target="zip-submit-notary" />
 
-        <antcall target="post-notary" />
+        <!-- <antcall target="zip-post-notary" /> -->
 
         <antcall target="zip-staple-notary" />
 
