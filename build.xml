@@ -2040,12 +2040,12 @@
             <arg value="${sign.account}"/>
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
         </exec>
-        <echo>notarize-app output:${retUUID.txt}</echo>
+        <echo>.....notarize-app.....</echo>
         <loadfile property="retUUID" srcfile="retUUID.txt">
             <filterchain>
                 <tokenfilter>
                     <stringtokenizer/>
-                    <containsregex pattern="[0-9a-fA-F\-]+" />
+                    <containsregex pattern=".*([0-9a-fA-F\-]+)$" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
@@ -2107,12 +2107,12 @@
             <arg value="${sign.account}"/>
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
         </exec>
-        <echo>notarize-zip-app output:${zipUUID.txt}</echo>
+        <echo>.....notarize-zip-app.....</echo>
         <loadfile property="zipUUID" srcfile="zipUUID.txt">
             <filterchain>
                 <tokenfilter>
                     <stringtokenizer/>
-                    <containsregex pattern="[0-9a-fA-F\-]+" />
+                    <containsregex pattern=".*([0-9a-fA-F\-]+)$" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
