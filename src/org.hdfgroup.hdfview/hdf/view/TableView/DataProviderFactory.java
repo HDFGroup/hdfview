@@ -94,6 +94,7 @@ public class DataProviderFactory {
                                                          final boolean dataTransposed) throws Exception
     {
         HDFDataProvider dataProvider = null;
+        log.debug("getDataProvider(): Datatype is {}", dtype.getDescription());
 
         try {
             if (dtype.isCompound())
@@ -375,30 +376,24 @@ public class DataProviderFactory {
         }
 
         /**
-         * When a CompoundDataProvider wants to pass a List of data down to a nested
-         * CompoundDataProvider, or when a top-level container DataProvider (such as an
-         * ArrayDataProvider) wants to hand data down to a base CompoundDataProvider, we
-         * need to pass down a List of data and the new value, plus a field and row
-         * index. This method is for facilitating this behavior.
+         * When a CompoundDataProvider wants to pass a List of data down to a nested CompoundDataProvider, or
+         * when a top-level container DataProvider (such as an ArrayDataProvider) wants to hand data down to a
+         * base CompoundDataProvider, we need to pass down a List of data and the new value, plus a field and
+         * row index. This method is for facilitating this behavior.
          *
-         * In general, all "container" DataProviders that have a "container" base
-         * DataProvider should call down into their base DataProvider(s) using this{},
-         * method, in order to ensure that buried CompoundDataProviders get handled
-         * correctly. When their base DataProvider is not a "container" type, the method
-         * setDataValue(index, Object, Object) should be used instead.
+         * In general, all "container" DataProviders that have a "container" base DataProvider should call
+         * down into their base DataProvider(s) using this, method, in order to ensure that buried
+         * CompoundDataProviders get handled correctly. When their base DataProvider is not a "container"
+         * type, the method setDataValue(index, Object, Object) should be used instead.
          *
-         * For atomic type DataProviders, we treat this method as directly calling into
-         * setDataValue(index, Object, Object) using the passed rowIndex. However, this
-         * method should, in general, not be called by atomic type DataProviders.
+         * For atomic type DataProviders, we treat this method as directly calling into setDataValue(index,
+         * Object, Object) using the passed rowIndex. However, this method should, in general, not be called
+         * by atomic type DataProviders.
          *
-         * @param columnIndex
-         *        the column
-         * @param rowIndex
-         *        the row
-         * @param bufObject
-         *        the data object
-         * @param newValue
-         *        the new data object
+         * @param columnIndex the column
+         * @param rowIndex    the row
+         * @param bufObject   the data object
+         * @param newValue    the new data object
          */
         public void setDataValue(int columnIndex, int rowIndex, Object bufObject, Object newValue)
         {
@@ -1623,7 +1618,7 @@ public class DataProviderFactory {
         private static final Logger log = LoggerFactory.getLogger(NumericalDataProvider.class);
 
         private final boolean isUINT64;
-
+        private final boolean isFLT16;
         private final long typeSize;
 
         NumericalDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed)
@@ -1633,6 +1628,7 @@ public class DataProviderFactory {
 
             typeSize = dtype.getDatatypeSize();
             isUINT64 = dtype.isUnsigned() && (typeSize == 8);
+            isFLT16  = dtype.isFloat() && (typeSize == 2);
         }
 
         @Override
@@ -1641,7 +1637,9 @@ public class DataProviderFactory {
             super.getDataValue(columnIndex, rowIndex);
 
             try {
-                if (isUINT64)
+                if (isFLT16)
+                    theValue = Float.float16ToFloat((short)theValue);
+                else if (isUINT64)
                     theValue = Tools.convertUINT64toBigInt(Long.valueOf((long)theValue));
             }
             catch (Exception ex) {
@@ -1660,7 +1658,9 @@ public class DataProviderFactory {
             super.getDataValue(obj, index);
 
             try {
-                if (isUINT64)
+                if (isFLT16)
+                    theValue = Float.float16ToFloat((short)theValue);
+                else if (isUINT64)
                     theValue = Tools.convertUINT64toBigInt(Long.valueOf((long)theValue));
             }
             catch (Exception ex) {
@@ -1671,6 +1671,70 @@ public class DataProviderFactory {
             log.trace("getDataValue({})=({}): finish", index, theValue);
 
             return theValue;
+        }
+
+        /**
+         * update the data value of a type.
+         *
+         * @param columnIndex the column
+         * @param rowIndex    the row
+         * @param newValue    the new data value object
+         */
+        @Override
+        public void setDataValue(int columnIndex, int rowIndex, Object newValue)
+        {
+            log.trace("setDataValue({}, {})=({}): start", rowIndex, columnIndex, newValue);
+            try {
+                if (isFLT16) {
+                    // must convert string from float to short first
+                    float fValue = Float.parseFloat((String)newValue);
+                    short sValue = Float.floatToFloat16(fValue);
+                    // setDataValue requires a String, so convert short to String
+                    String strValue = Short.toString(sValue);
+                    super.setDataValue(columnIndex, rowIndex, strValue);
+                }
+                else
+                    super.setDataValue(columnIndex, rowIndex, newValue);
+            }
+            catch (Exception ex) {
+                log.debug("setDataValue({}, {})=({}): failure: ", rowIndex, columnIndex, newValue, ex);
+                theValue = DataFactoryUtils.errStr;
+            }
+        }
+
+        /**
+         * When a parent HDFDataProvider (such as an ArrayDataProvider) wants to set a data value by routing
+         * the operation through its base HDFDataProvider, the parent HDFDataProvider will generally know the
+         * direct index to have the base provider use. This method is to facilitate this kind of behavior.
+         *
+         * Note that this method takes two Object parameters, one which is the object that the method should
+         * set its data inside of and one which is the new value to set. This is to be able to nicely support
+         * nested compound DataProviders.
+         *
+         * @param index     the index into the data array
+         * @param bufObject the data object
+         * @param newValue  the new data object
+         */
+        public void setDataValue(int index, Object bufObject, Object newValue)
+        {
+            log.trace("setDataValue({}: {})=({}): start", index, bufObject, newValue);
+            try {
+                if (isFLT16) {
+                    // must convert string from float to short first
+                    float fValue = Float.parseFloat((String)newValue);
+                    short sValue = Float.floatToFloat16(fValue);
+                    // setDataValue requires a String, so convert short to String
+                    String strValue = Short.toString(sValue);
+                    super.setDataValue(index, bufObject, strValue);
+                }
+                else
+                    super.setDataValue(index, bufObject, newValue);
+            }
+            catch (Exception ex) {
+                log.debug("setDataValue({}, {})=({}): updateAtomicValue failure: ", index, bufObject,
+                          newValue, ex);
+            }
+            log.trace("setDataValue({}, {})=({}): finish", index, bufObject, newValue);
         }
     }
 

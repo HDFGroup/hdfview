@@ -712,6 +712,7 @@ public class DataDisplayConverterFactory {
         private final StringBuilder buffer;
         private final long typeSize;
         private final boolean isUINT64;
+        private final boolean isFLT16;
 
         NumericalDataDisplayConverter(final Datatype dtype) throws Exception
         {
@@ -727,6 +728,7 @@ public class DataDisplayConverterFactory {
 
             typeSize = dtype.getDatatypeSize();
             isUINT64 = dtype.isUnsigned() && (typeSize == 8);
+            isFLT16  = dtype.isFloat() && (typeSize == 2);
         }
 
         @Override

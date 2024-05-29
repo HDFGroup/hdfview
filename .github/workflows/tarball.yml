@@ -50,7 +50,7 @@ jobs:
       branch_ref: ${{ steps.get-branch-name.outputs.BRANCH_REF }}
       branch_sha: ${{ steps.get-branch-sha.outputs.BRANCH_SHA }}
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v4
 
     - name: Get branch name
       id: get-branch-name
@@ -94,7 +94,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           path: hdfsrc
 

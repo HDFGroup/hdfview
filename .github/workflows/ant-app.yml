@@ -1,4 +1,4 @@
-name: hdfview 1_14 ci runs
+name: hdfview 1_14 app ci runs
 
 # Controls when the action will run. Triggers the workflow on a schedule
 on:
@@ -193,15 +193,15 @@ jobs:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: |
-        ant -noinput -buildfile build.xml binaryPackage
+        ant -noinput -buildfile build.xml binaryAppPackage
       shell: bash
 
-    - name: Rename snapshot binary base name
+    - name: Rename snapshot binary-app base name
       id: ren-basename
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
         cd build/dist
-        mv ${{ inputs.snap_name }}-win64.zip ${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
+        mv ${{ inputs.snap_name }}-win64.zip ${{ steps.set-file-base.outputs.FILE_BASE }}App-win64.zip
       shell: bash
 
     - name: List files for the space (Windows)
@@ -211,19 +211,19 @@ jobs:
       shell: pwsh
 
     # Save files created by ctest script
-    - name: Save published binary (Win)
+    - name: Save published binary-app (Win)
       uses: actions/upload-artifact@v4
       with:
-            name: zip-win-vs2022-binary
+            name: zip-win-vs2022-app-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
     # Save release files created by ctest script
-    - name: Save published release binary (Win)
+    - name: Save published release-app binary (Win)
       uses: actions/upload-artifact@v4
       with:
-            name: zip-win-vs2022-binary
+            name: zip-win-vs2022-app-binary
             path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
@@ -357,14 +357,14 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-      run: ant -noinput -buildfile build.xml binaryPackage
+      run: ant -noinput -buildfile build.xml binaryAppPackage
 
-    - name: Rename snapshot binary base name
+    - name: Rename snapshot binary-app base name
       id: ren-basename
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
         cd build/dist
-        mv ${{ inputs.snap_name }}-Linux-x86_64.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+        mv ${{ inputs.snap_name }}-Linux-x86_64.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
       shell: bash
 
     - name: List files in the space (Linux)
@@ -373,18 +373,18 @@ jobs:
             ls -l ${{ runner.workspace }}
 
     # Save files created by ctest script
-    - name: Save published snapshot binary (Linux)
+    - name: Save published snapshot-app binary (Linux)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-ubuntu-2204-binary
+            name: tgz-ubuntu-2204-app-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
-    - name: Save published release binary (Linux)
+    - name: Save published release-app binary (Linux)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-ubuntu-2204-binary
+            name: tgz-ubuntu-2204-app-binary
             path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
@@ -584,14 +584,14 @@ jobs:
         SIGNER: ${{ vars.SIGNER }}
         NOTARY_USER: ${{ vars.NOTARY_USER }}
         NOTARY_KEY: ${{ vars.NOTARY_KEY }}
-      run: ant -noinput -buildfile build.xml binaryPackage
+      run: ant -noinput -buildfile build.xml binaryAppPackage
 
-    - name: Rename snapshot binary base name
+    - name: Rename snapshot binary-app base name
       id: ren-basename
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
         cd build/dist
-        mv ${{ inputs.snap_name }}-Darwin.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+        mv ${{ inputs.snap_name }}-Darwin.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
       shell: bash
 
     - name: List files in the space (mac)
@@ -600,19 +600,19 @@ jobs:
             ls -l ${{ runner.workspace }}
 
     # Save files created by ctest script
-    - name: Save published snapshot binary (mac)
+    - name: Save published snapshot-app binary (mac)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-osx-binary
+            name: tgz-osx-app-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
     # Save release files created by ctest script
-    - name: Save published release binary (mac)
+    - name: Save published release-app binary (mac)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-osx-binary
+            name: tgz-osx-app-binary
             path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
