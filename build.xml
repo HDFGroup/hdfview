@@ -2025,8 +2025,8 @@
           ================================================================= -->
 
     <target name="submit-notary" if="sign.enable">
-        <exec executable="/usr/bin/xcrun" failonerror="true">
-            <redirector output="retUUID.txt" alwayslog="true"/>
+        <exec executable="/usr/bin/xcrun" failonerror="true"
+              outputproperty="retUUID.txt">
             <arg value="notarytool"/>
             <arg value="submit"/>
             <arg value="--wait"/>
@@ -2040,16 +2040,17 @@
             <arg value="${sign.account}"/>
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.dmg"/>
         </exec>
-        <echo>.....notarize-app.....</echo>
-        <loadfile property="retUUID" srcfile="retUUID.txt">
+        <echo>.....notarize-app output:${retUUID.txt}.....</echo>
+        <loadresource property="retUUID">
+            <concat>${retUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
                     <stringtokenizer delims="," />
-                    <containsregex pattern=".*([0-9a-fA-F\-]+)$" replace="\1" />
+                    <containsregex pattern="^.*([0-9a-fA-F\-]+).*$" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
-        </loadfile>
+        </loadresource>
         <echo>notarize-app:${retUUID}</echo>
     </target>
 
@@ -2092,8 +2093,8 @@
     </target>
 
     <target name="zip-submit-notary" if="sign.enable">
-        <exec executable="/usr/bin/xcrun" failonerror="true">
-            <redirector output="zipUUID.txt" alwayslog="true"/>
+        <exec executable="/usr/bin/xcrun" failonerror="true"
+              outputproperty="zipUUID.txt">
             <arg value="notarytool"/>
             <arg value="submit"/>
             <arg value="--wait"/>
@@ -2107,16 +2108,17 @@
             <arg value="${sign.account}"/>
             <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
         </exec>
-        <echo>.....notarize-zip-app.....</echo>
-        <loadfile property="zipUUID" srcfile="zipUUID.txt">
+        <echo>.....notarize-zip-app output:${zipUUID.txt}.....</echo>
+        <loadresource property="zipUUID">
+            <concat>${zipUUID.txt}</concat>
             <filterchain>
                 <tokenfilter>
                     <stringtokenizer delims="," />
-                    <containsregex pattern=".*([0-9a-fA-F\-]+)$" replace="\1" />
+                    <containsregex pattern="^.*([0-9a-fA-F\-]+).*$" replace="\1" />
                 </tokenfilter>
                 <striplinebreaks/>
             </filterchain>
-        </loadfile>
+        </loadresource>
         <echo>notarize-zip-app:${zipUUID}</echo>
     </target>
 
