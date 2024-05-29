@@ -1438,6 +1438,167 @@
     </target>
 
     <!-- =================================================================
+          BINARY - PACKAGE
+          ================================================================= -->
+    <target name="binaryPackage" depends="binaryPackX"
+        description="Packages into a distributable form"  />
+
+    <target name="binaryAppPackage" depends="binaryPack"
+        description="Packages the app image into a distributable form"  />
+
+    <!-- =================================================================
+          BINARY - PACKX
+          ================================================================= -->
+    <target name="setXPackage">
+        <property name="XPackage" value="true" />
+    </target>
+
+    <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
+        description="Packages up the installer, the license file and the README file into a distributable form"  />
+
+    <target name="binaryPackXWindows" depends="createJXPackage, createWindowsREADME" if="${isXWindows}">
+        <mkdir dir="${dist.dir}" />
+
+        <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" readonly="false" />
+        <echo message="xxxx Sign the windows binary xxxx"/>
+        <!-- Sign the generated exe -->
+        <exec executable="${env.SIGNTOOLDIR}\signtool.exe" failifexecutionfails="false">
+            <arg value="sign" />
+            <arg value="/v" />
+            <arg value="/debug" />
+            <arg value="/fd" />
+            <arg value="SHA256" />
+            <arg value="/d" />
+            <arg value="${ant.project.name} ${app.version} Utility" />
+            <arg value="/f" />
+            <arg value="${env.CERTIFICATE}" />
+            <arg value="/p" />
+            <arg value="${env.SIGNPASSWORD}" />
+            <arg value="/t" />
+            <arg value="http://timestamp.digicert.com" />
+            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
+        </exec>
+
+        <echo message="xxxx Package the windows binary xxxx"/>
+        <!-- Copy over license file -->
+        <copy todir="${dist.dir}">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <!-- Compress everything into one zip file -->
+        <condition property="win.extension" value="win64" else="win32">
+            <contains string="${os.arch}" substring="64" />
+        </condition>
+        <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-${win.extension}.zip" basedir="${dist.dir}" />
+    </target>
+
+    <target name="binaryPackXUnix" depends="createJXPackage, createDEBREADME, createRPMREADME" if="${isXUnix}">
+        <echo message="xxxx Package the unix binary xxxx"/>
+        <!-- Copy over license file -->
+        <copy todir="${dist.dir}">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+        <!-- Compress everything into one tar.gz file -->
+        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" compression="gzip">
+            <tarfileset dir="${dist.dir}" filemode="755">
+                <exclude name="temp.tar.gz" />
+            </tarfileset>
+        </tar>
+        <chmod perm="ugo+rx" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
+        <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
+    </target>
+
+    <target name="binaryPackXMac" depends="createJXPackageMac, createMacREADME" if="${isXMac}">
+        <!-- unlock keychain -->
+        <exec executable="security" dir="${dist.dir}" failonerror="true">
+            <arg value="unlock-keychain" />
+            <arg value="-p" />
+            <arg value="${pass.keychain_key}" />
+            <arg value="${name.keychain_key}" />
+        </exec>
+
+        <echo message="xxxx Code sign the mac dmg xxxx"/>
+        <!-- Code signing the dmg -->
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="--force" />
+            <arg value="--timestamp" />
+            <arg value="--options" />
+            <arg value="runtime" />
+            <arg value="--entitlements" />
+            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
+            <arg value="--verbose=4" />
+            <arg value="--strict" />
+            <arg value="--sign" />
+            <arg value="${sign.account}" />
+            <arg value="--deep" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <echo message="xxxx Check for secure dmg timestamp xxxx"/>
+        <!-- Code signing the application image -->
+        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
+            <arg value="-dvv" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <echo message="xxxx Verify dmg xxxx"/>
+        <exec dir="${dist.dir}" executable="hdiutil">
+            <arg value="verify" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <echo message="xxxx Notarize dmg xxxx"/>
+        <antcall target="submit-notary" />
+
+        <echo message="xxxx Staple notary ID to dmg xxxx"/>
+        <antcall target="staple-notary" />
+
+        <echo message="xxxx Package the mac dmg binary xxxx"/>
+        <!-- Copy over license file -->
+        <copy tofile="${dist.dir}/COPYING.txt">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+        <exec dir="${dist.dir}" executable="hdiutil">
+            <arg value="verify" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <echo message="xxxx Compress the mac dmg binary xxxx"/>
+        <!-- Copy over license file -->
+        <copy tofile="${dist.dir}/COPYING.txt">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <!-- Compress everything into one tar.gz file -->
+        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.tar.gz" compression="gzip">
+            <tarfileset dir="${dist.dir}" filemode="755">
+                <include name="COPYING.txt" />
+                <include name="README.txt" />
+                <include name="${ant.project.name}-${app.version}.dmg" />
+            </tarfileset>
+        </tar>
+
+    </target>
+
+    <!-- =================================================================
           JXPackage - native
          ================================================================= -->
 
@@ -1670,48 +1831,87 @@
     </target>
 
     <!-- =================================================================
-          BINARY - PACKAGE
+          MAC NOTARY FOR JXPACKAGE
           ================================================================= -->
-    <target name="binaryPackage" depends="binaryPackX"
-        description="Packages into a distributable form"  />
 
-    <target name="binaryAppPackage" depends="binaryPack"
-        description="Packages the app image into a distributable form"  />
-
-    <!-- =================================================================
-          BINARY - PACKX
-          ================================================================= -->
-    <target name="setXPackage">
-        <property name="XPackage" value="true" />
+    <target name="zip-submit-notary" if="sign.enable">
+        <exec executable="/usr/bin/xcrun" failonerror="true"
+              outputproperty="zipUUID.txt">
+            <arg value="notarytool"/>
+            <arg value="submit"/>
+            <arg value="--wait"/>
+            <arg value="--output-format"/>
+            <arg value="json"/>
+            <arg value="--apple-id"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <arg value="--team-id"/>
+            <arg value="${sign.account}"/>
+            <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
+        </exec>
+        <echo>.....notarize-zip-app output:${zipUUID.txt}.....</echo>
+        <loadresource property="zipUUID">
+            <concat>${zipUUID.txt}</concat>
+            <filterchain>
+                <tokenfilter>
+                    <stringtokenizer delims=",:&quot;" suppressdelims="true" />
+                    <containsregex pattern="([0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+)" replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadresource>
+        <echo>*** notarize-zip-app:${zipUUID} ***</echo>
     </target>
 
-    <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
-        description="Packages up the installer, the license file and the README file into a distributable form"  />
+    <target name="zip-post-notary" if="sign.enable">
+        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
+            <redirector output="notary.txt" alwayslog="true"/>
+            <arg value="notarytool"/>
+            <arg value="info"/>
+            <arg value="--apple-id"/>
+            <arg value="${notarize.account}"/>
+            <arg value="--password"/>
+            <arg value="${notarize.keychain_key}"/>
+            <arg value="--team-id"/>
+            <arg value="${sign.account}"/>
+            <arg value="${zipUUID}"/>
+        </exec>
+        <condition property="isnotarized">
+            <resourcecontains resource="notary.txt" substring="success"/>
+        </condition>
+        <echo>*** zip-notarize-info:${logInfo} ***</echo>
+    </target>
 
-    <target name="binaryPackXWindows" depends="createJXPackage, createWindowsREADME" if="${isXWindows}">
-        <mkdir dir="${dist.dir}" />
-
-        <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" readonly="false" />
-        <echo message="xxxx Sign the windows binary xxxx"/>
-        <!-- Sign the generated exe -->
-        <exec executable="${env.SIGNTOOLDIR}\signtool.exe" failifexecutionfails="false">
-            <arg value="sign" />
-            <arg value="/v" />
-            <arg value="/debug" />
-            <arg value="/fd" />
-            <arg value="SHA256" />
-            <arg value="/d" />
-            <arg value="${ant.project.name} ${app.version} Utility" />
-            <arg value="/f" />
-            <arg value="${env.CERTIFICATE}" />
-            <arg value="/p" />
-            <arg value="${env.SIGNPASSWORD}" />
-            <arg value="/t" />
-            <arg value="http://timestamp.digicert.com" />
-            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
+    <!-- Staple the received notarization to the app -->
+    <!-- run this after notarization is completed -->
+    <target name="zip-staple-notary" if="sign.enable">
+        <echo message="*** Stapling notarization to Mac Build ***"/>
+        <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
+            <arg value="stapler"/>
+            <arg value="staple"/>
+            <arg value="${ant.project.name}.app"/>
         </exec>
 
-        <echo message="xxxx Package the windows binary xxxx"/>
+        <!-- verify staple -->
+        <exec executable="/usr/bin/xcrun" dir="${dist.dir}">
+            <arg value="stapler"/>
+            <arg value="validate"/>
+            <arg value="-v" />
+            <arg value="${ant.project.name}.app"/>
+        </exec>
+    </target>
+
+    <!-- =================================================================
+          BINARY - PACK
+          ================================================================= -->
+    <target name="binaryPack" depends="clean-package, binaryPackWindows, binaryPackUnix, binaryPackMac"
+        description="Packages up the release directory, the license file and the README file into a distributable form" />
+
+    <target name="binaryPackWindows" depends="createJPackage, createWindowsAppREADME" if="${isAppWindows}">
+        <mkdir dir="${dist.dir}" />
+
+        <echo message="---- Create the windows installer binary ----"/>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -1724,20 +1924,14 @@
         <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-${win.extension}.zip" basedir="${dist.dir}" />
     </target>
 
-    <target name="binaryPackXUnix" depends="createJXPackage, createDEBREADME, createRPMREADME" if="${isXUnix}">
-        <echo message="xxxx Package the unix binary xxxx"/>
+    <target name="binaryPackUnix" depends="createJPackage, createUnixREADME" if="${isAppUnix}">
+        <mkdir dir="${dist.dir}" />
+
+        <echo message="---- Create the unix installer binary ----"/>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
             <fileset dir="${basedir}" includes="COPYING" />
         </copy>
-
-        <exec executable="uname" outputproperty="uname.os">
-            <arg value="-s" />
-        </exec>
-
-        <exec executable="uname" outputproperty="uname.version">
-            <arg value="-r" />
-        </exec>
 
         <!-- Compress everything into one tar.gz file -->
         <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" compression="gzip">
@@ -1749,7 +1943,7 @@
         <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
     </target>
 
-    <target name="binaryPackXMac" depends="createJXPackageMac, createMacREADME" if="${isXMac}">
+    <target name="binaryPackMac" depends="createJPackageMac, createMacREADME" if="${isAppMac}">
         <!-- unlock keychain -->
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
@@ -1758,7 +1952,18 @@
             <arg value="${name.keychain_key}" />
         </exec>
 
-        <echo message="xxxx Code sign the mac dmg xxxx"/>
+        <echo message="---- Create the mac zip ----"/>
+        <!-- create zip -->
+        <exec executable="ditto" dir="${dist.dir}" failonerror="true">
+            <arg value="-c" />
+            <arg value="-k" />
+            <arg value="--sequesterRsrc" />
+            <arg value="--keepParent" />
+            <arg value="${ant.project.name}.app" />
+            <arg value="${ant.project.name}-${app.version}.zip" />
+        </exec>
+
+        <echo message="---- Code sign the mac zip ----"/>
         <!-- Code signing the dmg -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="--force" />
@@ -1772,36 +1977,41 @@
             <arg value="--sign" />
             <arg value="${sign.account}" />
             <arg value="--deep" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
+            <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
-        <echo message="xxxx Check for secure dmg timestamp xxxx"/>
+        <echo message="---- Check for secure timestamp ----"/>
         <!-- Code signing the application image -->
         <exec executable="codesign" dir="${dist.dir}" failonerror="true">
             <arg value="-dvv" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
+            <arg value="${ant.project.name}-${app.version}.zip" />
         </exec>
 
-        <echo message="xxxx Verify dmg xxxx"/>
-        <exec dir="${dist.dir}" executable="hdiutil">
-            <arg value="verify" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
+        <echo message="---- Notarize zip AppImage ----"/>
+        <antcall target="zip-submit-notary" />
+
+        <!-- <antcall target="zip-post-notary" /> -->
+
+        <echo message="---- Staple zip AppImage ----"/>
+        <antcall target="zip-staple-notary" />
+
+        <!-- verify codesign -->
+        <echo message="---- Verify app codesign ----"/>
+        <exec executable="codesign" dir="${dist.dir}">
+            <arg value="-vvvv" />
+            <arg value="--strict" />
+            <arg value="${ant.project.name}.app" />
         </exec>
 
-        <!-- <echo message="xxxx Notarize dmg xxxx"/> -->
-        <!-- <antcall target="submit-notary" /> -->
-
-        <!-- <echo message="xxxx Get notary ID xxxx"/> -->
-        <!-- <antcall target="post-notary" /> -->
-
-        <echo message="xxxx Staple notary ID xxxx"/>
-        <antcall target="staple-notary" />
-
-        <echo message="xxxx Package the mac dmg binary xxxx"/>
-        <!-- Copy over license file -->
-        <copy tofile="${dist.dir}/COPYING.txt">
-            <fileset dir="${basedir}" includes="COPYING" />
-        </copy>
+        <!-- verify gatekeeper -->
+        <echo message="---- Verify app gatekeeper ----"/>
+        <exec executable="spctl" dir="${dist.dir}" failonerror="true">
+            <arg value="-vvvv" />
+            <arg value="--assess" />
+            <arg value="--type" />
+            <arg value="execute" />
+            <arg value="${ant.project.name}.app" />
+        </exec>
 
         <exec executable="uname" outputproperty="uname.os">
             <arg value="-s" />
@@ -1811,12 +2021,16 @@
             <arg value="-r" />
         </exec>
 
-        <exec dir="${dist.dir}" executable="hdiutil">
-            <arg value="verify" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
+        <!-- verify gatekeeper -->
+        <exec executable="spctl" dir="${dist.dir}" failonerror="false">
+            <arg value="-vvvv" />
+            <arg value="--assess" />
+            <arg value="--type" />
+            <arg value="install" />
+            <arg value="${ant.project.name}.app" />
         </exec>
 
-        <echo message="xxxx Compress the mac dmg binary xxxx"/>
+        <echo message="---- Compress the mac app binary ----"/>
         <!-- Copy over license file -->
         <copy tofile="${dist.dir}/COPYING.txt">
             <fileset dir="${basedir}" includes="COPYING" />
@@ -1827,10 +2041,9 @@
             <tarfileset dir="${dist.dir}" filemode="755">
                 <include name="COPYING.txt" />
                 <include name="README.txt" />
-                <include name="${ant.project.name}-${app.version}.dmg" />
+                <include name="${ant.project.name}.app/**" />
             </tarfileset>
         </tar>
-
     </target>
 
     <!-- =================================================================
@@ -2092,216 +2305,6 @@
         </exec>
     </target>
 
-    <target name="zip-submit-notary" if="sign.enable">
-        <exec executable="/usr/bin/xcrun" failonerror="true"
-              outputproperty="zipUUID.txt">
-            <arg value="notarytool"/>
-            <arg value="submit"/>
-            <arg value="--wait"/>
-            <arg value="--output-format"/>
-            <arg value="json"/>
-            <arg value="--apple-id"/>
-            <arg value="${notarize.account}"/>
-            <arg value="--password"/>
-            <arg value="${notarize.keychain_key}"/>
-            <arg value="--team-id"/>
-            <arg value="${sign.account}"/>
-            <arg value="${dist.dir}/${ant.project.name}-${app.version}.zip"/>
-        </exec>
-        <echo>.....notarize-zip-app output:${zipUUID.txt}.....</echo>
-        <loadresource property="zipUUID">
-            <concat>${zipUUID.txt}</concat>
-            <filterchain>
-                <tokenfilter>
-                    <stringtokenizer delims=",:&quot;" suppressdelims="true" />
-                    <containsregex pattern="([0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+\-[0-9a-fA-F]+)" replace="\1" />
-                </tokenfilter>
-                <striplinebreaks/>
-            </filterchain>
-        </loadresource>
-        <echo>*** notarize-zip-app:${zipUUID} ***</echo>
-    </target>
-
-    <target name="zip-post-notary" if="sign.enable">
-        <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
-            <redirector output="notary.txt" alwayslog="true"/>
-            <arg value="notarytool"/>
-            <arg value="info"/>
-            <arg value="--apple-id"/>
-            <arg value="${notarize.account}"/>
-            <arg value="--password"/>
-            <arg value="${notarize.keychain_key}"/>
-            <arg value="--team-id"/>
-            <arg value="${sign.account}"/>
-            <arg value="${zipUUID}"/>
-        </exec>
-        <condition property="isnotarized">
-            <resourcecontains resource="notary.txt" substring="success"/>
-        </condition>
-        <echo>*** zip-notarize-info:${logInfo} ***</echo>
-    </target>
-
-    <!-- Staple the received notarization to the app -->
-    <!-- run this after notarization is completed -->
-    <target name="zip-staple-notary" if="sign.enable">
-        <echo message="*** Stapling notarization to Mac Build ***"/>
-        <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
-            <arg value="stapler"/>
-            <arg value="staple"/>
-            <arg value="${ant.project.name}.app"/>
-        </exec>
-
-        <!-- verify staple -->
-        <exec executable="/usr/bin/xcrun" dir="${dist.dir}">
-            <arg value="stapler"/>
-            <arg value="validate"/>
-            <arg value="-v" />
-            <arg value="${ant.project.name}.app"/>
-        </exec>
-    </target>
-
-    <!-- =================================================================
-          BINARY - PACK
-          ================================================================= -->
-    <target name="binaryPack" depends="clean-package, binaryPackWindows, binaryPackUnix, binaryPackMac"
-        description="Packages up the release directory, the license file and the README file into a distributable form" />
-
-    <target name="binaryPackWindows" depends="createJPackage, createWindowsAppREADME" if="${isAppWindows}">
-        <mkdir dir="${dist.dir}" />
-
-        <echo message="---- Create the windows installer binary ----"/>
-        <!-- Copy over license file -->
-        <copy todir="${dist.dir}">
-            <fileset dir="${basedir}" includes="COPYING" />
-        </copy>
-
-        <!-- Compress everything into one zip file -->
-        <condition property="win.extension" value="win64" else="win32">
-            <contains string="${os.arch}" substring="64" />
-        </condition>
-        <zip destfile="${dist.dir}/${ant.project.name}-${app.version}-${win.extension}.zip" basedir="${dist.dir}" />
-    </target>
-
-    <target name="binaryPackUnix" depends="createJPackage, createUnixREADME" if="${isAppUnix}">
-        <mkdir dir="${dist.dir}" />
-
-        <echo message="---- Create the unix installer binary ----"/>
-        <!-- Copy over license file -->
-        <copy todir="${dist.dir}">
-            <fileset dir="${basedir}" includes="COPYING" />
-        </copy>
-
-        <!-- Compress everything into one tar.gz file -->
-        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" compression="gzip">
-            <tarfileset dir="${dist.dir}" filemode="755">
-                <exclude name="temp.tar.gz" />
-            </tarfileset>
-        </tar>
-        <chmod perm="ugo+rx" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
-        <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
-    </target>
-
-    <target name="binaryPackMac" depends="createJPackageMac, createMacREADME" if="${isAppMac}">
-        <!-- unlock keychain -->
-        <exec executable="security" dir="${dist.dir}" failonerror="true">
-            <arg value="unlock-keychain" />
-            <arg value="-p" />
-            <arg value="${pass.keychain_key}" />
-            <arg value="${name.keychain_key}" />
-        </exec>
-
-        <echo message="---- Create the mac zip ----"/>
-        <!-- create zip -->
-        <exec executable="ditto" dir="${dist.dir}" failonerror="true">
-            <arg value="-c" />
-            <arg value="-k" />
-            <arg value="--sequesterRsrc" />
-            <arg value="--keepParent" />
-            <arg value="${ant.project.name}.app" />
-            <arg value="${ant.project.name}-${app.version}.zip" />
-        </exec>
-
-        <echo message="---- Code sign the mac zip ----"/>
-        <!-- Code signing the dmg -->
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="--force" />
-            <arg value="--timestamp" />
-            <arg value="--options" />
-            <arg value="runtime" />
-            <arg value="--entitlements" />
-            <arg value="${basedir}/${lib.dir}/macosx/distribution.entitlements" />
-            <arg value="--verbose=4" />
-            <arg value="--strict" />
-            <arg value="--sign" />
-            <arg value="${sign.account}" />
-            <arg value="--deep" />
-            <arg value="${ant.project.name}-${app.version}.zip" />
-        </exec>
-
-        <echo message="---- Check for secure timestamp ----"/>
-        <!-- Code signing the application image -->
-        <exec executable="codesign" dir="${dist.dir}" failonerror="true">
-            <arg value="-dvv" />
-            <arg value="${ant.project.name}-${app.version}.zip" />
-        </exec>
-
-        <antcall target="zip-submit-notary" />
-
-        <!-- <antcall target="zip-post-notary" /> -->
-
-        <antcall target="zip-staple-notary" />
-
-        <!-- verify codesign -->
-        <echo message="---- Verify app codesign ----"/>
-        <exec executable="codesign" dir="${dist.dir}">
-            <arg value="-vvvv" />
-            <arg value="--strict" />
-            <arg value="${ant.project.name}.app" />
-        </exec>
-
-        <!-- verify gatekeeper -->
-        <echo message="---- Verify app gatekeeper ----"/>
-        <exec executable="spctl" dir="${dist.dir}" failonerror="true">
-            <arg value="-vvvv" />
-            <arg value="--assess" />
-            <arg value="--type" />
-            <arg value="execute" />
-            <arg value="${ant.project.name}.app" />
-        </exec>
-
-        <exec executable="uname" outputproperty="uname.os">
-            <arg value="-s" />
-        </exec>
-
-        <exec executable="uname" outputproperty="uname.version">
-            <arg value="-r" />
-        </exec>
-
-        <!-- verify gatekeeper -->
-        <exec executable="spctl" dir="${dist.dir}" failonerror="false">
-            <arg value="-vvvv" />
-            <arg value="--assess" />
-            <arg value="--type" />
-            <arg value="install" />
-            <arg value="${ant.project.name}.app" />
-        </exec>
-
-        <echo message="---- Compress the mac app binary ----"/>
-        <!-- Copy over license file -->
-        <copy tofile="${dist.dir}/COPYING.txt">
-            <fileset dir="${basedir}" includes="COPYING" />
-        </copy>
-
-        <!-- Compress everything into one tar.gz file -->
-        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.tar.gz" compression="gzip">
-            <tarfileset dir="${dist.dir}" filemode="755">
-                <include name="COPYING.txt" />
-                <include name="README.txt" />
-                <include name="${ant.project.name}.app/**" />
-            </tarfileset>
-        </tar>
-    </target>
-
-    <target name="main" depends="clean,run" />
+   <target name="main" depends="clean,run" />
 
 </project>
