@@ -2305,6 +2305,6 @@
         </exec>
     </target>
 
-    <target name="main" depends="clean,run" />
+   <target name="main" depends="clean,run" />
 
 </project>
