@@ -1,22 +1,16 @@
 The current HDFView products can be downloaded at:
-        https://www.hdfgroup.org/downloads/hdfview/
+        https://github.com/HDFGroup/hdfview/releases
 
 
 HDF Libraries
 =============================================================================
 This release was built and tested with HDF 4.3.x and HDF5 1.15.x.
 
-Windows ONLY: HDFView built with VS 2015 will require that
-the Visual C++ Redistributable Packages be installed on your machine.
-If you cannot access HDF5 files then you do not have these packages.
-You can obtain them from:
-         https://www.microsoft.com/en-us/download/details.aspx?id=48145
-
 
 JDK
 =============================================================================
-This release was built and tested with OpenJDK 19. It uses modules and the
-newest jpackage for distribution.
+This release was built and tested with OpenJDK 21. It uses modules, the
+newest jpackage for distribution  and adds support for float16 datatypes.
 
 
 Major Enhancements
