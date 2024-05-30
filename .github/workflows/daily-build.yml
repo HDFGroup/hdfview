@@ -111,3 +111,14 @@ jobs:
       use_environ: snapshots
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
+  call-workflow-remove:
+    needs: [get-base-names, call-workflow-tarball, call-workflow-ant, call-workflow-ant-app, call-workflow-release]
+    permissions:
+      contents: write # In order to allow file deletion
+    uses: ./.github/workflows/remove-files.yml
+    with:
+      file_base: ${{ needs.get-old-names.outputs.hdf5-name }}
+      use_tag: snapshot
+      use_environ: snapshots
+    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+
