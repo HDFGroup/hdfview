@@ -173,6 +173,7 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Release tag
@@ -191,6 +192,7 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: List files for the space (Linux)
