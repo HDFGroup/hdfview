@@ -22,6 +22,7 @@ newest jpackage for distribution.
 Major Enhancements
 ==============================================================================
     * Add User Option for editing the plugin path
+    * Add Support for operating with float16 datatypes
 
     ***** Previous fixes *****
     * GH #121 Updated all icons with transparency
