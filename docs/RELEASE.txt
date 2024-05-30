@@ -51,6 +51,7 @@ Major Bug Fixes
 Minor Bug Fixes
 ==============================================================================
     * GH #159 (Help menu dialogs have gigantic images) Implemented by changing the size from 1024 to 256.
+    * GH #171 (HDFView fails to find input files on command line when using relative paths)
 
     ***** Previous fixes *****
     * Corrected how the program updates changes to the fonts made in the User Preferences
