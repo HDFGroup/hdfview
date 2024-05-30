@@ -1591,6 +1591,35 @@ public abstract class Dataset extends HObject implements DataFormat {
                 break;
             }
         }
+        else if (theType.isFloat() && theType.getDatatypeSize() == 2) {
+            Object value = Array.get(theData, 0);
+            String strValue;
+
+            if (value == null)
+                strValue = "null";
+            else
+                strValue = Float.toString(Float.float16ToFloat((short)value));
+
+            // if (count > 0 && strValue.length() > count)
+            // truncate the extra characters
+            // strValue = strValue.substring(0, count);
+            sb.append(strValue);
+
+            for (int i = 1; i < count; i++) {
+                sb.append(delimiter);
+                value = Array.get(theData, i);
+
+                if (value == null)
+                    strValue = "null";
+                else
+                    strValue = Float.toString(Float.float16ToFloat((short)value));
+
+                if (count > 0 && strValue.length() > count)
+                    // truncate the extra characters
+                    strValue = strValue.substring(0, count);
+                sb.append(strValue);
+            }
+        }
         else if (theType.isUnsigned()) {
             String cname = valClass.getName();
             char dname   = cname.charAt(cname.lastIndexOf('[') + 1);

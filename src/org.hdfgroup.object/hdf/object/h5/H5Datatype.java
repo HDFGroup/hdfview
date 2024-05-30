@@ -1420,9 +1420,11 @@ public class H5Datatype extends Datatype {
             try {
                 if (datatypeSize > 8)
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_LDOUBLE);
+                else if (datatypeSize == 8)
+                    tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_DOUBLE);
                 else
-                    tid = H5.H5Tcopy((datatypeSize == 8) ? HDF5Constants.H5T_NATIVE_DOUBLE
-                                                         : HDF5Constants.H5T_NATIVE_FLOAT);
+                    tid = H5.H5Tcopy((datatypeSize == 4) ? HDF5Constants.H5T_NATIVE_FLOAT
+                                                         : HDF5Constants.H5T_NATIVE_FLOAT16);
 
                 if (datatypeOrder == Datatype.ORDER_BE) {
                     H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
@@ -1780,6 +1782,9 @@ public class H5Datatype extends Datatype {
                 typeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
 
             switch ((int)typeSize) {
+            case 2:
+                data = new short[numPoints];
+                break;
             case 4:
                 data = new float[numPoints];
                 break;

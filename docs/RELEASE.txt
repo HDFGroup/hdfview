@@ -1,30 +1,25 @@
 The current HDFView products can be downloaded at:
-        https://www.hdfgroup.org/downloads/hdfview/
+        https://github.com/HDFGroup/hdfview/releases
 
 
 HDF Libraries
 =============================================================================
 This release was built and tested with HDF 4.3.x and HDF5 1.14.x.
 
-Windows ONLY: HDFView built with VS 2015 will require that
-the Visual C++ Redistributable Packages be installed on your machine.
-If you cannot access HDF5 files then you do not have these packages.
-You can obtain them from:
-         https://www.microsoft.com/en-us/download/details.aspx?id=48145
-
 
 JDK
 =============================================================================
-This release was built and tested with OpenJDK 19. It uses modules and the
-newest jpackage for distribution.
+This release was built and tested with OpenJDK 21. It uses modules, the
+newest jpackage for distribution and adds support for float16 datatypes.
 
 
 Major Enhancements
 ==============================================================================
-    * Add User Option for editing the plugin path
+    * GH #117 Add User Option for editing the plugin path and include plugins.
+    * GH #138 Add Support for operating with float16 datatypes.
 
     ***** Previous fixes *****
-    * GH #121 Updated all icons with transparency
+    * GH #121 Updated all icons with transparency.
 
 Major Bug Fixes
 ==============================================================================
@@ -55,7 +50,8 @@ Major Bug Fixes
 
 Minor Bug Fixes
 ==============================================================================
-    *
+    * GH #159 (Help menu dialogs have gigantic images) Implemented by changing the size from 1024 to 256.
+    * GH #171 (HDFView fails to find input files on command line when using relative paths)
 
     ***** Previous fixes *****
     * Corrected how the program updates changes to the fonts made in the User Preferences

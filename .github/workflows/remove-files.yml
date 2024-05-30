@@ -1,0 +1,56 @@
+name: hdfview remove-files
+
+# Controls when the action will run. Triggers the workflow on a schedule
+on:
+  workflow_call:
+    inputs:
+      use_tag:
+        description: 'Release version tag'
+        type: string
+        required: false
+        default: HDFView-3.99.99
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+
+# Minimal permissions to be inherited by any job that doesn't declare its own permissions
+permissions:
+  contents: read
+
+# Previous workflows must pass to get here so tag the commit that created the files
+jobs:
+  PreRelease-delfiles:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.use_environ }}
+    permissions:
+        contents: write
+    steps:
+      - name: Get file base name
+        id: get-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      - name: PreRelease delete from tag
+        id: delete_prerelease
+        if: ${{ (inputs.use_environ == 'snapshots') }}
+        uses: mknejp/delete-release-assets@v1
+        with:
+          token: ${{ github.token }}
+          tag: "${{ inputs.use_tag }}"
+          assets: |
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz

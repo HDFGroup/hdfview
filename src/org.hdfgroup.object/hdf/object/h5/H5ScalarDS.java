@@ -1052,7 +1052,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         }
                         else if (dsDatatype.isRef() && (theData instanceof byte[])) {
                             log.trace(
-                                "AttributeCommonIO():read ioType isRef: converting byte array to List of bytes");
+                                "scalarDatasetCommonIO():read ioType isRef: converting byte array to List of bytes");
                             ArrayList<byte[]> theListData = new ArrayList<>((int)totalSelectedSpacePoints);
                             for (int m = 0; m < (int)totalSelectedSpacePoints; m++) {
                                 byte[] curBytes = new byte[(int)dsDatatype.getDatatypeSize()];
@@ -1062,7 +1062,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                                     theListData.add(curBytes);
                                 }
                                 catch (Exception err) {
-                                    log.trace("AttributeCommonIO(): arraycopy failure: ", err);
+                                    log.trace("scalarDatasetCommonIO(): arraycopy failure: ", err);
                                 }
                             }
                             theData = theListData;
@@ -2386,8 +2386,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                     data = valStr.getBytes();
                 else if (datatypeSize == 8)
                     data = HDFNativeData.doubleToByte(valDbl);
-                else
+                else if (datatypeSize == 4)
                     data = HDFNativeData.floatToByte((float)valDbl);
+                else
+                    data = HDFNativeData.shortToByte((short)Float.floatToFloat16((float)valDbl));
                 break;
             case Datatype.CLASS_STRING:
                 log.trace("parseFillValue(): class CLASS_STRING");

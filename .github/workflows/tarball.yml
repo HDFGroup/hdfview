@@ -50,7 +50,7 @@ jobs:
       branch_ref: ${{ steps.get-branch-name.outputs.BRANCH_REF }}
       branch_sha: ${{ steps.get-branch-sha.outputs.BRANCH_SHA }}
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v4
 
     - name: Get branch name
       id: get-branch-name
@@ -94,7 +94,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           path: hdfsrc
 
@@ -126,6 +126,13 @@ jobs:
         run: |
               ls -l ${{ github.workspace }}
               ls $GITHUB_WORKSPACE/hdfsrc
+
+      - name: Save NEWSLETTER
+        uses: actions/upload-artifact@v4
+        with:
+              name: NEWSLETTER
+              path: ./hdfsrc/docs/RELEASE.txt
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Create snapshot source file (tgz and zip)
         id: create-snapshot-files
@@ -171,10 +178,3 @@ jobs:
               name: zip-tarball
               path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-#      - name: Save NEWSLETTER
-#        uses: actions/upload-artifact@v4
-#        with:
-#              name: NEWSLETTER
-#              path: ./hdfsrc/release_docs/NEWSLETTER.txt
-#              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

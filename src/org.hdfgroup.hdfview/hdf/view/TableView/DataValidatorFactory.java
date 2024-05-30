@@ -636,19 +636,27 @@ public class DataValidatorFactory {
                     break;
 
                 case 2:
-                    if (datasetDatatype.isUnsigned()) {
-                        /*
-                         * First try to parse as a larger type in order to catch a NumberFormatException
-                         */
-                        Integer intValue = Integer.parseInt((String)newValue);
-                        if (intValue < 0)
-                            throw new NumberFormatException("Invalid negative value for unsigned datatype");
+                    if (datasetDatatype.isInteger()) {
+                        if (datasetDatatype.isUnsigned()) {
+                            /*
+                             * First try to parse as a larger type in order to catch a NumberFormatException
+                             */
+                            Integer intValue = Integer.parseInt((String)newValue);
+                            if (intValue < 0)
+                                throw new NumberFormatException(
+                                    "Invalid negative value for unsigned datatype");
 
-                        if (intValue > (Short.MAX_VALUE * 2) + 1)
-                            throw new NumberFormatException("Value out of range. Value:\"" + newValue + "\"");
+                            if (intValue > (Short.MAX_VALUE * 2) + 1)
+                                throw new NumberFormatException("Value out of range. Value:\"" + newValue +
+                                                                "\"");
+                        }
+                        else {
+                            Short.parseShort((String)newValue);
+                        }
                     }
                     else {
-                        Short.parseShort((String)newValue);
+                        /* Floating-point type */
+                        Float.parseFloat((String)newValue);
                     }
                     break;
 
