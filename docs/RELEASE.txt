@@ -10,16 +10,16 @@ This release was built and tested with HDF 4.3.x and HDF5 1.15.x.
 JDK
 =============================================================================
 This release was built and tested with OpenJDK 21. It uses modules, the
-newest jpackage for distribution  and adds support for float16 datatypes.
+newest jpackage for distribution and adds support for float16 datatypes.
 
 
 Major Enhancements
 ==============================================================================
-    * Add User Option for editing the plugin path
-    * Add Support for operating with float16 datatypes
+    * GH #117 Add User Option for editing the plugin path and include plugins.
+    * GH #138 Add Support for operating with float16 datatypes.
 
     ***** Previous fixes *****
-    * GH #121 Updated all icons with transparency
+    * GH #121 Updated all icons with transparency.
 
 Major Bug Fixes
 ==============================================================================
@@ -50,7 +50,7 @@ Major Bug Fixes
 
 Minor Bug Fixes
 ==============================================================================
-    *
+    * GH #159 (Help menu dialogs have gigantic images) Implemented by changing the size from 1024 to 256.
 
     ***** Previous fixes *****
     * Corrected how the program updates changes to the fonts made in the User Preferences
