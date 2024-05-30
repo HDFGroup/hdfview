@@ -16,7 +16,7 @@ on:
         description: 'The version name of the binaries'
         type: string
         required: false
-        default: HDFView-3.3.99
+        default: HDFView-3.3.2
       file_base:
         description: "The common base name of the source tarballs"
         required: true
@@ -105,7 +105,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'hdf5-1.14.4'
+        version: 'releases/tag/hdf5_1.14.4.3'
         file: '${{ inputs.use_hdf5 }}-win-vs2022_cl.zip'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -215,7 +215,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: zip-win-vs2022-app-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
@@ -224,7 +224,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: zip-win-vs2022-app-binary
-            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-win64.zip
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}App-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -288,7 +288,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'hdf5-1.14.4'
+        version: 'releases/tag/hdf5_1.14.4.3'
         file: '${{ inputs.use_hdf5 }}-ubuntu-2204_gcc.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -377,7 +377,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-app-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
@@ -385,7 +385,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-app-binary
-            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Linux-x86_64.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}App-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -491,7 +491,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'hdf5-1.14.4'
+        version: 'releases/tag/hdf5_1.14.4.3'
         file: '${{ inputs.use_hdf5 }}-osx.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -500,7 +500,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'hdf5-1.14.4'
+        version: 'releases/tag/hdf5_1.14.4.3'
         file: '${{ inputs.use_hdf5 }}-osx12.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -604,7 +604,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-osx-app-binary
-            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
@@ -613,7 +613,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
             name: tgz-osx-app-binary
-            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Darwin.tar.gz
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}App-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
 
