@@ -133,14 +133,14 @@ jobs:
 
       - name: Create sha256 sums for files
         run: |
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz > sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Darwin.tar.gz >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip >> sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Darwin.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
 
       - name: Store snapshot name
         run: |
