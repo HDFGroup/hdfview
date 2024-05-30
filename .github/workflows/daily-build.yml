@@ -130,5 +130,5 @@ jobs:
       file_base: ${{ needs.get-base-names.outputs.hdfview-name }}
       use_tag: HDFView-3.99.99
       use_environ: snapshots
-    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
