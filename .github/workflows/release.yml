@@ -17,7 +17,12 @@ on:
         description: 'HDF5 Release version tag'
         type: string
         required: false
-        default: hdf5_1.14.4.3'
+        default: hdf5_1.14.4.3
+      use_tag5:
+        description: 'HDF5 Release version base name'
+        type: string
+        required: false
+        default: hdf5-1.14.4-3
 
 permissions:
   contents: read
