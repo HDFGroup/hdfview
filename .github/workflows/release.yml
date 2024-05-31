@@ -9,12 +9,17 @@ on:
         required: false
         default: snapshot
       use_tag4:
-        description: 'HDF Release version tag'
+        description: 'HDF Release version tag and base name'
         type: string
         required: false
         default: snapshot
       use_tag5:
         description: 'HDF5 Release version tag'
+        type: string
+        required: false
+        default: snapshot
+      name_tag5:
+        description: 'HDF5 Release version base name'
         type: string
         required: false
         default: snapshot
@@ -56,6 +61,7 @@ jobs:
     with:
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
+      name_hdf5: ${{ inputs.use_tag5 }}
       file_base: ${{ needs.create-files-ant.outputs.file_base }}
       snap_name: hdfview-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
@@ -70,6 +76,7 @@ jobs:
     with:
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
+      name_hdf5: ${{ inputs.use_tag5 }}
       file_base: ${{ needs.create-files-ant.outputs.file_base }}
       snap_name: hdfview-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
