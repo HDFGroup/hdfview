@@ -65,6 +65,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
         file: '${{ inputs.use_hdf }}-win-vs2022_cl.zip'
 
     - name: Get hdf4 snapshot
@@ -73,6 +74,8 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
+=======
+>>>>>>> ca2a79d Correct hdf5 usage
         file: '${{ inputs.use_hdf }}-win-vs2022_cl.zip'
 
     - name: Get hdf4 snapshot
@@ -126,7 +129,11 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
         version: 'tags/snapshot'
+=======
+        version: 'tags/${{ inputs.use_hdf5 }}'
+>>>>>>> ca2a79d Correct hdf5 usage
         file: '${{ inputs.name_hdf5 }}-win-vs2022_cl.zip'
 
     - name: Uncompress gh binary (Win)
@@ -256,6 +263,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
         file: '${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz'
 
     - name: Get hdf4 snapshot
@@ -264,6 +272,8 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
+=======
+>>>>>>> ca2a79d Correct hdf5 usage
         file: '${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz'
 
     - name: Get hdf4 snapshot
@@ -307,7 +317,11 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
         version: 'tags/snapshot'
+=======
+        version: 'tags/${{ inputs.use_hdf5 }}'
+>>>>>>> ca2a79d Correct hdf5 usage
         file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
 
     - name: List files for the space (Linux)
@@ -447,6 +461,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
 
     - name: Get hdf4 release
@@ -465,6 +480,8 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
+=======
+>>>>>>> ca2a79d Correct hdf5 usage
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
 
     - name: Get hdf4 release
@@ -529,6 +546,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
         version: 'tags/snapshot'
         file: '${{ inputs.name_hdf5 }}-osx.tar.gz'
 
@@ -539,6 +557,9 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot'
+=======
+        version: 'tags/${{ inputs.use_hdf5 }}'
+>>>>>>> ca2a79d Correct hdf5 usage
         file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
 
     - name: List files for the space (mac)
