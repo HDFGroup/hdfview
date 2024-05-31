@@ -98,11 +98,15 @@ jobs:
         with:
           path: hdfsrc
 
+      - name: Read VERSION file
+        id: getversion
+        run: echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+
       - name: Retrieve version
         id: version
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          VERSION_BASE=$(echo VERSION | sed -r "s/.*-([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
+          VERSION_BASE=$(echo "${{ steps.getversion.outputs.version }}" | sed -r "s/.*-([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
           echo "TAG_VERSION=$VERSION_BASE" >> $GITHUB_OUTPUT
 
       - name: Set file base name
