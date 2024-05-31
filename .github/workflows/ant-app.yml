@@ -59,7 +59,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: 'hdf4.3.0'
+        version: '${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-win-vs2022_cl.zip'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -105,8 +105,8 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'releases/tag/hdf5_1.14.4.3'
-        file: '${{ inputs.use_hdf5 }}-win-vs2022_cl.zip'
+        version: 'tags/${{ inputs.use_hdf5 }}'
+        file: '${{ inputs.name_hdf5 }}-win-vs2022_cl.zip'
       if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf5 snapshot
@@ -114,11 +114,11 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot-1.14'
-        file: '${{ inputs.use_hdf5 }}-win-vs2022_cl.zip'
+        file: '${{ inputs.name_hdf5 }}-win-vs2022_cl.zip'
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: Uncompress gh binary (Win)
-      run: 7z x ${{ github.workspace }}/${{ inputs.use_hdf5 }}-win-vs2022_cl.zip
+      run: 7z x ${{ github.workspace }}/${{ inputs.name_hdf5 }}-win-vs2022_cl.zip
 
     - name: Uncompress hdf5 binary (Win)
       working-directory: ${{ github.workspace }}/hdf5
@@ -252,7 +252,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: 'hdf4.3.0'
+        version: '${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -288,8 +288,8 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'releases/tag/hdf5_1.14.4.3'
-        file: '${{ inputs.use_hdf5 }}-ubuntu-2204_gcc.tar.gz'
+        version: 'tags/${{ inputs.use_hdf5 }}'
+        file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf5 release
@@ -297,7 +297,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot-1.14'
-        file: '${{ inputs.use_hdf5 }}-ubuntu-2204_gcc.tar.gz'
+        file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: List files for the space (Linux)
@@ -306,7 +306,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf5 }}-ubuntu-2204_gcc.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz
 
     - name: Uncompress hdf5 binary (Linux)
       run:  |
@@ -435,7 +435,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: 'hdf4.3.0'
+        version: '${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-osx.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -444,7 +444,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: 'hdf4.3.0'
+        version: '${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -491,8 +491,8 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'releases/tag/hdf5_1.14.4.3'
-        file: '${{ inputs.use_hdf5 }}-osx.tar.gz'
+        version: 'tags/${{ inputs.use_hdf5 }}'
+        file: '${{ inputs.name_hdf5 }}-osx.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf5 release osx12
@@ -501,7 +501,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'releases/tag/hdf5_1.14.4.3'
-        file: '${{ inputs.use_hdf5 }}-osx12.tar.gz'
+        file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf5 snapshot
@@ -510,7 +510,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot-1.14'
-        file: '${{ inputs.use_hdf5 }}-osx.tar.gz'
+        file: '${{ inputs.name_hdf5 }}-osx.tar.gz'
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: Get hdf5 snapshot osx12
@@ -519,7 +519,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot-1.14'
-        file: '${{ inputs.use_hdf5 }}-osx12.tar.gz'
+        file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
       if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: List files for the space (mac)
@@ -528,7 +528,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (mac)
-      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf5 }}-osx*.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.name_hdf5 }}-osx*.tar.gz
 
     - name: Uncompress hdf5 binary (mac)
       run:  |
