@@ -12,7 +12,7 @@ on:
         description: 'HDF Release version tag'
         type: string
         required: false
-        default: snapshot
+        default: hdf4.3.0
       use_tag5:
         description: 'HDF5 Release version tag'
         type: string
