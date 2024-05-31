@@ -17,7 +17,7 @@ on:
         description: 'HDF5 Release version tag'
         type: string
         required: false
-        default: snapshot-1.14
+        default: hdf5_1.14.4.3'
 
 permissions:
   contents: read

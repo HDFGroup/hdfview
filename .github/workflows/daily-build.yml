@@ -31,7 +31,7 @@ jobs:
     - name: Get hdfview release base name
       uses: dsaltares/fetch-gh-release-asset@master
       with:
-        version: 'tags/HDFView-3.3.99'
+        version: 'tags/HDFView-3.3.2'
         file: 'last-file.txt'
     
     - name: Read base-name file
@@ -129,7 +129,7 @@ jobs:
     uses: ./.github/workflows/remove-files.yml
     with:
       file_base: ${{ needs.get-base-names.outputs.hdfview-name }}
-      use_tag: HDFView-3.3.99
+      use_tag: HDFView-3.3.2
       use_environ: snapshots
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 

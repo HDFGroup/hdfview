@@ -16,7 +16,7 @@ on:
         description: 'The version name of the binaries'
         type: string
         required: false
-        default: HDFView-3.3.99
+        default: HDFView-3.3.2
       file_base:
         description: "The common base name of the source tarballs"
         required: true
@@ -105,7 +105,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'hdf5-1.14.4'
+        version: 'releases/tag/hdf5_1.14.4.3'
         file: '${{ inputs.use_hdf5 }}-win-vs2022_cl.zip'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -288,7 +288,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'hdf5-1.14.4'
+        version: 'releases/tag/hdf5_1.14.4.3'
         file: '${{ inputs.use_hdf5 }}-ubuntu-2204_gcc.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -491,7 +491,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'hdf5-1.14.4'
+        version: 'releases/tag/hdf5_1.14.4.3'
         file: '${{ inputs.use_hdf5 }}-osx.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
@@ -500,7 +500,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'hdf5-1.14.4'
+        version: 'releases/tag/hdf5_1.14.4.3'
         file: '${{ inputs.use_hdf5 }}-osx12.tar.gz'
       if: ${{ (inputs.use_environ == 'release') }}
 
