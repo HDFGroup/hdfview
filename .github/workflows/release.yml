@@ -63,11 +63,15 @@ jobs:
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
 <<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
       name_hdf5: ${{ inputs.name_tag5 }}
 =======
       name_hdf5: ${{ inputs.use_tag5 }}
       file_base: ${{ needs.create-files-ant.outputs.file_base }}
 >>>>>>> ca2a79d Correct hdf5 usage
+=======
+      name_hdf5: ${{ inputs.name_tag5 }}
+>>>>>>> ba9303e Correct get hdf4/5 binaries
       snap_name: hdfview-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
     secrets:      
@@ -83,11 +87,15 @@ jobs:
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
 <<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
       name_hdf5: ${{ inputs.name_tag5 }}
 =======
       name_hdf5: ${{ inputs.use_tag5 }}
       file_base: ${{ needs.create-files-ant.outputs.file_base }}
 >>>>>>> ca2a79d Correct hdf5 usage
+=======
+      name_hdf5: ${{ inputs.name_tag5 }}
+>>>>>>> ba9303e Correct get hdf4/5 binaries
       snap_name: hdfview-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
     secrets:      
