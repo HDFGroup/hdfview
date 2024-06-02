@@ -221,6 +221,16 @@ jobs:
             name: zip-win-vs2022-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+
+    # Save release files created by ctest script
+    - name: Save published release binary (Win)
+      uses: actions/upload-artifact@v4
+      with:
+            name: zip-win-vs2022-binary
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-win64.zip
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Test with Ant
       env:
@@ -367,12 +377,21 @@ jobs:
             ls -l ${{ runner.workspace }}
 
     # Save files created by ctest script
-    - name: Save published binary (Linux)
+    - name: Save published snapshot binary (Linux)
       uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+
+    - name: Save published release binary (Linux)
+      uses: actions/upload-artifact@v4
+      with:
+            name: tgz-ubuntu-2204-binary
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Linux-x86_64.tar.gz
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Test with Ant
       env:
@@ -433,7 +452,7 @@ jobs:
         version: 'tags/${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
 
-    - name: Get hdf4 release
+    - name: Get hdf4 snapshot
       continue-on-error: true
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
@@ -442,7 +461,7 @@ jobs:
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf }}-osx.tar.gz'
 
-    - name: Get hdf4 release osx12
+    - name: Get hdf4 snapshot osx12
       continue-on-error: true
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
@@ -489,7 +508,7 @@ jobs:
         version: 'tags/${{ inputs.use_hdf5 }}'
         file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
 
-    - name: Get hdf5 release
+    - name: Get hdf5 snapshot
       continue-on-error: true
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
@@ -498,7 +517,7 @@ jobs:
         version: 'tags/snapshot'
         file: '${{ inputs.name_hdf5 }}-osx.tar.gz'
 
-    - name: Get hdf5 release osx12
+    - name: Get hdf5 snapshot osx12
       continue-on-error: true
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
@@ -585,12 +604,22 @@ jobs:
             ls -l ${{ runner.workspace }}
 
     # Save files created by ctest script
-    - name: Save published binary (mac)
+    - name: Save published snapshot binary (mac)
       uses: actions/upload-artifact@v4
       with:
             name: tgz-osx-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+
+    # Save release files created by ctest script
+    - name: Save published release binary (mac)
+      uses: actions/upload-artifact@v4
+      with:
+            name: tgz-osx-binary
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Darwin.tar.gz
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Test with Ant
       env:
