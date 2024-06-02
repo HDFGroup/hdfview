@@ -72,7 +72,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: 'tags/snapshot'
+        version: 'tags/${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-win-vs2022_cl.zip'
 
     - name: Uncompress gh binary (Win)
@@ -255,7 +255,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: 'tags/snapshot'
+        version: 'tags/${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz'
 
     - name: List files for the space (Linux)
@@ -439,7 +439,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: 'tags/snapshot'
+        version: 'tags/${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-osx.tar.gz'
 
     - name: Get hdf4 release osx12
@@ -448,7 +448,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: 'tags/snapshot'
+        version: 'tags/${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
 
     - name: List files for the space (mac)
