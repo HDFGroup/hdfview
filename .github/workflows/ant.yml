@@ -481,6 +481,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
 
     - name: Get hdf4 release
@@ -499,6 +500,8 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
+=======
+>>>>>>> 8ee157e Merge fix
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
 
     - name: Get hdf4 release
