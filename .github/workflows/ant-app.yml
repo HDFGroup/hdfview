@@ -60,20 +60,20 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1.13.0
 
     - name: Get hdf4 release
+      if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-win-vs2022_cl.zip'
-      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf4 snapshot
+      if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf }}-win-vs2022_cl.zip'
-      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: Uncompress gh binary (Win)
       run: 7z x ${{ github.workspace }}/${{ inputs.use_hdf }}-win-vs2022_cl.zip
@@ -106,20 +106,20 @@ jobs:
       shell: bash
 
     - name: Get hdf5 release
+      if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/${{ inputs.use_hdf5 }}'
         file: '${{ inputs.name_hdf5 }}-win-vs2022_cl.zip'
-      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf5 snapshot
+      if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot-1.14'
         file: '${{ inputs.name_hdf5 }}-win-vs2022_cl.zip'
-      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: Uncompress gh binary (Win)
       run: 7z x ${{ github.workspace }}/${{ inputs.name_hdf5 }}-win-vs2022_cl.zip
@@ -253,20 +253,20 @@ jobs:
         distribution: 'temurin'
 
     - name: Get hdf4 release
+      if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: '${{ inputs.use_hdf }}'
+        version: 'tags/${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz'
-      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf4 snapshot
+      if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz'
-      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: List files for the space (Linux)
       run: |
@@ -289,20 +289,20 @@ jobs:
         echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
 
     - name: Get hdf5 release
+      if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/${{ inputs.use_hdf5 }}'
         file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
-      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf5 release
+      if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot-1.14'
         file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
-      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: List files for the space (Linux)
       run: |
@@ -436,39 +436,39 @@ jobs:
 
     - name: Get hdf4 release
       continue-on-error: true
+      if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: '${{ inputs.use_hdf }}'
+        version: 'tags/${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-osx.tar.gz'
-      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf4 release osx12
       continue-on-error: true
+      if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
-        version: '${{ inputs.use_hdf }}'
+        version: 'tags/${{ inputs.use_hdf }}'
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
-      if: ${{ (inputs.use_environ == 'release') }}
 
-    - name: Get hdf4 snapshot
+    - name: Get hdf4 release
       continue-on-error: true
+      if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf }}-osx.tar.gz'
-      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: Get hdf4 snapshot osx12
       continue-on-error: true
+      if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf }}-osx12.tar.gz'
-      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: List files for the space (mac)
       run: |
@@ -492,39 +492,39 @@ jobs:
 
     - name: Get hdf5 release
       continue-on-error: true
+      if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/${{ inputs.use_hdf5 }}'
         file: '${{ inputs.name_hdf5 }}-osx.tar.gz'
-      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf5 release osx12
       continue-on-error: true
+      if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
         version: 'releases/tag/hdf5_1.14.4.3'
         file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
-      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Get hdf5 snapshot
       continue-on-error: true
+      if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot-1.14'
         file: '${{ inputs.name_hdf5 }}-osx.tar.gz'
-      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: Get hdf5 snapshot osx12
       continue-on-error: true
+      if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot-1.14'
+        version: 'tags/snapshot'
         file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
-      if: ${{ (inputs.use_environ == 'snapshots') }}
 
     - name: List files for the space (mac)
       run: |
