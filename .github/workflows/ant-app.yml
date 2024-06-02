@@ -59,7 +59,7 @@ jobs:
     - name: Enable Developer Command Prompt
       uses: ilammy/msvc-dev-cmd@v1.13.0
 
-    - name: Get hdf4 snapshot
+    - name: Get hdf4 release
       if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
@@ -105,7 +105,7 @@ jobs:
         echo "HDFLIB_ENV=$HDFDIR" >> $GITHUB_OUTPUT
       shell: bash
 
-    - name: Get hdf5 snapshot
+    - name: Get hdf5 release
       if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
@@ -200,7 +200,7 @@ jobs:
         ant -noinput -buildfile build.xml binaryAppPackage
       shell: bash
 
-    - name: Rename snapshot binary base name
+    - name: Rename snapshot binary-app base name
       id: ren-basename
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
@@ -215,12 +215,22 @@ jobs:
       shell: pwsh
 
     # Save files created by ctest script
-    - name: Save published binary (Win)
+    - name: Save published binary-app (Win)
       uses: actions/upload-artifact@v4
       with:
             name: zip-win-vs2022-app-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-win64.zip
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+
+    # Save release files created by ctest script
+    - name: Save published release-app binary (Win)
+      uses: actions/upload-artifact@v4
+      with:
+            name: zip-win-vs2022-app-binary
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}App-win64.zip
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Test with Ant
       env:
@@ -242,7 +252,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    - name: Get hdf4 snapshot
+    - name: Get hdf4 release
       if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
@@ -353,7 +363,7 @@ jobs:
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
       run: ant -noinput -buildfile build.xml binaryAppPackage
 
-    - name: Rename snapshot binary base name
+    - name: Rename snapshot binary-app base name
       id: ren-basename
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
@@ -367,12 +377,21 @@ jobs:
             ls -l ${{ runner.workspace }}
 
     # Save files created by ctest script
-    - name: Save published binary (Linux)
+    - name: Save published snapshot-app binary (Linux)
       uses: actions/upload-artifact@v4
       with:
             name: tgz-ubuntu-2204-app-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+
+    - name: Save published release-app binary (Linux)
+      uses: actions/upload-artifact@v4
+      with:
+            name: tgz-ubuntu-2204-app-binary
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}App-Linux-x86_64.tar.gz
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Test with Ant
       env:
@@ -442,7 +461,7 @@ jobs:
         version: 'tags/snapshot'
         file: '${{ inputs.use_hdf }}-osx.tar.gz'
 
-    - name: Get hdf4 release osx12
+    - name: Get hdf4 snapshot osx12
       continue-on-error: true
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
@@ -489,7 +508,7 @@ jobs:
         version: 'tags/${{ inputs.use_hdf5 }}'
         file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
 
-    - name: Get hdf5 release
+    - name: Get hdf5 snapshot
       continue-on-error: true
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
@@ -498,7 +517,7 @@ jobs:
         version: 'tags/snapshot'
         file: '${{ inputs.name_hdf5 }}-osx.tar.gz'
 
-    - name: Get hdf5 release osx12
+    - name: Get hdf5 snapshot osx12
       continue-on-error: true
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
@@ -571,7 +590,7 @@ jobs:
         NOTARY_KEY: ${{ vars.NOTARY_KEY }}
       run: ant -noinput -buildfile build.xml binaryAppPackage
 
-    - name: Rename snapshot binary base name
+    - name: Rename snapshot binary-app base name
       id: ren-basename
       if: ${{ (inputs.use_environ == 'snapshots') }}
       run: |
@@ -585,12 +604,22 @@ jobs:
             ls -l ${{ runner.workspace }}
 
     # Save files created by ctest script
-    - name: Save published App-binary (mac)
+    - name: Save published snapshot-app binary (mac)
       uses: actions/upload-artifact@v4
       with:
             name: tgz-osx-app-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+
+    # Save release files created by ctest script
+    - name: Save published release-app binary (mac)
+      uses: actions/upload-artifact@v4
+      with:
+            name: tgz-osx-app-binary
+            path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}App-Darwin.tar.gz
+            if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+      if: ${{ (inputs.use_environ == 'release') }}
 
     - name: Test with Ant
       env:
