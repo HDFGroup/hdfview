@@ -208,6 +208,14 @@ jobs:
         mv ${{ inputs.snap_name }}-win64.zip ${{ steps.set-file-base.outputs.FILE_BASE }}App-win64.zip
       shell: bash
 
+    - name: Rename snapshot binary-app base name
+      id: ren-basename
+      if: ${{ (inputs.use_environ == 'release') }}
+      run: |
+        cd build/dist
+        mv ${{ inputs.snap_name }}-win64.zip ${{ inputs.snap_name }}App-win64.zip
+      shell: bash
+
     - name: List files for the space (Windows)
       run: |
             Get-ChildItem -Path ${{ github.workspace }}/build/dist
@@ -369,6 +377,14 @@ jobs:
       run: |
         cd build/dist
         mv ${{ inputs.snap_name }}-Linux-x86_64.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
+      shell: bash
+
+    - name: Rename snapshot binary-app base name
+      id: ren-basename
+      if: ${{ (inputs.use_environ == 'release') }}
+      run: |
+        cd build/dist
+        mv ${{ inputs.snap_name }}-Linux-x86_64.tar.gz ${{ inputs.snap_name }}App-Linux-x86_64.tar.gz
       shell: bash
 
     - name: List files in the space (Linux)
@@ -596,6 +612,14 @@ jobs:
       run: |
         cd build/dist
         mv ${{ inputs.snap_name }}-Darwin.tar.gz ${{ steps.set-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
+      shell: bash
+
+    - name: Rename snapshot binary-app base name
+      id: ren-basename
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+      run: |
+        cd build/dist
+        mv ${{ inputs.snap_name }}-Darwin.tar.gz ${{ inputs.snap_name }}App-Darwin.tar.gz
       shell: bash
 
     - name: List files in the space (mac)
