@@ -521,7 +521,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'releases/tag/hdf5_1.14.4.3'
+        version: 'tags/${{ inputs.use_hdf5 }}'
         file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
 
     - name: Get hdf5 snapshot
@@ -539,7 +539,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot'
+        version: 'tags/snapshot-1.14'
         file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
 
     - name: List files for the space (mac)
@@ -616,7 +616,7 @@ jobs:
 
     - name: Rename release binary-app base name
       id: ren-release-basename
-      if: ${{ (inputs.use_environ == 'snapshots') }}
+      if: ${{ (inputs.use_environ == 'release') }}
       run: |
         cd build/dist
         mv ${{ inputs.snap_name }}-Darwin.tar.gz ${{ inputs.snap_name }}App-Darwin.tar.gz
