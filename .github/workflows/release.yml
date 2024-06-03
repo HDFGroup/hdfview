@@ -63,7 +63,7 @@ jobs:
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
       name_hdf5: ${{ inputs.name_tag5 }}
-      snap_name: hdfview-${{ needs.call-workflow-tarball.outputs.source_base }}
+      snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
     secrets:      
       APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
@@ -78,7 +78,7 @@ jobs:
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
       name_hdf5: ${{ inputs.name_tag5 }}
-      snap_name: hdfview-${{ needs.call-workflow-tarball.outputs.source_base }}
+      snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
     secrets:      
       APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
