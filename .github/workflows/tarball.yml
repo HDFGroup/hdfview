@@ -98,11 +98,15 @@ jobs:
         with:
           path: hdfsrc
 
+      - name: Read VERSION file
+        id: getversion
+        run: echo "version=$(cat hdfsrc/VERSION)" >> $GITHUB_OUTPUT
+
       - name: Retrieve version
         id: version
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
-          VERSION_BASE=$(echo cat VERSION | sed -r "s/.*-([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
+          VERSION_BASE=$(echo "${{ steps.getversion.outputs.version }}" | sed -r "s/.*-([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
           echo "TAG_VERSION=$VERSION_BASE" >> $GITHUB_OUTPUT
 
       - name: Set file base name
@@ -116,7 +120,7 @@ jobs:
             then
               FILE_NAME_BASE=$(echo "snapshot")
             else
-              FILE_NAME_BASE=$(echo "hdfview-${{ steps.version.outputs.TAG_VERSION }}")
+              FILE_NAME_BASE=$(echo "HDFView-${{ steps.version.outputs.TAG_VERSION }}")
             fi
           fi
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
@@ -134,7 +138,7 @@ jobs:
               path: ./hdfsrc/docs/RELEASE.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      - name: Create snapshot source file (tgz and zip)
+      - name: Create release source file (tgz and zip)
         id: create-snapshot-files
         if: ${{ (inputs.use_environ == 'release') }}
         run: |
@@ -143,7 +147,7 @@ jobs:
               tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./${{ steps.set-file-base.outputs.FILE_BASE }}
         shell: bash
 
-      - name: Create release source file (tgz and zip)
+      - name: Create snapshot source file (tgz and zip)
         id: create-release-files
         if: ${{ (inputs.use_environ == 'snapshots') }}
         run: |
