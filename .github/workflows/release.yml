@@ -9,7 +9,7 @@ on:
         required: false
         default: snapshot
       use_tag4:
-        description: 'HDF Release version tag'
+        description: 'HDF Release version tag and base name'
         type: string
         required: false
         default: snapshot
@@ -18,6 +18,11 @@ on:
         type: string
         required: false
         default: snapshot-1.14
+      name_tag5:
+        description: 'HDF5 Release version base name'
+        type: string
+        required: false
+        default: hdf5-1.14
 
 permissions:
   contents: read
@@ -54,10 +59,11 @@ jobs:
     needs: [log-the-inputs, call-workflow-tarball]
     uses: ./.github/workflows/ant.yml
     with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
-      file_base: ${{ needs.create-files-ant.outputs.file_base }}
-      snap_name: hdfview-${{ needs.call-workflow-tarball.outputs.source_base }}
+      name_hdf5: ${{ inputs.name_tag5 }}
+      snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
     secrets:      
       APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
@@ -68,10 +74,11 @@ jobs:
     needs: [log-the-inputs, call-workflow-tarball]
     uses: ./.github/workflows/ant-app.yml
     with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
-      file_base: ${{ needs.create-files-ant.outputs.file_base }}
-      snap_name: hdfview-${{ needs.call-workflow-tarball.outputs.source_base }}
+      name_hdf5: ${{ inputs.name_tag5 }}
+      snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
     secrets:      
       APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
@@ -84,7 +91,7 @@ jobs:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
     with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      file_base: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
