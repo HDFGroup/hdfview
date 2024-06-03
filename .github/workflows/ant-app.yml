@@ -616,7 +616,7 @@ jobs:
 
     - name: Rename release binary-app base name
       id: ren-release-basename
-      if: ${{ (inputs.use_environ == 'snapshots') }}
+      if: ${{ (inputs.use_environ == 'release') }}
       run: |
         cd build/dist
         mv ${{ inputs.snap_name }}-Darwin.tar.gz ${{ inputs.snap_name }}App-Darwin.tar.gz
