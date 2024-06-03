@@ -59,7 +59,7 @@ jobs:
     needs: [log-the-inputs, call-workflow-tarball]
     uses: ./.github/workflows/ant.yml
     with:
-      file_base: ${{ needs.create-files-ant.outputs.file_base }}
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
       name_hdf5: ${{ inputs.name_tag5 }}
@@ -74,7 +74,7 @@ jobs:
     needs: [log-the-inputs, call-workflow-tarball]
     uses: ./.github/workflows/ant-app.yml
     with:
-      file_base: ${{ needs.create-files-ant.outputs.file_base }}
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
       name_hdf5: ${{ inputs.name_tag5 }}
