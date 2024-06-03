@@ -91,7 +91,7 @@ jobs:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
     with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      file_base: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
