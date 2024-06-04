@@ -40,23 +40,19 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
-
-      - name: Get Commit
-        if: ${{ (inputs.use_environ == 'snapshots') }}
-        run: |
-          git checkout ${{ inputs.file_sha }}
+          ref: '${{ github.head_ref || github.ref_name }}'
 
       - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         id: "tag_create"
         with:
           commit_sha: ${{ inputs.file_sha }}
           tag: "${{ inputs.use_tag }}"
-          force_push_tag: true
+          force_push_tag: false
+          tag_exists_error: false
           message: "Latest snapshot"
-        if: ${{ inputs.use_environ == 'snapshots' }}
 
       # Print result using the action output.
       - run: |
@@ -159,7 +155,7 @@ jobs:
       - name: PreRelease tag
         id: create_prerelease
         if: ${{ (inputs.use_environ == 'snapshots') }}
-        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2.0.4
+        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.5
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
@@ -180,7 +176,7 @@ jobs:
       - name: Release tag
         id: create_release
         if: ${{ (inputs.use_environ == 'release') }}
-        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2.0.4
+        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.5
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: false
