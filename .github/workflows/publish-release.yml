@@ -17,8 +17,10 @@ on:
     
     # A workflow run is made up of one or more jobs that can run sequentially or
     # in parallel.
-    jobs:
-      steps:
+jobs:
+  publish-tag:
+    runs-on: ubuntu-latest
+    steps:
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         - name: Get Sources
           uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
