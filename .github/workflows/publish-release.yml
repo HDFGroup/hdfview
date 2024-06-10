@@ -9,7 +9,7 @@ on:
         type: string
         required: true
       target_dir:
-        description: 'HDFView Release version tag'
+        description: 'HDFView target bucket directory'
         type: string
         required: true
     permissions:
