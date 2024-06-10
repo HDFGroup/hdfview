@@ -49,8 +49,8 @@ on:
           with:
                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                 aws-region: us-east-1
+                 aws-region: ${{ secrets.AWS_REGION }}
 
         - name: Sync release to S3 bucket
           run: |
-                aws s3 sync ./HDFVIEW s3://HDFVIEW/${{ inputs.target_dir }} --delete
+                aws s3 sync ./HDFVIEW s3://${{ secrets.AWS_S#_BUCKET }}/${{ inputs.target_dir }} --delete
