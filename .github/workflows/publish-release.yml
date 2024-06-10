@@ -55,4 +55,4 @@ jobs:
 
         - name: Sync release to S3 bucket
           run: |
-                aws s3 sync ./HDFVIEW s3://${{ secrets.AWS_S3_BUCKET }}/${{ inputs.target_dir }} --delete
+                aws s3 sync ./HDFVIEW s3://${{ secrets.AWS_S3_BUCKET }}/ftp2/HDFVIEW/${{ inputs.target_dir }} --delete
