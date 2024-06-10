@@ -32,7 +32,7 @@ jobs:
           uses: dsaltares/fetch-gh-release-asset@master
           with:
             repo: 'HDFGroup/hdfview'
-            version: 'tags/${{ inputs.use_hdf }}'
+            version: 'tags/${{ inputs.use_tag }}'
             regex: true
             target: 'HDFVIEW/'
             file: '${{ inputs.use_hdf }}-*.*'
@@ -41,7 +41,7 @@ jobs:
           uses: dsaltares/fetch-gh-release-asset@master
           with:
             repo: 'HDFGroup/hdfview'
-            version: 'tags/${{ inputs.use_hdf }}'
+            version: 'tags/${{ inputs.use_tag }}'
             regex: true
             target: 'HDFVIEW/'
             file: 'UsersGuide.*'
