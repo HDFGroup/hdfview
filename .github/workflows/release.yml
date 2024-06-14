@@ -1,5 +1,6 @@
 name: hdfview release build
 
+# Triggers the workflow on demand
 on:
   workflow_dispatch:
     inputs:

@@ -1,5 +1,6 @@
 name: hdfview daily build
 
+# Triggered on pull request or schedule or on demand
 on:
   workflow_dispatch:
     inputs:
@@ -16,8 +17,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel.
 jobs:
   get-base-names:
     runs-on: ubuntu-latest
