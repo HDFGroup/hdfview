@@ -1,5 +1,6 @@
 name: hdfview daily build
 
+# Triggered on pull request or schedule or on demand
 on:
   workflow_dispatch:
     inputs:
@@ -16,8 +17,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel.
 jobs:
   get-base-names:
     runs-on: ubuntu-latest
@@ -35,13 +34,13 @@ jobs:
       with:
         version: 'tags/HDFView-99.99.99'
         file: 'last-file.txt'
-    
+
     - name: Read base-name file
       id: gethdfviewbase
       run: echo "HDFVIEW_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
-    
+
     - run: echo "hdfview base name is ${{ steps.gethdfviewbase.outputs.HDFVIEW_NAME_BASE }}."
-    
+
     - name: Get hdf4 release base name
       uses: dsaltares/fetch-gh-release-asset@master
       with:
