@@ -1,4 +1,4 @@
-HDFView version 3.3.2 currently under development
+HDFView version 3.3.3 currently under development
 
 ![HDF5 Logo](src/HDFView.png)
 
@@ -13,7 +13,7 @@ HELP AND SUPPORT
 ----------------
 Information regarding Help Desk and Support services is available at
 
-   https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
+   https://help.hdfgroup.org/
 
 
 FORUM and NEWS
@@ -55,7 +55,7 @@ PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Source packages for current and previous releases are located at:
     
-   https://portal.hdfgroup.org/display/support/Download+HDFView
+   https://support.hdfgroup.org/downloads/HDFVIEW/index.html
 
 Development code is available at our Github location:
     
