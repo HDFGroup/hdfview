@@ -34,6 +34,7 @@ jobs:
       with:
         version: 'tags/HDFView-99.99.99'
         file: 'last-file.txt'
+      continue-on-error: true
 
     - name: Read base-name file
       id: gethdfviewbase
