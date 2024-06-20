@@ -995,11 +995,11 @@ public class HDFView implements DataViewManager {
                 String usersGuideURL = ViewProperties.getUsersGuide();
                 log.trace("usersGuideURL: {}", usersGuideURL);
                 URL urlObject;
-                if (usersGuideURL != null)
-                    urlObject = new URI(usersGuideURL).toURL();
-                else
-                    urlObject = new URI(HDFVIEW_USERSGUIDE_URL).toURL();
                 try {
+                    if (usersGuideURL != null)
+                        urlObject = new URI(usersGuideURL).toURL();
+                    else
+                        urlObject = new URI(HDFVIEW_USERSGUIDE_URL).toURL();
                     org.eclipse.swt.program.Program.launch(urlObject.toString());
                 }
                 catch (Exception ex) {
