@@ -994,7 +994,7 @@ public class HDFView implements DataViewManager {
             {
                 String usersGuideURL = ViewProperties.getUsersGuide();
                 log.trace("usersGuideURL: {}", usersGuideURL);
-                URL urlObject = nnull;
+                URL urlObject;
                 if (usersGuideURL != null)
                     urlObject = new URI(usersGuideURL).toURL();
                 else
