@@ -1,6 +1,6 @@
 name: hdfview 1_14 release-files
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -122,6 +122,21 @@ jobs:
               name: tgz-ubuntu-2204-app-binary
               path: ${{ github.workspace }}
 
+      # Get files created by tarball script
+      - name: Get UsersGuide (Linux)
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+              name: docs-usersguide
+              path: ${{ github.workspace }}/UsersGuide
+
+      - name: Create snapshot source file (tgz and zip)
+        id: create-release-files
+        if: ${{ (inputs.use_environ == 'snapshots') }}
+        run: |
+              zip -r UsersGuide.zip ./UsersGuide
+              tar -zcvf UsersGuide.tar.gz ./UsersGuide
+        shell: bash
+
       - name: List files for the space
         run: |
             ls -l ${{ github.workspace }}
@@ -137,6 +152,8 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum UsersGuide.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum UsersGuide.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
 
       - name: Store snapshot name
         run: |
@@ -162,6 +179,8 @@ jobs:
           body_path: description.txt
           files: |
               last-file.txt
+              UsersGuide.tar.gz
+              UsersGuide.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
@@ -182,6 +201,8 @@ jobs:
           prerelease: false
           body_path: description.txt
           files: |
+              UsersGuide.tar.gz
+              UsersGuide.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz

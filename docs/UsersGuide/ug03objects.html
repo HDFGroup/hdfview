@@ -1,10 +1,6 @@
-<?php
-    $page_title = "HDFView User's Guide -- HDF Object Model";
-    include ("../../../../links.php");
-    include ("../../../../includes/header.html");
-?>
-<link href="edit.css" rel="stylesheet" type="text/css" />
+<html><head><link href="edit.css" rel="stylesheet" type="text/css">
 
+</head><body>
 <p>
 <a href="index.html">[Index]</a>
 <a href="ug01introduction.html">[1]</a>
@@ -19,7 +15,7 @@
 <fieldset>Chapter 3: HDF Object Model</fieldset></h1>
 
 <p>
-This chapter provides basic information about the <a href="javadocs/hdfview_java_doc/hdf/object/package-summary.html">HDF Object Model</a>.
+This chapter provides basic information about the <a href="../javadocs/org.hdfgroup.object/hdf/object/package-summary.html">HDF Object Model</a>.
 </p>
 <ul class="ul">
   <li class="add"><a href="ug03objects.html#ug03overview">3.1 Overview</a></li>
@@ -64,11 +60,11 @@ provides common standard Java APIs to access both HDF4 and HDF5 files.</p>
 <p>The HDF Object Package is <b>NOT</b> a &ldquo;wrapper&rdquo; for the native HDF
 libraries, and it requires the HDF4 and HDF5 wrappers.
 The HDF4 and HDF5 wrappers are separate HDF Java products. For
-details about the HDF4 and HDF5 native interfaces, read
-<a href="javadocs/hdf4_java_doc/index.html">
+details about the HDF4 and HDF5 native interfaces, see
+<a href="https://github.com/HDFGroup/hdf4/blob/master/java/src/hdf/overview.html">
 Java HDF Interface (JHI)</a>
 and the
-<a href="javadocs/hdf5_java_doc/index.html">
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/java/src/hdf/overview.html">
 Java HDF5 Interface (JHI5)</a>.</p>
 
 <p>
@@ -119,10 +115,10 @@ The HDF Object Package is used by Java applications to access HDF4 and
 HDF5 files without directly calling the HDF4 and HDF5 library APIs. Library
 calls are encapsulated into respective classes. The HDF Object Package
 requires the
-<a href="javadocs/hdf4_java_doc/index.html">
+<a href="https://github.com/HDFGroup/hdf4/blob/master/java/src/hdf/overview.html">
 Java HDF Interface (JHI)</a>
 and the
-<a href="javadocs/hdf5_java_doc/index.html">
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/java/src/hdf/overview.html">
 Java HDF5 Interface (JHI5)</a>.</p>
 <br />
 
