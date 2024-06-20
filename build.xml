@@ -250,7 +250,7 @@
         <fileset dir="${lib.dir}/extra" includes="slf4j-nop${version.slf4j}.jar" excludes="*sources.jar" />
     </path>
     <path id="unit-classpath">
-        <fileset dir="${lib.dir}" includes="extra/junit-4.13.2.jar extra/hamcrest-core-1.3.jar" excludes="*sources.jar" />
+        <fileset dir="${lib.dir}" includes="org.junit.jar org.hamcrest.jar" excludes="*sources.jar" />
     </path>
     <path id="swtbot-classpath">
         <fileset dir="${lib.dir}/ext/swt/swtbot" includes="*swtbot*.jar *log4j*.jar" excludes="*sources.jar" />

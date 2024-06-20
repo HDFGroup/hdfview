@@ -14,11 +14,16 @@
 
 package hdf.view;
 
+import java.awt.Desktop;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -169,7 +174,7 @@ public class HDFView implements DataViewManager {
     private static final String HDF5_VERSION    = HDFVersions.getPropertyVersionHDF5();
     private static final String HDFVIEW_VERSION = HDFVersions.getPropertyVersionView();
     private static final String HDFVIEW_USERSGUIDE_URL =
-        "https://portal.hdfgroup.org/display/HDFVIEW/HDFView+3.x+User%27s+Guide";
+        "https://support.hdfgroup.org/documentation/HDFVIEW/HDFView+3.x+User%27s+Guide";
     private static final String JAVA_COMPILER = "jdk " + JAVA_VERSION;
     private static final String JAVA_VER_INFO =
         "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
@@ -987,7 +992,19 @@ public class HDFView implements DataViewManager {
             @Override
             public void widgetSelected(SelectionEvent e)
             {
-                org.eclipse.swt.program.Program.launch(HDFVIEW_USERSGUIDE_URL);
+                String usersGuideURL = ViewProperties.getUsersGuide();
+                log.trace("usersGuideURL: {}", usersGuideURL);
+                URL urlObject;
+                try {
+                    if (usersGuideURL != null)
+                        urlObject = new URI(usersGuideURL).toURL();
+                    else
+                        urlObject = new URI(HDFVIEW_USERSGUIDE_URL).toURL();
+                    org.eclipse.swt.program.Program.launch(urlObject.toString());
+                }
+                catch (Exception ex) {
+                    log.debug("Could not instantiate Browser: {}", ex);
+                }
             }
         });
 
