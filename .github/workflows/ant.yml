@@ -1,6 +1,6 @@
 name: hdfview 1_14 ci runs
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:

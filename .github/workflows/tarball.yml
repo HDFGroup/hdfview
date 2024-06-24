@@ -1,6 +1,6 @@
 name: hdfview 1_14 tarball
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -136,6 +136,14 @@ jobs:
         with:
               name: NEWSLETTER
               path: ./hdfsrc/docs/RELEASE.txt
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      # Save User Guide
+      - name: Save User Guide (Linux)
+        uses: actions/upload-artifact@v4
+        with:
+              name: docs-usersguide
+              path: ./hdfsrc/docs/UsersGuide
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Create release source file (tgz and zip)
