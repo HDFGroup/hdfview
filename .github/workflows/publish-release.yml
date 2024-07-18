@@ -47,7 +47,7 @@ jobs:
         - name: List files for the space
           run: |
               ls -l ${{ github.workspace }}
-              ls ${{ runner.workspace }}/HDFVIEW
+              ls ${{ github.workspace }}/HDFVIEW
 
         - name: Setup AWS CLI
           uses: aws-actions/configure-aws-credentials@v1
