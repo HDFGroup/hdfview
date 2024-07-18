@@ -1,0 +1,40 @@
+name: hdfview publish files in HDFVIEW from branch to S3
+
+# Triggers the workflow on demand
+on:
+  workflow_dispatch:
+    inputs:
+      target_dir:
+        description: 'HDFView target bucket directory'
+        type: string
+        required: true
+    permissions:
+      contents: read
+
+jobs:
+  publish-tag:
+    runs-on: ubuntu-latest
+    steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - name: Get Sources
+          uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+          with:
+            fetch-depth: 0
+            ref: '${{ github.head_ref || github.ref_name }}'
+
+        - name: List files for the space
+          run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}/HDFVIEW
+
+        - name: Setup AWS CLI
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                 aws-region: ${{ secrets.AWS_REGION }}
+
+        - name: Sync dir to S3 bucket
+          run: |
+                aws s3 sync ./HDFVIEW s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }} --delete
+
