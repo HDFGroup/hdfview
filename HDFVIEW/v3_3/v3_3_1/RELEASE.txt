@@ -1,0 +1,96 @@
+The current HDFView products can be downloaded at:
+        https://www.hdfgroup.org/downloads/hdfview/
+
+
+HDF Libraries
+=============================================================================
+This release was built and tested with HDF 4.2.16 and HDF5 1.14.2.
+
+Windows ONLY: HDFView built with VS 2015 will require that
+the Visual C++ Redistributable Packages be installed on your machine.
+If you cannot access HDF5 files then you do not have these packages.
+You can obtain them from:
+         https://www.microsoft.com/en-us/download/details.aspx?id=48145
+
+
+JDK
+=============================================================================
+This release was built and tested with OpenJDK 19. It uses modules and the
+newest jpackage for distribution.
+
+Major Enhancements
+==============================================================================
+    * GH #121 Updated all icons with transpareancy
+
+Major Bug Fixes
+==============================================================================
+    * GH #119 (crashes opening HDF4 file) has been fixed. The problem was
+      that the HDF4 xdr.dll file was not copied from the hdf4 install location.
+
+    ***** Previous fixes *****
+    * HDFVIEW-284 (crashes on NETCDF-4 grids) has been fixed. The problem was
+      that references in variable-length containers were trying to be handled
+      like strings. Upon investigation, the problem was found to extend to 
+      references in any container. The table display code for vlen references
+      also changed to account for the hdf5 Java API fixes.
+      The fix required that variable-length types in the Java wrappers in the
+      hdf5 library for read and write also be fixed.
+
+      HDFView-221 Add support for true Variable-length types in Java
+      Sub-issue HDFView-222 fixed the read/write support for variable-length
+      in the Java wrappers. This fix involved handling the data object as
+      a list of lists and using the datatype of the list.
+      Sub-issue HDFView-222 fixed the object library to handle the List of Lists
+      concept.
+      Sub-issue HDFView-223 updated the DataProviders, DataDisplayConverters
+      and DataValidators to work with variable-length List of Lists.
+
+Minor Bug Fixes
+==============================================================================
+    * Corrected how the program updates changes to the fonts made in the User Preferences
+      dialog. There are still issues with having to trigger a visual refresh.
+
+    * GH #73 (Check aarch64 in machine.arch property) fixed by adding a section to
+      for aarch64.
+
+    * GH #147 (HDFView 3.3.0 shows incorrect references in compound types in datasets)
+      fixed by adding a start index into the object reference array of data read from a
+      compound type.
+
+Limitations / Known Problems
+==============================================================================
+    * HDFView currently cannot nicely handle large datasets when using the
+      default display mode, as the data is loaded in its entirety. To view
+      large datasets, it is recommended to right click on a data object and
+      use the "Open As" menu item, where a subset of data to view can be
+      selected.
+
+    * HDFView also cannot nicely handle large numbers of objects, because of
+      a design issue that requires HDFView to visit all the objects in a file.
+
+    * Object/region references can't be opened by a double-click or by
+      right-clicking and choosing "Show As Table/Image" when inside a compound
+      datatype.
+
+    * If a file is opened in read-only mode, right-clicking on a dataset in
+      in the tree view and choosing any of the options under the
+      "Export Dataset" menu item will fail with a message of
+      'Unable to export dataset: Unable to open file'. The current workaround
+      is to re-open the file in read/write mode.
+
+    * The 'Recent Files' button does not work on Mac due to a cross-platform
+      issue with SWT.
+
+    * Selecting and changing individual points in PaletteView for an image
+      palette is broken.
+
+    * Logging and optional HDF4 requires rebuilds from source.
+
+    * Automatically opening HDFView and displaying a file selected still does display
+    the file on a mac.
+
+
+Other Notes
+==============================================================================
+
+
