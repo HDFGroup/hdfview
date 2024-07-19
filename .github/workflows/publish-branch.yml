@@ -4,6 +4,10 @@ name: hdfview publish files in HDFVIEW from branch to S3
 on:
   workflow_dispatch:
     inputs:
+      local_dir:
+        description: 'HDFView local directory'
+        type: string
+        required: true
       target_dir:
         description: 'HDFView target bucket directory'
         type: string
@@ -36,5 +40,5 @@ jobs:
 
         - name: Sync dir to S3 bucket
           run: |
-                aws s3 sync ./HDFVIEW s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}
+                aws s3 sync ./HDFVIEW/${{ inputs.local_dir }} s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}
 
