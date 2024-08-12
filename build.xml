@@ -1468,15 +1468,17 @@
             <arg value="/debug" />
             <arg value="/fd" />
             <arg value="SHA256" />
+            <arg value="/tr" />
+            <arg value="http://timestamp.acs.microsoft.com" />
+            <arg value="/td" />
+            <arg value="SHA256" />
             <arg value="/d" />
             <arg value="${ant.project.name} ${app.version} Utility" />
-            <arg value="/f" />
-            <arg value="${env.CERTIFICATE}" />
-            <arg value="/p" />
-            <arg value="${env.SIGNPASSWORD}" />
-            <arg value="/t" />
-            <arg value="http://timestamp.digicert.com" />
-            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
+            <arg value="/dlib" />
+            <arg value="Microsoft.Trusted.Signing.Client\bin\x64\Azure.CodeSigning.Dlib.dll" />
+            <arg value="/dmdf" />
+            <arg value="${basedir}\credentials.json" />
+            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.msi" />
         </exec>
 
         <echo message="xxxx Package the windows binary xxxx"/>
@@ -1824,9 +1826,8 @@
             <arg value="--win-menu" />
             <arg value="--win-menu-group" />
             <arg value="The HDF Group" />
-            <!-- create exe installer - msi needs more work -->
-            <!-- <arg value="- -type" />
-            <arg value="msi" /> -->
+            <arg value="--type" />
+            <arg value="msi" />
         </exec>
     </target>
 
