@@ -220,6 +220,7 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
+        BINSIGN: ${{ steps.set-signing-state.BINSIGN }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -456,7 +457,7 @@ jobs:
     - name: Check Secrets exists
       id: set-signing-state
       run: |
-        if [ '${{ secrets.AZURE_ENDPOINT }}' != '' ];
+        if [ '${{ secrets.APPLE_CERTS_BASE64 }}' != '' ];
         then
           SIGN_VAL=$(echo "true");
         else
@@ -602,6 +603,7 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
+        BINSIGN: ${{ steps.set-signing-state.BINSIGN }}
         KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
         KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
         SIGNER: ${{ vars.SIGNER }}
