@@ -204,6 +204,18 @@ jobs:
       run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
       shell: bash
 
+    - name: Check Secrets exists
+      id: set-signing-state
+      run: |
+        if [ '${{ secrets.AZURE_ENDPOINT }}' != '' ];
+        then
+          SIGN_VAL=$(echo "true");
+        else
+          SIGN_VAL=$(echo "false");
+        fi
+        echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Build with Ant
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
@@ -441,6 +453,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Check Secrets exists
+      id: set-signing-state
+      run: |
+        if [ '${{ secrets.AZURE_ENDPOINT }}' != '' ];
+        then
+          SIGN_VAL=$(echo "true");
+        else
+          SIGN_VAL=$(echo "false");
+        fi
+        echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Install the Apple certificate and provisioning profile
       shell: bash
       env:
@@ -461,6 +485,7 @@ jobs:
           # import certificate to keychain
           security -v import $CERTIFICATE_PATH -P $P12_PASSWORD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
           security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+      if: ${{ steps.set-signing-state.BINSIGN == 'true' }}
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4

@@ -204,6 +204,18 @@ jobs:
       run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
       shell: bash
 
+    - name: Check Secrets exists
+      id: set-signing-state
+      run: |
+        if [ '${{ secrets.AZURE_ENDPOINT }}' != '' ];
+        then
+          SIGN_VAL=$(echo "true");
+        else
+          SIGN_VAL=$(echo "false");
+        fi
+        echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Install TrustedSigning (Windows)
       run: |
           Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
@@ -211,6 +223,7 @@ jobs:
           .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.53 -x
           Install-Module -Name TrustedSigning -RequiredVersion 0.3.8
       shell: pwsh
+      if: ${{ steps.set-signing-state.BINSIGN == 'true' }}
 
     - name: create-json
       id: create-json
@@ -218,6 +231,7 @@ jobs:
       with:
           name: "credentials.json"
           json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+      if: ${{ steps.set-signing-state.BINSIGN == 'true' }}
 
     - name: Build with Ant
       env:
@@ -440,6 +454,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Check Secrets exists
+      id: set-signing-state
+      run: |
+        if [ '${{ secrets.AZURE_ENDPOINT }}' != '' ];
+        then
+          SIGN_VAL=$(echo "true");
+        else
+          SIGN_VAL=$(echo "false");
+        fi
+        echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Install the Apple certificate and provisioning profile
       shell: bash
       env:
@@ -460,6 +486,7 @@ jobs:
           # import certificate to keychain
           security -v import $CERTIFICATE_PATH -P $P12_PASSWORD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
           security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+      if: ${{ steps.set-signing-state.BINSIGN == 'true' }}
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
