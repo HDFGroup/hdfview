@@ -16,7 +16,7 @@
     <record name="antoutput.log" action="start" append="${build.antoutput.append}" loglevel="verbose" />
 
     <property name="sign_state" value="${env.BINSIGN}" />
-    <condition property="${sign.enable}">
+    <condition property="sign.enable">
         <equals arg1="${sign_state}" arg2="exists" />
     </condition>
     <!-- MAC signing: -->
