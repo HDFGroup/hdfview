@@ -296,7 +296,7 @@ jobs:
         version: 'tags/${{ inputs.use_hdf5 }}'
         file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
 
-    - name: Get hdf5 release
+    - name: Get hdf5 snapshot
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
