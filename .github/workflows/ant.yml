@@ -59,7 +59,7 @@ jobs:
     - name: Enable Developer Command Prompt
       uses: ilammy/msvc-dev-cmd@v1.13.0
 
-    - name: Get hdf4 snapshot
+    - name: Get hdf4 release
       if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
@@ -105,7 +105,7 @@ jobs:
         echo "HDFLIB_ENV=$HDFDIR" >> $GITHUB_OUTPUT
       shell: bash
 
-    - name: Get hdf5 snapshot
+    - name: Get hdf5 release
       if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
@@ -252,7 +252,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    - name: Get hdf4 snapshot
+    - name: Get hdf4 release
       if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
