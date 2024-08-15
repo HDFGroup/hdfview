@@ -15,9 +15,9 @@
 
     <record name="antoutput.log" action="start" append="${build.antoutput.append}" loglevel="verbose" />
 
-    <property name="sign_state" value="sign" />
+    <property name="sign_state" value="${env.BINSIGN}" />
     <condition property="sign.enable">
-        <equals arg1="${sign_state}" arg2="sign" />
+        <equals arg1="${sign_state}" arg2="exists" />
     </condition>
     <!-- MAC signing: -->
     <property name="sign.account" value="${env.SIGNER}" />
@@ -1456,10 +1456,8 @@
     <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
         description="Packages up the installer, the license file and the README file into a distributable form"  />
 
-    <target name="binaryPackXWindows" depends="createJXPackage, createWindowsREADME" if="${isXWindows}">
-        <mkdir dir="${dist.dir}" />
-
-        <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" readonly="false" />
+    <target name="binaryPackSignXWindows" depends="createJXPackage, createWindowsREADME" if="${sign.enable}">
+        <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.msi" readonly="false" />
         <echo message="xxxx Sign the windows binary xxxx"/>
         <!-- Sign the generated exe -->
         <exec executable="${env.SIGNTOOLDIR}\signtool.exe" failifexecutionfails="false">
@@ -1468,17 +1466,22 @@
             <arg value="/debug" />
             <arg value="/fd" />
             <arg value="SHA256" />
+            <arg value="/tr" />
+            <arg value="http://timestamp.acs.microsoft.com" />
+            <arg value="/td" />
+            <arg value="SHA256" />
             <arg value="/d" />
             <arg value="${ant.project.name} ${app.version} Utility" />
-            <arg value="/f" />
-            <arg value="${env.CERTIFICATE}" />
-            <arg value="/p" />
-            <arg value="${env.SIGNPASSWORD}" />
-            <arg value="/t" />
-            <arg value="http://timestamp.digicert.com" />
-            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.exe" />
+            <arg value="/dlib" />
+            <arg value="Microsoft.Trusted.Signing.Client\bin\x64\Azure.CodeSigning.Dlib.dll" />
+            <arg value="/dmdf" />
+            <arg value="${basedir}\credentials.json" />
+            <arg value="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.msi" />
         </exec>
+    </target>
 
+    <target name="binaryPackXWindows" depends="binaryPackSignXWindows, createJXPackage, createWindowsREADME" if="${isXWindows}">
+        <mkdir dir="${dist.dir}" />
         <echo message="xxxx Package the windows binary xxxx"/>
         <!-- Copy over license file -->
         <copy todir="${dist.dir}">
@@ -1824,9 +1827,8 @@
             <arg value="--win-menu" />
             <arg value="--win-menu-group" />
             <arg value="The HDF Group" />
-            <!-- create exe installer - msi needs more work -->
-            <!-- <arg value="- -type" />
-            <arg value="msi" /> -->
+            <arg value="--type" />
+            <arg value="msi" />
         </exec>
     </target>
 
@@ -1834,7 +1836,7 @@
           MAC NOTARY FOR JXPACKAGE
           ================================================================= -->
 
-    <target name="zip-submit-notary" if="sign.enable">
+    <target name="zip-submit-notary" if="${sign.enable}">
         <exec executable="/usr/bin/xcrun" failonerror="true"
               outputproperty="zipUUID.txt">
             <arg value="notarytool"/>
@@ -1864,7 +1866,7 @@
         <echo>*** notarize-zip-app:${zipUUID} ***</echo>
     </target>
 
-    <target name="zip-post-notary" if="sign.enable">
+    <target name="zip-post-notary" if="${sign.enable}">
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
             <arg value="notarytool"/>
@@ -1885,7 +1887,7 @@
 
     <!-- Staple the received notarization to the app -->
     <!-- run this after notarization is completed -->
-    <target name="zip-staple-notary" if="sign.enable">
+    <target name="zip-staple-notary" if="${sign.enable}">
         <echo message="*** Stapling notarization to Mac Build ***"/>
         <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
             <arg value="stapler"/>
@@ -2237,7 +2239,7 @@
           MAC NOTARY FOR JPACKAGE
           ================================================================= -->
 
-    <target name="submit-notary" if="sign.enable">
+    <target name="submit-notary" if="${sign.enable}">
         <exec executable="/usr/bin/xcrun" failonerror="true"
               outputproperty="retUUID.txt">
             <arg value="notarytool"/>
@@ -2267,7 +2269,7 @@
         <echo>*** notarize-app:${retUUID} ***</echo>
     </target>
 
-    <target name="post-notary" if="sign.enable">
+    <target name="post-notary" if="${sign.enable}">
         <exec executable="/usr/bin/xcrun" failonerror="true" outputproperty="logInfo" resultproperty="logUUID">
             <redirector output="notary.txt" alwayslog="true"/>
             <arg value="notarytool"/>
@@ -2288,7 +2290,7 @@
 
     <!-- Staple the received notarization to the app -->
     <!-- run this after notarization is completed -->
-    <target name="staple-notary" if="sign.enable">
+    <target name="staple-notary" if="${sign.enable}">
         <echo message="*** Stapling notarization to Mac Build ***"/>
         <exec executable="/usr/bin/xcrun" dir="${dist.dir}" failonerror="true">
             <arg value="stapler"/>
