@@ -248,7 +248,7 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-        BINSIGN: ${{ steps.set-signing-state.outputs.BINSIGN }}
+        BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -621,7 +621,7 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-        BINSIGN: ${{ steps.set-signing-state.outputs.BINSIGN }}
+        BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
         KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
         KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
         SIGNER: ${{ vars.SIGNER }}
