@@ -232,7 +232,7 @@ jobs:
           Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
           .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
           .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.53 -x
-          Install-Module -Name TrustedSigning -RequiredVersion 0.3.8
+#          Install-Module -Name TrustedSigning -RequiredVersion 0.4.1
       shell: pwsh
       if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
@@ -248,13 +248,14 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-        BINSIGN: ${{ steps.set-signing-state.outputs.BINSIGN }}
+        BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
         AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
         AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+        SIGNTOOLDIR: ${{ runner.workspace }}/Microsoft.Windows.SDK.BuildTools.10.0.22621.3233/tools/sign
       run: |
         ant -noinput -buildfile build.xml binaryAppPackage
       shell: bash
@@ -621,7 +622,7 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
-        BINSIGN: ${{ steps.set-signing-state.outputs.BINSIGN }}
+        BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
         KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
         KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
         SIGNER: ${{ vars.SIGNER }}
