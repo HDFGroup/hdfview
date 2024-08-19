@@ -255,7 +255,7 @@ jobs:
         AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
         AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
         AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-        SIGNTOOLDIR: ${{ runner.workspace }}/Microsoft.Windows.SDK.BuildTools.10.0.22621.3233/tools/sign
+        SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools.10.0.22621.3233/tools/sign
       run: |
         ant -noinput -buildfile build.xml binaryAppPackage
       shell: bash
