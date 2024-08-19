@@ -1486,7 +1486,7 @@
         <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.msi" readonly="false" />
         <echo message="xxxx Sign the windows binary xxxx"/>
         <!-- Sign the generated exe -->
-        <exec executable="${env.SIGNTOOLDIR}\signtool.exe" failifexecutionfails="false">
+        <exec executable="${env.SIGNTOOLDIR}/signtool.exe" failifexecutionfails="false">
             <arg value="sign" />
             <arg value="/v" />
             <arg value="/debug" />
