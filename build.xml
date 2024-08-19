@@ -1365,10 +1365,22 @@
         <condition property="isXMac" else="false">
             <and>
                 <equals arg1="${isMac}" arg2="true" />
+                <not>
+                    <equals arg1="${sign_state}" arg2="true" />
+                </not>
                 <equals arg1="${XPackage}" arg2="true" />
             </and>
         </condition>
         <echo if:set="isXMac">isXMac=${isXMac}</echo>
+
+        <condition property="isSignXMac" else="false">
+            <and>
+                <equals arg1="${isMac}" arg2="true" />
+                <equals arg1="${sign_state}" arg2="true" />
+                <equals arg1="${XPackage}" arg2="true" />
+            </and>
+        </condition>
+        <echo if:set="isSignXMac">isSignXMac=${isSignXMac}</echo>
 
         <condition property="isXUnix" else="false">
             <and>
@@ -1410,11 +1422,25 @@
             <and>
                 <equals arg1="${isMac}" arg2="true" />
                 <not>
+                    <equals arg1="${sign_state}" arg2="true" />
+                </not>
+                <not>
                     <equals arg1="${XPackage}" arg2="true" />
                 </not>
             </and>
         </condition>
         <echo if:set="isAppMac">isAppMac=${isAppMac}</echo>
+
+        <condition property="isSignAppMac" else="false">
+            <and>
+                <equals arg1="${isMac}" arg2="true" />
+                <equals arg1="${sign_state}" arg2="true" />
+                <not>
+                    <equals arg1="${XPackage}" arg2="true" />
+                </not>
+            </and>
+        </condition>
+        <echo if:set="isSignAppMac">isSignAppMac=${isSignAppMac}</echo>
 
         <condition property="isAppUnix" else="false">
             <and>
@@ -1453,7 +1479,7 @@
         <property name="XPackage" value="true" />
     </target>
 
-    <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac"
+    <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac, binaryPackSignXMac"
         description="Packages up the installer, the license file and the README file into a distributable form"  />
 
     <target name="binaryPackSignXWindows" depends="createJXPackage, createWindowsREADME" if="${sign.enable}">
@@ -1521,6 +1547,42 @@
     </target>
 
     <target name="binaryPackXMac" depends="createJXPackageMac, createMacREADME" if="${isXMac}">
+        <echo message="xxxx Package the mac dmg binary xxxx"/>
+        <!-- Copy over license file -->
+        <copy tofile="${dist.dir}/COPYING.txt">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+        <exec dir="${dist.dir}" executable="hdiutil">
+            <arg value="verify" />
+            <arg value="${ant.project.name}-${app.version}.dmg" />
+        </exec>
+
+        <echo message="xxxx Compress the mac dmg binary xxxx"/>
+        <!-- Copy over license file -->
+        <copy tofile="${dist.dir}/COPYING.txt">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <!-- Compress everything into one tar.gz file -->
+        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.tar.gz" compression="gzip">
+            <tarfileset dir="${dist.dir}" filemode="755">
+                <include name="COPYING.txt" />
+                <include name="README.txt" />
+                <include name="${ant.project.name}-${app.version}.dmg" />
+            </tarfileset>
+        </tar>
+    </target>
+
+    <target name="binaryPackSignXMac" depends="createJXPackageMac, createMacREADME" if="${isSignXMac}">
         <!-- unlock keychain -->
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
@@ -1605,11 +1667,85 @@
           JXPackage - native
          ================================================================= -->
 
-    <target name="createJXPackage" depends="createJXPackageWindows, createJXPackageUnix, createJXPackageMac"
+    <target name="createJXPackage" depends="createJXPackageWindows, createJXPackageUnix, createJXPackageMac, createJXPackageSignMac"
             description="Create the final package for distribution" />
 
     <!-- package args for fixed jpackage -->
     <target name="createJXPackageMac" depends="createJPackageBase" if="${isXMac}">
+        <echo> JXPackage the mac application</echo>
+        <exec executable="${java.home}/bin/jpackage">
+            <!-- Basic usage -->
+            <arg value="--verbose" />
+            <arg value="--name" />
+            <arg value="${ant.project.name}" />
+            <arg value="--module-path" />
+            <arg value="${basedir}/${release.dir}" />
+            <arg value="--input" />
+            <arg value="${release.dir}" />
+            <arg value="--main-jar" />
+            <arg value="${ant.project.name}.jar"/>
+            <arg value="--main-class" />
+            <arg value="${main-class}"/>
+            <arg value="--dest" />
+            <arg value="${dist.dir}" />
+            <!-- Package metadata -->
+            <arg value="--app-version" />
+            <arg value="${app.version}" />
+            <arg value="--copyright" />
+            <arg value="Copyright 2006 by The HDF Group" />
+            <arg value="--description" />
+            <arg value="A visual tool for browsing and editing HDF files" />
+            <arg value="--vendor" />
+            <arg value="The HDF Group" />
+            <arg value="--license-file" />
+            <arg value="${basedir}/COPYING" />
+            <!-- File associations -->
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewH4.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF4.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewH5.properties" />
+            <arg value="--file-associations" />
+            <arg value="${basedir}/package_files/HDFViewHDF5.properties" />
+            <!-- Launchers -->
+            <!-- <arg value="- -arguments" />
+            <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" /> -->
+            <arg value="--arguments" />
+            <arg value="-Dhdfview.root='$APPDIR'" />
+            <arg value="--java-options" />
+            <arg value="-Xmx1024M" />
+            <arg value="--java-options" />
+            <arg value="-XstartOnFirstThread" />
+            <!-- <arg value="- -java-options" />
+            <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" /> -->
+            <arg value="--java-options" />
+            <arg value="-Djava.library.path='$APPDIR'" />
+            <!-- Application images -->
+            <arg value="--resource-dir" />
+            <arg value="${basedir}/package_files/macosx" />
+
+            <!-- Runtime images -->
+            <arg value="--runtime-image" />
+            <arg value="${jar.dir}/jre" />
+            <!-- Platform-specific details -->
+            <!-- <arg value="- -install-dir" /> -->
+            <!-- <arg value="/Applications/HDF_Group/${ant.project.name}" /> -->
+            <arg value="--type" />
+            <arg value="dmg" />
+            <arg value="--icon" />
+            <arg value="${basedir}/package_files/macosx/HDFView.icns" />
+            <arg value="--mac-package-identifier" />
+            <arg value="HDFView.hdfgroup.org" />
+            <arg value="--mac-package-name" />
+            <arg value="${ant.project.name}-${app.version}" />
+        </exec>
+    </target>
+
+    <!-- package args for fixed jpackage -->
+    <target name="createJXPackageSignMac" depends="createJPackageBase" if="${isSignXMac}">
         <!-- unlock keychain -->
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
@@ -1946,6 +2082,40 @@
     </target>
 
     <target name="binaryPackMac" depends="createJPackageMac, createMacREADME" if="${isAppMac}">
+        <exec executable="uname" outputproperty="uname.os">
+            <arg value="-s" />
+        </exec>
+
+        <exec executable="uname" outputproperty="uname.version">
+            <arg value="-r" />
+        </exec>
+
+        <!-- verify gatekeeper -->
+        <exec executable="spctl" dir="${dist.dir}" failonerror="false">
+            <arg value="-vvvv" />
+            <arg value="--assess" />
+            <arg value="--type" />
+            <arg value="install" />
+            <arg value="${ant.project.name}.app" />
+        </exec>
+
+        <echo message="---- Compress the mac app binary ----"/>
+        <!-- Copy over license file -->
+        <copy tofile="${dist.dir}/COPYING.txt">
+            <fileset dir="${basedir}" includes="COPYING" />
+        </copy>
+
+        <!-- Compress everything into one tar.gz file -->
+        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.tar.gz" compression="gzip">
+            <tarfileset dir="${dist.dir}" filemode="755">
+                <include name="COPYING.txt" />
+                <include name="README.txt" />
+                <include name="${ant.project.name}.app/**" />
+            </tarfileset>
+        </tar>
+    </target>
+
+    <target name="binaryPackSignMac" depends="createJPackageMac, createMacREADME" if="${isSignAppMac}">
         <!-- unlock keychain -->
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
@@ -2052,10 +2222,72 @@
           JPACKAGE APP-IMAGE
           ================================================================= -->
 
-    <target name="createJPackage" depends="createJPackageWindows, createJPackageUnix, createJPackageMac"
+    <target name="createJPackage" depends="createJPackageWindows, createJPackageUnix, createJPackageMac, createJPackageSignMac"
             description="Create the final package for distribution" />
 
     <target name="createJPackageMac" depends="createJPackageBase" if="${isAppMac}">
+        <echo> Create the mac jpackage</echo>
+        <exec executable="${java.home}/bin/jpackage">
+            <!-- Basic usage -->
+            <arg value="--verbose" />
+            <arg value="--name" />
+            <arg value="${ant.project.name}" />
+            <arg value="--module-path" />
+            <arg value="${basedir}/${release.dir}" />
+            <arg value="--input" />
+            <arg value="${release.dir}" />
+            <arg value="--main-jar" />
+            <arg value="${ant.project.name}.jar"/>
+            <arg value="--main-class" />
+            <arg value="${main-class}"/>
+            <arg value="--dest" />
+            <arg value="${dist.dir}" />
+            <!-- Package metadata -->
+            <arg value="--app-version" />
+            <arg value="${app.version}" />
+            <arg value="--copyright" />
+            <arg value="Copyright 2006 by The HDF Group" />
+            <arg value="--description" />
+            <arg value="A visual tool for browsing and editing HDF files" />
+            <arg value="--vendor" />
+            <arg value="The HDF Group" />
+            <!-- <arg value="- -license-file" />
+            <arg value="${basedir}/COPYING" /> -->
+            <!-- Launchers -->
+            <!-- <arg value="- -arguments" />
+            <arg value="-Dhdfview.root='/Applications/HDF_Group/${ant.project.name}'" /> -->
+            <arg value="--arguments" />
+            <arg value="-Dhdfview.root='$APPDIR'" />
+            <arg value="--java-options" />
+            <arg value="-Xmx1024M" />
+            <arg value="--java-options" />
+            <arg value="-XstartOnFirstThread" />
+            <!-- <arg value="- -java-options" />
+            <arg value="-Djava.library.path='/Applications/HDF_Group/${ant.project.name}/lib:/Applications/HDF_Group/${ant.project.name}/lib/ext'" /> -->
+            <arg value="--java-options" />
+            <arg value="-Djava.library.path='$APPDIR'" />
+            <!-- Application images -->
+            <arg value="--resource-dir" />
+            <arg value="${basedir}/package_files/macosx" />
+
+            <!-- Runtime images -->
+            <!-- <arg value="- -install-dir" />
+            <arg value="/Applications/HDF_Group/${ant.project.name}" /> -->
+            <arg value="--runtime-image" />
+            <arg value="${jar.dir}/jre" />
+            <!-- Platform-specific details -->
+            <arg value="--type" />
+            <arg value="app-image" />
+            <arg value="--icon" />
+            <arg value="${basedir}/package_files/macosx/HDFView.icns" />
+            <arg value="--mac-package-identifier" />
+            <arg value="HDFView.hdfgroup.org" />
+            <arg value="--mac-package-name" />
+            <arg value="${ant.project.name}-${app.version}" />
+        </exec>
+    </target>
+
+    <target name="createJPackageSignMac" depends="createJPackageBase" if="${isSignAppMac}">
         <!-- unlock keychain -->
         <exec executable="security" dir="${dist.dir}" failonerror="true">
             <arg value="unlock-keychain" />
