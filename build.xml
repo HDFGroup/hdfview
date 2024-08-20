@@ -1373,7 +1373,7 @@
         <condition property="isSignXMac" else="false">
             <and>
                 <equals arg1="${isMac}" arg2="true" />
-                <equals arg1="${sign_state}" arg2="true" />
+                <equals arg1="${sign.enable}" arg2="true" />
                 <equals arg1="${XPackage}" arg2="true" />
             </and>
         </condition>
@@ -1418,7 +1418,7 @@
         <condition property="isSignXWindows" else="false">
             <and>
                 <equals arg1="${isWindows}" arg2="true" />
-                <equals arg1="${sign_state}" arg2="true" />
+                <equals arg1="${sign.enable}" arg2="true" />
                 <equals arg1="${XPackage}" arg2="true" />
             </and>
         </condition>
@@ -1428,7 +1428,7 @@
             <and>
                 <equals arg1="${isMac}" arg2="true" />
                 <not>
-                    <equals arg1="${sign_state}" arg2="true" />
+                    <equals arg1="${sign.enable}" arg2="true" />
                 </not>
                 <not>
                     <equals arg1="${XPackage}" arg2="true" />
@@ -1440,7 +1440,7 @@
         <condition property="isSignAppMac" else="false">
             <and>
                 <equals arg1="${isMac}" arg2="true" />
-                <equals arg1="${sign_state}" arg2="true" />
+                <equals arg1="${sign.enable}" arg2="true" />
                 <not>
                     <equals arg1="${XPackage}" arg2="true" />
                 </not>
@@ -1632,41 +1632,6 @@
 
         <echo message="xxxx Staple notary ID to dmg xxxx"/>
         <antcall target="staple-notary" />
-
-        <echo message="xxxx Package the mac dmg binary xxxx"/>
-        <!-- Copy over license file -->
-        <copy tofile="${dist.dir}/COPYING.txt">
-            <fileset dir="${basedir}" includes="COPYING" />
-        </copy>
-
-        <exec executable="uname" outputproperty="uname.os">
-            <arg value="-s" />
-        </exec>
-
-        <exec executable="uname" outputproperty="uname.version">
-            <arg value="-r" />
-        </exec>
-
-        <exec dir="${dist.dir}" executable="hdiutil">
-            <arg value="verify" />
-            <arg value="${ant.project.name}-${app.version}.dmg" />
-        </exec>
-
-        <echo message="xxxx Compress the mac dmg binary xxxx"/>
-        <!-- Copy over license file -->
-        <copy tofile="${dist.dir}/COPYING.txt">
-            <fileset dir="${basedir}" includes="COPYING" />
-        </copy>
-
-        <!-- Compress everything into one tar.gz file -->
-        <tar destfile="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}.tar.gz" compression="gzip">
-            <tarfileset dir="${dist.dir}" filemode="755">
-                <include name="COPYING.txt" />
-                <include name="README.txt" />
-                <include name="${ant.project.name}-${app.version}.dmg" />
-            </tarfileset>
-        </tar>
-
     </target>
 
     <!-- =================================================================
