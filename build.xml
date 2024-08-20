@@ -1365,9 +1365,6 @@
         <condition property="isXMac" else="false">
             <and>
                 <equals arg1="${isMac}" arg2="true" />
-                <not>
-                    <equals arg1="${sign_state}" arg2="true" />
-                </not>
                 <equals arg1="${XPackage}" arg2="true" />
             </and>
         </condition>
@@ -1375,7 +1372,7 @@
 
         <condition property="isSignXMac" else="false">
             <and>
-                <equals arg1="${isMac}" arg2="true" />
+                <equals arg1="${isXMac}" arg2="true" />
                 <equals arg1="${sign_state}" arg2="true" />
                 <equals arg1="${XPackage}" arg2="true" />
             </and>
@@ -1417,6 +1414,15 @@
             </and>
         </condition>
         <echo if:set="isXWindows">isXWindows=${isXWindows}</echo>
+
+        <condition property="isSignXWindows" else="false">
+            <and>
+                <equals arg1="${isWindows}" arg2="true" />
+                <equals arg1="${sign_state}" arg2="true" />
+                <equals arg1="${XPackage}" arg2="true" />
+            </and>
+        </condition>
+        <echo if:set="isSignXWindows">isSignXWindows=${isSignXWindows}</echo>
 
         <condition property="isAppMac" else="false">
             <and>
@@ -1546,7 +1552,7 @@
         <chmod perm="u+w" file="${dist.dir}/${ant.project.name}-${app.version}-${uname.os}-${machine.arch}.tar.gz" />
     </target>
 
-    <target name="binaryPackXMac" depends="createJXPackageMac, createMacREADME" if="${isXMac}">
+    <target name="binaryPackXMac" depends="binaryPackSignXMac, createJXPackageMac, createMacREADME" if="${isXMac}">
         <echo message="xxxx Package the mac dmg binary xxxx"/>
         <!-- Copy over license file -->
         <copy tofile="${dist.dir}/COPYING.txt">
