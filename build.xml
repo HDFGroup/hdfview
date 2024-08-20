@@ -1372,7 +1372,7 @@
 
         <condition property="isSignXMac" else="false">
             <and>
-                <equals arg1="${isXMac}" arg2="true" />
+                <equals arg1="${isMac}" arg2="true" />
                 <equals arg1="${sign_state}" arg2="true" />
                 <equals arg1="${XPackage}" arg2="true" />
             </and>
@@ -1488,7 +1488,7 @@
     <target name="binaryPackX" depends="setXPackage, binaryPackXWindows, binaryPackXUnix, binaryPackXMac, binaryPackSignXMac"
         description="Packages up the installer, the license file and the README file into a distributable form"  />
 
-    <target name="binaryPackSignXWindows" depends="createJXPackage, createWindowsREADME" if="${sign.enable}">
+    <target name="binaryPackSignXWindows" depends="createJXPackage, createWindowsREADME" if="${isSignXWindows}">
         <attrib file="${basedir}\${dist.dir}\${ant.project.name}-${app.version}.msi" readonly="false" />
         <echo message="xxxx Sign the windows binary xxxx"/>
         <!-- Sign the generated exe -->
