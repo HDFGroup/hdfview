@@ -2014,7 +2014,7 @@
     <!-- =================================================================
           BINARY - PACK
           ================================================================= -->
-    <target name="binaryPack" depends="clean-package, binaryPackWindows, binaryPackUnix, binaryPackMac"
+    <target name="binaryPack" depends="clean-package, binaryPackWindows, binaryPackUnix, binaryPackMac, binaryPackSignMac"
         description="Packages up the release directory, the license file and the README file into a distributable form" />
 
     <target name="binaryPackWindows" depends="createJPackage, createWindowsAppREADME" if="${isAppWindows}">
