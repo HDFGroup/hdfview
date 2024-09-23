@@ -37,16 +37,51 @@ on:
             required: true
         KEYCHAIN_PASSWD:
             required: true
+        AZURE_TENANT_ID:
+            required: true
+        AZURE_CLIENT_ID:
+            required: true
+        AZURE_CLIENT_SECRET:
+            required: true
+        AZURE_ENDPOINT:
+            required: true
+        AZURE_CODE_SIGNING_NAME:
+            required: true
+        AZURE_CERT_PROFILE_NAME:
+            required: true
 
 permissions:
   contents: read
 
 jobs:
+  check-secret:
+    name: Check Secrets exists
+    runs-on: ubuntu-latest
+    outputs:
+      sign-state: ${{ steps.set-signing-state.outputs.BINSIGN }}
+    steps:
+      - name: Identify Signing Status
+        id: set-signing-state
+        env: 
+            signing_secret: ${{ secrets.AZURE_ENDPOINT }}
+        run: |
+          if [[ '${{ env.signing_secret }}' == '' ]]
+          then
+            SIGN_VAL=$(echo 'notexists')
+          else
+            SIGN_VAL=$(echo 'exists')
+          fi
+          echo "BINSIGN=$SIGN_VAL" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - run: echo "signing is ${{ steps.set-signing-state.outputs.BINSIGN }}."
+
   build_and_test_win:
   # Windows w/ MSVC + CMake
   #
     name: "Windows MSVC CTest"
     runs-on: windows-latest
+    needs: [check-secret]
     steps:
     - uses: actions/checkout@v4
 
@@ -174,8 +209,8 @@ jobs:
     - name: Get zip-tarball (Windows)
       uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
       with:
-              name: zip-tarball
-              path: ${{ github.workspace }}
+          name: zip-tarball
+          path: ${{ github.workspace }}
 
     - name: using powershell
       shell: pwsh
@@ -183,8 +218,8 @@ jobs:
 
     - name: List files for the space (Windows)
       run: |
-              Get-ChildItem -Path ${{ github.workspace }}
-              Get-ChildItem -Path ${{ runner.workspace }}
+          Get-ChildItem -Path ${{ github.workspace }}
+          Get-ChildItem -Path ${{ runner.workspace }}
       shell: pwsh
 
     - name: Uncompress source (Windows)
@@ -192,10 +227,35 @@ jobs:
       run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
       shell: bash
 
+    - name: Install TrustedSigning (Windows)
+      run: |
+          Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+          .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+          .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.53 -x
+#          Install-Module -Name TrustedSigning -RequiredVersion 0.4.1
+      shell: pwsh
+      if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
+    - name: create-json
+      id: create-json
+      uses: jsdaniell/create-json@v1.2.3
+      with:
+          name: "credentials.json"
+          json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
+      if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
+
     - name: Build with Ant
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
+        BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
+        AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+        AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+        SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
       run: |
         ant -noinput -buildfile build.xml binaryAppPackage
       shell: bash
@@ -251,6 +311,7 @@ jobs:
   #
     name: "Ubuntu gcc CMake"
     runs-on: ubuntu-latest
+    needs: [check-secret]
     steps:
     - uses: actions/checkout@v4
 
@@ -304,7 +365,7 @@ jobs:
         version: 'tags/${{ inputs.use_hdf5 }}'
         file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
 
-    - name: Get hdf5 release
+    - name: Get hdf5 snapshot
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
@@ -419,7 +480,8 @@ jobs:
   # mac (osx) w/ clang + ant
   #
     name: "mac clang CMake"
-    runs-on: macos-13
+    runs-on: macos-latest
+    needs: [check-secret]
     steps:
     - uses: actions/checkout@v4
 
@@ -443,6 +505,7 @@ jobs:
           # import certificate to keychain
           security -v import $CERTIFICATE_PATH -P $P12_PASSWORD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
           security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+      if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
@@ -451,40 +514,20 @@ jobs:
         distribution: 'temurin'
 
     - name: Get hdf4 release
-      continue-on-error: true
       if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
-        file: '${{ inputs.use_hdf }}-osx.tar.gz'
+        file: '${{ inputs.use_hdf }}-macos14_clang.tar.gz'
 
-    - name: Get hdf4 release osx12
-      continue-on-error: true
-      if: ${{ (inputs.use_environ == 'release') }}
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf4'
-        version: 'tags/${{ inputs.use_hdf }}'
-        file: '${{ inputs.use_hdf }}-osx12.tar.gz'
-
-    - name: Get hdf4 release
-      continue-on-error: true
+    - name: Get hdf4 snapshot
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
-        file: '${{ inputs.use_hdf }}-osx.tar.gz'
-
-    - name: Get hdf4 snapshot osx12
-      continue-on-error: true
-      if: ${{ (inputs.use_environ == 'snapshots') }}
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf4'
-        version: 'tags/snapshot'
-        file: '${{ inputs.use_hdf }}-osx12.tar.gz'
+        file: '${{ inputs.use_hdf }}-macos14_clang.tar.gz'
 
     - name: List files for the space (mac)
       run: |
@@ -492,7 +535,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (mac)
-      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-osx*.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-macos14_clang*.tar.gz
 
     - name: Uncompress hdf4 binary (mac)
       run: |
@@ -507,40 +550,20 @@ jobs:
         echo "HDFLIB_ENV=$HDFDIR$FILE_NAME_HDF" >> $GITHUB_OUTPUT
 
     - name: Get hdf5 release
-      continue-on-error: true
       if: ${{ (inputs.use_environ == 'release') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/${{ inputs.use_hdf5 }}'
-        file: '${{ inputs.name_hdf5 }}-osx.tar.gz'
-
-    - name: Get hdf5 release osx12
-      continue-on-error: true
-      if: ${{ (inputs.use_environ == 'release') }}
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf5'
-        version: 'tags/${{ inputs.use_hdf5 }}'
-        file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
+        file: '${{ inputs.name_hdf5 }}-macos14_clang.tar.gz'
 
     - name: Get hdf5 snapshot
-      continue-on-error: true
       if: ${{ (inputs.use_environ == 'snapshots') }}
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot-1.14'
-        file: '${{ inputs.name_hdf5 }}-osx.tar.gz'
-
-    - name: Get hdf5 snapshot osx12
-      continue-on-error: true
-      if: ${{ (inputs.use_environ == 'snapshots') }}
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot-1.14'
-        file: '${{ inputs.name_hdf5 }}-osx12.tar.gz'
+        file: '${{ inputs.name_hdf5 }}-macos14_clang.tar.gz'
 
     - name: List files for the space (mac)
       run: |
@@ -548,7 +571,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (mac)
-      run: tar -zxvf ${{ github.workspace }}/${{ inputs.name_hdf5 }}-osx*.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.name_hdf5 }}-macos14_clang*.tar.gz
 
     - name: Uncompress hdf5 binary (mac)
       run:  |
@@ -599,6 +622,7 @@ jobs:
       env:
         HDFLIBS: ${{ steps.set-hdflib-name.outputs.HDFLIB_ENV }}
         HDF5LIBS: ${{ steps.set-hdf5lib-name.outputs.HDF5LIB_ENV }}
+        BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
         KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
         KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
         SIGNER: ${{ vars.SIGNER }}
@@ -631,7 +655,7 @@ jobs:
     - name: Save published snapshot-app binary (mac)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-osx-app-binary
+            name: tgz-macos14_clang-app-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
@@ -640,7 +664,7 @@ jobs:
     - name: Save published release-app binary (mac)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-osx-app-binary
+            name: tgz-macos14_clang-app-binary
             path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}App-Darwin.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}

@@ -2810,7 +2810,7 @@ public class HDFView implements DataViewManager {
             for (int i = args.length - j; i < args.length; i++) {
                 tmpFile = new File(args[i]);
                 if (!tmpFile.isAbsolute())
-                    tmpFile = new File(rootDir, args[i]);
+                    tmpFile = new File(startDir, args[i]);
                 log.trace("main: filelist - file = {} ", tmpFile.getAbsolutePath());
                 log.trace("main: filelist - add file = {} exists={} isFile={} isDir={}", tmpFile,
                           tmpFile.exists(), tmpFile.isFile(), tmpFile.isDirectory());
