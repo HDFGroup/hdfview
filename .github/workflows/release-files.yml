@@ -131,7 +131,6 @@ jobs:
 
       - name: Create snapshot source file (tgz and zip)
         id: create-release-files
-        if: ${{ (inputs.use_environ == 'snapshots') }}
         run: |
               zip -r UsersGuide.zip ./UsersGuide
               tar -zcvf UsersGuide.tar.gz ./UsersGuide
