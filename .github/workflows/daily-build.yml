@@ -71,8 +71,8 @@ jobs:
     - name: Read inputs
       id: getinputs
       run: |
-        echo "INPUTS_IGNORE=${{ ((github.event.inputs.use_ignore == '' && github.event.inputs.use_ignore)  || 'ignore') }}" >> $GITHUB_OUTPUT
-        echo "INPUTS_ENVIRON=${{ ((github.event.inputs.use_environ == '' && github.event.inputs.use_environ)  || 'snapshots') }}" >> $GITHUB_OUTPUT
+        echo "INPUTS_IGNORE=${{ github.event.inputs.use_ignore }}" >> $GITHUB_OUTPUT
+        echo "INPUTS_ENVIRON=${{ github.event.inputs.use_environ }}" >> $GITHUB_OUTPUT
 
     - run: echo "use_ignore is ${{ steps.getinputs.outputs.INPUTS_IGNORE }}."
 
@@ -95,16 +95,16 @@ jobs:
       use_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
       name_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
       use_environ: snapshots
-    secrets:      
-      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
-      APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
-      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-      AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-      AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+    secrets:
+        APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+        APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+        KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
+        AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+        AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
 
   call-workflow-ant-app:
     needs: [get-base-names, call-workflow-tarball]
@@ -115,16 +115,16 @@ jobs:
       use_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
       name_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
       use_environ: snapshots
-    secrets:      
-      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
-      APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
-      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-      AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-      AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+    secrets:
+        APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+        APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+        KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
+        AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+        AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
 
   call-workflow-release:
     needs: [get-base-names, call-workflow-tarball, call-workflow-ant, call-workflow-ant-app]
