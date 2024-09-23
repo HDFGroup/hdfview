@@ -9,8 +9,6 @@ on:
         type: string
         required: false
         default: check
-  pull_request:
-    branches: [ "master" ]
   schedule:
     - cron: "5 0 * * *"
 
@@ -72,11 +70,8 @@ jobs:
       id: getinputs
       run: |
         echo "INPUTS_IGNORE=${{ github.event.inputs.use_ignore }}" >> $GITHUB_OUTPUT
-        echo "INPUTS_ENVIRON=${{ github.event.inputs.use_environ }}" >> $GITHUB_OUTPUT
 
     - run: echo "use_ignore is ${{ steps.getinputs.outputs.INPUTS_IGNORE }}."
-
-    - run: echo "use_environ is ${{ steps.getinputs.outputs.INPUTS_ENVIRON }}."
 
   call-workflow-tarball:
     needs: get-base-names
