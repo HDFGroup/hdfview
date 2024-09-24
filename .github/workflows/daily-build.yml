@@ -100,6 +100,7 @@ jobs:
         AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
         AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
         AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-ant-app:
     needs: [get-base-names, call-workflow-tarball]
@@ -120,6 +121,7 @@ jobs:
         AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
         AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
         AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-release:
     needs: [get-base-names, call-workflow-tarball, call-workflow-ant, call-workflow-ant-app]
@@ -130,6 +132,7 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
+      use_tag: HDFView-3.3.99
       use_environ: snapshots
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
