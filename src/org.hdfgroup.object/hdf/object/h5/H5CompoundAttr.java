@@ -51,26 +51,25 @@ import org.slf4j.LoggerFactory;
 /**
  * The H5CompoundAttr class defines an HDF5 attribute of compound datatypes.
  *
- * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group
- * or named datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group or named
+ * datatype.
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of
- * one or more atomic types or small arrays of such types. Each member of a compound type has a name which is
- * unique within that type, and a byte offset that determines the first byte (smallest byte address) of that
- * member in a compound datum.
+ * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of one or more
+ * atomic types or small arrays of such types. Each member of a compound type has a name which is unique within that
+ * type, and a byte offset that determines the first byte (smallest byte address) of that member in a compound datum.
  *
- * For more information on HDF5 attributes and datatypes, read the
- * <a href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in HDF5 User
- * Guide</a>
+ * For more information on HDF5 attributes and datatypes, read the <a href=
+ * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
+ * Attributes in HDF5 User Guide</a>
  *
- * There are two basic types of compound attributes: simple compound data and nested compound data. Members of
- * a simple compound attribute have atomic datatypes. Members of a nested compound attribute are compound or
- * array of compound data.
+ * There are two basic types of compound attributes: simple compound data and nested compound data. Members of a simple
+ * compound attribute have atomic datatypes. Members of a nested compound attribute are compound or array of compound
+ * data.
  *
- * Since Java does not understand C structures, we cannot directly read/write compound data values as in the
- * following C example.
+ * Since Java does not understand C structures, we cannot directly read/write compound data values as in the following C
+ * example.
  *
  * <pre>
  * typedef struct s1_t {
@@ -84,10 +83,10 @@ import org.slf4j.LoggerFactory;
  *     H5Dread(..., s1);
  * </pre>
  *
- * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by
- * fields instead of compound structure. As for the example above, the java.util.Vector object has three
- * elements: int[LENGTH], float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of
- * int, float and double, we will be able to read/write the compound data by field.
+ * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by fields
+ * instead of compound structure. As for the example above, the java.util.Vector object has three elements: int[LENGTH],
+ * float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of int, float and double, we will be
+ * able to read/write the compound data by field.
  *
  * @version 1.0 6/15/2021
  * @author Allen Byrne
