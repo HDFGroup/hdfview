@@ -40,7 +40,7 @@ public abstract class ScalarDS extends Dataset {
     private static final Logger log = LoggerFactory.getLogger(ScalarDS.class);
 
     /************************************************************
-     * The following constant strings are copied from * https://hdfgroup.github.io/hdf5/_i_m_g.html * to make
+     * The following constant strings are copied from * https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_i_m_g.html * to make
      *the definition consistent with the image specs. *
      ************************************************************/
 
@@ -307,7 +307,7 @@ public abstract class ScalarDS extends Dataset {
      * Returns true if this dataset is an image.
      *
      * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For
-     * more details, read <a href="https://hdfgroup.github.io/hdf5/_i_m_g.html"> HDF5 Image and Palette
+     * more details, read <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_i_m_g.html"> HDF5 Image and Palette
      * Specification</a>
      *
      * @return true if the dataset is an image; otherwise, returns false.

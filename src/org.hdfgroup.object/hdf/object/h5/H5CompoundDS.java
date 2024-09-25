@@ -53,26 +53,25 @@ import org.slf4j.LoggerFactory;
 /**
  * The H5CompoundDS class defines an HDF5 dataset of compound datatypes.
  *
- * An HDF5 dataset is an object composed of a collection of data elements, or raw data, and metadata that
- * stores a description of the data elements, data layout, and all other information necessary to write, read,
- * and interpret the stored data.
+ * An HDF5 dataset is an object composed of a collection of data elements, or raw data, and metadata that stores a
+ * description of the data elements, data layout, and all other information necessary to write, read, and interpret the
+ * stored data.
  *
- * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of
- * one or more atomic types or small arrays of such types. Each member of a compound type has a name which is
- * unique within that type, and a byte offset that determines the first byte (smallest byte address) of that
- * member in a compound datum.
+ * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of one or more
+ * atomic types or small arrays of such types. Each member of a compound type has a name which is unique within that
+ * type, and a byte offset that determines the first byte (smallest byte address) of that member in a compound datum.
  *
- * For more information on HDF5 datasets and datatypes, read
- * <a href="https://hdfgroup.github.io/hdf5/_h5_d__u_g.html#sec_dataset">HDF5 Datasets in HDF5 User Guide</a>
- * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
- * Guide</a>
+ * For more information on HDF5 datasets and datatypes, read <a href=
+ * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_d__u_g.html#sec_dataset">HDF5
+ * Datasets in HDF5 User Guide</a> <a href=
+ * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+ * Datatypes in HDF5 User Guide</a>
  *
- * There are two basic types of compound datasets: simple compound data and nested compound data. Members of a
- * simple compound dataset have atomic datatypes. Members of a nested compound dataset are compound or array
- * of compound data.
+ * There are two basic types of compound datasets: simple compound data and nested compound data. Members of a simple
+ * compound dataset have atomic datatypes. Members of a nested compound dataset are compound or array of compound data.
  *
- * Since Java does not understand C structures, we cannot directly read/write compound data values as in the
- * following C example.
+ * Since Java does not understand C structures, we cannot directly read/write compound data values as in the following C
+ * example.
  *
  * <pre>
  * typedef struct s1_t {
@@ -86,10 +85,10 @@ import org.slf4j.LoggerFactory;
  *     H5Dread(..., s1);
  * </pre>
  *
- * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by
- * fields instead of compound structure. As for the example above, the java.util.Vector object has three
- * elements: int[LENGTH], float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of
- * int, float and double, we will be able to read/write the compound data by field.
+ * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by fields
+ * instead of compound structure. As for the example above, the java.util.Vector object has three elements: int[LENGTH],
+ * float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of int, float and double, we will be
+ * able to read/write the compound data by field.
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
