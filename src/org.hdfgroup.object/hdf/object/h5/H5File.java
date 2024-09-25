@@ -633,7 +633,8 @@ public class H5File extends FileFormat {
      * Attribute, boolean)} method may be used to write image attributes that are not handled by this method.
      *
      * For more information about HDF5 image attributes, read <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_i_m_g.html">HDF5 Image and Palette Specification</a>
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_i_m_g.html">HDF5
+     * Image and Palette Specification</a>
      *
      * This method can be called to create attributes for 24-bit true color and indexed images. The
      * <code>selectionFlag</code> parameter controls whether this will be an indexed or true color image. If

@@ -28,8 +28,9 @@ import org.slf4j.LoggerFactory;
  * Datatype is an abstract class that defines datatype characteristics and APIs for a data type.
  *
  * A datatype has four basic characteristics: class, size, byte order and sign. These characteristics are
- * defined in the See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in
- * HDF5 User Guide</a>
+ * defined in the See <a
+ * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+ * Datatypes in HDF5 User Guide</a>
  *
  * These characteristics apply to all the sub-classes. The sub-classes may have different ways to describe a
  * datatype. We here define the <strong> native datatype</strong> to the datatype used by the sub-class. For
@@ -55,122 +56,142 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     public static final int NATIVE = -1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_NO_CLASS = -1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_INTEGER = 0;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_FLOAT = 1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_CHAR = 2;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_STRING = 3;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_BITFIELD = 4;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_OPAQUE = 5;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_COMPOUND = 6;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_REFERENCE = 7;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_ENUM = 8;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_VLEN = 9;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_ARRAY = 10;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int CLASS_TIME = 11;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int ORDER_LE = 0;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int ORDER_BE = 1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int ORDER_VAX = 2;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int ORDER_NONE = 3;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int SIGN_NONE = 0;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int SIGN_2 = 1;
 
     /**
-     * See <a href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
-     * Guide</a>
+     * See <a
+     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
      */
     public static final int NSGN = 2;
 

@@ -34,9 +34,9 @@ import org.slf4j.LoggerFactory;
  * The abstract class provides general APIs to create and manipulate dataset/attribute objects, and retrieve
  * dataset/attribute properties, datatype and dimension sizes.
  *
- * This class provides two convenient functions, read()/write(), to read/write data values. Reading/writing data may
- * take many library calls if we use the library APIs directly. The read() and write functions hide all the details of
- * these calls from users.
+ * This class provides two convenient functions, read()/write(), to read/write data values. Reading/writing
+ * data may take many library calls if we use the library APIs directly. The read() and write functions hide
+ * all the details of these calls from users.
  *
  * For more details on dataset and attributes, See <a href=
  * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_d__u_g.html#sec_dataset">HDF5
