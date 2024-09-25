@@ -38,9 +38,10 @@ import org.slf4j.LoggerFactory;
 /**
  * An H5Group object represents an existing HDF5 group in file.
  *
- * In HDF5, every object has at least one name. An HDF5 group is used to store a set of the names together in one place,
- * i.e. a group. The general structure of a group is similar to that of the UNIX file system in that the group may
- * contain references to other groups or data objects just as the UNIX directory may contain sub-directories or files.
+ * In HDF5, every object has at least one name. An HDF5 group is used to store a set of the names together in
+ * one place, i.e. a group. The general structure of a group is similar to that of the UNIX file system in
+ * that the group may contain references to other groups or data objects just as the UNIX directory may
+ * contain sub-directories or files.
  *
  * For more information on HDF5 Groups,
  *

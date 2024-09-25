@@ -36,8 +36,8 @@ import nom.tam.fits.Header;
 import nom.tam.fits.HeaderCard;
 
 /**
- * FitsDataset describes an multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
- * float, double and string, and operations performed on the scalar dataset
+ * FitsDataset describes an multi-dimension array of HDF5 scalar or atomic data types, such as byte, int,
+ * short, long, float, double and string, and operations performed on the scalar dataset
  *
  * The library predefines a modest number of datatypes. For details, read <a href=
  * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
