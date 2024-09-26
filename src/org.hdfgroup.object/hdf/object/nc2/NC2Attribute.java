@@ -41,7 +41,8 @@ import org.slf4j.LoggerFactory;
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
  * For more details on attributes, <a
- * href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in HDF5 User Guide</a>
+ * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
+ * Attributes in HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
  *

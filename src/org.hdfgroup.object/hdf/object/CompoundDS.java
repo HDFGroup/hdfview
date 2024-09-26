@@ -45,9 +45,9 @@ import org.slf4j.LoggerFactory;
  * which is unique within that type, and a datatype of that member in a compound datum. Compound datatypes can
  * be nested, i.e. members of a compound datatype can be some other compound datatype.
  *
- * For more details on compound datatypes, See
- * <a href="https://hdfgroup.github.io/hdf5/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5 User
- * Guide</a>
+ * For more details on compound datatypes, See <a href=
+ * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+ * Datatypes in HDF5 User Guide</a>
  *
  * Since Java cannot handle C-structured compound data, data in a compound dataset is loaded in to an Java
  * List. Each element of the list is a data array that corresponds to a compound field. The data is
