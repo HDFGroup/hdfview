@@ -136,7 +136,8 @@ import org.eclipse.swt.widgets.TreeItem;
  *
  * A default color table is provided for images without palette attached to it. Current choice of default
  * palettes include Gray, Rainbow, Nature and Wave. For more infomation on palette, read <a
- * href="https://hdfgroup.github.io/hdf5/_i_m_g.html">HDF5 Image and Palette Specification</a>
+ * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_i_m_g.html">HDF5
+ * Image and Palette Specification</a>
  *
  * @author Jordan T. Henderson
  * @version 2.4 2//2016

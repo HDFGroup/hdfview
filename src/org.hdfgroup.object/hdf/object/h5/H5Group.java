@@ -45,7 +45,9 @@ import org.slf4j.LoggerFactory;
  *
  * For more information on HDF5 Groups,
  *
- * <a href="https://hdfgroup.github.io/hdf5/_h5_g__u_g.html#sec_group">HDF5 Groups in HDF5 User Guide</a>
+ * <a href=
+ * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_g__u_g.html#sec_group">HDF5
+ * Groups in HDF5 User Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao

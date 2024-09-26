@@ -61,9 +61,9 @@ import org.slf4j.LoggerFactory;
  * unique within that type, and a byte offset that determines the first byte (smallest byte address) of that
  * member in a compound datum.
  *
- * For more information on HDF5 attributes and datatypes, read the
- * <a href="https://hdfgroup.github.io/hdf5/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in HDF5 User
- * Guide</a>
+ * For more information on HDF5 attributes and datatypes, read the <a href=
+ * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
+ * Attributes in HDF5 User Guide</a>
  *
  * There are two basic types of compound attributes: simple compound data and nested compound data. Members of
  * a simple compound attribute have atomic datatypes. Members of a nested compound attribute are compound or
