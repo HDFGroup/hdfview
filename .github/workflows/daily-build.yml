@@ -10,7 +10,7 @@ on:
         required: false
         default: check
   pull_request:
-    branches: [ "master" ]
+    branches: [ "hdfview-3-1_14" ]
 
 permissions:
   contents: read
@@ -69,7 +69,7 @@ jobs:
     - name: Read inputs
       id: getinputs
       run: |
-        echo "INPUTS_IGNORE=${{ github.event.inputs.use_ignore }}" >> $GITHUB_OUTPUT
+        echo "INPUTS_IGNORE=${{ inputs.use_ignore }}" >> $GITHUB_OUTPUT
 
     - run: echo "use_ignore is ${{ steps.getinputs.outputs.INPUTS_IGNORE }}."
 
