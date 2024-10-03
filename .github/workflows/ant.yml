@@ -1,4 +1,4 @@
-name: hdfview ci runs
+name: hdfview 1_16 ci runs
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -20,7 +20,7 @@ on:
         description: 'The version name of the binaries'
         type: string
         required: false
-        default: HDFView-99.99.99
+        default: HDFView-3.4.99
       file_base:
         description: "The common base name of the source tarballs"
         required: true
@@ -153,7 +153,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot'
+        version: 'tags/snapshot-1.16'
         file: '${{ inputs.name_hdf5 }}-win-vs2022_cl.zip'
 
     - name: Uncompress gh binary (Win)
@@ -362,7 +362,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot'
+        version: 'tags/snapshot-1.16'
         file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
 
     - name: List files for the space (Linux)
@@ -546,7 +546,7 @@ jobs:
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot'
+        version: 'tags/snapshot-1.16'
         file: '${{ inputs.name_hdf5 }}-macos14_clang.tar.gz'
 
     - name: List files for the space (mac)

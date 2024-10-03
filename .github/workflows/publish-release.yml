@@ -1,4 +1,4 @@
-name: hdfview publishrelease
+name: hdfview 1.16 publishrelease
 
 # Triggers the workflow on demand
 on:

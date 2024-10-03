@@ -7,7 +7,7 @@
 #
 # which you will need to set to "Read and write permissions"
 #
-name: clang-format Commit Changes
+name: clang-format 1_16 Commit Changes
 on: 
   workflow_dispatch:
   push:
