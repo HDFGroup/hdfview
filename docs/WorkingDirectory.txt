@@ -35,7 +35,7 @@ The following locations are involved in where the working directory for a file s
    A. The initial working directory as described above.
    B. The directory used to load a file specified as an argument on the command line invocation of HDFView.
       java ... hdf.view.HDFView startDir=some_location "ARGS"
-   C. A location saved in the HDFView property file, .hdfview99.99.99 in the user home directory.
+   C. A location saved in the HDFView property file, .hdfview3.4.99 in the user home directory.
       work.dir=dir_path
       This is property is only set by using the "User Options" dialog.
    D. The last directory used to load a file using the HDFView file search dialog.

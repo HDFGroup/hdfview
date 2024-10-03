@@ -1,4 +1,4 @@
-name: clang-format Check
+name: clang-format 1_16 Check
 on:
   pull_request:
 permissions:

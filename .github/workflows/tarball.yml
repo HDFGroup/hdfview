@@ -1,4 +1,4 @@
-name: hdfview tarball
+name: hdfview 1_16 tarball
 
 # Triggers the workflow on a call from another workflow
 on:
