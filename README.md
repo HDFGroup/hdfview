@@ -56,7 +56,7 @@ PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Source packages for current and previous releases are located at:
     
-   https://support.hdfgroup.org/downloads/HDFVIEW/index.html
+   https://support.hdfgroup.org/downloads/
 
 Development code is available at our Github location:
     
