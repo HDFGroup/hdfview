@@ -139,7 +139,11 @@ public class H5File extends FileFormat {
     public static final int LIBVER_V112 = HDF5Constants.H5F_LIBVER_V112;
     /** The library v1.14 version value */
     public static final int LIBVER_V114 = HDF5Constants.H5F_LIBVER_V114;
+<<<<<<< Upstream, based on branch 'master-complex' of https://github.com/byrnHDF/hdfview.git
     /** The library v2.0 version value */
+=======
+    /** The library v1.16 version value */
+>>>>>>> d5ac702 Update to latest develop vesrsion (#346)
     public static final int LIBVER_V200 = HDF5Constants.H5F_LIBVER_V200;
 
     /**
