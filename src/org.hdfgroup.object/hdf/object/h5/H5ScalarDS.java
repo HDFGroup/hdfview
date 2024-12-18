@@ -375,10 +375,14 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         datatype = new H5Datatype(getFileFormat(), tid);
 
                     log.trace(
-                        "init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isStdRef={} : isRegRef={}",
+                            "init(): tid={} is tclass={} has isText={} : isNamed={} :  isUnsigned={} ",
                         tid, datatype.getDatatypeClass(), ((H5Datatype)datatype).isText(), datatype.isNamed(),
-                        datatype.isVLEN(), datatype.isEnum(), datatype.isUnsigned(),
-                        ((H5Datatype)datatype).isStdRef(), ((H5Datatype)datatype).isRegRef());
+                            datatype.isUnsigned());
+                    log.trace(
+                            "init(): tid={} is tclass={} has isVLEN={} : isEnum={} : isStdRef={} : isRegRef={} : isComplex={}",
+                            tid, datatype.getDatatypeClass(), datatype.isVLEN(), datatype.isEnum(),
+                            ((H5Datatype) datatype).isStdRef(), ((H5Datatype) datatype).isRegRef(),
+                            ((H5Datatype) datatype).isComplex());
                 }
                 catch (Exception ex) {
                     log.debug("init(): failed to create datatype for dataset: ", ex);
@@ -495,6 +499,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
             startDims    = new long[rank];
             selectedDims = new long[rank];
 
+            log.trace("init(): resetSelection");
             resetSelection();
         }
         else {
@@ -2400,8 +2405,19 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 log.trace("parseFillValue(): class CLASS_REFERENCE");
                 data = HDFNativeData.longToByte((long)valDbl);
                 break;
+            case Datatype.CLASS_COMPLEX:
+                log.trace("parseFillValue(): class CLASS_COMPLEX");
+                break;
             default:
                 log.debug("parseFillValue(): datatypeClass unknown");
+                if (datatypeSize > 8)
+                    data = valStr.getBytes();
+                else if (datatypeSize == 8)
+                    data = HDFNativeData.doubleToByte(valDbl);
+                else if (datatypeSize == 4)
+                    data = HDFNativeData.floatToByte((float) valDbl);
+                else
+                    data = HDFNativeData.shortToByte((short) Float.floatToFloat16((float) valDbl));
                 break;
             } // (datatypeClass)
         }

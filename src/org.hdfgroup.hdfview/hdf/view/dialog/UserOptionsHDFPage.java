@@ -55,9 +55,9 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private Button checkNativeOrder, checkDecOrder, checkIncOrder;
     private Button checkIndexName, checkIndexCreateOrder;
     private Button earlyLibVersion, early18LibVersion, early110LibVersion, early112LibVersion,
-        early114LibVersion, earlyLateLibVersion;
+            early114LibVersion, early200LibVersion, earlyLateLibVersion;
     private Button lateLibVersion, late18LibVersion, late110LibVersion, late112LibVersion, late114LibVersion,
-        lateLateLibVersion;
+            late200LibVersion, lateLateLibVersion;
     private Button pluginDirButton;
 
     /** Default early libversion for files */
@@ -130,6 +130,8 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                 ViewProperties.setEarlyLib("v112");
             else if (early114LibVersion.getSelection())
                 ViewProperties.setEarlyLib("v114");
+            else if (early200LibVersion.getSelection())
+                ViewProperties.setEarlyLib("v200");
             else if (earlyLateLibVersion.getSelection())
                 ViewProperties.setEarlyLib("Latest");
             else
@@ -148,6 +150,8 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
                 ViewProperties.setLateLib("v112");
             else if (late114LibVersion.getSelection())
                 ViewProperties.setLateLib("v114");
+            else if (late200LibVersion.getSelection())
+                ViewProperties.setLateLib("v200");
             else if (lateLateLibVersion.getSelection())
                 ViewProperties.setLateLib("Latest");
             else
@@ -211,6 +215,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         early110LibVersion.setSelection(earlyLibVers.compareTo("v110") == 0);
         early112LibVersion.setSelection(earlyLibVers.compareTo("v112") == 0);
         early114LibVersion.setSelection(earlyLibVers.compareTo("v114") == 0);
+        early200LibVersion.setSelection(earlyLibVers.compareTo("v200") == 0);
         earlyLateLibVersion.setSelection(earlyLibVers.compareTo("Latest") == 0);
 
         lateLibVers = ViewProperties.getLateLib();
@@ -220,6 +225,7 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         late110LibVersion.setSelection(lateLibVers.compareTo("v110") == 0);
         late112LibVersion.setSelection(lateLibVers.compareTo("v112") == 0);
         late114LibVersion.setSelection(lateLibVers.compareTo("v114") == 0);
+        late200LibVersion.setSelection(lateLibVers.compareTo("v200") == 0);
         lateLateLibVersion.setSelection(lateLibVers.compareTo("Latest") == 0);
 
         checkConvertEnum.setSelection(ViewProperties.isConvertEnum());
@@ -311,6 +317,11 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         early114LibVersion.setText("v114");
         early114LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+        early200LibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
+        early200LibVersion.setFont(curFont);
+        early200LibVersion.setText("v200");
+        early200LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
         earlyLateLibVersion = new Button(earlyLibVersionGroup, SWT.RADIO);
         earlyLateLibVersion.setFont(curFont);
         earlyLateLibVersion.setText("Latest");
@@ -347,6 +358,11 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
         late114LibVersion.setFont(curFont);
         late114LibVersion.setText("v114");
         late114LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        late200LibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
+        late200LibVersion.setFont(curFont);
+        late200LibVersion.setText("v200");
+        late200LibVersion.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         lateLateLibVersion = new Button(lateLibVersionGroup, SWT.RADIO);
         lateLateLibVersion.setFont(curFont);
