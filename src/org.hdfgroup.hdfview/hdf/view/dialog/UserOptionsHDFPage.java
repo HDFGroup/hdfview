@@ -55,9 +55,9 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
     private Button checkNativeOrder, checkDecOrder, checkIncOrder;
     private Button checkIndexName, checkIndexCreateOrder;
     private Button earlyLibVersion, early18LibVersion, early110LibVersion, early112LibVersion,
-            early114LibVersion, early200LibVersion, earlyLateLibVersion;
+        early114LibVersion, early200LibVersion, earlyLateLibVersion;
     private Button lateLibVersion, late18LibVersion, late110LibVersion, late112LibVersion, late114LibVersion,
-            late200LibVersion, lateLateLibVersion;
+        late200LibVersion, lateLateLibVersion;
     private Button pluginDirButton;
 
     /** Default early libversion for files */

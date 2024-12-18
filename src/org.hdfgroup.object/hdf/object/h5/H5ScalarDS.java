@@ -374,15 +374,14 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                     else
                         datatype = new H5Datatype(getFileFormat(), tid);
 
+                    log.trace("init(): tid={} is tclass={} has isText={} : isNamed={} :  isUnsigned={} ", tid,
+                              datatype.getDatatypeClass(), ((H5Datatype)datatype).isText(),
+                              datatype.isNamed(), datatype.isUnsigned());
                     log.trace(
-                            "init(): tid={} is tclass={} has isText={} : isNamed={} :  isUnsigned={} ",
-                        tid, datatype.getDatatypeClass(), ((H5Datatype)datatype).isText(), datatype.isNamed(),
-                            datatype.isUnsigned());
-                    log.trace(
-                            "init(): tid={} is tclass={} has isVLEN={} : isEnum={} : isStdRef={} : isRegRef={} : isComplex={}",
-                            tid, datatype.getDatatypeClass(), datatype.isVLEN(), datatype.isEnum(),
-                            ((H5Datatype) datatype).isStdRef(), ((H5Datatype) datatype).isRegRef(),
-                            ((H5Datatype) datatype).isComplex());
+                        "init(): tid={} is tclass={} has isVLEN={} : isEnum={} : isStdRef={} : isRegRef={} : isComplex={}",
+                        tid, datatype.getDatatypeClass(), datatype.isVLEN(), datatype.isEnum(),
+                        ((H5Datatype)datatype).isStdRef(), ((H5Datatype)datatype).isRegRef(),
+                        ((H5Datatype)datatype).isComplex());
                 }
                 catch (Exception ex) {
                     log.debug("init(): failed to create datatype for dataset: ", ex);
@@ -2415,9 +2414,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 else if (datatypeSize == 8)
                     data = HDFNativeData.doubleToByte(valDbl);
                 else if (datatypeSize == 4)
-                    data = HDFNativeData.floatToByte((float) valDbl);
+                    data = HDFNativeData.floatToByte((float)valDbl);
                 else
-                    data = HDFNativeData.shortToByte((short) Float.floatToFloat16((float) valDbl));
+                    data = HDFNativeData.shortToByte((short)Float.floatToFloat16((float)valDbl));
                 break;
             } // (datatypeClass)
         }

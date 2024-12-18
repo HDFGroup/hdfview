@@ -970,9 +970,10 @@ public class DataDisplayConverterFactory {
         private static final Logger log = LoggerFactory.getLogger(ComplexDataDisplayConverter.class);
 
         private final HDFDisplayConverter baseTypeConverter;
-        private final StringBuilder       buffer;
+        private final StringBuilder buffer;
 
-        ComplexDataDisplayConverter(final Datatype dtype) throws Exception {
+        ComplexDataDisplayConverter(final Datatype dtype) throws Exception
+        {
             super(dtype);
 
             if (!dtype.isComplex()) {
@@ -1000,8 +1001,9 @@ public class DataDisplayConverterFactory {
             }
             catch (Exception ex) {
                 log.debug("exit: couldn't get DataDisplayConverter for base datatype: ", ex);
-                throw new Exception("ComplexDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: "
-                        + ex.getMessage());
+                throw new Exception(
+                    "ComplexDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: " +
+                    ex.getMessage());
             }
 
             buffer = new StringBuilder();
@@ -1031,8 +1033,8 @@ public class DataDisplayConverterFactory {
             buffer.setLength(0); // clear the old string
 
             /*
-             * Pass the cell's row and column index down in case there is a CompoundDataDisplayConverter at the bottom
-             * of the chain.
+             * Pass the cell's row and column index down in case there is a CompoundDataDisplayConverter at
+             * the bottom of the chain.
              */
             baseTypeConverter.cellRowIdx = cellRowIdx;
             baseTypeConverter.cellColIdx = cellColIdx;
@@ -1040,7 +1042,7 @@ public class DataDisplayConverterFactory {
             try {
                 Object obj;
                 Object convertedValue;
-                int    arrLen = Array.getLength(value);
+                int arrLen = Array.getLength(value);
 
                 log.trace("canonicalToDisplayValue({}): array length={}", value, arrLen);
 

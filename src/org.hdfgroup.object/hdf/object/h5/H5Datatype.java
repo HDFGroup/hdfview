@@ -818,7 +818,7 @@ public class H5Datatype extends Datatype {
                 tsize         = H5.H5Tget_size(tid);
                 isVariableStr = H5.H5Tis_variable_str(tid);
                 isVLEN        = false;
-                isComplex = false;
+                isComplex     = false;
                 log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize,
                           torder, isVLEN);
                 if (H5.H5Tcommitted(tid)) {
@@ -1155,14 +1155,14 @@ public class H5Datatype extends Datatype {
             }
             else if (nativeClass == HDF5Constants.H5T_COMPLEX) {
                 log.debug("fromNative(): datatypeClass is complex");
-                long tmptid = HDF5Constants.H5I_INVALID_HID;
+                long tmptid   = HDF5Constants.H5I_INVALID_HID;
                 datatypeClass = CLASS_COMPLEX;
-                isComplex = true;
+                isComplex     = true;
                 try {
                     log.trace("fromNative(): complex type");
-                    tmptid = H5.H5Tget_super(tid);
+                    tmptid              = H5.H5Tget_super(tid);
                     int nativeBaseClass = H5.H5Tget_class(tmptid);
-                    baseType = new H5Datatype(this.fileFormat, tmptid, this);
+                    baseType            = new H5Datatype(this.fileFormat, tmptid, this);
                     if (baseType == null) {
                         log.debug("fromNative(): Complex datatype has null base type");
                         throw new Exception("Datatype (Complex) has no base datatype");
@@ -1898,7 +1898,7 @@ public class H5Datatype extends Datatype {
             else {
                 if (typeSize == NATIVE)
                     typeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
-                data = new byte[(int) (numPoints * 2 * typeSize)];
+                data = new byte[(int)(numPoints * 2 * typeSize)];
             }
         }
         else if ((typeClass == CLASS_OPAQUE) || (typeClass == CLASS_BITFIELD)) {

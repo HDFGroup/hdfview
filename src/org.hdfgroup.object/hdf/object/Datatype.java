@@ -1017,10 +1017,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      *
      * @return true if the datatype is complex; false otherwise
      */
-    public boolean isComplex()
-    {
-        return (datatypeClass == Datatype.CLASS_COMPLEX);
-    }
+    public boolean isComplex() { return (datatypeClass == Datatype.CLASS_COMPLEX); }
 
     /* Implement interface MetaDataContainer */
 
