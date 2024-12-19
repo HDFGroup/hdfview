@@ -816,7 +816,8 @@ public class DataValidatorFactory {
 
         private final HDFDataValidator baseValidator;
 
-        ComplexDataValidator(final Datatype dtype) throws Exception {
+        ComplexDataValidator(final Datatype dtype) throws Exception
+        {
             super(dtype);
 
             if (!dtype.isComplex()) {
