@@ -1014,6 +1014,7 @@ public class DataDisplayConverterFactory {
         {
             cellRowIdx = cell.getRowIndex();
             cellColIdx = cell.getColumnIndex();
+            log.trace("canonicalToDisplayValue({}): cellRowIdx={} cellRowIdx={}", value, cellRowIdx, cellRowIdx);
             return canonicalToDisplayValue(value);
         }
 

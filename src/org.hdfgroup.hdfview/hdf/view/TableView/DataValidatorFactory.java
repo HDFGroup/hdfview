@@ -116,6 +116,8 @@ public class DataValidatorFactory {
                 validator = new BitfieldDataValidator(dtype);
             else if (dtype.isRef())
                 validator = new RefDataValidator(dtype);
+            else if (dtype.isComplex())
+                validator = new ComplexDataValidator(dtype);
         }
         catch (Exception ex) {
             log.debug("getDataValidator(Datatype): failed to retrieve a DataValidator: ", ex);
@@ -807,5 +809,60 @@ public class DataValidatorFactory {
         private static final Logger log = LoggerFactory.getLogger(RefDataValidator.class);
 
         RefDataValidator(final Datatype dtype) { super(dtype); }
+    }
+
+    private static class ComplexDataValidator extends HDFDataValidator {
+        private static final Logger log = LoggerFactory.getLogger(ComplexDataValidator.class);
+
+        private final HDFDataValidator baseValidator;
+
+        ComplexDataValidator(final Datatype dtype) throws Exception {
+            super(dtype);
+
+            if (!dtype.isComplex()) {
+                log.debug("datatype is not a complex type: exit");
+                throw new Exception("ComplexDataValidator: datatype is not a complex type");
+            }
+
+            Datatype baseType = dtype.getDatatypeBase();
+            if (baseType == null) {
+                log.debug("base datatype is null: exit");
+                throw new Exception("ComplexDataValidator: base datatype is null");
+            }
+            if (!baseType.isFloat()) {
+                log.debug("base datatype is not a float type: exit");
+                throw new Exception("ComplexDataValidator: datatype is not a float type");
+            }
+
+            log.trace("base Datatype is {}", dtype.getDescription());
+
+            try {
+                baseValidator = getDataValidator(baseType);
+            }
+            catch (Exception ex) {
+                log.debug("couldn't get DataValidator for base datatype: exit: ", ex);
+                throw new Exception("couldn't get DataValidator for base datatype: " + ex.getMessage());
+            }
+        }
+
+        @Override
+        public boolean validate(int colIndex, int rowIndex, Object newValue)
+        {
+            log.trace("validate({}, {}, {}): start", rowIndex, colIndex, newValue);
+
+            try {
+                super.checkValidValue(newValue);
+
+                baseValidator.validate(colIndex, rowIndex, newValue);
+            }
+            catch (Exception ex) {
+                super.throwValidationFailedException(rowIndex, colIndex, newValue, ex.toString());
+            }
+            finally {
+                log.trace("validate({}, {}, {}): finish", rowIndex, colIndex, newValue);
+            }
+
+            return true;
+        }
     }
 }
