@@ -696,6 +696,7 @@ public class DataProviderFactory {
                 Object colValue   = ((List<?>)dataBuf).get(providerIndex);
                 if (colValue == null)
                     return DataFactoryUtils.nullStr;
+                log.trace("getDataValue: colValue={}, rowIdx={}, fieldIdx={}", colValue, rowIdx, fieldIdx);
 
                 /*
                  * Delegate data retrieval to one of the base DataProviders according to the
@@ -736,6 +737,31 @@ public class DataProviderFactory {
                     int adjustedColIndex = columnIndex - arrCompoundStartIdx;
 
                     theValue = base.getDataValue(colValue, adjustedColIndex, rowIdx);
+                }
+                else if (base instanceof ComplexDataProvider) {
+                    int             arrCompoundStartIdx = columnIndex;
+                    HDFDataProvider theProvider;
+                    while (arrCompoundStartIdx >= 0) {
+                        try {
+                            theProvider = baseTypeProviders[baseProviderIndexMap.get(arrCompoundStartIdx - 1)];
+                            if (theProvider != base)
+                                break;
+
+                            arrCompoundStartIdx--;
+                        }
+                        catch (Exception ex) {
+                            break;
+                        }
+                    }
+
+                    int adjustedColIndex = columnIndex - arrCompoundStartIdx;
+                    log.trace("getDataValue: adjustedColIndex={}, columnIndex={}, arrCompoundStartIdx={}",
+                            adjustedColIndex, columnIndex, arrCompoundStartIdx);
+                    rowIdx = rowIdx * 2;
+
+                    theValue = base.getDataValue(colValue, adjustedColIndex, rowIdx);
+                    log.trace("getDataValue: theValue={}, rowIdx={}, adjustedColIndex={}", theValue, rowIdx,
+                            adjustedColIndex);
                 }
                 else
                     theValue = base.getDataValue(colValue, rowIdx);
