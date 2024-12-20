@@ -739,11 +739,12 @@ public class DataProviderFactory {
                     theValue = base.getDataValue(colValue, adjustedColIndex, rowIdx);
                 }
                 else if (base instanceof ComplexDataProvider) {
-                    int             arrCompoundStartIdx = columnIndex;
+                    int arrCompoundStartIdx = columnIndex;
                     HDFDataProvider theProvider;
                     while (arrCompoundStartIdx >= 0) {
                         try {
-                            theProvider = baseTypeProviders[baseProviderIndexMap.get(arrCompoundStartIdx - 1)];
+                            theProvider =
+                                baseTypeProviders[baseProviderIndexMap.get(arrCompoundStartIdx - 1)];
                             if (theProvider != base)
                                 break;
 
@@ -756,12 +757,12 @@ public class DataProviderFactory {
 
                     int adjustedColIndex = columnIndex - arrCompoundStartIdx;
                     log.trace("getDataValue: adjustedColIndex={}, columnIndex={}, arrCompoundStartIdx={}",
-                            adjustedColIndex, columnIndex, arrCompoundStartIdx);
+                              adjustedColIndex, columnIndex, arrCompoundStartIdx);
                     rowIdx = rowIdx * 2;
 
                     theValue = base.getDataValue(colValue, adjustedColIndex, rowIdx);
                     log.trace("getDataValue: theValue={}, rowIdx={}, adjustedColIndex={}", theValue, rowIdx,
-                            adjustedColIndex);
+                              adjustedColIndex);
                 }
                 else
                     theValue = base.getDataValue(colValue, rowIdx);
