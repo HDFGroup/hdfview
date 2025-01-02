@@ -1854,7 +1854,7 @@
             <arg value="--icon" />
             <arg value="${basedir}/package_files/hdfview.png" />
             <arg value="--linux-menu-group" />
-            <arg value="The HDF Group" />
+            <arg value="Science;DataVisualization;" />
             <!-- Runtime images -->
             <!-- <arg value="- -install-dir" />
             <arg value="/opt/HDF_Group/${ant.project.name}" /> -->
