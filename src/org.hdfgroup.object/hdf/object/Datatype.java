@@ -151,6 +151,13 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
      * Datatypes in HDF5 User Guide</a>
      */
+    public static final int CLASS_COMPLEX = 12;
+
+    /**
+     * See <a href=
+     * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
+     * Datatypes in HDF5 User Guide</a>
+     */
     public static final int ORDER_LE = 0;
 
     /**
@@ -245,6 +252,11 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * Determines whether this datatype is a variable-length type.
      */
     protected boolean isVLEN = false;
+
+    /**
+     * Determines whether this datatype is a complex type.
+     */
+    protected boolean isComplex = false;
 
     /**
      * Determines whether this datatype is a variable-length string type.
@@ -570,6 +582,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * <li>CLASS_ENUM
      * <li>CLASS_VLEN
      * <li>CLASS_ARRAY
+     * <li>CLASS_COMPLEX
      * </ul>
      *
      * @return the class of the datatype.
@@ -848,6 +861,13 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
         case CLASS_VLEN:
             description.append("Variable-length");
             break;
+        case CLASS_COMPLEX:
+            log.trace("getDescription(): Complex [{}]", datatypeNATIVE);
+            if (datatypeNATIVE)
+                description.append("native Complex");
+            else
+                description.append(String.valueOf(datatypeSize * 8)).append("-bit Complex");
+            break;
         default:
             description.append("Unknown");
             break;
@@ -991,6 +1011,13 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
      * @return true if the datatype is bitfield; false otherwise
      */
     public boolean isBitField() { return (datatypeClass == Datatype.CLASS_BITFIELD); }
+
+    /**
+     * Checks if this datatype is a complex type.
+     *
+     * @return true if the datatype is complex; false otherwise
+     */
+    public boolean isComplex() { return (datatypeClass == Datatype.CLASS_COMPLEX); }
 
     /* Implement interface MetaDataContainer */
 
