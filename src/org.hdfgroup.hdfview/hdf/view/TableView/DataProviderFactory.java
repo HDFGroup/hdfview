@@ -1401,15 +1401,15 @@ public class DataProviderFactory {
         private Object[] retrieveArrayOfComplexElements(Object objBuf, int columnIndex, int startRowIndex)
         {
             log.debug("retrieveArrayOfComplexElements(): objBuf={}", objBuf);
-            ArrayList<byte[]> vlElements = ((ArrayList[]) objBuf)[startRowIndex];
+            ArrayList<byte[]> vlElements = ((ArrayList[])objBuf)[startRowIndex];
             log.debug("retrieveArrayOfComplexElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
             log.debug("retrieveArrayOfComplexElements(): vlSize={} length={}", vlSize, vlElements.size());
-            Object[] tempArray = new Object[(int) vlSize];
+            Object[] tempArray = new Object[(int)vlSize];
 
             for (int i = 0; i < vlSize; i++) {
                 ArrayList<byte[]> ref_value = vlElements;
-                StringBuilder     sb        = new StringBuilder();
+                StringBuilder sb            = new StringBuilder();
                 sb.append("{");
                 for (int m = 0; m < ref_value.size(); m++) {
                     if (m > 0)
