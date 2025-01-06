@@ -1290,6 +1290,12 @@ public class DataProviderFactory {
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
+                else if (baseTypeDataProvider instanceof ComplexDataProvider) {
+                    /*
+                     * TODO: assign to global arrayElements.
+                     */
+                    theValue = retrieveArrayOfComplexElements(dataBuf, columnIndex, bufIndex);
+                }
                 else {
                     /*
                      * TODO: assign to global arrayElements.
@@ -1328,6 +1334,9 @@ public class DataProviderFactory {
                 }
                 else if (baseTypeDataProvider instanceof RefDataProvider) {
                     theValue = retrieveArrayOfArrayElements(obj, columnIndex, rowIndex);
+                }
+                else if (baseTypeDataProvider instanceof ComplexDataProvider) {
+                    theValue = retrieveArrayOfComplexElements(obj, columnIndex, rowIndex);
                 }
                 else {
                     theValue = retrieveArrayOfAtomicElements(obj, rowIndex);
@@ -1384,6 +1393,34 @@ public class DataProviderFactory {
                 }
                 sb.append("}");
                 tempArray[i] = sb.toString();
+            }
+
+            return tempArray;
+        }
+
+        private Object[] retrieveArrayOfComplexElements(Object objBuf, int columnIndex, int startRowIndex)
+        {
+            log.debug("retrieveArrayOfComplexElements(): objBuf={}", objBuf);
+            ArrayList<byte[]> vlElements = ((ArrayList[]) objBuf)[startRowIndex];
+            log.debug("retrieveArrayOfComplexElements(): vlElements={}", vlElements);
+            long vlSize = vlElements.size();
+            log.debug("retrieveArrayOfComplexElements(): vlSize={} length={}", vlSize, vlElements.size());
+            Object[] tempArray = new Object[(int) vlSize];
+
+            for (int i = 0; i < vlSize; i++) {
+                ArrayList<byte[]> ref_value = vlElements;
+                StringBuilder     sb        = new StringBuilder();
+                sb.append("{");
+                for (int m = 0; m < ref_value.size(); m++) {
+                    if (m > 0)
+                        sb.append(", ");
+                    byte[] byteElements = ref_value.get(m);
+                    log.trace("retrieveArrayOfComplexElements byteElements={}", byteElements);
+                    sb.append(baseTypeDataProvider.getDataValue(byteElements, columnIndex, i * 2));
+                }
+                sb.append("}");
+                tempArray[i] = sb.toString();
+                log.trace("retrieveArrayOfComplexElements(tempArray[{}]={}): start", i, tempArray);
             }
 
             return tempArray;

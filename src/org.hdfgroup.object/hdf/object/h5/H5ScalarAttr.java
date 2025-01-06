@@ -1225,7 +1225,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                     for (int j = 0; j < lsize; j++)
                         strs[j] = "";
                     try {
-                        log.trace("AttributeCommonIO():read ioType H5AreadComplicated");
+                        log.trace("AttributeCommonIO():read ioType H5AreadComposite");
                         H5.H5AreadComplex(attr_id, tid, strs);
                     }
                     catch (Exception ex) {

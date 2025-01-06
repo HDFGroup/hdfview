@@ -2818,16 +2818,16 @@ public class H5Datatype extends Datatype {
         return topTID;
     }
 
-    private boolean datatypeIsComplicated(long tid)
+    private boolean datatypeIsComposite(long tid)
     {
         long tclass = HDF5Constants.H5T_NO_CLASS;
 
         try {
             tclass = H5.H5Tget_class(tid);
-            log.trace("datatypeIsComplicated():{}", tclass);
+            log.trace("datatypeIsComposite():{}", tclass);
         }
         catch (Exception ex) {
-            log.debug("datatypeIsComplicated():", ex);
+            log.debug("datatypeIsComposite():", ex);
         }
 
         boolean retVal = (tclass == HDF5Constants.H5T_COMPOUND);
@@ -2855,14 +2855,14 @@ public class H5Datatype extends Datatype {
 
     private boolean datatypeIsAtomic(long tid)
     {
-        boolean retVal = !(datatypeIsComplicated(tid) | datatypeIsReference(tid) | isRef());
+        boolean retVal = !(datatypeIsComposite(tid) | datatypeIsReference(tid) | isRef());
         retVal |= isOpaque();
         retVal |= isBitField();
 
         return retVal;
     }
 
-    private boolean datatypeClassIsComplicated(long tclass)
+    private boolean datatypeClassIsComposite(long tclass)
     {
         boolean retVal = (tclass == HDF5Constants.H5T_COMPOUND);
         retVal |= (tclass == HDF5Constants.H5T_ENUM);
@@ -2879,7 +2879,7 @@ public class H5Datatype extends Datatype {
 
     private boolean datatypeClassIsAtomic(long tclass)
     {
-        boolean retVal = !(datatypeClassIsComplicated(tclass) | datatypeClassIsReference(tclass));
+        boolean retVal = !(datatypeClassIsComposite(tclass) | datatypeClassIsReference(tclass));
         retVal |= (tclass == Datatype.CLASS_OPAQUE);
         retVal |= (tclass == Datatype.CLASS_BITFIELD);
 
