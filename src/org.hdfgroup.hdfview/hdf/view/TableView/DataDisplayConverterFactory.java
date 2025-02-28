@@ -102,6 +102,8 @@ public class DataDisplayConverterFactory {
                 converter = new BitfieldDataDisplayConverter(dtype);
             else if (dtype.isRef())
                 converter = new RefDataDisplayConverter(dtype);
+            else if (dtype.isComplex())
+                converter = new ComplexDataDisplayConverter(dtype);
         }
         catch (Exception ex) {
             log.debug(
@@ -961,6 +963,143 @@ public class DataDisplayConverterFactory {
             }
 
             return buffer;
+        }
+    }
+
+    private static class ComplexDataDisplayConverter extends HDFDisplayConverter {
+        private static final Logger log = LoggerFactory.getLogger(ComplexDataDisplayConverter.class);
+
+        private final HDFDisplayConverter baseTypeConverter;
+        private final StringBuilder buffer;
+
+        ComplexDataDisplayConverter(final Datatype dtype) throws Exception
+        {
+            super(dtype);
+
+            if (!dtype.isComplex()) {
+                log.debug("exit: datatype is not a complex type");
+                throw new Exception("ComplexDataDisplayConverter: datatype is not a complex type");
+            }
+
+            Datatype baseType = dtype.getDatatypeBase();
+
+            if (baseType == null) {
+                log.debug("exit: base datatype is null");
+                throw new Exception("ComplexDataDisplayConverter: base datatype is null");
+            }
+
+            try {
+                baseTypeConverter = getDataDisplayConverter(baseType);
+
+                /*
+                 * Make base datatype converter inherit the data conversion settings.
+                 */
+                baseTypeConverter.setShowAsHex(this.showAsHex);
+                baseTypeConverter.setShowAsBin(this.showAsBin);
+                baseTypeConverter.setNumberFormat(this.numberFormat);
+                baseTypeConverter.setConvertEnum(this.isEnumConverted);
+            }
+            catch (Exception ex) {
+                log.debug("exit: couldn't get DataDisplayConverter for base datatype: ", ex);
+                throw new Exception(
+                    "ComplexDataDisplayConverter: couldn't get DataDisplayConverter for base datatype: " +
+                    ex.getMessage());
+            }
+
+            buffer = new StringBuilder();
+        }
+
+        @Override
+        public Object canonicalToDisplayValue(ILayerCell cell, IConfigRegistry configRegistry, Object value)
+        {
+            cellRowIdx = cell.getRowIndex();
+            cellColIdx = cell.getColumnIndex();
+            log.trace("canonicalToDisplayValue({}): cellRowIdx={} cellRowIdx={}", value, cellRowIdx,
+                      cellRowIdx);
+            return canonicalToDisplayValue(value);
+        }
+
+        @Override
+        public Object canonicalToDisplayValue(Object value)
+        {
+            log.trace("canonicalToDisplayValue({}): start", value);
+
+            if (value instanceof String)
+                return value;
+
+            if (value == null) {
+                log.debug("canonicalToDisplayValue({}): value is null", value);
+                return DataFactoryUtils.nullStr;
+            }
+
+            buffer.setLength(0); // clear the old string
+
+            /*
+             * Pass the cell's row and column index down in case there is a CompoundDataDisplayConverter at
+             * the bottom of the chain.
+             */
+            baseTypeConverter.cellRowIdx = cellRowIdx;
+            baseTypeConverter.cellColIdx = cellColIdx;
+
+            try {
+                Object obj;
+                Object convertedValue;
+                int arrLen = Array.getLength(value);
+
+                log.trace("canonicalToDisplayValue({}): array length={}", value, arrLen);
+
+                for (int i = 0; i < arrLen; i++) {
+                    if (i > 0)
+                        buffer.append("+");
+
+                    obj = Array.get(value, i);
+
+                    convertedValue = baseTypeConverter.canonicalToDisplayValue(obj);
+
+                    buffer.append(convertedValue);
+                }
+
+                buffer.append("i");
+            }
+            catch (Exception ex) {
+                log.debug("canonicalToDisplayValue({}): failure: ", value, ex);
+                buffer.setLength(0);
+                buffer.append(DataFactoryUtils.errStr);
+            }
+
+            return buffer;
+        }
+
+        @Override
+        public void setNumberFormat(NumberFormat format)
+        {
+            super.setNumberFormat(format);
+
+            baseTypeConverter.setNumberFormat(format);
+        }
+
+        @Override
+        public void setShowAsHex(boolean asHex)
+        {
+            super.setShowAsHex(asHex);
+
+            baseTypeConverter.setShowAsHex(asHex);
+        }
+
+        @Override
+        public void setShowAsBin(boolean asBin)
+        {
+            super.setShowAsBin(asBin);
+
+            baseTypeConverter.setShowAsBin(asBin);
+        }
+
+        @Override
+        public void setConvertEnum(boolean convert)
+        {
+            super.setConvertEnum(convert);
+
+            baseTypeConverter.setConvertEnum(convert);
         }
     }
 }

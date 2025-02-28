@@ -593,6 +593,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
             case Datatype.CLASS_ENUM:
             case Datatype.CLASS_VLEN:
             case Datatype.CLASS_TIME:
+            case Datatype.CLASS_COMPLEX:
                 theObj = convertByteMember(baseType, byteData);
                 break;
 
