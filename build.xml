@@ -209,7 +209,7 @@
     <property name="release.dir" value="${build.dir}/HDF_Group/${ant.project.name}/${app.version}" />
     <property name="includeantruntime" value="false" />
     <property name="jre.version" value="${ant.java.version}" />
-    <property name="version.slf4j" value="-2.0.6" />
+    <property name="version.slf4j" value="-2.0.16" />
 
     <!-- Define the SonarQube global properties (the most usual way is to pass these properties via the command line) -->
     <property name="sonar.host.url" value="http://localhost:9000" />
@@ -448,13 +448,17 @@
         </pathconvert>
 
         <jar destfile="${testclasses.dir}/lib/ext/test.modules.TestModuleLoading.jar"
-            includes="test/modules/**" excludes="Test*.java *.h5" />
+            includes="test/modules/**" excludes="Test*.java *.h5">
+            <manifest>
+                <attribute name="Class-Path" value="${manifest.classpath}" />
+            </manifest>
+        </jar>
     </target>
 
     <target name="jar" depends="compile, objectjar">
         <mkdir dir="${jar.dir}" />
 
-        <pathconvert property="manifest.classpath" pathsep=" ">
+        <pathconvert property="vmanifest.classpath" pathsep=" ">
             <path refid="view-classpath" />
             <mapper>
                 <chainedmapper>
@@ -479,7 +483,7 @@
             </fileset>
             <manifest>
                 <attribute name="Main-Class" value="${main-class}" />
-                <attribute name="Class-Path" value="${manifest.classpath}" />
+                <attribute name="Class-Path" value="${vmanifest.classpath}" />
             </manifest>
         </jar>
     </target>
@@ -521,6 +525,8 @@
                 <path refid="log-classpath" />
                 <path refid="obj-classpath" />
                 <path refid="hdfobject-jar" />
+                <path refid="jni4-classpath" />
+                <path refid="jni5-classpath" />
                 <path refid="application" />
             </classpath>
             <sysproperty key="java.library.path" path="${release.dir}${path.separator}${release.dir}/bin" />
@@ -531,18 +537,21 @@
         </java>
     </target>
 
-    <target name="run-jar" depends="jar" description="Runs the application directly from the .jar file">
+    <target name="run-jar" depends="deploy,jar" description="Runs the application directly from the .jar file">
         <mkdir dir="${jar.dir}/lib" />
         <mkdir dir="${jar.dir}/lib/ext" />
-        <copy todir="${jar.dir}/lib">
-            <fileset dir="${lib.dir}" includes="fits.jar netcdf.jar" excludes="*sources.jar" />
-            <fileset dir="${hdf.lib.dir}" includes="*.jar" excludes="slf4j*.jar" />
-            <fileset dir="${hdf5.lib.dir}" includes="*.jar" excludes="slf4j*.jar" />
+        <copy todir="${jar.dir}" flatten="true">
+            <path refid="obj-classpath" />
+            <path refid="jni4-classpath" />
+            <path refid="jni5-classpath" />
+            <path refid="slf4j-classpath" />
+            <path refid="log-classpath" />
+            <path refid="swt-classpath" />
         </copy>
-        <java fork="true" jar="${jar.dir}/${ant.project.name}.jar">
+        <java dir="${jar.dir}" fork="true" jar="${jar.dir}/${ant.project.name}.jar">
             <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=${build.log.level.run}" />
             <jvmarg value="${XstartOnFirstThreadFlag}" />
-            <sysproperty key="java.library.path" path="${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
+            <sysproperty key="java.library.path" path="${basedir}/${jar.dir}${path.separator}${hdf.lib.dir}${path.separator}${hdf5.lib.dir}" />
             <sysproperty key="hdfview.root" path="${basedir}/${jar.dir}" />
             <!-- <sysproperty key="hdfview.workdir" path="${basedir}/${jar.dir}" />  -->
             <env key="HDF5_PLUGIN_PATH" path="${hdf5.plugin.dir}" />
