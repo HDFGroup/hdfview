@@ -972,6 +972,8 @@
                 <arg value="${release.dir}" />
                 <arg value="--add-modules" />
                 <arg value="java.desktop" />
+                <arg value="--add-options" />
+                <arg value="--enable-native-access" />
             </exec>
         </sequential>
     </macrodef>

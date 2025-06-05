@@ -1755,9 +1755,8 @@ public abstract class Dataset extends HObject implements DataFormat {
                 else
                     strValue = value.toString();
 
-                if (count > 0 && strValue.length() > count)
-                    // truncate the extra characters
-                    strValue = strValue.substring(0, count);
+                if (count > 50) // truncate the extra characters
+                    strValue = "...";
                 sb.append(strValue);
             }
         }
