@@ -164,7 +164,7 @@ jobs:
 
       - name: Rename release file base name
         id: ren-basename
-        if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag  == 'snapshot') }}
+        if: ${{ (inputs.use_environ == 'snapshots') && (inputs.use_tag  == 'snapshot') }}
         run: |
           mv hdfview-${{ steps.version.outputs.TAG_VERSION }}.tar.gz ${{ inputs.use_tag }}.tar.gz
           mv hdfview-${{ steps.version.outputs.TAG_VERSION }}.zip ${{ inputs.use_tag }}.zip
