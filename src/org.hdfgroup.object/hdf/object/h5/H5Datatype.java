@@ -818,6 +818,7 @@ public class H5Datatype extends Datatype {
                 tsize         = H5.H5Tget_size(tid);
                 isVariableStr = H5.H5Tis_variable_str(tid);
                 isVLEN        = false;
+                isComplex     = false;
                 log.trace("fromNative(): tclass={}, tsize={}, torder={}, isVLEN={}", nativeClass, tsize,
                           torder, isVLEN);
                 if (H5.H5Tcommitted(tid)) {
@@ -1150,6 +1151,30 @@ public class H5Datatype extends Datatype {
                 catch (Exception ex) {
                     log.debug("fromNative(): opaque type tag retrieval failed: ", ex);
                     opaqueTag = null;
+                }
+            }
+            else if (nativeClass == HDF5Constants.H5T_COMPLEX) {
+                log.debug("fromNative(): datatypeClass is complex");
+                long tmptid   = HDF5Constants.H5I_INVALID_HID;
+                datatypeClass = CLASS_COMPLEX;
+                isComplex     = true;
+                try {
+                    log.trace("fromNative(): complex type");
+                    tmptid              = H5.H5Tget_super(tid);
+                    int nativeBaseClass = H5.H5Tget_class(tmptid);
+                    baseType            = new H5Datatype(this.fileFormat, tmptid, this);
+                    if (baseType == null) {
+                        log.debug("fromNative(): Complex datatype has null base type");
+                        throw new Exception("Datatype (Complex) has no base datatype");
+                    }
+
+                    datatypeSign = baseType.getDatatypeSign();
+                }
+                catch (Exception ex) {
+                    log.debug("fromNative(): Complex type failure: ", ex);
+                }
+                finally {
+                    close(tmptid);
                 }
             }
             else {
@@ -1626,6 +1651,38 @@ public class H5Datatype extends Datatype {
             }
 
             break;
+        case CLASS_COMPLEX:
+            log.trace("createNative(): CLASS_COMPLEX is {}-byte H5T_COMPLEX", datatypeSize);
+            try {
+                if (baseType != null) {
+                    if ((tmptid = baseType.createNative()) < 0) {
+                        log.debug("createNative(): failed to create native type for COMPLEX base datatype");
+                        break;
+                    }
+
+                    tid = H5.H5Tcomplex_create(tmptid);
+                }
+                else {
+                    if (datatypeSize == NATIVE) {
+                        datatypeNATIVE = true;
+                        datatypeSize   = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
+                    }
+                    else
+                        datatypeNATIVE = false;
+
+                    tid = H5.H5Tcreate(HDF5Constants.H5T_COMPLEX, datatypeSize);
+                }
+            }
+            catch (Exception ex) {
+                log.debug("createNative(): native complex datatype creation failed: ", ex);
+                if (tid >= 0)
+                    close(tid);
+                tid = HDF5Constants.H5I_INVALID_HID;
+            }
+            finally {
+                close(tmptid);
+            }
+            break;
         default:
             log.debug("createNative(): Unknown class");
             break;
@@ -1738,8 +1795,8 @@ public class H5Datatype extends Datatype {
             for (int i = 0; i < numPoints; i++)
                 ((String[])data)[i] = "";
         }
-        else if (typeClass == HDF5Constants.H5T_INTEGER) {
-            log.trace("allocateArray(): class H5T_INTEGER");
+        else if (typeClass == CLASS_INTEGER) {
+            log.trace("allocateArray(): class CLASS_INTEGER");
             if (typeSize == NATIVE)
                 typeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
 
@@ -1760,8 +1817,8 @@ public class H5Datatype extends Datatype {
                 break;
             }
         }
-        else if (typeClass == HDF5Constants.H5T_ENUM) {
-            log.trace("allocateArray(): class H5T_ENUM");
+        else if (typeClass == CLASS_ENUM) {
+            log.trace("allocateArray(): class CLASS_ENUM");
 
             if (baseType != null)
                 data = H5Datatype.allocateArray(baseType, numPoints);
@@ -1771,13 +1828,13 @@ public class H5Datatype extends Datatype {
                 data = new byte[(int)(numPoints * typeSize)];
             }
         }
-        else if (typeClass == HDF5Constants.H5T_COMPOUND) {
-            log.trace("allocateArray(): class H5T_COMPOUND");
+        else if (typeClass == CLASS_COMPOUND) {
+            log.trace("allocateArray(): class CLASS_COMPOUND");
 
             data = new ArrayList<>(dtype.getCompoundMemberTypes().size());
         }
-        else if (typeClass == HDF5Constants.H5T_FLOAT) {
-            log.trace("allocateArray(): class H5T_FLOAT");
+        else if (typeClass == CLASS_FLOAT) {
+            log.trace("allocateArray(): class CLASS_FLOAT");
             if (typeSize == NATIVE)
                 typeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
 
@@ -1798,8 +1855,8 @@ public class H5Datatype extends Datatype {
                 break;
             }
         }
-        else if ((typeClass == HDF5Constants.H5T_STRING) || (typeClass == HDF5Constants.H5T_REFERENCE)) {
-            log.trace("allocateArray(): class H5T_STRING || H5T_REFERENCE");
+        else if ((typeClass == CLASS_STRING) || (typeClass == CLASS_REFERENCE)) {
+            log.trace("allocateArray(): class CLASS_STRING || CLASS_REFERENCE");
 
             data = new byte[(int)(numPoints * typeSize)];
         }
@@ -1812,8 +1869,8 @@ public class H5Datatype extends Datatype {
             // if (baseType != null)
             // ((ArrayList<>)data).add(H5Datatype.allocateArray(baseType, numPoints));
         }
-        else if (typeClass == HDF5Constants.H5T_ARRAY) {
-            log.trace("allocateArray(): class H5T_ARRAY");
+        else if (typeClass == CLASS_ARRAY) {
+            log.trace("allocateArray(): class CLASS_ARRAY");
 
             try {
                 log.trace("allocateArray(): ArrayRank={}", dtype.getArrayDims().length);
@@ -1831,11 +1888,21 @@ public class H5Datatype extends Datatype {
                     data = H5Datatype.allocateArray(baseType, asize);
             }
             catch (Exception ex) {
-                log.debug("allocateArray(): H5T_ARRAY class failure: ", ex);
+                log.debug("allocateArray(): CLASS_ARRAY class failure: ", ex);
             }
         }
-        else if ((typeClass == HDF5Constants.H5T_OPAQUE) || (typeClass == HDF5Constants.H5T_BITFIELD)) {
-            log.trace("allocateArray(): class H5T_OPAQUE || H5T_BITFIELD");
+        else if (typeClass == CLASS_COMPLEX) {
+            log.trace("allocateArray(): class CLASS_COMPLEX");
+            if (baseType != null)
+                data = H5Datatype.allocateArray(baseType, numPoints * 2);
+            else {
+                if (typeSize == NATIVE)
+                    typeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
+                data = new byte[(int)(numPoints * 2 * typeSize)];
+            }
+        }
+        else if ((typeClass == CLASS_OPAQUE) || (typeClass == CLASS_BITFIELD)) {
+            log.trace("allocateArray(): class CLASS_OPAQUE || CLASS_BITFIELD");
             if (typeSize == NATIVE)
                 typeSize = H5.H5Tget_size(typeClass);
 
@@ -2069,6 +2136,13 @@ public class H5Datatype extends Datatype {
             if (baseType != null)
                 description.append(" of ").append(baseType.getDescription());
 
+            break;
+        case CLASS_COMPLEX:
+            log.trace("getDescription(): Complex");
+            description.append("Complex");
+
+            if (baseType != null)
+                description.append(" of ").append(baseType.getDescription());
             break;
         default:
             description.append("Unknown");
@@ -2744,16 +2818,16 @@ public class H5Datatype extends Datatype {
         return topTID;
     }
 
-    private boolean datatypeIsComplex(long tid)
+    private boolean datatypeIsComposite(long tid)
     {
         long tclass = HDF5Constants.H5T_NO_CLASS;
 
         try {
             tclass = H5.H5Tget_class(tid);
-            log.trace("datatypeIsComplex():{}", tclass);
+            log.trace("datatypeIsComposite():{}", tclass);
         }
         catch (Exception ex) {
-            log.debug("datatypeIsComplex():", ex);
+            log.debug("datatypeIsComposite():", ex);
         }
 
         boolean retVal = (tclass == HDF5Constants.H5T_COMPOUND);
@@ -2781,19 +2855,20 @@ public class H5Datatype extends Datatype {
 
     private boolean datatypeIsAtomic(long tid)
     {
-        boolean retVal = !(datatypeIsComplex(tid) | datatypeIsReference(tid) | isRef());
+        boolean retVal = !(datatypeIsComposite(tid) | datatypeIsReference(tid) | isRef());
         retVal |= isOpaque();
         retVal |= isBitField();
 
         return retVal;
     }
 
-    private boolean datatypeClassIsComplex(long tclass)
+    private boolean datatypeClassIsComposite(long tclass)
     {
         boolean retVal = (tclass == HDF5Constants.H5T_COMPOUND);
         retVal |= (tclass == HDF5Constants.H5T_ENUM);
         retVal |= (tclass == HDF5Constants.H5T_VLEN);
         retVal |= (tclass == HDF5Constants.H5T_ARRAY);
+        retVal |= (tclass == HDF5Constants.H5T_COMPLEX);
 
         return retVal;
     }
@@ -2804,7 +2879,7 @@ public class H5Datatype extends Datatype {
 
     private boolean datatypeClassIsAtomic(long tclass)
     {
-        boolean retVal = !(datatypeClassIsComplex(tclass) | datatypeClassIsReference(tclass));
+        boolean retVal = !(datatypeClassIsComposite(tclass) | datatypeClassIsReference(tclass));
         retVal |= (tclass == Datatype.CLASS_OPAQUE);
         retVal |= (tclass == Datatype.CLASS_BITFIELD);
 

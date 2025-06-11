@@ -1258,6 +1258,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
             case Datatype.CLASS_ENUM:
             case Datatype.CLASS_VLEN:
             case Datatype.CLASS_TIME:
+            case Datatype.CLASS_COMPLEX:
                 byteData = convertMemberByte(baseType, theObj);
                 break;
 
