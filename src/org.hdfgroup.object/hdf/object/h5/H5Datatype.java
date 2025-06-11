@@ -1097,10 +1097,16 @@ public class H5Datatype extends Datatype {
                             enumStr = Short.toString((HDFNativeData.byteToShort(val))[0]);
                             break;
                         case 4:
-                            enumStr = Integer.toString((HDFNativeData.byteToInt(val))[0]);
+                            if (isUnsigned())
+                                enumStr = Integer.toUnsignedString((HDFNativeData.byteToInt(val))[0]);
+                            else
+                                enumStr = Integer.toString((HDFNativeData.byteToInt(val))[0]);
                             break;
                         case 8:
-                            enumStr = Long.toString((HDFNativeData.byteToLong(val))[0]);
+                            if (isUnsigned())
+                                enumStr = Long.toUnsignedString((HDFNativeData.byteToLong(val))[0]);
+                            else
+                                enumStr = Long.toString((HDFNativeData.byteToLong(val))[0]);
                             break;
                         default:
                             enumStr = "-1";
