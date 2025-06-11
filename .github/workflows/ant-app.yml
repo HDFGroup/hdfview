@@ -335,7 +335,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/snapshot'
-        file: '${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz'
+        file: '${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz'
 
     - name: List files for the space (Linux)
       run: |
@@ -343,7 +343,12 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (Linux)
+      if: ${{ (inputs.use_environ == 'release') }}
       run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz
+
+    - name: Uncompress gh snapsho binary (Linux)
+      if: ${{ (inputs.use_environ == 'snapshots') }}
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz
 
     - name: Uncompress hdf4 binary (Linux)
       run: |
@@ -363,7 +368,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/${{ inputs.use_hdf5 }}'
-        file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
+        file: '${{ inputs.name_hdf5 }}-ubuntu-2404_gcc.tar.gz'
 
     - name: Get hdf5 snapshot
       if: ${{ (inputs.use_environ == 'snapshots') }}
@@ -371,7 +376,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf5'
         version: 'tags/snapshot'
-        file: '${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz'
+        file: '${{ inputs.name_hdf5 }}-ubuntu-2404_gcc.tar.gz'
 
     - name: List files for the space (Linux)
       run: |
@@ -379,7 +384,7 @@ jobs:
             ls ${{ runner.workspace }}
 
     - name: Uncompress gh binary (Linux)
-      run: tar -zxvf ${{ github.workspace }}/${{ inputs.name_hdf5 }}-ubuntu-2204_gcc.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.name_hdf5 }}-ubuntu-2404_gcc.tar.gz
 
     - name: Uncompress hdf5 binary (Linux)
       run:  |
