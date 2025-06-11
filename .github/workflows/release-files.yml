@@ -100,7 +100,7 @@ jobs:
       - name: Get published binary (Linux)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: tgz-ubuntu-2204-binary
+              name: tgz-ubuntu-2404-binary
               path: ${{ github.workspace }}
 
       # Get files created by ant-app script
@@ -119,7 +119,7 @@ jobs:
       - name: Get published app binary (Linux)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: tgz-ubuntu-2204-app-binary
+              name: tgz-ubuntu-2404-app-binary
               path: ${{ github.workspace }}
 
       # Get files created by tarball script

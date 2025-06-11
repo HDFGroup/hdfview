@@ -319,7 +319,7 @@ jobs:
       with:
         repo: 'HDFGroup/hdf4'
         version: 'tags/${{ inputs.use_hdf }}'
-        file: '${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz'
+        file: '${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz'
 
     - name: Get hdf4 snapshot
       if: ${{ (inputs.use_environ == 'snapshots') }}
@@ -336,7 +336,7 @@ jobs:
 
     - name: Uncompress gh binary (Linux)
       if: ${{ (inputs.use_environ == 'release') }}
-      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-ubuntu-2204_gcc.tar.gz
+      run: tar -zxvf ${{ github.workspace }}/${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz
 
     - name: Uncompress gh snapsho binary (Linux)
       if: ${{ (inputs.use_environ == 'snapshots') }}
@@ -446,7 +446,7 @@ jobs:
     - name: Save published snapshot binary (Linux)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-ubuntu-2204-binary
+            name: tgz-ubuntu-2404-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
