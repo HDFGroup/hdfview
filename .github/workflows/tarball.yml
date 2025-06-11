@@ -162,14 +162,6 @@ jobs:
               tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
         shell: bash
 
-      - name: Rename release file base name
-        id: ren-basename
-        if: ${{ (inputs.use_environ == 'snapshots') && (inputs.use_tag  == 'snapshot') }}
-        run: |
-          mv hdfview-${{ steps.version.outputs.TAG_VERSION }}.tar.gz ${{ inputs.use_tag }}.tar.gz
-          mv hdfview-${{ steps.version.outputs.TAG_VERSION }}.zip ${{ inputs.use_tag }}.zip
-        shell: bash
-
       - name: List files in the repository
         run: |
               ls -l ${{ github.workspace }}
