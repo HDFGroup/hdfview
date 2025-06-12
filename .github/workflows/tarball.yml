@@ -115,12 +115,7 @@ jobs:
           then
             FILE_NAME_BASE=$(echo "hdfview-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
           else
-            if [[ '${{ inputs.use_tag }}' == 'snapshot' ]]
-            then
-              FILE_NAME_BASE=$(echo "snapshot")
-            else
-              FILE_NAME_BASE=$(echo "HDFView-${{ steps.version.outputs.TAG_VERSION }}")
-            fi
+            FILE_NAME_BASE=$(echo "HDFView-${{ steps.version.outputs.TAG_VERSION }}")
           fi
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
@@ -160,14 +155,6 @@ jobs:
         run: |
               zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
               tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
-        shell: bash
-
-      - name: Copy release file base name
-        id: ren-basename
-        if: ${{ (inputs.use_tag  == 'snapshot') }}
-        run: |
-          cp ${{ inputs.use_tag }}.tar.gz hdfview-${{ steps.version.outputs.TAG_VERSION }}.tar.gz
-          cp ${{ inputs.use_tag }}.zip hdfview-${{ steps.version.outputs.TAG_VERSION }}.zip
         shell: bash
 
       - name: List files in the repository
