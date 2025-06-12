@@ -454,7 +454,7 @@ jobs:
     - name: Save published release binary (Linux)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-ubuntu-2204-binary
+            name: tgz-ubuntu-2404-binary
             path: ${{ github.workspace }}/build/dist/${{ inputs.snap_name }}-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'release') }}
