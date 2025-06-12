@@ -34,9 +34,9 @@ public class DatasetTest {
 
     private H5File testFile = null;
     String[] dsetNames      = {H5TestFile.NAME_DATASET_INT,  H5TestFile.NAME_DATASET_FLOAT,
-                          H5TestFile.NAME_DATASET_CHAR, H5TestFile.NAME_DATASET_STR,
-                          H5TestFile.NAME_DATASET_ENUM, H5TestFile.NAME_DATASET_COMPOUND,
-                          H5TestFile.NAME_DATASET_IMAGE};
+                               H5TestFile.NAME_DATASET_CHAR, H5TestFile.NAME_DATASET_STR,
+                               H5TestFile.NAME_DATASET_ENUM, H5TestFile.NAME_DATASET_COMPOUND,
+                               H5TestFile.NAME_DATASET_IMAGE};
     private Dataset[] dSets = new Dataset[dsetNames.length];
 
     protected void closeFile()
