@@ -1,19 +1,22 @@
 name: clang-format Check
 on:
   pull_request:
+
 permissions:
   contents: read
+
 jobs:
   formatting-check:
     name: Formatting Check
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4.1.7
+
     - name: Run clang-format style check for Java code
-      uses: DoozyX/clang-format-lint-action@v0.13
+      uses: DoozyX/clang-format-lint-action@v0.20
       with:
         source: './src ./test'
         extensions: 'java'
-        clangFormatVersion: 13
+        clangFormatVersion: 17
         style: file

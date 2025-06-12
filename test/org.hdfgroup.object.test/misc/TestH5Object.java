@@ -499,13 +499,13 @@ public class TestH5Object {
 
         final int N                = 5;
         final int dtype_cls[]      = {Datatype.CLASS_INTEGER, Datatype.CLASS_FLOAT, Datatype.CLASS_CHAR,
-                                 Datatype.CLASS_STRING, Datatype.CLASS_ENUM};
+                                      Datatype.CLASS_STRING, Datatype.CLASS_ENUM};
         final String dtype_names[] = {"INTEGER", "FLOAT", "CHAR", "STRING", "ENUM"};
         final String msgs[]        = {"H5File.createDatatype(..., " + dtype_names[0] + ")",
-                               "H5File.createDatatype(..., " + dtype_names[1] + ")",
-                               "H5File.createDatatype(..., " + dtype_names[2] + ")",
-                               "H5File.createDatatype(..., " + dtype_names[3] + ")",
-                               "H5File.createDatatype(..., " + dtype_names[4] + ")"};
+                                      "H5File.createDatatype(..., " + dtype_names[1] + ")",
+                                      "H5File.createDatatype(..., " + dtype_names[2] + ")",
+                                      "H5File.createDatatype(..., " + dtype_names[3] + ")",
+                                      "H5File.createDatatype(..., " + dtype_names[4] + ")"};
 
         message = "Test creating named datatypes";
         try {
@@ -555,7 +555,7 @@ public class TestH5Object {
         Group pgroup            = null;
         final int N             = 5;
         final int dtype_cls[]   = {Datatype.CLASS_INTEGER, Datatype.CLASS_FLOAT, Datatype.CLASS_CHAR,
-                                 Datatype.CLASS_STRING, Datatype.CLASS_ENUM};
+                                   Datatype.CLASS_STRING, Datatype.CLASS_ENUM};
         final int dtype_sizes[] = {-1, -1, 1, 80, -1};
         final String names[]    = {"INTEGER", "FLOAT", "CHAR", "STRING", "ENUM"};
 

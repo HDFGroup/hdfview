@@ -82,7 +82,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
 
         ArrayList[] moduleList = {treeViews, metaDataViews, tableViews, imageViews, paletteViews};
         Combo[] choiceList     = {choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView,
-                              choicePaletteView};
+                                  choicePaletteView};
         for (int i = 0; i < moduleList.length; i++) {
             Combo curModuleCombo = choiceList[i];
             if (curModuleCombo != null) {
@@ -123,7 +123,7 @@ public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
 
         ArrayList[] moduleList = {treeViews, metaDataViews, tableViews, imageViews, paletteViews};
         Combo[] choiceList     = {choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView,
-                              choicePaletteView};
+                                  choicePaletteView};
         for (int i = 0; i < moduleList.length; i++) {
             Object theModule = choiceList[i].getItem(choiceList[i].getSelectionIndex());
             moduleList[i].remove(theModule);

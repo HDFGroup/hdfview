@@ -11,5 +11,4 @@ import org.junit.runners.Suite;
                      TestTreeViewExport.class, TestHDFViewTAttr2.class, TestTreeViewNewVLDatatypes.class,
                      TestHDFViewRefs.class, TestHDFViewFloat16.class})
 
-public class TestAll {
-}
+public class TestAll {}

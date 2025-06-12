@@ -73,58 +73,58 @@ jobs:
 
       # Get files created by tarball script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
 
       # Get files created by ant script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: zip-win-vs2022-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (MacOS)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: tgz-macos14_clang-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: tgz-ubuntu-2404-binary
               path: ${{ github.workspace }}
 
       # Get files created by ant-app script
       - name: Get published app binary (Windows)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: zip-win-vs2022-app-binary
               path: ${{ github.workspace }}
       
       - name: Get published app binary (MacOS)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: tgz-macos14_clang-app-binary
               path: ${{ github.workspace }}
       
       - name: Get published app binary (Linux)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: tgz-ubuntu-2404-app-binary
               path: ${{ github.workspace }}
 
       # Get files created by tarball script
       - name: Get UsersGuide (Linux)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: docs-usersguide
               path: ${{ github.workspace }}/UsersGuide
@@ -159,7 +159,7 @@ jobs:
           echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
 
       - name: Get NEWSLETTER
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
               name: NEWSLETTER
               path: ${{ github.workspace }}
@@ -171,7 +171,7 @@ jobs:
       - name: PreRelease tag
         id: create_prerelease
         if: ${{ (inputs.use_environ == 'snapshots') }}
-        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        uses: softprops/action-gh-release@v2.2.2
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
@@ -194,7 +194,7 @@ jobs:
       - name: Release tag
         id: create_release
         if: ${{ (inputs.use_environ == 'release') }}
-        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        uses: softprops/action-gh-release@v2.2.2
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: false

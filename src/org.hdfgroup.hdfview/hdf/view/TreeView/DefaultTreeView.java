@@ -3336,9 +3336,9 @@ public class DefaultTreeView implements TreeView {
 
             String[] lowValues  = {"Earliest", "V18", "V110", "V112", "V114", "V200", "Latest"};
             int[] lowConstants  = {HDF5Constants.H5F_LIBVER_EARLIEST, HDF5Constants.H5F_LIBVER_V18,
-                                  HDF5Constants.H5F_LIBVER_V110,     HDF5Constants.H5F_LIBVER_V112,
-                                  HDF5Constants.H5F_LIBVER_V114,     HDF5Constants.H5F_LIBVER_V200,
-                                  HDF5Constants.H5F_LIBVER_LATEST};
+                                   HDF5Constants.H5F_LIBVER_V110,     HDF5Constants.H5F_LIBVER_V112,
+                                   HDF5Constants.H5F_LIBVER_V114,     HDF5Constants.H5F_LIBVER_V200,
+                                   HDF5Constants.H5F_LIBVER_LATEST};
             String[] highValues = {"V18", "V110", "V112", "V114", "V200", "Latest"};
             int[] highConstants = {HDF5Constants.H5F_LIBVER_V18,  HDF5Constants.H5F_LIBVER_V110,
                                    HDF5Constants.H5F_LIBVER_V112, HDF5Constants.H5F_LIBVER_V114,
