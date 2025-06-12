@@ -462,7 +462,7 @@ jobs:
     - name: Save published snapshot-app binary (Linux)
       uses: actions/upload-artifact@v4
       with:
-            name: tgz-ubuntu-2204-app-binary
+            name: tgz-ubuntu-2404-app-binary
             path: ${{ github.workspace }}/build/dist/${{ steps.set-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
             if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
       if: ${{ (inputs.use_environ == 'snapshots') }}
