@@ -164,7 +164,6 @@ jobs:
 
       # Save files created by release script
       - name: Save tgz-tarball
-        if: ${{ (inputs.use_tag  != 'snapshot') }}
         uses: actions/upload-artifact@v4
         with:
               name: tgz-tarball
@@ -172,7 +171,6 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save zip-tarball
-        if: ${{ (inputs.use_tag  != 'snapshot') }}
         uses: actions/upload-artifact@v4
         with:
               name: zip-tarball
