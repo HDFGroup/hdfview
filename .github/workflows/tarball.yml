@@ -166,8 +166,8 @@ jobs:
         id: ren-basename
         if: ${{ (inputs.use_tag  == 'snapshot') }}
         run: |
-          cp ${{ inputs.use_tag }}.tar.gz hdfview-${{ steps.version.outputs.TAG_VERSION }}.tar.gz
-          cp ${{ inputs.use_tag }}.zip hdfview-${{ steps.version.outputs.TAG_VERSION }}.zip
+          cp ${{ inputs.use_tag }}.tar.gz HDFView-${{ steps.version.outputs.TAG_VERSION }}.tar.gz
+          cp ${{ inputs.use_tag }}.zip HDFView-${{ steps.version.outputs.TAG_VERSION }}.zip
         shell: bash
 
       - name: List files in the repository
@@ -192,13 +192,13 @@ jobs:
               path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      # Save files created by release script
+      # Save files created by snapshot script
       - name: Save tgz-tarball
         if: ${{ (inputs.use_tag  == 'snapshot') }}
         uses: actions/upload-artifact@v4
         with:
               name: tgz-tarball
-              path: ${{ inputs.use_tag }}.tar.gz
+              path: HDFView-${{ steps.version.outputs.TAG_VERSION }}.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save zip-tarball
@@ -206,5 +206,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: zip-tarball
-              path: ${{ inputs.use_tag }}.zip
+              path: HDFView-${{ steps.version.outputs.TAG_VERSION }}.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
