@@ -1453,9 +1453,18 @@ public class H5Datatype extends Datatype {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_LDOUBLE);
                 else if (datatypeSize == 8)
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_DOUBLE);
+                else if (datatypeSize == 4)
+                    tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
+                else if (datatypeSize == 2)
+                    // HDF5Constants.H5T_NATIVE_FLOAT16 is not available in all versions of HDF5
+                    // so we need to check if it is available
+                    // before using it.
+                    if (HDF5Constants.H5T_NATIVE_FLOAT16 == HDF5Constants.H5I_INVALID_HID)
+                        tid = H5.H5Tget_native_type(HDF5Constants.H5I_INVALID_HID);
+                    else
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT16);
                 else
-                    tid = H5.H5Tcopy((datatypeSize == 4) ? HDF5Constants.H5T_NATIVE_FLOAT
-                                                         : HDF5Constants.H5T_NATIVE_FLOAT16);
+                    tid = -1;
 
                 if (datatypeOrder == Datatype.ORDER_BE) {
                     H5.H5Tset_order(tid, HDF5Constants.H5T_ORDER_BE);
