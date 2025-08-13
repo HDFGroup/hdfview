@@ -1,2 +1,4 @@
 antoutput.log
 /.settings/
+/target/
+/libs/
