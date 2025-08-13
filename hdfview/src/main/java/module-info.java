@@ -1,6 +1,9 @@
 /** the hdfview module */
 module org.hdfgroup.hdfview
 {
+    requires static java.compiler;
+    requires transitive org.eclipse.swt;
+
     exports hdf;
     exports hdf.view;
     exports hdf.view.TreeView;

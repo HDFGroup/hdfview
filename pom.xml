@@ -1,0 +1,108 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.hdfgroup.hdfview</groupId>
+  <artifactId>hdfview-bom</artifactId>
+  <version>3.4-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <modules>
+<!-- The repository module must be first in order to ensure
+     that the local repository is populated -->
+    <module>repository</module>
+    <module>object</module>
+    <module>hdfview</module>
+  </modules>
+
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.release>21</maven.compiler.release>
+    <slf4j.version>2.0.17</slf4j.version>
+    <junit.version>4.13.2</junit.version>
+    <hdf.version>4.3.1</hdf.version>
+    <hdf5.version>2.0.0</hdf5.version>
+    <user.properties.file>build.properties</user.properties.file>
+    <properties.plugin.version>1.2.1</properties.plugin.version>
+    <swt.version>3.126.0</swt.version>
+    <osgi.platform>gtk.linux.x86_64</osgi.platform>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- SLF4J API -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- SLF4J SIMPLE -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <filters>
+      <filter>./build.properties</filter>
+    </filters>
+    <!-- Instructing the resources plugin to filter certain directories -->
+    <resources>
+      <resource>
+        <directory>.</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.5.3</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>properties-maven-plugin</artifactId>
+          <version>${properties.plugin.version}</version>
+          <executions>
+            <execution>
+              <phase>initialize</phase>
+              <goals>
+                <goal>read-project-properties</goal>
+              </goals>
+              <configuration>
+                <files>
+                  <file>${user.properties.file}</file>
+                </files>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+    </plugins>
+  </build>
+
+  <organization>
+    <name>The HDF Group</name>
+    <url>https://www.hdfgroup.org</url>
+  </organization>
+</project>

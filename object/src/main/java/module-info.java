@@ -1,6 +1,8 @@
 /** the hdf object module */
 module org.hdfgroup.object
 {
+    requires static java.compiler;
+
     exports hdf.object;
     exports hdf.object.fits;
     exports hdf.object.h4;
