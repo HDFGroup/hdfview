@@ -129,10 +129,152 @@ This document outlines high-level improvement suggestions for the HDFView projec
 ## Implementation Priority
 
 ### Phase 1: Foundation (High Priority)
-1. Complete Maven migration and remove Ant build system
-2. Fix platform-specific SWT dependency resolution
-3. Implement developer containers and setup automation
-4. Add basic static analysis and code quality tools
+
+#### 1. Complete Maven Migration and Remove Ant Build System
+
+**Scope**: Complete removal of Ant build infrastructure and ensure Maven handles all build tasks.
+
+**Tasks**:
+- **1.1 Audit Ant Dependencies** (1 day)
+  - Document all tasks currently handled by `build.xml`
+  - Identify any custom Ant tasks that need Maven equivalents
+  - Check for Ant-specific build properties or configurations
+
+- **1.2 Migrate Missing Build Tasks** (2-3 days)
+  - Ensure all Ant build tasks have Maven equivalents
+  - Update packaging and distribution tasks in Maven
+  - Migrate any custom build scripts or generators
+
+- **1.3 Remove Ant Files** (0.5 days)
+  - Delete `build.xml` from root directory
+  - Remove any remaining `.ant` or `ant.properties` files
+  - Clean up Ant-related documentation references
+
+- **1.4 Remove Maven-Antrun Dependencies** (1 day)
+  - Remove `maven-antrun-plugin` from `hdfview/pom.xml:211-226`
+  - Update compiler plugin configuration to remove Ant property dependencies
+  - Test build process without Ant integration
+
+**Acceptance Criteria**:
+- No `build.xml` files remain in repository
+- `mvn clean install` successfully builds entire project
+- All existing functionality preserved (tests pass)
+- No Ant runtime dependencies
+
+#### 2. Fix Platform-Specific SWT Dependency Resolution
+
+**Scope**: Enable proper cross-platform SWT dependency resolution for Linux, Windows, and macOS.
+
+**Tasks**:
+- **2.1 Uncomment and Fix SWT Profiles** (1 day)
+  - Uncomment platform profiles in `hdfview/pom.xml:111-194`
+  - Fix Maven profile syntax and property resolution
+  - Update SWT artifact IDs for current versions
+
+- **2.2 Configure Platform-Specific Dependencies** (2 days)
+  - **Linux**: `org.eclipse.swt.gtk.linux.x86_64`
+  - **Windows**: `org.eclipse.swt.win32.win32.x86_64`
+  - **macOS**: `org.eclipse.swt.cocoa.macosx.x86_64` and `org.eclipse.swt.cocoa.macosx.aarch64`
+  - Add ARM64 support for both Windows and macOS
+
+- **2.3 Replace Local SWT Dependencies** (1 day)
+  - Remove local Eclipse dependencies from `org.eclipse.local` group
+  - Update to use Maven Central SWT dependencies
+  - Update version properties in parent POM
+
+- **2.4 Test Multi-Platform Builds** (1 day)
+  - Verify builds work on each target platform
+  - Test SWT UI launches correctly per platform
+  - Document platform-specific build commands
+
+**Acceptance Criteria**:
+- Maven profiles automatically select correct SWT dependencies
+- Application builds and runs on Linux, Windows, and macOS
+- No manual platform configuration required
+- CI can build for multiple platforms
+
+#### 3. Improve Current build.properties System
+
+**Scope**: Enhance the existing `build.properties` approach for better native library management and developer experience.
+
+**Tasks**:
+- **3.1 Standardize build.properties Structure** (1 day)
+  - Create template `build.properties.template` with default values
+  - Document all available properties and their purposes
+  - Separate development vs production configurations
+
+- **3.2 Add Environment Variable Support** (1 day)
+  - Allow properties to fallback to environment variables
+  - Support `HDF4_HOME`, `HDF5_HOME` environment variables
+  - Add auto-detection of common installation paths
+
+- **3.3 Improve Native Library Path Management** (2 days)
+  - Add Maven profile-based library path resolution
+  - Support multiple HDF library versions side by side
+  - Add validation to ensure native libraries are found at build time
+
+- **3.4 Create Platform-Specific Property Templates** (1 day)
+  - `build.properties.linux.template`
+  - `build.properties.windows.template` 
+  - `build.properties.macos.template`
+  - Include platform-specific default paths and configurations
+
+- **3.5 Add Build Property Validation** (1 day)
+  - Maven plugin to validate required properties are set
+  - Check native library files exist at specified paths
+  - Provide clear error messages for missing dependencies
+
+**Acceptance Criteria**:
+- Clear documentation for setting up `build.properties`
+- Sensible defaults that work for common installation scenarios
+- Validation prevents builds with missing native libraries
+- Platform-specific templates reduce setup complexity
+
+#### 4. Add Basic Static Analysis and Code Quality Tools
+
+**Scope**: Integrate SpotBugs for static analysis with CI/CD integration capability.
+
+**Tasks**:
+- **4.1 Integrate SpotBugs** (1 day)
+  - Add `com.github.spotbugs:spotbugs-maven-plugin` to parent POM
+  - Configure exclusion rules for known false positives
+  - Set appropriate analysis level (default: medium)
+
+- **4.2 Configure Quality Gates** (1 day)
+  - Set build failure thresholds for critical/high priority issues
+  - Configure report generation in target directory
+  - Add HTML and XML report outputs
+
+- **4.3 Create Quality Profile** (0.5 days)
+  - Define custom ruleset for HDFView specific patterns
+  - Configure exclusions for UI and native library integration code
+  - Document quality standards and expectations
+
+- **4.4 CI Integration Preparation** (0.5 days)
+  - Ensure SpotBugs reports are generated in CI-friendly format
+  - Configure Maven to run static analysis in `verify` phase
+  - Document integration points for Phase 2 CI/CD work
+
+**Acceptance Criteria**:
+- SpotBugs runs automatically during `mvn verify`
+- Build fails on critical static analysis issues
+- Reports generated in `target/spotbugs` directory
+- Zero critical issues in codebase after cleanup
+
+#### Phase 1 Timeline and Dependencies
+
+**Total Estimated Duration**: 2-3 weeks
+
+**Dependency Order**:
+1. Tasks 1.1-1.4 (Ant Migration) - **Must complete first**
+2. Tasks 2.1-2.4 (SWT Profiles) - **Can run in parallel with Task 3**
+3. Tasks 3.1-3.5 (build.properties) - **Can run in parallel with Task 2**
+4. Tasks 4.1-4.4 (Static Analysis) - **Can start after Maven migration**
+
+**Risk Mitigation**:
+- Test each change incrementally to avoid breaking builds
+- Maintain backup branch before major changes
+- Verify all tests pass after each major task completion
 
 ### Phase 2: Modernization (Medium Priority)
 1. Upgrade to JUnit 5 and improve testing infrastructure
