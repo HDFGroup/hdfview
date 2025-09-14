@@ -16,6 +16,8 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.release>21</maven.compiler.release>
+    <!-- Use classpath instead of module path (module-info.java disabled) -->
+    <maven.compiler.testCompilerArgument>-classpath</maven.compiler.testCompilerArgument>
     <slf4j.version>2.0.17</slf4j.version>
     <junit.version>4.13.2</junit.version>
     <hdf.version>4.3.1</hdf.version>
@@ -67,6 +69,160 @@
     </resources>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
+        <!-- Configure compiler for non-modular build -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.14.0</version>
+          <configuration>
+            <source>21</source>
+            <target>21</target>
+            <release>21</release>
+            <!-- Force classpath mode instead of module path -->
+            <forceJavacCompilerUse>true</forceJavacCompilerUse>
+          </configuration>
+        </plugin>
+        <!-- Properties Plugin for external property file loading -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>properties-maven-plugin</artifactId>
+          <version>1.2.1</version>
+          <executions>
+            <execution>
+              <phase>initialize</phase>
+              <goals>
+                <goal>read-project-properties</goal>
+              </goals>
+              <configuration>
+                <files>
+                  <file>build.properties</file>
+                </files>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Exec Plugin for version extraction and application execution -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>3.1.1</version>
+          <executions>
+            <!-- Extract HDF4 version from libhdf4.settings -->
+            <execution>
+              <id>extract-hdf4-version</id>
+              <phase>initialize</phase>
+              <goals><goal>exec</goal></goals>
+              <configuration>
+                <executable>sh</executable>
+                <arguments>
+                  <argument>-c</argument>
+                  <argument>if [ -f "${hdf.lib.dir}/libhdf4.settings" ]; then grep "HDF4 Version:" "${hdf.lib.dir}/libhdf4.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf4.version; else echo "unknown" > ${project.build.directory}/hdf4.version; fi</argument>
+                </arguments>
+                <skip>${maven.exec.skip}</skip>
+              </configuration>
+            </execution>
+            <!-- Extract HDF5 version from libhdf5.settings -->
+            <execution>
+              <id>extract-hdf5-version</id>
+              <phase>initialize</phase>
+              <goals><goal>exec</goal></goals>
+              <configuration>
+                <executable>sh</executable>
+                <arguments>
+                  <argument>-c</argument>
+                  <argument>grep "HDF5 Version:" "${hdf5.lib.dir}/libhdf5.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf5.version</argument>
+                </arguments>
+              </configuration>
+            </execution>
+            <!-- Extract application version from VERSION file -->
+            <execution>
+              <id>extract-app-version</id>
+              <phase>initialize</phase>
+              <goals><goal>exec</goal></goals>
+              <configuration>
+                <executable>sh</executable>
+                <arguments>
+                  <argument>-c</argument>
+                  <argument>grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' VERSION | head -1 > ${project.build.directory}/app.version</argument>
+                </arguments>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- JaCoCo Plugin for code coverage analysis -->
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.11</version>
+          <executions>
+            <execution>
+              <id>default-prepare-agent</id>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>default-report</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>default-check</id>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <rule>
+                    <element>BUNDLE</element>
+                    <limits>
+                      <limit>
+                        <counter>COMPLEXITY</counter>
+                        <value>COVEREDRATIO</value>
+                        <minimum>0.20</minimum>
+                      </limit>
+                    </limits>
+                  </rule>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- JavaDoc Plugin for documentation generation -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.6.3</version>
+          <configuration>
+            <source>21</source>
+            <target>21</target>
+            <encoding>UTF-8</encoding>
+            <docencoding>UTF-8</docencoding>
+            <charset>UTF-8</charset>
+            <show>protected</show>
+            <nohelp>true</nohelp>
+            <failOnError>false</failOnError>
+            <failOnWarnings>false</failOnWarnings>
+            <quiet>true</quiet>
+            <additionalJOptions>
+              <additionalJOption>-J-Xmx1024m</additionalJOption>
+            </additionalJOptions>
+            <!-- Handle modules/non-modular JARs -->
+            <detectJavaApiLink>false</detectJavaApiLink>
+            <additionalJOption>-Xdoclint:none</additionalJOption>
+          </configuration>
+          <executions>
+            <execution>
+              <id>aggregate</id>
+              <goals>
+                <goal>aggregate</goal>
+              </goals>
+              <phase>site</phase>
+            </execution>
+          </executions>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>

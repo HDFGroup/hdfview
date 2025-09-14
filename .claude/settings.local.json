@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn:*)",
+      "Read(//home/byrn/HDF_Projects/temp/HDF_Group/HDF/4.3.1-1/lib/**)",
+      "Read(//home/byrn/HDF_Projects/temp/HDF_Group/HDF5/2.0.0/lib/**)",
+      "Bash(cat:*)",
+      "Bash(ant:*)",
+      "Bash(timeout 60 ant compile)",
+      "Bash(grep:*)",
+      "Bash(echo:*)",
+      "WebSearch",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

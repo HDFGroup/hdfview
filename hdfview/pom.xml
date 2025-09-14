@@ -53,9 +53,9 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.local</groupId>
+      <groupId>org.eclipse.nebula.widgets.nattable</groupId>
       <artifactId>org.eclipse.nebula.widgets.nattable.core</artifactId>
-      <version>2.4.0</version>
+      <version>2.5.0</version>
       <scope>compile</scope>
     </dependency>
 <!-- 
@@ -65,29 +65,16 @@
       <version>${swt.version}</version>
     </dependency>
 -->
+<!--
     <dependency>
       <groupId>org.eclipse.local</groupId>
       <artifactId>org.eclipse.swt</artifactId>
       <version>${swt.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.eclipse.local</groupId>
-      <artifactId>org.eclipse.swtbot</artifactId>
-      <version>4.2.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.local</groupId>
-      <artifactId>org.eclipse.swtbot.nebula.nattable.finder</artifactId>
-      <version>4.2.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.local</groupId>
-      <artifactId>org.eclipse.swtbot.swt.finder</artifactId>
-      <version>4.2.1</version>
-      <scope>test</scope>
-    </dependency>
+-->
+    <!-- SWTBot dependencies temporarily removed - not easily available on Maven Central
+         Will be re-added in Phase 2 with Tycho/p2 repository integration -->
+    <!-- TODO: Add SWTBot UI test dependencies in Phase 2 -->
   </dependencies>
 
     <dependencyManagement>
@@ -107,7 +94,6 @@
 
 <!-- 
 -->
-<!-- 
   <profiles>
     <profile>
       <id>swt-unix</id>
@@ -117,7 +103,7 @@
         </os>
       </activation>
       <properties>
-        <osgi.platform>gtk.linux.${os.arch}</osgi.platform>
+        <osgi.platform>gtk.linux.x86_64</osgi.platform>
         <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
         <env>linux</env>
       </properties>
@@ -191,7 +177,6 @@
       </dependencies>
     </profile>
   </profiles>
--->
 
   <build>
     <plugins>
