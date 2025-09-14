@@ -8,7 +8,7 @@ HDFView is a Java-based GUI application for viewing and editing HDF (Hierarchica
 
 ## Build System
 
-The project uses **Maven** as the primary build system with a multi-module structure. While legacy Ant build files exist (`build.xml`), the current development focuses on Maven.
+The project uses **Maven** as the build system with a multi-module structure. The Ant build system has been removed as part of Phase 1 migration - Maven is now the only supported build system.
 
 ### Build Commands
 
@@ -29,8 +29,17 @@ mvn clean install
 ### Key Build Configuration
 
 - **Java Version**: Java 21 (set via `maven.compiler.source` and `maven.compiler.release`)
-- **Build Properties**: Configuration stored in `build.properties` file
-- **Native Libraries**: HDF4/HDF5 native libraries required (paths set in `build.properties`)
+- **Build System**: Maven-only (Ant build removed in Phase 1 migration)
+- **Build Properties**: External configuration loaded via properties-maven-plugin from `build.properties`
+- **Native Libraries**: HDF4/HDF5 native libraries required (paths configured in `build.properties`)
+- **Module System**: Disabled temporarily (non-modular build for SWT compatibility)
+
+### Maven Plugins Integrated
+
+- **Properties Plugin**: External property file loading (`build.properties`)
+- **Exec Plugin**: Native library version extraction and application execution
+- **JaCoCo Plugin**: Code coverage analysis and reporting
+- **JavaDoc Plugin**: API documentation generation with multi-module aggregation
 
 ## Architecture
 

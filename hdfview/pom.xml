@@ -191,32 +191,17 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-            <execution>
-                <phase>generate-resources</phase>
-                <goals>
-                    <goal>run</goal>
-                </goals>
-                <configuration>
-                    <exportAntProperties>true</exportAntProperties>
-                    <target>
-                        <property name="cp" refid="maven.compile.classpath"/>
-                    </target>
-                </configuration>
-            </execution>
-        </executions>
-      </plugin>
+      <!-- maven-antrun-plugin removed - Maven compiler plugin handles classpath automatically -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.14.0</version>
         <configuration>
-            <compilerArgs>
-                <arg>-cp</arg>
-                <arg>${cp}${path.separator}${project.parent.basedir}/target/*</arg>
-            </compilerArgs>
+            <!-- Maven handles classpath automatically - no manual configuration needed -->
+            <source>21</source>
+            <target>21</target>
+            <release>21</release>
+            <encoding>UTF-8</encoding>
+            <!-- Use parent POM compiler configuration for non-modular build -->
         </configuration>
       </plugin>
       <plugin>
