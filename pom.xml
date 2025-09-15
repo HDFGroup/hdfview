@@ -19,7 +19,8 @@
     <!-- Use classpath instead of module path (module-info.java disabled) -->
     <maven.compiler.testCompilerArgument>-classpath</maven.compiler.testCompilerArgument>
     <slf4j.version>2.0.17</slf4j.version>
-    <junit.version>4.13.2</junit.version>
+    <junit.version>5.10.0</junit.version>
+    <junit4.version>4.13.2</junit4.version>
     <hdf.version>4.3.1</hdf.version>
     <hdf5.version>2.0.0</hdf5.version>
     <user.properties.file>build.properties</user.properties.file>
@@ -46,12 +47,32 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- JUnit 5 -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-params</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
+      <!-- JUnit 4 compatibility during transition -->
+      <dependency>
+        <groupId>org.junit.vintage</groupId>
+        <artifactId>junit-vintage-engine</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>${junit.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <version>${junit4.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -149,11 +170,28 @@
             </execution>
           </executions>
         </plugin>
-        <!-- JaCoCo Plugin for code coverage analysis -->
+        <!-- JaCoCo Plugin for comprehensive code coverage analysis -->
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>0.8.11</version>
+          <configuration>
+            <excludes>
+              <!-- UI Framework exclusions -->
+              <exclude>**/hdf/view/ViewProperties*</exclude>
+              <exclude>**/hdf/view/dialog/*Dialog*</exclude>
+              <!-- Native library wrappers -->
+              <exclude>**/hdf/hdf5lib/**</exclude>
+              <exclude>**/hdf/hdf4lib/**</exclude>
+              <!-- Generated code -->
+              <exclude>**/generated/**</exclude>
+              <!-- Test utilities -->
+              <exclude>**/test/**/*Test*</exclude>
+              <!-- Main methods and application launchers -->
+              <exclude>**/HDFView.main*</exclude>
+              <exclude>**/Main.main*</exclude>
+            </excludes>
+          </configuration>
           <executions>
             <execution>
               <id>default-prepare-agent</id>
@@ -175,18 +213,49 @@
               </goals>
               <configuration>
                 <rules>
+                  <!-- Overall project minimum thresholds -->
                   <rule>
                     <element>BUNDLE</element>
                     <limits>
                       <limit>
-                        <counter>COMPLEXITY</counter>
+                        <counter>LINE</counter>
                         <value>COVEREDRATIO</value>
-                        <minimum>0.20</minimum>
+                        <minimum>0.60</minimum>
+                      </limit>
+                      <limit>
+                        <counter>BRANCH</counter>
+                        <value>COVEREDRATIO</value>
+                        <minimum>0.50</minimum>
+                      </limit>
+                    </limits>
+                  </rule>
+                  <!-- Higher standards for core data model packages -->
+                  <rule>
+                    <element>PACKAGE</element>
+                    <includes>
+                      <include>hdf.object.*</include>
+                      <include>hdf.view.datacontent.*</include>
+                    </includes>
+                    <limits>
+                      <limit>
+                        <counter>LINE</counter>
+                        <value>COVEREDRATIO</value>
+                        <minimum>0.70</minimum>
                       </limit>
                     </limits>
                   </rule>
                 </rules>
+                <!-- Start with warnings only during Phase 2C implementation -->
+                <haltOnFailure>false</haltOnFailure>
               </configuration>
+            </execution>
+            <!-- Aggregated reporting across all modules -->
+            <execution>
+              <id>aggregate-report</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>report-aggregate</goal>
+              </goals>
             </execution>
           </executions>
         </plugin>
@@ -232,6 +301,70 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.5.3</version>
+          <configuration>
+            <argLine>
+              --add-opens java.base/java.lang=ALL-UNNAMED
+              --add-opens java.base/java.time=ALL-UNNAMED
+              --add-opens java.base/java.time.format=ALL-UNNAMED
+              --add-opens java.base/java.util=ALL-UNNAMED
+              --enable-native-access=jarhdf5
+              -Djava.library.path=${platform.hdf.lib}
+            </argLine>
+            <includes>
+              <include>**/*Test.java</include>
+              <include>**/Test*.java</include>
+            </includes>
+            <!-- Configure parallel execution for unit tests -->
+            <parallel>methods</parallel>
+            <threadCount>4</threadCount>
+            <groups>unit</groups>
+            <!-- Fallback for tests without tags -->
+            <excludedGroups>ui</excludedGroups>
+          </configuration>
+          <executions>
+            <!-- Fast unit tests (default) -->
+            <execution>
+              <id>unit-tests</id>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+                <groups>unit</groups>
+                <parallel>methods</parallel>
+                <threadCount>4</threadCount>
+              </configuration>
+            </execution>
+            <!-- Integration tests (serial execution) -->
+            <execution>
+              <id>integration-tests</id>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+                <groups>integration</groups>
+                <parallel>none</parallel>
+              </configuration>
+            </execution>
+            <!-- UI tests (serial execution, headless false) -->
+            <execution>
+              <id>ui-tests</id>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+                <groups>ui</groups>
+                <parallel>none</parallel>
+                <argLine>
+                  --add-opens java.base/java.lang=ALL-UNNAMED
+                  --add-opens java.base/java.time=ALL-UNNAMED
+                  --add-opens java.desktop/java.awt=ALL-UNNAMED
+                  --enable-native-access=jarhdf5
+                  -Djava.awt.headless=false
+                  -Djava.library.path=${platform.hdf.lib}
+                </argLine>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <!-- Maven Enforcer Plugin for build validation -->
         <plugin>
@@ -252,6 +385,67 @@
               <version>4.8.6</version>
             </dependency>
           </dependencies>
+        </plugin>
+
+        <!-- PMD Plugin for Java 21 compatible static analysis -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>3.21.2</version>
+          <dependencies>
+            <dependency>
+              <groupId>net.sourceforge.pmd</groupId>
+              <artifactId>pmd-core</artifactId>
+              <version>7.0.0</version>
+            </dependency>
+            <dependency>
+              <groupId>net.sourceforge.pmd</groupId>
+              <artifactId>pmd-java</artifactId>
+              <version>7.0.0</version>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <targetJdk>21</targetJdk>
+            <rulesets>
+              <ruleset>pmd-rules.xml</ruleset>
+            </rulesets>
+            <excludes>
+              <exclude>**/hdf/hdf5lib/**/*.java</exclude>
+              <exclude>**/hdf/hdf4lib/**/*.java</exclude>
+              <exclude>**/test/**/*.java</exclude>
+            </excludes>
+            <includeTests>false</includeTests>
+            <failOnViolation>false</failOnViolation>
+            <verbose>true</verbose>
+            <analysisCache>true</analysisCache>
+            <analysisCacheLocation>target/pmd-cache</analysisCacheLocation>
+          </configuration>
+        </plugin>
+
+        <!-- Checkstyle Plugin for Java 21 compatible code style enforcement -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>3.3.1</version>
+          <dependencies>
+            <dependency>
+              <groupId>com.puppycrawl.tools</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>10.12.5</version>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <configLocation>checkstyle-rules.xml</configLocation>
+            <includeTestSourceDirectory>false</includeTestSourceDirectory>
+            <excludes>
+              **/hdf/hdf5lib/**/*.java,
+              **/hdf/hdf4lib/**/*.java,
+              **/test/**/*.java
+            </excludes>
+            <failOnViolation>false</failOnViolation>
+            <violationSeverity>warning</violationSeverity>
+            <cacheFile>target/checkstyle-cache</cacheFile>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -394,8 +588,376 @@ Otherwise, ensure HDF4 libraries are installed or set HDF4_HOME environment vari
             </dependency>
           </dependencies>
         </plugin>
+
+        <!-- PMD Static Analysis - Java 21 Compatible -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>pmd-check</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>pmd-cpd-check</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>cpd-check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Checkstyle Code Style Enforcement - Java 21 Compatible -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>checkstyle-check</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- OWASP Dependency Vulnerability Scanning -->
+        <plugin>
+          <groupId>org.owasp</groupId>
+          <artifactId>dependency-check-maven</artifactId>
+          <version>9.0.7</version>
+          <configuration>
+            <failBuildOnCVSS>8.0</failBuildOnCVSS>
+            <skipTestScope>true</skipTestScope>
+            <skipProvidedScope>true</skipProvidedScope>
+            <suppressionFile>dependency-check-suppressions.xml</suppressionFile>
+            <formats>
+              <format>HTML</format>
+              <format>XML</format>
+              <format>JSON</format>
+            </formats>
+            <outputDirectory>target/dependency-check</outputDirectory>
+            <autoUpdate>true</autoUpdate>
+            <cveValidForHours>24</cveValidForHours>
+          </configuration>
+          <executions>
+            <execution>
+              <id>security-check</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- License Maven Plugin for compliance checking -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>2.3.0</version>
+          <configuration>
+            <licenseMerges>
+              <licenseMerge>Apache License, Version 2.0|The Apache Software License, Version 2.0|Apache 2.0|Apache License 2.0</licenseMerge>
+              <licenseMerge>BSD License|BSD|BSD-2-Clause|BSD-3-Clause|The BSD License</licenseMerge>
+              <licenseMerge>MIT License|MIT|The MIT License</licenseMerge>
+              <licenseMerge>Eclipse Public License|EPL|Eclipse Public License - v 1.0</licenseMerge>
+            </licenseMerges>
+            <failOnMissing>false</failOnMissing>
+            <failOnBlacklist>false</failOnBlacklist>
+            <excludedLicenses>
+              <excludedLicense>GPL v2</excludedLicense>
+              <excludedLicense>GPL v3</excludedLicense>
+              <excludedLicense>AGPL v3</excludedLicense>
+            </excludedLicenses>
+            <includedScopes>compile,runtime</includedScopes>
+          </configuration>
+          <executions>
+            <execution>
+              <id>license-check</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>aggregate-third-party-report</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
     </plugins>
   </build>
+
+  <!-- Reporting configuration for unified quality dashboard -->
+  <reporting>
+    <plugins>
+      <!-- JaCoCo Coverage Reporting -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>report</report>
+              <report>report-aggregate</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- PMD Static Analysis Reporting -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>pmd</report>
+              <report>cpd</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- Checkstyle Code Style Reporting -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>checkstyle</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- OWASP Dependency Check Security Reporting -->
+      <plugin>
+        <groupId>org.owasp</groupId>
+        <artifactId>dependency-check-maven</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>aggregate</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- License Compliance Reporting -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>third-party-report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- SpotBugs Reporting (ready for Java 21 activation) -->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>spotbugs</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- Maven Site Plugin for comprehensive reporting -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>4.0.0-M13</version>
+      </plugin>
+
+      <!-- Project Info Reports -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>3.5.0</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>index</report>
+              <report>summary</report>
+              <report>dependencies</report>
+              <report>dependency-info</report>
+              <report>dependency-convergence</report>
+              <report>team</report>
+              <report>scm</report>
+              <report>licenses</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <!-- Progressive Quality Gate Profiles -->
+  <profiles>
+    <!-- Phase 1: Report only (default during Phase 2C implementation) -->
+    <profile>
+      <id>quality-report</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.60</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.50</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+              <haltOnFailure>false</haltOnFailure>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Phase 2: Warnings on regression (activate in Week 3-4) -->
+    <profile>
+      <id>quality-warn</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.60</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.50</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+              <haltOnFailure>false</haltOnFailure>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Phase 3: Enforce quality gates (activate in Week 5+) -->
+    <profile>
+      <id>quality-enforce</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.60</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.50</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+                <!-- Higher standards for core packages -->
+                <rule>
+                  <element>PACKAGE</element>
+                  <includes>
+                    <include>hdf.object.*</include>
+                    <include>hdf.view.datacontent.*</include>
+                  </includes>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.70</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+              <haltOnFailure>true</haltOnFailure>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Development profile for comprehensive quality checks -->
+    <profile>
+      <id>quality-dev</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>quality-dev-check</id>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <rule>
+                      <element>BUNDLE</element>
+                      <limits>
+                        <limit>
+                          <counter>LINE</counter>
+                          <value>COVEREDRATIO</value>
+                          <minimum>0.40</minimum>
+                        </limit>
+                      </limits>
+                    </rule>
+                  </rules>
+                  <haltOnFailure>false</haltOnFailure>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <organization>
     <name>The HDF Group</name>

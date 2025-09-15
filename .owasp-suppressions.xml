@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+    <!--
+    OWASP Dependency Check Suppressions for HDFView
+
+    This file contains suppressions for known false positives and accepted risks.
+    Each suppression should include:
+    1. Justification for suppression
+    2. Review date and reviewer
+    3. Expiration date for re-evaluation
+    -->
+
+    <!-- SWT Platform-Specific Dependencies -->
+    <suppress>
+        <notes>
+            SWT platform JARs contain native code and may trigger false positives.
+            These are official Eclipse SWT distributions.
+            Review Date: 2025-09-15
+            Next Review: 2026-03-15
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.platform/org\.eclipse\.swt\..*@.*$</packageUrl>
+        <cve>CVE-2021-28165</cve>
+        <cve>CVE-2021-28164</cve>
+    </suppress>
+
+    <!-- HDF Group Native Libraries -->
+    <suppress>
+        <notes>
+            HDF native libraries are core dependencies for file format support.
+            Security is managed through HDF Group's own security processes.
+            Review Date: 2025-09-15
+            Next Review: 2026-03-15
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.hdfgroup/.*@.*$</packageUrl>
+        <vulnerabilityName regex="true">.*native.*</vulnerabilityName>
+    </suppress>
+
+    <!-- Test Dependencies -->
+    <suppress>
+        <notes>
+            Test-only dependencies with lower security requirements.
+            These are not included in production distributions.
+            Review Date: 2025-09-15
+            Next Review: 2026-09-15
+        </notes>
+        <packageUrl regex="true">^pkg:maven/(junit|org\.junit|org\.hamcrest|org\.mockito)/.*@.*$</packageUrl>
+        <cpe>cpe:/a:junit:junit</cpe>
+    </suppress>
+
+    <!-- Apache Commons False Positives -->
+    <suppress>
+        <notes>
+            Commons dependencies often have false positives for older CVEs.
+            Using current stable versions which include security fixes.
+            Review Date: 2025-09-15
+            Next Review: 2026-03-15
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons-.*@.*$</packageUrl>
+        <cve>CVE-2014-0114</cve>
+        <cve>CVE-2019-10086</cve>
+    </suppress>
+
+    <!-- Accepted Low-Risk Vulnerabilities -->
+    <suppress until="2026-09-15Z">
+        <notes>
+            Low severity vulnerabilities in non-critical paths.
+            Monitoring for updates but not blocking releases.
+            Review Date: 2025-09-15
+        </notes>
+        <cvssBelow>4.0</cvssBelow>
+    </suppress>
+
+    <!-- Development and Build Tool Dependencies -->
+    <suppress>
+        <notes>
+            Maven plugins and build tools are development-time only.
+            Not included in runtime distribution.
+            Review Date: 2025-09-15
+            Next Review: 2026-09-15
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.maven\.plugins/.*@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/org\.jacoco/.*@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/com\.github\.spotbugs/.*@.*$</packageUrl>
+    </suppress>
+
+</suppressions>

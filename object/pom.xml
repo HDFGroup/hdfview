@@ -31,10 +31,32 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        <!-- JUnit 5 dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- JUnit 4 compatibility during transition -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
+            <version>${junit4.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -103,11 +125,33 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.0</version>
                 <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <release>21</release>
+                    <!-- Force classpath mode instead of module path -->
+                    <forceJavacCompilerUse>true</forceJavacCompilerUse>
                     <compilerArgs>
                         <arg>-cp</arg>
                         <arg>${cp}${path.separator}${project.parent.basedir}/target/*</arg>
                     </compilerArgs>
                 </configuration>
+                <executions>
+                    <!-- Test compilation with explicit classpath mode -->
+                    <execution>
+                        <id>test-compile</id>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>--add-opens</arg>
+                                <arg>java.base/java.lang=ALL-UNNAMED</arg>
+                                <arg>--add-opens</arg>
+                                <arg>java.base/java.time=ALL-UNNAMED</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

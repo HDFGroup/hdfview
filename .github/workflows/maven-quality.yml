@@ -1,0 +1,295 @@
+name: Maven Quality Gates
+
+on:
+  push:
+    branches: [ master-maven, main ]
+  pull_request:
+    branches: [ master-maven, main ]
+  schedule:
+    # Run quality analysis daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  security-events: write
+
+env:
+  MAVEN_OPTS: >-
+    -Xmx3g
+    -Xms1g
+    -XX:+UseParallelGC
+    -Djava.awt.headless=true
+
+jobs:
+  quality-analysis:
+    name: Quality Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for better analysis
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.m2/repository
+          !~/.m2/repository/org/hdfgroup
+        key: ${{ runner.os }}-maven-quality-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-quality-
+          ${{ runner.os }}-maven-
+
+    - name: Cache Analysis Data
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.sonar/cache
+          **/target/pmd-cache
+          **/target/checkstyle-cache
+        key: ${{ runner.os }}-analysis-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-analysis-
+
+    - name: Install HDF Libraries
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libhdf5-dev libhdf4-dev
+
+    - name: Set up build.properties
+      run: |
+        cat > build.properties << EOF
+        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+        hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/hdf5/plugins
+        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
+        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
+        ci.build=true
+        quality.analysis=true
+        EOF
+
+    - name: Run Tests with Coverage
+      run: |
+        echo "::group::Test Execution with Coverage"
+        mvn clean test jacoco:report -B \
+          -Dmaven.test.failure.ignore=false \
+          -Djacoco.excludes="**/Test*,**/Mock*,**/Stub*"
+        echo "::endgroup::"
+
+    - name: Code Coverage Analysis
+      run: |
+        echo "::group::Coverage Analysis"
+
+        # Generate coverage report
+        mvn jacoco:report
+
+        # Extract coverage percentage
+        if [ -f target/site/jacoco/index.html ]; then
+          COVERAGE=$(grep -o 'Total[^%]*%' target/site/jacoco/index.html | grep -o '[0-9]*%' | head -1)
+          echo "Current code coverage: ${COVERAGE:-Unknown}"
+          echo "COVERAGE_PERCENT=${COVERAGE:-0%}" >> $GITHUB_ENV
+        fi
+
+        # Check coverage threshold
+        mvn jacoco:check -Djacoco.haltOnFailure=false || echo "Coverage below threshold - check required"
+        echo "::endgroup::"
+
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./target/site/jacoco/jacoco.xml,./object/target/site/jacoco/jacoco.xml,./hdfview/target/site/jacoco/jacoco.xml
+        flags: unittests
+        name: codecov-hdfview
+        fail_ci_if_error: false
+        verbose: true
+
+    - name: Generate Coverage Badge
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master-maven'
+      run: |
+        # Create a simple coverage badge
+        COVERAGE_NUM=$(echo $COVERAGE_PERCENT | sed 's/%//')
+        if [ -n "$COVERAGE_NUM" ] && [ "$COVERAGE_NUM" -ge 80 ]; then
+          COLOR="brightgreen"
+        elif [ -n "$COVERAGE_NUM" ] && [ "$COVERAGE_NUM" -ge 60 ]; then
+          COLOR="yellow"
+        else
+          COLOR="red"
+        fi
+
+        echo "Coverage: $COVERAGE_PERCENT (Color: $COLOR)"
+
+    - name: Static Analysis - PMD
+      run: |
+        echo "::group::PMD Analysis"
+        mvn pmd:pmd pmd:cpd -B \
+          -Dpmd.failOnViolation=false \
+          -Dpmd.analysisCache=true
+        echo "::endgroup::"
+
+    - name: Static Analysis - Checkstyle
+      run: |
+        echo "::group::Checkstyle Analysis"
+        mvn checkstyle:checkstyle -B \
+          -Dcheckstyle.failOnViolation=false \
+          -Dcheckstyle.cache.file=target/checkstyle-cache
+        echo "::endgroup::"
+
+    - name: Quality Gate Evaluation
+      id: quality-gate
+      run: |
+        echo "::group::Quality Gate Evaluation"
+
+        # Initialize counters
+        QUALITY_ISSUES=0
+        QUALITY_WARNINGS=0
+
+        # Check coverage threshold
+        COVERAGE_NUM=$(echo ${COVERAGE_PERCENT:-0%} | sed 's/%//')
+        if [ -n "$COVERAGE_NUM" ] && [ "$COVERAGE_NUM" -lt 60 ]; then
+          echo "❌ Coverage below 60%: $COVERAGE_PERCENT"
+          QUALITY_ISSUES=$((QUALITY_ISSUES + 1))
+        else
+          echo "✅ Coverage acceptable: ${COVERAGE_PERCENT:-Unknown}"
+        fi
+
+        # Check PMD results
+        if [ -f target/pmd.xml ]; then
+          PMD_VIOLATIONS=$(grep -c '<violation' target/pmd.xml || echo "0")
+          if [ "$PMD_VIOLATIONS" -gt 50 ]; then
+            echo "❌ PMD violations too high: $PMD_VIOLATIONS (max 50)"
+            QUALITY_ISSUES=$((QUALITY_ISSUES + 1))
+          elif [ "$PMD_VIOLATIONS" -gt 20 ]; then
+            echo "⚠️  PMD violations elevated: $PMD_VIOLATIONS"
+            QUALITY_WARNINGS=$((QUALITY_WARNINGS + 1))
+          else
+            echo "✅ PMD violations acceptable: $PMD_VIOLATIONS"
+          fi
+        fi
+
+        # Check Checkstyle results
+        if [ -f target/checkstyle-result.xml ]; then
+          CHECKSTYLE_ERRORS=$(grep -c 'severity="error"' target/checkstyle-result.xml || echo "0")
+          if [ "$CHECKSTYLE_ERRORS" -gt 0 ]; then
+            echo "❌ Checkstyle errors found: $CHECKSTYLE_ERRORS"
+            QUALITY_ISSUES=$((QUALITY_ISSUES + 1))
+          else
+            echo "✅ No Checkstyle errors"
+          fi
+        fi
+
+        # Set outputs
+        echo "quality_issues=$QUALITY_ISSUES" >> $GITHUB_OUTPUT
+        echo "quality_warnings=$QUALITY_WARNINGS" >> $GITHUB_OUTPUT
+        echo "coverage_percent=${COVERAGE_PERCENT:-0%}" >> $GITHUB_OUTPUT
+
+        # Summary
+        echo "Quality Gate Summary:"
+        echo "- Issues (blocking): $QUALITY_ISSUES"
+        echo "- Warnings: $QUALITY_WARNINGS"
+        echo "- Coverage: ${COVERAGE_PERCENT:-Unknown}"
+
+        if [ "$QUALITY_ISSUES" -gt 0 ]; then
+          echo "QUALITY_GATE_STATUS=failed" >> $GITHUB_ENV
+          echo "::error::Quality gate failed with $QUALITY_ISSUES issues"
+        else
+          echo "QUALITY_GATE_STATUS=passed" >> $GITHUB_ENV
+          echo "Quality gate passed"
+        fi
+
+        echo "::endgroup::"
+
+    - name: Comment PR with Quality Report
+      uses: actions/github-script@v7
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+
+          let qualityReport = `## 🔍 Quality Analysis Report
+
+          | Metric | Status | Value |
+          |--------|--------|-------|
+          | **Code Coverage** | ${process.env.COVERAGE_PERCENT && parseInt(process.env.COVERAGE_PERCENT) >= 60 ? '✅' : '❌'} | ${process.env.COVERAGE_PERCENT || 'Unknown'} |
+          | **Quality Gate** | ${process.env.QUALITY_GATE_STATUS === 'passed' ? '✅ Passed' : '❌ Failed'} | ${{ steps.quality-gate.outputs.quality_issues }} issues |
+          `;
+
+          // Add PMD information if available
+          try {
+            const pmdFile = 'target/pmd.xml';
+            if (fs.existsSync(pmdFile)) {
+              const pmdContent = fs.readFileSync(pmdFile, 'utf8');
+              const violations = (pmdContent.match(/<violation/g) || []).length;
+              qualityReport += `| **PMD Analysis** | ${violations <= 20 ? '✅' : violations <= 50 ? '⚠️' : '❌'} | ${violations} violations |\n`;
+            }
+          } catch (e) {
+            console.log('PMD report not available');
+          }
+
+          qualityReport += `
+
+          ### Details
+          - **Coverage Threshold**: 60% minimum required
+          - **PMD Violations**: Maximum 50 allowed
+          - **Checkstyle**: No errors allowed
+
+          `;
+
+          if (process.env.QUALITY_GATE_STATUS === 'failed') {
+            qualityReport += `
+          ⚠️ **Quality gate failed!** Please address the issues above before merging.
+
+          For help with quality issues, see [Quality Guidelines](docs/quality-guidelines.md)
+          `;
+          }
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: qualityReport
+          });
+
+    - name: Archive Quality Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: quality-reports-${{ github.run_number }}
+        path: |
+          **/target/site/jacoco/
+          **/target/pmd.xml
+          **/target/checkstyle-result.xml
+          **/target/site/pmd.html
+          **/target/site/checkstyle.html
+        retention-days: 30
+
+    - name: Quality Summary
+      if: always()
+      run: |
+        echo "## 🔍 Quality Analysis Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: $QUALITY_GATE_STATUS" >> $GITHUB_STEP_SUMMARY
+        echo "- **Coverage**: ${COVERAGE_PERCENT:-Unknown}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Issues**: ${{ steps.quality-gate.outputs.quality_issues }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Warnings**: ${{ steps.quality-gate.outputs.quality_warnings }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Reports Available" >> $GITHUB_STEP_SUMMARY
+        echo "- Code Coverage: target/site/jacoco/index.html" >> $GITHUB_STEP_SUMMARY
+        echo "- PMD Analysis: target/site/pmd.html" >> $GITHUB_STEP_SUMMARY
+        echo "- Checkstyle: target/site/checkstyle.html" >> $GITHUB_STEP_SUMMARY
+
+    # Fail the workflow if quality gate failed
+    - name: Quality Gate Check
+      if: env.QUALITY_GATE_STATUS == 'failed'
+      run: |
+        echo "Quality gate failed with ${{ steps.quality-gate.outputs.quality_issues }} issues"
+        exit 1

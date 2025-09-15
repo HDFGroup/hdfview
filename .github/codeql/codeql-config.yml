@@ -1,0 +1,44 @@
+name: "HDFView CodeQL Configuration"
+
+disable-default-queries: false
+
+queries:
+  - uses: security-and-quality
+  - uses: security-extended
+
+paths-ignore:
+  # Build and dependency directories
+  - target/
+  - .m2/
+
+  # Test data files
+  - "**/testfiles/"
+  - "**/*.h5"
+  - "**/*.hdf"
+  - "**/*.nc"
+
+  # Generated sources
+  - "**/generated-sources/"
+  - "**/generated-test-sources/"
+
+  # Native library directories
+  - libs/native/
+
+  # Documentation
+  - docs/
+  - "**/*.md"
+
+paths:
+  # Focus on main source code
+  - hdfview/src/main/java/
+  - object/src/main/java/
+
+  # Include test sources for security analysis
+  - hdfview/src/test/java/
+  - object/src/test/java/
+
+# Java-specific configuration
+packs:
+  # Include additional security-focused query packs
+  - java/ql/src/codeql-suites/java-security-and-quality.qls
+  - java/ql/src/codeql-suites/java-security-extended.qls

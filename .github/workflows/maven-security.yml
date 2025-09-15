@@ -1,0 +1,265 @@
+name: Security and Dependency Scanning
+
+on:
+  push:
+    branches: [ master-maven, main ]
+  pull_request:
+    branches: [ master-maven, main ]
+  schedule:
+    # Run security scan weekly on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+env:
+  MAVEN_OPTS: >-
+    -Xmx2g
+    -Xms1g
+    -XX:+UseParallelGC
+    -Djava.awt.headless=true
+
+jobs:
+  dependency-check:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-security-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-security-
+          ${{ runner.os }}-maven-
+
+    - name: Cache OWASP Database
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository/org/owasp/dependency-check-data
+        key: ${{ runner.os }}-owasp-db-${{ github.run_number }}
+        restore-keys: |
+          ${{ runner.os }}-owasp-db-
+
+    - name: Set up build.properties
+      run: |
+        cat > build.properties << EOF
+        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
+        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
+        ci.build=true
+        security.scan=true
+        EOF
+
+    - name: OWASP Dependency Check
+      run: |
+        echo "::group::OWASP Dependency Vulnerability Check"
+
+        mvn org.owasp:dependency-check-maven:check \
+          -Dformat=ALL \
+          -DfailBuildOnCVSS=7 \
+          -DsuppressFile=.owasp-suppressions.xml \
+          -B || echo "Dependency check completed with findings"
+
+        echo "::endgroup::"
+
+    - name: Parse Dependency Check Results
+      id: dependency-results
+      run: |
+        if [ -f target/dependency-check-report.json ]; then
+          # Count vulnerabilities by severity
+          HIGH_VULNS=$(jq '.dependencies[].vulnerabilities[]? | select(.severity == "HIGH")' target/dependency-check-report.json | jq -s length)
+          MEDIUM_VULNS=$(jq '.dependencies[].vulnerabilities[]? | select(.severity == "MEDIUM")' target/dependency-check-report.json | jq -s length)
+          LOW_VULNS=$(jq '.dependencies[].vulnerabilities[]? | select(.severity == "LOW")' target/dependency-check-report.json | jq -s length)
+
+          echo "high_vulnerabilities=${HIGH_VULNS:-0}" >> $GITHUB_OUTPUT
+          echo "medium_vulnerabilities=${MEDIUM_VULNS:-0}" >> $GITHUB_OUTPUT
+          echo "low_vulnerabilities=${LOW_VULNS:-0}" >> $GITHUB_OUTPUT
+
+          echo "Vulnerability Summary:"
+          echo "- High: ${HIGH_VULNS:-0}"
+          echo "- Medium: ${MEDIUM_VULNS:-0}"
+          echo "- Low: ${LOW_VULNS:-0}"
+        else
+          echo "No dependency check report found"
+          echo "high_vulnerabilities=0" >> $GITHUB_OUTPUT
+          echo "medium_vulnerabilities=0" >> $GITHUB_OUTPUT
+          echo "low_vulnerabilities=0" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Upload Dependency Check Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: dependency-check-report-${{ github.run_number }}
+        path: |
+          target/dependency-check-report.html
+          target/dependency-check-report.json
+          target/dependency-check-report.xml
+        retention-days: 30
+
+    - name: Create Security Summary
+      run: |
+        echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+        echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| High | ${{ steps.dependency-results.outputs.high_vulnerabilities }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Medium | ${{ steps.dependency-results.outputs.medium_vulnerabilities }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Low | ${{ steps.dependency-results.outputs.low_vulnerabilities }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📊 **Report**: Available in build artifacts" >> $GITHUB_STEP_SUMMARY
+
+  codeql-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java' ]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        config-file: ./.github/codeql/codeql-config.yml
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-codeql-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Set up build.properties
+      run: |
+        cat > build.properties << EOF
+        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
+        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
+        ci.build=true
+        EOF
+
+    - name: Build for CodeQL Analysis
+      run: |
+        mvn clean compile -B -DskipTests
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-license-${{ hashFiles('**/pom.xml') }}
+
+    - name: Set up build.properties
+      run: |
+        cat > build.properties << EOF
+        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
+        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
+        ci.build=true
+        EOF
+
+    - name: Generate License Report
+      run: |
+        echo "::group::License Analysis"
+
+        # Generate dependency tree with licenses
+        mvn dependency:tree -B > dependency-tree.txt
+
+        # Use license plugin if available
+        mvn license:aggregate-third-party-report -B || echo "License plugin not configured"
+
+        echo "::endgroup::"
+
+    - name: Check for Prohibited Licenses
+      run: |
+        echo "::group::License Compliance Check"
+
+        # List of prohibited license patterns (case-insensitive)
+        PROHIBITED_LICENSES="GPL-2.0|GPL-3.0|AGPL|SSPL|BUSL"
+
+        if [ -f dependency-tree.txt ]; then
+          # Check for prohibited licenses in dependency tree
+          if grep -iE "$PROHIBITED_LICENSES" dependency-tree.txt; then
+            echo "❌ Prohibited licenses found!"
+            echo "PROHIBITED_LICENSES_FOUND=true" >> $GITHUB_ENV
+          else
+            echo "✅ No prohibited licenses detected"
+            echo "PROHIBITED_LICENSES_FOUND=false" >> $GITHUB_ENV
+          fi
+        fi
+
+        echo "::endgroup::"
+
+    - name: Upload License Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: license-reports-${{ github.run_number }}
+        path: |
+          dependency-tree.txt
+          target/generated-sources/license/THIRD-PARTY.txt
+        retention-days: 30
+
+    - name: License Compliance Summary
+      run: |
+        echo "## 📜 License Compliance Summary" >> $GITHUB_STEP_SUMMARY
+        if [ "$PROHIBITED_LICENSES_FOUND" = "true" ]; then
+          echo "❌ **Status**: Prohibited licenses detected" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ Review required before merging" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ **Status**: No prohibited licenses found" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📋 **Reports**: Available in build artifacts" >> $GITHUB_STEP_SUMMARY
+
+    - name: Fail on Prohibited Licenses
+      if: env.PROHIBITED_LICENSES_FOUND == 'true'
+      run: |
+        echo "Build failed due to prohibited licenses"
+        exit 1

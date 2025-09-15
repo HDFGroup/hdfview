@@ -1,0 +1,95 @@
+version: 2
+
+updates:
+  # Maven dependency updates
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+
+    # Security updates are applied immediately
+    allow:
+      - dependency-type: "all"
+
+    # Group updates by category to reduce PR noise
+    groups:
+      junit-dependencies:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.junit.vintage:*"
+          - "org.junit.platform:*"
+
+      maven-plugins:
+        patterns:
+          - "org.apache.maven.plugins:*"
+          - "org.jacoco:*"
+          - "com.github.spotbugs:*"
+          - "org.owasp:*"
+
+      eclipse-swt:
+        patterns:
+          - "org.eclipse.platform:*"
+          - "org.eclipse.nebula:*"
+
+      hdf-group:
+        patterns:
+          - "org.hdfgroup:*"
+
+      apache-commons:
+        patterns:
+          - "org.apache.commons:*"
+
+      logging:
+        patterns:
+          - "org.slf4j:*"
+          - "ch.qos.logback:*"
+
+      test-dependencies:
+        patterns:
+          - "org.mockito:*"
+          - "org.hamcrest:*"
+          - "org.awaitility:*"
+
+    # Dependency update limits
+    open-pull-requests-limit: 10
+
+    # Custom commit message
+    commit-message:
+      prefix: "deps"
+      prefix-development: "dev-deps"
+      include: "scope"
+
+    # Add reviewers for dependency updates
+    reviewers:
+      - "hdf-group/hdfview-developers"
+
+    # Label dependency PRs
+    labels:
+      - "dependencies"
+      - "automated"
+
+    # Target branch for updates
+    target-branch: "master-maven"
+
+  # GitHub Actions workflow updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "UTC"
+
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+    labels:
+      - "github-actions"
+      - "ci"
+      - "automated"
+
+    target-branch: "master-maven"

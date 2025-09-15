@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<ruleset name="HDFView PMD Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>PMD rules customized for HDFView project with Java 21 support</description>
+
+    <!-- Include standard rulesets with HDFView-specific exclusions -->
+
+    <!-- Best Practices -->
+    <rule ref="category/java/bestpractices.xml">
+        <!-- Exclude rules that don't apply well to UI/SWT code -->
+        <exclude name="JUnitTestsShouldIncludeAssert"/>
+        <exclude name="UseVarargs"/> <!-- SWT methods don't use varargs -->
+        <exclude name="AvoidReassigningParameters"/> <!-- Common in SWT event handlers -->
+        <exclude name="GuardLogStatement"/> <!-- Acceptable for HDFView logging -->
+    </rule>
+
+    <!-- Code Style -->
+    <rule ref="category/java/codestyle.xml">
+        <!-- Exclude overly restrictive style rules -->
+        <exclude name="OnlyOneReturn"/> <!-- Multiple returns can be clearer -->
+        <exclude name="AtLeastOneConstructor"/> <!-- Not always needed -->
+        <exclude name="CommentDefaultAccessModifier"/> <!-- Package-private is fine -->
+        <exclude name="CallSuperInConstructor"/> <!-- Not always applicable -->
+        <exclude name="LocalVariableCouldBeFinal"/> <!-- Too noisy for UI code -->
+        <exclude name="MethodArgumentCouldBeFinal"/> <!-- Too noisy for UI code -->
+        <exclude name="ShortVariable"/> <!-- Allow short names in loops -->
+        <exclude name="LongVariable"/> <!-- Allow descriptive names -->
+    </rule>
+
+    <!-- Design -->
+    <rule ref="category/java/design.xml">
+        <!-- Exclude rules that conflict with UI patterns -->
+        <exclude name="TooManyMethods"/> <!-- UI classes naturally have many methods -->
+        <exclude name="LawOfDemeter"/> <!-- UI event handling often violates this -->
+        <exclude name="ExcessiveImports"/> <!-- UI classes often need many imports -->
+        <exclude name="GodClass"/> <!-- Some UI classes are necessarily large -->
+        <exclude name="ExcessiveClassLength"/> <!-- UI classes can be long -->
+        <exclude name="TooManyFields"/> <!-- UI classes often have many components -->
+    </rule>
+
+    <!-- Performance -->
+    <rule ref="category/java/performance.xml">
+        <!-- Allow some flexibility for UI performance patterns -->
+        <exclude name="AvoidInstantiatingObjectsInLoops"/> <!-- Sometimes necessary in UI -->
+    </rule>
+
+    <!-- Security -->
+    <rule ref="category/java/security.xml"/>
+
+    <!-- Error Prone -->
+    <rule ref="category/java/errorprone.xml">
+        <!-- Customize for HDF-specific patterns -->
+        <exclude name="DataflowAnomalyAnalysis"/> <!-- Too many false positives -->
+        <exclude name="NullAssignment"/> <!-- Sometimes necessary for cleanup -->
+        <exclude name="AvoidFieldNameMatchingMethodName"/> <!-- Common in data classes -->
+    </rule>
+
+    <!-- Custom rules for HDF-specific patterns -->
+
+    <!-- Ensure HDF file resources are properly closed -->
+    <rule ref="category/java/errorprone.xml/CloseResource">
+        <properties>
+            <property name="closeTargets"
+                     value="H5File,H4File,NC2File,FileFormat,H5Group,H5Dataset"/>
+        </properties>
+    </rule>
+
+    <!-- Relax some rules for specific packages -->
+
+    <!-- Native library wrapper packages can have different patterns -->
+    <rule ref="category/java/codestyle.xml/ShortMethodName">
+        <properties>
+            <property name="xpath">
+                <value>//ClassOrInterfaceDeclaration[not(starts-with(@Image, 'H5'))]//MethodDeclarator[@Image and string-length(@Image) &lt; 3]</value>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- UI event handlers can have empty catch blocks for user cancellation -->
+    <rule ref="category/java/errorprone.xml/EmptyCatchBlock">
+        <properties>
+            <property name="allowCommentedBlocks" value="true"/>
+            <property name="allowExceptionNameRegex" value="^(ignored|expected|cancel|user.*)$"/>
+        </properties>
+    </rule>
+
+    <!-- Configure complexity thresholds for UI classes -->
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="classReportLevel" value="80"/>
+            <property name="methodReportLevel" value="12"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/design.xml/NPathComplexity">
+        <properties>
+            <property name="reportLevel" value="200"/>
+        </properties>
+    </rule>
+
+    <!-- Allow longer parameter lists for UI constructors -->
+    <rule ref="category/java/design.xml/ExcessiveParameterList">
+        <properties>
+            <property name="minimum" value="12"/>
+        </properties>
+    </rule>
+
+    <!-- Custom violation priorities -->
+    <rule ref="category/java/errorprone.xml/AvoidBranchingStatementAsLastInLoop">
+        <priority>4</priority>
+    </rule>
+
+    <rule ref="category/java/performance.xml/UseStringBufferForStringAppends">
+        <priority>3</priority>
+    </rule>
+
+</ruleset>
