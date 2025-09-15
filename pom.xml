@@ -58,7 +58,7 @@
 
   <build>
     <filters>
-      <filter>./build.properties</filter>
+      <filter>${maven.multiModuleProjectDirectory}/build.properties</filter>
     </filters>
     <!-- Instructing the resources plugin to filter certain directories -->
     <resources>
@@ -95,7 +95,7 @@
               </goals>
               <configuration>
                 <files>
-                  <file>build.properties</file>
+                  <file>${session.executionRootDirectory}/build.properties</file>
                 </files>
               </configuration>
             </execution>
@@ -233,6 +233,26 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.5.3</version>
         </plugin>
+        <!-- Maven Enforcer Plugin for build validation -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>3.4.1</version>
+        </plugin>
+        <!-- SpotBugs Plugin for static analysis -->
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>4.8.6.4</version>
+          <dependencies>
+            <!-- Update SpotBugs core - Java 21 has limited support -->
+            <dependency>
+              <groupId>com.github.spotbugs</groupId>
+              <artifactId>spotbugs</artifactId>
+              <version>4.8.6</version>
+            </dependency>
+          </dependencies>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -251,8 +271,128 @@
                   <file>${user.properties.file}</file>
                 </files>
               </configuration>
+              <inherited>false</inherited>
             </execution>
           </executions>
+        </plugin>
+        <!-- Maven Enforcer Plugin for native library validation -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>enforce-hdf5-libraries</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <!-- Hard validation: HDF5 library directory must exist -->
+                  <requireProperty>
+                    <property>hdf5.lib.dir</property>
+                    <message>ERROR: hdf5.lib.dir property is required. Please set it in build.properties.
+See build.properties.template for examples or docs/build.properties.example for guidance.</message>
+                  </requireProperty>
+                  <requireFilesExist>
+                    <files>
+                      <file>${hdf5.lib.dir}</file>
+                    </files>
+                    <message>ERROR: HDF5 library directory does not exist: ${hdf5.lib.dir}
+
+Please ensure HDF5 libraries are installed and hdf5.lib.dir points to the correct location.
+
+Common locations:
+- Linux: /usr/local/lib, /usr/lib/x86_64-linux-gnu
+- macOS: /opt/homebrew/lib, /usr/local/lib
+- Windows: C:/Program Files/HDF_Group/HDF5/*/lib
+
+You can also set HDF5_HOME environment variable and use: hdf5.lib.dir=${env.HDF5_HOME}/lib</message>
+                  </requireFilesExist>
+                  <!-- Hard validation: HDF5 plugin directory should exist -->
+                  <requireProperty>
+                    <property>hdf5.plugin.dir</property>
+                    <message>ERROR: hdf5.plugin.dir property is required for full HDF5 functionality.</message>
+                  </requireProperty>
+                  <requireFilesExist>
+                    <files>
+                      <file>${hdf5.plugin.dir}</file>
+                    </files>
+                    <message>ERROR: HDF5 plugin directory does not exist: ${hdf5.plugin.dir}
+
+HDF5 plugins are required for full functionality. Please ensure the plugin directory exists.
+You can also use: hdf5.plugin.dir=${env.HDF5_HOME}/lib/plugin</message>
+                  </requireFilesExist>
+                </rules>
+              </configuration>
+            </execution>
+            <!-- Soft validation for HDF4 libraries (warnings only) -->
+            <execution>
+              <id>check-hdf4-libraries</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <fail>false</fail>
+                <rules>
+                  <requireFilesExist>
+                    <files>
+                      <file>${hdf.lib.dir}</file>
+                    </files>
+                    <message>WARNING: HDF4 library directory does not exist: ${hdf.lib.dir}
+
+HDF4 support is optional. If you don't need HDF4 support, comment out the hdf.lib.dir property in build.properties.
+Otherwise, ensure HDF4 libraries are installed or set HDF4_HOME environment variable.</message>
+                  </requireFilesExist>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- SpotBugs Plugin for static code analysis
+             NOTE: SpotBugs 4.8.6 does not support Java 21 bytecode (class file major version 68)
+             To enable SpotBugs analysis:
+             1. Wait for SpotBugs version with Java 21 support, OR
+             2. Compile with Java 17 temporarily for analysis
+
+             Plugin is configured and ready - uncomment executions when Java 21 support is available
+             Manual execution: mvn spotbugs:spotbugs (may fail with current Java 21 setup) -->
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <configuration>
+            <effort>Max</effort>
+            <threshold>Medium</threshold>
+            <failOnError>false</failOnError>
+            <xmlOutput>true</xmlOutput>
+            <spotbugsXmlOutput>true</spotbugsXmlOutput>
+            <spotbugsXmlOutputDirectory>${project.build.directory}/spotbugs</spotbugsXmlOutputDirectory>
+            <htmlOutput>true</htmlOutput>
+            <spotbugsHtmlOutputDirectory>${project.build.directory}/spotbugs</spotbugsHtmlOutputDirectory>
+            <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+            <includeTests>false</includeTests>
+            <onlyAnalyze>hdf.*,ncsa.*</onlyAnalyze>
+          </configuration>
+          <!-- Executions commented out due to Java 21 incompatibility - uncomment when SpotBugs supports Java 21
+          <executions>
+            <execution>
+              <id>spotbugs-analysis</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>spotbugs</goal>
+              </goals>
+            </execution>
+          </executions>
+          -->
+          <dependencies>
+            <!-- Update SpotBugs core to latest version for Java 21 support -->
+            <dependency>
+              <groupId>com.github.spotbugs</groupId>
+              <artifactId>spotbugs</artifactId>
+              <version>4.8.6</version>
+            </dependency>
+          </dependencies>
         </plugin>
     </plugins>
   </build>

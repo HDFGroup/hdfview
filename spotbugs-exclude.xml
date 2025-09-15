@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs exclusion rules for HDFView
+  This file excludes false positives and patterns specific to HDF/SWT development
+-->
+<FindBugsFilter>
+
+    <!-- Exclude UI initialization patterns common in SWT applications -->
+    <Match>
+        <Class name="~.*\.view\..*"/>
+        <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"/>
+    </Match>
+
+    <!-- Exclude SWT-specific patterns - widgets often require null checks -->
+    <Match>
+        <Class name="~.*\.view\..*"/>
+        <Bug pattern="UWF_NULL_FIELD"/>
+    </Match>
+
+    <!-- Exclude SWT dispose patterns - widgets handle their own disposal -->
+    <Match>
+        <Method name="~.*dispose.*"/>
+        <Bug pattern="UWF_NULL_FIELD"/>
+    </Match>
+
+    <!-- Exclude native library integration patterns -->
+    <Match>
+        <Class name="~.*\.h[45]\..*"/>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
+
+    <!-- Exclude JNI-related patterns in HDF native integration -->
+    <Match>
+        <Class name="~.*\.jni\..*"/>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
+
+    <!-- Exclude HDF library wrapper classes that may have unusual patterns -->
+    <Match>
+        <Class name="~.*\.h[45]\..*"/>
+        <Bug pattern="MS_SHOULD_BE_FINAL"/>
+    </Match>
+
+    <!-- Exclude UI event handling patterns -->
+    <Match>
+        <Class name="~.*\.view\..*"/>
+        <Method name="~.*Listener.*"/>
+        <Bug pattern="UWF_UNWRITTEN_FIELD"/>
+    </Match>
+
+    <!-- Exclude SWT Image and resource management patterns -->
+    <Match>
+        <Class name="~.*\.view\..*"/>
+        <Bug pattern="OS_OPEN_STREAM"/>
+    </Match>
+
+    <!-- Exclude test classes from analysis (reduce noise) -->
+    <Match>
+        <Class name="~.*Test.*"/>
+    </Match>
+    <Match>
+        <Class name="~.*TestCase.*"/>
+    </Match>
+
+    <!-- Exclude utility classes with static initialization patterns -->
+    <Match>
+        <Class name="~.*Utils.*"/>
+        <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"/>
+    </Match>
+
+    <!-- Exclude HDF format-specific classes that may have complex inheritance -->
+    <Match>
+        <Class name="~.*\.fits\..*"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+    <Match>
+        <Class name="~.*\.netcdf\..*"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+
+</FindBugsFilter>
