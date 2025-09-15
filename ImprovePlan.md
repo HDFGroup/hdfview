@@ -278,279 +278,320 @@ This document outlines high-level improvement suggestions for the HDFView projec
 
 ### Phase 2: Modernization (Medium Priority)
 
-**Prerequisites**:
-- ✅ **Complete**: Phase 1 tasks 1.1-1.4 (Maven migration) - Pure Maven build achieved
-- ❌ **Missing**: Phase 1 tasks 2-4 (SWT platforms, build.properties, static analysis)
-- ✅ **Already Integrated**: JaCoCo, JavaDoc, Properties, Exec plugins from Task 1.2
+**Prerequisites**: ✅ **ALL PHASE 1 TASKS COMPLETE**
+- ✅ **Task 1**: Maven Migration - Pure Maven build achieved
+- ✅ **Task 2**: SWT Platform Support - Linux x86_64 fully operational
+- ✅ **Task 3**: build.properties Enhancement - Consolidated with validation
+- ✅ **Task 4**: Static Analysis - Infrastructure ready (pending Java 21 support)
+- ✅ **Foundation**: JaCoCo, JavaDoc, Properties, Exec plugins integrated
 
-#### 0. Complete Missing Phase 1 Prerequisites (CRITICAL)
+#### 1. Complete JUnit 5 Migration and Testing Infrastructure
 
-**Scope**: Complete the missing Phase 1 tasks required for Phase 2 modernization.
+**Scope**: Migrate all 66+ tests from JUnit 4 to JUnit 5 with improved organization and modern testing practices.
 
-**Tasks** (Priority Order):
-- **2.0.1 Implement SWT Platform Support** (2 days) - **HIGHEST PRIORITY**
-  - ❌ **Currently Missing**: Platform profiles still commented out in hdfview/pom.xml:111-194
-  - Uncomment and fix SWT platform profiles for Linux, Windows, macOS
-  - Configure ARM64 support for Windows and macOS
-  - Replace local SWT dependencies (`org.eclipse.local`) with Maven Central versions
-  - Test multi-platform dependency resolution and application startup
-  - **Critical for**: Cross-platform builds and CI/CD matrix builds
-
-- **2.0.2 Simplified SpotBugs Static Analysis** (0.5 days) - **MEDIUM PRIORITY**
-  - Add basic SpotBugs Maven plugin to parent POM
-  - Configure medium threshold with build warnings (not failures initially)
-  - Create basic exclusion rules for SWT/UI patterns
-  - Generate HTML reports for developer review
-  - **Simplified scope**: Basic integration only, full quality gates in main Phase 2
-
-- **2.0.3 Targeted build.properties Enhancements** (0.5 days) - **LOW PRIORITY**
-  - **Current Issues**: Hardcoded absolute paths, Linux-only assumptions, no fallbacks
-  - **Change 1**: Add environment variable fallbacks:
-    ```properties
-    # Enhanced with fallbacks
-    hdf.lib.dir = ${env.HDF4_HOME}/lib
-    hdf5.lib.dir = ${env.HDF5_HOME}/lib
-    hdf5.plugin.dir = ${env.HDF5_HOME}/lib/plugin
-    ```
-  - **Change 2**: Create `build.properties.template` with cross-platform examples
-  - **Change 3**: Add platform detection for library paths:
-    ```properties
-    # Auto-detect platform library path variable
-    platform.hdf.lib = ${env.LD_LIBRARY_PATH}    # Linux
-    #platform.hdf.lib = ${env.PATH}              # Windows
-    #platform.hdf.lib = ${env.DYLD_LIBRARY_PATH} # macOS
-    ```
-  - **Change 4**: Add basic Maven validation to check if library directories exist
-  - **Benefit**: Reduces developer setup complexity and supports multiple environments
-
-**Acceptance Criteria**:
-- Maven profiles automatically select correct SWT dependencies per platform
-- SpotBugs runs during `mvn verify` with zero critical issues
-- Application builds and runs on Linux, Windows, and macOS
-- Build validation prevents missing native library issues
-
-#### 1. Upgrade to JUnit 5 and Improve Testing Infrastructure
-
-**Scope**: Modernize testing framework while maintaining existing test functionality and improving test organization.
+**Duration**: 3-4 weeks
 
 **Tasks**:
-- **2.1 Assess Current Test Suite** (2 days)
-  - Audit all 66+ existing test classes for migration complexity
-  - Document SWTBot UI test dependencies and patterns
-  - Identify tests that can benefit from JUnit 5 features (parameterized, dynamic tests)
-  - Create migration strategy for existing vs new tests
+- **2.1 Set Up JUnit 5 Infrastructure** (2 days)
+  - Add JUnit 5 dependencies (jupiter-engine, jupiter-params, vintage-engine) to parent POM
+  - Configure Maven Surefire plugin v3.2+ for JUnit 5 support
+  - Add JUnit 4 vintage engine for transition period compatibility
+  - Update test execution JVM arguments for module access and SWT testing
+  - Test infrastructure with sample migration
 
-- **2.2 Set Up JUnit 5 Infrastructure** (2 days)
-  - Add JUnit 5 dependencies to parent POM (jupiter-engine, jupiter-params, vintage-engine)
-  - Configure Maven Surefire plugin for JUnit 5 support
-  - Add JUnit 4 vintage engine for backward compatibility
-  - Update test execution JVM arguments for module access
+- **2.2 Audit and Categorize Existing Tests** (2 days)
+  - Document all 66+ existing test classes by category (unit, integration, UI)
+  - Identify SWTBot UI test patterns and dependencies
+  - Map tests that benefit from JUnit 5 features (parameterized, dynamic, nested)
+  - Create migration priority matrix based on complexity and value
+  - Document test data dependencies and setup requirements
 
-- **2.3 Create Modern Test Base Classes** (2 days)
-  - Design new test base classes using JUnit 5 patterns
-  - Create SWTBot test utilities with modern assertions
-  - Implement test data management with `@TempDir` and fixtures
-  - Add parameterized test support for multiple HDF formats
+- **2.3 Create Modern Test Foundation** (3 days)
+  - Design JUnit 5 test base classes with consistent patterns
+  - Create SWTBot test utilities with modern assertions and `@TempDir` support
+  - Implement test data management utilities for HDF files
+  - Add parameterized test support for HDF4/HDF5/NetCDF format variations
+  - Create test fixtures and helper classes for common operations
 
-- **2.4 Migrate High-Value Tests** (3 days)
-  - Convert 10-15 core functionality tests to JUnit 5
-  - Focus on data model tests and file I/O operations
-  - Implement parameterized tests for HDF4/HDF5/NetCDF formats
-  - Add dynamic tests for varying dataset sizes
+- **2.4 Migrate Core Data Model Tests** (4 days)
+  - Convert all object module tests (~20 tests) to JUnit 5
+  - Focus on HDF4Object, HDF5Object, NetCDF data model classes
+  - Implement parameterized tests for different data types and formats
+  - Add dynamic tests for varying dataset configurations
+  - Use `@Nested` tests for logical test grouping
 
-- **2.5 Improve Test Organization** (2 days)
-  - Separate unit tests from integration/UI tests
-  - Create test suites with `@Suite` annotations
-  - Add test categories (`@Tag`) for different test types
-  - Configure Maven profiles for different test execution modes
+- **2.5 Migrate UI and Integration Tests** (5 days)
+  - Convert all SWTBot UI tests (~40 tests) to JUnit 5
+  - Update HDFView application tests with modern lifecycle management
+  - Migrate file I/O integration tests with `@TempDir` and proper cleanup
+  - Add test categories with `@Tag` annotations (unit, integration, ui, slow)
+  - Implement test suites with `@Suite` for different execution modes
 
-- **2.6 Enhanced Test Data Management** (1 day)
-  - Centralize test HDF files in `test-resources`
-  - Add programmatic test data generation utilities
-  - Implement test file cleanup and isolation
-  - Document test data requirements and setup
+- **2.6 Organize Test Structure and Execution** (2 days)
+  - Create Maven profiles for test execution modes (unit-only, integration, all)
+  - Separate slow/UI tests from fast unit tests
+  - Configure parallel test execution for improved performance
+  - Add test coverage integration with JaCoCo for trend monitoring
+  - Document test execution patterns and IDE setup
 
-**Acceptance Criteria**:
-- JUnit 5 infrastructure runs alongside existing JUnit 4 tests
-- At least 15 core tests migrated to JUnit 5 with improved patterns
-- Test execution time reduced by 20% through better organization
-- Clear separation between unit, integration, and UI tests
-- All tests pass in both IDE and Maven environments
-
-#### 2. Implement Proper CI/CD with Maven
-
-**Scope**: Replace Ant-based GitHub Actions with comprehensive Maven CI/CD pipeline.
-
-**Tasks**:
-- **2.7 Audit Current GitHub Actions** (1 day)
-  - Document all workflows in `.github/workflows/`
-  - Identify Ant-specific steps that need Maven equivalents
-  - Review artifact generation and deployment processes
-  - Assess multi-platform build requirements
-
-- **2.8 Create Maven CI/CD Workflows** (3 days)
-  - **Basic Build Workflow**: Build, test, static analysis on push/PR
-  - **Multi-Platform Builds**: Linux, Windows, macOS with platform-specific SWT
-  - **Release Workflow**: Automated versioning, packaging, and GitHub releases
-  - **Quality Gate Workflow**: Code coverage, static analysis reporting
-
-- **2.9 Configure Build Matrix** (2 days)
-  - Matrix strategy for Java versions (21 as primary, 17 for compatibility)
-  - Platform-specific build configurations (Linux, Windows, macOS)
-  - Profile-based builds for different HDF library versions
-  - Parallel execution for faster builds
-
-- **2.10 Set Up Artifact Management** (2 days)
-  - Configure Maven repository for internal dependencies
-  - Set up GitHub Packages for release artifacts
-  - Implement caching for dependencies and build outputs
-  - Add artifact retention policies
-
-- **2.11 Security and Dependency Scanning** (1 day)
-  - Add OWASP dependency check plugin to Maven
-  - Configure GitHub security scanning (CodeQL, Dependabot)
-  - Set up vulnerability reporting and notifications
-  - Add license compliance checking
-
-- **2.12 Documentation and Notifications** (1 day)
-  - Create CI/CD documentation for contributors
-  - Set up build status badges and notifications
-  - Configure Slack/email notifications for failures
-  - Add deployment documentation
+- **2.7 Remove JUnit 4 Dependencies** (1 day)
+  - Remove vintage engine after all tests migrated
+  - Clean up JUnit 4 dependencies and imports
+  - Update CI/CD configuration for JUnit 5 only
+  - Final validation of all test execution modes
 
 **Acceptance Criteria**:
-- All Ant workflows replaced with Maven equivalents
-- Successful multi-platform builds on each commit
-- Automated quality gates prevent merging of low-quality code
-- Release process fully automated with proper versioning
-- Build times under 15 minutes for full matrix
+- All 66+ tests migrated to JUnit 5 with no JUnit 4 dependencies
+- Test execution time improved by 20% through parallel execution and organization
+- Clear separation: unit tests (<2s), integration tests (<30s), UI tests (any duration)
+- Test coverage baseline established with JaCoCo integration
+- Comprehensive test execution documentation for contributors
 
-#### 3. Add Code Coverage and Quality Gates
+#### 2. Implement Maven-based CI/CD Pipeline
 
-**Scope**: Expand existing JaCoCo integration and implement comprehensive code quality measurement and enforcement.
+**Scope**: Replace Ant-based GitHub Actions with comprehensive Maven CI/CD focusing on development workflow and quality gates.
+
+**Duration**: 2-3 weeks
 
 **Tasks**:
-- **2.13 Enhance Existing JaCoCo Code Coverage** (1 day)
-  - ✅ **Already Complete**: JaCoCo Maven plugin configured for all modules
-  - ✅ **Already Complete**: Coverage aggregation across modules working
-  - Enhance HTML and XML report configuration
-  - Set up coverage trend tracking and reporting
+- **2.8 Audit and Plan CI/CD Migration** (2 days)
+  - Document all existing workflows in `.github/workflows/`
+  - Identify Ant-specific steps requiring Maven equivalents
+  - Map current artifact generation and deployment processes
+  - Plan development-focused workflow (defer multi-platform matrix per guidance)
+  - Create migration strategy minimizing disruption
 
-- **2.14 Set Coverage Thresholds** (1 day)
-  - Define minimum coverage percentages per module
-  - Configure line, branch, and method coverage rules
-  - Set up incremental coverage requirements for new code
-  - Add coverage trend tracking
+- **2.9 Create Core Maven Workflows** (4 days)
+  - **Development Workflow**: Build, test, quality analysis on push/PR
+    - Maven clean compile test verify
+    - JUnit 5 test execution with reporting
+    - JaCoCo code coverage with trend analysis
+    - Java 21 compatible static analysis (PMD, Checkstyle)
+  - **Quality Gate Workflow**: Automated quality checks and reporting
+    - Code coverage thresholds and trend monitoring
+    - Static analysis violation reporting
+    - Test success rate and performance metrics
+  - **Dependency Management**: Security and license scanning
+    - OWASP dependency vulnerability checks
+    - GitHub Dependabot integration
+    - License compliance validation
 
-- **2.15 Expand Static Analysis** (2 days)
-  - ✅ **Basic SpotBugs**: Already implemented in prerequisite Task 2.0.2
-  - **Enhance SpotBugs**: Add quality gate enforcement and comprehensive exclusions
-  - **Add PMD**: Custom ruleset for HDFView patterns
-  - **Add CheckStyle**: Java standard formatting rules
-  - **Add OWASP**: Dependency vulnerability scanning
-  - **Create Dashboard**: Unified quality reporting across tools
+- **2.10 Configure Build Optimization** (2 days)
+  - Implement Maven dependency caching for faster builds
+  - Configure parallel test execution within CI
+  - Set up incremental build strategies
+  - Add build performance monitoring and reporting
+  - Target <10 minute build times for development workflow
 
-- **2.16 Quality Gate Integration** (2 days)
-  - Configure Maven to fail builds on quality violations
-  - Set up quality gate exceptions for legacy code
-  - Add quality metrics to PR status checks
-  - Implement quality trend reporting
+- **2.11 Set Up Quality Reporting and Gates** (3 days)
+  - Configure automated code coverage reporting with JaCoCo
+  - Set up static analysis reporting (PMD, Checkstyle output)
+  - Implement quality gates that fail builds on regression
+  - Add PR status checks for quality metrics
+  - Create quality trend dashboards and notifications
 
-- **2.17 Performance Regression Testing** (2 days)
+- **2.12 Implement Artifact and Release Management** (2 days)
+  - Configure GitHub Packages for Maven artifacts
+  - Set up automated versioning for releases
+  - Create release workflow with changelog generation
+  - Implement artifact retention and cleanup policies
+  - Document release process and artifact usage
+
+- **2.13 Documentation and Team Integration** (2 days)
+  - Create comprehensive CI/CD documentation for contributors
+  - Set up build status badges for repository README
+  - Configure notification strategies (GitHub, email)
+  - Add troubleshooting guide for common CI issues
+  - Document development workflow integration
+
+**Acceptance Criteria**:
+- All Ant workflows replaced with Maven-based equivalents
+- Development builds complete in <10 minutes with full quality analysis
+- Automated quality gates prevent regression in code quality and coverage
+- Release process fully automated with proper versioning and artifacts
+- Comprehensive documentation and team onboarding materials
+
+#### 3. Implement Comprehensive Code Quality and Static Analysis
+
+**Scope**: Expand JaCoCo integration and implement Java 21 compatible static analysis with comprehensive quality gates.
+
+**Duration**: 2-3 weeks
+
+**Tasks**:
+- **2.14 Enhance Code Coverage Infrastructure** (2 days)
+  - Enhance existing JaCoCo configuration with detailed reporting
+  - Set up coverage trend tracking and historical analysis
+  - Configure coverage aggregation across object and hdfview modules
+  - Add coverage exclusions for generated code and native library wrappers
+  - Integrate coverage reporting with CI/CD pipeline
+
+- **2.15 Set Coverage Thresholds and Quality Gates** (2 days)
+  - Define minimum coverage percentages: 60% line, 50% branch per module
+  - Configure incremental coverage requirements for new code (80% minimum)
+  - Set up coverage trend monitoring and regression detection
+  - Implement Maven build failure on coverage regression
+  - Add coverage metrics to PR status checks
+
+- **2.16 Implement Java 21 Compatible Static Analysis** (4 days)
+  - **Add PMD v7.0+**: Java 21 compatible static analysis
+    - Configure HDFView-specific ruleset excluding SWT/JNI patterns
+    - Focus on code quality, potential bugs, performance issues
+    - Generate XML/HTML reports for CI integration
+  - **Add Checkstyle v10.12+**: Code formatting and style enforcement
+    - Configure Google Java Style or similar standard
+    - Add HDFView-specific exclusions for legacy patterns
+    - Integrate with IDE configurations (Eclipse, IntelliJ, VS Code)
+  - **Enhance SpotBugs Foundation**: Update when Java 21 support available
+    - Monitor SpotBugs releases for Java 21 compatibility
+    - Prepare activation plan for existing configuration
+    - Document alternative static analysis approach
+
+- **2.17 Add Security and Dependency Analysis** (2 days)
+  - **OWASP Dependency Check**: Vulnerability scanning for Maven dependencies
+    - Configure database updates and reporting
+    - Set up vulnerability threshold and build failure rules
+    - Integrate with GitHub security advisories
+  - **License Compliance**: Automated license scanning and reporting
+    - Document approved licenses for HDFView project
+    - Flag license conflicts and GPL compatibility issues
+    - Generate license reports for distribution
+
+- **2.18 Create Unified Quality Reporting** (3 days)
+  - Set up quality gate enforcement in Maven build lifecycle
+  - Configure build failure rules for each quality tool
+  - Create unified quality reporting dashboard
+  - Implement quality metrics trend analysis and alerts
+  - Add quality status checks for PR reviews
+
+- **2.19 Performance and Memory Analysis** (2 days)
   - Add JMH (Java Microbenchmark Harness) for performance testing
-  - Create benchmarks for large file operations
-  - Set up performance regression detection
-  - Add memory usage monitoring in tests
+  - Create benchmarks for large HDF file operations (loading, parsing, rendering)
+  - Set up performance regression detection in CI
+  - Add memory usage profiling for large dataset operations
+  - Document performance baseline and monitoring
 
-- **2.18 Documentation Quality** (1 day)
-  - Configure JavaDoc generation with coverage metrics
-  - Add documentation linting for missing docs
-  - Set up API documentation publishing
-  - Add inline documentation quality checks
+- **2.20 Documentation Quality and API Standards** (1 day)
+  - Enhance existing JavaDoc generation with coverage metrics
+  - Add documentation linting for missing JavaDoc
+  - Set up automated API documentation publishing
+  - Configure inline documentation quality checks
+  - Document API standards and contribution requirements
 
 **Acceptance Criteria**:
-- Achieve >60% code coverage across all modules
-- Zero high-priority static analysis violations
-- Quality gates prevent regression in coverage or quality
-- Performance benchmarks integrated into CI pipeline
-- Comprehensive quality dashboard available
+- Achieve >60% code coverage with trend monitoring and quality gates
+- Java 21 compatible static analysis (PMD, Checkstyle) running in CI
+- Zero high-priority security vulnerabilities in dependencies
+- Quality gates prevent regression in coverage, style, and security
+- Performance benchmarks established with regression detection
+- Comprehensive quality dashboard and reporting system
 
-#### 4. Evaluate and Plan UI Framework Migration
+#### 4. Research UI Framework Alternatives (Deferred Implementation)
 
-**Scope**: Comprehensive evaluation of UI framework alternatives and detailed migration planning.
+**Scope**: Research and evaluation only - provide recommendations for future UI modernization without implementation.
+
+**Duration**: 1-2 weeks
 
 **Tasks**:
-- **2.19 Current SWT Assessment** (2 days)
-  - Document all SWT components currently used
-  - Identify platform-specific SWT issues and limitations
-  - Assess performance bottlenecks in current UI
-  - Document accessibility and theming limitations
+- **2.21 Current SWT Assessment and Documentation** (3 days)
+  - Comprehensive audit of all SWT components and widgets used
+  - Document platform-specific issues, limitations, and workarounds
+  - Assess current UI performance bottlenecks and memory usage
+  - Evaluate accessibility compliance and theming limitations
+  - Map integration points with native HDF libraries
+  - Document user workflow dependencies on SWT-specific features
 
-- **2.20 JavaFX Evaluation** (3 days)
-  - Create proof-of-concept HDF data viewer in JavaFX
-  - Evaluate table/tree components for large datasets
-  - Test cross-platform look and feel consistency
-  - Assess JavaFX packaging and distribution options
+- **2.22 JavaFX Research and Proof-of-Concept** (4 days)
+  - Create minimal proof-of-concept HDF data viewer in JavaFX
+  - Evaluate TableView/TreeView performance with large HDF datasets
+  - Test cross-platform look and feel consistency (Linux focus)
+  - Assess JavaFX packaging options (jpackage, native installers)
+  - Research JavaFX-SWT integration possibilities for incremental migration
+  - Document JavaFX licensing and long-term support considerations
 
-- **2.21 Alternative Framework Assessment** (2 days)
-  - Evaluate Swing modernization options (FlatLaf, etc.)
-  - Research web-based alternatives (Vaadin, JavaFX WebView)
-  - Assess native integration requirements for HDF libraries
-  - Compare licensing and maintenance implications
+- **2.23 Alternative Framework Survey** (2 days)
+  - Research Swing modernization options (FlatLaf, Darcula themes)
+  - Evaluate web-based alternatives (Vaadin, Spring Boot + web UI)
+  - Assess JavaFX WebView for hybrid approaches
+  - Research desktop framework trends and community support
+  - Compare native integration capabilities across frameworks
+  - Document licensing, maintenance, and community implications
 
-- **2.22 Migration Complexity Analysis** (2 days)
-  - Estimate effort for migrating each UI component
-  - Identify high-risk migration areas (custom widgets, native integration)
-  - Plan incremental migration strategy
-  - Assess impact on existing user workflows
+- **2.24 Migration Feasibility Analysis** (2 days)
+  - Estimate migration effort for each major UI component
+  - Identify high-risk areas (custom widgets, native library integration)
+  - Assess impact on existing user workflows and data visualization
+  - Evaluate backward compatibility and user adoption considerations
+  - Document technical debt and modernization benefits
+  - Create risk/benefit analysis matrix
 
-- **2.23 Architecture Planning** (2 days)
-  - Design MVP/MVVM architecture for new UI framework
-  - Plan separation of UI logic from data models
-  - Design plugin architecture for extensible UI components
-  - Create UI component design system and standards
-
-- **2.24 Create Migration Roadmap** (1 day)
-  - Prioritize UI components for migration order
-  - Define Phase 3 implementation timeline
-  - Document backward compatibility requirements
-  - Create UI framework decision document (ADR)
+- **2.25 Create Comprehensive UI Framework Report** (2 days)
+  - **Framework Comparison Matrix**: Feature, performance, maintenance comparison
+  - **Migration Strategy Options**: Big bang vs incremental vs hybrid approaches
+  - **Risk Assessment**: Technical, user experience, and project risks
+  - **Recommendation**: Clear framework choice with justification
+  - **Future Roadmap**: Suggested Phase 3 implementation approach
+  - **Decision Document (ADR)**: Architectural decision record for stakeholder review
 
 **Acceptance Criteria**:
-- Comprehensive evaluation report with framework recommendation
-- Working proof-of-concept in recommended framework
-- Detailed migration plan with effort estimates
-- Architectural design ready for Phase 3 implementation
-- Stakeholder approval for framework choice
+- Comprehensive evaluation report comparing SWT, JavaFX, and alternatives
+- Working JavaFX proof-of-concept demonstrating HDF data visualization
+- Clear framework recommendation with detailed justification
+- Migration feasibility assessment with effort estimates and risk analysis
+- Architectural Decision Record (ADR) ready for stakeholder review and approval
+- **No implementation commitment** - research and recommendations only
 
 #### Phase 2 Timeline and Dependencies
 
-**Total Estimated Duration**: 6-8 weeks (3 days for prerequisites + main Phase 2 work)
+**Total Estimated Duration**: 8-10 weeks
 
-**Dependency Order**:
-1. **Days 1-3**: Complete missing Phase 1 tasks (SWT platforms priority, basic SpotBugs, optional build.properties) - **Critical prerequisite**
-2. **Week 2-3**: Tasks 2.1-2.6 (JUnit 5 Migration) - **Can start after SWT platform support**
-3. **Week 3-5**: Tasks 2.7-2.12 (CI/CD Implementation) - **Can run in parallel with testing work**
-4. **Week 4-6**: Tasks 2.13-2.18 (Quality Gates) - **Builds on existing JaCoCo and basic SpotBugs**
-5. **Week 5-7**: Tasks 2.19-2.24 (UI Framework Evaluation) - **Can run in parallel with quality work**
+**Dependency Order and Execution Strategy**:
 
-**Parallel Execution Strategy**:
-- Testing infrastructure (2.1-2.6) and CI/CD setup (2.7-2.12) can run concurrently
-- Quality gates (2.13-2.18) depend on CI/CD but can overlap with UI evaluation
-- UI framework evaluation (2.19-2.24) is independent and can run throughout Phase 2
+**Phase 2A: Testing Foundation (Weeks 1-4)**
+- **Tasks 2.1-2.7**: Complete JUnit 5 Migration (3-4 weeks)
+  - Critical prerequisite for CI/CD quality gates
+  - Can start immediately with stable Phase 1 foundation
+  - Provides test infrastructure for quality measurement
+
+**Phase 2B: CI/CD and Quality Infrastructure (Weeks 3-7)**
+- **Tasks 2.8-2.13**: Maven CI/CD Pipeline (2-3 weeks)
+  - Can start in Week 3 after basic JUnit 5 infrastructure ready
+  - Parallel execution with final JUnit 5 migration tasks
+- **Tasks 2.14-2.20**: Code Quality and Static Analysis (2-3 weeks)
+  - Depends on CI/CD pipeline infrastructure
+  - Can overlap with final CI/CD tasks
+
+**Phase 2C: Research and Planning (Weeks 6-9)**
+- **Tasks 2.21-2.25**: UI Framework Research (1-2 weeks)
+  - Independent of other Phase 2 work
+  - Can run in parallel with quality implementation
+  - Research only - no implementation dependencies
+
+**Parallel Execution Opportunities**:
+- JUnit 5 final migration (2.6-2.7) + CI/CD setup (2.8-2.9) - Weeks 3-4
+- CI/CD optimization (2.10) + Quality infrastructure (2.14-2.15) - Weeks 4-5
+- Quality gates (2.16-2.18) + UI framework research (2.21-2.23) - Weeks 6-7
+
+**Critical Dependencies**:
+1. **JUnit 5 Infrastructure** (Tasks 2.1-2.2) must complete before CI/CD work
+2. **CI/CD Core Workflows** (Tasks 2.8-2.9) must complete before quality gates
+3. **Coverage Infrastructure** (Task 2.14) must complete before quality thresholds
+4. **UI Framework Research** has no dependencies - can start anytime
 
 **Risk Mitigation**:
-- Maintain JUnit 4 compatibility during JUnit 5 migration
-- Implement CI/CD changes incrementally to avoid breaking existing workflows
-- Test quality gates on feature branches before enforcing on main branch
-- Keep current SWT UI functional throughout evaluation period
+- Maintain JUnit 4 vintage engine until all tests migrated
+- Implement CI/CD incrementally to avoid breaking existing development workflow
+- Test quality gates on feature branches before enforcing on main
+- Keep UI framework research separate from implementation to avoid scope creep
+- Monitor Java 21 ecosystem changes for SpotBugs activation opportunities
 
 **Success Criteria for Phase 2**:
-- Modern testing infrastructure with >60% code coverage
-- Fully automated CI/CD pipeline with quality gates
-- Comprehensive quality metrics and reporting
-- Framework migration plan ready for Phase 3 execution
-- No regression in application functionality or performance
+- All 66+ tests migrated to JUnit 5 with improved organization and performance
+- Fully automated Maven-based CI/CD pipeline with <10 minute build times
+- >60% code coverage with automated quality gates preventing regression
+- Java 21 compatible static analysis (PMD, Checkstyle) integrated and enforced
+- Comprehensive UI framework evaluation with clear recommendations for Phase 3
+- Zero high-priority security vulnerabilities in dependencies
+- Complete documentation and team onboarding materials
 
 ### Phase 3: Enhancement (Lower Priority)
 1. Architectural refactoring for better separation of concerns
