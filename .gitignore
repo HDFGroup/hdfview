@@ -2,3 +2,4 @@ antoutput.log
 /.settings/
 /target/
 /libs/
+/.claude/
