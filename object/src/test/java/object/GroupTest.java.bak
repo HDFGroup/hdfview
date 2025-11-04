@@ -1,9 +1,9 @@
 package object;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.util.Iterator;
 import java.util.List;
@@ -17,22 +17,19 @@ import hdf.object.h5.H5Group;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Rishi R Sinha (migrated to JUnit 5)
+ * @author Rishi R Sinha
  *
  */
-@Tag("unit")
-@Tag("object")
 public class GroupTest {
     private static final Logger log = LoggerFactory.getLogger(GroupTest.class);
 
@@ -63,7 +60,7 @@ public class GroupTest {
         assertEquals(1, nObjs); // file id should be the only one left open
     }
 
-    @BeforeAll
+    @BeforeClass
     public static void createFile() throws Exception
     {
         try {
@@ -83,7 +80,7 @@ public class GroupTest {
         }
     }
 
-    @AfterAll
+    @AfterClass
     public static void checkIDs() throws Exception
     {
         try {
@@ -97,7 +94,7 @@ public class GroupTest {
     }
 
     @SuppressWarnings("deprecation")
-    @BeforeEach
+    @Before
     public void openFiles() throws Exception
     {
         try {
@@ -115,7 +112,7 @@ public class GroupTest {
         assertNotNull(testGroup);
     }
 
-    @AfterEach
+    @After
     public void removeFiles() throws Exception
     {
         if (testFile != null) {

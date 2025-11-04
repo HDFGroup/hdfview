@@ -170,13 +170,23 @@ public class TestDataManager {
             return false;
         }
 
-        try (H5File testFile = new H5File(filePath.toString(), FileFormat.READ)) {
+        H5File testFile = null;
+        try {
+            testFile = new H5File(filePath.toString(), FileFormat.READ);
             // Try to open and get basic file info
             testFile.open();
             return testFile.getFID() > 0;
         } catch (Exception ex) {
             log.warn("Test file validation failed for: {}", filePath, ex);
             return false;
+        } finally {
+            if (testFile != null) {
+                try {
+                    testFile.close();
+                } catch (Exception e) {
+                    // Ignore close errors
+                }
+            }
         }
     }
 

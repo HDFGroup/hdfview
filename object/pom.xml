@@ -130,15 +130,26 @@
                     <release>21</release>
                     <!-- Force classpath mode instead of module path -->
                     <forceJavacCompilerUse>true</forceJavacCompilerUse>
-                    <compilerArgs>
-                        <arg>-cp</arg>
-                        <arg>${cp}${path.separator}${project.parent.basedir}/target/*</arg>
-                    </compilerArgs>
                 </configuration>
                 <executions>
-                    <!-- Test compilation with explicit classpath mode -->
+                    <!-- Main compilation with custom classpath -->
                     <execution>
-                        <id>test-compile</id>
+                        <id>default-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>-cp</arg>
+                                <arg>${cp}${path.separator}${project.parent.basedir}/target/*</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </execution>
+                    <!-- Test compilation without custom classpath (uses Maven defaults) -->
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>test-compile</phase>
                         <goals>
                             <goal>testCompile</goal>
                         </goals>

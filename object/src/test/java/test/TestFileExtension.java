@@ -65,7 +65,7 @@ public class TestFileExtension implements BeforeEachCallback, AfterEachCallback 
             if (testFileCreated) {
                 log.info("Cleaning up HDF5 test file");
                 try {
-                    H5TestFile.deleteTestFile();
+                    java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(H5TestFile.NAME_FILE_H5));
                     testFileCreated = false;
                     log.info("HDF5 test file cleaned up successfully");
                 } catch (Exception ex) {

@@ -17,7 +17,9 @@
       "Bash(rm:*)",
       "Bash(cp:*)",
       "Bash(./scripts/migrate-junit5.sh:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(git rm:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

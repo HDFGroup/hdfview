@@ -38,8 +38,13 @@ mvn clean install
 
 - **Properties Plugin**: External property file loading (`build.properties`)
 - **Exec Plugin**: Native library version extraction and application execution
-- **JaCoCo Plugin**: Code coverage analysis and reporting
+- **JaCoCo Plugin**: Code coverage analysis and reporting (60% line, 50% branch coverage targets)
 - **JavaDoc Plugin**: API documentation generation with multi-module aggregation
+- **Surefire Plugin**: JUnit 5 test execution with parallel test support
+- **PMD Plugin**: Static code analysis (v7.0+, Java 21 compatible)
+- **Checkstyle Plugin**: Code style enforcement (v10.12+, Java 21 compatible)
+- **OWASP Dependency Check**: Security vulnerability scanning
+- **License Plugin**: License compliance checking
 
 ## Architecture
 
@@ -58,9 +63,11 @@ The project consists of three main Maven modules:
 
 ### Key Technologies
 
-- **UI Framework**: Eclipse SWT (Standard Widget Toolkit) 
+- **UI Framework**: Eclipse SWT (Standard Widget Toolkit)
 - **Data Tables**: Eclipse NatTable (Nebula widgets)
-- **Testing**: JUnit 4 + SWTBot for UI testing
+- **Testing**: JUnit 5 (migration in progress) + SWTBot for UI testing
+  - Modern test infrastructure with parameterized tests, test tagging, and parallel execution
+  - JUnit 4 vintage engine for backward compatibility during migration
 - **File Formats**: HDF4, HDF5, NetCDF, FITS via native libraries
 - **Logging**: SLF4J
 
@@ -84,14 +91,26 @@ The project consists of three main Maven modules:
 
 ### Testing
 
-- UI tests use SWTBot framework for automated GUI testing
+- **Test Framework**: JUnit 5 migration in progress (infrastructure complete)
+  - Modern test foundation classes for HDF testing
+  - Test categorization: `@Tag("unit")`, `@Tag("integration")`, `@Tag("ui")`
+  - Parameterized tests for data type variations
+  - Parallel execution for unit tests (4 threads)
+- **UI Testing**: SWTBot framework for automated GUI testing
+- **Code Coverage**: JaCoCo with 60% line coverage target
 - Test execution requires JVM arguments for module access:
   ```
   --add-opens java.base/java.lang=ALL-UNNAMED
   --add-opens java.base/java.time=ALL-UNNAMED
   --enable-native-access=jarhdf5
   ```
-- Run individual test: `mvn test -Dtest=TestClassName`
+- **Run Tests**:
+  ```bash
+  mvn test                          # Run all tests
+  mvn test -Dtest=TestClassName     # Run specific test
+  mvn test -Dgroups="unit & fast"   # Run fast unit tests only
+  mvn test -Dgroups="integration"   # Run integration tests
+  ```
 
 ### Platform-Specific Notes
 
@@ -99,9 +118,102 @@ The project consists of three main Maven modules:
 - Currently configured for Linux GTK (`gtk.linux.x86_64`)
 - Platform profiles exist but are commented out in `hdfview/pom.xml`
 
+## CI/CD and Quality Assurance
+
+### GitHub Actions Workflows
+
+The project uses automated GitHub Actions workflows for continuous integration and quality assurance:
+
+- **`maven-ci.yml`**: Primary CI pipeline (~15 min)
+  - Build, compile, test with Maven
+  - Parallel unit tests, serial integration tests
+  - Artifact generation and publishing
+
+- **`maven-quality.yml`**: Code quality analysis (~25 min)
+  - JaCoCo code coverage (60% threshold)
+  - PMD static analysis (violation limits)
+  - Checkstyle code style enforcement
+  - Quality reports and PR comments
+
+- **`maven-security.yml`**: Security and compliance (~20 min)
+  - OWASP dependency vulnerability scanning (CVSS 8.0+ threshold)
+  - GitHub CodeQL security analysis
+  - License compliance checking (prohibits GPL/AGPL)
+
+- **`maven-release.yml`**: Automated releases (~30 min)
+  - Version management from Git tags
+  - GitHub Packages publication
+  - Release notes generation
+
+### Quality Tools and Standards
+
+- **Code Coverage**: 60% line coverage, 50% branch coverage (JaCoCo)
+- **Static Analysis**: PMD v7.0+ with HDFView-specific rulesets
+- **Code Style**: Checkstyle v10.12+ (Google Java Style adapted)
+- **Security**: OWASP Dependency Check with CVE monitoring
+- **Progressive Enforcement**: Currently in report-only mode, moving to enforcement
+
+### Quality Management Scripts
+
+Located in `scripts/`:
+- `validate-quality.sh` - Quick quality validation for pre-commit
+- `check-quality.sh` - Comprehensive quality analysis
+- `analyze-coverage.sh` - Coverage analysis with threshold checking
+- `security-analysis.sh` - Security and license compliance scanning
+- `collect-metrics.sh` - Unified quality metrics collection
+- `migrate-junit5.sh` - Automated JUnit 4 to JUnit 5 migration
+
 ## File Locations
 
 - Main application JAR output: `libs/`
 - Dependencies copied to: `target/lib/`
 - Native libraries: Referenced via `build.properties` paths
 - Test data: Includes sample HDF5 file at `object/TestHDF5.h5`
+- Documentation: `.claude/` directory contains all project documentation
+- Quality configurations: `pmd-rules.xml`, `checkstyle-rules.xml`, `dependency-check-suppressions.xml`
+
+## Modernization Status
+
+### ✅ Phase 1: Maven Migration (COMPLETE)
+- Pure Maven build system operational
+- Ant build system removed
+- Multi-module structure with proper dependency management
+- SWT platform support for Linux x86_64
+- Native library integration configured
+
+### ✅ Phase 2A: JUnit 5 Migration (INFRASTRUCTURE COMPLETE, MIGRATION IN PROGRESS)
+- JUnit 5 v5.10.0 infrastructure integrated
+- Modern test foundation classes created
+- Automated migration script available
+- Sample test successfully migrated
+- **Current Task**: Migrating remaining test files to JUnit 5
+
+### ✅ Phase 2B: CI/CD Pipeline (COMPLETE)
+- 4 production GitHub Actions workflows operational
+- Automated build, test, quality, and security scanning
+- Release management with GitHub Packages
+- All performance targets achieved
+
+### ✅ Phase 2C: Quality Analysis (COMPLETE)
+- Java 21 compatible static analysis tools integrated
+- Progressive quality gate enforcement configured
+- Code coverage, security scanning, and license compliance
+- Quality management scripts for local development
+
+### 📋 Phase 2D: UI Framework Research (DEFERRED)
+- Detailed research plan documented in `.claude/Phase2D-UI-Framework-Research.md`
+- Focus on JavaFX evaluation for large dataset performance
+- Planned but deferred to prioritize test migration completion
+
+### 🎯 Current Focus
+**JUnit 5 Test Migration**: Systematically migrating remaining test files to JUnit 5 using established infrastructure and migration tools.
+
+## Documentation
+
+Comprehensive project documentation is maintained in the `.claude/` directory:
+
+- **Phase 1 Documentation**: `.claude/Phase1/` - Complete Maven migration history
+- **Phase 2 Summaries**: Implementation details for JUnit 5, CI/CD, and Quality Analysis
+- **Guides**: JUnit 5 migration, CI/CD operations, troubleshooting
+- **Status Reports**: Current status and planning documents
+- **Configuration Examples**: PMD rules, Checkstyle configuration, quality standards
