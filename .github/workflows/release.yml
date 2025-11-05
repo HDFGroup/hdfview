@@ -54,9 +54,9 @@ jobs:
       use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
 
-  call-workflow-ant:
+  call-workflow-maven-build:
     needs: [log-the-inputs, call-workflow-tarball]
-    uses: ./.github/workflows/ant.yml
+    uses: ./.github/workflows/maven-build.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
@@ -64,40 +64,9 @@ jobs:
       name_hdf5: ${{ inputs.name_tag5 }}
       snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
-    secrets:
-        APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
-        APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
-        KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-        AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-        AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-
-  call-workflow-ant-app:
-    needs: [log-the-inputs, call-workflow-tarball]
-    uses: ./.github/workflows/ant-app.yml
-    with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
-      use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
-      name_hdf5: ${{ inputs.name_tag5 }}
-      snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
-      use_environ: release
-    secrets:
-        APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
-        APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
-        KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-        AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-        AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
 
   call-workflow-release:
-    needs: [log-the-inputs, call-workflow-tarball, call-workflow-ant, call-workflow-ant-app]
+    needs: [log-the-inputs, call-workflow-tarball, call-workflow-maven-build]
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
