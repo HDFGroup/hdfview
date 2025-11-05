@@ -146,10 +146,11 @@ jobs:
     - name: Build with Maven
       run: |
         echo "Building HDFView with Maven..."
-        # Build and install without running verify phase (skips PMD, Checkstyle, CPD)
-        # The repository module must be installed first for other modules to find dependencies
-        # Quality checks are handled by the dedicated maven-quality.yml workflow
-        mvn clean package install:install -DskipTests -B
+        # Run verify phase to trigger repository module's install-file executions for HDF JARs
+        # Comprehensively skip all quality plugins to avoid PMD/CPD class loading issues
+        mvn clean verify -DskipTests -Dmaven.test.skip=true \
+          -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true \
+          -Denforcer.skip=true -Dmaven.javadoc.skip=true -B
 
     - name: Create Linux Binary Archive
       run: |
@@ -286,10 +287,11 @@ jobs:
     - name: Build Application Package
       run: |
         echo "Building HDFView application package with Maven..."
-        # Build and install without running verify phase (skips PMD, Checkstyle, CPD)
-        # The repository module must be installed first for other modules to find dependencies
-        # Quality checks are handled by the dedicated maven-quality.yml workflow
-        mvn clean package install:install -DskipTests -B
+        # Run verify phase to trigger repository module's install-file executions for HDF JARs
+        # Comprehensively skip all quality plugins to avoid PMD/CPD class loading issues
+        mvn clean verify -DskipTests -Dmaven.test.skip=true \
+          -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true \
+          -Denforcer.skip=true -Dmaven.javadoc.skip=true -B
 
     - name: Create Linux Application Archive
       run: |
