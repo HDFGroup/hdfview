@@ -229,7 +229,7 @@
             <release>21</release>
             <encoding>UTF-8</encoding>
             <!-- Force classpath mode instead of module path -->
-            <forceJavacCompilerUse>true</forceJavacCompilerUse>
+            <forceLegacyJavacApi>true</forceLegacyJavacApi>
         </configuration>
         <executions>
           <!-- Test compilation with proper module access for SWTBot -->
@@ -240,12 +240,8 @@
               <goal>testCompile</goal>
             </goals>
             <configuration>
-              <compilerArgs>
-                <arg>--add-opens</arg>
-                <arg>java.base/java.lang=ALL-UNNAMED</arg>
-                <arg>--add-opens</arg>
-                <arg>java.base/java.time=ALL-UNNAMED</arg>
-              </compilerArgs>
+              <!-- Note: --add-opens is a JVM runtime option, not a compiler option.
+                   It's configured in maven-surefire-plugin instead. -->
             </configuration>
           </execution>
         </executions>

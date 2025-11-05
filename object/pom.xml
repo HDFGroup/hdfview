@@ -129,7 +129,7 @@
                     <target>21</target>
                     <release>21</release>
                     <!-- Force classpath mode instead of module path -->
-                    <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                    <forceLegacyJavacApi>true</forceLegacyJavacApi>
                 </configuration>
                 <executions>
                     <!-- Main compilation with custom classpath -->

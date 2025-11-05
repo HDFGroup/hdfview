@@ -68,8 +68,8 @@ jobs:
         sudo apt-get install -y \
           libhdf5-dev \
           libhdf4-dev \
-          libhdf5-103 \
-          libhdf4-0-alt
+          libhdf5-103-1t64 \
+          libhdf4-0t64-alt
 
         # Verify installation
         ldconfig -p | grep hdf || echo "HDF libraries may not be properly installed"
