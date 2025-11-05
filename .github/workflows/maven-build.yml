@@ -111,7 +111,7 @@ jobs:
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download snapshot \
           --repo HDFGroup/hdf5 \
-          --pattern "${{ inputs.use_hdf5 }-ubuntu-2404_gcc.tar.gz"
+          --pattern "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract the archive
         tar -xzf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
