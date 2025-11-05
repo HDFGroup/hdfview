@@ -79,53 +79,52 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       run: |
         echo "Downloading HDF4: ${{ inputs.use_hdf }}"
-        mkdir -p ${{ github.workspace }}/hdf_libs
-        cd ${{ github.workspace }}/hdf_libs
 
         # Download HDF4 binary from HDF Group GitHub releases
         gh release download snapshot \
           --repo HDFGroup/hdf4 \
           --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract the archive
-        tar -xzf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+        # Extract outer tar.gz (creates hdf4/ directory)
+        tar -zxvf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
-        # Find and run the installer script
-        INSTALLER=$(find . -name "HDF*.sh" -type f | head -1)
-        if [ -n "$INSTALLER" ]; then
-          echo "Running HDF4 installer: $INSTALLER"
-          bash "$INSTALLER" --skip-license --prefix=${{ github.workspace }}/hdf4_install
-          echo "HDF4 installed to: ${{ github.workspace }}/hdf4_install"
-          ls -la ${{ github.workspace }}/hdf4_install
-        else
-          echo "Warning: HDF4 installer not found"
-        fi
+        # Extract inner tar.gz into hdf4/ directory
+        cd "${{ github.workspace }}/hdf4"
+        tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
+
+        # Set HDF4 library path
+        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
+        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+
+        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
+        ls -la "$HDF4DIR$FILE_NAME_HDF"
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Download and Install HDF5 from GitHub
       run: |
         echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
-        cd ${{ github.workspace }}/hdf_libs
 
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download snapshot \
           --repo HDFGroup/hdf5 \
           --pattern "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract the archive
-        tar -xzf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+        # Extract outer tar.gz (creates hdf5/ directory)
+        tar -zxvf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
-        # Find and run the installer script
-        INSTALLER=$(find . -name "HDF5*.sh" -type f | head -1)
-        if [ -n "$INSTALLER" ]; then
-          echo "Running HDF5 installer: $INSTALLER"
-          bash "$INSTALLER" --skip-license --prefix=${{ github.workspace }}/hdf5_install
-          echo "HDF5 installed to: ${{ github.workspace }}/hdf5_install"
-          ls -la ${{ github.workspace }}/hdf5_install
-        else
-          echo "Warning: HDF5 installer not found"
-        fi
+        # Extract inner tar.gz into hdf5/ directory
+        cd "${{ github.workspace }}/hdf5"
+        tar -zxvf HDF5-*-Linux.tar.gz --strip-components 1
+
+        # Set HDF5 library path
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
+        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+
+        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
+        ls -la "$HDF5DIR$FILE_NAME_HDF5"
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -135,10 +134,10 @@ jobs:
         # Build Properties using HDF libraries from GitHub releases
         # HDF4: ${{ inputs.use_hdf }}
         # HDF5: ${{ inputs.use_hdf5 }}
-        hdf5.lib.dir=${{ github.workspace }}/hdf5_install/lib
-        hdf5.plugin.dir=${{ github.workspace }}/hdf5_install/lib/plugin
-        hdf.lib.dir=${{ github.workspace }}/hdf4_install/lib
-        platform.hdf.lib=${{ github.workspace }}/hdf5_install/lib
+        hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
+        hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
+        hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
+        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
         EOF
 
         echo "Generated build.properties:"
@@ -165,13 +164,13 @@ jobs:
         fi
 
         # Copy HDF native libraries
-        if [ -d "${{ github.workspace }}/hdf5_install/lib" ]; then
+        if [ -d "${{ env.HDF5LIB_PATH }}/lib" ]; then
           mkdir -p hdfview-dist/lib
-          cp -L ${{ github.workspace }}/hdf5_install/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF5 .so files"
+          cp -L ${{ env.HDF5LIB_PATH }}/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF5 .so files"
         fi
-        if [ -d "${{ github.workspace }}/hdf4_install/lib" ]; then
+        if [ -d "${{ env.HDF4LIB_PATH }}/lib" ]; then
           mkdir -p hdfview-dist/lib
-          cp -L ${{ github.workspace }}/hdf4_install/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF4 .so files"
+          cp -L ${{ env.HDF4LIB_PATH }}/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF4 .so files"
         fi
 
         # Create archive with the expected naming convention
@@ -217,47 +216,52 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       run: |
         echo "Downloading HDF4: ${{ inputs.use_hdf }}"
-        mkdir -p ${{ github.workspace }}/hdf_libs
-        cd ${{ github.workspace }}/hdf_libs
 
         # Download HDF4 binary from HDF Group GitHub releases
         gh release download snapshot \
           --repo HDFGroup/hdf4 \
           --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract the archive
-        tar -xzf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+        # Extract outer tar.gz (creates hdf4/ directory)
+        tar -zxvf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
-        # Find and run the installer script
-        INSTALLER=$(find . -name "HDF*.sh" -type f | head -1)
-        if [ -n "$INSTALLER" ]; then
-          echo "Running HDF4 installer: $INSTALLER"
-          bash "$INSTALLER" --skip-license --prefix=${{ github.workspace }}/hdf4_install
-          echo "HDF4 installed to: ${{ github.workspace }}/hdf4_install"
-        fi
+        # Extract inner tar.gz into hdf4/ directory
+        cd "${{ github.workspace }}/hdf4"
+        tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
+
+        # Set HDF4 library path
+        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
+        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+
+        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
+        ls -la "$HDF4DIR$FILE_NAME_HDF"
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Download and Install HDF5 from GitHub
       run: |
         echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
-        cd ${{ github.workspace }}/hdf_libs
 
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download snapshot \
           --repo HDFGroup/hdf5 \
           --pattern "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract the archive
-        tar -xzf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+        # Extract outer tar.gz (creates hdf5/ directory)
+        tar -zxvf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
-        # Find and run the installer script
-        INSTALLER=$(find . -name "HDF5*.sh" -type f | head -1)
-        if [ -n "$INSTALLER" ]; then
-          echo "Running HDF5 installer: $INSTALLER"
-          bash "$INSTALLER" --skip-license --prefix=${{ github.workspace }}/hdf5_install
-          echo "HDF5 installed to: ${{ github.workspace }}/hdf5_install"
-        fi
+        # Extract inner tar.gz into hdf5/ directory
+        cd "${{ github.workspace }}/hdf5"
+        tar -zxvf HDF5-*-Linux.tar.gz --strip-components 1
+
+        # Set HDF5 library path
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
+        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+
+        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
+        ls -la "$HDF5DIR$FILE_NAME_HDF5"
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -267,10 +271,10 @@ jobs:
         # Build Properties using HDF libraries from GitHub releases
         # HDF4: ${{ inputs.use_hdf }}
         # HDF5: ${{ inputs.use_hdf5 }}
-        hdf5.lib.dir=${{ github.workspace }}/hdf5_install/lib
-        hdf5.plugin.dir=${{ github.workspace }}/hdf5_install/lib/plugin
-        hdf.lib.dir=${{ github.workspace }}/hdf4_install/lib
-        platform.hdf.lib=${{ github.workspace }}/hdf5_install/lib
+        hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
+        hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
+        hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
+        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
         EOF
 
         echo "Generated build.properties:"
@@ -292,13 +296,13 @@ jobs:
         cp libs/*.jar hdfview-app/ 2>/dev/null || echo "No libs JARs found"
 
         # Copy HDF native libraries
-        if [ -d "${{ github.workspace }}/hdf5_install/lib" ]; then
+        if [ -d "${{ env.HDF5LIB_PATH }}/lib" ]; then
           mkdir -p hdfview-app/lib
-          cp -L ${{ github.workspace }}/hdf5_install/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF5 .so files"
+          cp -L ${{ env.HDF5LIB_PATH }}/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF5 .so files"
         fi
-        if [ -d "${{ github.workspace }}/hdf4_install/lib" ]; then
+        if [ -d "${{ env.HDF4LIB_PATH }}/lib" ]; then
           mkdir -p hdfview-app/lib
-          cp -L ${{ github.workspace }}/hdf4_install/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF4 .so files"
+          cp -L ${{ env.HDF4LIB_PATH }}/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF4 .so files"
         fi
 
         # Create archive with App suffix
