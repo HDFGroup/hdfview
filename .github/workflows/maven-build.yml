@@ -2,7 +2,6 @@ name: Maven Build for Release
 
 # Reusable workflow for building HDFView with Maven
 # Replaces the legacy ant.yml and ant-app.yml workflows
-<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
 # Downloads HDF4 and HDF5 libraries from HDF Group GitHub releases
 on:
   workflow_call:
@@ -80,52 +79,53 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       run: |
         echo "Downloading HDF4: ${{ inputs.use_hdf }}"
+        mkdir -p ${{ github.workspace }}/hdf_libs
+        cd ${{ github.workspace }}/hdf_libs
 
         # Download HDF4 binary from HDF Group GitHub releases
         gh release download snapshot \
           --repo HDFGroup/hdf4 \
           --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+        # Extract the archive
+        tar -xzf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract inner tar.gz into hdf4/ directory
-        cd "${{ github.workspace }}/hdf4"
-        tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
-
-        # Set HDF4 library path
-        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
-
-        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
-        ls -la "$HDF4DIR$FILE_NAME_HDF"
+        # Find and run the installer script
+        INSTALLER=$(find . -name "HDF*.sh" -type f | head -1)
+        if [ -n "$INSTALLER" ]; then
+          echo "Running HDF4 installer: $INSTALLER"
+          bash "$INSTALLER" --skip-license --prefix=${{ github.workspace }}/hdf4_install
+          echo "HDF4 installed to: ${{ github.workspace }}/hdf4_install"
+          ls -la ${{ github.workspace }}/hdf4_install
+        else
+          echo "Warning: HDF4 installer not found"
+        fi
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Download and Install HDF5 from GitHub
       run: |
         echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
+        cd ${{ github.workspace }}/hdf_libs
 
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download snapshot \
           --repo HDFGroup/hdf5 \
-          --pattern "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+          --pattern "${{ inputs.use_hdf5 }-ubuntu-2404_gcc.tar.gz"
 
-        # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+        # Extract the archive
+        tar -xzf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract inner tar.gz into hdf5/ directory
-        cd "${{ github.workspace }}/hdf5"
-        tar -zxvf HDF5-*-Linux.tar.gz --strip-components 1
-
-        # Set HDF5 library path
-        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
-
-        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
-        ls -la "$HDF5DIR$FILE_NAME_HDF5"
+        # Find and run the installer script
+        INSTALLER=$(find . -name "HDF5*.sh" -type f | head -1)
+        if [ -n "$INSTALLER" ]; then
+          echo "Running HDF5 installer: $INSTALLER"
+          bash "$INSTALLER" --skip-license --prefix=${{ github.workspace }}/hdf5_install
+          echo "HDF5 installed to: ${{ github.workspace }}/hdf5_install"
+          ls -la ${{ github.workspace }}/hdf5_install
+        else
+          echo "Warning: HDF5 installer not found"
+        fi
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -135,65 +135,18 @@ jobs:
         # Build Properties using HDF libraries from GitHub releases
         # HDF4: ${{ inputs.use_hdf }}
         # HDF5: ${{ inputs.use_hdf5 }}
-        hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
-        hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
-        hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
-        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
+        hdf5.lib.dir=${{ github.workspace }}/hdf5_install/lib
+        hdf5.plugin.dir=${{ github.workspace }}/hdf5_install/lib/plugin
+        hdf.lib.dir=${{ github.workspace }}/hdf4_install/lib
+        platform.hdf.lib=${{ github.workspace }}/hdf5_install/lib
         EOF
 
         echo "Generated build.properties:"
         cat build.properties
 
-    - name: Install HDF JARs to Local Maven Repository
-      run: |
-        echo "Manually installing HDF JARs to avoid PMD issues..."
-
-        # Copy HDF JARs from downloaded distributions to repository/lib
-        mkdir -p repository/lib
-        cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs found"
-        cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs found"
-        cp lib/fits.jar repository/lib/ 2>/dev/null || echo "fits.jar not found"
-        cp lib/netcdf.jar repository/lib/ 2>/dev/null || echo "netcdf.jar not found"
-
-        # List what we have
-        echo "JARs in repository/lib:"
-        ls -la repository/lib/*.jar
-
-        # Manually install each JAR to local Maven repository
-        # This bypasses the repository module's POM and avoids PMD issues
-
-        # Install jarhdf5
-        if [ -f repository/lib/jarhdf5-2.0.0.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/jarhdf5-2.0.0.jar \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-        fi
-
-        # Install jarhdf
-        if [ -f repository/lib/jarhdf-4.3.1.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/jarhdf-4.3.1.jar \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
-            -Dpackaging=jar -DgeneratePom=true
-        fi
-
-        # Install fits
-        if [ -f repository/lib/fits.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/fits.jar \
-            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-        fi
-
-        # Install netcdf
-        if [ -f repository/lib/netcdf.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
-            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-        fi
-
     - name: Build with Maven
       run: |
         echo "Building HDFView with Maven..."
-        # Now build with package (HDF JARs already installed manually above)
         mvn clean package -DskipTests -B
 
     - name: Create Linux Binary Archive
@@ -212,13 +165,13 @@ jobs:
         fi
 
         # Copy HDF native libraries
-        if [ -d "${{ env.HDF5LIB_PATH }}/lib" ]; then
+        if [ -d "${{ github.workspace }}/hdf5_install/lib" ]; then
           mkdir -p hdfview-dist/lib
-          cp -L ${{ env.HDF5LIB_PATH }}/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF5 .so files"
+          cp -L ${{ github.workspace }}/hdf5_install/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF5 .so files"
         fi
-        if [ -d "${{ env.HDF4LIB_PATH }}/lib" ]; then
+        if [ -d "${{ github.workspace }}/hdf4_install/lib" ]; then
           mkdir -p hdfview-dist/lib
-          cp -L ${{ env.HDF4LIB_PATH }}/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF4 .so files"
+          cp -L ${{ github.workspace }}/hdf4_install/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF4 .so files"
         fi
 
         # Create archive with the expected naming convention
@@ -264,52 +217,47 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       run: |
         echo "Downloading HDF4: ${{ inputs.use_hdf }}"
+        mkdir -p ${{ github.workspace }}/hdf_libs
+        cd ${{ github.workspace }}/hdf_libs
 
         # Download HDF4 binary from HDF Group GitHub releases
         gh release download snapshot \
           --repo HDFGroup/hdf4 \
           --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+        # Extract the archive
+        tar -xzf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract inner tar.gz into hdf4/ directory
-        cd "${{ github.workspace }}/hdf4"
-        tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
-
-        # Set HDF4 library path
-        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
-
-        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
-        ls -la "$HDF4DIR$FILE_NAME_HDF"
+        # Find and run the installer script
+        INSTALLER=$(find . -name "HDF*.sh" -type f | head -1)
+        if [ -n "$INSTALLER" ]; then
+          echo "Running HDF4 installer: $INSTALLER"
+          bash "$INSTALLER" --skip-license --prefix=${{ github.workspace }}/hdf4_install
+          echo "HDF4 installed to: ${{ github.workspace }}/hdf4_install"
+        fi
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Download and Install HDF5 from GitHub
       run: |
         echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
+        cd ${{ github.workspace }}/hdf_libs
 
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download snapshot \
           --repo HDFGroup/hdf5 \
           --pattern "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+        # Extract the archive
+        tar -xzf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
-        # Extract inner tar.gz into hdf5/ directory
-        cd "${{ github.workspace }}/hdf5"
-        tar -zxvf HDF5-*-Linux.tar.gz --strip-components 1
-
-        # Set HDF5 library path
-        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
-
-        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
-        ls -la "$HDF5DIR$FILE_NAME_HDF5"
+        # Find and run the installer script
+        INSTALLER=$(find . -name "HDF5*.sh" -type f | head -1)
+        if [ -n "$INSTALLER" ]; then
+          echo "Running HDF5 installer: $INSTALLER"
+          bash "$INSTALLER" --skip-license --prefix=${{ github.workspace }}/hdf5_install
+          echo "HDF5 installed to: ${{ github.workspace }}/hdf5_install"
+        fi
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -319,65 +267,18 @@ jobs:
         # Build Properties using HDF libraries from GitHub releases
         # HDF4: ${{ inputs.use_hdf }}
         # HDF5: ${{ inputs.use_hdf5 }}
-        hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
-        hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
-        hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
-        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
+        hdf5.lib.dir=${{ github.workspace }}/hdf5_install/lib
+        hdf5.plugin.dir=${{ github.workspace }}/hdf5_install/lib/plugin
+        hdf.lib.dir=${{ github.workspace }}/hdf4_install/lib
+        platform.hdf.lib=${{ github.workspace }}/hdf5_install/lib
         EOF
 
         echo "Generated build.properties:"
         cat build.properties
 
-    - name: Install HDF JARs to Local Maven Repository
-      run: |
-        echo "Manually installing HDF JARs to avoid PMD issues..."
-
-        # Copy HDF JARs from downloaded distributions to repository/lib
-        mkdir -p repository/lib
-        cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs found"
-        cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs found"
-        cp lib/fits.jar repository/lib/ 2>/dev/null || echo "fits.jar not found"
-        cp lib/netcdf.jar repository/lib/ 2>/dev/null || echo "netcdf.jar not found"
-
-        # List what we have
-        echo "JARs in repository/lib:"
-        ls -la repository/lib/*.jar
-
-        # Manually install each JAR to local Maven repository
-        # This bypasses the repository module's POM and avoids PMD issues
-
-        # Install jarhdf5
-        if [ -f repository/lib/jarhdf5-2.0.0.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/jarhdf5-2.0.0.jar \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-        fi
-
-        # Install jarhdf
-        if [ -f repository/lib/jarhdf-4.3.1.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/jarhdf-4.3.1.jar \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
-            -Dpackaging=jar -DgeneratePom=true
-        fi
-
-        # Install fits
-        if [ -f repository/lib/fits.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/fits.jar \
-            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-        fi
-
-        # Install netcdf
-        if [ -f repository/lib/netcdf.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
-            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-        fi
-
     - name: Build Application Package
       run: |
         echo "Building HDFView application package with Maven..."
-        # Now build with package (HDF JARs already installed manually above)
         mvn clean package -DskipTests -B
 
     - name: Create Linux Application Archive
@@ -391,13 +292,13 @@ jobs:
         cp libs/*.jar hdfview-app/ 2>/dev/null || echo "No libs JARs found"
 
         # Copy HDF native libraries
-        if [ -d "${{ env.HDF5LIB_PATH }}/lib" ]; then
+        if [ -d "${{ github.workspace }}/hdf5_install/lib" ]; then
           mkdir -p hdfview-app/lib
-          cp -L ${{ env.HDF5LIB_PATH }}/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF5 .so files"
+          cp -L ${{ github.workspace }}/hdf5_install/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF5 .so files"
         fi
-        if [ -d "${{ env.HDF4LIB_PATH }}/lib" ]; then
+        if [ -d "${{ github.workspace }}/hdf4_install/lib" ]; then
           mkdir -p hdfview-app/lib
-          cp -L ${{ env.HDF4LIB_PATH }}/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF4 .so files"
+          cp -L ${{ github.workspace }}/hdf4_install/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF4 .so files"
         fi
 
         # Create archive with App suffix
@@ -497,290 +398,3 @@ jobs:
         echo "This workflow downloads HDF4 and HDF5 binaries from HDF Group GitHub releases." >> $GITHUB_STEP_SUMMARY
         echo "This replaces the legacy Ant-based build workflows." >> $GITHUB_STEP_SUMMARY
         echo "Cross-platform native builds (Windows, macOS) require additional implementation." >> $GITHUB_STEP_SUMMARY
-=======
-on:
-  workflow_call:
-    inputs:
-      file_base:
-        description: 'Base name for artifacts'
-        type: string
-        required: true
-      use_hdf:
-        description: 'HDF4 version (legacy parameter, not used in Maven build)'
-        type: string
-        required: false
-        default: 'snapshot'
-      use_hdf5:
-        description: 'HDF5 version (legacy parameter, not used in Maven build)'
-        type: string
-        required: false
-        default: 'snapshot'
-      name_hdf5:
-        description: 'HDF5 base name (legacy parameter, not used in Maven build)'
-        type: string
-        required: false
-        default: 'snapshot'
-      use_environ:
-        description: 'Environment (snapshots or release)'
-        type: string
-        required: false
-        default: 'snapshots'
-      snap_name:
-        description: 'Snapshot name (legacy parameter for compatibility)'
-        type: string
-        required: false
-        default: ''
-
-permissions:
-  contents: read
-
-env:
-  MAVEN_OPTS: >-
-    -Xmx2g
-    -Xms1g
-    -XX:+UseParallelGC
-    -XX:+TieredCompilation
-    -XX:TieredStopAtLevel=1
-    -Djava.awt.headless=true
-
-jobs:
-  build-linux:
-    name: Build Linux Binary
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-
-    - name: Cache Maven Dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.m2/repository
-          !~/.m2/repository/org/hdfgroup
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-
-    - name: Install HDF Libraries
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libhdf5-dev \
-          libhdf4-dev \
-          libhdf5-103 \
-          libhdf4-0-alt
-
-    - name: Set up build.properties
-      run: |
-        cat > build.properties << EOF
-        # Build Properties for Release
-        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
-        hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/hdf5/plugins
-        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
-        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
-        EOF
-
-    - name: Build with Maven
-      run: |
-        echo "Building HDFView with Maven..."
-        mvn clean package -DskipTests -B
-
-    - name: Create Linux Binary Archive
-      run: |
-        # Create a distribution directory
-        mkdir -p hdfview-dist
-
-        # Copy JAR files
-        cp hdfview/target/*.jar hdfview-dist/ 2>/dev/null || echo "No hdfview JARs found"
-        cp object/target/*.jar hdfview-dist/ 2>/dev/null || echo "No object JARs found"
-        cp libs/*.jar hdfview-dist/ 2>/dev/null || echo "No libs JARs found"
-
-        # Copy dependencies
-        if [ -d "target/lib" ]; then
-          cp -r target/lib hdfview-dist/
-        fi
-
-        # Create archive with the expected naming convention
-        tar -czf ${{ inputs.file_base }}-Linux-x86_64.tar.gz hdfview-dist/
-
-        echo "Linux binary archive created: ${{ inputs.file_base }}-Linux-x86_64.tar.gz"
-        ls -lh ${{ inputs.file_base }}-Linux-x86_64.tar.gz
-
-    - name: Upload Linux Binary Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: tgz-ubuntu-2404-binary
-        path: ${{ inputs.file_base }}-Linux-x86_64.tar.gz
-        retention-days: 30
-
-  build-linux-app:
-    name: Build Linux Application Package
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-
-    - name: Cache Maven Dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.m2/repository
-          !~/.m2/repository/org/hdfgroup
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-
-    - name: Install HDF Libraries
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libhdf5-dev \
-          libhdf4-dev \
-          libhdf5-103 \
-          libhdf4-0-alt
-
-    - name: Set up build.properties
-      run: |
-        cat > build.properties << EOF
-        # Build Properties for Release
-        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
-        hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/hdf5/plugins
-        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
-        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
-        EOF
-
-    - name: Build Application Package
-      run: |
-        echo "Building HDFView application package with Maven..."
-        mvn clean package -DskipTests -B
-
-    - name: Create Linux Application Archive
-      run: |
-        # Create application distribution directory
-        mkdir -p hdfview-app
-
-        # Copy application files
-        cp hdfview/target/*.jar hdfview-app/ 2>/dev/null || echo "No hdfview JARs found"
-        cp object/target/*.jar hdfview-app/ 2>/dev/null || echo "No object JARs found"
-        cp libs/*.jar hdfview-app/ 2>/dev/null || echo "No libs JARs found"
-
-        # Copy native libraries if available
-        if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
-          mkdir -p hdfview-app/lib
-          cp /usr/lib/x86_64-linux-gnu/libhdf*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF libraries to bundle"
-        fi
-
-        # Create archive with App suffix
-        tar -czf ${{ inputs.file_base }}App-Linux-x86_64.tar.gz hdfview-app/
-
-        echo "Linux application archive created: ${{ inputs.file_base }}App-Linux-x86_64.tar.gz"
-        ls -lh ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
-
-    - name: Upload Linux App Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: tgz-ubuntu-2404-app-binary
-        path: ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
-        retention-days: 30
-
-  build-windows-placeholder:
-    name: Windows Build Placeholder
-    runs-on: ubuntu-latest
-    steps:
-    - name: Create Windows Placeholder
-      run: |
-        echo "Windows cross-platform build not yet implemented for Maven" > README.txt
-        echo "The Maven build system currently supports Linux only." >> README.txt
-        echo "Windows native builds require additional configuration." >> README.txt
-        zip ${{ inputs.file_base }}-win64.zip README.txt
-
-    - name: Upload Windows Binary Placeholder
-      uses: actions/upload-artifact@v4
-      with:
-        name: zip-win-vs2022-binary
-        path: ${{ inputs.file_base }}-win64.zip
-        retention-days: 30
-
-    - name: Create Windows App Placeholder
-      run: |
-        echo "Windows application package not yet implemented for Maven" > README.txt
-        zip ${{ inputs.file_base }}App-win64.zip README.txt
-
-    - name: Upload Windows App Placeholder
-      uses: actions/upload-artifact@v4
-      with:
-        name: zip-win-vs2022-app-binary
-        path: ${{ inputs.file_base }}App-win64.zip
-        retention-days: 30
-
-  build-macos-placeholder:
-    name: macOS Build Placeholder
-    runs-on: ubuntu-latest
-    steps:
-    - name: Create macOS Placeholder
-      run: |
-        echo "macOS cross-platform build not yet implemented for Maven" > README.txt
-        echo "The Maven build system currently supports Linux only." >> README.txt
-        echo "macOS native builds require additional configuration." >> README.txt
-        tar -czf ${{ inputs.file_base }}-Darwin.tar.gz README.txt
-
-    - name: Upload macOS Binary Placeholder
-      uses: actions/upload-artifact@v4
-      with:
-        name: tgz-macos14_clang-binary
-        path: ${{ inputs.file_base }}-Darwin.tar.gz
-        retention-days: 30
-
-    - name: Create macOS App Placeholder
-      run: |
-        echo "macOS application package not yet implemented for Maven" > README.txt
-        tar -czf ${{ inputs.file_base }}App-Darwin.tar.gz README.txt
-
-    - name: Upload macOS App Placeholder
-      uses: actions/upload-artifact@v4
-      with:
-        name: tgz-macos14_clang-app-binary
-        path: ${{ inputs.file_base }}App-Darwin.tar.gz
-        retention-days: 30
-
-  build-summary:
-    name: Build Summary
-    runs-on: ubuntu-latest
-    needs: [build-linux, build-linux-app, build-windows-placeholder, build-macos-placeholder]
-    if: always()
-    steps:
-    - name: Summary
-      run: |
-        echo "## Maven Build Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Artifacts Created" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Linux x86_64 binary archive" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Linux x86_64 application package" >> $GITHUB_STEP_SUMMARY
-        echo "- ⚠️ Windows binaries (placeholder - not yet implemented)" >> $GITHUB_STEP_SUMMARY
-        echo "- ⚠️ macOS binaries (placeholder - not yet implemented)" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Notes" >> $GITHUB_STEP_SUMMARY
-        echo "This workflow replaces the legacy Ant-based build workflows." >> $GITHUB_STEP_SUMMARY
-        echo "Cross-platform native builds (Windows, macOS) require additional implementation." >> $GITHUB_STEP_SUMMARY
-        echo "See .claude/Current-Status-2025-11-04.md for details." >> $GITHUB_STEP_SUMMARY
->>>>>>> 34624c7 Update workflows for maven
