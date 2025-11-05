@@ -2,6 +2,7 @@ name: Maven Build for Release
 
 # Reusable workflow for building HDFView with Maven
 # Replaces the legacy ant.yml and ant-app.yml workflows
+<<<<<<< Upstream, based on branch 'master' of https://github.com/byrnHDF/hdfview.git
 # Downloads HDF4 and HDF5 libraries from HDF Group GitHub releases
 on:
   workflow_call:
@@ -496,3 +497,290 @@ jobs:
         echo "This workflow downloads HDF4 and HDF5 binaries from HDF Group GitHub releases." >> $GITHUB_STEP_SUMMARY
         echo "This replaces the legacy Ant-based build workflows." >> $GITHUB_STEP_SUMMARY
         echo "Cross-platform native builds (Windows, macOS) require additional implementation." >> $GITHUB_STEP_SUMMARY
+=======
+on:
+  workflow_call:
+    inputs:
+      file_base:
+        description: 'Base name for artifacts'
+        type: string
+        required: true
+      use_hdf:
+        description: 'HDF4 version (legacy parameter, not used in Maven build)'
+        type: string
+        required: false
+        default: 'snapshot'
+      use_hdf5:
+        description: 'HDF5 version (legacy parameter, not used in Maven build)'
+        type: string
+        required: false
+        default: 'snapshot'
+      name_hdf5:
+        description: 'HDF5 base name (legacy parameter, not used in Maven build)'
+        type: string
+        required: false
+        default: 'snapshot'
+      use_environ:
+        description: 'Environment (snapshots or release)'
+        type: string
+        required: false
+        default: 'snapshots'
+      snap_name:
+        description: 'Snapshot name (legacy parameter for compatibility)'
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  MAVEN_OPTS: >-
+    -Xmx2g
+    -Xms1g
+    -XX:+UseParallelGC
+    -XX:+TieredCompilation
+    -XX:TieredStopAtLevel=1
+    -Djava.awt.headless=true
+
+jobs:
+  build-linux:
+    name: Build Linux Binary
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.m2/repository
+          !~/.m2/repository/org/hdfgroup
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Install HDF Libraries
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libhdf5-dev \
+          libhdf4-dev \
+          libhdf5-103 \
+          libhdf4-0-alt
+
+    - name: Set up build.properties
+      run: |
+        cat > build.properties << EOF
+        # Build Properties for Release
+        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+        hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/hdf5/plugins
+        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
+        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
+        EOF
+
+    - name: Build with Maven
+      run: |
+        echo "Building HDFView with Maven..."
+        mvn clean package -DskipTests -B
+
+    - name: Create Linux Binary Archive
+      run: |
+        # Create a distribution directory
+        mkdir -p hdfview-dist
+
+        # Copy JAR files
+        cp hdfview/target/*.jar hdfview-dist/ 2>/dev/null || echo "No hdfview JARs found"
+        cp object/target/*.jar hdfview-dist/ 2>/dev/null || echo "No object JARs found"
+        cp libs/*.jar hdfview-dist/ 2>/dev/null || echo "No libs JARs found"
+
+        # Copy dependencies
+        if [ -d "target/lib" ]; then
+          cp -r target/lib hdfview-dist/
+        fi
+
+        # Create archive with the expected naming convention
+        tar -czf ${{ inputs.file_base }}-Linux-x86_64.tar.gz hdfview-dist/
+
+        echo "Linux binary archive created: ${{ inputs.file_base }}-Linux-x86_64.tar.gz"
+        ls -lh ${{ inputs.file_base }}-Linux-x86_64.tar.gz
+
+    - name: Upload Linux Binary Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: tgz-ubuntu-2404-binary
+        path: ${{ inputs.file_base }}-Linux-x86_64.tar.gz
+        retention-days: 30
+
+  build-linux-app:
+    name: Build Linux Application Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.m2/repository
+          !~/.m2/repository/org/hdfgroup
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Install HDF Libraries
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libhdf5-dev \
+          libhdf4-dev \
+          libhdf5-103 \
+          libhdf4-0-alt
+
+    - name: Set up build.properties
+      run: |
+        cat > build.properties << EOF
+        # Build Properties for Release
+        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+        hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/hdf5/plugins
+        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
+        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
+        EOF
+
+    - name: Build Application Package
+      run: |
+        echo "Building HDFView application package with Maven..."
+        mvn clean package -DskipTests -B
+
+    - name: Create Linux Application Archive
+      run: |
+        # Create application distribution directory
+        mkdir -p hdfview-app
+
+        # Copy application files
+        cp hdfview/target/*.jar hdfview-app/ 2>/dev/null || echo "No hdfview JARs found"
+        cp object/target/*.jar hdfview-app/ 2>/dev/null || echo "No object JARs found"
+        cp libs/*.jar hdfview-app/ 2>/dev/null || echo "No libs JARs found"
+
+        # Copy native libraries if available
+        if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
+          mkdir -p hdfview-app/lib
+          cp /usr/lib/x86_64-linux-gnu/libhdf*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF libraries to bundle"
+        fi
+
+        # Create archive with App suffix
+        tar -czf ${{ inputs.file_base }}App-Linux-x86_64.tar.gz hdfview-app/
+
+        echo "Linux application archive created: ${{ inputs.file_base }}App-Linux-x86_64.tar.gz"
+        ls -lh ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
+
+    - name: Upload Linux App Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: tgz-ubuntu-2404-app-binary
+        path: ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
+        retention-days: 30
+
+  build-windows-placeholder:
+    name: Windows Build Placeholder
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Windows Placeholder
+      run: |
+        echo "Windows cross-platform build not yet implemented for Maven" > README.txt
+        echo "The Maven build system currently supports Linux only." >> README.txt
+        echo "Windows native builds require additional configuration." >> README.txt
+        zip ${{ inputs.file_base }}-win64.zip README.txt
+
+    - name: Upload Windows Binary Placeholder
+      uses: actions/upload-artifact@v4
+      with:
+        name: zip-win-vs2022-binary
+        path: ${{ inputs.file_base }}-win64.zip
+        retention-days: 30
+
+    - name: Create Windows App Placeholder
+      run: |
+        echo "Windows application package not yet implemented for Maven" > README.txt
+        zip ${{ inputs.file_base }}App-win64.zip README.txt
+
+    - name: Upload Windows App Placeholder
+      uses: actions/upload-artifact@v4
+      with:
+        name: zip-win-vs2022-app-binary
+        path: ${{ inputs.file_base }}App-win64.zip
+        retention-days: 30
+
+  build-macos-placeholder:
+    name: macOS Build Placeholder
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create macOS Placeholder
+      run: |
+        echo "macOS cross-platform build not yet implemented for Maven" > README.txt
+        echo "The Maven build system currently supports Linux only." >> README.txt
+        echo "macOS native builds require additional configuration." >> README.txt
+        tar -czf ${{ inputs.file_base }}-Darwin.tar.gz README.txt
+
+    - name: Upload macOS Binary Placeholder
+      uses: actions/upload-artifact@v4
+      with:
+        name: tgz-macos14_clang-binary
+        path: ${{ inputs.file_base }}-Darwin.tar.gz
+        retention-days: 30
+
+    - name: Create macOS App Placeholder
+      run: |
+        echo "macOS application package not yet implemented for Maven" > README.txt
+        tar -czf ${{ inputs.file_base }}App-Darwin.tar.gz README.txt
+
+    - name: Upload macOS App Placeholder
+      uses: actions/upload-artifact@v4
+      with:
+        name: tgz-macos14_clang-app-binary
+        path: ${{ inputs.file_base }}App-Darwin.tar.gz
+        retention-days: 30
+
+  build-summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [build-linux, build-linux-app, build-windows-placeholder, build-macos-placeholder]
+    if: always()
+    steps:
+    - name: Summary
+      run: |
+        echo "## Maven Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Artifacts Created" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Linux x86_64 binary archive" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Linux x86_64 application package" >> $GITHUB_STEP_SUMMARY
+        echo "- ⚠️ Windows binaries (placeholder - not yet implemented)" >> $GITHUB_STEP_SUMMARY
+        echo "- ⚠️ macOS binaries (placeholder - not yet implemented)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Notes" >> $GITHUB_STEP_SUMMARY
+        echo "This workflow replaces the legacy Ant-based build workflows." >> $GITHUB_STEP_SUMMARY
+        echo "Cross-platform native builds (Windows, macOS) require additional implementation." >> $GITHUB_STEP_SUMMARY
+        echo "See .claude/Current-Status-2025-11-04.md for details." >> $GITHUB_STEP_SUMMARY
+>>>>>>> 34624c7 Update workflows for maven
