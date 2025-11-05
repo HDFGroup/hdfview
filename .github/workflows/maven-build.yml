@@ -146,11 +146,10 @@ jobs:
     - name: Build with Maven
       run: |
         echo "Building HDFView with Maven..."
-        # Run verify phase to trigger repository module's install-file executions for HDF JARs
-        # Comprehensively skip all quality plugins to avoid PMD/CPD class loading issues
-        mvn clean verify -DskipTests -Dmaven.test.skip=true \
-          -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true \
-          -Denforcer.skip=true -Dmaven.javadoc.skip=true -B
+        # Step 1: Run verify ONLY on repository module to install HDF JARs (avoids PMD on root)
+        mvn verify -pl repository -DskipTests -B
+        # Step 2: Build entire project with package (skips verify phase, no PMD/CPD issues)
+        mvn package -DskipTests -B
 
     - name: Create Linux Binary Archive
       run: |
@@ -287,11 +286,10 @@ jobs:
     - name: Build Application Package
       run: |
         echo "Building HDFView application package with Maven..."
-        # Run verify phase to trigger repository module's install-file executions for HDF JARs
-        # Comprehensively skip all quality plugins to avoid PMD/CPD class loading issues
-        mvn clean verify -DskipTests -Dmaven.test.skip=true \
-          -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true \
-          -Denforcer.skip=true -Dmaven.javadoc.skip=true -B
+        # Step 1: Run verify ONLY on repository module to install HDF JARs (avoids PMD on root)
+        mvn verify -pl repository -DskipTests -B
+        # Step 2: Build entire project with package (skips verify phase, no PMD/CPD issues)
+        mvn package -DskipTests -B
 
     - name: Create Linux Application Archive
       run: |
