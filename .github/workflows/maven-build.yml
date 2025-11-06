@@ -454,8 +454,17 @@ jobs:
         Set-Location hdf4
         7z x HDF-*-win64.zip
 
+        # Debug: Show directory structure
+        Write-Host "Directory structure after extraction:"
+        Get-ChildItem -Recurse -Directory -Depth 3 | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName }
+
         # Find the HDF_Group directory (may be nested in extracted directory)
         $HDF4BASE = Get-ChildItem -Path . -Filter "HDF_Group" -Directory -Recurse | Select-Object -First 1
+        if (-not $HDF4BASE) {
+          Write-Error "HDF_Group directory not found!"
+          Get-ChildItem -Directory | ForEach-Object { Write-Host $_.Name }
+          exit 1
+        }
         $HDF4DIR = Join-Path $HDF4BASE.FullName "HDF"
         $FILE_NAME = (Get-ChildItem $HDF4DIR).Name
         $HDF4LIB_PATH = "$HDF4DIR\$FILE_NAME"
