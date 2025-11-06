@@ -508,6 +508,12 @@ jobs:
         if (Test-Path "$env:HDF5LIB_PATH\lib\*.jar") {
           Copy-Item "$env:HDF5LIB_PATH\lib\*.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
         }
+        if (Test-Path "lib\fits.jar") {
+          Copy-Item "lib\fits.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
+        }
+        if (Test-Path "lib\netcdf.jar") {
+          Copy-Item "lib\netcdf.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
+        }
 
         $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf5) {
@@ -519,6 +525,16 @@ jobs:
         if ($jarhdf) {
           mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
             -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+        }
+
+        if (Test-Path "repository\lib\fits.jar") {
+          mvn install:install-file "-Dfile=repository\lib\fits.jar" `
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+        }
+
+        if (Test-Path "repository\lib\netcdf.jar") {
+          mvn install:install-file "-Dfile=repository\lib\netcdf.jar" `
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
         }
 
     - name: Build with Maven
@@ -625,6 +641,12 @@ jobs:
         if (Test-Path "$env:HDF5LIB_PATH\lib\*.jar") {
           Copy-Item "$env:HDF5LIB_PATH\lib\*.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
         }
+        if (Test-Path "lib\fits.jar") {
+          Copy-Item "lib\fits.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
+        }
+        if (Test-Path "lib\netcdf.jar") {
+          Copy-Item "lib\netcdf.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
+        }
         $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf5) {
           mvn install:install-file "-Dfile=$($jarhdf5.FullName)" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
@@ -632,6 +654,14 @@ jobs:
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
           mvn install:install-file "-Dfile=$($jarhdf.FullName)" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+        }
+        if (Test-Path "repository\lib\fits.jar") {
+          mvn install:install-file "-Dfile=repository\lib\fits.jar" `
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+        }
+        if (Test-Path "repository\lib\netcdf.jar") {
+          mvn install:install-file "-Dfile=repository\lib\netcdf.jar" `
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
         }
 
     - name: Build Application Package
@@ -739,6 +769,8 @@ jobs:
         mkdir -p repository/lib
         cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs"
         cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs"
+        cp lib/fits.jar repository/lib/ 2>/dev/null || echo "fits.jar not found"
+        cp lib/netcdf.jar repository/lib/ 2>/dev/null || echo "netcdf.jar not found"
 
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
@@ -750,6 +782,20 @@ jobs:
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" \
             -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+        fi
+
+        # Install fits
+        if [ -f repository/lib/fits.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+        fi
+
+        # Install netcdf
+        if [ -f repository/lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
         fi
 
     - name: Build with Maven
@@ -846,6 +892,8 @@ jobs:
         mkdir -p repository/lib
         cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs"
         cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs"
+        cp lib/fits.jar repository/lib/ 2>/dev/null || echo "fits.jar not found"
+        cp lib/netcdf.jar repository/lib/ 2>/dev/null || echo "netcdf.jar not found"
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
@@ -853,6 +901,14 @@ jobs:
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+        fi
+        if [ -f repository/lib/fits.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+        fi
+        if [ -f repository/lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
         fi
 
     - name: Build Application Package
