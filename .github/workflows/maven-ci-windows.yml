@@ -1,0 +1,360 @@
+name: Maven CI Pipeline - Windows
+
+on:
+  push:
+    branches: [ master, develop, main ]
+  pull_request:
+    branches: [ master, develop, main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+env:
+  # JVM configuration for CI performance
+  MAVEN_OPTS: >-
+    -Xmx2g
+    -Xms1g
+    -XX:+UseParallelGC
+    -XX:+TieredCompilation
+    -XX:TieredStopAtLevel=1
+    -Djava.awt.headless=true
+
+jobs:
+  build-and-test-windows:
+    name: Build and Test (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 35
+
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.m2/repository
+          !~/.m2/repository/org/hdfgroup
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Cache HDF Libraries
+      id: cache-hdf
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/hdf4
+          ${{ github.workspace }}/hdf5
+        key: ${{ runner.os }}-hdf-github-${{ github.run_id }}
+        restore-keys: |
+          ${{ runner.os }}-hdf-github-
+
+    - name: Download and Install HDF4 from GitHub
+      if: steps.cache-hdf.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: |
+        Write-Host "Downloading HDF4 from GitHub releases..."
+        gh release download snapshot `
+          --repo HDFGroup/hdf4 `
+          --pattern "hdf4-master-*-win-vs2022_cl.zip"
+
+        Write-Host "Extracting HDF4..."
+        # Extract outer ZIP
+        $hdf4Zip = Get-ChildItem "hdf4-master-*-win-vs2022_cl.zip" | Select-Object -First 1
+        7z x $hdf4Zip.Name
+
+        # Extract inner ZIP
+        Set-Location hdf4
+        $innerZip = Get-ChildItem "HDF-*-win64.zip" | Select-Object -First 1
+        7z x $innerZip.Name
+
+        # Find version directory
+        $HDF4DIR = "${{ github.workspace }}\hdf4\HDF_Group\HDF"
+        $FILE_NAME_HDF = (Get-ChildItem $HDF4DIR).Name
+        $HDF4LIB_PATH = "$HDF4DIR\$FILE_NAME_HDF"
+
+        # Set environment variable
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $env:GITHUB_ENV
+        Write-Host "HDF4 installed to: $HDF4LIB_PATH"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Download and Install HDF5 from GitHub
+      if: steps.cache-hdf.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: |
+        Write-Host "Downloading HDF5 from GitHub releases..."
+        gh release download snapshot `
+          --repo HDFGroup/hdf5 `
+          --pattern "hdf5-develop-*-win-vs2022_cl.zip"
+
+        Write-Host "Extracting HDF5..."
+        # Extract outer ZIP
+        $hdf5Zip = Get-ChildItem "hdf5-develop-*-win-vs2022_cl.zip" | Select-Object -First 1
+        7z x $hdf5Zip.Name
+
+        # Extract inner ZIP
+        Set-Location hdf5
+        $innerZip = Get-ChildItem "HDF5-*-win64.zip" | Select-Object -First 1
+        7z x $innerZip.Name
+
+        # Find version directory
+        $HDF5DIR = "${{ github.workspace }}\hdf5\HDF_Group\HDF5"
+        $FILE_NAME_HDF5 = (Get-ChildItem $HDF5DIR).Name
+        $HDF5LIB_PATH = "$HDF5DIR\$FILE_NAME_HDF5"
+
+        # Set environment variable
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $env:GITHUB_ENV
+        Write-Host "HDF5 installed to: $HDF5LIB_PATH"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Set Environment Variables from Cache
+      if: steps.cache-hdf.outputs.cache-hit == 'true'
+      shell: pwsh
+      run: |
+        $HDF4DIR = "${{ github.workspace }}\hdf4\HDF_Group\HDF"
+        $FILE_NAME_HDF = (Get-ChildItem $HDF4DIR).Name
+        $HDF4LIB_PATH = "$HDF4DIR\$FILE_NAME_HDF"
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $env:GITHUB_ENV
+
+        $HDF5DIR = "${{ github.workspace }}\hdf5\HDF_Group\HDF5"
+        $FILE_NAME_HDF5 = (Get-ChildItem $HDF5DIR).Name
+        $HDF5LIB_PATH = "$HDF5DIR\$FILE_NAME_HDF5"
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $env:GITHUB_ENV
+
+        Write-Host "Using cached HDF libraries:"
+        Write-Host "HDF4: $HDF4LIB_PATH"
+        Write-Host "HDF5: $HDF5LIB_PATH"
+
+    - name: Install HDF JARs to Local Maven Repository
+      shell: pwsh
+      run: |
+        Write-Host "Installing HDF JARs to local Maven repository..."
+
+        # Copy HDF JARs from downloaded distributions
+        New-Item -Path "repository\lib" -ItemType Directory -Force | Out-Null
+
+        # Copy JARs (they're in lib/ directory on Windows too)
+        if (Test-Path "$env:HDF4LIB_PATH\lib\*.jar") {
+          Copy-Item "$env:HDF4LIB_PATH\lib\*.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
+        } else {
+          Write-Host "No HDF4 JARs found"
+        }
+
+        if (Test-Path "$env:HDF5LIB_PATH\lib\*.jar") {
+          Copy-Item "$env:HDF5LIB_PATH\lib\*.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
+        } else {
+          Write-Host "No HDF5 JARs found"
+        }
+
+        # List what we have
+        Write-Host "JARs in repository\lib:"
+        if (Test-Path "repository\lib\*.jar") {
+          Get-ChildItem "repository\lib\*.jar" | Format-Table Name, Length
+        } else {
+          Write-Host "No JARs found"
+        }
+
+        # Install jarhdf5
+        $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($jarhdf5) {
+          mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 `
+            -Dpackaging=jar -DgeneratePom=true
+          Write-Host "Installed: $($jarhdf5.Name)"
+        }
+
+        # Install jarhdf
+        $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($jarhdf) {
+          mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 `
+            -Dpackaging=jar -DgeneratePom=true
+          Write-Host "Installed: $($jarhdf.Name)"
+        }
+
+        # Install slf4j-api if present
+        $slf4j = Get-ChildItem "repository\lib\slf4j-api-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($slf4j) {
+          $version = $slf4j.Name -replace 'slf4j-api-([0-9.]+)\.jar', '$1'
+          mvn install:install-file "-Dfile=$($slf4j.FullName)" `
+            -DgroupId=org.slf4j -DartifactId=slf4j-api "-Dversion=$version" `
+            -Dpackaging=jar -DgeneratePom=true
+          Write-Host "Installed: $($slf4j.Name)"
+        }
+
+    - name: Set up build.properties
+      shell: pwsh
+      run: |
+        $buildProps = @"
+        # CI Build Properties for HDFView (Windows)
+        # Generated automatically for GitHub Actions
+        # Using HDF libraries from GitHub releases
+
+        # HDF5 Configuration
+        hdf5.lib.dir=$env:HDF5LIB_PATH/lib
+        hdf5.plugin.dir=$env:HDF5LIB_PATH/lib/plugin
+
+        # HDF4 Configuration
+        hdf.lib.dir=$env:HDF4LIB_PATH/lib
+
+        # Platform Configuration
+        platform.hdf.lib=$env:HDF5LIB_PATH/lib
+
+        # CI-specific settings
+        ci.build=true
+        skip.native.tests=false
+        "@
+
+        $buildProps | Out-File -FilePath "build.properties" -Encoding utf8
+
+        Write-Host "Generated build.properties for CI:"
+        Get-Content "build.properties"
+
+        # Set PATH for DLL loading (Windows uses PATH not LD_LIBRARY_PATH)
+        $newPath = "$env:HDF5LIB_PATH\bin;$env:HDF4LIB_PATH\bin;$env:PATH"
+        echo "PATH=$newPath" >> $env:GITHUB_ENV
+
+        # Also set for current session
+        $env:PATH = $newPath
+
+    - name: Validate Maven Configuration
+      shell: pwsh
+      run: |
+        mvn help:effective-pom -q > effective-pom.log
+        Write-Host "Maven configuration validated"
+        Write-Host "Active profiles:"
+        mvn help:active-profiles
+
+    - name: Maven Compile
+      shell: pwsh
+      run: |
+        Write-Host "::group::Maven Compile"
+        mvn clean compile -B `
+          -Dmaven.compiler.showDeprecation=false `
+          -Dmaven.compiler.showWarnings=false
+        Write-Host "::endgroup::"
+
+    - name: Run Unit Tests
+      shell: pwsh
+      run: |
+        Write-Host "::group::Unit Tests (Fast, Parallel)"
+        mvn test `
+          "-Dgroups=unit & fast" `
+          -B `
+          -Dmaven.test.failure.ignore=false `
+          -Djunit.jupiter.execution.parallel.enabled=true `
+          -Djunit.jupiter.execution.parallel.mode.default=concurrent
+        Write-Host "::endgroup::"
+
+    - name: Run Integration Tests
+      shell: pwsh
+      run: |
+        Write-Host "::group::Integration Tests (Serial)"
+        mvn test `
+          -Dgroups=integration `
+          -B `
+          -Dmaven.test.failure.ignore=false `
+          -Djunit.jupiter.execution.parallel.enabled=false
+        Write-Host "::endgroup::"
+
+    - name: Package Application
+      shell: pwsh
+      run: |
+        Write-Host "::group::Package Application"
+        mvn package -DskipTests -B
+        Write-Host "::endgroup::"
+
+    - name: Verify Build Artifacts
+      shell: pwsh
+      run: |
+        Write-Host "Build artifacts created:"
+        Get-ChildItem -Recurse -Filter "*.jar" | Select-Object -First 10 | Format-Table FullName
+
+        Write-Host "Library artifacts:"
+        if (Test-Path "libs\") {
+          Get-ChildItem "libs\" | Format-Table Name, Length
+        } else {
+          Write-Host "No libs directory found"
+        }
+
+        Write-Host "Target artifacts:"
+        Get-ChildItem -Recurse -Path "target" -Filter "*.jar" -ErrorAction SilentlyContinue | Select-Object -First 5 | Format-Table FullName
+
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Maven Test Results (Windows)
+        path: '**/target/surefire-reports/*.xml'
+        reporter: java-junit
+        fail-on-error: true
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-windows-${{ github.run_number }}
+        path: |
+          **/target/surefire-reports/
+          **/target/failsafe-reports/
+        retention-days: 30
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: build-artifacts-windows-${{ github.run_number }}
+        path: |
+          libs/*.jar
+          target/*.jar
+          hdfview/target/*.jar
+          object/target/*.jar
+        retention-days: 7
+
+    - name: Build Summary
+      if: always()
+      shell: pwsh
+      run: |
+        $summary = @"
+        ## Build Summary (Windows)
+        - **Status**: ${{ job.status }}
+        - **Platform**: Windows $(Get-ComputerInfo | Select-Object -ExpandProperty OsVersion)
+        - **Architecture**: $env:PROCESSOR_ARCHITECTURE
+        - **Java Version**: $(java -version 2>&1 | Select-Object -First 1)
+        - **Maven Version**: $(mvn --version | Select-Object -First 1)
+        - **Build Time**: $(Get-Date)
+        "@
+
+        $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+
+        if (Test-Path "target\surefire-reports\TEST-*.xml") {
+          "- **Test Results**: Available in artifacts" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+        }
+
+        "`n### Artifacts Generated" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+
+        $jars = Get-ChildItem -Recurse -Filter "*.jar" | Where-Object { $_.LastWriteTime -gt (Get-Date).AddMinutes(-10) } | Select-Object -First 5
+        if ($jars) {
+          foreach ($jar in $jars) {
+            "- $($jar.FullName)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          }
+        } else {
+          "- No JAR artifacts found" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+        }
