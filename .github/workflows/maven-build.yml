@@ -524,7 +524,7 @@ jobs:
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
           mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 -Dpackaging=jar -DgeneratePom=true
         }
 
         if (Test-Path "repository\lib\fits.jar") {
@@ -653,7 +653,7 @@ jobs:
         }
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
-          mvn install:install-file "-Dfile=$($jarhdf.FullName)" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+          mvn install:install-file "-Dfile=$($jarhdf.FullName)" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 -Dpackaging=jar -DgeneratePom=true
         }
         if (Test-Path "repository\lib\fits.jar") {
           mvn install:install-file "-Dfile=repository\lib\fits.jar" `
@@ -781,7 +781,7 @@ jobs:
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 -Dpackaging=jar -DgeneratePom=true
         fi
 
         # Install fits
@@ -900,7 +900,7 @@ jobs:
         fi
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
-          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 -Dpackaging=jar -DgeneratePom=true
         fi
         if [ -f repository/lib/fits.jar ]; then
           mvn install:install-file -Dfile=repository/lib/fits.jar \
