@@ -231,20 +231,6 @@
             <!-- Force classpath mode instead of module path -->
             <forceLegacyJavacApi>true</forceLegacyJavacApi>
         </configuration>
-        <executions>
-          <!-- Test compilation with proper module access for SWTBot -->
-          <execution>
-            <id>default-testCompile</id>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-            <configuration>
-              <!-- Note: add-opens is a JVM runtime option (not a compiler option).
-                   It's configured in maven-surefire-plugin instead. -->
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
