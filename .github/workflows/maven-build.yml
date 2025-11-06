@@ -454,20 +454,15 @@ jobs:
         Set-Location hdf4
         7z x HDF-*-win64.zip
 
-        # Debug: Show directory structure
-        Write-Host "Directory structure after extraction:"
-        Get-ChildItem -Recurse -Directory -Depth 3 | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName }
-
-        # Find the HDF_Group directory (may be nested in extracted directory)
-        $HDF4BASE = Get-ChildItem -Path . -Filter "HDF_Group" -Directory -Recurse | Select-Object -First 1
-        if (-not $HDF4BASE) {
-          Write-Error "HDF_Group directory not found!"
+        # Windows structure: hdf4/HDF-4.3.1-win64/lib, hdf4/HDF-4.3.1-win64/bin
+        # Find the extracted HDF-*-win64 directory
+        $HDF4DIR = Get-ChildItem -Path . -Filter "HDF-*-win64" -Directory | Select-Object -First 1
+        if (-not $HDF4DIR) {
+          Write-Error "HDF-*-win64 directory not found!"
           Get-ChildItem -Directory | ForEach-Object { Write-Host $_.Name }
           exit 1
         }
-        $HDF4DIR = Join-Path $HDF4BASE.FullName "HDF"
-        $FILE_NAME = (Get-ChildItem $HDF4DIR).Name
-        $HDF4LIB_PATH = "$HDF4DIR\$FILE_NAME"
+        $HDF4LIB_PATH = $HDF4DIR.FullName
         echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $env:GITHUB_ENV
         Write-Host "HDF4 installed to: $HDF4LIB_PATH"
       env:
@@ -486,11 +481,15 @@ jobs:
         Set-Location hdf5
         7z x HDF5-*-win64.zip
 
-        # Find the HDF_Group directory (may be nested in extracted directory)
-        $HDF5BASE = Get-ChildItem -Path . -Filter "HDF_Group" -Directory -Recurse | Select-Object -First 1
-        $HDF5DIR = Join-Path $HDF5BASE.FullName "HDF5"
-        $FILE_NAME = (Get-ChildItem $HDF5DIR).Name
-        $HDF5LIB_PATH = "$HDF5DIR\$FILE_NAME"
+        # Windows structure: hdf5/HDF5-x.y.z-win64/lib, hdf5/HDF5-x.y.z-win64/bin
+        # Find the extracted HDF5-*-win64 directory
+        $HDF5DIR = Get-ChildItem -Path . -Filter "HDF5-*-win64" -Directory | Select-Object -First 1
+        if (-not $HDF5DIR) {
+          Write-Error "HDF5-*-win64 directory not found!"
+          Get-ChildItem -Directory | ForEach-Object { Write-Host $_.Name }
+          exit 1
+        }
+        $HDF5LIB_PATH = $HDF5DIR.FullName
         echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $env:GITHUB_ENV
         Write-Host "HDF5 installed to: $HDF5LIB_PATH"
       env:
@@ -615,11 +614,13 @@ jobs:
         7z x "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
         Set-Location hdf4
         7z x HDF-*-win64.zip
-        # Find the HDF_Group directory (may be nested in extracted directory)
-        $HDF4BASE = Get-ChildItem -Path . -Filter "HDF_Group" -Directory -Recurse | Select-Object -First 1
-        $HDF4DIR = Join-Path $HDF4BASE.FullName "HDF"
-        $FILE_NAME = (Get-ChildItem $HDF4DIR).Name
-        echo "HDF4LIB_PATH=$HDF4DIR\$FILE_NAME" >> $env:GITHUB_ENV
+        # Windows structure: hdf4/HDF-4.3.1-win64/lib, hdf4/HDF-4.3.1-win64/bin
+        $HDF4DIR = Get-ChildItem -Path . -Filter "HDF-*-win64" -Directory | Select-Object -First 1
+        if (-not $HDF4DIR) {
+          Write-Error "HDF-*-win64 directory not found!"
+          exit 1
+        }
+        echo "HDF4LIB_PATH=$($HDF4DIR.FullName)" >> $env:GITHUB_ENV
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -630,11 +631,13 @@ jobs:
         7z x "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
         Set-Location hdf5
         7z x HDF5-*-win64.zip
-        # Find the HDF_Group directory (may be nested in extracted directory)
-        $HDF5BASE = Get-ChildItem -Path . -Filter "HDF_Group" -Directory -Recurse | Select-Object -First 1
-        $HDF5DIR = Join-Path $HDF5BASE.FullName "HDF5"
-        $FILE_NAME = (Get-ChildItem $HDF5DIR).Name
-        echo "HDF5LIB_PATH=$HDF5DIR\$FILE_NAME" >> $env:GITHUB_ENV
+        # Windows structure: hdf5/HDF5-x.y.z-win64/lib, hdf5/HDF5-x.y.z-win64/bin
+        $HDF5DIR = Get-ChildItem -Path . -Filter "HDF5-*-win64" -Directory | Select-Object -First 1
+        if (-not $HDF5DIR) {
+          Write-Error "HDF5-*-win64 directory not found!"
+          exit 1
+        }
+        echo "HDF5LIB_PATH=$($HDF5DIR.FullName)" >> $env:GITHUB_ENV
       env:
         GH_TOKEN: ${{ github.token }}
 
