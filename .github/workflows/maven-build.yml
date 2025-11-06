@@ -530,23 +530,23 @@ jobs:
         $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf5) {
           mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=2.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
         }
 
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
           mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 -Dpackaging=jar -DgeneratePom=true
+            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=4.3.1" "-Dpackaging=jar" "-DgeneratePom=true"
         }
 
         if (Test-Path "repository\lib\fits.jar") {
           mvn install:install-file "-Dfile=repository\lib\fits.jar" `
-            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+            "-DgroupId=fits" "-DartifactId=fits" "-Dversion=1.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
         }
 
         if (Test-Path "repository\lib\netcdf.jar") {
           mvn install:install-file "-Dfile=repository\lib\netcdf.jar" `
-            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+            "-DgroupId=netcdf" "-DartifactId=netcdf" "-Dversion=1.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
         }
 
     - name: Build with Maven
@@ -669,19 +669,21 @@ jobs:
         }
         $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf5) {
-          mvn install:install-file "-Dfile=$($jarhdf5.FullName)" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+          mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
+            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=2.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
         }
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
-          mvn install:install-file "-Dfile=$($jarhdf.FullName)" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 -Dpackaging=jar -DgeneratePom=true
+          mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
+            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=4.3.1" "-Dpackaging=jar" "-DgeneratePom=true"
         }
         if (Test-Path "repository\lib\fits.jar") {
           mvn install:install-file "-Dfile=repository\lib\fits.jar" `
-            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+            "-DgroupId=fits" "-DartifactId=fits" "-Dversion=1.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
         }
         if (Test-Path "repository\lib\netcdf.jar") {
           mvn install:install-file "-Dfile=repository\lib\netcdf.jar" `
-            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+            "-DgroupId=netcdf" "-DartifactId=netcdf" "-Dversion=1.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
         }
 
     - name: Build Application Package
