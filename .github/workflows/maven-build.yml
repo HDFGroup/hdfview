@@ -553,7 +553,7 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Building HDFView with Maven..."
-        mvn clean package -Dmaven.test.skip=true -B
+        mvn clean package "-Dmaven.test.skip=true" -B
 
     - name: Create Windows Binary Archive
       shell: pwsh
@@ -689,7 +689,7 @@ jobs:
     - name: Build Application Package
       shell: pwsh
       run: |
-        mvn clean package -Dmaven.test.skip=true -B
+        mvn clean package "-Dmaven.test.skip=true" -B
 
     - name: Create Windows Application Archive
       shell: pwsh
