@@ -553,11 +553,34 @@ jobs:
             "-DgroupId=netcdf" "-DartifactId=netcdf" "-Dversion=1.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
         }
 
+    - name: Build repository module (copies platform SWT JAR)
+      shell: pwsh
+      run: |
+        Write-Host "Building repository module..."
+        mvn clean install -pl repository -am "-Dmaven.test.skip=true" -B
+
+    - name: Install SWT JAR to Local Maven Repository
+      shell: pwsh
+      run: |
+        Write-Host "Installing Windows SWT JAR to local Maven repository..."
+        if (Test-Path "repository\lib\swt.jar") {
+          mvn install:install-file "-Dfile=repository\lib\swt.jar" `
+            "-DgroupId=org.eclipse.platform" `
+            "-DartifactId=org.eclipse.swt.win32.win32.amd64" `
+            "-Dversion=3.126.0" `
+            "-Dpackaging=jar" `
+            "-DgeneratePom=true"
+          Write-Host "Windows SWT JAR installed"
+        } else {
+          Write-Error "swt.jar not found in repository/lib/"
+          exit 1
+        }
+
     - name: Build with Maven
       shell: pwsh
       run: |
         Write-Host "Building HDFView with Maven..."
-        mvn clean package "-Dmaven.test.skip=true" -B
+        mvn package -pl object,hdfview "-Dmaven.test.skip=true" -B
 
     - name: Create Windows Binary Archive
       shell: pwsh
@@ -697,10 +720,33 @@ jobs:
             "-DgroupId=netcdf" "-DartifactId=netcdf" "-Dversion=1.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
         }
 
+    - name: Build repository module (copies platform SWT JAR)
+      shell: pwsh
+      run: |
+        Write-Host "Building repository module..."
+        mvn clean install -pl repository -am "-Dmaven.test.skip=true" -B
+
+    - name: Install SWT JAR to Local Maven Repository
+      shell: pwsh
+      run: |
+        Write-Host "Installing Windows SWT JAR to local Maven repository..."
+        if (Test-Path "repository\lib\swt.jar") {
+          mvn install:install-file "-Dfile=repository\lib\swt.jar" `
+            "-DgroupId=org.eclipse.platform" `
+            "-DartifactId=org.eclipse.swt.win32.win32.amd64" `
+            "-Dversion=3.126.0" `
+            "-Dpackaging=jar" `
+            "-DgeneratePom=true"
+          Write-Host "Windows SWT JAR installed"
+        } else {
+          Write-Error "swt.jar not found in repository/lib/"
+          exit 1
+        }
+
     - name: Build Application Package
       shell: pwsh
       run: |
-        mvn clean package "-Dmaven.test.skip=true" -B
+        mvn package -pl object,hdfview "-Dmaven.test.skip=true" -B
 
     - name: Create Windows Application Archive
       shell: pwsh
@@ -831,10 +877,31 @@ jobs:
             -Dpackaging=jar -DgeneratePom=true
         fi
 
+    - name: Build repository module (copies platform SWT JAR)
+      run: |
+        echo "Building repository module..."
+        mvn clean install -pl repository -am -Dmaven.test.skip=true -B
+
+    - name: Install SWT JAR to Local Maven Repository
+      run: |
+        echo "Installing macOS SWT JAR to local Maven repository..."
+        if [ -f repository/lib/swt.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/swt.jar \
+            -DgroupId=org.eclipse.platform \
+            -DartifactId=org.eclipse.swt.cocoa.macosx.amd64 \
+            -Dversion=3.126.0 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "macOS SWT JAR installed"
+        else
+          echo "ERROR: swt.jar not found in repository/lib/"
+          exit 1
+        fi
+
     - name: Build with Maven
       run: |
         echo "Building HDFView with Maven..."
-        mvn clean package -Dmaven.test.skip=true -B
+        mvn package -pl object,hdfview -Dmaven.test.skip=true -B
 
     - name: Create macOS Binary Archive
       run: |
@@ -944,9 +1011,30 @@ jobs:
             -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
         fi
 
+    - name: Build repository module (copies platform SWT JAR)
+      run: |
+        echo "Building repository module..."
+        mvn clean install -pl repository -am -Dmaven.test.skip=true -B
+
+    - name: Install SWT JAR to Local Maven Repository
+      run: |
+        echo "Installing macOS SWT JAR to local Maven repository..."
+        if [ -f repository/lib/swt.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/swt.jar \
+            -DgroupId=org.eclipse.platform \
+            -DartifactId=org.eclipse.swt.cocoa.macosx.amd64 \
+            -Dversion=3.126.0 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "macOS SWT JAR installed"
+        else
+          echo "ERROR: swt.jar not found in repository/lib/"
+          exit 1
+        fi
+
     - name: Build Application Package
       run: |
-        mvn clean package -Dmaven.test.skip=true -B
+        mvn package -pl object,hdfview -Dmaven.test.skip=true -B
 
     - name: Create macOS Application Archive
       run: |
