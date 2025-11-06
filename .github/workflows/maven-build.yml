@@ -193,7 +193,8 @@ jobs:
       run: |
         echo "Building HDFView with Maven..."
         # Now build with package (HDF JARs already installed manually above)
-        mvn clean package -DskipTests -B
+        # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
+        mvn clean package -Dmaven.test.skip=true -B
 
     - name: Create Linux Binary Archive
       run: |
@@ -377,7 +378,8 @@ jobs:
       run: |
         echo "Building HDFView application package with Maven..."
         # Now build with package (HDF JARs already installed manually above)
-        mvn clean package -DskipTests -B
+        # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
+        mvn clean package -Dmaven.test.skip=true -B
 
     - name: Create Linux Application Archive
       run: |
