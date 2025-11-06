@@ -454,7 +454,9 @@ jobs:
         Set-Location hdf4
         7z x HDF-*-win64.zip
 
-        $HDF4DIR = "${{ github.workspace }}\hdf4\HDF_Group\HDF"
+        # Find the HDF_Group directory (may be nested in extracted directory)
+        $HDF4BASE = Get-ChildItem -Path . -Filter "HDF_Group" -Directory -Recurse | Select-Object -First 1
+        $HDF4DIR = Join-Path $HDF4BASE.FullName "HDF"
         $FILE_NAME = (Get-ChildItem $HDF4DIR).Name
         $HDF4LIB_PATH = "$HDF4DIR\$FILE_NAME"
         echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $env:GITHUB_ENV
@@ -475,7 +477,9 @@ jobs:
         Set-Location hdf5
         7z x HDF5-*-win64.zip
 
-        $HDF5DIR = "${{ github.workspace }}\hdf5\HDF_Group\HDF5"
+        # Find the HDF_Group directory (may be nested in extracted directory)
+        $HDF5BASE = Get-ChildItem -Path . -Filter "HDF_Group" -Directory -Recurse | Select-Object -First 1
+        $HDF5DIR = Join-Path $HDF5BASE.FullName "HDF5"
         $FILE_NAME = (Get-ChildItem $HDF5DIR).Name
         $HDF5LIB_PATH = "$HDF5DIR\$FILE_NAME"
         echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $env:GITHUB_ENV
@@ -602,7 +606,9 @@ jobs:
         7z x "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
         Set-Location hdf4
         7z x HDF-*-win64.zip
-        $HDF4DIR = "${{ github.workspace }}\hdf4\HDF_Group\HDF"
+        # Find the HDF_Group directory (may be nested in extracted directory)
+        $HDF4BASE = Get-ChildItem -Path . -Filter "HDF_Group" -Directory -Recurse | Select-Object -First 1
+        $HDF4DIR = Join-Path $HDF4BASE.FullName "HDF"
         $FILE_NAME = (Get-ChildItem $HDF4DIR).Name
         echo "HDF4LIB_PATH=$HDF4DIR\$FILE_NAME" >> $env:GITHUB_ENV
       env:
@@ -615,7 +621,9 @@ jobs:
         7z x "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
         Set-Location hdf5
         7z x HDF5-*-win64.zip
-        $HDF5DIR = "${{ github.workspace }}\hdf5\HDF_Group\HDF5"
+        # Find the HDF_Group directory (may be nested in extracted directory)
+        $HDF5BASE = Get-ChildItem -Path . -Filter "HDF_Group" -Directory -Recurse | Select-Object -First 1
+        $HDF5DIR = Join-Path $HDF5BASE.FullName "HDF5"
         $FILE_NAME = (Get-ChildItem $HDF5DIR).Name
         echo "HDF5LIB_PATH=$HDF5DIR\$FILE_NAME" >> $env:GITHUB_ENV
       env:
