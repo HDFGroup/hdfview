@@ -240,7 +240,7 @@
               <goal>testCompile</goal>
             </goals>
             <configuration>
-              <!-- Note: --add-opens is a JVM runtime option, not a compiler option.
+              <!-- Note: add-opens is a JVM runtime option (not a compiler option).
                    It's configured in maven-surefire-plugin instead. -->
             </configuration>
           </execution>
