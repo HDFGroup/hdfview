@@ -194,7 +194,8 @@ jobs:
         echo "Building HDFView with Maven..."
         # Now build with package (HDF JARs already installed manually above)
         # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
-        mvn clean package -Dmaven.test.skip=true -B
+        # Skip quality checks (PMD, Checkstyle) for artifact builds - use CI workflows for quality
+        mvn clean package -Dmaven.test.skip=true -Dpmd.skip=true -Dcheckstyle.skip=true -B
 
     - name: Create Linux Binary Archive
       run: |
@@ -379,7 +380,8 @@ jobs:
         echo "Building HDFView application package with Maven..."
         # Now build with package (HDF JARs already installed manually above)
         # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
-        mvn clean package -Dmaven.test.skip=true -B
+        # Skip quality checks (PMD, Checkstyle) for artifact builds - use CI workflows for quality
+        mvn clean package -Dmaven.test.skip=true -Dpmd.skip=true -Dcheckstyle.skip=true -B
 
     - name: Create Linux Application Archive
       run: |
@@ -557,7 +559,7 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Building repository module..."
-        mvn clean install -pl repository -am "-Dmaven.test.skip=true" -B
+        mvn clean install -pl repository -am "-Dmaven.test.skip=true" "-Dpmd.skip=true" "-Dcheckstyle.skip=true" -B
 
     - name: Install SWT JAR to Local Maven Repository
       shell: pwsh
@@ -580,7 +582,7 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Building HDFView with Maven..."
-        mvn package -pl object,hdfview "-Dmaven.test.skip=true" -B
+        mvn package -pl object,hdfview "-Dmaven.test.skip=true" "-Dpmd.skip=true" "-Dcheckstyle.skip=true" -B
 
     - name: Create Windows Binary Archive
       shell: pwsh
@@ -724,7 +726,7 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Building repository module..."
-        mvn clean install -pl repository -am "-Dmaven.test.skip=true" -B
+        mvn clean install -pl repository -am "-Dmaven.test.skip=true" "-Dpmd.skip=true" "-Dcheckstyle.skip=true" -B
 
     - name: Install SWT JAR to Local Maven Repository
       shell: pwsh
@@ -746,7 +748,7 @@ jobs:
     - name: Build Application Package
       shell: pwsh
       run: |
-        mvn package -pl object,hdfview "-Dmaven.test.skip=true" -B
+        mvn package -pl object,hdfview "-Dmaven.test.skip=true" "-Dpmd.skip=true" "-Dcheckstyle.skip=true" -B
 
     - name: Create Windows Application Archive
       shell: pwsh
@@ -880,7 +882,7 @@ jobs:
     - name: Build repository module (copies platform SWT JAR)
       run: |
         echo "Building repository module..."
-        mvn clean install -pl repository -am -Dmaven.test.skip=true -B
+        mvn clean install -pl repository -am -Dmaven.test.skip=true -Dpmd.skip=true -Dcheckstyle.skip=true -B
 
     - name: Install SWT JAR to Local Maven Repository
       run: |
@@ -901,7 +903,7 @@ jobs:
     - name: Build with Maven
       run: |
         echo "Building HDFView with Maven..."
-        mvn package -pl object,hdfview -Dmaven.test.skip=true -B
+        mvn package -pl object,hdfview -Dmaven.test.skip=true -Dpmd.skip=true -Dcheckstyle.skip=true -B
 
     - name: Create macOS Binary Archive
       run: |
@@ -1014,7 +1016,7 @@ jobs:
     - name: Build repository module (copies platform SWT JAR)
       run: |
         echo "Building repository module..."
-        mvn clean install -pl repository -am -Dmaven.test.skip=true -B
+        mvn clean install -pl repository -am -Dmaven.test.skip=true -Dpmd.skip=true -Dcheckstyle.skip=true -B
 
     - name: Install SWT JAR to Local Maven Repository
       run: |
@@ -1034,7 +1036,7 @@ jobs:
 
     - name: Build Application Package
       run: |
-        mvn package -pl object,hdfview -Dmaven.test.skip=true -B
+        mvn package -pl object,hdfview -Dmaven.test.skip=true -Dpmd.skip=true -Dcheckstyle.skip=true -B
 
     - name: Create macOS Application Archive
       run: |
