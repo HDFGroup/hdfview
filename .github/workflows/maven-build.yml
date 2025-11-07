@@ -194,8 +194,8 @@ jobs:
         echo "Building HDFView with Maven..."
         # Now build with package (HDF JARs already installed manually above)
         # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
-        # Skip quality checks (PMD, Checkstyle) for artifact builds - use CI workflows for quality
-        mvn clean package -Dmaven.test.skip=true -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true -Dmaven.pmd.skip=true -B
+        # package phase stops before verify, avoiding PMD/Checkstyle execution
+        mvn clean package -Dmaven.test.skip=true -B
 
     - name: Create Linux Binary Archive
       run: |
@@ -380,8 +380,8 @@ jobs:
         echo "Building HDFView application package with Maven..."
         # Now build with package (HDF JARs already installed manually above)
         # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
-        # Skip quality checks (PMD, Checkstyle) for artifact builds - use CI workflows for quality
-        mvn clean package -Dmaven.test.skip=true -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true -Dmaven.pmd.skip=true -B
+        # package phase stops before verify, avoiding PMD/Checkstyle execution
+        mvn clean package -Dmaven.test.skip=true -B
 
     - name: Create Linux Application Archive
       run: |
@@ -558,8 +558,10 @@ jobs:
     - name: Build repository module (copies platform SWT JAR)
       shell: pwsh
       run: |
-        Write-Host "Building repository module..."
-        mvn clean install -pl repository -am "-Dmaven.test.skip=true" "-Dpmd.skip=true" "-Dcpd.skip=true" "-Dcheckstyle.skip=true" "-Dmaven.pmd.skip=true" -B
+        Write-Host "Building repository module to copy SWT JAR..."
+        # Only run generate-sources phase to trigger antrun plugin (copies SWT JAR)
+        # This avoids the verify phase which would trigger PMD
+        mvn generate-sources -pl repository -B
 
     - name: Install SWT JAR to Local Maven Repository
       shell: pwsh
@@ -582,7 +584,8 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Building HDFView with Maven..."
-        mvn package -pl object,hdfview "-Dmaven.test.skip=true" "-Dpmd.skip=true" "-Dcpd.skip=true" "-Dcheckstyle.skip=true" "-Dmaven.pmd.skip=true" -B
+        # Build object and hdfview modules, stop at package phase to avoid verify/PMD
+        mvn package -pl object,hdfview "-Dmaven.test.skip=true" -B
 
     - name: Create Windows Binary Archive
       shell: pwsh
@@ -725,8 +728,10 @@ jobs:
     - name: Build repository module (copies platform SWT JAR)
       shell: pwsh
       run: |
-        Write-Host "Building repository module..."
-        mvn clean install -pl repository -am "-Dmaven.test.skip=true" "-Dpmd.skip=true" "-Dcpd.skip=true" "-Dcheckstyle.skip=true" "-Dmaven.pmd.skip=true" -B
+        Write-Host "Building repository module to copy SWT JAR..."
+        # Only run generate-sources phase to trigger antrun plugin (copies SWT JAR)
+        # This avoids the verify phase which would trigger PMD
+        mvn generate-sources -pl repository -B
 
     - name: Install SWT JAR to Local Maven Repository
       shell: pwsh
@@ -881,8 +886,10 @@ jobs:
 
     - name: Build repository module (copies platform SWT JAR)
       run: |
-        echo "Building repository module..."
-        mvn clean install -pl repository -am -Dmaven.test.skip=true -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true -Dmaven.pmd.skip=true -B
+        echo "Building repository module to copy SWT JAR..."
+        # Only run generate-sources phase to trigger antrun plugin (copies SWT JAR)
+        # This avoids the verify phase which would trigger PMD
+        mvn generate-sources -pl repository -B
 
     - name: Install SWT JAR to Local Maven Repository
       run: |
@@ -903,7 +910,8 @@ jobs:
     - name: Build with Maven
       run: |
         echo "Building HDFView with Maven..."
-        mvn package -pl object,hdfview -Dmaven.test.skip=true -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true -Dmaven.pmd.skip=true -B
+        # Build object and hdfview modules, stop at package phase to avoid verify/PMD
+        mvn package -pl object,hdfview -Dmaven.test.skip=true -B
 
     - name: Create macOS Binary Archive
       run: |
@@ -1015,8 +1023,10 @@ jobs:
 
     - name: Build repository module (copies platform SWT JAR)
       run: |
-        echo "Building repository module..."
-        mvn clean install -pl repository -am -Dmaven.test.skip=true -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true -Dmaven.pmd.skip=true -B
+        echo "Building repository module to copy SWT JAR..."
+        # Only run generate-sources phase to trigger antrun plugin (copies SWT JAR)
+        # This avoids the verify phase which would trigger PMD
+        mvn generate-sources -pl repository -B
 
     - name: Install SWT JAR to Local Maven Repository
       run: |
