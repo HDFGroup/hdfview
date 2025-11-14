@@ -1,10 +1,8 @@
-name: Maven CI Pipeline
+name: CI - Linux
 
 on:
-  push:
-    branches: [ master-maven, develop, main ]
-  pull_request:
-    branches: [ master-maven, develop, main ]
+  workflow_call:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,7 +21,7 @@ env:
 
 jobs:
   build-and-test:
-    name: Build and Test
+    name: Build and Test (Linux)
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -140,13 +138,29 @@ jobs:
           echo "Installed: $JAR_FILE"
         fi
 
-        # Install jarhdf
+        # Install jarhdf (version 4.3.1 for HDF4)
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE"
+        fi
+
+        # Install fits.jar
+        if [ -f lib/fits.jar ]; then
+          mvn install:install-file -Dfile=lib/fits.jar \
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: fits.jar"
+        fi
+
+        # Install netcdf.jar
+        if [ -f lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=lib/netcdf.jar \
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: netcdf.jar"
         fi
 
         # Install slf4j-api if present
@@ -244,7 +258,7 @@ jobs:
       uses: dorny/test-reporter@v1
       if: success() || failure()
       with:
-        name: Maven Test Results
+        name: Maven Test Results (Linux)
         path: '**/target/surefire-reports/*.xml'
         reporter: java-junit
         fail-on-error: true
@@ -253,7 +267,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results-${{ github.run_number }}
+        name: test-results-linux-${{ github.run_number }}
         path: |
           **/target/surefire-reports/
           **/target/failsafe-reports/
@@ -263,7 +277,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: success()
       with:
-        name: build-artifacts-${{ github.run_number }}
+        name: build-artifacts-linux-${{ github.run_number }}
         path: |
           libs/*.jar
           target/*.jar
@@ -274,7 +288,7 @@ jobs:
     - name: Build Summary
       if: always()
       run: |
-        echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "## Build Summary (Linux)" >> $GITHUB_STEP_SUMMARY
         echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Java Version**: $(java -version 2>&1 | head -n1)" >> $GITHUB_STEP_SUMMARY
         echo "- **Maven Version**: $(mvn --version | head -n1)" >> $GITHUB_STEP_SUMMARY

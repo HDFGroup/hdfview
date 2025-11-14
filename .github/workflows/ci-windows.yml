@@ -1,10 +1,7 @@
-name: Maven CI Pipeline - Windows
+name: CI - Windows
 
 on:
-  push:
-    branches: [ master, develop, main ]
-  pull_request:
-    branches: [ master, develop, main ]
+  workflow_call:
   workflow_dispatch:
 
 permissions:
