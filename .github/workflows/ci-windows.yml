@@ -195,20 +195,24 @@ jobs:
     - name: Set up build.properties
       shell: pwsh
       run: |
+        # Convert Windows paths to use forward slashes (Java/Maven compatible)
+        $HDF5_PATH = $env:HDF5LIB_PATH -replace '\\', '/'
+        $HDF4_PATH = $env:HDF4LIB_PATH -replace '\\', '/'
+
         $buildProps = @"
         # CI Build Properties for HDFView (Windows)
         # Generated automatically for GitHub Actions
         # Using HDF libraries from GitHub releases
 
         # HDF5 Configuration
-        hdf5.lib.dir=$env:HDF5LIB_PATH/lib
-        hdf5.plugin.dir=$env:HDF5LIB_PATH/lib/plugin
+        hdf5.lib.dir=$HDF5_PATH/lib
+        hdf5.plugin.dir=$HDF5_PATH/lib/plugin
 
         # HDF4 Configuration
-        hdf.lib.dir=$env:HDF4LIB_PATH/lib
+        hdf.lib.dir=$HDF4_PATH/lib
 
         # Platform Configuration
-        platform.hdf.lib=$env:HDF5LIB_PATH/lib
+        platform.hdf.lib=$HDF5_PATH/lib
 
         # CI-specific settings
         ci.build=true
