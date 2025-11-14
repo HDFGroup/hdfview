@@ -1,11 +1,12 @@
 package uitest;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
@@ -15,6 +16,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
+@Tag("ui")
 public class TestTreeViewFilters extends AbstractWindowTest {
     private static final String testFilename = "tfilters.h5";
     String[][] filtersExpectedData           = {{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
