@@ -225,7 +225,7 @@ jobs:
     - name: Package Application
       run: |
         echo "::group::Package Application"
-        mvn package -DskipTests -B
+        mvn package -Dmaven.test.skip=true -B
         echo "::endgroup::"
 
     - name: Verify Build Artifacts

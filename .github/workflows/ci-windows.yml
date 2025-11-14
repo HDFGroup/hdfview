@@ -272,7 +272,7 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "::group::Package Application"
-        mvn package -DskipTests -B
+        mvn package -Dmaven.test.skip=true -B
         Write-Host "::endgroup::"
 
     - name: Verify Build Artifacts
