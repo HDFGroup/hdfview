@@ -1,14 +1,15 @@
 package uitest;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
 import java.io.File;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
@@ -29,6 +30,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
  * NOTE: Currently no support is added for testing Compound type Attributes.
  */
 
+@Tag("ui")
+@Tag("integration")
 public class TestHDFViewAttributes extends AbstractWindowTest {
     private String groupname   = "test_group";
     private String datasetname = "test_dataset";
@@ -743,7 +746,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    //    @Ignore
+    //    @Disabled
     //    public void testOpenHDF5CompoundAttribute() {
     //        try {
     //            /* Test open of attribute by double-click */
@@ -760,7 +763,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
     //        }
     //    }
 
-    //    @Ignore
+    //    @Disabled
     //    public void testEditHDF4ScalarAttribute() {
     //        try {
     //
@@ -775,7 +778,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
     //        }
     //    }
 
-    //    @Ignore
+    //    @Disabled
     //    public void testEditHDF5ScalarAttribute() {
     //        try {
     //
@@ -790,7 +793,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
     //        }
     //    }
 
-    //    @Ignore
+    //    @Disabled
     //    public void testEditHDF5CompoundAttribute() {
     //        try {
     //
@@ -805,7 +808,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
     //        }
     //    }
 
-    //    @Ignore
+    //    @Disabled
     //    public void testDiscardHDF4ScalarAttributeEditResults() {
     //        try {
     //
@@ -820,7 +823,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
     //        }
     //    }
 
-    //    @Ignore
+    //    @Disabled
     //    public void testDiscardHDF5ScalarAttributeEditResults() {
     //        try {
     //
@@ -835,7 +838,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
     //        }
     //    }
 
-    //    @Ignore
+    //    @Disabled
     //    public void testDiscardHDF5CompoundAttributeEditResults() {
     //        try {
     //
@@ -970,7 +973,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    //    @Ignore
+    //    @Disabled
     //    public void testHDF4AttributeEditDisabledForReadOnly() {
     //        try {
     //
@@ -1063,7 +1066,7 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
         }
     }
 
-    //    @Ignore
+    //    @Disabled
     //    public void testHDF5AttributeEditDisabledForReadOnly() {
     //        try {
     //

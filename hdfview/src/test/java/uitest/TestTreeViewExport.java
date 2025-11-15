@@ -1,7 +1,7 @@
 package uitest;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
@@ -10,7 +10,8 @@ import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withRe
 import java.io.File;
 
 import org.hamcrest.Matcher;
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
@@ -24,6 +25,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
+@Tag("ui")
+@Tag("integration")
 public class TestTreeViewExport extends AbstractWindowTest {
     private String filename  = "testdsimp.h5";
     private String groupname = "testgroupname";

@@ -1,7 +1,7 @@
 package uitest;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
@@ -11,8 +11,9 @@ import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
+@Tag("ui")
+@Tag("integration")
 public class TestTreeViewFiles extends AbstractWindowTest {
     private static final Logger log = LoggerFactory.getLogger(TestTreeViewFiles.class);
 
@@ -838,7 +841,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Disabled
     // TODO: disabled until import from template functionality is fixed
     public void openHDF5CompoundArrayImport()
     {
