@@ -1,14 +1,15 @@
 package uitest;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
 import java.io.File;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.widgets.Shell;
@@ -22,6 +23,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
+@Tag("ui")
+@Tag("integration")
 public class TestHDFViewTAttr2 extends AbstractWindowTest {
     private static final String testFilename = "tattr2.h5";
     String[][] arrayExpectedData             = {{"\\[1, 2, 3\\]"}, {"\\[4, 5, 6\\]"}};
@@ -541,7 +544,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
         }
     }
 
-    @Ignore
+    @Disabled
     public void openTAttr2GroupReferenceAsTable()
     {
         String dataset_name     = "dset";

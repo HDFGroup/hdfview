@@ -1,13 +1,14 @@
 package uitest;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.swt.SWT;
@@ -32,6 +33,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
  *
  * @author Jordan Henderson
  */
+@Tag("ui")
+@Tag("integration")
 public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
     private String filename     = "tframeselection.h5";
     private String dataset_name = "test_dataset";

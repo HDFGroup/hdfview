@@ -1,10 +1,11 @@
 package uitest;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
@@ -28,6 +29,8 @@ import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
  * it is guaranteed that we are retrieving the correct converted data
  * value.
  */
+@Tag("ui")
+@Tag("integration")
 public class TestHDFViewFloat16 extends AbstractWindowTest {
     @Test
     public void checkHDF5DS16BITS()
