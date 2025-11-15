@@ -75,7 +75,7 @@ The project consists of three main Maven modules:
 
 - Main source: `src/` (contains modular Java source with `org.hdfgroup.hdfview` and `org.hdfgroup.object`)
 - Module sources: `hdfview/src/`, `object/src/`
-- Tests: `test/` and `hdfview/src/test/` (66+ test classes, primarily UI tests)
+- Tests: `test/` and `hdfview/src/test/` (17 UI test classes in JUnit 5 migration)
 
 ## Development Workflow
 
@@ -124,23 +124,33 @@ The project consists of three main Maven modules:
 
 The project uses automated GitHub Actions workflows for continuous integration and quality assurance:
 
-- **`maven-ci.yml`**: Primary CI pipeline (~15 min)
-  - Build, compile, test with Maven
-  - Parallel unit tests, serial integration tests
-  - Artifact generation and publishing
+- **`maven-ci-orchestrator.yml`**: Primary CI orchestrator
+  - Triggers all platform-specific CI builds in parallel
+  - Runs on push, pull_request, and manual dispatch
+  - Calls: ci-linux.yml, ci-windows.yml, ci-macos.yml
 
-- **`maven-quality.yml`**: Code quality analysis (~25 min)
+- **`ci-linux.yml`, `ci-windows.yml`, `ci-macos.yml`**: Platform CI builds
+  - Build, compile, and test (currently tests disabled during JUnit 5 migration)
+  - Can be triggered independently via workflow_dispatch
+  - Cross-platform build verification
+
+- **`maven-quality.yml`**: Code quality analysis
   - JaCoCo code coverage (60% threshold)
   - PMD static analysis (violation limits)
   - Checkstyle code style enforcement
-  - Quality reports and PR comments
+  - Runs daily at 2 AM UTC + on push/PR
 
-- **`maven-security.yml`**: Security and compliance (~20 min)
+- **`maven-security.yml`**: Security and compliance
   - OWASP dependency vulnerability scanning (CVSS 8.0+ threshold)
   - GitHub CodeQL security analysis
   - License compliance checking (prohibits GPL/AGPL)
 
-- **`maven-release.yml`**: Automated releases (~30 min)
+- **`maven-build.yml`**: Cross-platform binary builds
+  - 6 build jobs (Linux, Windows, macOS binaries and app packages)
+  - Downloads HDF4/HDF5 from GitHub releases
+  - Daily scheduled builds
+
+- **`maven-release.yml`**: Automated releases
   - Version management from Git tags
   - GitHub Packages publication
   - Release notes generation
@@ -181,12 +191,12 @@ Located in `scripts/`:
 - SWT platform support for Linux x86_64
 - Native library integration configured
 
-### ✅ Phase 2A: JUnit 5 Migration (INFRASTRUCTURE COMPLETE, MIGRATION IN PROGRESS)
+### ✅ Phase 2A: JUnit 5 Migration (INFRASTRUCTURE COMPLETE, MIGRATION IN PROGRESS - 18%)
 - JUnit 5 v5.10.0 infrastructure integrated
 - Modern test foundation classes created
 - Automated migration script available
-- Sample test successfully migrated
-- **Current Task**: Migrating remaining test files to JUnit 5
+- **Progress**: 3 of 17 test files migrated (18%)
+- **Current Task**: Migrating remaining 14 test files to JUnit 5
 
 ### ✅ Phase 2B: CI/CD Pipeline (COMPLETE)
 - 4 production GitHub Actions workflows operational
@@ -205,8 +215,12 @@ Located in `scripts/`:
 - Focus on JavaFX evaluation for large dataset performance
 - Planned but deferred to prioritize test migration completion
 
-### 🎯 Current Focus
+### 🎯 Current Focus (November 15, 2025)
 **JUnit 5 Test Migration**: Systematically migrating remaining test files to JUnit 5 using established infrastructure and migration tools.
+- **Progress**: 3 of 17 files complete (18%)
+- **Remaining**: 14 test files
+- **Strategy**: Small files first, large files last
+- **CI Tests**: Disabled until migration complete, then will re-enable and verify
 
 ## Documentation
 

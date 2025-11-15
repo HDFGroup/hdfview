@@ -105,9 +105,28 @@
       <version>${swt.version}</version>
     </dependency>
 -->
-    <!-- SWTBot dependencies temporarily removed - not easily available on Maven Central
-         Will be re-added in Phase 2 with Tycho/p2 repository integration -->
-    <!-- TODO: Add SWTBot UI test dependencies in Phase 2 -->
+    <!-- SWTBot dependencies for UI testing -->
+    <!-- Installed to local Maven repository from Eclipse P2 repository -->
+    <!-- See scripts/install-swtbot.sh for installation -->
+    <dependency>
+      <groupId>org.eclipse.swtbot</groupId>
+      <artifactId>org.eclipse.swtbot.swt.finder</artifactId>
+      <version>4.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.swtbot</groupId>
+      <artifactId>org.eclipse.swtbot.nebula.nattable.finder</artifactId>
+      <version>4.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Hamcrest matchers (required by SWTBot) -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>2.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
     <dependencyManagement>
