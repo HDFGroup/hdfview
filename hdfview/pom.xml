@@ -310,6 +310,17 @@
         <directory>src/main/resources</directory>
         <filtering>false</filtering>
       </resource>
+      <!-- Include non-Java files from src/main/java (icons, properties, etc.) -->
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.gif</include>
+          <include>**/*.png</include>
+          <include>**/*.jpg</include>
+          <include>**/*.properties</include>
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
     </resources>
 
     <pluginManagement><!-- lock down plugins versions to avoid using Maven
