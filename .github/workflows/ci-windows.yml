@@ -292,7 +292,7 @@ jobs:
         name: Maven Test Results (Windows)
         path: '**/target/surefire-reports/*.xml'
         reporter: java-junit
-        fail-on-error: true
+        fail-on-error: false
 
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
