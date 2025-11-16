@@ -192,6 +192,12 @@ jobs:
           Write-Host "Installed: $($slf4j.Name)"
         }
 
+    - name: Install SWTBot Dependencies
+      shell: bash
+      run: |
+        echo "Installing SWTBot UI testing dependencies..."
+        ./scripts/install-swtbot.sh
+
     - name: Set up build.properties
       shell: pwsh
       run: |
@@ -248,35 +254,19 @@ jobs:
           "-Dmaven.compiler.showWarnings=false"
         Write-Host "::endgroup::"
 
-    # TODO: Re-enable tests after JUnit 5 migration is complete and test tags are properly set
-    # - name: Run Unit Tests
-    #   shell: pwsh
-    #   run: |
-    #     Write-Host "::group::Unit Tests (Fast, Parallel)"
-    #     mvn test `
-    #       "-Dgroups=unit & fast" `
-    #       -B `
-    #       -Dmaven.test.failure.ignore=false `
-    #       -Djunit.jupiter.execution.parallel.enabled=true `
-    #       -Djunit.jupiter.execution.parallel.mode.default=concurrent
-    #     Write-Host "::endgroup::"
-
-    # - name: Run Integration Tests
-    #   shell: pwsh
-    #   run: |
-    #     Write-Host "::group::Integration Tests (Serial)"
-    #     mvn test `
-    #       -Dgroups=integration `
-    #       -B `
-    #       -Dmaven.test.failure.ignore=false `
-    #       -Djunit.jupiter.execution.parallel.enabled=false
-    #     Write-Host "::endgroup::"
+    - name: Run Tests
+      shell: pwsh
+      run: |
+        Write-Host "::group::Run All Tests"
+        mvn test -B `
+          "-Dmaven.test.failure.ignore=false"
+        Write-Host "::endgroup::"
 
     - name: Package Application
       shell: pwsh
       run: |
         Write-Host "::group::Package Application"
-        mvn package "-Dmaven.test.skip=true" -B
+        mvn package "-DskipTests" -B
         Write-Host "::endgroup::"
 
     - name: Verify Build Artifacts

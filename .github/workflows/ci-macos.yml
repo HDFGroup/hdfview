@@ -157,6 +157,11 @@ jobs:
           echo "Installed: $JAR_FILE"
         fi
 
+    - name: Install SWTBot Dependencies
+      run: |
+        echo "Installing SWTBot UI testing dependencies..."
+        ./scripts/install-swtbot.sh
+
     - name: Set up build.properties
       run: |
         cat > build.properties << EOF
@@ -200,32 +205,17 @@ jobs:
           -Dmaven.compiler.showWarnings=false
         echo "::endgroup::"
 
-    # TODO: Re-enable tests after JUnit 5 migration is complete and test tags are properly set
-    # - name: Run Unit Tests
-    #   run: |
-    #     echo "::group::Unit Tests (Fast, Parallel)"
-    #     mvn test \
-    #       -Dgroups="unit & fast" \
-    #       -B \
-    #       -Dmaven.test.failure.ignore=false \
-    #       -Djunit.jupiter.execution.parallel.enabled=true \
-    #       -Djunit.jupiter.execution.parallel.mode.default=concurrent
-    #     echo "::endgroup::"
-
-    # - name: Run Integration Tests
-    #   run: |
-    #     echo "::group::Integration Tests (Serial)"
-    #     mvn test \
-    #       -Dgroups="integration" \
-    #       -B \
-    #       -Dmaven.test.failure.ignore=false \
-    #       -Djunit.jupiter.execution.parallel.enabled=false
-    #     echo "::endgroup::"
+    - name: Run Tests
+      run: |
+        echo "::group::Run All Tests"
+        mvn test -B \
+          -Dmaven.test.failure.ignore=false
+        echo "::endgroup::"
 
     - name: Package Application
       run: |
         echo "::group::Package Application"
-        mvn package -Dmaven.test.skip=true -B
+        mvn package -DskipTests -B
         echo "::endgroup::"
 
     - name: Verify Build Artifacts
