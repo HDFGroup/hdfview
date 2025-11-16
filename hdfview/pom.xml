@@ -293,11 +293,8 @@
                         --add-opens java.base/java.time.format=ALL-UNNAMED
                         --add-opens java.base/java.util=ALL-UNNAMED
                         --enable-native-access=jarhdf5
-                        -Djava.library.path=${project.parent.basedir}/target
+                        -Djava.library.path=${platform.hdf.lib}
                     </argLine>
-                    <additionalClasspathElements>
-                        <additionalClasspathElement>${project.parent.basedir}/target/*</additionalClasspathElement>
-                    </additionalClasspathElements>
                 </configuration>
             </plugin>
     </plugins>
