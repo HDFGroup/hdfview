@@ -273,7 +273,7 @@
           <artifactId>maven-dependency-plugin</artifactId>
           <executions>
             <execution>
-              <phase>install</phase>
+              <phase>package</phase>
               <goals>
                 <goal>copy-dependencies</goal>
               </goals>
@@ -304,7 +304,15 @@
             </plugin>
     </plugins>
 
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven 
+    <!-- Explicit resources configuration to ensure proper copying -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
+
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven
         defaults (may be moved to parent pom) -->
     </pluginManagement>
   </build>

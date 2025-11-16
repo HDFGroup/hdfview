@@ -172,7 +172,7 @@ echo
 # Build if needed
 if [[ $BUILD_NEEDED -eq 1 ]]; then
     print_status "Building project (this may take a few minutes)..."
-    mvn clean install -q
+    mvn clean package -DskipTests -q
     print_success "Build completed"
     echo
 fi
@@ -209,8 +209,14 @@ case $CHOICE in
     2)
         print_status "Launching HDFView via direct JAR execution..."
         if [[ ! -f "libs/hdfview-3.4-SNAPSHOT.jar" ]]; then
-            print_error "JAR file not found. Run option 1 first to build."
+            print_error "JAR file not found. Build the project first."
             exit 1
+        fi
+
+        if [[ ! -d "hdfview/target/lib" ]]; then
+            print_error "Dependencies not found. Building project..."
+            mvn package -DskipTests -q
+            print_success "Build completed"
         fi
 
         CLASSPATH="libs/hdfview-3.4-SNAPSHOT.jar:hdfview/target/lib/*"
