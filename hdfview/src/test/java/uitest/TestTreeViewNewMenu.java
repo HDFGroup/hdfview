@@ -36,11 +36,11 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "1",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 1);
-            assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
+            assertTrue(filetree.visibleRowCount() == 1,
+                constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "1",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "createNewHDF5Dataset() filetree is missing file '" + filename + "'");
 
             items[0].click();
             items[0].contextMenu().contextMenu("New").menu("Group").click();
@@ -52,20 +52,19 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
             groupShell.bot().text(0).setText(groupname);
 
             String val = groupShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("createNewHDF5Dataset()", "wrong group name", groupname, val),
-                val.equals(groupname));
+            assertTrue(val.equals(groupname),
+                constructWrongValueMessage("createNewHDF5Dataset()", "wrong group name", groupname, val));
 
             groupShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(groupShell));
 
-            assertTrue(constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "2",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 2);
-            assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
-            assertTrue("createNewHDF5Dataset() filetree is missing group '" + groupname + "'",
-                       items[0].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue(filetree.visibleRowCount() == 2,
+                constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "2",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "createNewHDF5Dataset() filetree is missing file '" + filename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(groupname) == 0,
+                "createNewHDF5Dataset() filetree is missing group '" + groupname + "'");
 
             items[0].getNode(0).click();
 
@@ -79,14 +78,13 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
             datasetShell.bot().text(2).setText(datasetdimsize);
 
             val = datasetShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("createNewHDF5Dataset()", "wrong dataset name", datasetname, val),
-                val.equals(datasetname));
+            assertTrue(val.equals(datasetname),
+                constructWrongValueMessage("createNewHDF5Dataset()", "wrong dataset name", datasetname, val));
 
             val = datasetShell.bot().text(2).getText();
-            assertTrue(constructWrongValueMessage("createNewHDF5Dataset()", "wrong dataset dimension sizes",
-                                                  datasetdimsize, val),
-                       val.equals(datasetdimsize));
+            assertTrue(val.equals(datasetdimsize),
+                constructWrongValueMessage("createNewHDF5Dataset()", "wrong dataset dimension sizes",
+                                                  datasetdimsize, val));
 
             datasetShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(datasetShell));
@@ -94,15 +92,15 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Expand All").click();
 
-            assertTrue(constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "3",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 3);
-            assertTrue("createNewHDF5Dataset() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
-            assertTrue("createNewHDF5Dataset() filetree is missing group '" + groupname + "'",
-                       items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("createNewHDF5Dataset() filetree is missing dataset '" + datasetname + "'",
-                       items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            assertTrue(filetree.visibleRowCount() == 3,
+                constructWrongValueMessage("createNewHDF5Dataset()", "filetree wrong row count", "3",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "createNewHDF5Dataset() filetree is missing file '" + filename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(groupname) == 0,
+                "createNewHDF5Dataset() filetree is missing group '" + groupname + "'");
+            assertTrue(items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0,
+                "createNewHDF5Dataset() filetree is missing dataset '" + datasetname + "'");
 
             items[0].getNode(0).getNode(0).click();
             items[0].getNode(0).getNode(0).contextMenu().contextMenu("Open").click();
@@ -161,9 +159,8 @@ public class TestTreeViewNewMenu extends AbstractWindowTest {
                     String expected =
                         String.valueOf(((row - 1) * (table2.preferredColumnCount() - 1)) + (col));
                     val = table2.getCellDataValueByPosition(row, col);
-                    assertTrue(
-                        constructWrongValueMessage("createNewHDF5Dataset()", "wrong data", expected, val),
-                        val.equals(expected));
+                    assertTrue(val.equals(expected),
+                        constructWrongValueMessage("createNewHDF5Dataset()", "wrong data", expected, val));
                 }
             }
 

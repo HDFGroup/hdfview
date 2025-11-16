@@ -49,8 +49,8 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             groupShell.bot().text(0).setText(groupname);
 
             String val = groupShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("createNewHDF5Group()", "wrong group name", groupname, val),
-                       val.equals(groupname));
+            assertTrue(val.equals(groupname),
+                constructWrongValueMessage("createNewHDF5Group()", "wrong group name", groupname, val));
 
             groupShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(groupShell));
@@ -91,16 +91,14 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             datasetShell.bot().text(0).setText(datasetname);
 
             String val = datasetShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("createNewHDF5Dataset()", "wrong dataset name", datasetname, val),
-                val.equals(datasetname));
+            assertTrue(val.equals(datasetname),
+                constructWrongValueMessage("createNewHDF5Dataset()", "wrong dataset name", datasetname, val));
 
             datasetShell.bot().text(2).setText(currentSize);
 
             val = datasetShell.bot().text(2).getText();
-            assertTrue(
-                constructWrongValueMessage("createNewHDF5Dataset()", "wrong current size", currentSize, val),
-                val.equals(currentSize));
+            assertTrue(val.equals(currentSize),
+                constructWrongValueMessage("createNewHDF5Dataset()", "wrong current size", currentSize, val));
 
             datasetShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(datasetShell));
@@ -132,10 +130,10 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                             table.widget.getActiveCellEditor().setEditorValue(val);
                             table.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT,
                                                                       true, true);
-                            assertTrue(constructWrongValueMessage("createNewHDF5Dataset()", "wrong value",
+                            assertTrue(table.getCellDataValueByPosition(row, col).equals(val),
+                                constructWrongValueMessage("createNewHDF5Dataset()", "wrong value",
                                                                   val,
-                                                                  table.getCellDataValueByPosition(row, col)),
-                                       table.getCellDataValueByPosition(row, col).equals(val));
+                                                                  table.getCellDataValueByPosition(row, col)));
                         }
                     }
                 }
@@ -181,22 +179,22 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "1",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 1);
-            assertTrue("testHardLinks() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
+            assertTrue(filetree.visibleRowCount() == 1,
+                constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "1",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "testHardLinks() filetree is missing file '" + filename + "'");
 
             createNewHDF5Group();
             createNewHDF5Dataset();
 
-            assertTrue(constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "3",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 3);
-            assertTrue("testHardLinks() filetree is missing group '" + groupname + "'",
-                       items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testHardLinks() filetree is missing dataset '" + datasetname + "'",
-                       items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            assertTrue(filetree.visibleRowCount() == 3,
+                constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "3",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getNode(0).getText().compareTo(groupname) == 0,
+                "testHardLinks() filetree is missing group '" + groupname + "'");
+            assertTrue(items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0,
+                "testHardLinks() filetree is missing dataset '" + datasetname + "'");
 
             // Test links to groups
             items[0].click();
@@ -209,15 +207,15 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().text(0).setText(group_link_name);
 
             String val = linkShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("testHardLinks()", "wrong link name", group_link_name, val),
-                       val.equals(group_link_name));
+            assertTrue(val.equals(group_link_name),
+                constructWrongValueMessage("testHardLinks()", "wrong link name", group_link_name, val));
 
             SWTBotCombo combo = linkShell.bot().comboBox(0);
             combo.setSelection("/");
 
             val = combo.getText();
-            assertTrue(constructWrongValueMessage("testHardLinks()", "wrong link parent", "/", val),
-                       val.equals("/"));
+            assertTrue(val.equals("/"),
+                constructWrongValueMessage("testHardLinks()", "wrong link parent", "/", val));
 
             linkShell.bot().radio("Hard Link").click();
 
@@ -225,9 +223,9 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             ccombo.setSelection("/" + groupname + "/");
 
             val = ccombo.getText();
-            assertTrue(constructWrongValueMessage("testHardLinks()", "wrong link target",
-                                                  "/" + groupname + "/", val),
-                       val.equals("/" + groupname + "/"));
+            assertTrue(val.equals("/" + groupname + "/"),
+                constructWrongValueMessage("testHardLinks()", "wrong link target",
+                                                  "/" + groupname + "/", val));
 
             linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
@@ -239,11 +237,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
-            assertTrue(constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "5",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 5);
-            assertTrue("testHardLinks() filetree is missing link '" + group_link_name + "'",
-                       items[0].getNode(1).getText().compareTo(group_link_name) == 0);
+            assertTrue(filetree.visibleRowCount() == 5,
+                constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "5",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getNode(1).getText().compareTo(group_link_name) == 0,
+                "testHardLinks() filetree is missing link '" + group_link_name + "'");
 
             // Delete link
             items[0].getNode(1).click();
@@ -272,16 +270,15 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().text(0).setText(dataset_link_name);
 
             val = linkShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("testHardLinks()", "wrong link name", dataset_link_name, val),
-                val.equals(dataset_link_name));
+            assertTrue(val.equals(dataset_link_name),
+                constructWrongValueMessage("testHardLinks()", "wrong link name", dataset_link_name, val));
 
             combo = linkShell.bot().comboBox(0);
             combo.setSelection("/");
 
             val = combo.getText();
-            assertTrue(constructWrongValueMessage("testHardLinks()", "wrong link parent", "/", val),
-                       val.equals("/"));
+            assertTrue(val.equals("/"),
+                constructWrongValueMessage("testHardLinks()", "wrong link parent", "/", val));
 
             linkShell.bot().radio("Hard Link").click();
 
@@ -289,9 +286,9 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             ccombo.setSelection("/" + groupname + "/" + datasetname);
 
             val = ccombo.getText();
-            assertTrue(constructWrongValueMessage("testHardLinks()", "wrong link target",
-                                                  "/" + groupname + "/" + datasetname, val),
-                       val.equals("/" + groupname + "/" + datasetname));
+            assertTrue(val.equals("/" + groupname + "/" + datasetname),
+                constructWrongValueMessage("testHardLinks()", "wrong link target",
+                                                  "/" + groupname + "/" + datasetname, val));
 
             linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
@@ -303,11 +300,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
-            assertTrue(constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "4",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 4);
-            assertTrue("testHardLinks() filetree is missing link '" + dataset_link_name + "'",
-                       items[0].getNode(0).getText().compareTo(dataset_link_name) == 0);
+            assertTrue(filetree.visibleRowCount() == 4,
+                constructWrongValueMessage("testHardLinks()", "filetree wrong row count", "4",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getNode(0).getText().compareTo(dataset_link_name) == 0,
+                "testHardLinks() filetree is missing link '" + dataset_link_name + "'");
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Open").click();
@@ -327,8 +324,8 @@ public class TestHDFViewLinks extends AbstractWindowTest {
                 for (int col = 1; col <= 4; col++) {
                     String thisVal  = table.getCellDataValueByPosition(row, col);
                     String expected = String.valueOf(((row - 1) * 4) + (col));
-                    assertTrue(constructWrongValueMessage("testHardLinks()", "wrong data", expected, thisVal),
-                               thisVal.equals(expected));
+                    assertTrue(thisVal.equals(expected),
+                        constructWrongValueMessage("testHardLinks()", "wrong data", expected, thisVal));
                 }
             }
 
@@ -372,22 +369,22 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "1",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 1);
-            assertTrue("testSoftLinks() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
+            assertTrue(filetree.visibleRowCount() == 1,
+                constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "1",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "testSoftLinks() filetree is missing file '" + filename + "'");
 
             createNewHDF5Group();
             createNewHDF5Dataset();
 
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "3",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 3);
-            assertTrue("testSoftLinks() filetree is missing group '" + groupname + "'",
-                       items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testSoftLinks() filetree is missing dataset '" + datasetname + "'",
-                       items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            assertTrue(filetree.visibleRowCount() == 3,
+                constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "3",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getNode(0).getText().compareTo(groupname) == 0,
+                "testSoftLinks() filetree is missing group '" + groupname + "'");
+            assertTrue(items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0,
+                "testSoftLinks() filetree is missing dataset '" + datasetname + "'");
 
             // Test soft link to existing object
             items[0].click();
@@ -400,15 +397,15 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().text(0).setText(group_link_name);
 
             String val = linkShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link name", group_link_name, val),
-                       val.equals(group_link_name));
+            assertTrue(val.equals(group_link_name),
+                constructWrongValueMessage("testSoftLinks()", "wrong link name", group_link_name, val));
 
             SWTBotCombo combo = linkShell.bot().comboBox(0);
             combo.setSelection("/");
 
             val = combo.getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link parent", "/", val),
-                       val.equals("/"));
+            assertTrue(val.equals("/"),
+                constructWrongValueMessage("testSoftLinks()", "wrong link parent", "/", val));
 
             linkShell.bot().radio("Soft Link").click();
 
@@ -416,9 +413,9 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             ccombo.setSelection("/" + groupname + "/");
 
             val = ccombo.getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link target",
-                                                  "/" + groupname + "/", val),
-                       val.equals("/" + groupname + "/"));
+            assertTrue(val.equals("/" + groupname + "/"),
+                constructWrongValueMessage("testSoftLinks()", "wrong link target",
+                                                  "/" + groupname + "/", val));
 
             linkShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
@@ -430,11 +427,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "5",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 5);
-            assertTrue("testSoftLinks() filetree is missing link '" + group_link_name + "'",
-                       items[0].getNode(1).getText().compareTo(group_link_name) == 0);
+            assertTrue(filetree.visibleRowCount() == 5,
+                constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "5",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getNode(1).getText().compareTo(group_link_name) == 0,
+                "testSoftLinks() filetree is missing link '" + group_link_name + "'");
 
             // Test soft link to non-existing object
             items[0].click();
@@ -447,16 +444,16 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().text(0).setText("test_nonexisting_object_link");
 
             val = linkShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link name",
-                                                  "test_nonexisting_object_link", val),
-                       val.equals("test_nonexisting_object_link"));
+            assertTrue(val.equals("test_nonexisting_object_link"),
+                constructWrongValueMessage("testSoftLinks()", "wrong link name",
+                                                  "test_nonexisting_object_link", val));
 
             combo = linkShell.bot().comboBox(0);
             combo.setSelection("/");
 
             val = combo.getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link parent", "/", val),
-                       val.equals("/"));
+            assertTrue(val.equals("/"),
+                constructWrongValueMessage("testSoftLinks()", "wrong link parent", "/", val));
 
             linkShell.bot().radio("Soft Link").click();
 
@@ -464,15 +461,15 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             ccombo.setSelection("/" + groupname + "/");
 
             val = ccombo.getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link target",
-                                                  "/" + groupname + "/", val),
-                       val.equals("/" + groupname + "/"));
+            assertTrue(val.equals("/" + groupname + "/"),
+                constructWrongValueMessage("testSoftLinks()", "wrong link target",
+                                                  "/" + groupname + "/", val));
 
             ccombo.setText("nonexist");
 
             val = linkShell.bot().ccomboBox().getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link target", "nonexist", val),
-                       val.equals("nonexist"));
+            assertTrue(val.equals("nonexist"),
+                constructWrongValueMessage("testSoftLinks()", "wrong link target", "nonexist", val));
 
             // linkShell.bot().button(" &Cancel ").click();
             // bot.waitUntil(Conditions.shellCloses(linkShell));
@@ -487,11 +484,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "6",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 6);
-            assertTrue("testSoftLinks() filetree is missing link 'test_nonexisting_object_link'",
-                       items[0].getNode(2).getText().compareTo("test_nonexisting_object_link") == 0);
+            assertTrue(filetree.visibleRowCount() == 6,
+                constructWrongValueMessage("testSoftLinks()", "filetree wrong row count", "6",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getNode(2).getText().compareTo("test_nonexisting_object_link") == 0,
+                "testSoftLinks() filetree is missing link 'test_nonexisting_object_link'");
 
             // Change link target to existing object
             items[0].getNode(2).click();
@@ -500,8 +497,8 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             tabItem.activate();
 
             val = bot.textWithLabel("Link To Target: ").getText();
-            assertTrue(constructWrongValueMessage("testSoftLinks()", "wrong link name", "/nonexist", val),
-                       val.equals("/nonexist"));
+            assertTrue(val.equals("/nonexist"),
+                constructWrongValueMessage("testSoftLinks()", "wrong link name", "/nonexist", val));
 
             // skip the rest untill issue with MessageDialog can be fixed
             //            bot.textWithLabel("Link To Target: ").setText("/" + groupname + "/" +
@@ -593,22 +590,22 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "1",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 1);
-            assertTrue("testExternalLinks() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
+            assertTrue(filetree.visibleRowCount() == 1,
+                constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "1",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "testExternalLinks() filetree is missing file '" + filename + "'");
 
             createNewHDF5Group();
             createNewHDF5Dataset();
 
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "3",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 3);
-            assertTrue("testExternalLinks() filetree is missing group '" + groupname + "'",
-                       items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("testExternalLinks() filetree is missing dataset '" + datasetname + "'",
-                       items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            assertTrue(filetree.visibleRowCount() == 3,
+                constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "3",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getNode(0).getText().compareTo(groupname) == 0,
+                "testExternalLinks() filetree is missing group '" + groupname + "'");
+            assertTrue(items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0,
+                "testExternalLinks() filetree is missing dataset '" + datasetname + "'");
 
             // Test external link to existing object
             items[0].click();
@@ -621,33 +618,32 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().text(0).setText(file_link_name);
 
             String val = linkShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("testExternalLinks()", "wrong link name", file_link_name, val),
-                val.equals(file_link_name));
+            assertTrue(val.equals(file_link_name),
+                constructWrongValueMessage("testExternalLinks()", "wrong link name", file_link_name, val));
 
             SWTBotCombo combo = linkShell.bot().comboBox(0);
             combo.setSelection("/");
 
             val = combo.getText();
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong link parent", "/", val),
-                       val.equals("/"));
+            assertTrue(val.equals("/"),
+                constructWrongValueMessage("testExternalLinks()", "wrong link parent", "/", val));
 
             linkShell.bot().radio("External Link").click();
 
             linkShell.bot().textWithLabel("Target File: ").setText(workDir + "/" + file_link_name);
 
             val = linkShell.bot().textWithLabel("Target File: ").getText();
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong link file",
-                                                  workDir + "/" + file_link_name, val),
-                       val.equals(workDir + "/" + file_link_name));
+            assertTrue(val.equals(workDir + "/" + file_link_name),
+                constructWrongValueMessage("testExternalLinks()", "wrong link file",
+                                                  workDir + "/" + file_link_name, val));
 
             SWTBotCCombo ccombo = linkShell.bot().ccomboBox(0);
             ccombo.setText("/" + file_dset_name);
 
             val = ccombo.getText();
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong link target",
-                                                  "/" + file_dset_name, val),
-                       val.equals("/" + file_dset_name));
+            assertTrue(val.equals("/" + file_dset_name),
+                constructWrongValueMessage("testExternalLinks()", "wrong link target",
+                                                  "/" + file_dset_name, val));
 
             linkShell.bot().button("   OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
@@ -659,11 +655,11 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "4",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 4);
-            assertTrue("testExternalLinks() filetree is missing link '" + file_link_name + "'",
-                       items[0].getNode(1).getText().compareTo(file_link_name) == 0);
+            assertTrue(filetree.visibleRowCount() == 4,
+                constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "4",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getNode(1).getText().compareTo(file_link_name) == 0,
+                "testExternalLinks() filetree is missing link '" + file_link_name + "'");
 
             items[0].getNode(1).click();
             items[0].getNode(1).contextMenu().contextMenu("Open").click();
@@ -679,13 +675,13 @@ public class TestHDFViewLinks extends AbstractWindowTest {
 
             table.click(1, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "255", val),
-                       val.equals("255"));
+            assertTrue(val.equals("255"),
+                constructWrongValueMessage("testExternalLinks()", "wrong data", "255", val));
 
             table.click(8, 1);
             val = tableShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong data", "128", val),
-                       val.equals("128"));
+            assertTrue(val.equals("128"),
+                constructWrongValueMessage("testExternalLinks()", "wrong data", "128", val));
 
             // TODO Disabled until offscreen columns/rows can be accessed
             // table.click(8, 8);
@@ -707,33 +703,32 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             linkShell.bot().text(0).setText("test_external_nonexisting_link");
 
             val = linkShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong link name",
-                                                  "test_external_nonexisting_link", val),
-                       val.equals("test_external_nonexisting_link"));
+            assertTrue(val.equals("test_external_nonexisting_link"),
+                constructWrongValueMessage("testExternalLinks()", "wrong link name",
+                                                  "test_external_nonexisting_link", val));
 
             combo = linkShell.bot().comboBox(0);
             combo.setSelection("/");
 
             val = combo.getText();
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong link parent", "/", val),
-                       val.equals("/"));
+            assertTrue(val.equals("/"),
+                constructWrongValueMessage("testExternalLinks()", "wrong link parent", "/", val));
 
             linkShell.bot().radio("External Link").click();
 
             linkShell.bot().textWithLabel("Target File: ").setText(workDir + "/" + file_link_name);
 
             val = linkShell.bot().textWithLabel("Target File: ").getText();
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "wrong link file",
-                                                  workDir + "/" + file_link_name, val),
-                       val.equals(workDir + "/" + file_link_name));
+            assertTrue(val.equals(workDir + "/" + file_link_name),
+                constructWrongValueMessage("testExternalLinks()", "wrong link file",
+                                                  workDir + "/" + file_link_name, val));
 
             ccombo = linkShell.bot().ccomboBox(0);
             ccombo.setText("/nonexist");
 
             val = ccombo.getText();
-            assertTrue(
-                constructWrongValueMessage("testExternalLinks()", "wrong link target", "/nonexist", val),
-                val.equals("/nonexist"));
+            assertTrue(val.equals("/nonexist"),
+                constructWrongValueMessage("testExternalLinks()", "wrong link target", "/nonexist", val));
 
             linkShell.bot().button("   OK   ").click();
             bot.waitUntil(Conditions.shellCloses(linkShell));
@@ -745,13 +740,13 @@ public class TestHDFViewLinks extends AbstractWindowTest {
             items = filetree.getAllItems();
             filetree.expandNode(items[0].getText(), true);
 
-            assertTrue(constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "5",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 5);
-            assertTrue("testExternalLinks() filetree is missing link '"
+            assertTrue(filetree.visibleRowCount() == 5,
+                constructWrongValueMessage("testExternalLinks()", "filetree wrong row count", "5",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getNode(0).getText().compareTo("test_external_nonexisting_link") == 0,
+                "testExternalLinks() filetree is missing link '"
                            + "test_external_nonexisting_link"
-                           + "'",
-                       items[0].getNode(0).getText().compareTo("test_external_nonexisting_link") == 0);
+                           + "'");
 
             // Change link target to existing object
             items[0].getNode(0).click();

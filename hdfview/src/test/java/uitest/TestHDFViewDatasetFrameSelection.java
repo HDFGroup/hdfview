@@ -49,13 +49,13 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("testNextFrame()", "filetree wrong row count", "2",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 2);
-            assertTrue("testNextFrame() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
-            assertTrue("testNextFrame() filetree is missing dataset '" + dataset_name + "'",
-                       items[0].getNode(0).getText().compareTo(dataset_name) == 0);
+            assertTrue(filetree.visibleRowCount() == 2,
+                constructWrongValueMessage("testNextFrame()", "filetree wrong row count", "2",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "testNextFrame() filetree is missing file '" + filename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(dataset_name) == 0,
+                "testNextFrame() filetree is missing dataset '" + dataset_name + "'");
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Open").click();
@@ -91,27 +91,26 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             }
 
             String val = table.getCellDataValueByPosition(5, 3);
-            assertTrue(constructWrongValueMessage("testNextFrame()", "wrong data", "478", val),
-                       val.equals("478"));
+            assertTrue(val.equals("478"),
+                constructWrongValueMessage("testNextFrame()", "wrong data", "478", val));
 
             val = table.getCellDataValueByPosition(2, 4);
-            assertTrue(constructWrongValueMessage("testNextFrame()", "wrong data", "52", val),
-                       val.equals("52"));
+            assertTrue(val.equals("52"),
+                constructWrongValueMessage("testNextFrame()", "wrong data", "52", val));
 
             tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
 
             val = tableShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("testNextFrame()", "frame field shows wrong value", "1", val),
-                val.equals("1"));
+            assertTrue(val.equals("1"),
+                constructWrongValueMessage("testNextFrame()", "frame field shows wrong value", "1", val));
 
             val = table.getCellDataValueByPosition(4, 5);
-            assertTrue(constructWrongValueMessage("testNextFrame()", "wrong data", "454", val),
-                       val.equals("454"));
+            assertTrue(val.equals("454"),
+                constructWrongValueMessage("testNextFrame()", "wrong data", "454", val));
 
             val = table.getCellDataValueByPosition(3, 2);
-            assertTrue(constructWrongValueMessage("testNextFrame()", "wrong data", "984", val),
-                       val.equals("984"));
+            assertTrue(val.equals("984"),
+                constructWrongValueMessage("testNextFrame()", "wrong data", "984", val));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -146,13 +145,13 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("testPreviousFrame()", "filetree wrong row count", "2",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 2);
-            assertTrue("testPreviousFrame() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
-            assertTrue("testPreviousFrame() filetree is missing dataset '" + dataset_name + "'",
-                       items[0].getNode(0).getText().compareTo(dataset_name) == 0);
+            assertTrue(filetree.visibleRowCount() == 2,
+                constructWrongValueMessage("testPreviousFrame()", "filetree wrong row count", "2",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "testPreviousFrame() filetree is missing file '" + filename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(dataset_name) == 0,
+                "testPreviousFrame() filetree is missing dataset '" + dataset_name + "'");
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Open").click();
@@ -188,27 +187,26 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             }
 
             String val = table.getCellDataValueByPosition(4, 2);
-            assertTrue(constructWrongValueMessage("testPreviousFrame()", "wrong data", "6", val),
-                       val.equals("6"));
+            assertTrue(val.equals("6"),
+                constructWrongValueMessage("testPreviousFrame()", "wrong data", "6", val));
 
             val = table.getCellDataValueByPosition(5, 3);
-            assertTrue(constructWrongValueMessage("testPreviousFrame()", "wrong data", "215", val),
-                       val.equals("215"));
+            assertTrue(val.equals("215"),
+                constructWrongValueMessage("testPreviousFrame()", "wrong data", "215", val));
 
             tableShell.bot().toolbarButtonWithTooltip("Previous Frame").click();
 
             val = tableShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("testPreviousFrame()", "frame field shows wrong value", "0", val),
-                val.equals("0"));
+            assertTrue(val.equals("0"),
+                constructWrongValueMessage("testPreviousFrame()", "frame field shows wrong value", "0", val));
 
             val = table.getCellDataValueByPosition(1, 1);
-            assertTrue(constructWrongValueMessage("testPreviousFrame()", "wrong data", "13", val),
-                       val.equals("13"));
+            assertTrue(val.equals("13"),
+                constructWrongValueMessage("testPreviousFrame()", "wrong data", "13", val));
 
             val = table.getCellDataValueByPosition(5, 5);
-            assertTrue(constructWrongValueMessage("testPreviousFrame()", "wrong data", "4", val),
-                       val.equals("4"));
+            assertTrue(val.equals("4"),
+                constructWrongValueMessage("testPreviousFrame()", "wrong data", "4", val));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -243,13 +241,13 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("testFirstFrame()", "filetree wrong row count", "2",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 2);
-            assertTrue("testFirstFrame() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
-            assertTrue("testFirstFrame() filetree is missing dataset '" + dataset_name + "'",
-                       items[0].getNode(0).getText().compareTo(dataset_name) == 0);
+            assertTrue(filetree.visibleRowCount() == 2,
+                constructWrongValueMessage("testFirstFrame()", "filetree wrong row count", "2",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "testFirstFrame() filetree is missing file '" + filename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(dataset_name) == 0,
+                "testFirstFrame() filetree is missing dataset '" + dataset_name + "'");
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Open").click();
@@ -288,32 +286,30 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
                 tableShell.bot().toolbarButtonWithTooltip("Next Frame").click();
 
             String val = tableShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("testFirstFrame()", "frame field shows wrong value", "3", val),
-                val.equals("3"));
+            assertTrue(val.equals("3"),
+                constructWrongValueMessage("testFirstFrame()", "frame field shows wrong value", "3", val));
 
             val = table.getCellDataValueByPosition(4, 2);
-            assertTrue(constructWrongValueMessage("testFirstFrame()", "wrong data", "456", val),
-                       val.equals("456"));
+            assertTrue(val.equals("456"),
+                constructWrongValueMessage("testFirstFrame()", "wrong data", "456", val));
 
             val = table.getCellDataValueByPosition(1, 3);
-            assertTrue(constructWrongValueMessage("testFirstFrame()", "wrong data", "7", val),
-                       val.equals("7"));
+            assertTrue(val.equals("7"),
+                constructWrongValueMessage("testFirstFrame()", "wrong data", "7", val));
 
             tableShell.bot().toolbarButtonWithTooltip("First Frame").click();
 
             val = tableShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("testFirstFrame()", "frame field shows wrong value", "0", val),
-                val.equals("0"));
+            assertTrue(val.equals("0"),
+                constructWrongValueMessage("testFirstFrame()", "frame field shows wrong value", "0", val));
 
             val = table.getCellDataValueByPosition(4, 5);
-            assertTrue(constructWrongValueMessage("testFirstFrame()", "wrong data", "52", val),
-                       val.equals("52"));
+            assertTrue(val.equals("52"),
+                constructWrongValueMessage("testFirstFrame()", "wrong data", "52", val));
 
             val = table.getCellDataValueByPosition(5, 2);
-            assertTrue(constructWrongValueMessage("testFirstFrame()", "wrong data", "345", val),
-                       val.equals("345"));
+            assertTrue(val.equals("345"),
+                constructWrongValueMessage("testFirstFrame()", "wrong data", "345", val));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -348,13 +344,13 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("testLastFrame()", "filetree wrong row count", "2",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 2);
-            assertTrue("testLastFrame() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
-            assertTrue("testLastFrame() filetree is missing dataset '" + dataset_name + "'",
-                       items[0].getNode(0).getText().compareTo(dataset_name) == 0);
+            assertTrue(filetree.visibleRowCount() == 2,
+                constructWrongValueMessage("testLastFrame()", "filetree wrong row count", "2",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "testLastFrame() filetree is missing file '" + filename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(dataset_name) == 0,
+                "testLastFrame() filetree is missing dataset '" + dataset_name + "'");
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Open").click();
@@ -390,27 +386,26 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             }
 
             String val = table.getCellDataValueByPosition(3, 4);
-            assertTrue(constructWrongValueMessage("testLastFrame()", "wrong data", "63", val),
-                       val.equals("63"));
+            assertTrue(val.equals("63"),
+                constructWrongValueMessage("testLastFrame()", "wrong data", "63", val));
 
             val = table.getCellDataValueByPosition(2, 1);
-            assertTrue(constructWrongValueMessage("testLastFrame()", "wrong data", "2", val),
-                       val.equals("2"));
+            assertTrue(val.equals("2"),
+                constructWrongValueMessage("testLastFrame()", "wrong data", "2", val));
 
             tableShell.bot().toolbarButtonWithTooltip("Last Frame").click();
 
             val = tableShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("testLastFrame()", "frame field shows wrong value", "4", val),
-                val.equals("4"));
+            assertTrue(val.equals("4"),
+                constructWrongValueMessage("testLastFrame()", "frame field shows wrong value", "4", val));
 
             val = table.getCellDataValueByPosition(1, 5);
-            assertTrue(constructWrongValueMessage("testLastFrame()", "wrong data", "789", val),
-                       val.equals("789"));
+            assertTrue(val.equals("789"),
+                constructWrongValueMessage("testLastFrame()", "wrong data", "789", val));
 
             val = table.getCellDataValueByPosition(5, 2);
-            assertTrue(constructWrongValueMessage("testLastFrame()", "wrong data", "7945", val),
-                       val.equals("7945"));
+            assertTrue(val.equals("7945"),
+                constructWrongValueMessage("testLastFrame()", "wrong data", "7945", val));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -445,13 +440,13 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("testEnterFrame()", "filetree wrong row count", "2",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 2);
-            assertTrue("testEnterFrame() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
-            assertTrue("testEnterFrame() filetree is missing dataset '" + dataset_name + "'",
-                       items[0].getNode(0).getText().compareTo(dataset_name) == 0);
+            assertTrue(filetree.visibleRowCount() == 2,
+                constructWrongValueMessage("testEnterFrame()", "filetree wrong row count", "2",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "testEnterFrame() filetree is missing file '" + filename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(dataset_name) == 0,
+                "testEnterFrame() filetree is missing dataset '" + dataset_name + "'");
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Open").click();
@@ -487,12 +482,12 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             }
 
             String val = table.getCellDataValueByPosition(4, 3);
-            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "99", val),
-                       val.equals("99"));
+            assertTrue(val.equals("99"),
+                constructWrongValueMessage("testEnterFrame()", "wrong data", "99", val));
 
             val = table.getCellDataValueByPosition(5, 4);
-            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "86", val),
-                       val.equals("86"));
+            assertTrue(val.equals("86"),
+                constructWrongValueMessage("testEnterFrame()", "wrong data", "86", val));
 
             final SWTBotText text = tableShell.bot().text(0);
             text.setText("3");
@@ -510,12 +505,12 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             });
 
             val = table.getCellDataValueByPosition(3, 2);
-            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "63", val),
-                       val.equals("63"));
+            assertTrue(val.equals("63"),
+                constructWrongValueMessage("testEnterFrame()", "wrong data", "63", val));
 
             val = table.getCellDataValueByPosition(1, 3);
-            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "7", val),
-                       val.equals("7"));
+            assertTrue(val.equals("7"),
+                constructWrongValueMessage("testEnterFrame()", "wrong data", "7", val));
 
             text.setText("2");
 
@@ -532,12 +527,12 @@ public class TestHDFViewDatasetFrameSelection extends AbstractWindowTest {
             });
 
             val = table.getCellDataValueByPosition(3, 2);
-            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "88", val),
-                       val.equals("88"));
+            assertTrue(val.equals("88"),
+                constructWrongValueMessage("testEnterFrame()", "wrong data", "88", val));
 
             val = table.getCellDataValueByPosition(1, 3);
-            assertTrue(constructWrongValueMessage("testEnterFrame()", "wrong data", "66", val),
-                       val.equals("66"));
+            assertTrue(val.equals("66"),
+                constructWrongValueMessage("testEnterFrame()", "wrong data", "66", val));
         }
         catch (Exception ex) {
             ex.printStackTrace();

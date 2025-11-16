@@ -66,8 +66,8 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             groupShell.bot().text(0).setText(groupname);
 
             String val = groupShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("createNewGroup()", "wrong group name", groupname, val),
-                       val.equals(groupname));
+            assertTrue(val.equals(groupname),
+                constructWrongValueMessage("createNewGroup()", "wrong group name", groupname, val));
 
             groupShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(groupShell));
@@ -108,16 +108,14 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             datasetShell.bot().text(0).setText(datasetname);
 
             String val = datasetShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("createNewDataset()", "wrong dataset name", datasetname, val),
-                val.equals(datasetname));
+            assertTrue(val.equals(datasetname),
+                constructWrongValueMessage("createNewDataset()", "wrong dataset name", datasetname, val));
 
             datasetShell.bot().text(2).setText(currentSize);
 
             val = datasetShell.bot().text(2).getText();
-            assertTrue(
-                constructWrongValueMessage("createNewDataset()", "wrong current size", currentSize, val),
-                val.equals(currentSize));
+            assertTrue(val.equals(currentSize),
+                constructWrongValueMessage("createNewDataset()", "wrong current size", currentSize, val));
 
             datasetShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(datasetShell));
@@ -149,9 +147,9 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
                             table.widget.getActiveCellEditor().setEditorValue(val);
                             table.widget.getActiveCellEditor().commit(SelectionLayer.MoveDirectionEnum.RIGHT,
                                                                       true, true);
-                            assertTrue(constructWrongValueMessage("createNewDataset()", "wrong value", val,
-                                                                  table.getCellDataValueByPosition(row, col)),
-                                       table.getCellDataValueByPosition(row, col).equals(val));
+                            assertTrue(table.getCellDataValueByPosition(row, col).equals(val),
+                                constructWrongValueMessage("createNewDataset()", "wrong value", val,
+                                                                  table.getCellDataValueByPosition(row, col)));
                         }
                     }
                 }
@@ -191,10 +189,10 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
         try {
             /* Verify that there are currently no attributes on the group */
-            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count",
+            assertTrue(attrTable.rowCount() == attrindex,
+                constructWrongValueMessage(testname, "attribute table wrong row count",
                                                   String.valueOf(attrindex),
-                                                  String.valueOf(attrTable.rowCount())),
-                       attrTable.rowCount() == attrindex);
+                                                  String.valueOf(attrTable.rowCount())));
 
             SWTBotButton addButton = bot.button("Add Attribute");
             addButton.click();
@@ -210,16 +208,16 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(newAttributeShell));
 
             /* Verify that the attribute has been added to the table with the correct name and value */
-            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count",
+            assertTrue(attrTable.rowCount() == attrindex + 1,
+                constructWrongValueMessage(testname, "attribute table wrong row count",
                                                   String.valueOf(attrindex + 1),
-                                                  String.valueOf(attrTable.rowCount())),
-                       attrTable.rowCount() == attrindex + 1);
+                                                  String.valueOf(attrTable.rowCount())));
 
             newItem = attrTable.getTableItem(attrindex);
 
-            assertTrue(constructWrongValueMessage(testname, "attribute wrong name", attrName,
-                                                  newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                       newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
+            assertTrue(newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName),
+                constructWrongValueMessage(testname, "attribute wrong name", attrName,
+                                                  newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)));
             // assertTrue(constructWrongValueMessage(testname, "attribute wrong value", attrValue,
             //         newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
             //         newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
@@ -248,10 +246,10 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
         try {
             /* Verify that there are currently no attributes on the group */
-            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count",
+            assertTrue(attrTable.rowCount() == attrindex,
+                constructWrongValueMessage(testname, "attribute table wrong row count",
                                                   String.valueOf(attrindex),
-                                                  String.valueOf(attrTable.rowCount())),
-                       attrTable.rowCount() == attrindex);
+                                                  String.valueOf(attrTable.rowCount())));
 
             SWTBotButton addButton = bot.button("Add Attribute");
             addButton.click();
@@ -267,16 +265,16 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(newAttributeShell));
 
             /* Verify that the attribute has been added to the table with the correct name and value */
-            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count",
+            assertTrue(attrTable.rowCount() == attrindex + 1,
+                constructWrongValueMessage(testname, "attribute table wrong row count",
                                                   String.valueOf(attrindex + 1),
-                                                  String.valueOf(attrTable.rowCount())),
-                       attrTable.rowCount() == attrindex + 1);
+                                                  String.valueOf(attrTable.rowCount())));
 
             newItem = attrTable.getTableItem(attrindex);
 
-            assertTrue(constructWrongValueMessage(testname, "attribute wrong name", attrName,
-                                                  newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)),
-                       newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName));
+            assertTrue(newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX).equals(attrName),
+                constructWrongValueMessage(testname, "attribute wrong name", attrName,
+                                                  newItem.getText(ATTRIBUTE_TABLE_NAME_COLUMN_INDEX)));
             //            assertTrue(constructWrongValueMessage(testname, "attribute wrong value", attrValue,
             //                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX)),
             //                    newItem.getText(ATTRIBUTE_TABLE_VALUE_COLUMN_INDEX).equals(attrValue));
@@ -323,9 +321,9 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             /*
              * Verify that the attribute has been removed from the attribute table.
              */
-            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count", "0",
-                                                  String.valueOf(attrTable.rowCount())),
-                       attrTable.rowCount() == 0);
+            assertTrue(attrTable.rowCount() == 0,
+                constructWrongValueMessage(testname, "attribute table wrong row count", "0",
+                                                  String.valueOf(attrTable.rowCount())));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -366,9 +364,9 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             /*
              * Verify that the attribute has been renamed from the attribute table.
              */
-            assertTrue(constructWrongValueMessage(testname, "attribute table wrong row count", "1",
-                                                  String.valueOf(attrTable.rowCount())),
-                       attrTable.rowCount() == 1);
+            assertTrue(attrTable.rowCount() == 1,
+                constructWrongValueMessage(testname, "attribute table wrong row count", "1",
+                                                  String.valueOf(attrTable.rowCount())));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -875,10 +873,10 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             newItem.click();
 
-            assertTrue(constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
+            assertTrue(!bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled(),
+                constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
                                                   "rename attribute menuitem not disabled", "disabled",
-                                                  "enabled"),
-                       !bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled());
+                                                  "enabled"));
 
             /* Now repeat the process for the dataset that was created */
             attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
@@ -886,10 +884,10 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             newItem.click();
 
-            assertTrue(constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
+            assertTrue(!bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled(),
+                constructWrongValueMessage("testHDF4RenameAttributeFunctionDisabled()",
                                                   "rename attribute menuitem not disabled", "disabled",
-                                                  "enabled"),
-                       !bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled());
+                                                  "enabled"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -931,14 +929,14 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             newItem.click();
 
-            assertTrue(constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
+            assertTrue(!bot.table().contextMenu().contextMenu("Delete Attribute").isEnabled(),
+                constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
                                                   "delete attribute menuitem not disabled", "disabled",
-                                                  "enabled"),
-                       !bot.table().contextMenu().contextMenu("Delete Attribute").isEnabled());
-            assertTrue(constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
+                                                  "enabled"));
+            assertTrue(!bot.button("Delete Attribute").isEnabled(),
+                constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
                                                   "delete attribute button not disabled", "disabled",
-                                                  "enabled"),
-                       !bot.button("Delete Attribute").isEnabled());
+                                                  "enabled"));
 
             /* Now repeat the process for the dataset that was created */
             attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
@@ -946,14 +944,14 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
 
             newItem.click();
 
-            assertTrue(constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
+            assertTrue(!bot.table().contextMenu().contextMenu("Delete Attribute").isEnabled(),
+                constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
                                                   "delete attribute menuitem not disabled", "disabled",
-                                                  "enabled"),
-                       !bot.table().contextMenu().contextMenu("Delete Attribute").isEnabled());
-            assertTrue(constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
+                                                  "enabled"));
+            assertTrue(!bot.button("Delete Attribute").isEnabled(),
+                constructWrongValueMessage("testHDF4DeleteAttributeFunctionDisabled()",
                                                   "delete attribute button not disabled", "disabled",
-                                                  "enabled"),
-                       !bot.button("Delete Attribute").isEnabled());
+                                                  "enabled"));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -1036,17 +1034,17 @@ public class TestHDFViewAttributes extends AbstractWindowTest {
             checkFileTree(filetree, "testHDF5RenameAttributeDisabledForReadOnly()", 3, testFilename);
             SWTBotTable attrTable = openAttributeTable(filetree, testFilename, groupname);
 
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
+            assertTrue(!bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled(),
+                constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
                                                   "rename attribute menuitem not disabled", "disabled",
-                                                  "enabled"),
-                       !bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled());
+                                                  "enabled"));
 
             attrTable = openAttributeTable(filetree, testFilename, groupname + '/' + datasetname);
 
-            assertTrue(constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
+            assertTrue(!bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled(),
+                constructWrongValueMessage("testHDF5RenameAttributeDisabledForReadOnly()",
                                                   "rename attribute menuitem not disabled", "disabled",
-                                                  "enabled"),
-                       !bot.table().contextMenu().contextMenu("Rename Attribute").isEnabled());
+                                                  "enabled"));
         }
         catch (Exception ex) {
             ex.printStackTrace();

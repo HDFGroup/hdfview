@@ -559,18 +559,18 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("openTAttr2GroupReferenceAsTable()",
+            assertTrue(filetree.visibleRowCount() == 4,
+                constructWrongValueMessage("openTAttr2GroupReferenceAsTable()",
                                                   "filetree wrong row count", "4",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 4);
-            assertTrue("openTAttr2GroupReferenceAsTable() filetree is missing file '" + testFilename + "'",
-                       items[0].getText().compareTo(testFilename) == 0);
-            assertTrue("openTAttr2GroupReferenceAsTable() filetree is missing dataset '" + dataset_name + "'",
-                       items[0].getNode(0).getText().compareTo(dataset_name) == 0);
-            assertTrue("openTAttr2GroupReferenceAsTable() filetree is missing group '" + group_name + "'",
-                       items[0].getNode(1).getText().compareTo(group_name) == 0);
-            assertTrue("openTAttr2GroupReferenceAsTable() filetree is missing group '" + group_name2 + "'",
-                       items[0].getNode(2).getText().compareTo(group_name2) == 0);
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(testFilename) == 0,
+                "openTAttr2GroupReferenceAsTable() filetree is missing file '" + testFilename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(dataset_name) == 0,
+                "openTAttr2GroupReferenceAsTable() filetree is missing dataset '" + dataset_name + "'");
+            assertTrue(items[0].getNode(1).getText().compareTo(group_name) == 0,
+                "openTAttr2GroupReferenceAsTable() filetree is missing group '" + group_name + "'");
+            assertTrue(items[0].getNode(2).getText().compareTo(group_name2) == 0,
+                "openTAttr2GroupReferenceAsTable() filetree is missing group '" + group_name2 + "'");
 
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Expand All").click();
@@ -588,9 +588,9 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             SWTBotNatTable table = new SWTBotNatTable(tableShell.bot().widget(widgetOfType(NatTable.class)));
 
             table.click(3, 3);
-            assertTrue("openTAttr2GroupReferenceAsTable() data [" + tableShell.bot().text(2).getText() +
-                           "] did not match regex '/dset H5O_TYPE_OBJ_REF'",
-                       tableShell.bot().text(2).getText().matches("/dset H5O_TYPE_OBJ_REF"));
+            assertTrue(tableShell.bot().text(2).getText().matches("/dset H5O_TYPE_OBJ_REF"),
+                "openTAttr2GroupReferenceAsTable() data [" + tableShell.bot().text(2).getText() +
+                           "] did not match regex '/dset H5O_TYPE_OBJ_REF'");
 
             table.contextMenu(3, 3).menu("Show As &Table").click();
             org.hamcrest.Matcher<Shell> shell2Matcher =
@@ -612,9 +612,9 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
                 new SWTBotNatTable(table2Shell.bot().widget(widgetOfType(NatTable.class)));
 
             table2.click(2, 1);
-            assertTrue("openTAttr2GroupReferenceAsTable() data [" + table2Shell.bot().text(0).getText() +
-                           "] did not match regex '0'",
-                       table2Shell.bot().text(0).getText().matches("0"));
+            assertTrue(table2Shell.bot().text(0).getText().matches("0"),
+                "openTAttr2GroupReferenceAsTable() data [" + table2Shell.bot().text(0).getText() +
+                           "] did not match regex '0'");
         }
         catch (Exception ex) {
             ex.printStackTrace();

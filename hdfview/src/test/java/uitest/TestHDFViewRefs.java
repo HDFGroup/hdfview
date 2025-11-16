@@ -136,18 +136,16 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             tabItem.activate();
 
             String val = bot.textWithLabel("Name: ").getText();
-            assertTrue(
-                constructWrongValueMessage("openTDataRegionReference()", "wrong name", datasetName, val),
-                val.equals(datasetName)); // Test dataset name
+            assertTrue(val.equals(datasetName),
+                constructWrongValueMessage("openTDataRegionReference()", "wrong name", datasetName, val)); // Test dataset name
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
-            assertTrue(constructWrongValueMessage("openTDataRegionReference()", "wrong rank", "1", val),
-                       val.equals("1")); // Test rank
+            assertTrue(val.equals("1"),
+                constructWrongValueMessage("openTDataRegionReference()", "wrong rank", "1", val)); // Test rank
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 3).getText();
-            assertTrue(constructWrongValueMessage("openTDataRegionReference()", "wrong data type",
-                                                  "Dataset region reference", val),
-                       val.equals("Dataset region reference")); // Test data type
+            assertTrue(val.equals("Dataset region reference"),
+                constructWrongValueMessage("openTDataRegionReference()", "wrong data type", "Dataset region reference", val)); // Test data type
 
             // Open dataset 'DS08BITS'
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
@@ -224,18 +222,16 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             tabItem.activate();
 
             String val = bot.textWithLabel("Name: ").getText();
-            assertTrue(
-                constructWrongValueMessage("openTAttributeReference()", "wrong name", datasetName, val),
-                val.equals(datasetName)); // Test dataset name
+            assertTrue(val.equals(datasetName),
+                constructWrongValueMessage("openTAttributeReference()", "wrong name", datasetName, val)); // Test dataset name
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
-            assertTrue(constructWrongValueMessage("openTAttributeReference()", "wrong rank", "1", val),
-                       val.equals("1")); // Test rank
+            assertTrue(val.equals("1"),
+                constructWrongValueMessage("openTAttributeReference()", "wrong rank", "1", val)); // Test rank
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 3).getText();
-            assertTrue(
-                constructWrongValueMessage("openTAttributeReference()", "wrong data type", "Reference", val),
-                val.equals("Reference")); // Test data type
+            assertTrue(val.equals("Reference"),
+                constructWrongValueMessage("openTAttributeReference()", "wrong data type", "Reference", val)); // Test data type
 
             // Open dataset 'Dataset3' Table
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
@@ -334,17 +330,16 @@ public class TestHDFViewRefs extends AbstractWindowTest {
             tabItem.activate();
 
             String val = bot.textWithLabel("Name: ").getText();
-            assertTrue(constructWrongValueMessage("openTObjectReference()", "wrong name", datasetName, val),
-                       val.equals(datasetName)); // Test dataset name
+            assertTrue(val.equals(datasetName),
+                constructWrongValueMessage("openTObjectReference()", "wrong name", datasetName, val)); // Test dataset name
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
-            assertTrue(constructWrongValueMessage("openTObjectReference()", "wrong rank", "1", val),
-                       val.equals("1")); // Test rank
+            assertTrue(val.equals("1"),
+                constructWrongValueMessage("openTObjectReference()", "wrong rank", "1", val)); // Test rank
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 3).getText();
-            assertTrue(
-                constructWrongValueMessage("openTObjectReference()", "wrong data type", "Reference", val),
-                val.equals("Reference")); // Test data type
+            assertTrue(val.equals("Reference"),
+                constructWrongValueMessage("openTObjectReference()", "wrong data type", "Reference", val)); // Test data type
 
             // Open dataset 'Dataset3' Table
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
