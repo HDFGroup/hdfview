@@ -229,9 +229,10 @@ jobs:
       run: |
         echo "::group::Build and Install Dependencies"
         # Build all modules (repository, object, hdfview) in reactor order
-        # This ensures object module is built and available for hdfview
+        # Use 'package' instead of 'install' to avoid repository module's install-file executions
+        # HDF JARs are already installed in the previous step from downloaded distributions
         # Skip OWASP security check (runs in separate maven-security.yml workflow)
-        mvn clean install -DskipTests -Ddependency-check.skip=true -B
+        mvn clean package -DskipTests -Ddependency-check.skip=true -B
         echo "::endgroup::"
 
     - name: Run Tests with Coverage
