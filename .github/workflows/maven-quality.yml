@@ -228,12 +228,14 @@ jobs:
     - name: Build All Modules
       run: |
         echo "::group::Build and Install Dependencies"
-        # Build all modules (repository, object, hdfview) in reactor order
-        # Use 'install' phase - repository module's install-file executions are in 'verify' phase
-        # So they won't run (install phase doesn't execute verify phase)
+        # Build repository module (needed by object) but don't install it
+        mvn clean compile -pl repository -B
+
+        # Install only object and hdfview modules
+        # This avoids repository module's install-file executions
         # HDF JARs are already installed in the previous step from downloaded distributions
         # Skip OWASP security check (runs in separate maven-security.yml workflow)
-        mvn clean install -DskipTests -Ddependency-check.skip=true -B
+        mvn install -pl object,hdfview -DskipTests -Ddependency-check.skip=true -B
         echo "::endgroup::"
 
     - name: Run Tests with Coverage
