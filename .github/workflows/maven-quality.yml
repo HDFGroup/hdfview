@@ -225,11 +225,20 @@ jobs:
         # Set LD_LIBRARY_PATH for test execution
         echo "LD_LIBRARY_PATH=${{ env.HDF5LIB_PATH }}/lib:${{ env.HDF4LIB_PATH }}/lib" >> $GITHUB_ENV
 
+    - name: Build All Modules
+      run: |
+        echo "::group::Build and Install Dependencies"
+        # Build all modules (repository, object, hdfview) in reactor order
+        # This ensures object module is built and available for hdfview
+        mvn clean install -DskipTests -B
+        echo "::endgroup::"
+
     - name: Run Tests with Coverage
       run: |
         echo "::group::Test Execution with Coverage"
         # Run tests with Xvfb for headless GUI testing
-        xvfb-run -a -s "-screen 0 1024x768x24" mvn clean test jacoco:report -B \
+        # Don't use 'clean' here - we need the installed object module
+        xvfb-run -a -s "-screen 0 1024x768x24" mvn test jacoco:report -B \
           -Dmaven.test.failure.ignore=false \
           -Djacoco.excludes="**/Test*,**/Mock*,**/Stub*"
         echo "::endgroup::"
