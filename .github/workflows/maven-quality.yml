@@ -16,11 +16,11 @@ permissions:
   security-events: write
 
 env:
+  # Note: java.awt.headless NOT set to true - SWT GUI tests need display (Xvfb)
   MAVEN_OPTS: >-
     -Xmx3g
     -Xms1g
     -XX:+UseParallelGC
-    -Djava.awt.headless=true
 
 jobs:
   quality-analysis:

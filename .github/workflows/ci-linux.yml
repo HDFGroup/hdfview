@@ -11,13 +11,13 @@ permissions:
 
 env:
   # JVM configuration for CI performance
+  # Note: java.awt.headless NOT set to true - SWT GUI tests need display (Xvfb)
   MAVEN_OPTS: >-
     -Xmx2g
     -Xms1g
     -XX:+UseParallelGC
     -XX:+TieredCompilation
     -XX:TieredStopAtLevel=1
-    -Djava.awt.headless=true
 
 jobs:
   build-and-test:
