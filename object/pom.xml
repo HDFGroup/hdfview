@@ -190,16 +190,15 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!-- Temporarily skip object module tests in CI until native library path is resolved -->
-                    <!-- Focus on UI tests in hdfview module which is the main JUnit 5 migration target -->
-                    <skipTests>true</skipTests>
+                    <!-- Object module tests require native HDF4/HDF5 libraries -->
+                    <!-- Library paths configured via build.properties (hdf5.lib.dir, hdf.lib.dir) -->
                     <argLine>
                         --add-opens java.base/java.lang=ALL-UNNAMED
                         --add-opens java.base/java.time=ALL-UNNAMED
                         --add-opens java.base/java.time.format=ALL-UNNAMED
                         --add-opens java.base/java.util=ALL-UNNAMED
                         --enable-native-access=jarhdf5
-                        -Djava.library.path=${platform.hdf.lib}
+                        -Djava.library.path=${hdf5.lib.dir}:${hdf.lib.dir}
                     </argLine>
                 </configuration>
             </plugin>

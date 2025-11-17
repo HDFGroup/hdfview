@@ -287,11 +287,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!-- Temporarily skip UI tests in CI - they require graphical display (Xvfb) -->
-                    <!-- SWTBot UI tests need headless display configuration to run in CI -->
-                    <!-- Tests remain available for local development -->
-                    <!-- TODO: Configure Xvfb in CI workflows to re-enable these tests -->
-                    <skipTests>true</skipTests>
+                    <!-- SWTBot UI tests now run in CI with Xvfb headless display configuration -->
+                    <!-- Tests require graphical display: Xvfb configured in Linux CI workflow -->
+                    <!-- Local development: tests run normally in desktop environment -->
                     <argLine>
                         --add-opens java.base/java.lang=ALL-UNNAMED
                         --add-opens java.base/java.time=ALL-UNNAMED

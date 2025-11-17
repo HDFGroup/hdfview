@@ -221,10 +221,20 @@ jobs:
           -Dmaven.compiler.showWarnings=false
         echo "::endgroup::"
 
+    - name: Set up Xvfb for Headless GUI Testing
+      run: |
+        echo "Installing Xvfb and GTK dependencies for headless SWT testing..."
+        sudo apt-get update
+        sudo apt-get install -y xvfb libgtk-3-0 libgtk-3-dev x11-xserver-utils
+        echo "Xvfb and GTK installed successfully"
+
     - name: Run Tests
       run: |
         echo "::group::Run All Tests"
-        mvn test -B \
+        # Run tests with Xvfb for headless GUI testing
+        # -a auto-selects display number, :99 is default
+        # -screen 0 1024x768x24 creates virtual display with 24-bit color
+        xvfb-run -a -s "-screen 0 1024x768x24" mvn test -B \
           -Dmaven.test.failure.ignore=false
         echo "::endgroup::"
 
