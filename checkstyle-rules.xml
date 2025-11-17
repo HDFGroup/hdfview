@@ -215,14 +215,11 @@
         <module name="AnnotationUseStyle"/>
 
         <!-- Javadoc checks (relaxed for existing codebase) -->
+        <!-- Note: Many properties deprecated/removed in Checkstyle 10.x -->
         <module name="InvalidJavadocPosition"/>
         <module name="JavadocMethod">
             <property name="severity" value="info"/>
-            <property name="allowMissingParamTags" value="true"/>
-            <property name="allowMissingReturnTag" value="true"/>
-            <property name="allowMissingThrowsTags" value="true"/>
-            <property name="allowThrowsTagsForSubclasses" value="true"/>
-            <property name="allowUndeclaredRTE" value="true"/>
+            <!-- Only use properties compatible with Checkstyle 10.x -->
         </module>
         <module name="JavadocType">
             <property name="severity" value="info"/>
