@@ -85,9 +85,22 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
         echo "Downloading HDF5 from GitHub releases..."
-        gh release download snapshot \
-          --repo HDFGroup/hdf5 \
-          --pattern "hdf5-develop-*-ubuntu-2404_gcc.tar.gz"
+        # Retry logic for transient failures
+        for i in 1 2 3; do
+          echo "Download attempt $i of 3..."
+          if gh release download snapshot \
+            --repo HDFGroup/hdf5 \
+            --pattern "hdf5-develop-*-ubuntu-2404_gcc.tar.gz"; then
+            break
+          fi
+          if [ $i -lt 3 ]; then
+            echo "Download failed, retrying in 5 seconds..."
+            sleep 5
+          else
+            echo "All download attempts failed"
+            exit 1
+          fi
+        done
 
         echo "Extracting HDF5..."
         tar -zxvf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
