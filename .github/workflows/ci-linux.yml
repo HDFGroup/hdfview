@@ -106,8 +106,8 @@ jobs:
         tar -zxvf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
         cd hdf5
 
-        # Extract inner tar.gz with explicit filename handling
-        HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz)
+        # Extract inner tar.gz - use first match if multiple exist
+        HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
         echo "Extracting $HDF5_TARBALL..."
         tar -zxvf "$HDF5_TARBALL" --strip-components 1
 
