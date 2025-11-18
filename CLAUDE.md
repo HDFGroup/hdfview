@@ -246,34 +246,50 @@ Located in `scripts/`:
 - Focus on JavaFX evaluation for large dataset performance
 - Planned but deferred to prioritize test migration completion
 
-### 🎯 Current Status (November 17, 2025)
-**All CI/CD Infrastructure Complete and Operational**: All four CI workflows passing successfully.
+### 🎯 Current Status (November 18, 2025)
+**Test Discovery Fixed and CI Infrastructure Hardened**: All major blockers resolved.
 
-- **JUnit 5 Migration**: 100% complete (17 UI tests, ~503 assertions fixed) ✅
-- **CI/CD Pipeline**: All 4 workflows passing (Linux, Windows, macOS, Quality Gates) ✅
+- **JUnit 5 Migration**: 100% complete (17 UI test classes, ~503 assertions fixed) ✅
+- **Test Discovery**: Fixed - removed `<excludedGroups>ui</excludedGroups>`, tests re-enabled ✅
+- **Test Organization**: TestAll suite removed, JUnit 5 auto-discovery working ✅
+- **CI/CD Pipeline**: Enhanced with retry logic and robust error handling ✅
 - **Build System**: Resources and dependencies properly configured ✅
 - **Launcher Scripts**: Cross-platform scripts (Unix & Windows) working ✅
 - **Application**: Successfully launches with all libraries and resources ✅
 - **Quality Gates**: PMD, Checkstyle, JaCoCo analysis operational ✅
 - **Headless Testing**: Xvfb configured for Linux CI ✅
+- **Documentation**: Comprehensive Testing Guide added (`docs/Testing-Guide.md`) ✅
 
 **Tests Status:**
-- Object module (2 tests): Pass locally, skipped in CI (tag filtering issue)
-- UI module (17 tests): Fully migrated, skipped in CI (tag filtering issue)
-- Test infrastructure: Complete and verified working (Xvfb, SWTBot installed)
-- **Blocking Issue**: Parent POM `<excludedGroups>ui</excludedGroups>` prevents test discovery
+- **Object module (9 tests)**: ✅ All passing locally, enabled in CI
+- **UI module (16 classes, 92 tests)**: ✅ Discovered by JUnit 5, enabled in CI
+- Test infrastructure: Complete and verified (Xvfb, SWTBot, retry logic)
+- CI improvements: HDF5 download retry logic, extraction error handling
+
+**Test Executions:**
+- `default-test`: Runs unit-tagged tests
+- `unit-tests`: Runs unit tests in parallel (4 threads)
+- `integration-tests`: Runs integration-tagged tests serially
+- `ui-tests`: Runs ui-tagged tests serially with display config
 
 **Next Priorities:**
-- Fix surefire tag filtering to enable test discovery (remove `<excludedGroups>ui</excludedGroups>`)
-- Re-enable tests in CI workflows once discovery works
-- Achieve meaningful code coverage metrics (currently 0% due to skipped tests)
+- Monitor CI test execution results
+- Fix any UI test initialization issues in headless environment
+- Achieve meaningful code coverage metrics (>60% target)
 
 ## Documentation
 
-Comprehensive project documentation is maintained in the `.claude/` directory:
+Comprehensive project documentation is maintained in multiple locations:
 
+### User Documentation (`docs/`)
+- **Testing Guide**: `docs/Testing-Guide.md` - Complete guide for running tests locally and in CI
+- **Build Instructions**: `docs/Build_HDFView.txt` - How to build the project
+- **Build Properties**: `docs/build.properties.example` - Configuration template
+- **Users Guide**: `docs/UsersGuide/` - End-user documentation
+
+### Developer Documentation (`.claude/`)
 - **Phase 1 Documentation**: `.claude/Phase1/` - Complete Maven migration history
 - **Phase 2 Summaries**: Implementation details for JUnit 5, CI/CD, and Quality Analysis
-- **Guides**: JUnit 5 migration, CI/CD operations, troubleshooting
+- **Guides**: `.claude/guides/` - JUnit 5 migration, CI/CD operations, troubleshooting
 - **Status Reports**: Current status and planning documents
 - **Configuration Examples**: PMD rules, Checkstyle configuration, quality standards
