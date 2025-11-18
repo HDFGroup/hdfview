@@ -105,7 +105,11 @@ jobs:
         echo "Extracting HDF5..."
         tar -zxvf hdf5-develop-*-macos14_clang.tar.gz
         cd hdf5
-        tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
+
+        # Extract inner tar.gz with explicit filename handling
+        HDF5_TARBALL=$(ls HDF5-*-Darwin.tar.gz)
+        echo "Extracting $HDF5_TARBALL..."
+        tar -zxvf "$HDF5_TARBALL" --strip-components 1
 
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
         FILE_NAME_HDF5=$(ls $HDF5DIR)
