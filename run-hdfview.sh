@@ -41,10 +41,33 @@ fi
 
 print_success "Found project files (pom.xml, build.properties)"
 
+# Function to load properties file (converts dots to underscores for bash)
+load_properties() {
+    local prop_file=$1
+    while IFS='=' read -r key value; do
+        # Skip comments and empty lines
+        [[ "$key" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "$key" ]] && continue
+
+        # Trim whitespace from key and value
+        key=$(echo "$key" | xargs)
+        value=$(echo "$value" | xargs)
+
+        # Skip if still empty after trimming
+        [[ -z "$key" ]] && continue
+
+        # Replace dots with underscores for bash variable names
+        key=$(echo "$key" | tr '.' '_')
+
+        # Export as environment variable
+        export "$key=$value"
+    done < "$prop_file"
+}
+
 # Load build.properties for validation
 if [[ -f "build.properties" ]]; then
     print_status "Loading build.properties..."
-    source build.properties
+    load_properties "build.properties"
     print_success "build.properties loaded"
 else
     print_error "build.properties file not found!"
@@ -149,7 +172,7 @@ echo
 # Build if needed
 if [[ $BUILD_NEEDED -eq 1 ]]; then
     print_status "Building project (this may take a few minutes)..."
-    mvn clean install -q
+    mvn clean package -DskipTests -q
     print_success "Build completed"
     echo
 fi
@@ -186,8 +209,14 @@ case $CHOICE in
     2)
         print_status "Launching HDFView via direct JAR execution..."
         if [[ ! -f "libs/hdfview-3.4-SNAPSHOT.jar" ]]; then
-            print_error "JAR file not found. Run option 1 first to build."
+            print_error "JAR file not found. Build the project first."
             exit 1
+        fi
+
+        if [[ ! -d "hdfview/target/lib" ]]; then
+            print_error "Dependencies not found. Building project..."
+            mvn package -DskipTests -q
+            print_success "Build completed"
         fi
 
         CLASSPATH="libs/hdfview-3.4-SNAPSHOT.jar:hdfview/target/lib/*"

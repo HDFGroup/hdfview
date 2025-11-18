@@ -1,7 +1,7 @@
 package uitest;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
@@ -10,7 +10,8 @@ import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withRe
 import java.io.File;
 
 import org.hamcrest.Matcher;
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
@@ -24,6 +25,8 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
+@Tag("ui")
+@Tag("integration")
 public class TestTreeViewExport extends AbstractWindowTest {
     private String filename  = "testdsimp.h5";
     private String groupname = "testgroupname";
@@ -37,11 +40,11 @@ public class TestTreeViewExport extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue(constructWrongValueMessage("createImportHDF5Dataset()", "filetree wrong row count",
-                                                  "1", String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 1);
-            assertTrue("createImportHDF5Dataset() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
+            assertTrue(filetree.visibleRowCount() == 1,
+                constructWrongValueMessage("createImportHDF5Dataset()", "filetree wrong row count",
+                                                  "1", String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "createImportHDF5Dataset() filetree is missing file '" + filename + "'");
 
             items[0].click();
             items[0].contextMenu().contextMenu("New").menu("Group").click();
@@ -53,20 +56,19 @@ public class TestTreeViewExport extends AbstractWindowTest {
             groupShell.bot().text(0).setText(groupname);
 
             String val = groupShell.bot().text(0).getText();
-            assertTrue(
-                constructWrongValueMessage("createImportHDF5Dataset()", "wrong group name", groupname, val),
-                val.equals(groupname));
+            assertTrue(val.equals(groupname),
+                constructWrongValueMessage("createImportHDF5Dataset()", "wrong group name", groupname, val));
 
             groupShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(groupShell));
 
-            assertTrue(constructWrongValueMessage("createImportHDF5Dataset()", "filetree wrong row count",
-                                                  "2", String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 2);
-            assertTrue("createImportHDF5Dataset() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
-            assertTrue("createImportHDF5Dataset() filetree is missing group '" + groupname + "'",
-                       items[0].getNode(0).getText().compareTo(groupname) == 0);
+            assertTrue(filetree.visibleRowCount() == 2,
+                constructWrongValueMessage("createImportHDF5Dataset()", "filetree wrong row count",
+                                                  "2", String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "createImportHDF5Dataset() filetree is missing file '" + filename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(groupname) == 0,
+                "createImportHDF5Dataset() filetree is missing group '" + groupname + "'");
 
             items[0].getNode(0).click();
 
@@ -83,14 +85,14 @@ public class TestTreeViewExport extends AbstractWindowTest {
             datasetShell.bot().comboBox(3).setSelection("64");
 
             val = datasetShell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("createImportHDF5Dataset()", "wrong dataset name",
-                                                  datasetname, val),
-                       val.equals(datasetname));
+            assertTrue(val.equals(datasetname),
+                constructWrongValueMessage("createImportHDF5Dataset()", "wrong dataset name",
+                                                  datasetname, val));
 
             val = datasetShell.bot().text(2).getText();
-            assertTrue(constructWrongValueMessage("createImportHDF5Dataset()",
-                                                  "wrong dataset dimension sizes", datasetdimsize, val),
-                       val.equals(datasetdimsize));
+            assertTrue(val.equals(datasetdimsize),
+                constructWrongValueMessage("createImportHDF5Dataset()",
+                                                  "wrong dataset dimension sizes", datasetdimsize, val));
 
             datasetShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(datasetShell));
@@ -98,15 +100,15 @@ public class TestTreeViewExport extends AbstractWindowTest {
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Expand All").click();
 
-            assertTrue(constructWrongValueMessage("createImportHDF5Dataset()", "filetree wrong row count",
-                                                  "3", String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 3);
-            assertTrue("createImportHDF5Dataset() filetree is missing file '" + filename + "'",
-                       items[0].getText().compareTo(filename) == 0);
-            assertTrue("createImportHDF5Dataset() filetree is missing group '" + groupname + "'",
-                       items[0].getNode(0).getText().compareTo(groupname) == 0);
-            assertTrue("createImportHDF5Dataset() filetree is missing dataset '" + datasetname + "'",
-                       items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0);
+            assertTrue(filetree.visibleRowCount() == 3,
+                constructWrongValueMessage("createImportHDF5Dataset()", "filetree wrong row count",
+                                                  "3", String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(filename) == 0,
+                "createImportHDF5Dataset() filetree is missing file '" + filename + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(groupname) == 0,
+                "createImportHDF5Dataset() filetree is missing group '" + groupname + "'");
+            assertTrue(items[0].getNode(0).getNode(0).getText().compareTo(datasetname) == 0,
+                "createImportHDF5Dataset() filetree is missing dataset '" + datasetname + "'");
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -150,9 +152,9 @@ public class TestTreeViewExport extends AbstractWindowTest {
             text.setText(importfilename);
 
             String val = text.getText();
-            assertTrue("importHDF5Dataset() wrong file name: expected '" + importfilename + "' but was '" +
-                           val + "'",
-                       val.equals(importfilename));
+            assertTrue(val.equals(importfilename),
+                "importHDF5Dataset() wrong file name: expected '" + importfilename + "' but was '" +
+                           val + "'");
 
             importShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(importShell));
@@ -243,15 +245,15 @@ public class TestTreeViewExport extends AbstractWindowTest {
             text.setText(groupsetname + ".txt");
 
             String val = text.getText();
-            assertTrue("saveHDF5DatasetText() wrong file name: expected '" + groupsetname + ".txt"
-                           + "' but was '" + val + "'",
-                       val.equals(groupsetname + ".txt"));
+            assertTrue(val.equals(groupsetname + ".txt"),
+                "saveHDF5DatasetText() wrong file name: expected '" + groupsetname + ".txt"
+                           + "' but was '" + val + "'");
 
             exportShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(exportShell));
 
             export_file = new File(workDir, groupsetname + ".txt");
-            assertTrue("File-export text file created", export_file.exists());
+            assertTrue(export_file.exists(), "File-export text file created");
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -296,13 +298,13 @@ public class TestTreeViewExport extends AbstractWindowTest {
             items[0].getNode(0).click();
             items[0].getNode(0).contextMenu().contextMenu("Expand All").click();
 
-            assertTrue(constructWrongValueMessage("saveHDF5DatasetBinary()", "filetree wrong row count", "10",
-                                                  String.valueOf(filetree.visibleRowCount())),
-                       filetree.visibleRowCount() == 10);
-            assertTrue("saveHDF5DatasetBinary() filetree is missing file '" + fname + "'",
-                       items[0].getText().compareTo(fname) == 0);
-            assertTrue("saveHDF5DatasetBinary() filetree is missing group '" + groupsetname + "'",
-                       items[0].getNode(0).getText().compareTo("DS08BITS") == 0);
+            assertTrue(filetree.visibleRowCount() == 10,
+                constructWrongValueMessage("saveHDF5DatasetBinary()", "filetree wrong row count", "10",
+                                                  String.valueOf(filetree.visibleRowCount())));
+            assertTrue(items[0].getText().compareTo(fname) == 0,
+                "saveHDF5DatasetBinary() filetree is missing file '" + fname + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo("DS08BITS") == 0,
+                "saveHDF5DatasetBinary() filetree is missing group '" + groupsetname + "'");
 
             items[0].getNode(3).click();
             items[0]
@@ -327,15 +329,15 @@ public class TestTreeViewExport extends AbstractWindowTest {
             text.setText(groupsetname + ".bin");
 
             String val = text.getText();
-            assertTrue("saveHDF5DatasetText() wrong file name: expected '" + groupsetname + ".bin"
-                           + "' but was '" + val + "'",
-                       val.equals(groupsetname + ".bin"));
+            assertTrue(val.equals(groupsetname + ".bin"),
+                "saveHDF5DatasetText() wrong file name: expected '" + groupsetname + ".bin"
+                           + "' but was '" + val + "'");
 
             exportShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(exportShell));
 
             export_file = new File(workDir, "DU64BITS.bin");
-            assertTrue("File-export binary file created", export_file.exists());
+            assertTrue(export_file.exists(), "File-export binary file created");
         }
         catch (Exception ex) {
             ex.printStackTrace();

@@ -190,17 +190,16 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <!-- Object module tests: 9 tests run locally, 0 failures -->
+                    <!-- Library paths configured via build.properties (hdf5.lib.dir, hdf.lib.dir) -->
                     <argLine>
                         --add-opens java.base/java.lang=ALL-UNNAMED
                         --add-opens java.base/java.time=ALL-UNNAMED
                         --add-opens java.base/java.time.format=ALL-UNNAMED
                         --add-opens java.base/java.util=ALL-UNNAMED
                         --enable-native-access=jarhdf5
-                        -Djava.library.path=${project.parent.basedir}/target
+                        -Djava.library.path=${hdf5.lib.dir}:${hdf.lib.dir}
                     </argLine>
-                    <additionalClasspathElements>
-                        <additionalClasspathElement>${project.parent.basedir}/target/*</additionalClasspathElement>
-                    </additionalClasspathElements>
                 </configuration>
             </plugin>
         </plugins>

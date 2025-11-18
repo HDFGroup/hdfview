@@ -51,6 +51,11 @@
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-suite</artifactId>
+      <scope>test</scope>
+    </dependency>
     <!-- JUnit 4 compatibility during transition -->
     <dependency>
       <groupId>org.junit.vintage</groupId>
@@ -100,9 +105,28 @@
       <version>${swt.version}</version>
     </dependency>
 -->
-    <!-- SWTBot dependencies temporarily removed - not easily available on Maven Central
-         Will be re-added in Phase 2 with Tycho/p2 repository integration -->
-    <!-- TODO: Add SWTBot UI test dependencies in Phase 2 -->
+    <!-- SWTBot dependencies for UI testing -->
+    <!-- Installed to local Maven repository from Eclipse P2 repository -->
+    <!-- See scripts/install-swtbot.sh for installation -->
+    <dependency>
+      <groupId>org.eclipse.swtbot</groupId>
+      <artifactId>org.eclipse.swtbot.swt.finder</artifactId>
+      <version>4.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.swtbot</groupId>
+      <artifactId>org.eclipse.swtbot.nebula.nattable.finder</artifactId>
+      <version>4.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Hamcrest matchers (required by SWTBot) -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>2.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
     <dependencyManagement>
@@ -231,20 +255,6 @@
             <!-- Force classpath mode instead of module path -->
             <forceLegacyJavacApi>true</forceLegacyJavacApi>
         </configuration>
-        <executions>
-          <!-- Test compilation with proper module access for SWTBot -->
-          <execution>
-            <id>default-testCompile</id>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-            <configuration>
-              <!-- Note: --add-opens is a JVM runtime option, not a compiler option.
-                   It's configured in maven-surefire-plugin instead. -->
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -263,7 +273,7 @@
           <artifactId>maven-dependency-plugin</artifactId>
           <executions>
             <execution>
-              <phase>install</phase>
+              <phase>package</phase>
               <goals>
                 <goal>copy-dependencies</goal>
               </goals>
@@ -277,22 +287,40 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <!-- UI tests: 17 tests fully migrated to JUnit 5 with SWTBot -->
+                    <!-- Tests tagged with @Tag("ui") and @Tag("integration") -->
                     <argLine>
                         --add-opens java.base/java.lang=ALL-UNNAMED
                         --add-opens java.base/java.time=ALL-UNNAMED
                         --add-opens java.base/java.time.format=ALL-UNNAMED
                         --add-opens java.base/java.util=ALL-UNNAMED
                         --enable-native-access=jarhdf5
-                        -Djava.library.path=${project.parent.basedir}/target
+                        -Djava.library.path=${platform.hdf.lib}
                     </argLine>
-                    <additionalClasspathElements>
-                        <additionalClasspathElement>${project.parent.basedir}/target/*</additionalClasspathElement>
-                    </additionalClasspathElements>
                 </configuration>
             </plugin>
     </plugins>
 
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven 
+    <!-- Explicit resources configuration to ensure proper copying -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+      <!-- Include non-Java files from src/main/java (icons, properties, etc.) -->
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.gif</include>
+          <include>**/*.png</include>
+          <include>**/*.jpg</include>
+          <include>**/*.properties</include>
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven
         defaults (may be moved to parent pom) -->
     </pluginManagement>
   </build>

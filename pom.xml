@@ -63,6 +63,12 @@
         <artifactId>junit-jupiter-api</artifactId>
         <version>${junit.version}</version>
       </dependency>
+      <!-- JUnit Platform Suite for test suite support -->
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-suite</artifactId>
+        <version>1.10.0</version>
+      </dependency>
       <!-- JUnit 4 compatibility during transition -->
       <dependency>
         <groupId>org.junit.vintage</groupId>
@@ -318,8 +324,7 @@
             <parallel>methods</parallel>
             <threadCount>4</threadCount>
             <groups>unit</groups>
-            <!-- Fallback for tests without tags -->
-            <excludedGroups>ui</excludedGroups>
+            <!-- Fallback for tests without tags - UI tests run in separate execution -->
           </configuration>
           <executions>
             <!-- Fast unit tests (default) -->
@@ -391,17 +396,17 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
-          <version>3.21.2</version>
+          <version>3.25.0</version>
           <dependencies>
             <dependency>
               <groupId>net.sourceforge.pmd</groupId>
               <artifactId>pmd-core</artifactId>
-              <version>7.0.0</version>
+              <version>7.7.0</version>
             </dependency>
             <dependency>
               <groupId>net.sourceforge.pmd</groupId>
               <artifactId>pmd-java</artifactId>
-              <version>7.0.0</version>
+              <version>7.7.0</version>
             </dependency>
           </dependencies>
           <configuration>

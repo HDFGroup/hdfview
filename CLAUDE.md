@@ -16,14 +16,42 @@ The project uses **Maven** as the build system with a multi-module structure. Th
 # Build the entire project
 mvn clean compile
 
-# Run tests 
+# Run tests
 mvn test
 
-# Package application
+# Package application (includes dependencies)
 mvn package
+
+# Package without tests (faster)
+mvn clean package -DskipTests
 
 # Install dependencies and build
 mvn clean install
+```
+
+### Launcher Scripts
+
+Cross-platform launcher scripts are provided for easy local execution:
+
+- **`run-hdfview.sh`** - Unix/Linux/macOS launcher
+- **`run-hdfview.bat`** - Windows launcher
+
+Both scripts provide:
+- Environment validation (Java, Maven, HDF libraries)
+- Automatic property file parsing (`build.properties`)
+- Automatic build if needed
+- Three launch options:
+  1. Maven exec:java (development)
+  2. Direct JAR execution (recommended)
+  3. Environment validation only
+
+**Usage:**
+```bash
+# Unix/Linux/macOS
+./run-hdfview.sh
+
+# Windows
+run-hdfview.bat
 ```
 
 ### Key Build Configuration
@@ -37,6 +65,8 @@ mvn clean install
 ### Maven Plugins Integrated
 
 - **Properties Plugin**: External property file loading (`build.properties`)
+- **Resources Plugin**: Copies resources from both `src/main/resources` and `src/main/java` (icons, images)
+- **Dependency Plugin**: Copies runtime dependencies to `hdfview/target/lib/` during package phase
 - **Exec Plugin**: Native library version extraction and application execution
 - **JaCoCo Plugin**: Code coverage analysis and reporting (60% line, 50% branch coverage targets)
 - **JavaDoc Plugin**: API documentation generation with multi-module aggregation
@@ -75,7 +105,7 @@ The project consists of three main Maven modules:
 
 - Main source: `src/` (contains modular Java source with `org.hdfgroup.hdfview` and `org.hdfgroup.object`)
 - Module sources: `hdfview/src/`, `object/src/`
-- Tests: `test/` and `hdfview/src/test/` (66+ test classes, primarily UI tests)
+- Tests: `test/` and `hdfview/src/test/` (17 UI test classes in JUnit 5 migration)
 
 ## Development Workflow
 
@@ -124,23 +154,33 @@ The project consists of three main Maven modules:
 
 The project uses automated GitHub Actions workflows for continuous integration and quality assurance:
 
-- **`maven-ci.yml`**: Primary CI pipeline (~15 min)
-  - Build, compile, test with Maven
-  - Parallel unit tests, serial integration tests
-  - Artifact generation and publishing
+- **`maven-ci-orchestrator.yml`**: Primary CI orchestrator
+  - Triggers all platform-specific CI builds in parallel
+  - Runs on push, pull_request, and manual dispatch
+  - Calls: ci-linux.yml, ci-windows.yml, ci-macos.yml
 
-- **`maven-quality.yml`**: Code quality analysis (~25 min)
+- **`ci-linux.yml`, `ci-windows.yml`, `ci-macos.yml`**: Platform CI builds
+  - Build, compile, and test (currently tests disabled during JUnit 5 migration)
+  - Can be triggered independently via workflow_dispatch
+  - Cross-platform build verification
+
+- **`maven-quality.yml`**: Code quality analysis
   - JaCoCo code coverage (60% threshold)
   - PMD static analysis (violation limits)
   - Checkstyle code style enforcement
-  - Quality reports and PR comments
+  - Runs daily at 2 AM UTC + on push/PR
 
-- **`maven-security.yml`**: Security and compliance (~20 min)
+- **`maven-security.yml`**: Security and compliance
   - OWASP dependency vulnerability scanning (CVSS 8.0+ threshold)
   - GitHub CodeQL security analysis
   - License compliance checking (prohibits GPL/AGPL)
 
-- **`maven-release.yml`**: Automated releases (~30 min)
+- **`maven-build.yml`**: Cross-platform binary builds
+  - 6 build jobs (Linux, Windows, macOS binaries and app packages)
+  - Downloads HDF4/HDF5 from GitHub releases
+  - Daily scheduled builds
+
+- **`maven-release.yml`**: Automated releases
   - Version management from Git tags
   - GitHub Packages publication
   - Release notes generation
@@ -181,12 +221,13 @@ Located in `scripts/`:
 - SWT platform support for Linux x86_64
 - Native library integration configured
 
-### ✅ Phase 2A: JUnit 5 Migration (INFRASTRUCTURE COMPLETE, MIGRATION IN PROGRESS)
+### ✅ Phase 2A: JUnit 5 Migration (COMPLETE - 100%)
 - JUnit 5 v5.10.0 infrastructure integrated
 - Modern test foundation classes created
-- Automated migration script available
-- Sample test successfully migrated
-- **Current Task**: Migrating remaining test files to JUnit 5
+- Automated migration scripts developed (v2, v3, v4)
+- **Progress**: All 17 UI test files migrated (100%)
+- **Assertion fixes**: ~503 assertions migrated from JUnit 4 to JUnit 5 parameter order
+- **Status**: All tests compile successfully, ready for execution
 
 ### ✅ Phase 2B: CI/CD Pipeline (COMPLETE)
 - 4 production GitHub Actions workflows operational
@@ -205,15 +246,50 @@ Located in `scripts/`:
 - Focus on JavaFX evaluation for large dataset performance
 - Planned but deferred to prioritize test migration completion
 
-### 🎯 Current Focus
-**JUnit 5 Test Migration**: Systematically migrating remaining test files to JUnit 5 using established infrastructure and migration tools.
+### 🎯 Current Status (November 18, 2025)
+**Test Discovery Fixed and CI Infrastructure Hardened**: All major blockers resolved.
+
+- **JUnit 5 Migration**: 100% complete (17 UI test classes, ~503 assertions fixed) ✅
+- **Test Discovery**: Fixed - removed `<excludedGroups>ui</excludedGroups>`, tests re-enabled ✅
+- **Test Organization**: TestAll suite removed, JUnit 5 auto-discovery working ✅
+- **CI/CD Pipeline**: Enhanced with retry logic and robust error handling ✅
+- **Build System**: Resources and dependencies properly configured ✅
+- **Launcher Scripts**: Cross-platform scripts (Unix & Windows) working ✅
+- **Application**: Successfully launches with all libraries and resources ✅
+- **Quality Gates**: PMD, Checkstyle, JaCoCo analysis operational ✅
+- **Headless Testing**: Xvfb configured for Linux CI ✅
+- **Documentation**: Comprehensive Testing Guide added (`docs/Testing-Guide.md`) ✅
+
+**Tests Status:**
+- **Object module (9 tests)**: ✅ All passing locally, enabled in CI
+- **UI module (16 classes, 92 tests)**: ✅ Discovered by JUnit 5, enabled in CI
+- Test infrastructure: Complete and verified (Xvfb, SWTBot, retry logic)
+- CI improvements: HDF5 download retry logic, extraction error handling
+
+**Test Executions:**
+- `default-test`: Runs unit-tagged tests
+- `unit-tests`: Runs unit tests in parallel (4 threads)
+- `integration-tests`: Runs integration-tagged tests serially
+- `ui-tests`: Runs ui-tagged tests serially with display config
+
+**Next Priorities:**
+- Monitor CI test execution results
+- Fix any UI test initialization issues in headless environment
+- Achieve meaningful code coverage metrics (>60% target)
 
 ## Documentation
 
-Comprehensive project documentation is maintained in the `.claude/` directory:
+Comprehensive project documentation is maintained in multiple locations:
 
+### User Documentation (`docs/`)
+- **Testing Guide**: `docs/Testing-Guide.md` - Complete guide for running tests locally and in CI
+- **Build Instructions**: `docs/Build_HDFView.txt` - How to build the project
+- **Build Properties**: `docs/build.properties.example` - Configuration template
+- **Users Guide**: `docs/UsersGuide/` - End-user documentation
+
+### Developer Documentation (`.claude/`)
 - **Phase 1 Documentation**: `.claude/Phase1/` - Complete Maven migration history
 - **Phase 2 Summaries**: Implementation details for JUnit 5, CI/CD, and Quality Analysis
-- **Guides**: JUnit 5 migration, CI/CD operations, troubleshooting
+- **Guides**: `.claude/guides/` - JUnit 5 migration, CI/CD operations, troubleshooting
 - **Status Reports**: Current status and planning documents
 - **Configuration Examples**: PMD rules, Checkstyle configuration, quality standards
