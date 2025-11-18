@@ -324,8 +324,7 @@
             <parallel>methods</parallel>
             <threadCount>4</threadCount>
             <groups>unit</groups>
-            <!-- Fallback for tests without tags -->
-            <excludedGroups>ui</excludedGroups>
+            <!-- Fallback for tests without tags - UI tests run in separate execution -->
           </configuration>
           <executions>
             <!-- Fast unit tests (default) -->
