@@ -13,11 +13,11 @@
 
 package uitest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
@@ -34,12 +34,12 @@ import hdf.HDFVersions;
 import hdf.view.HDFView;
 
 import org.hamcrest.Matcher;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.TestInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,16 +95,16 @@ public abstract class AbstractWindowTest {
 
     protected static Rectangle monitorBounds;
 
-    @Rule
-    public TestName testName = new TestName();
+    protected TestInfo testInfo;
 
     protected static enum FILE_MODE { READ_ONLY, READ_WRITE, MULTI_READ_ONLY }
 
     private static final String objectShellTitleRegex = ".*at.*\\[.*in.*\\]";
 
-    @Before
-    public final void setupSWTBot() throws InterruptedException, BrokenBarrierException
+    @BeforeEach
+    public final void setupSWTBot(TestInfo testInfo) throws InterruptedException, BrokenBarrierException
     {
+        this.testInfo = testInfo;
         // synchronize with the thread opening the shell
         swtBarrier.await();
         bot = new SWTBot();
@@ -119,7 +119,7 @@ public abstract class AbstractWindowTest {
         });
     }
 
-    @After
+    @AfterEach
     public void closeShell() throws InterruptedException
     {
         // close the shell
@@ -135,7 +135,7 @@ public abstract class AbstractWindowTest {
     public void checkOpenFiles()
     {
         if (open_files > 0) {
-            String failMsg = "Test " + testName.getMethodName() + " still had " + open_files + " files open!";
+            String failMsg = "Test " + testInfo.getDisplayName() + " still had " + open_files + " files open!";
 
             open_files = 0;
 
@@ -145,7 +145,7 @@ public abstract class AbstractWindowTest {
         open_files = 0;
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setupApp()
     {
         clearRemovePropertyFile();
@@ -252,9 +252,9 @@ public abstract class AbstractWindowTest {
             text.setText(hdf_file.getName());
 
             String val = text.getText();
-            assertTrue("openFile() wrong file name: expected '" + hdf_file.getName() + "' but was '" + val +
-                           "'",
-                       val.equals(hdf_file.getName()));
+            assertTrue(val.equals(hdf_file.getName()),
+                       "openFile() wrong file name: expected '" + hdf_file.getName() + "' but was '" + val +
+                           "'");
 
             fileNameShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(fileNameShell));
@@ -266,11 +266,11 @@ public abstract class AbstractWindowTest {
              * TODO: difference here between rowCount() and visibleRowCount(). Can't use
              * checkFileTree().
              */
-            assertTrue("openFile() filetree wrong row count: expected '" + String.valueOf(open_files) +
-                           "' but was '" + filetree.rowCount() + "'",
-                       filetree.rowCount() == open_files + 1);
-            assertTrue("openFile() filetree is missing file '" + hdf_file.getName() + "'",
-                       filetree.getAllItems()[open_files].getText().compareTo(hdf_file.getName()) == 0);
+            assertTrue(filetree.rowCount() == open_files + 1,
+                       "openFile() filetree wrong row count: expected '" + String.valueOf(open_files) +
+                           "' but was '" + filetree.rowCount() + "'");
+            assertTrue(filetree.getAllItems()[open_files].getText().compareTo(hdf_file.getName()) == 0,
+                       "openFile() filetree is missing file '" + hdf_file.getName() + "'");
 
             /*
              * Increment the open_files value last, in case an error occurs when opening a
@@ -321,13 +321,14 @@ public abstract class AbstractWindowTest {
             text.setText(name);
 
             String val = text.getText();
-            assertTrue("createFile() wrong file name: expected '" + name + "' but was '" + val + "'",
-                       val.equals(name));
+            assertTrue(val.equals(name),
+                       "createFile() wrong file name: expected '" + name + "' but was '" + val + "'");
 
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(shell));
 
-            assertTrue("createFile() File '" + hdfFile + "' not created", hdfFile.exists());
+            assertTrue(hdfFile.exists(),
+                       "createFile() File '" + hdfFile + "' not created");
             open_files++;
         }
         catch (Exception ex) {
@@ -358,17 +359,19 @@ public abstract class AbstractWindowTest {
 
             if (deleteFile) {
                 if (hdfFile.exists()) {
-                    assertTrue("closeFile() File '" + hdfFile + "' not deleted", hdfFile.delete());
-                    assertFalse("closeFile() File '" + hdfFile + "' not gone", hdfFile.exists());
+                    assertTrue(hdfFile.delete(),
+                               "closeFile() File '" + hdfFile + "' not deleted");
+                    assertFalse(hdfFile.exists(),
+                                "closeFile() File '" + hdfFile + "' not gone");
                 }
             }
             log.trace("closeFile after open_files={}", open_files);
 
             if (open_files > 0) {
-                assertTrue(constructWrongValueMessage("closeFile()", "filetree wrong row count",
+                assertTrue(filetree.rowCount() == open_files - 1,
+                           constructWrongValueMessage("closeFile()", "filetree wrong row count",
                                                       String.valueOf(open_files - 1),
-                                                      String.valueOf(filetree.rowCount())),
-                           filetree.rowCount() == open_files - 1);
+                                                      String.valueOf(filetree.rowCount())));
                 open_files--;
             }
 
@@ -396,13 +399,13 @@ public abstract class AbstractWindowTest {
 
         String expectedRowCountStr = String.valueOf(expectedRowCount);
         int visibleRowCount        = tree.visibleRowCount();
-        assertTrue(constructWrongValueMessage(funcName, "filetree wrong row count", expectedRowCountStr,
-                                              String.valueOf(visibleRowCount)),
-                   visibleRowCount == expectedRowCount);
+        assertTrue(visibleRowCount == expectedRowCount,
+                   constructWrongValueMessage(funcName, "filetree wrong row count", expectedRowCountStr,
+                                              String.valueOf(visibleRowCount)));
 
         String curFilename = tree.getAllItems()[0].getText();
-        assertTrue(constructWrongValueMessage(funcName, "filetree is missing file", filename, curFilename),
-                   curFilename.compareTo(filename) == 0);
+        assertTrue(curFilename.compareTo(filename) == 0,
+                   constructWrongValueMessage(funcName, "filetree is missing file", filename, curFilename));
     }
 
     protected void testSamplePixel(final int theX, final int theY, String requiredValue)
@@ -433,9 +436,8 @@ public abstract class AbstractWindowTest {
             });
 
             String val = thisbot.text().getText();
-            assertTrue(
-                constructWrongValueMessage("testSamplePixel()", "wrong pixel value", requiredValue, val),
-                val.equals(requiredValue));
+            assertTrue(val.equals(requiredValue),
+                       constructWrongValueMessage("testSamplePixel()", "wrong pixel value", requiredValue, val));
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -677,7 +679,7 @@ public abstract class AbstractWindowTest {
                 String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
                 if (noRegex)
                     expectedValRegex = "\\Q" + expectedValRegex + "\\E";
-                assertTrue(errMsg, val.matches(expectedValRegex));
+                assertTrue(val.matches(expectedValRegex), errMsg);
             }
 
             @Override
@@ -725,7 +727,7 @@ public abstract class AbstractWindowTest {
                 String errMsg = constructWrongValueMessage(funcName, sb.toString(), expectedValRegex, val);
                 if (noRegex)
                     expectedValRegex = "\\Q" + expectedValRegex + "\\E";
-                assertTrue(errMsg, val.matches(expectedValRegex));
+                assertTrue(val.matches(expectedValRegex), errMsg);
             }
         }
     }
