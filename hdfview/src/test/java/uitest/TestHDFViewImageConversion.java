@@ -18,6 +18,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
 @Tag("ui")
 @Tag("integration")
+@Tag("visual")  // Requires real display - pixel-level image verification
 public class TestHDFViewImageConversion extends AbstractWindowTest {
     private static String JPGFILE   = "apollo17_earth.jpg";
     private static String HDF4IMAGE = JPGFILE + ".hdf";

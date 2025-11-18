@@ -225,8 +225,10 @@ jobs:
     - name: Run Tests
       run: |
         echo "::group::Run All Tests"
+        # macOS requires -XstartOnFirstThread for SWT Display (Cocoa restriction)
         mvn test -B \
-          -Dmaven.test.failure.ignore=false
+          -Dmaven.test.failure.ignore=false \
+          -DargLine="-XstartOnFirstThread"
         echo "::endgroup::"
 
     - name: Package Application
