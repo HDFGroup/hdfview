@@ -3,3 +3,4 @@ antoutput.log
 /target/
 /libs/
 /.claude/
+/build.properties
