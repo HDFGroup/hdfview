@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +21,12 @@ import object.H5TestFile;
  */
 public class TestFileExtension implements BeforeEachCallback, AfterEachCallback {
 
-    private static final Logger log = LoggerFactory.getLogger(TestFileExtension.class);
+    private static final Logger log        = LoggerFactory.getLogger(TestFileExtension.class);
     private static boolean testFileCreated = false;
 
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
+    public void beforeEach(ExtensionContext context) throws Exception
+    {
         // Create test file once per test class execution
         synchronized (TestFileExtension.class) {
             if (!testFileCreated) {
@@ -33,7 +35,8 @@ public class TestFileExtension implements BeforeEachCallback, AfterEachCallback 
                     H5TestFile.createTestFile(null);
                     testFileCreated = true;
                     log.info("HDF5 test file created successfully");
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     log.error("Failed to create HDF5 test file", ex);
                     throw new RuntimeException("Unable to create HDF5 test file: " + ex.getMessage(), ex);
                 }
@@ -42,12 +45,13 @@ public class TestFileExtension implements BeforeEachCallback, AfterEachCallback 
 
         // Log test method start
         Method testMethod = context.getRequiredTestMethod();
-        String testName = context.getDisplayName();
+        String testName   = context.getDisplayName();
         log.debug("Setting up test: {}.{}", testMethod.getDeclaringClass().getSimpleName(), testName);
     }
 
     @Override
-    public void afterEach(ExtensionContext context) throws Exception {
+    public void afterEach(ExtensionContext context) throws Exception
+    {
         // Log test method completion
         String testName = context.getDisplayName();
         log.debug("Completed test: {}", testName);
@@ -60,7 +64,8 @@ public class TestFileExtension implements BeforeEachCallback, AfterEachCallback 
     /**
      * Manually trigger test file deletion (called from @AfterAll methods)
      */
-    public static void cleanupTestFile() {
+    public static void cleanupTestFile()
+    {
         synchronized (TestFileExtension.class) {
             if (testFileCreated) {
                 log.info("Cleaning up HDF5 test file");
@@ -68,7 +73,8 @@ public class TestFileExtension implements BeforeEachCallback, AfterEachCallback 
                     java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(H5TestFile.NAME_FILE_H5));
                     testFileCreated = false;
                     log.info("HDF5 test file cleaned up successfully");
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     log.warn("Failed to delete HDF5 test file", ex);
                 }
             }

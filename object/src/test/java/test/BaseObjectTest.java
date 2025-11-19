@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.nio.file.Path;
 
 import hdf.object.h5.H5File;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +40,8 @@ public abstract class BaseObjectTest {
     protected String testMethodName;
 
     @BeforeEach
-    void baseSetUp(TestInfo testInfo) {
+    void baseSetUp(TestInfo testInfo)
+    {
         testMethodName = testInfo.getDisplayName();
         log.debug("Starting test: {}", testMethodName);
 
@@ -48,13 +51,15 @@ public abstract class BaseObjectTest {
             if (openID > 0) {
                 log.debug("Test setup - HDF5 IDs still open: {}", openID);
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             log.warn("Could not check HDF5 open ID count", ex);
         }
     }
 
     @AfterEach
-    void baseTearDown() {
+    void baseTearDown()
+    {
         // Ensure test file is closed
         closeTestFile();
 
@@ -64,7 +69,8 @@ public abstract class BaseObjectTest {
             if (openID > 0) {
                 log.warn("Test cleanup - HDF5 IDs still open: {}", openID);
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             log.warn("Could not check HDF5 open ID count during cleanup", ex);
         }
 
@@ -74,11 +80,13 @@ public abstract class BaseObjectTest {
     /**
      * Safely close the test file if it's open
      */
-    protected void closeTestFile() {
+    protected void closeTestFile()
+    {
         if (testFile != null) {
             try {
                 testFile.close();
-            } catch (final Exception ex) {
+            }
+            catch (final Exception ex) {
                 log.warn("Failed to close test file", ex);
             }
             testFile = null;
@@ -90,29 +98,29 @@ public abstract class BaseObjectTest {
      * @param fileid The file ID to check
      * @param expectedCount Expected number of open objects (usually 1 for file ID only)
      */
-    protected void assertHDF5ObjectCount(long fileid, int expectedCount) {
+    protected void assertHDF5ObjectCount(long fileid, int expectedCount)
+    {
         long nObjs = 0;
         try {
             nObjs = H5.H5Fget_obj_count(fileid, HDF5Constants.H5F_OBJ_ALL);
-        } catch (final Exception ex) {
+        }
+        catch (final Exception ex) {
             fail("H5.H5Fget_obj_count() failed: " + ex.getMessage());
         }
         assertEquals(expectedCount, nObjs,
-            String.format("Expected %d HDF5 objects open, but found %d", expectedCount, nObjs));
+                     String.format("Expected %d HDF5 objects open, but found %d", expectedCount, nObjs));
     }
 
     /**
      * Assert that a test file exists and is readable
      * @param filePath Path to the test file
      */
-    protected void assertTestFileExists(Path filePath) {
+    protected void assertTestFileExists(Path filePath)
+    {
         assertNotNull(filePath, "Test file path should not be null");
-        assertTrue(filePath.toFile().exists(),
-            "Test file should exist: " + filePath);
-        assertTrue(filePath.toFile().canRead(),
-            "Test file should be readable: " + filePath);
-        assertTrue(filePath.toFile().length() > 0,
-            "Test file should not be empty: " + filePath);
+        assertTrue(filePath.toFile().exists(), "Test file should exist: " + filePath);
+        assertTrue(filePath.toFile().canRead(), "Test file should be readable: " + filePath);
+        assertTrue(filePath.toFile().length() > 0, "Test file should not be empty: " + filePath);
     }
 
     /**
@@ -120,7 +128,8 @@ public abstract class BaseObjectTest {
      * @param message The base message
      * @return Formatted message with test context
      */
-    protected String withTestContext(String message) {
+    protected String withTestContext(String message)
+    {
         return String.format("[%s] %s", testMethodName, message);
     }
 
@@ -128,7 +137,8 @@ public abstract class BaseObjectTest {
      * Template method for test-specific setup
      * Override in subclasses for additional setup
      */
-    protected void doTestSetup() throws Exception {
+    protected void doTestSetup() throws Exception
+    {
         // Override in subclasses
     }
 
@@ -136,7 +146,8 @@ public abstract class BaseObjectTest {
      * Template method for test-specific cleanup
      * Override in subclasses for additional cleanup
      */
-    protected void doTestCleanup() throws Exception {
+    protected void doTestCleanup() throws Exception
+    {
         // Override in subclasses
     }
 }

@@ -34,12 +34,12 @@ import hdf.HDFVersions;
 import hdf.view.HDFView;
 
 import org.hamcrest.Matcher;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +135,8 @@ public abstract class AbstractWindowTest {
     public void checkOpenFiles()
     {
         if (open_files > 0) {
-            String failMsg = "Test " + testInfo.getDisplayName() + " still had " + open_files + " files open!";
+            String failMsg =
+                "Test " + testInfo.getDisplayName() + " still had " + open_files + " files open!";
 
             open_files = 0;
 
@@ -252,9 +253,8 @@ public abstract class AbstractWindowTest {
             text.setText(hdf_file.getName());
 
             String val = text.getText();
-            assertTrue(val.equals(hdf_file.getName()),
-                       "openFile() wrong file name: expected '" + hdf_file.getName() + "' but was '" + val +
-                           "'");
+            assertTrue(val.equals(hdf_file.getName()), "openFile() wrong file name: expected '" +
+                                                           hdf_file.getName() + "' but was '" + val + "'");
 
             fileNameShell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(fileNameShell));
@@ -327,8 +327,7 @@ public abstract class AbstractWindowTest {
             shell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(shell));
 
-            assertTrue(hdfFile.exists(),
-                       "createFile() File '" + hdfFile + "' not created");
+            assertTrue(hdfFile.exists(), "createFile() File '" + hdfFile + "' not created");
             open_files++;
         }
         catch (Exception ex) {
@@ -359,10 +358,8 @@ public abstract class AbstractWindowTest {
 
             if (deleteFile) {
                 if (hdfFile.exists()) {
-                    assertTrue(hdfFile.delete(),
-                               "closeFile() File '" + hdfFile + "' not deleted");
-                    assertFalse(hdfFile.exists(),
-                                "closeFile() File '" + hdfFile + "' not gone");
+                    assertTrue(hdfFile.delete(), "closeFile() File '" + hdfFile + "' not deleted");
+                    assertFalse(hdfFile.exists(), "closeFile() File '" + hdfFile + "' not gone");
                 }
             }
             log.trace("closeFile after open_files={}", open_files);
@@ -436,8 +433,9 @@ public abstract class AbstractWindowTest {
             });
 
             String val = thisbot.text().getText();
-            assertTrue(val.equals(requiredValue),
-                       constructWrongValueMessage("testSamplePixel()", "wrong pixel value", requiredValue, val));
+            assertTrue(
+                val.equals(requiredValue),
+                constructWrongValueMessage("testSamplePixel()", "wrong pixel value", requiredValue, val));
         }
         catch (Exception ex) {
             ex.printStackTrace();
