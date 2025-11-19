@@ -190,11 +190,6 @@ jobs:
           echo "Installed: $JAR_FILE"
         fi
 
-    - name: Install SWTBot Dependencies
-      run: |
-        echo "Installing SWTBot UI testing dependencies..."
-        ./scripts/install-swtbot.sh
-
     - name: Set up build.properties
       run: |
         cat > build.properties << EOF

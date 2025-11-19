@@ -202,11 +202,6 @@ jobs:
           echo "Installed: $JAR_FILE"
         fi
 
-    - name: Install SWTBot Dependencies
-      run: |
-        echo "Installing SWTBot UI testing dependencies..."
-        ./scripts/install-swtbot.sh
-
     - name: Set up Xvfb for Headless GUI Testing
       run: |
         echo "Installing Xvfb and GTK dependencies for headless SWT testing..."

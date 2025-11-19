@@ -192,12 +192,6 @@ jobs:
           Write-Host "Installed: $($slf4j.Name)"
         }
 
-    - name: Install SWTBot Dependencies
-      shell: bash
-      run: |
-        echo "Installing SWTBot UI testing dependencies..."
-        ./scripts/install-swtbot.sh
-
     - name: Set up build.properties
       shell: pwsh
       run: |
