@@ -255,7 +255,7 @@ jobs:
         # Skip hdfview UI tests until verified locally - only run object tests
         # Note: Windows CI doesn't have virtual display for GUI tests
         mvn test -B -pl object `
-          -Dmaven.test.failure.ignore=false
+          "-Dmaven.test.failure.ignore=false"
         Write-Host "::endgroup::"
 
     - name: Package Application

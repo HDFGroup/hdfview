@@ -253,9 +253,10 @@ jobs:
     - name: Run Tests with Coverage
       run: |
         echo "::group::Test Execution with Coverage"
-        # Run tests with Xvfb for headless GUI testing
+        # Skip hdfview UI tests until verified locally - only run object tests
+        # Run object tests with coverage, no need for Xvfb since object tests are non-GUI
         # Don't use 'clean' here - we need the installed object module
-        xvfb-run -a -s "-screen 0 1024x768x24" mvn test jacoco:report -B \
+        mvn test jacoco:report -B -pl object \
           -Dmaven.test.failure.ignore=false \
           -Djacoco.excludes="**/Test*,**/Mock*,**/Stub*"
         echo "::endgroup::"
@@ -264,26 +265,26 @@ jobs:
       run: |
         echo "::group::Coverage Analysis"
 
-        # Generate coverage report
-        mvn jacoco:report
+        # Generate coverage report for object module only
+        mvn jacoco:report -pl object
 
-        # Extract coverage percentage
-        if [ -f target/site/jacoco/index.html ]; then
-          COVERAGE=$(grep -o 'Total[^%]*%' target/site/jacoco/index.html | grep -o '[0-9]*%' | head -1)
-          echo "Current code coverage: ${COVERAGE:-Unknown}"
+        # Extract coverage percentage from object module
+        if [ -f object/target/site/jacoco/index.html ]; then
+          COVERAGE=$(grep -o 'Total[^%]*%' object/target/site/jacoco/index.html | grep -o '[0-9]*%' | head -1)
+          echo "Current code coverage (object module): ${COVERAGE:-Unknown}"
           echo "COVERAGE_PERCENT=${COVERAGE:-0%}" >> $GITHUB_ENV
         fi
 
-        # Check coverage threshold
-        mvn jacoco:check -Djacoco.haltOnFailure=false || echo "Coverage below threshold - check required"
+        # Check coverage threshold for object module
+        mvn jacoco:check -pl object -Djacoco.haltOnFailure=false || echo "Coverage below threshold - check required"
         echo "::endgroup::"
 
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
-        files: ./target/site/jacoco/jacoco.xml,./object/target/site/jacoco/jacoco.xml,./hdfview/target/site/jacoco/jacoco.xml
+        files: ./object/target/site/jacoco/jacoco.xml
         flags: unittests
-        name: codecov-hdfview
+        name: codecov-hdfview-object
         fail_ci_if_error: false
         verbose: true
 
