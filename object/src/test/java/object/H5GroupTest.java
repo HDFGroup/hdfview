@@ -1048,7 +1048,7 @@ public class H5GroupTest {
             String name =
                 H5.H5Lget_name_by_idx(gid, ".", HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC,
                                       1, HDF5Constants.H5P_DEFAULT); // Get name of ith link.
-            assertEquals(name);
+            assertEquals("G3", name);
             assertEquals(HDF5Constants.H5G_STORAGE_TYPE_COMPACT, ginfo.storage_type, "G3");
         }
         catch (final Exception ex) {

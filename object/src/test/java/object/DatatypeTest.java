@@ -293,9 +293,9 @@ public class DatatypeTest {
                         break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
-                        assertEquals("getDatatypeClass(): counter=" + counter + " (i=" + i + ", j=" + j +
-                                         ", k=" + k + ", l=" + l + ") class value results: ",
-                                     classes[i], baseTypes[counter++].getDatatypeClass());
+                        assertEquals(classes[i], baseTypes[counter++].getDatatypeClass(),
+                                     "getDatatypeClass(): counter=" + counter + " (i=" + i + ", j=" + j +
+                                         ", k=" + k + ", l=" + l + ") class value results: ");
                     }
                 }
             }
@@ -332,9 +332,9 @@ public class DatatypeTest {
                         break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
-                        assertEquals("getDatatypeSize(): counter=" + counter + " (i=" + i + ", j=" + j +
-                                         ", k=" + k + ", l=" + l + ") datatype size value results: ",
-                                     sizes[l], baseTypes[counter++].getDatatypeSize());
+                        assertEquals(sizes[l], baseTypes[counter++].getDatatypeSize(),
+                                     "getDatatypeSize(): counter=" + counter + " (i=" + i + ", j=" + j +
+                                         ", k=" + k + ", l=" + l + ") datatype size value results: ");
                     }
                 }
             }
@@ -371,9 +371,9 @@ public class DatatypeTest {
                         break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
-                        assertEquals("getDatatypeOrder(): counter=" + counter + " (i=" + i + ", j=" + j +
-                                         ", k=" + k + ", l=" + l + ") datatype order value results: ",
-                                     orders[j], baseTypes[counter++].getDatatypeOrder());
+                        assertEquals(orders[j], baseTypes[counter++].getDatatypeOrder(),
+                                     "getDatatypeOrder(): counter=" + counter + " (i=" + i + ", j=" + j +
+                                         ", k=" + k + ", l=" + l + ") datatype order value results: ");
                     }
                 }
             }
@@ -410,9 +410,9 @@ public class DatatypeTest {
                         break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
-                        assertEquals("getDatatypeSign(): counter=" + counter + " (i=" + i + ", j=" + j +
-                                         ", k=" + k + ", l=" + l + ") datatype sign value results: ",
-                                     signs[k], baseTypes[counter++].getDatatypeSign());
+                        assertEquals(signs[k], baseTypes[counter++].getDatatypeSign(),
+                                     "getDatatypeSign(): counter=" + counter + " (i=" + i + ", j=" + j +
+                                         ", k=" + k + ", l=" + l + ") datatype sign value results: ");
                     }
                 }
             }
@@ -438,7 +438,7 @@ public class DatatypeTest {
         }
 
         ed.setEnumMembers("40=high, 20=low");
-        assertEquals(ed.getEnumMembersAsString());
+        assertEquals("40=high, 20=low", ed.getEnumMembersAsString());
     }
 
     /**
@@ -484,10 +484,10 @@ public class DatatypeTest {
                         break;
                     }
                     for (int l = 0; l < n_sizes; l++) {
-                        assertEquals("getDatatypeDescription(): counter=" + counter + " (i=" + i +
+                        assertEquals(descriptions[counter], baseTypes[counter].getDescription(),
+                                     "getDatatypeDescription(): counter=" + counter + " (i=" + i +
                                          ", j=" + j + ", k=" + k + ", l=" + l +
-                                         ") datatype description value results: ",
-                                     descriptions[counter], baseTypes[counter].getDescription());
+                                         ") datatype description value results: ");
                         counter++;
                     }
                 }

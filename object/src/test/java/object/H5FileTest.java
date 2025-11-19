@@ -502,7 +502,7 @@ public class H5FileTest {
             String name =
                 H5.H5Lget_name_by_idx(gid, ".", HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC,
                                       1, HDF5Constants.H5P_DEFAULT); // Get name of 2nd link
-            assertEquals(name);
+            assertEquals("G3", name);
         }
         catch (final Exception ex) {
             fail("H5.H5Lget_name_by_idx() failed. " + ex);
@@ -605,7 +605,7 @@ public class H5FileTest {
             String name =
                 H5.H5Lget_name_by_idx(gid, ".", HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC,
                                       1, HDF5Constants.H5P_DEFAULT); // Get name of 2nd link
-            assertEquals(name);
+            assertEquals("G3", name);
         }
         catch (final Exception ex) {
             fail("H5.H5Lget_name_by_idx() failed. " + ex);

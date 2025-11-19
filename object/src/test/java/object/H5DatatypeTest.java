@@ -471,9 +471,9 @@ public class H5DatatypeTest {
                 fail("new H5Datatype failed. " + ex);
             }
 
-            assertEquals("sizes#" + i, sizes[i], type.getDatatypeSize());
-            assertEquals("signs#" + i, signs[i], type.getDatatypeSign());
-            assertEquals("orders#" + i, orders[i], type.getDatatypeOrder());
+            assertEquals(sizes[i], type.getDatatypeSize(), "sizes#" + i);
+            assertEquals(signs[i], type.getDatatypeSign(), "signs#" + i);
+            assertEquals(orders[i], type.getDatatypeOrder(), "orders#" + i);
         }
     }
 
