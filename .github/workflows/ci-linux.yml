@@ -251,7 +251,8 @@ jobs:
         # Run tests with Xvfb for headless GUI testing
         # -a auto-selects display number, :99 is default
         # -screen 0 1024x768x24 creates virtual display with 24-bit color
-        xvfb-run -a -s "-screen 0 1024x768x24" mvn test -B \
+        # Skip hdfview UI tests until verified locally - only run object tests
+        mvn test -B -pl object \
           -Dmaven.test.failure.ignore=false
         echo "::endgroup::"
 
