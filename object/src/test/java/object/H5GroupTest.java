@@ -1,11 +1,11 @@
 package object;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -32,11 +32,12 @@ import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5G_info_t;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,8 @@ import org.slf4j.LoggerFactory;
  * @author xcao
  *
  */
+@Tag("unit")
+@Tag("fast")
 public class H5GroupTest {
     private static final Logger log             = LoggerFactory.getLogger(H5GroupTest.class);
     private static final H5File H5FILE          = new H5File();
@@ -92,7 +95,7 @@ public class H5GroupTest {
         assertEquals(1, nObjs); // file id should be the only one left open
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void createFile() throws Exception
     {
         try {
@@ -112,7 +115,7 @@ public class H5GroupTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void checkIDs() throws Exception
     {
         try {
@@ -125,7 +128,7 @@ public class H5GroupTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void openFiles() throws Exception
     {
         try {
@@ -162,7 +165,7 @@ public class H5GroupTest {
         assertNotNull(testGroup);
     }
 
-    @After
+    @AfterEach
     public void removeFiles() throws Exception
     {
         if (testFile != null) {
@@ -254,7 +257,7 @@ public class H5GroupTest {
         catch (final Exception ex) {
             fail("get(GNAME) get(oldname) failed. " + ex);
         }
-        assertNull("The dataset should be null because it has been renamed", tmpDset);
+        assertNull(tmpDset, "The dataset should be null because it has been renamed");
 
         // set back the original name
         try {
@@ -1045,8 +1048,8 @@ public class H5GroupTest {
             String name =
                 H5.H5Lget_name_by_idx(gid, ".", HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC,
                                       1, HDF5Constants.H5P_DEFAULT); // Get name of ith link.
-            assertEquals("G3", name);
-            assertEquals(HDF5Constants.H5G_STORAGE_TYPE_COMPACT, ginfo.storage_type);
+            assertEquals(name);
+            assertEquals(HDF5Constants.H5G_STORAGE_TYPE_COMPACT, ginfo.storage_type, "G3");
         }
         catch (final Exception ex) {
             fail("H5.H5Lget_name_by_idx() failed. " + ex);

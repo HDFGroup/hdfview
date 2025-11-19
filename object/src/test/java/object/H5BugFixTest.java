@@ -1,9 +1,9 @@
 package object;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
@@ -16,11 +16,12 @@ import hdf.object.h5.H5ScalarDS;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Peter Cao, The HDF Group
  */
+@Tag("unit")
+@Tag("fast")
 public class H5BugFixTest {
     private static final Logger log    = LoggerFactory.getLogger(H5BugFixTest.class);
     private static final int NLOOPS    = 10;
@@ -98,7 +101,7 @@ public class H5BugFixTest {
         assertEquals(1, nObjs); // file id should be the only one left open
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void createFile() throws Exception
     {
         try {
@@ -118,7 +121,7 @@ public class H5BugFixTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void checkIDs() throws Exception
     {
         try {
@@ -132,7 +135,7 @@ public class H5BugFixTest {
     }
 
     @SuppressWarnings("deprecation")
-    @Before
+    @BeforeEach
     public void openFiles() throws Exception
     {
         try {
@@ -147,7 +150,7 @@ public class H5BugFixTest {
         assertNotNull(testFile);
     }
 
-    @After
+    @AfterEach
     public void removeFiles() throws Exception
     {
         if (testFile != null) {

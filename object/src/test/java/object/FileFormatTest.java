@@ -1,10 +1,10 @@
 package object;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Enumeration;
 
@@ -14,16 +14,19 @@ import hdf.object.h5.H5File;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 /**
  * @author rsinha
  *
  */
+@Tag("unit")
+@Tag("fast")
 public class FileFormatTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormatTest.class);
     private static final H5File H5FILE        = new H5File();
@@ -54,7 +57,7 @@ public class FileFormatTest {
         assertEquals(1, nObjs); // file id should be the only one left open
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void createFile() throws Exception
     {
         try {
@@ -74,7 +77,7 @@ public class FileFormatTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void checkIDs() throws Exception
     {
         try {
@@ -88,7 +91,7 @@ public class FileFormatTest {
     }
 
     @SuppressWarnings("deprecation")
-    @Before
+    @BeforeEach
     public void openFiles() throws Exception
     {
         try {
@@ -115,7 +118,7 @@ public class FileFormatTest {
         }
     }
 
-    @After
+    @AfterEach
     public void removeFiles() throws Exception
     {
         if (testFile != null) {

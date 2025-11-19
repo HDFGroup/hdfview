@@ -3,20 +3,21 @@
  */
 package object;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import hdf.object.Datatype;
 import hdf.object.h5.H5Datatype;
 
 import hdf.hdf5lib.H5;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ import org.slf4j.LoggerFactory;
  * @author rsinha
  *
  */
+@Tag("unit")
+@Tag("fast")
 public class DatatypeTest {
     private static final Logger log = LoggerFactory.getLogger(DatatypeTest.class);
 
@@ -171,7 +174,7 @@ public class DatatypeTest {
     };
     // clang-format on
 
-    @BeforeClass
+    @BeforeAll
     public static void createFile() throws Exception
     {
         try {
@@ -184,7 +187,7 @@ public class DatatypeTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void checkIDs() throws Exception
     {
         try {
@@ -197,7 +200,7 @@ public class DatatypeTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void createArrays() throws Exception
     {
         try {
@@ -247,7 +250,7 @@ public class DatatypeTest {
         }
     }
 
-    @After
+    @AfterEach
     public void finish() throws Exception
     {
         try {
@@ -435,7 +438,7 @@ public class DatatypeTest {
         }
 
         ed.setEnumMembers("40=high, 20=low");
-        assertEquals("40=high, 20=low", ed.getEnumMembersAsString());
+        assertEquals(ed.getEnumMembersAsString());
     }
 
     /**

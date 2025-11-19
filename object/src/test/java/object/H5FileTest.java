@@ -1,11 +1,11 @@
 package object;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -32,12 +32,13 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +91,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Peter Cao, The HDF Group
  */
+@Tag("unit")
+@Tag("fast")
 public class H5FileTest {
     private static final Logger log             = LoggerFactory.getLogger(H5FileTest.class);
     private static final H5File H5FILE          = new H5File();
@@ -131,7 +134,7 @@ public class H5FileTest {
         assertEquals(1, nObjs); // file id should be the only one left open
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void createFile() throws Exception
     {
         try {
@@ -151,7 +154,7 @@ public class H5FileTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void checkIDs() throws Exception
     {
         try {
@@ -164,7 +167,7 @@ public class H5FileTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void openFiles() throws Exception
     {
         try {
@@ -201,7 +204,7 @@ public class H5FileTest {
         assertNotNull(testDataset);
     }
 
-    @After
+    @AfterEach
     public void removeFiles() throws Exception
     {
         if (testFile != null) {
@@ -499,7 +502,7 @@ public class H5FileTest {
             String name =
                 H5.H5Lget_name_by_idx(gid, ".", HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC,
                                       1, HDF5Constants.H5P_DEFAULT); // Get name of 2nd link
-            assertEquals("G3", name);
+            assertEquals(name);
         }
         catch (final Exception ex) {
             fail("H5.H5Lget_name_by_idx() failed. " + ex);
@@ -523,7 +526,7 @@ public class H5FileTest {
     }
 
     /**
-     * Test method for {@link hdf.object.h5.H5File#createGcpl(int, int, int)} .
+     * Test method for {@link hdf.object.h5.H5File#createGcpl(int, int, int, "G3")} .
      *
      * What to test:
      * <ul>
@@ -602,7 +605,7 @@ public class H5FileTest {
             String name =
                 H5.H5Lget_name_by_idx(gid, ".", HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC,
                                       1, HDF5Constants.H5P_DEFAULT); // Get name of 2nd link
-            assertEquals("G3", name);
+            assertEquals(name);
         }
         catch (final Exception ex) {
             fail("H5.H5Lget_name_by_idx() failed. " + ex);
@@ -621,7 +624,7 @@ public class H5FileTest {
     /**
      * Test method for
      * {@link hdf.object.h5.H5File#createScalarDS(java.lang.String, hdf.object.Group, hdf.object.Datatype,
-     * long[], long[], long[], int, java.lang.Object)} , <br>
+     * long[], long[], long[], int, java.lang.Object, "G3")} , <br>
      * {@link hdf.object.h5.H5File#createCompoundDS(java.lang.String, hdf.object.Group, long[],
      * java.lang.String[], hdf.object.Datatype[], int[], java.lang.Object)} , <br>
      * {@link hdf.object.h5.H5File#createCompoundDS(java.lang.String, hdf.object.Group, long[], long[],
@@ -725,7 +728,7 @@ public class H5FileTest {
      * </ul>
      */
     @SuppressWarnings({"rawtypes", "deprecation"})
-    @Ignore // depends on HDFFV-9547
+    @Disabled // depends on HDFFV-9547
     public void testCopyHObjectGroup()
     {
         log.debug("testCopyHObjectGroup");
@@ -1229,7 +1232,7 @@ public class H5FileTest {
      * </ul>
      */
     @SuppressWarnings({"rawtypes", "deprecation"})
-    @Ignore // depends on HDFFV-9547
+    @Disabled // depends on HDFFV-9547
     public void testUpdateReferenceDataset()
     {
         log.debug("testUpdateReferenceDataset");
@@ -1583,9 +1586,9 @@ public class H5FileTest {
                 catch (Exception ex) {
                     fail("H5.H5Lget_info: " + ex);
                 }
-                assertFalse("H5Lget_info(): ", link_info == null);
+                assertFalse(link_info == null, "H5Lget_info(): ");
                 log.trace("H5Lget_info(): NAME_SOFT_LINK_DANGLE {}", link_info.type);
-                assertTrue("H5Lget_info(): link type", link_info.type == HDF5Constants.H5L_TYPE_SOFT);
+                assertTrue(link_info.type == HDF5Constants.H5L_TYPE_SOFT, "H5Lget_info(): link type");
 
                 //                String[] link_value = { null, null };
                 //                String targetObjName = null;
@@ -1598,7 +1601,7 @@ public class H5FileTest {
                 //                    obj.getFullName(), ex);
                 //                }
                 //                log.trace("H5Lget_value(): NAME_SOFT_LINK_DANGLE {} {}", link_value[0],
-                //                link_value[1]); assertEquals("DS1", link_value[0]);
+                //                link_value[1]); assertEquals(link_value[0]);
             }
             finally {
                 try {
@@ -1620,7 +1623,7 @@ public class H5FileTest {
 
     /**
      * Test method for
-     * {@link hdf.object.h5.H5File#createLink(hdf.object.Group, java.lang.String, hdf.object.HObject, int)}
+     * {@link hdf.object.h5.H5File#createLink(hdf.object.Group, java.lang.String, hdf.object.HObject, int, "DS1")}
      *
      * What to test:
      * <ul>
@@ -1774,8 +1777,8 @@ public class H5FileTest {
         catch (Exception ex) {
             fail("H5.H5Lget_info: " + ex);
         }
-        assertFalse("H5Lget_info ", link_info == null);
-        assertTrue("H5Lget_info link type", link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL);
+        assertFalse(link_info == null, "H5Lget_info ");
+        assertTrue(link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL, "H5Lget_info link type");
 
         //        String[] link_value = { null, null };
         //        String targetObjName = null;
@@ -1785,7 +1788,7 @@ public class H5FileTest {
         //        catch (Exception ex) {
         //            log.debug("getLinkTargetName(): H5Lget_value {} failure: ", obj.getFullName(), ex);
         //        }
-        //        assertEquals("DGroup", link_value[1] + FileFormat.FILE_OBJ_SEP + link_value[0]);
+        //        assertEquals(link_value[1] + FileFormat.FILE_OBJ_SEP + link_value[0]);
 
         try {
             fgrp1.close(gid);
@@ -1810,7 +1813,7 @@ public class H5FileTest {
     }
 
     /**
-     * Test method for {@link hdf.object.h5.H5File#getAttribute(int, int, int)}.
+     * Test method for {@link hdf.object.h5.H5File#getAttribute(int, int, int, "DGroup")}.
      *
      * What to test:
      * <ul>

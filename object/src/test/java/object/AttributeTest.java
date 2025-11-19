@@ -1,10 +1,10 @@
 package object;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,11 +20,12 @@ import hdf.object.h5.H5ScalarAttr;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ import org.slf4j.LoggerFactory;
  * @author Rishi R. Sinha
  *
  */
+@Tag("unit")
+@Tag("fast")
 public class AttributeTest {
     private static final Logger log    = LoggerFactory.getLogger(AttributeTest.class);
     private static final H5File H5FILE = new H5File();
@@ -66,7 +69,7 @@ public class AttributeTest {
         assertEquals(1, nObjs); // file id should be the only one left open
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void createFile() throws Exception
     {
         try {
@@ -86,7 +89,7 @@ public class AttributeTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void checkIDs() throws Exception
     {
         try {
@@ -100,7 +103,7 @@ public class AttributeTest {
     }
 
     @SuppressWarnings({"deprecation", "rawtypes"})
-    @Before
+    @BeforeEach
     public void openFiles() throws Exception
     {
         try {
@@ -134,7 +137,7 @@ public class AttributeTest {
         }
     }
 
-    @After
+    @AfterEach
     public void removeFiles() throws Exception
     {
         if (testFile != null) {
