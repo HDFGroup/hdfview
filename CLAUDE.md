@@ -246,27 +246,26 @@ Located in `scripts/`:
 - Focus on JavaFX evaluation for large dataset performance
 - Planned but deferred to prioritize test migration completion
 
-### 🎯 Current Status (November 19, 2025)
-**JUnit 5 Migration Complete - Tests Running Locally**: All critical blockers resolved.
+### 🎯 Current Status (November 20, 2025)
+**Comprehensive Project Cleanup Complete**: Test data relocated, orphaned files removed, true status documented.
 
-- **JUnit 5 Migration**: ✅ **100% COMPLETE** (including AbstractWindowTest base class)
-- **Test Execution**: ✅ Working locally (tests observable, no "bot is null" errors)
-- **Test Infrastructure**: ✅ SWTBot initialization fixed, barrier synchronization working
-- **macOS Support**: ✅ `-XstartOnFirstThread` added for SWT/Cocoa compatibility
-- **Visual Tests**: ✅ Tagged and excluded from CI (pixel-level tests need real display)
-- **CI/CD Pipeline**: ✅ Enhanced with retry logic and robust error handling
+- **JUnit 5 Migration (UI)**: ✅ **100% COMPLETE** for hdfview module (16 test classes, 92 tests)
+- **JUnit 5 Migration (Object)**: ⚠️ **INCOMPLETE** - 14 of 16 test classes still disabled (JUnit 4 format)
+- **Test Data**: ✅ **Relocated to Maven resources** (116 files moved from source tree)
+- **Project Structure**: ✅ **Orphaned directories removed** (249 files, 131MB cleaned up)
 - **Build System**: ✅ Resources and dependencies properly configured
 - **Launcher Scripts**: ✅ Cross-platform scripts (Unix & Windows) working
 - **Application**: ✅ Successfully launches with all libraries and resources
 - **Quality Gates**: ✅ PMD, Checkstyle, JaCoCo analysis operational
-- **Headless Testing**: ✅ Xvfb configured for Linux CI
-- **Documentation**: ✅ Comprehensive Testing Guide and session summaries
+- **Headless Testing**: ✅ Xvfb configured for Linux CI (but tests still have issues)
+- **Documentation**: ✅ Accurate status now documented
 
-**Tests Status:**
-- **Object module (9 tests)**: ✅ All passing locally and in CI
-- **UI module (16 classes, 92 tests)**: ✅ Executing locally, 90 tests enabled in CI (2 visual tests excluded)
-- **Visual tests (2 tests)**: ✅ Tagged for local-only execution (require real display)
-- **Total**: 101 tests discovered, 99 run in CI, 101 run locally
+**Tests Status (CORRECTED):**
+- **Object module**: ⚠️ Only 2 test classes enabled (9 test methods), 14 classes disabled (JUnit 4)
+- **UI module**: ✅ 16 classes migrated (92 tests), 90 tests run in CI (2 visual excluded)
+- **Visual tests**: ✅ 2 tests tagged for local-only execution
+- **Total Enabled**: 18 test classes, 101 test methods
+- **Total Disabled**: 14 test classes (object module, ~11,322 lines of code)
 
 **Test Executions:**
 - `default-test`: Runs unit-tagged tests
@@ -274,17 +273,23 @@ Located in `scripts/`:
 - `integration-tests`: Runs integration-tagged tests serially
 - `ui-tests`: Runs ui-tagged tests serially with display config, excludes visual tests
 
-**Commits:**
-- ✅ `23d2c17b` - Migrate AbstractWindowTest from JUnit 4 to JUnit 5 (PUSHED)
-- ✅ `9c3d4d93` - Sync maven-quality workflow with CI improvements (PUSHED)
-- 💾 `d90b4691` - Fix macOS SWT threading and exclude visual tests (READY - pending push)
+**Recent Commits (November 18-20):**
+- ✅ `c536a007` - Update dev document (Nov 19)
+- ✅ `b64ca3e0` - Ignore runtime files (Nov 18)
+- ✅ `d90b4691` - Fix macOS SWT threading and exclude visual tests (Nov 18)
+- ✅ `9c3d4d93` - Sync maven-quality workflow with CI improvements
+- ✅ `23d2c17b` - Migrate AbstractWindowTest from JUnit 4 to JUnit 5
+- ✅ `f6d623f2` - Relocate test data files to Maven resources (Nov 20) **NEW**
+- ✅ `1a2098dd` - Comprehensive .gitignore update (Nov 20) **NEW**
+- ✅ `f297014c` - Remove orphaned Ant build directories (Nov 20) **NEW**
 
 **Next Priorities:**
-1. Push pending commit when GitHub infrastructure recovers
-2. Verify CI test execution on all platforms (Linux, macOS, Windows)
-3. Analyze and fix any remaining test failures
-4. Generate code coverage reports (target >60%)
-5. Document visual test exclusion strategy
+1. ⚠️ **Complete object module JUnit 5 migration** (14 disabled test classes)
+2. Fix CI test execution issues (macOS threading, Linux timeouts)
+3. Verify tests can find relocated data files
+4. Re-enable disabled object module tests incrementally
+5. Generate code coverage reports (realistic target after test re-enabling)
+6. Fix macOS SWT Display threading architecture issue
 
 ## Documentation
 
