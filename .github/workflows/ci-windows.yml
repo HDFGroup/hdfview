@@ -252,6 +252,9 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "::group::Run All Tests"
+        # Install parent POM first (required for child module resolution)
+        mvn install -B -N "-Ddependency-check.skip=true"
+
         # Compile repository module (sets up dependencies but don't install)
         mvn compile -B -pl repository "-Ddependency-check.skip=true"
 
