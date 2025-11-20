@@ -211,8 +211,8 @@ jobs:
         # HDF4 Configuration
         hdf.lib.dir=$HDF4_PATH/lib
 
-        # Platform Configuration
-        platform.hdf.lib=$HDF5_PATH/lib
+        # Platform Configuration (Windows DLLs are in bin, not lib)
+        platform.hdf.lib=$HDF5_PATH/bin;$HDF4_PATH/bin
 
         # CI-specific settings
         ci.build=true

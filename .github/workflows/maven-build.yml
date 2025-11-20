@@ -508,7 +508,7 @@ jobs:
         hdf5.lib.dir=$HDF5_PATH/lib
         hdf5.plugin.dir=$HDF5_PATH/lib/plugin
         hdf.lib.dir=$HDF4_PATH/lib
-        platform.hdf.lib=$HDF5_PATH/lib
+        platform.hdf.lib=$HDF5_PATH/bin;$HDF4_PATH/bin
         "@ | Out-File -FilePath build.properties -Encoding utf8
 
         Write-Host "Generated build.properties:"
@@ -684,7 +684,7 @@ jobs:
         hdf5.lib.dir=$HDF5_PATH/lib
         hdf5.plugin.dir=$HDF5_PATH/lib/plugin
         hdf.lib.dir=$HDF4_PATH/lib
-        platform.hdf.lib=$HDF5_PATH/lib
+        platform.hdf.lib=$HDF5_PATH/bin;$HDF4_PATH/bin
         "@ | Out-File -FilePath build.properties -Encoding utf8
 
         Write-Host "Generated build.properties:"

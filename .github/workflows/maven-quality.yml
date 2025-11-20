@@ -306,7 +306,8 @@ jobs:
     - name: Static Analysis - PMD
       run: |
         echo "::group::PMD Analysis"
-        mvn pmd:pmd pmd:cpd -B \
+        # Run PMD on object module only (matching test scope)
+        mvn pmd:pmd pmd:cpd -B -pl object \
           -Dpmd.failOnViolation=false \
           -Dpmd.analysisCache=true
         echo "::endgroup::"
@@ -314,7 +315,8 @@ jobs:
     - name: Static Analysis - Checkstyle
       run: |
         echo "::group::Checkstyle Analysis"
-        mvn checkstyle:checkstyle -B \
+        # Run Checkstyle on object module only (matching test scope)
+        mvn checkstyle:checkstyle -B -pl object \
           -Dcheckstyle.failOnViolation=false \
           -Dcheckstyle.cache.file=target/checkstyle-cache
         echo "::endgroup::"
@@ -328,18 +330,23 @@ jobs:
         QUALITY_ISSUES=0
         QUALITY_WARNINGS=0
 
-        # Check coverage threshold
-        COVERAGE_NUM=$(echo ${COVERAGE_PERCENT:-0%} | sed 's/%//')
-        if [ -n "$COVERAGE_NUM" ] && [ "$COVERAGE_NUM" -lt 60 ]; then
-          echo "❌ Coverage below 60%: $COVERAGE_PERCENT"
+        # Check coverage threshold (object module only)
+        COVERAGE_NUM=$(echo "${COVERAGE_PERCENT:-0%}" | sed 's/%//' | tr -d '\n')
+        # Validate COVERAGE_NUM is a number
+        if [ -z "$COVERAGE_NUM" ] || ! [[ "$COVERAGE_NUM" =~ ^[0-9]+$ ]]; then
+          COVERAGE_NUM=0
+        fi
+
+        if [ "$COVERAGE_NUM" -lt 60 ]; then
+          echo "❌ Coverage below 60%: ${COVERAGE_PERCENT:-0%}"
           QUALITY_ISSUES=$((QUALITY_ISSUES + 1))
         else
           echo "✅ Coverage acceptable: ${COVERAGE_PERCENT:-Unknown}"
         fi
 
-        # Check PMD results
-        if [ -f target/pmd.xml ]; then
-          PMD_VIOLATIONS=$(grep -c '<violation' target/pmd.xml || echo "0")
+        # Check PMD results (object module)
+        if [ -f object/target/pmd.xml ]; then
+          PMD_VIOLATIONS=$(grep -c '<violation' object/target/pmd.xml || echo "0")
           if [ "$PMD_VIOLATIONS" -gt 50 ]; then
             echo "❌ PMD violations too high: $PMD_VIOLATIONS (max 50)"
             QUALITY_ISSUES=$((QUALITY_ISSUES + 1))
@@ -349,17 +356,23 @@ jobs:
           else
             echo "✅ PMD violations acceptable: $PMD_VIOLATIONS"
           fi
+        else
+          echo "⚠️  PMD results not found"
+          QUALITY_WARNINGS=$((QUALITY_WARNINGS + 1))
         fi
 
-        # Check Checkstyle results
-        if [ -f target/checkstyle-result.xml ]; then
-          CHECKSTYLE_ERRORS=$(grep -c 'severity="error"' target/checkstyle-result.xml || echo "0")
+        # Check Checkstyle results (object module)
+        if [ -f object/target/checkstyle-result.xml ]; then
+          CHECKSTYLE_ERRORS=$(grep -c 'severity="error"' object/target/checkstyle-result.xml || echo "0")
           if [ "$CHECKSTYLE_ERRORS" -gt 0 ]; then
             echo "❌ Checkstyle errors found: $CHECKSTYLE_ERRORS"
             QUALITY_ISSUES=$((QUALITY_ISSUES + 1))
           else
             echo "✅ No Checkstyle errors"
           fi
+        else
+          echo "⚠️  Checkstyle results not found"
+          QUALITY_WARNINGS=$((QUALITY_WARNINGS + 1))
         fi
 
         # Set outputs
