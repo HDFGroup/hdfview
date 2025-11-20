@@ -252,6 +252,9 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "::group::Run All Tests"
+        # Install object module first (hdfview depends on it)
+        mvn install -B -pl object "-DskipTests"
+
         # Run object tests (all passing)
         mvn test -B -pl object "-Dmaven.test.failure.ignore=false"
 
