@@ -252,10 +252,13 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "::group::Run All Tests"
-        # Skip hdfview UI tests until verified locally - only run object tests
-        # Note: Windows CI doesn't have virtual display for GUI tests
-        mvn test -B -pl object `
-          "-Dmaven.test.failure.ignore=false"
+        # Run object tests (all passing)
+        mvn test -B -pl object "-Dmaven.test.failure.ignore=false"
+
+        # Run hdfview tests - only passing test classes to verify CI stability
+        # Excluded: ImageConversion, LibBounds, Refs, TAttr2, TreeViewFiles, TreeViewFilters (known issues)
+        mvn test -B -pl hdfview "-Dmaven.test.failure.ignore=false" `
+          "-Dtest=TestHDFViewAttributes,TestHDFViewCutCopyPaste,TestHDFViewDatasetFrameSelection,TestHDFViewIntConversions,TestHDFViewLinks,TestHDFViewMenu,TestTreeViewExport,TestTreeViewNewMenu,TestTreeViewNewVLDatatypes"
         Write-Host "::endgroup::"
 
     - name: Package Application

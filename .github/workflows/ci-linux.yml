@@ -243,12 +243,17 @@ jobs:
     - name: Run Tests
       run: |
         echo "::group::Run All Tests"
-        # Run tests with Xvfb for headless GUI testing
+        # Run object tests (all passing)
+        mvn test -B -pl object -Dmaven.test.failure.ignore=false
+
+        # Run hdfview tests with Xvfb for headless GUI testing
         # -a auto-selects display number, :99 is default
         # -screen 0 1024x768x24 creates virtual display with 24-bit color
-        # Skip hdfview UI tests until verified locally - only run object tests
-        mvn test -B -pl object \
-          -Dmaven.test.failure.ignore=false
+        # Only running passing test classes to verify CI stability
+        # Excluded: ImageConversion, LibBounds, Refs, TAttr2, TreeViewFiles, TreeViewFilters (known issues)
+        xvfb-run -a -s "-screen 0 1024x768x24" mvn test -B -pl hdfview \
+          -Dmaven.test.failure.ignore=false \
+          -Dtest='TestHDFViewAttributes,TestHDFViewCutCopyPaste,TestHDFViewDatasetFrameSelection,TestHDFViewIntConversions,TestHDFViewLinks,TestHDFViewMenu,TestTreeViewExport,TestTreeViewNewMenu,TestTreeViewNewVLDatatypes'
         echo "::endgroup::"
 
     - name: Package Application
