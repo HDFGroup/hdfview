@@ -37,8 +37,8 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
 
             String val = bot.textWithLabel("Library version bounds: ").getText();
             assertTrue(
-                val.equals("Earliest and V200"),
-                constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "Earliest and V200", val));
+                val.equals("V18 and V200"),
+                constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "V18 and V200", val));
 
             SWTBotTreeItem[] items = filetree.getAllItems();
             items[0].click();
@@ -47,30 +47,30 @@ public class TestHDFViewLibBounds extends AbstractWindowTest {
             SWTBotShell libVersionShell = bot.shell("Set the library version bounds: ");
             libVersionShell.activate();
 
-            libVersionShell.bot().comboBox(0).setSelection("V18");
+            libVersionShell.bot().comboBox(0).setSelection("V110");
 
             libVersionShell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(libVersionShell));
 
             val = bot.textWithLabel("Library version bounds: ").getText();
             assertTrue(
-                val.equals("V18 and V200"),
-                constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "V18 and V200", val));
+                val.equals("V110 and V200"),
+                constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "V110 and V200", val));
 
             items[0].contextMenu().contextMenu("Set Lib version bounds").click();
 
             libVersionShell = bot.shell("Set the library version bounds: ");
             libVersionShell.activate();
 
-            libVersionShell.bot().comboBox(1).setSelection("V18");
+            libVersionShell.bot().comboBox(1).setSelection("V110");
 
             libVersionShell.bot().button("   &OK   ").click();
             bot.waitUntil(shellCloses(libVersionShell));
 
             val = bot.textWithLabel("Library version bounds: ").getText();
             assertTrue(
-                val.equals("V18 and V18"),
-                constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "V18 and V18", val));
+                val.equals("V110 and V110"),
+                constructWrongValueMessage("testLibVersion()", "wrong lib bounds", "V110 and V110", val));
 
             items[0].contextMenu().contextMenu("Set Lib version bounds").click();
 

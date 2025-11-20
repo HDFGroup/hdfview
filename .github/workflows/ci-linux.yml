@@ -243,9 +243,12 @@ jobs:
     - name: Run Tests
       run: |
         echo "::group::Run All Tests"
-        # Install all modules first (hdfview depends on object, both depend on parent)
-        # Skip OWASP check (runs in separate maven-security.yml workflow)
-        mvn install -B -DskipTests -Ddependency-check.skip=true
+        # Compile repository module (sets up dependencies but don't install)
+        mvn compile -B -pl repository -Ddependency-check.skip=true
+
+        # Install object and hdfview modules (needed for testing)
+        # Skip repository install (tries to install files that don't exist in CI)
+        mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
 
         # Run object tests (all passing)
         mvn test -B -pl object -Dmaven.test.failure.ignore=false
