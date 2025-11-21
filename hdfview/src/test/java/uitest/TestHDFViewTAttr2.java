@@ -439,7 +439,7 @@ public class TestHDFViewTAttr2 extends AbstractWindowTest {
             {"bitfield3D", "8-bit bitfield", "4 x 3 x 2",
              "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24"},
             {"compound", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "2",
-             "\\{1, 3, 2.0, 4.\\}"},
+             "\\{1, 3, 2.0, 4.0\\}"},
             {"compound2D", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "3 x 2",
              "\\{1, 3, 5, 7, 9, 11, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0\\}"},
             {"compound3D", "Compound \\{a = 8-bit integer, b = 64-bit floating-point\\}", "4 x 3 x 2",
