@@ -185,6 +185,18 @@ set JVM_ARGS=%JVM_ARGS% --add-opens java.base/java.util=ALL-UNNAMED
 set JVM_ARGS=%JVM_ARGS% --enable-native-access=jarhdf5
 set JVM_ARGS=%JVM_ARGS% -Djava.library.path=!hdf5_lib_dir!;!hdf_lib_dir!
 
+REM SLF4J logging configuration
+set SLF4J_IMPL=nop
+if "%1"=="--debug" set SLF4J_IMPL=simple
+if "%HDFVIEW_DEBUG%"=="1" set SLF4J_IMPL=simple
+
+if "!SLF4J_IMPL!"=="simple" (
+    echo [INFO] Debug logging enabled (slf4j-simple^)
+) else (
+    echo [INFO] Logging disabled (slf4j-nop^). Use --debug or set HDFVIEW_DEBUG=1 to enable.
+)
+echo.
+
 REM Launch options
 echo Choose launch method:
 echo 1. Maven exec:java (recommended for development)
@@ -223,8 +235,22 @@ if not exist "hdfview\target\lib" (
     echo [OK] Build completed
 )
 
-set CLASSPATH=libs\hdfview-3.4-SNAPSHOT.jar;hdfview\target\lib\*
-echo Command: java %JVM_ARGS% -cp "%CLASSPATH%" hdf.view.HDFView
+REM Build classpath, excluding slf4j-nop or slf4j-simple based on debug mode
+set CLASSPATH=libs\hdfview-3.4-SNAPSHOT.jar
+for %%j in (hdfview\target\lib\*.jar) do (
+    set "jarname=%%~nxj"
+    if "!SLF4J_IMPL!"=="simple" (
+        REM Skip nop, include simple
+        echo !jarname! | findstr /i "^slf4j-nop" >nul
+        if errorlevel 1 set "CLASSPATH=!CLASSPATH!;%%j"
+    ) else (
+        REM Skip simple, include nop
+        echo !jarname! | findstr /i "^slf4j-simple" >nul
+        if errorlevel 1 set "CLASSPATH=!CLASSPATH!;%%j"
+    )
+)
+
+echo Command: java %JVM_ARGS% -cp "..." hdf.view.HDFView
 echo.
 java %JVM_ARGS% -cp "%CLASSPATH%" hdf.view.HDFView
 goto :end

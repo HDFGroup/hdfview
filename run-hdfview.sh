@@ -191,7 +191,17 @@ JVM_ARGS=(
     "-Djava.library.path=$hdf5_lib_dir:$hdf_lib_dir"
 )
 
+# SLF4J logging configuration
+SLF4J_IMPL="nop"  # Default: no logging
+if [[ "$1" == "--debug" ]] || [[ "$HDFVIEW_DEBUG" == "1" ]]; then
+    SLF4J_IMPL="simple"
+    print_status "Debug logging enabled (slf4j-simple)"
+else
+    print_status "Logging disabled (slf4j-nop). Use --debug or HDFVIEW_DEBUG=1 to enable."
+fi
+
 # Launch options
+echo
 echo "Choose launch method:"
 echo "1. Maven exec:java (recommended for development)"
 echo "2. Direct JAR execution"
@@ -219,8 +229,21 @@ case $CHOICE in
             print_success "Build completed"
         fi
 
-        CLASSPATH="libs/hdfview-3.4-SNAPSHOT.jar:hdfview/target/lib/*"
-        echo "Command: java ${JVM_ARGS[*]} -cp \"$CLASSPATH\" hdf.view.HDFView"
+        # Build classpath, excluding slf4j-nop or slf4j-simple based on debug mode
+        CLASSPATH="libs/hdfview-3.4-SNAPSHOT.jar"
+        for jar in hdfview/target/lib/*.jar; do
+            jarname=$(basename "$jar")
+            if [[ "$SLF4J_IMPL" == "simple" ]]; then
+                # Skip nop, include simple
+                [[ "$jarname" == slf4j-nop* ]] && continue
+            else
+                # Skip simple, include nop
+                [[ "$jarname" == slf4j-simple* ]] && continue
+            fi
+            CLASSPATH="$CLASSPATH:$jar"
+        done
+
+        echo "Command: java ${JVM_ARGS[*]} -cp \"...\" hdf.view.HDFView"
         echo
         java "${JVM_ARGS[@]}" -cp "$CLASSPATH" hdf.view.HDFView
         ;;
