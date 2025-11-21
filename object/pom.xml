@@ -198,7 +198,7 @@
                         --add-opens java.base/java.time.format=ALL-UNNAMED
                         --add-opens java.base/java.util=ALL-UNNAMED
                         --enable-native-access=jarhdf5
-                        -Djava.library.path=${hdf5.lib.dir}:${hdf.lib.dir}
+                        -Djava.library.path=${platform.hdf.lib}
                     </argLine>
                 </configuration>
             </plugin>

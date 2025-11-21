@@ -192,12 +192,6 @@ jobs:
           Write-Host "Installed: $($slf4j.Name)"
         }
 
-    - name: Install SWTBot Dependencies
-      shell: bash
-      run: |
-        echo "Installing SWTBot UI testing dependencies..."
-        ./scripts/install-swtbot.sh
-
     - name: Set up build.properties
       shell: pwsh
       run: |
@@ -217,8 +211,8 @@ jobs:
         # HDF4 Configuration
         hdf.lib.dir=$HDF4_PATH/lib
 
-        # Platform Configuration
-        platform.hdf.lib=$HDF5_PATH/lib
+        # Platform Configuration (Windows DLLs are in bin, not lib)
+        platform.hdf.lib=$HDF5_PATH/bin;$HDF4_PATH/bin
 
         # CI-specific settings
         ci.build=true
@@ -258,11 +252,20 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "::group::Run All Tests"
-        # Skip GUI tests on Windows - GitHub Actions Windows runners don't have virtual display
-        # SWT/SWTBot tests require graphical display which is not available in Windows Server CI
-        # Tests remain available for local Windows development
-        mvn test -B `
-          "-DskipTests=true"
+        # Install parent POM first (required for child module resolution)
+        mvn install -B -N "-Ddependency-check.skip=true"
+
+        # Compile repository module (sets up dependencies but don't install)
+        mvn compile -B -pl repository "-Ddependency-check.skip=true"
+
+        # Install object and hdfview modules (needed for testing)
+        # Skip repository install (tries to install files that don't exist in CI)
+        mvn install -B -pl object,hdfview "-DskipTests" "-Ddependency-check.skip=true"
+
+        # Run object tests only (all 149 tests passing)
+        # HDFView UI tests disabled in CI - require real display
+        # UI tests should be run locally before merging
+        mvn test -B -pl object "-Dmaven.test.failure.ignore=false"
         Write-Host "::endgroup::"
 
     - name: Package Application

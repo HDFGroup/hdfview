@@ -297,6 +297,10 @@
                         --enable-native-access=jarhdf5
                         -Djava.library.path=${platform.hdf.lib}
                     </argLine>
+                    <!-- Set working directory to test resources where test data files are located -->
+                    <systemPropertyVariables>
+                        <hdfview.workdir>${project.build.testOutputDirectory}/uitest</hdfview.workdir>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
     </plugins>

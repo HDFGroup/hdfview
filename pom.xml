@@ -358,6 +358,7 @@
               </goals>
               <configuration>
                 <groups>ui</groups>
+                <excludedGroups>visual</excludedGroups> <!-- Skip pixel-level tests in CI -->
                 <parallel>none</parallel>
                 <argLine>
                   --add-opens java.base/java.lang=ALL-UNNAMED

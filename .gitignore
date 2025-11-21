@@ -1,5 +1,53 @@
+# Ant build output
 antoutput.log
+
+# Eclipse/IDE settings
 /.settings/
+
+# Maven build output
 /target/
+*/target/
 /libs/
+
+# Claude Code documentation
 /.claude/
+
+# Local build configuration (user-specific)
+/build.properties
+
+# Runtime-generated test files
+*.h5
+*.hdf
+*.nc
+*.he5
+
+# But allow test data in resources directories
+!**/src/test/resources/**/*.h5
+!**/src/test/resources/**/*.hdf
+!**/src/test/resources/**/*.nc
+!**/src/test/resources/**/*.he5
+
+# Samples directory test files (if kept)
+!samples/*.h5
+!samples/*.hdf
+!samples/*.nc
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Log files
+*.log
+
+# Temp files
+*~
+*.swp
+*.tmp

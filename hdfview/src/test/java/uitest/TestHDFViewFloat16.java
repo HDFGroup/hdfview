@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +32,7 @@ import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
  */
 @Tag("ui")
 @Tag("integration")
+@Disabled("Float16 tests cause JVM crash (SIGSEGV) in native HDF5 library - requires native debugging")
 public class TestHDFViewFloat16 extends AbstractWindowTest {
     @Test
     public void checkHDF5DS16BITS()

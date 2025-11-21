@@ -1,11 +1,15 @@
 #!/bin/bash
 # install-swtbot.sh
-# Install SWTBot dependencies to local Maven repository
+# [DEPRECATED] This script is no longer needed for the Maven build
 #
-# SWTBot is not available on Maven Central, so we download the JARs from
-# Eclipse P2 repository and install them to the local Maven repository.
+# SWTBot dependencies are now automatically installed by the repository/pom.xml
+# module during the Maven build process. The JARs are located in repository/lib/
+# and are installed to the local Maven repository via maven-install-plugin.
 #
-# Usage: ./scripts/install-swtbot.sh
+# This script is kept for reference but should not be used in CI workflows.
+# To install SWTBot dependencies, simply run: mvn clean install -pl repository
+#
+# Usage: ./scripts/install-swtbot.sh (DEPRECATED - use Maven build instead)
 
 set -e
 

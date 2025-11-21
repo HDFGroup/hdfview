@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
@@ -235,13 +235,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             String val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("SHUFFLE: Nbytes = 4, SZIP, GZIP, Error detection filter, NBIT"),
-                constructWrongValueMessage(
+                       constructWrongValueMessage(
                            "checkHDF5Filters()", "wrong data",
                            "SHUFFLE: Nbytes = 4, SZIP, GZIP, Error detection filter, NBIT", val));
 
@@ -251,13 +252,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("NONE"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "alloc_time_incr", "General Object Info");
             tabItem.activate();
@@ -265,13 +267,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("NONE"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "alloc_time_late", "General Object Info");
             tabItem.activate();
@@ -279,13 +282,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("NONE"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "chunked", "General Object Info");
             tabItem.activate();
@@ -293,13 +297,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("NONE"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "compact", "General Object Info");
             tabItem.activate();
@@ -308,12 +313,12 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
             assertTrue(val.equals("COMPACT"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "COMPACT", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "COMPACT", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("NONE"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "contiguous", "General Object Info");
             tabItem.activate();
@@ -322,12 +327,12 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
             assertTrue(val.equals("CONTIGUOUS"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CONTIGUOUS", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CONTIGUOUS", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("NONE"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "deflate", "General Object Info");
             tabItem.activate();
@@ -335,13 +340,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("GZIP"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "GZIP", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "GZIP", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "external", "General Object Info");
             tabItem.activate();
@@ -358,7 +364,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("NONE"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NONE", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "fletcher32", "General Object Info");
             tabItem.activate();
@@ -366,13 +372,15 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("Error detection filter"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "Error detection filter", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data",
+                                                  "Error detection filter", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "myfilter", "General Object Info");
             tabItem.activate();
@@ -380,11 +388,12 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("USERDEFINED myfilter(405): 5, 6"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data",
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data",
                                                   "USERDEFINED myfilter(405): 5, 6", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "nbit", "General Object Info");
@@ -393,13 +402,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("NBIT"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NBIT", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "NBIT", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "scaleoffset", "General Object Info");
             tabItem.activate();
@@ -407,13 +417,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("SCALEOFFSET: MIN BITS = 2"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data",
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data",
                                                   "SCALEOFFSET: MIN BITS = 2", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "shuffle", "General Object Info");
@@ -422,12 +433,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
-            assertTrue(val.equals("SHUFFLE: Nbytes = 4"),
+            assertTrue(
+                val.equals("SHUFFLE: Nbytes = 4"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "SHUFFLE: Nbytes = 4", val));
 
             tabItem = openMetadataTab(filetree, testFilename, "szip", "General Object Info");
@@ -436,13 +449,14 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
-            assertTrue(val.equals("CHUNKED: 10 X 5"),
+            assertTrue(
+                val.equals("CHUNKED: 10 X 5"),
                 constructWrongValueMessage("checkHDF5Filters()", "wrong data", "CHUNKED: 10 X 5", val));
             val = bot.labelInGroup("Miscellaneous Dataset Information", 4).getText();
             assertTrue(val.equals("Filters: "), "label matches");
             val = bot.labelInGroup("Miscellaneous Dataset Information", 5).getText();
             assertTrue(val.equals("SZIP"),
-                constructWrongValueMessage("checkHDF5Filters()", "wrong data", "SZIP", val));
+                       constructWrongValueMessage("checkHDF5Filters()", "wrong data", "SZIP", val));
         }
         catch (Exception ex) {
             ex.printStackTrace();
