@@ -2,6 +2,16 @@
 
 # HDFView Launcher Script
 # Validates environment and launches HDFView application
+#
+# Usage:
+#   ./run-hdfview.sh              # Launch with direct JAR (default)
+#   ./run-hdfview.sh --debug      # Launch with debug logging
+#   ./run-hdfview.sh --choose     # Interactive mode to choose launch method
+#   ./run-hdfview.sh --maven      # Launch with Maven exec:java
+#   ./run-hdfview.sh --validate   # Just validate environment
+#
+# Environment variables:
+#   HDFVIEW_DEBUG=1               # Enable debug logging
 
 set -e  # Exit on any error
 
@@ -137,6 +147,22 @@ else
     print_warning "HDF4 support will be disabled"
 fi
 
+# Check if repository dependencies are installed
+print_status "Checking Maven repository dependencies..."
+if [[ ! -d "$HOME/.m2/repository/jarhdf/jarhdf" ]]; then
+    print_warning "HDF dependencies not found in Maven repository"
+    print_status "Installing repository dependencies..."
+    mvn clean install -pl repository -Ddependency-check.skip=true -q
+    if [[ $? -eq 0 ]]; then
+        print_success "Repository dependencies installed"
+    else
+        print_error "Failed to install repository dependencies"
+        exit 1
+    fi
+else
+    print_success "Maven repository dependencies found"
+fi
+
 # Check if project needs building
 print_status "Checking build status..."
 if [[ ! -d "hdfview/target" ]] || [[ ! -f "libs/hdfview-3.4-SNAPSHOT.jar" ]]; then
@@ -191,23 +217,62 @@ JVM_ARGS=(
     "-Djava.library.path=$hdf5_lib_dir:$hdf_lib_dir"
 )
 
-# SLF4J logging configuration
+# Parse command line arguments
 SLF4J_IMPL="nop"  # Default: no logging
-if [[ "$1" == "--debug" ]] || [[ "$HDFVIEW_DEBUG" == "1" ]]; then
+LAUNCH_MODE="jar"  # Default: direct JAR execution
+
+for arg in "$@"; do
+    case $arg in
+        --debug)
+            SLF4J_IMPL="simple"
+            ;;
+        --choose)
+            LAUNCH_MODE="choose"
+            ;;
+        --maven)
+            LAUNCH_MODE="maven"
+            ;;
+        --validate)
+            LAUNCH_MODE="validate"
+            ;;
+    esac
+done
+
+# Check environment variable for debug
+if [[ "$HDFVIEW_DEBUG" == "1" ]]; then
     SLF4J_IMPL="simple"
+fi
+
+# Show logging status
+if [[ "$SLF4J_IMPL" == "simple" ]]; then
     print_status "Debug logging enabled (slf4j-simple)"
 else
     print_status "Logging disabled (slf4j-nop). Use --debug or HDFVIEW_DEBUG=1 to enable."
 fi
 
 # Launch options
-echo
-echo "Choose launch method:"
-echo "1. Maven exec:java (recommended for development)"
-echo "2. Direct JAR execution"
-echo "3. Just validate environment (no launch)"
-echo
-read -p "Enter choice [1-3]: " CHOICE
+if [[ "$LAUNCH_MODE" == "choose" ]]; then
+    echo
+    echo "Choose launch method:"
+    echo "1. Maven exec:java"
+    echo "2. Direct JAR execution (recommended)"
+    echo "3. Just validate environment (no launch)"
+    echo
+    read -p "Enter choice [1-3]: " CHOICE
+else
+    # Map launch mode to choice number
+    case $LAUNCH_MODE in
+        maven)
+            CHOICE=1
+            ;;
+        jar)
+            CHOICE=2
+            ;;
+        validate)
+            CHOICE=3
+            ;;
+    esac
+fi
 
 case $CHOICE in
     1)
