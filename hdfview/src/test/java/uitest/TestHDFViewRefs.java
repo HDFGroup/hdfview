@@ -161,12 +161,12 @@ public class TestHDFViewRefs extends AbstractWindowTest {
                 retriever.testAllTableLocations(expectedTrueData);
             else
                 retriever.testAllTableLocations(expectedData);
-            //dataTable.doubleclick(1, 1);
-            //tableShellData = openDataObject("Dataset2");
+            // dataTable.doubleclick(1, 1);
+            // tableShellData = openDataObject("Dataset2");
 
-            //final SWTBotNatTable table2 = getNatTable(tableShellData);
-            //TableDataRetriever retriever2 =
-            //    DataRetrieverFactory.getTableDataRetriever(table2, "openTDataRegionReference()", true);
+            // final SWTBotNatTable table2 = getNatTable(tableShellData);
+            // TableDataRetriever retriever2 =
+            //     DataRetrieverFactory.getTableDataRetriever(table2, "openTDataRegionReference()", true);
 
             // retriever2.testAllTableLocations(expectedTableData);
         }
