@@ -70,14 +70,17 @@ mvn test -pl hdfview
 ### Expected Results
 
 **Object Module:**
-- 9 tests should run
+- 149 tests across 15 test classes should run
 - Tests HDF5 object model and file operations
 - No display required
+- **Status**: ✅ All passing in CI (Linux, macOS, Windows)
 
 **UI Module:**
-- 17 test classes for GUI functionality
-- Requires display (real or virtual via Xvfb)
+- 16 test classes for GUI functionality
+- Requires display (real display, NOT Xvfb - SWT limitation)
 - Tests SWT widgets, menus, dialogs, etc.
+- **Status**: ⚠️ Run locally only (disabled in CI due to display requirements)
+- **Current Results**: ~78 tests passing, 5 tests failing (tracked in GitHub issues #383-386)
 
 ---
 
@@ -99,17 +102,20 @@ HDFView uses JUnit 5 with tag-based test organization:
 hdfview/
 ├── object/                    # HDF object model
 │   └── src/test/java/
-│       └── object/            # 9 tests (no display)
+│       └── object/            # 15 test classes, 149 tests (no display)
 │           ├── DatasetTest.java
-│           └── GroupTest.java
+│           ├── GroupTest.java
+│           ├── AttributeTest.java
+│           ├── H5FileTest.java
+│           └── ... (11 more test classes)
 │
 └── hdfview/                   # GUI application
     └── src/test/java/
-        └── uitest/            # 17 UI test classes
+        └── uitest/            # 16 UI test classes (~83 tests)
             ├── TestAll.java   # Test suite
             ├── TestHDFViewMenu.java
             ├── TestTreeViewFiles.java
-            └── ...
+            └── ... (13 more test classes)
 ```
 
 ### Maven Surefire Executions
@@ -400,16 +406,23 @@ Tests run automatically in CI via GitHub Actions:
 
 ### CI Test Execution
 
-```yaml
-# Linux (with Xvfb)
-xvfb-run -a -s "-screen 0 1024x768x24" mvn test -B
+**Current Strategy (November 2025):**
+- **Object Module Only**: CI runs only object module tests (149 tests)
+- **UI Tests Disabled**: UI tests require real display (Xvfb not compatible with SWT)
+- **All Platforms**: Linux, macOS, and Windows run object tests
 
-# macOS (native display)
-mvn test -B
+```bash
+# Current CI command (all platforms)
+mvn test -pl object -B
 
-# Windows (native display, UI tests may be disabled)
-mvn test -B
+# UI tests are run locally only
+mvn test -pl hdfview  # Local development only
 ```
+
+**Why UI tests are disabled in CI:**
+- SWT requires native display (Xvfb virtual display doesn't work)
+- macOS requires Display on main thread (threading conflicts)
+- UI tests are validated locally before merge
 
 ### Viewing CI Test Results
 
@@ -529,7 +542,8 @@ mvn test -Dmaven.test.failure.ignore=true
 
 ---
 
-**Last Updated:** November 18, 2025
+**Last Updated:** November 23, 2025
 **HDFView Version:** 3.4-SNAPSHOT
 **Java Version:** 21
 **Maven Version:** 3.9+
+**Test Status:** Object: 149/149 passing | UI: ~78/83 passing (local only)

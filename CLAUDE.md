@@ -286,7 +286,7 @@ HDFVIEW_DEBUG=1 ./run-hdfview.sh
 ```
 
 **Next Priorities:**
-1. Fix TestHDFViewRefs timeout (issue #385)
+1. ✅ **FIXED**: TestHDFViewRefs timeout (issue #385) - Fixed November 23, 2025
 2. Fix compound dataset save bug (issue #386) - deep investigation needed
 3. Add new datatype testing
 4. Improve code coverage
