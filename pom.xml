@@ -39,13 +39,16 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- SLF4J SIMPLE -->
+      <!-- SLF4J implementations (choose at runtime) -->
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
         <version>${slf4j.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-nop</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
       <!-- JUnit 5 -->
       <dependency>
@@ -62,6 +65,12 @@
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-api</artifactId>
         <version>${junit.version}</version>
+      </dependency>
+      <!-- JUnit Platform Suite for test suite support -->
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-suite</artifactId>
+        <version>1.10.0</version>
       </dependency>
       <!-- JUnit 4 compatibility during transition -->
       <dependency>
@@ -100,7 +109,7 @@
             <target>21</target>
             <release>21</release>
             <!-- Force classpath mode instead of module path -->
-            <forceJavacCompilerUse>true</forceJavacCompilerUse>
+            <forceLegacyJavacApi>true</forceLegacyJavacApi>
           </configuration>
         </plugin>
         <!-- Properties Plugin for external property file loading -->
@@ -318,8 +327,7 @@
             <parallel>methods</parallel>
             <threadCount>4</threadCount>
             <groups>unit</groups>
-            <!-- Fallback for tests without tags -->
-            <excludedGroups>ui</excludedGroups>
+            <!-- Fallback for tests without tags - UI tests run in separate execution -->
           </configuration>
           <executions>
             <!-- Fast unit tests (default) -->
@@ -353,6 +361,7 @@
               </goals>
               <configuration>
                 <groups>ui</groups>
+                <excludedGroups>visual</excludedGroups> <!-- Skip pixel-level tests in CI -->
                 <parallel>none</parallel>
                 <argLine>
                   --add-opens java.base/java.lang=ALL-UNNAMED
@@ -391,17 +400,17 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
-          <version>3.21.2</version>
+          <version>3.25.0</version>
           <dependencies>
             <dependency>
               <groupId>net.sourceforge.pmd</groupId>
               <artifactId>pmd-core</artifactId>
-              <version>7.0.0</version>
+              <version>7.7.0</version>
             </dependency>
             <dependency>
               <groupId>net.sourceforge.pmd</groupId>
               <artifactId>pmd-java</artifactId>
-              <version>7.0.0</version>
+              <version>7.7.0</version>
             </dependency>
           </dependencies>
           <configuration>

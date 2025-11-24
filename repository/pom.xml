@@ -21,6 +21,8 @@
             </activation>
             <build>
                 <plugins>
+                    <!-- SWT JAR copy disabled - swt.jar already in repository/lib/ and using Maven Central -->
+                    <!--
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
@@ -30,7 +32,6 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <target>
-                                        <!-- Copy the correct swt jar -->
                                         <copy todir="./lib">
                                             <fileset
                                                 dir="../lib/ext/swt/osx/${os.arch}"
@@ -46,6 +47,7 @@
                             </execution>
                         </executions>
                     </plugin>
+                    -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-install-plugin</artifactId>
@@ -87,6 +89,8 @@
             </activation>
             <build>
                 <plugins>
+                    <!-- SWT JAR copy disabled - swt.jar already in repository/lib/ and using Maven Central -->
+                    <!--
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
@@ -96,7 +100,6 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <target>
-                                        <!-- Copy the correct swt jar -->
                                         <copy todir="./lib">
                                             <fileset
                                                 dir="../lib/ext/swt/linux/${os.arch}"
@@ -112,6 +115,7 @@
                             </execution>
                         </executions>
                     </plugin>
+                    -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-install-plugin</artifactId>
@@ -148,6 +152,8 @@
             </activation>
             <build>
                 <plugins>
+                    <!-- SWT JAR copy disabled - swt.jar already in repository/lib/ and using Maven Central -->
+                    <!--
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
@@ -157,7 +163,6 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <target>
-                                        <!-- Copy the correct swt jar -->
                                         <copy todir="./lib">
                                             <fileset
                                                 dir="../lib/ext/swt/win/${os.arch}"
@@ -173,6 +178,7 @@
                             </execution>
                         </executions>
                     </plugin>
+                    -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-install-plugin</artifactId>
@@ -222,16 +228,8 @@
                                         <include name="*.jar" />
                                         <exclude name="slf4j*.jar" />
                                     </fileset>
-                                    <fileset dir="../lib/ext/swt">
-                                        <include name="*.jar" />
-                                    </fileset>
-                                    <fileset dir="../lib/ext/swt/swtbot">
-                                        <include name="*.jar" />
-                                    </fileset>
-                                    <fileset dir="../lib">
-                                        <include name="fits.jar" />
-                                        <include name="netcdf.jar" />
-                                    </fileset>
+                                    <!-- SWT, SWTBot, fits.jar, and netcdf.jar are already in repository/lib/ -->
+                                    <!-- No need to copy from lib/ext/swt or ../lib (removed during cleanup) -->
                                 </copy>
                             </target>
                         </configuration>

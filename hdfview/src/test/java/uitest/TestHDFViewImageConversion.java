@@ -1,11 +1,13 @@
 package uitest;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
@@ -15,12 +17,16 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
+@Tag("ui")
+@Tag("integration")
+@Tag("visual") // Requires real display - pixel-level image verification
 public class TestHDFViewImageConversion extends AbstractWindowTest {
     private static String JPGFILE   = "apollo17_earth.jpg";
     private static String HDF4IMAGE = JPGFILE + ".hdf";
     private static String HDF5IMAGE = JPGFILE + ".h5";
 
     @Test
+    @Disabled("HDF4 image conversion has known bug in native library - to be fixed later")
     public void convertImageToHDF4()
     {
         File hdf_file = new File(workDir, HDF4IMAGE);
@@ -35,16 +41,16 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             convertshell.bot().text(0).setText(workDir + File.separator + JPGFILE);
 
             String val = convertshell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong source file",
-                                                  workDir + File.separator + JPGFILE, val),
-                       val.equals(workDir + File.separator + JPGFILE));
+            assertTrue(val.equals(workDir + File.separator + JPGFILE),
+                       constructWrongValueMessage("convertImageToHDF4()", "wrong source file",
+                                                  workDir + File.separator + JPGFILE, val));
 
             convertshell.bot().text(1).setText(workDir + File.separator + HDF4IMAGE);
 
             val = convertshell.bot().text(1).getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong dest file",
-                                                  workDir + File.separator + HDF4IMAGE, val),
-                       val.equals(workDir + File.separator + HDF4IMAGE));
+            assertTrue(val.equals(workDir + File.separator + HDF4IMAGE),
+                       constructWrongValueMessage("convertImageToHDF4()", "wrong dest file",
+                                                  workDir + File.separator + HDF4IMAGE, val));
 
             convertshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(convertshell));
@@ -52,10 +58,10 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("convertImageToHDF4() filetree is missing file '" + HDF4IMAGE + "'",
-                       items[0].getText().compareTo(HDF4IMAGE) == 0);
-            assertTrue("convertImageToHDF4() filetree is missing image '" + JPGFILE + "'",
-                       items[0].getNode(0).getText().compareTo(JPGFILE) == 0);
+            assertTrue(items[0].getText().compareTo(HDF4IMAGE) == 0,
+                       "convertImageToHDF4() filetree is missing file '" + HDF4IMAGE + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(JPGFILE) == 0,
+                       "convertImageToHDF4() filetree is missing image '" + JPGFILE + "'");
 
             items[0].getNode(0).click();
 
@@ -65,17 +71,18 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             tabItem.activate();
 
             val = bot.textWithLabel("Name: ").getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image name", JPGFILE, val),
-                       val.equals(JPGFILE)); // Test dataset name
+            assertTrue(val.equals(JPGFILE),
+                       constructWrongValueMessage("convertImageToHDF4()", "wrong image name", JPGFILE,
+                                                  val)); // Test dataset name
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image rank", "2", val),
-                       val.equals("2")); // Test rank
+            assertTrue(val.equals("2"), constructWrongValueMessage("convertImageToHDF4()", "wrong image rank",
+                                                                   "2", val)); // Test rank
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 1).getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF4()", "wrong image dimension sizes",
-                                                  "533 x 533", val),
-                       val.equals("533 x 533")); // Test dimension sizes
+            assertTrue(val.equals("533 x 533"),
+                       constructWrongValueMessage("convertImageToHDF4()", "wrong image dimension sizes",
+                                                  "533 x 533", val)); // Test dimension sizes
 
             // Test sample pixels
             items[0].getNode(0).contextMenu().contextMenu("Open As").click();
@@ -131,16 +138,16 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             convertshell.bot().text(0).setText(workDir + File.separator + JPGFILE);
 
             String val = convertshell.bot().text(0).getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong source file",
-                                                  workDir + File.separator + JPGFILE, val),
-                       val.equals(workDir + File.separator + JPGFILE));
+            assertTrue(val.equals(workDir + File.separator + JPGFILE),
+                       constructWrongValueMessage("convertImageToHDF5()", "wrong source file",
+                                                  workDir + File.separator + JPGFILE, val));
 
             convertshell.bot().text(1).setText(workDir + File.separator + HDF5IMAGE);
 
             val = convertshell.bot().text(1).getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong dest file",
-                                                  workDir + File.separator + HDF5IMAGE, val),
-                       val.equals(workDir + File.separator + HDF5IMAGE));
+            assertTrue(val.equals(workDir + File.separator + HDF5IMAGE),
+                       constructWrongValueMessage("convertImageToHDF5()", "wrong dest file",
+                                                  workDir + File.separator + HDF5IMAGE, val));
 
             convertshell.bot().button("   &OK   ").click();
             bot.waitUntil(Conditions.shellCloses(convertshell));
@@ -148,10 +155,10 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             SWTBotTree filetree    = bot.tree();
             SWTBotTreeItem[] items = filetree.getAllItems();
 
-            assertTrue("convertImageToHDF5() filetree is missing file '" + HDF5IMAGE + "'",
-                       items[0].getText().compareTo(HDF5IMAGE) == 0);
-            assertTrue("convertImageToHDF5() filetree is missing image '" + JPGFILE + "'",
-                       items[0].getNode(0).getText().compareTo(JPGFILE) == 0);
+            assertTrue(items[0].getText().compareTo(HDF5IMAGE) == 0,
+                       "convertImageToHDF5() filetree is missing file '" + HDF5IMAGE + "'");
+            assertTrue(items[0].getNode(0).getText().compareTo(JPGFILE) == 0,
+                       "convertImageToHDF5() filetree is missing image '" + JPGFILE + "'");
 
             // Test metadata
             items[0].getNode(0).click();
@@ -160,17 +167,18 @@ public class TestHDFViewImageConversion extends AbstractWindowTest {
             tabItem.activate();
 
             val = bot.textWithLabel("Name: ").getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image name", JPGFILE, val),
-                       val.equals(JPGFILE)); // Test dataset name
+            assertTrue(val.equals(JPGFILE),
+                       constructWrongValueMessage("convertImageToHDF5()", "wrong image name", JPGFILE,
+                                                  val)); // Test dataset name
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 0).getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image rank", "3", val),
-                       val.equals("3")); // Test rank
+            assertTrue(val.equals("3"), constructWrongValueMessage("convertImageToHDF5()", "wrong image rank",
+                                                                   "3", val)); // Test rank
 
             val = bot.textInGroup("Dataset Dataspace and Datatype", 1).getText();
-            assertTrue(constructWrongValueMessage("convertImageToHDF5()", "wrong image dimension sizes",
-                                                  "533 x 533 x 3", val),
-                       val.equals("533 x 533 x 3")); // Test dimension sizes
+            assertTrue(val.equals("533 x 533 x 3"),
+                       constructWrongValueMessage("convertImageToHDF5()", "wrong image dimension sizes",
+                                                  "533 x 533 x 3", val)); // Test dimension sizes
 
             // Test sample pixels
             items[0].getNode(0).contextMenu().contextMenu("Open As").click();

@@ -2,6 +2,16 @@
 
 # HDFView Launcher Script
 # Validates environment and launches HDFView application
+#
+# Usage:
+#   ./run-hdfview.sh              # Launch with direct JAR (default)
+#   ./run-hdfview.sh --debug      # Launch with debug logging
+#   ./run-hdfview.sh --choose     # Interactive mode to choose launch method
+#   ./run-hdfview.sh --maven      # Launch with Maven exec:java
+#   ./run-hdfview.sh --validate   # Just validate environment
+#
+# Environment variables:
+#   HDFVIEW_DEBUG=1               # Enable debug logging
 
 set -e  # Exit on any error
 
@@ -41,10 +51,33 @@ fi
 
 print_success "Found project files (pom.xml, build.properties)"
 
+# Function to load properties file (converts dots to underscores for bash)
+load_properties() {
+    local prop_file=$1
+    while IFS='=' read -r key value; do
+        # Skip comments and empty lines
+        [[ "$key" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "$key" ]] && continue
+
+        # Trim whitespace from key and value
+        key=$(echo "$key" | xargs)
+        value=$(echo "$value" | xargs)
+
+        # Skip if still empty after trimming
+        [[ -z "$key" ]] && continue
+
+        # Replace dots with underscores for bash variable names
+        key=$(echo "$key" | tr '.' '_')
+
+        # Export as environment variable
+        export "$key=$value"
+    done < "$prop_file"
+}
+
 # Load build.properties for validation
 if [[ -f "build.properties" ]]; then
     print_status "Loading build.properties..."
-    source build.properties
+    load_properties "build.properties"
     print_success "build.properties loaded"
 else
     print_error "build.properties file not found!"
@@ -114,6 +147,22 @@ else
     print_warning "HDF4 support will be disabled"
 fi
 
+# Check if repository dependencies are installed
+print_status "Checking Maven repository dependencies..."
+if [[ ! -d "$HOME/.m2/repository/jarhdf/jarhdf" ]]; then
+    print_warning "HDF dependencies not found in Maven repository"
+    print_status "Installing repository dependencies..."
+    mvn clean install -pl repository -Ddependency-check.skip=true -q
+    if [[ $? -eq 0 ]]; then
+        print_success "Repository dependencies installed"
+    else
+        print_error "Failed to install repository dependencies"
+        exit 1
+    fi
+else
+    print_success "Maven repository dependencies found"
+fi
+
 # Check if project needs building
 print_status "Checking build status..."
 if [[ ! -d "hdfview/target" ]] || [[ ! -f "libs/hdfview-3.4-SNAPSHOT.jar" ]]; then
@@ -149,7 +198,7 @@ echo
 # Build if needed
 if [[ $BUILD_NEEDED -eq 1 ]]; then
     print_status "Building project (this may take a few minutes)..."
-    mvn clean install -q
+    mvn clean package -DskipTests -q
     print_success "Build completed"
     echo
 fi
@@ -168,13 +217,62 @@ JVM_ARGS=(
     "-Djava.library.path=$hdf5_lib_dir:$hdf_lib_dir"
 )
 
+# Parse command line arguments
+SLF4J_IMPL="nop"  # Default: no logging
+LAUNCH_MODE="jar"  # Default: direct JAR execution
+
+for arg in "$@"; do
+    case $arg in
+        --debug)
+            SLF4J_IMPL="simple"
+            ;;
+        --choose)
+            LAUNCH_MODE="choose"
+            ;;
+        --maven)
+            LAUNCH_MODE="maven"
+            ;;
+        --validate)
+            LAUNCH_MODE="validate"
+            ;;
+    esac
+done
+
+# Check environment variable for debug
+if [[ "$HDFVIEW_DEBUG" == "1" ]]; then
+    SLF4J_IMPL="simple"
+fi
+
+# Show logging status
+if [[ "$SLF4J_IMPL" == "simple" ]]; then
+    print_status "Debug logging enabled (slf4j-simple)"
+else
+    print_status "Logging disabled (slf4j-nop). Use --debug or HDFVIEW_DEBUG=1 to enable."
+fi
+
 # Launch options
-echo "Choose launch method:"
-echo "1. Maven exec:java (recommended for development)"
-echo "2. Direct JAR execution"
-echo "3. Just validate environment (no launch)"
-echo
-read -p "Enter choice [1-3]: " CHOICE
+if [[ "$LAUNCH_MODE" == "choose" ]]; then
+    echo
+    echo "Choose launch method:"
+    echo "1. Maven exec:java"
+    echo "2. Direct JAR execution (recommended)"
+    echo "3. Just validate environment (no launch)"
+    echo
+    read -p "Enter choice [1-3]: " CHOICE
+else
+    # Map launch mode to choice number
+    case $LAUNCH_MODE in
+        maven)
+            CHOICE=1
+            ;;
+        jar)
+            CHOICE=2
+            ;;
+        validate)
+            CHOICE=3
+            ;;
+    esac
+fi
 
 case $CHOICE in
     1)
@@ -186,12 +284,31 @@ case $CHOICE in
     2)
         print_status "Launching HDFView via direct JAR execution..."
         if [[ ! -f "libs/hdfview-3.4-SNAPSHOT.jar" ]]; then
-            print_error "JAR file not found. Run option 1 first to build."
+            print_error "JAR file not found. Build the project first."
             exit 1
         fi
 
-        CLASSPATH="libs/hdfview-3.4-SNAPSHOT.jar:hdfview/target/lib/*"
-        echo "Command: java ${JVM_ARGS[*]} -cp \"$CLASSPATH\" hdf.view.HDFView"
+        if [[ ! -d "hdfview/target/lib" ]]; then
+            print_error "Dependencies not found. Building project..."
+            mvn package -DskipTests -q
+            print_success "Build completed"
+        fi
+
+        # Build classpath, excluding slf4j-nop or slf4j-simple based on debug mode
+        CLASSPATH="libs/hdfview-3.4-SNAPSHOT.jar"
+        for jar in hdfview/target/lib/*.jar; do
+            jarname=$(basename "$jar")
+            if [[ "$SLF4J_IMPL" == "simple" ]]; then
+                # Skip nop, include simple
+                [[ "$jarname" == slf4j-nop* ]] && continue
+            else
+                # Skip simple, include nop
+                [[ "$jarname" == slf4j-simple* ]] && continue
+            fi
+            CLASSPATH="$CLASSPATH:$jar"
+        done
+
+        echo "Command: java ${JVM_ARGS[*]} -cp \"...\" hdf.view.HDFView"
         echo
         java "${JVM_ARGS[@]}" -cp "$CLASSPATH" hdf.view.HDFView
         ;;

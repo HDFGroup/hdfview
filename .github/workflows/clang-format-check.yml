@@ -16,7 +16,7 @@ jobs:
     - name: Run clang-format style check for Java code
       uses: DoozyX/clang-format-lint-action@v0.20
       with:
-        source: './src ./test'
+        source: './hdfview/src ./object/src'
         extensions: 'java'
         clangFormatVersion: 17
         style: file
