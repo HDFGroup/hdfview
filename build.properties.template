@@ -43,12 +43,13 @@ hdf.lib.dir=/home/byrn/HDF_Projects/temp/HDF_Group/HDF/4.3.1-1/lib
 # Platform-Specific Runtime Configuration
 # -----------------------------------------------------------------------------
 # Platform library path for native libraries (used for java.library.path)
-# Linux/macOS: Use /lib directory (shared libraries)
+# Linux/macOS: Use /lib directory (shared libraries) - colon-separated for multiple paths
 # Windows: Use /bin directory (DLLs) - semicolon-separated for multiple paths
 # Examples:
-#   Linux:   platform.hdf.lib=/path/to/hdf5/lib
+#   Linux:   platform.hdf.lib=/path/to/hdf5/lib:/path/to/hdf4/lib
 #   Windows: platform.hdf.lib=C:/path/to/hdf5/bin;C:/path/to/hdf4/bin
-platform.hdf.lib=${env.LD_LIBRARY_PATH}
+# NOTE: Environment variable placeholders like ${env.LD_LIBRARY_PATH} do NOT work - use actual paths
+platform.hdf.lib=/home/byrn/HDF_Projects/temp/HDF_Group/HDF5/2.0.0/lib:/home/byrn/HDF_Projects/temp/HDF_Group/HDF/4.3.1-1/lib
 
 # -----------------------------------------------------------------------------
 # Build Configuration

@@ -265,13 +265,13 @@ Located in `scripts/`:
 - **CI**: Object tests (149) running on all platforms
 
 **Disabled Tests (with GitHub issues):**
-| Test | Issue | Reason |
-|------|-------|--------|
-| TestHDFViewFloat16 | #383 | JVM crash (SIGSEGV) in native HDF5 |
-| convertImageToHDF4 | #384 | HDF4 native library bug |
-| openTAttributeReference | #385 | Timeout waiting for dialog |
-| openHDF5CompoundDSints | #386 | Compound data save index bug |
-| checkHDF5Filters | #387 | Fixed (PR #389) |
+| Test | Issue | Reason | Status |
+|------|-------|--------|--------|
+| TestHDFViewFloat16 | #383 | JVM crash (SIGSEGV) in native HDF5 | Open |
+| convertImageToHDF4 | #384 | HDF4 native library bug | Open |
+| openTAttributeReference | #385 | Timeout waiting for dialog | ✅ Fixed Nov 23 |
+| openHDF5CompoundDSints | #386 | Compound data save/read bug | 🔬 Debugging |
+| checkHDF5Filters | #387 | Fixed (PR #389) | ✅ Fixed |
 
 **Recent Commits (November 21, 2025):**
 - ✅ `023afc4e` - Add SLF4J logging toggle to launcher scripts
@@ -287,7 +287,11 @@ HDFVIEW_DEBUG=1 ./run-hdfview.sh
 
 **Next Priorities:**
 1. ✅ **FIXED**: TestHDFViewRefs timeout (issue #385) - Fixed November 23, 2025
-2. Fix compound dataset save bug (issue #386) - deep investigation needed
+2. 🔬 **IN PROGRESS**: Compound dataset save bug (issue #386) - Debugging session November 24, 2025
+   - ✅ Identified dataset caching bug, added clearData() after write()
+   - ❌ Test still fails - deeper READ mapping bug remains
+   - 📝 See `.claude/Issue-386-Debugging-Session-2024-11-24.md` for details
+   - 📝 Next steps in `.claude/NEXT-SESSION-Issue-386.md`
 3. Add new datatype testing
 4. Improve code coverage
 

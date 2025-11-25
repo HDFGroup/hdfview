@@ -36,11 +36,15 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <!-- SLF4J implementations - choose at runtime via launcher script -->
+    <!-- slf4j-nop DISABLED for debugging - uncomment for production to disable logging -->
+    <!--
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-nop</artifactId>
       <scope>runtime</scope>
     </dependency>
+    -->
+    <!-- slf4j-simple ENABLED for debugging - provides console logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
