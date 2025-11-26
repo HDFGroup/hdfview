@@ -9,14 +9,16 @@ title HDFView Release Schedule
 projectscale monthly
 Project starts 2023-01-01
 
-[3.3] starts 2023-01-01 and lasts 156 weeks
+[3.3] starts 2023-01-01 and lasts 75 weeks
 [3.3.0] happens 2023-03-31
 [3.3.1] happens 2023-08-31
-[3.3.2] happens 2024-06-04
-[3.3.3] happens 2025-04-30
+[3.3.2] happens 2024-06-03
 [3.3.1] displays on same row as [3.3.0]
 [3.3.2] displays on same row as [3.3.0]
 [3.3.3] displays on same row as [3.3.0]
 [3.3] is colored in #C266FF
+[3.4] starts 2024-06-04 and lasts 80 weeks
+[3.4.0] happens 2025-12-31
+[3.4] is colored in #10CCFF
 
 @endgantt
