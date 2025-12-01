@@ -1232,8 +1232,8 @@ public abstract class DefaultBaseTableView implements TableView {
             log.debug("updateValueInFile(): Active cell editor detected - committing before save");
             try {
                 dataTable.getActiveCellEditor().commit(
-                    org.eclipse.nebula.widgets.nattable.selection.SelectionLayer.MoveDirectionEnum.NONE,
-                    true, true);
+                    org.eclipse.nebula.widgets.nattable.selection.SelectionLayer.MoveDirectionEnum.NONE, true,
+                    true);
                 log.debug("updateValueInFile(): Cell editor committed successfully");
             }
             catch (Exception ex) {

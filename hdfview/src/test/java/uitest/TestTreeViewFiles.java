@@ -730,7 +730,11 @@ public class TestTreeViewFiles extends AbstractWindowTest {
                 });
 
                 // Delay to see the result
-                try { Thread.sleep(1000); } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(1000);
+                }
+                catch (InterruptedException e) {
+                }
 
                 retriever.testTableLocation(3, 2, "0");
 
@@ -781,8 +785,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
                 // WORKAROUND: After file reload, column index requires +1 offset for correct cell access
                 // First testTableLocation call (line 735) works with (3, 2) before reload
-                // After reload, must use (3, 3) to access the same cell - likely a viewport/scroll state issue
-                // Manual testing confirms the data is correct; this is a test framework quirk
+                // After reload, must use (3, 3) to access the same cell - likely a viewport/scroll state
+                // issue Manual testing confirms the data is correct; this is a test framework quirk
                 retriever.testTableLocation(3, 2 + 1, "0");
             }
             catch (Exception ex) {
