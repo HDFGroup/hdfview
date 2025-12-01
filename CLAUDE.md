@@ -246,20 +246,20 @@ Located in `scripts/`:
 - Focus on JavaFX evaluation for large dataset performance
 - Planned but deferred to prioritize test migration completion
 
-### 🎯 Current Status (November 21, 2025)
-**Test Stabilization Complete**: CI running object tests, UI tests verified locally.
+### 🎯 Current Status (December 1, 2025)
+**Active Work**: Implementing fix for Issue #386 (compound dataset index mapping bug)
 
 - **JUnit 5 Migration**: ✅ **100% COMPLETE** across entire project
 - **CI Strategy**: ✅ Object tests only in CI (UI tests require real display)
-- **Launcher Scripts**: ✅ Now with SLF4J debug logging toggle (`--debug` flag)
+- **Launcher Scripts**: ✅ Enhanced with automatic dependency management and debug logging
 - **Test Issues**: 5 GitHub issues filed for test failures (#383-387)
-- **Documentation**: ✅ Updated with current status
+- **Documentation**: ✅ Comprehensive session tracking and planning documents
 
 **Tests Status:**
 - **Object module**: ✅ 15 test classes, 149 tests - **ALL PASSING**
 - **UI module**: 16 test classes
-  - ✅ 10 test classes fully passing (66 tests)
-  - ⚠️ 3 test classes with partial failures (5 failing tests)
+  - ✅ 11 test classes fully passing (~71 tests)
+  - ⚠️ 2 test classes with partial failures (4 failing tests)
   - 🚫 2 test classes disabled (native library bugs)
   - 🚫 1 test class disabled (Float16 JVM crash)
 - **CI**: Object tests (149) running on all platforms
@@ -267,31 +267,39 @@ Located in `scripts/`:
 **Disabled Tests (with GitHub issues):**
 | Test | Issue | Reason | Status |
 |------|-------|--------|--------|
-| TestHDFViewFloat16 | #383 | JVM crash (SIGSEGV) in native HDF5 | Open |
-| convertImageToHDF4 | #384 | HDF4 native library bug | Open |
+| TestHDFViewFloat16 | #383 | JVM crash (SIGSEGV) in native HDF5 | Upstream |
+| convertImageToHDF4 | #384 | HDF4 native library bug | Upstream |
 | openTAttributeReference | #385 | Timeout waiting for dialog | ✅ Fixed Nov 23 |
-| openHDF5CompoundDSints | #386 | Compound data save/read bug | 🔬 Debugging |
-| checkHDF5Filters | #387 | Fixed (PR #389) | ✅ Fixed |
+| openHDF5CompoundDSints | #386 | Compound data save/read bug | 🔧 Implementing fix |
+| checkHDF5Filters | #387 | Test data file issue | ✅ Fixed (PR #389) |
 
-**Recent Commits (November 21, 2025):**
-- ✅ `023afc4e` - Add SLF4J logging toggle to launcher scripts
-- ✅ `a9e242d7` - Fix tfilters.h5 test data file
-- ✅ `8a55263f` - Disable Float16/HDF4 tests, fix TAttr2 expected value
-- ✅ `a5636fc2` - Disable hdfview UI tests in CI
+**Recent Progress:**
+- ✅ **November 23, 2025**: Issue #385 fixed (shell matching using dataset name)
+- ✅ **November 23, 2025**: Enhanced run-hdfview.sh with auto-dependency management
+- ✅ **November 25, 2025**: Issue #386 root cause identified (index mapping bug)
+- ✅ **November 25, 2025**: UX improvement - auto-commit on save implemented
+- ✅ **November 25, 2025**: Comprehensive debug logging added to data flow
+- 🔧 **December 1, 2025**: Implementing Issue #386 fix
 
 **Launcher Script Usage:**
 ```bash
-./run-hdfview.sh --debug    # Enable debug logging
-HDFVIEW_DEBUG=1 ./run-hdfview.sh
+./run-hdfview.sh              # Launch with direct JAR (default)
+./run-hdfview.sh --debug      # Enable debug logging
+./run-hdfview.sh --choose     # Interactive mode
+./run-hdfview.sh --validate   # Validate environment only
 ```
 
-**Next Priorities:**
-1. ✅ **FIXED**: TestHDFViewRefs timeout (issue #385) - Fixed November 23, 2025
-2. 🔬 **IN PROGRESS**: Compound dataset save bug (issue #386) - Debugging session November 24, 2025
-   - ✅ Identified dataset caching bug, added clearData() after write()
-   - ❌ Test still fails - deeper READ mapping bug remains
-   - 📝 See `.claude/Issue-386-Debugging-Session-2024-11-24.md` for details
-   - 📝 Next steps in `.claude/NEXT-SESSION-Issue-386.md`
+**Current Work (December 1, 2025):**
+1. 🔧 **IMPLEMENTING**: Index mapping fix for compound datasets (issue #386)
+   - ✅ Root cause: Index mapping bug in `DataFactoryUtils.buildIndexMaps()`
+   - ✅ Write path working correctly (file saves correctly)
+   - ❌ Read path broken: doesn't account for member storage order
+   - ✅ UX improvement: Auto-commit on save implemented
+   - ✅ Debug logging infrastructure in place
+   - 📝 See `.claude/Issue-386-Summary.md` for root cause analysis
+   - 📝 Implementation plan in `.claude/Next-Session-Plan-Issue-386.md`
+   - ⏱️ Implementation in progress (estimated: 4-6 hours)
+2. Scalar vs compound code consistency analysis
 3. Add new datatype testing
 4. Improve code coverage
 

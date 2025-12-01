@@ -1224,6 +1224,25 @@ public abstract class DefaultBaseTableView implements TableView {
     @Override
     public void updateValueInFile()
     {
+        log.debug("updateValueInFile(): ENTRY");
+
+        // Commit any active cell editor before saving
+        // This ensures that uncommitted edits (e.g., user typed but didn't press ENTER/TAB) are saved
+        if (dataTable != null && dataTable.getActiveCellEditor() != null) {
+            log.debug("updateValueInFile(): Active cell editor detected - committing before save");
+            try {
+                dataTable.getActiveCellEditor().commit(
+                    org.eclipse.nebula.widgets.nattable.selection.SelectionLayer.MoveDirectionEnum.NONE,
+                    true, true);
+                log.debug("updateValueInFile(): Cell editor committed successfully");
+            }
+            catch (Exception ex) {
+                log.warn("updateValueInFile(): Failed to commit active editor", ex);
+            }
+        }
+        else {
+            log.debug("updateValueInFile(): No active cell editor to commit");
+        }
 
         if (isReadOnly || !dataProvider.getIsValueChanged() || showAsBin || showAsHex) {
             log.debug(
@@ -1231,8 +1250,10 @@ public abstract class DefaultBaseTableView implements TableView {
             return;
         }
 
+        log.debug("updateValueInFile(): Calling dataObject.write()");
         try {
             dataObject.write();
+            log.debug("updateValueInFile(): dataObject.write() completed successfully");
         }
         catch (Exception ex) {
             shell.getDisplay().beep();
@@ -1242,6 +1263,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         dataProvider.setIsValueChanged(false);
+        log.debug("updateValueInFile(): EXIT - value changed flag cleared");
     }
 
     @Override

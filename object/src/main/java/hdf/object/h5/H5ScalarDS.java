@@ -898,6 +898,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
         try {
             scalarDatasetCommonIO(H5File.IO_TYPE.WRITE, buf);
+            // Clear the data cache after writing to ensure fresh reads
+            clearData();
+            log.debug("write(Object): data cache cleared after successful write");
         }
         catch (Exception ex) {
             log.debug("write(Object): failed to write to scalar dataset: ", ex);
