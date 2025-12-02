@@ -267,10 +267,10 @@ Located in `scripts/`:
 **Disabled Tests (with GitHub issues):**
 | Test | Issue | Reason | Status |
 |------|-------|--------|--------|
-| TestHDFViewFloat16 | #383 | JVM crash (SIGSEGV) in native HDF5 | Upstream |
+| TestHDFViewFloat16 | #383 | JVM crash (SIGSEGV) in native HDF5 | ✅ Protected Dec 2 (HDF5 #6076) |
 | convertImageToHDF4 | #384 | HDF4 native library bug | Upstream |
 | openTAttributeReference | #385 | Timeout waiting for dialog | ✅ Fixed Nov 23 |
-| openHDF5CompoundDSints | #386 | Compound data save/read bug | 🔧 Implementing fix |
+| openHDF5CompoundDSints | #386 | Compound data save/read bug | ✅ Fixed Dec 1 |
 | checkHDF5Filters | #387 | Test data file issue | ✅ Fixed (PR #389) |
 
 **Recent Progress:**
@@ -279,7 +279,8 @@ Located in `scripts/`:
 - ✅ **November 25, 2025**: Issue #386 root cause identified (index mapping bug)
 - ✅ **November 25, 2025**: UX improvement - auto-commit on save implemented
 - ✅ **November 25, 2025**: Comprehensive debug logging added to data flow
-- 🔧 **December 1, 2025**: Implementing Issue #386 fix
+- ✅ **December 1, 2025**: Issue #386 fix implemented
+- ✅ **December 2, 2025**: Issue #383 resolved - BFLOAT16 crash protection added
 
 **Launcher Script Usage:**
 ```bash
@@ -289,19 +290,20 @@ Located in `scripts/`:
 ./run-hdfview.sh --validate   # Validate environment only
 ```
 
-**Current Work (December 1, 2025):**
-1. 🔧 **IMPLEMENTING**: Index mapping fix for compound datasets (issue #386)
-   - ✅ Root cause: Index mapping bug in `DataFactoryUtils.buildIndexMaps()`
-   - ✅ Write path working correctly (file saves correctly)
-   - ❌ Read path broken: doesn't account for member storage order
-   - ✅ UX improvement: Auto-commit on save implemented
-   - ✅ Debug logging infrastructure in place
-   - 📝 See `.claude/Issue-386-Summary.md` for root cause analysis
-   - 📝 Implementation plan in `.claude/Next-Session-Plan-Issue-386.md`
-   - ⏱️ Implementation in progress (estimated: 4-6 hours)
-2. Scalar vs compound code consistency analysis
-3. Add new datatype testing
-4. Improve code coverage
+**Current Work (December 2, 2025):**
+1. ✅ **COMPLETE**: Issue #383 - BFLOAT16 crash protection
+   - Protection added to H5ScalarDS and H5CompoundDS
+   - Upstream issue filed: HDFGroup/hdf5#6076
+   - Regression confirmed: worked in 1.14.6, broken in 2.0.0
+   - PR #397 updated with fix
+2. ✅ **COMPLETE**: Issue #386 - Compound dataset fix
+   - Test framework viewport quirk documented
+   - PR #397 ready for merge
+3. Verify full test suite passes
+4. Merge PR #397 (contains both fixes)
+5. Scalar vs compound code consistency analysis (future)
+6. Add new datatype testing (future)
+7. Improve code coverage (future)
 
 ## Documentation
 
