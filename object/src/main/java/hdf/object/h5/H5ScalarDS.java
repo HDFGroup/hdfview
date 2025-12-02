@@ -944,7 +944,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 // See https://github.com/HDFGroup/hdf5/issues/6076
                 if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 2) {
                     throw new Exception(
-                        "BFLOAT16 (16-bit floating-point) datasets are not supported due to a bug in HDF5 Java bindings. " +
+                        "BFLOAT16 (16-bit floating-point) datasets are not supported due to a bug in HDF5 Java bindings. "
+                        +
                         "Reading this datatype causes a JVM crash. See https://github.com/HDFGroup/hdf5/issues/6076 for details.");
                 }
 
@@ -971,7 +972,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                              dsDatatype.isRefObj() ||
                              ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
                         log.trace("scalarDatasetCommonIO(): allocating buffer for {} with {} points",
-                                 dsDatatype.getDescription(), (int)totalSelectedSpacePoints);
+                                  dsDatatype.getDescription(), (int)totalSelectedSpacePoints);
                         try {
                             theData = H5Datatype.allocateArray(dsDatatype, (int)totalSelectedSpacePoints);
                         }

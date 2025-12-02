@@ -1194,8 +1194,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
         // See https://github.com/HDFGroup/hdf5/issues/6076
         if (memberType.isFloat() && memberType.getDatatypeSize() == 2) {
             throw new Exception(
-                "Compound dataset member '" + memberName + "' is BFLOAT16 (16-bit floating-point), " +
-                "which is not supported due to a bug in HDF5 Java bindings. " +
+                "Compound dataset member '" + memberName + "' is BFLOAT16 (16-bit floating-point), "
+                + "which is not supported due to a bug in HDF5 Java bindings. "
+                +
                 "Reading this datatype causes a JVM crash. See https://github.com/HDFGroup/hdf5/issues/6076 for details.");
         }
 
