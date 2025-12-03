@@ -32,7 +32,7 @@ import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
  */
 @Tag("ui")
 @Tag("integration")
-@Disabled("Float16 tests cause JVM crash (SIGSEGV) in native HDF5 library - requires native debugging")
+@Disabled("BFLOAT16 buffer allocation bug in HDF5 Java bindings causes SEGV - see issue #383 (upstream)")
 public class TestHDFViewFloat16 extends AbstractWindowTest {
     @Test
     public void checkHDF5DS16BITS()

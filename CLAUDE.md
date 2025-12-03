@@ -246,50 +246,64 @@ Located in `scripts/`:
 - Focus on JavaFX evaluation for large dataset performance
 - Planned but deferred to prioritize test migration completion
 
-### 🎯 Current Status (November 21, 2025)
-**Test Stabilization Complete**: CI running object tests, UI tests verified locally.
+### 🎯 Current Status (December 1, 2025)
+**Active Work**: Implementing fix for Issue #386 (compound dataset index mapping bug)
 
 - **JUnit 5 Migration**: ✅ **100% COMPLETE** across entire project
 - **CI Strategy**: ✅ Object tests only in CI (UI tests require real display)
-- **Launcher Scripts**: ✅ Now with SLF4J debug logging toggle (`--debug` flag)
+- **Launcher Scripts**: ✅ Enhanced with automatic dependency management and debug logging
 - **Test Issues**: 5 GitHub issues filed for test failures (#383-387)
-- **Documentation**: ✅ Updated with current status
+- **Documentation**: ✅ Comprehensive session tracking and planning documents
 
 **Tests Status:**
 - **Object module**: ✅ 15 test classes, 149 tests - **ALL PASSING**
 - **UI module**: 16 test classes
-  - ✅ 10 test classes fully passing (66 tests)
-  - ⚠️ 3 test classes with partial failures (5 failing tests)
+  - ✅ 11 test classes fully passing (~71 tests)
+  - ⚠️ 2 test classes with partial failures (4 failing tests)
   - 🚫 2 test classes disabled (native library bugs)
   - 🚫 1 test class disabled (Float16 JVM crash)
 - **CI**: Object tests (149) running on all platforms
 
 **Disabled Tests (with GitHub issues):**
-| Test | Issue | Reason |
-|------|-------|--------|
-| TestHDFViewFloat16 | #383 | JVM crash (SIGSEGV) in native HDF5 |
-| convertImageToHDF4 | #384 | HDF4 native library bug |
-| openTAttributeReference | #385 | Timeout waiting for dialog |
-| openHDF5CompoundDSints | #386 | Compound data save index bug |
-| checkHDF5Filters | #387 | Fixed (PR #389) |
+| Test | Issue | Reason | Status |
+|------|-------|--------|--------|
+| TestHDFViewFloat16 | #383 | JVM crash (SIGSEGV) in native HDF5 | ✅ Protected Dec 2 (HDF5 #6076) |
+| convertImageToHDF4 | #384 | HDF4 native library bug | Upstream |
+| openTAttributeReference | #385 | Timeout waiting for dialog | ✅ Fixed Nov 23 |
+| openHDF5CompoundDSints | #386 | Compound data save/read bug | ✅ Fixed Dec 1 |
+| checkHDF5Filters | #387 | Test data file issue | ✅ Fixed (PR #389) |
 
-**Recent Commits (November 21, 2025):**
-- ✅ `023afc4e` - Add SLF4J logging toggle to launcher scripts
-- ✅ `a9e242d7` - Fix tfilters.h5 test data file
-- ✅ `8a55263f` - Disable Float16/HDF4 tests, fix TAttr2 expected value
-- ✅ `a5636fc2` - Disable hdfview UI tests in CI
+**Recent Progress:**
+- ✅ **November 23, 2025**: Issue #385 fixed (shell matching using dataset name)
+- ✅ **November 23, 2025**: Enhanced run-hdfview.sh with auto-dependency management
+- ✅ **November 25, 2025**: Issue #386 root cause identified (index mapping bug)
+- ✅ **November 25, 2025**: UX improvement - auto-commit on save implemented
+- ✅ **November 25, 2025**: Comprehensive debug logging added to data flow
+- ✅ **December 1, 2025**: Issue #386 fix implemented
+- ✅ **December 2, 2025**: Issue #383 resolved - BFLOAT16 crash protection added
 
 **Launcher Script Usage:**
 ```bash
-./run-hdfview.sh --debug    # Enable debug logging
-HDFVIEW_DEBUG=1 ./run-hdfview.sh
+./run-hdfview.sh              # Launch with direct JAR (default)
+./run-hdfview.sh --debug      # Enable debug logging
+./run-hdfview.sh --choose     # Interactive mode
+./run-hdfview.sh --validate   # Validate environment only
 ```
 
-**Next Priorities:**
-1. ✅ **FIXED**: TestHDFViewRefs timeout (issue #385) - Fixed November 23, 2025
-2. Fix compound dataset save bug (issue #386) - deep investigation needed
-3. Add new datatype testing
-4. Improve code coverage
+**Current Work (December 2, 2025):**
+1. ✅ **COMPLETE**: Issue #383 - BFLOAT16 crash protection
+   - Protection added to H5ScalarDS and H5CompoundDS
+   - Upstream issue filed: HDFGroup/hdf5#6076
+   - Regression confirmed: worked in 1.14.6, broken in 2.0.0
+   - PR #397 updated with fix
+2. ✅ **COMPLETE**: Issue #386 - Compound dataset fix
+   - Test framework viewport quirk documented
+   - PR #397 ready for merge
+3. Verify full test suite passes
+4. Merge PR #397 (contains both fixes)
+5. Scalar vs compound code consistency analysis (future)
+6. Add new datatype testing (future)
+7. Improve code coverage (future)
 
 ## Documentation
 
