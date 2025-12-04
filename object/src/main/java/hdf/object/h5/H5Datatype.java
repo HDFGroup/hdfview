@@ -353,8 +353,16 @@ public class H5Datatype extends Datatype {
     public H5Datatype(FileFormat theFile, long nativeID, Datatype pbase) throws Exception
     {
         super(theFile, nativeID, pbase);
+        try {
+            long tsize = H5.H5Tget_size(nativeID);
+            log.trace("H5Datatype constructor: nativeID={} tsize={} BEFORE fromNative()", nativeID, tsize);
+        }
+        catch (Exception ex) {
+            log.debug("H5Datatype constructor: H5Tget_size failure: ", ex);
+        }
         fromNative(nativeID);
         datatypeDescription = getDescription();
+        log.trace("H5Datatype constructor: AFTER fromNative() datatypeSize={}", datatypeSize);
     }
 
     /**
@@ -1853,24 +1861,34 @@ public class H5Datatype extends Datatype {
         }
         else if (typeClass == CLASS_FLOAT) {
             log.trace("allocateArray(): class CLASS_FLOAT");
+            System.out.println("DEBUG: After CLASS_FLOAT log, typeSize=" + typeSize);
+            log.trace("allocateArray(): CLASS_FLOAT typeSize={}", typeSize);
 
             // For float types, we need to use NATIVE type size for buffer allocation,
             // not file storage size, because H5Dread/H5Aread expect native-sized buffers.
             // This is critical for types like BFLOAT16 where file size=2 but native size=4.
             long bufferTypeSize = typeSize;
+            log.trace("allocateArray(): bufferTypeSize initialized to {}", bufferTypeSize);
 
+            log.trace("allocateArray(): checking typeSize conditions");
             if (typeSize == NATIVE) {
+                log.trace("allocateArray(): typeSize == NATIVE branch taken");
                 bufferTypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
                 log.trace("allocateArray(): typeSize was NATIVE, resolved to: {}", bufferTypeSize);
             }
             else if (typeSize == 1 || typeSize == 2) {
+                log.trace("allocateArray(): typeSize == 1 or 2 branch taken (typeSize={})", typeSize);
                 // For 1-byte (Float8) and 2-byte (Float16/BFLOAT16) floats, the native representation
                 // may be larger than the file storage size. Use 4 bytes (float) for safety.
                 // This prevents JVM crashes when the HDF5 library expects a larger buffer.
                 bufferTypeSize = 4;
                 log.trace("allocateArray(): small float type (size {}), using 4-byte buffer", typeSize);
             }
+            else {
+                log.trace("allocateArray(): no typeSize condition matched, bufferTypeSize remains {}", bufferTypeSize);
+            }
 
+            log.trace("allocateArray(): about to switch on bufferTypeSize={}", bufferTypeSize);
             switch ((int)bufferTypeSize) {
             case 1:
                 log.trace("allocateArray(): allocating byte array for 1-byte float");

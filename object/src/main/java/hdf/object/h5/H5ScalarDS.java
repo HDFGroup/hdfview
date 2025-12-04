@@ -617,26 +617,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 try {
                     tid = H5.H5Dget_type(did);
                     log.trace("getDatatype(): isNativeDatatype={}", isNativeDatatype);
-                    if (!isNativeDatatype) {
-                        long tmptid = -1;
-                        try {
-                            tmptid = H5Datatype.toNative(tid);
-                            if (tmptid >= 0) {
-                                try {
-                                    H5.H5Tclose(tid);
-                                }
-                                catch (Exception ex2) {
-                                    log.debug("getDatatype(): H5Tclose(tid {}) failure: ", tid, ex2);
-                                }
-                                tid = tmptid;
-                            }
-                        }
-                        catch (Exception ex) {
-                            log.debug("getDatatype(): toNative: ", ex);
-                        }
-                    }
-                    int nativeClass = H5.H5Tget_class(tid);
-                    if (nativeClass == HDF5Constants.H5T_REFERENCE) {
+
+                    // For display purposes, create H5Datatype from the FILE type, not NATIVE type.
+                    // This preserves the correct bit width (e.g., "16-bit" for Float16/BFLOAT16).
+                    // The toNative conversion happens later during data reading in createNative().
+                    int fileTypeClass = H5.H5Tget_class(tid);
+                    if (fileTypeClass == HDF5Constants.H5T_REFERENCE) {
                         long lsize = 1;
                         if (rank > 0) {
                             log.trace("getDatatype(): rank={}, dims={}", rank, dims);
@@ -1529,7 +1515,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
         List<Attribute> attrlist = null;
         try {
+            log.trace("getMetadata(): calling objMetadata.getMetadata() for object: {}", getPath() + getName());
             attrlist = objMetadata.getMetadata(attrPropList);
+            log.trace("getMetadata(): returned {} attributes", attrlist == null ? 0 : attrlist.size());
         }
         catch (Exception ex) {
             log.debug("getMetadata(): getMetadata failed: ", ex);
@@ -1970,17 +1958,11 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         }
         if (aid > 0) {
             try {
-                atid        = H5.H5Aget_type(aid);
-                long tmptid = atid;
-                atid        = H5.H5Tget_native_type(tmptid);
-                try {
-                    H5.H5Tclose(tmptid);
-                }
-                catch (Exception ex) {
-                    log.debug("getAttrValue(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
-                }
+                // Get the FILE type for creating H5Datatype with correct bit width.
+                // The toNative conversion happens later in createNative() during data reading.
+                atid = H5.H5Aget_type(aid);
 
-                asid         = H5.H5Aget_space(aid);
+                asid = H5.H5Aget_space(aid);
                 long adims[] = null;
 
                 int arank = H5.H5Sget_simple_extent_ndims(asid);
