@@ -394,7 +394,9 @@ public class H5Datatype extends Datatype {
     {
         if (tid >= 0) {
             try {
-                log.trace("close(): H5Tclose(tid={}) - datatype={}", tid, this.getDescription());
+                // NOTE: Avoid calling getDescription() here as it may cause recursion
+                // if called during createNative() cleanup
+                log.trace("close(): H5Tclose(tid={})", tid);
                 H5.H5Tclose(tid);
             }
             catch (HDF5Exception ex) {
@@ -1851,23 +1853,47 @@ public class H5Datatype extends Datatype {
         }
         else if (typeClass == CLASS_FLOAT) {
             log.trace("allocateArray(): class CLASS_FLOAT");
-            if (typeSize == NATIVE)
-                typeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
 
-            switch ((int)typeSize) {
+            // For float types, we need to use NATIVE type size for buffer allocation,
+            // not file storage size, because H5Dread/H5Aread expect native-sized buffers.
+            // This is critical for types like BFLOAT16 where file size=2 but native size=4.
+            long bufferTypeSize = typeSize;
+
+            if (typeSize == NATIVE) {
+                bufferTypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
+                log.trace("allocateArray(): typeSize was NATIVE, resolved to: {}", bufferTypeSize);
+            }
+            else if (typeSize == 1 || typeSize == 2) {
+                // For 1-byte (Float8) and 2-byte (Float16/BFLOAT16) floats, the native representation
+                // may be larger than the file storage size. Use 4 bytes (float) for safety.
+                // This prevents JVM crashes when the HDF5 library expects a larger buffer.
+                bufferTypeSize = 4;
+                log.trace("allocateArray(): small float type (size {}), using 4-byte buffer", typeSize);
+            }
+
+            switch ((int)bufferTypeSize) {
+            case 1:
+                log.trace("allocateArray(): allocating byte array for 1-byte float");
+                data = new byte[numPoints];
+                break;
             case 2:
+                log.trace("allocateArray(): allocating short array for 2-byte float");
                 data = new short[numPoints];
                 break;
             case 4:
+                log.trace("allocateArray(): allocating float array for 4-byte float");
                 data = new float[numPoints];
                 break;
             case 8:
+                log.trace("allocateArray(): allocating double array for 8-byte float");
                 data = new double[numPoints];
                 break;
             case 16:
+                log.trace("allocateArray(): allocating byte array for 16-byte float");
                 data = new byte[numPoints * 16];
                 break;
             default:
+                log.warn("allocateArray(): unsupported float type size: {}", bufferTypeSize);
                 break;
             }
         }

@@ -940,14 +940,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(
                     did, dims, startDims, selectedStride, selectedDims, spaceIDs);
 
-                // Check for BFLOAT16 which causes JVM crash due to HDF5 Java bindings bug
-                // See https://github.com/HDFGroup/hdf5/issues/6076
-                if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 2) {
-                    throw new Exception(
-                        "BFLOAT16 (16-bit floating-point) datasets are not supported due to a bug in HDF5 Java bindings. "
-                        +
-                        "Reading this datatype causes a JVM crash. See https://github.com/HDFGroup/hdf5/issues/6076 for details.");
-                }
+                // NOTE: BFLOAT16 crash protection removed - now properly handled in H5Datatype.allocateArray()
+                // which queries native type size for buffer allocation. See Issue #383.
 
                 if (ioType == H5File.IO_TYPE.READ) {
                     log.trace(
@@ -994,9 +988,17 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                          */
                         long tid = HDF5Constants.H5I_INVALID_HID;
                         try {
-                            log.trace("scalarDatasetCommonIO():read ioType create native");
-                            tid = dsDatatype.createNative();
-                            log.trace("scalarDatasetCommonIO(): native type created tid={}", tid);
+                            // For Float8 (1-byte float), createNative() fails in HDF5 2.0
+                            // Use H5T_NATIVE_FLOAT directly to request conversion
+                            if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 1) {
+                                log.trace("scalarDatasetCommonIO(): Float8 - using H5T_NATIVE_FLOAT for conversion");
+                                tid = HDF5Constants.H5T_NATIVE_FLOAT;
+                            }
+                            else {
+                                log.trace("scalarDatasetCommonIO():read ioType create native");
+                                tid = dsDatatype.createNative();
+                                log.trace("scalarDatasetCommonIO(): native type created tid={}", tid);
+                            }
 
                             if (dsDatatype.isVarStr()) {
                                 log.trace(
@@ -1040,7 +1042,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                             throw new Exception(ex.getMessage(), ex);
                         }
                         finally {
-                            dsDatatype.close(tid);
+                            // Don't close predefined types like H5T_NATIVE_FLOAT
+                            if (!(dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 1))
+                                dsDatatype.close(tid);
                         }
 
                         /*
