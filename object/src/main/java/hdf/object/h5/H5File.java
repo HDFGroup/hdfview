@@ -500,9 +500,10 @@ public class H5File extends FileFormat {
                         // Get the FILE type for creating H5Datatype with correct bit width.
                         // The toNative conversion happens later in createNative() during data reading.
                         try {
-                            tid = H5.H5Aget_type(aid);
+                            tid        = H5.H5Aget_type(aid);
                             long tsize = H5.H5Tget_size(tid);
-                            log.trace("getAttribute(): Attribute[{}] tid={} FILE TYPE SIZE={} from aid={}", i, tid, tsize, aid);
+                            log.trace("getAttribute(): Attribute[{}] tid={} FILE TYPE SIZE={} from aid={}", i,
+                                      tid, tsize, aid);
                         }
                         catch (Exception ex) {
                             log.debug("getAttribute(): Attribute[{}] H5Aget_type failure: ", i, ex);

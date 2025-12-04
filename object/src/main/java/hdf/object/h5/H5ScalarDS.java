@@ -1515,7 +1515,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
         List<Attribute> attrlist = null;
         try {
-            log.trace("getMetadata(): calling objMetadata.getMetadata() for object: {}", getPath() + getName());
+            log.trace("getMetadata(): calling objMetadata.getMetadata() for object: {}",
+                      getPath() + getName());
             attrlist = objMetadata.getMetadata(attrPropList);
             log.trace("getMetadata(): returned {} attributes", attrlist == null ? 0 : attrlist.size());
         }
@@ -1962,7 +1963,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 // The toNative conversion happens later in createNative() during data reading.
                 atid = H5.H5Aget_type(aid);
 
-                asid = H5.H5Aget_space(aid);
+                asid         = H5.H5Aget_space(aid);
                 long adims[] = null;
 
                 int arank = H5.H5Sget_simple_extent_ndims(asid);

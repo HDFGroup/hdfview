@@ -1885,7 +1885,8 @@ public class H5Datatype extends Datatype {
                 log.trace("allocateArray(): small float type (size {}), using 4-byte buffer", typeSize);
             }
             else {
-                log.trace("allocateArray(): no typeSize condition matched, bufferTypeSize remains {}", bufferTypeSize);
+                log.trace("allocateArray(): no typeSize condition matched, bufferTypeSize remains {}",
+                          bufferTypeSize);
             }
 
             log.trace("allocateArray(): about to switch on bufferTypeSize={}", bufferTypeSize);
