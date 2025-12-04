@@ -24,13 +24,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test to investigate BFLOAT16 datatype size discrepancy between datasets and attributes.
- *
- * Issue: For BFLOAT16 data:
- * - Attributes report size=4 (correct, uses native type)
- * - Datasets report size=2 (incorrect, uses file type)
- *
- * Both should use the native type size (4 bytes) for proper memory allocation.
+ * Test for BFLOAT16 datatypes in datasets and attributes.
  */
 @Tag("unit")
 @DisplayName("BFLOAT16 Datatype Size Consistency Test")

@@ -15,10 +15,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test to verify BFLOAT16 dataset can be read without JVM crash.
- *
- * This test validates the allocateArray() fix that queries native type size
- * for buffer allocation, preventing crashes when file size != native size.
+ * Test to verify BFLOAT16 dataset can be read.
  */
 @Tag("unit")
 @DisplayName("BFLOAT16 Dataset Read Test")
@@ -51,7 +48,7 @@ public class TestBFloat16Read {
     }
 
     @Test
-    @DisplayName("BFLOAT16 dataset should read without crash")
+    @DisplayName("BFLOAT16 dataset should read")
     public void testBFloat16DatasetRead() throws Exception
     {
         // Get the dataset
@@ -86,7 +83,7 @@ public class TestBFloat16Read {
     }
 
     @Test
-    @DisplayName("BFLOAT16 attribute should read without crash")
+    @DisplayName("BFLOAT16 attribute should read")
     public void testBFloat16AttributeRead() throws Exception
     {
         // Get the dataset (attributes are on the dataset)

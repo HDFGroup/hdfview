@@ -934,7 +934,7 @@ public class H5File extends FileFormat {
         }
 
         ver += vers[0] + "." + vers[1] + "." + vers[2];
-        log.debug("getLibversion(): libversion is {}", ver);
+        log.trace("getLibversion(): libversion is {}", ver);
 
         return ver;
     }
@@ -2616,7 +2616,7 @@ public class H5File extends FileFormat {
 
         pgroup.close(gid);
 
-        log.debug("depth_first({}): nTotal={}", parentObject, nTotal);
+        log.trace("depth_first({}): nTotal={}", parentObject, nTotal);
         return nTotal;
     } // private depth_first()
 

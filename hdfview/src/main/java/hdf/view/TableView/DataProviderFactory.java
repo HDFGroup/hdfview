@@ -94,7 +94,7 @@ public class DataProviderFactory {
                                                          final boolean dataTransposed) throws Exception
     {
         HDFDataProvider dataProvider = null;
-        log.debug("getDataProvider(): Datatype is {}", dtype.getDescription());
+        log.trace("getDataProvider(): Datatype is {}", dtype.getDescription());
 
         try {
             if (dtype.isCompound())
@@ -127,7 +127,7 @@ public class DataProviderFactory {
          * Try to use a default DataProvider.
          */
         if (dataProvider == null) {
-            log.debug("getDataProvider(): using a default data provider");
+            log.trace("getDataProvider(): using a default data provider");
 
             dataProvider = new HDFDataProvider(dtype, dataBuf, dataTransposed);
         }
@@ -676,15 +676,14 @@ public class DataProviderFactory {
         @Override
         public Object getDataValue(int columnIndex, int rowIndex)
         {
-            log.trace("=== COMPOUND getDataValue ENTRY ===");
-            log.trace("  Input: columnIndex={}, rowIndex={}", columnIndex, rowIndex);
+            log.trace("CompoundDataProvider.getDataValue: Input: columnIndex={}, rowIndex={}", columnIndex, rowIndex);
 
             try {
                 int fieldIdx = columnIndex;
                 int rowIdx   = rowIndex;
 
-                log.trace("  Initial: fieldIdx={}, rowIdx={}", fieldIdx, rowIdx);
-                log.trace("  nSubColumns={}, selectedMemberTypes.length={}", nSubColumns,
+                log.trace("CompoundDataProvider.getDataValue: Initial: fieldIdx={}, rowIdx={}", fieldIdx, rowIdx);
+                log.trace("CompoundDataProvider.getDataValue: nSubColumns={}, selectedMemberTypes.length={}", nSubColumns,
                           selectedMemberTypes.length);
 
                 if (nSubColumns > 1) { // multi-dimension compound dataset
@@ -697,20 +696,20 @@ public class DataProviderFactory {
 
                     int realColIdx = columnIndex / selectedMemberTypes.length;
                     rowIdx         = rowIndex * nSubColumns + realColIdx;
-                    log.trace("  Multi-dim adjusted: fieldIdx={}, rowIdx={}, realColIdx={}", fieldIdx, rowIdx,
+                    log.trace("CompoundDataProvider.getDataValue: Multi-dim adjusted: fieldIdx={}, rowIdx={}, realColIdx={}", fieldIdx, rowIdx,
                               realColIdx);
                 }
 
                 int providerIndex = baseProviderIndexMap.get(fieldIdx);
-                log.trace("  INDEX MAPPING READ: fieldIdx={} -> providerIndex={}", fieldIdx, providerIndex);
-                log.trace("  baseProviderIndexMap: {}", baseProviderIndexMap);
+                log.trace("CompoundDataProvider.getDataValue: INDEX MAPPING READ: fieldIdx={} -> providerIndex={}", fieldIdx, providerIndex);
+                log.trace("CompoundDataProvider.getDataValue: baseProviderIndexMap: {}", baseProviderIndexMap);
 
                 Object colValue = ((List<?>)dataBuf).get(providerIndex);
                 if (colValue == null) {
-                    log.trace("  colValue is null, returning nullStr");
+                    log.trace("CompoundDataProvider.getDataValue: colValue is null, returning nullStr");
                     return DataFactoryUtils.nullStr;
                 }
-                log.trace("  colValue retrieved from dataBuf[{}], type={}", providerIndex,
+                log.trace("CompoundDataProvider.getDataValue: colValue retrieved from dataBuf[{}], type={}", providerIndex,
                           colValue.getClass().getSimpleName());
 
                 /*
@@ -718,10 +717,10 @@ public class DataProviderFactory {
                  * index of the relevant compound field.
                  */
                 HDFDataProvider base = baseTypeProviders[providerIndex];
-                log.trace("  Base provider[{}]: type={}, isContainerType={}", providerIndex,
+                log.trace("CompoundDataProvider.getDataValue: Base provider[{}]: type={}, isContainerType={}", providerIndex,
                           base.getClass().getSimpleName(), base.isContainerType);
                 if (providerIndex < selectedMemberTypes.length) {
-                    log.trace("  Member type: {}", selectedMemberTypes[providerIndex].getDescription());
+                    log.trace("CompoundDataProvider.getDataValue: Member type: {}", selectedMemberTypes[providerIndex].getDescription());
                 }
 
                 if (base instanceof CompoundDataProvider)
@@ -777,28 +776,28 @@ public class DataProviderFactory {
                     }
 
                     int adjustedColIndex = columnIndex - arrCompoundStartIdx;
-                    log.trace("getDataValue: adjustedColIndex={}, columnIndex={}, arrCompoundStartIdx={}",
+                    log.trace("CompoundDataProvider.getDataValue: adjustedColIndex={}, columnIndex={}, arrCompoundStartIdx={}",
                               adjustedColIndex, columnIndex, arrCompoundStartIdx);
                     rowIdx = rowIdx * 2;
 
                     theValue = base.getDataValue(colValue, adjustedColIndex, rowIdx);
-                    log.trace("getDataValue: theValue={}, rowIdx={}, adjustedColIndex={}", theValue, rowIdx,
+                    log.trace("CompoundDataProvider.getDataValue: theValue={}, rowIdx={}, adjustedColIndex={}", theValue, rowIdx,
                               adjustedColIndex);
                 }
                 else {
-                    log.trace("  Non-container: Calling base.getDataValue(colValue, {})", rowIdx);
+                    log.trace("CompoundDataProvider.getDataValue: Non-container: Calling base.getDataValue(colValue, {})", rowIdx);
                     theValue = base.getDataValue(colValue, rowIdx);
-                    log.trace("  Retrieved value: '{}'", theValue);
+                    log.trace("CompoundDataProvider.getDataValue: Retrieved value: '{}'", theValue);
                 }
 
-                log.trace("=== COMPOUND getDataValue RETURN: '{}' ===", theValue);
+                log.trace("CompoundDataProvider.getDataValue: RETURN: '{}' ===", theValue);
             }
             catch (Exception ex) {
-                log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
+                log.debug("CompoundDataProvider.getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
                 theValue = DataFactoryUtils.errStr;
             }
 
-            log.trace("getDataValue({}, {}): finish", rowIndex, columnIndex);
+            log.trace("CompoundDataProvider.getDataValue({}, {}): finish", rowIndex, columnIndex);
 
             return theValue;
         }
@@ -832,10 +831,10 @@ public class DataProviderFactory {
                     theValue = base.getDataValue(colValue, rowIndex);
             }
             catch (Exception ex) {
-                log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
+                log.debug("CompoundDataProvider.getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
                 theValue = DataFactoryUtils.errStr;
             }
-            log.trace("getDataValue({})=({}): finish", rowIndex, columnIndex);
+            log.trace("CompoundDataProvider.getDataValue({})=({}): finish", rowIndex, columnIndex);
 
             return theValue;
         }
@@ -850,20 +849,19 @@ public class DataProviderFactory {
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue)
         {
-            log.debug("=== COMPOUND setDataValue ENTRY ===");
-            log.debug("  Input: columnIndex={}, rowIndex={}, newValue={}", columnIndex, rowIndex, newValue);
+            log.trace("CompoundDataProvider.setDataValue: columnIndex={}, rowIndex={}, newValue={}", columnIndex, rowIndex, newValue);
 
             if ((newValue == null) || ((newValue = ((String)newValue).trim()) == null)) {
-                log.debug("setDataValue({}, {})=({}): cell value not updated; new value is null", rowIndex,
+                log.debug("CompoundDataProvider.setDataValue({}, {})=({}): cell value not updated; new value is null", rowIndex,
                           columnIndex, newValue);
                 return;
             }
 
             // No need to update if values are the same
             Object oldVal = this.getDataValue(columnIndex, rowIndex);
-            log.debug("  Old value at ({}, {}): {}", columnIndex, rowIndex, oldVal);
+            log.trace("CompoundDataProvider.setDataValue: Old value at ({}, {}): {}", columnIndex, rowIndex, oldVal);
             if ((oldVal != null) && newValue.equals(oldVal.toString())) {
-                log.debug("setDataValue({}, {})=({}): cell value not updated; new value same as old value",
+                log.debug("CompoundDataProvider.setDataValue({}, {})=({}): cell value not updated; new value same as old value",
                           rowIndex, columnIndex, newValue);
                 return;
             }
@@ -872,8 +870,8 @@ public class DataProviderFactory {
                 int fieldIdx = columnIndex;
                 int rowIdx   = rowIndex;
 
-                log.debug("  Initial: fieldIdx={}, rowIdx={}", fieldIdx, rowIdx);
-                log.debug("  nSubColumns={}, selectedMemberTypes.length={}", nSubColumns,
+                log.trace("CompoundDataProvider.setDataValue: Initial: fieldIdx={}, rowIdx={}", fieldIdx, rowIdx);
+                log.trace("CompoundDataProvider.setDataValue: nSubColumns={}, selectedMemberTypes.length={}", nSubColumns,
                           selectedMemberTypes.length);
 
                 if (nSubColumns > 1) { // multi-dimension compound dataset
@@ -886,20 +884,20 @@ public class DataProviderFactory {
 
                     int realColIdx = columnIndex / selectedMemberTypes.length;
                     rowIdx         = rowIndex * nSubColumns + realColIdx;
-                    log.debug("  Multi-dim adjusted: fieldIdx={}, rowIdx={}, realColIdx={}", fieldIdx, rowIdx,
+                    log.trace("CompoundDataProvider.setDataValue: Multi-dim adjusted: fieldIdx={}, rowIdx={}, realColIdx={}", fieldIdx, rowIdx,
                               realColIdx);
                 }
 
                 int providerIndex = baseProviderIndexMap.get(fieldIdx);
-                log.debug("  INDEX MAPPING: fieldIdx={} -> providerIndex={}", fieldIdx, providerIndex);
-                log.debug("  baseProviderIndexMap: {}", baseProviderIndexMap);
+                log.trace("CompoundDataProvider.setDataValue: INDEX MAPPING: fieldIdx={} -> providerIndex={}", fieldIdx, providerIndex);
+                log.trace("CompoundDataProvider.setDataValue: baseProviderIndexMap: {}", baseProviderIndexMap);
 
                 Object colValue = ((List<?>)dataBuf).get(providerIndex);
                 if (colValue == null) {
-                    log.debug("setDataValue({}, {})=({}): colValue is null", rowIndex, columnIndex, newValue);
+                    log.debug("CompoundDataProvider.setDataValue({}, {})=({}): colValue is null", rowIndex, columnIndex, newValue);
                     return;
                 }
-                log.debug("  colValue retrieved from dataBuf[{}], type={}", providerIndex,
+                log.trace("CompoundDataProvider.setDataValue: colValue retrieved from dataBuf[{}], type={}", providerIndex,
                           colValue.getClass().getSimpleName());
 
                 /*
@@ -907,7 +905,7 @@ public class DataProviderFactory {
                  * of the relevant compound field.
                  */
                 HDFDataProvider base = baseTypeProviders[providerIndex];
-                log.debug("  Base provider[{}]: type={}, isContainerType={}", providerIndex,
+                log.trace("CompoundDataProvider.setDataValue: Base provider[{}]: type={}, isContainerType={}", providerIndex,
                           base.getClass().getSimpleName(), base.isContainerType);
 
                 if (base.isContainerType) {
@@ -918,26 +916,26 @@ public class DataProviderFactory {
                      * among the nested compound's members.
                      */
                     int adjustedFieldIdx = fieldIdx - relCmpdStartIndexMap.get(fieldIdx);
-                    log.debug("  Container type: adjustedFieldIdx={} (fieldIdx {} - startIdx {})",
+                    log.trace("CompoundDataProvider.setDataValue: Container type: adjustedFieldIdx={} (fieldIdx {} - startIdx {})",
                               adjustedFieldIdx, fieldIdx, relCmpdStartIndexMap.get(fieldIdx));
-                    log.debug("  Calling base.setDataValue({}, {}, colValue, {})", adjustedFieldIdx, rowIdx,
+                    log.trace("CompoundDataProvider.setDataValue: Calling base.setDataValue({}, {}, colValue, {})", adjustedFieldIdx, rowIdx,
                               newValue);
                     base.setDataValue(adjustedFieldIdx, rowIdx, colValue, newValue);
                 }
                 else {
-                    log.debug("  Non-container: Calling base.setDataValue({}, colValue, {})", rowIdx,
+                    log.trace("CompoundDataProvider.setDataValue: Non-container: Calling base.setDataValue({}, colValue, {})", rowIdx,
                               newValue);
                     base.setDataValue(rowIdx, colValue, newValue);
                 }
 
                 isValueChanged = true;
-                log.debug("=== COMPOUND setDataValue SUCCESS ===");
+                log.trace("CompoundDataProvider.setDataValue: SUCCESS");
             }
             catch (Exception ex) {
-                log.debug("setDataValue({}, {})=({}): cell value update failure: ", rowIndex, columnIndex,
+                log.debug("CompoundDataProvider.setDataValue({}, {})=({}): cell value update failure: ", rowIndex, columnIndex,
                           newValue, ex);
             }
-            log.trace("setDataValue({}, {})=({}): finish", rowIndex, columnIndex, newValue);
+            log.trace("CompoundDataProvider.setDataValue({}, {})=({}): finish", rowIndex, columnIndex, newValue);
 
             /*
              * TODO: throwing error dialogs when something fails?
@@ -949,13 +947,13 @@ public class DataProviderFactory {
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object bufObject, Object newValue)
         {
-            log.debug("=== COMPOUND setDataValue(bufObject) ENTRY ===");
-            log.debug("  Input: columnIndex={}, rowIndex={}, newValue={}", columnIndex, rowIndex, newValue);
+            log.trace("=== COMPOUND setDataValue(bufObject) ENTRY ===");
+            log.trace("  Input: columnIndex={}, rowIndex={}, newValue={}", columnIndex, rowIndex, newValue);
 
             try {
                 int providerIndex = baseProviderIndexMap.get(columnIndex);
-                log.debug("  INDEX MAPPING: columnIndex={} -> providerIndex={}", columnIndex, providerIndex);
-                log.debug("  baseProviderIndexMap: {}", baseProviderIndexMap);
+                log.trace("  INDEX MAPPING: columnIndex={} -> providerIndex={}", columnIndex, providerIndex);
+                log.trace("  baseProviderIndexMap: {}", baseProviderIndexMap);
 
                 Object colValue = ((List<?>)bufObject).get(providerIndex);
                 if (colValue == null) {
@@ -963,14 +961,14 @@ public class DataProviderFactory {
                               bufObject, newValue);
                     return;
                 }
-                log.debug("  colValue retrieved from bufObject[{}]", providerIndex);
+                log.trace("  colValue retrieved from bufObject[{}]", providerIndex);
 
                 /*
                  * Delegate data setting to one of the base DataProviders according to the index
                  * of the relevant compound field.
                  */
                 HDFDataProvider base = baseTypeProviders[providerIndex];
-                log.debug("  Base provider[{}]: type={}, isContainerType={}", providerIndex,
+                log.trace("  Base provider[{}]: type={}, isContainerType={}", providerIndex,
                           base.getClass().getSimpleName(), base.isContainerType);
 
                 if (base.isContainerType) {
@@ -981,23 +979,23 @@ public class DataProviderFactory {
                      * among the nested compound's members.
                      */
                     int adjustedColIdx = columnIndex - relCmpdStartIndexMap.get(columnIndex);
-                    log.debug("  Container type: adjustedColIdx={} (columnIndex {} - startIdx {})",
+                    log.trace("  Container type: adjustedColIdx={} (columnIndex {} - startIdx {})",
                               adjustedColIdx, columnIndex, relCmpdStartIndexMap.get(columnIndex));
-                    log.debug("  Calling base.setDataValue({}, {}, colValue, {})", adjustedColIdx, rowIndex,
+                    log.trace("  Calling base.setDataValue({}, {}, colValue, {})", adjustedColIdx, rowIndex,
                               newValue);
                     base.setDataValue(adjustedColIdx, rowIndex, colValue, newValue);
                 }
                 else {
-                    log.debug("  Non-container: Calling base.setDataValue({}, colValue, {})", rowIndex,
+                    log.trace("  Non-container: Calling base.setDataValue({}, colValue, {})", rowIndex,
                               newValue);
                     base.setDataValue(rowIndex, colValue, newValue);
                 }
 
                 isValueChanged = true;
-                log.debug("=== COMPOUND setDataValue(bufObject) SUCCESS ===");
+                log.trace("=== COMPOUND setDataValue(bufObject) SUCCESS ===");
             }
             catch (Exception ex) {
-                log.debug("setDataValue({}, {}, {})=({}): cell value update failure: ", rowIndex, columnIndex,
+                log.trace("setDataValue({}, {}, {})=({}): cell value update failure: ", rowIndex, columnIndex,
                           bufObject, newValue, ex);
             }
             log.trace("setDataValue({}, {}, {})=({}): finish", rowIndex, columnIndex, bufObject, newValue);
@@ -1249,7 +1247,7 @@ public class DataProviderFactory {
                  * TODO:
                  */
                 /* Tools.showError(shell, "Select", "Number of data points < " + morder + "."); */
-                log.debug("updateArrayElements(): number of data points ({}) < array size {}",
+                log.trace("updateArrayElements(): number of data points ({}) < array size {}",
                           st.countTokens(), arraySize);
                 log.trace("updateArrayElements({}, {}, {}): finish", curBuf, newValue, bufStartIndex);
                 return;
@@ -1393,7 +1391,7 @@ public class DataProviderFactory {
 
             try {
                 long vlSize = Array.getLength(obj);
-                log.debug("getDataValue(): vlSize={} obj={}", vlSize, obj);
+                log.trace("getDataValue(): vlSize={} obj={}", vlSize, obj);
 
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
                     /*
@@ -1428,7 +1426,7 @@ public class DataProviderFactory {
         private Object[] retrieveArrayOfCompoundElements(Object objBuf, int columnIndex, int rowIndex)
         {
             long vlSize = Array.getLength(objBuf);
-            log.debug("retrieveArrayOfCompoundElements(): vlSize={}", vlSize);
+            log.trace("retrieveArrayOfCompoundElements(): vlSize={}", vlSize);
             long adjustedRowIdx =
                 (rowIndex * vlSize * colCount) +
                 (columnIndex / ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size());
@@ -1445,11 +1443,11 @@ public class DataProviderFactory {
 
         private Object[] retrieveArrayOfArrayElements(Object objBuf, int columnIndex, int startRowIndex)
         {
-            log.debug("retrieveArrayOfArrayElements(): objBuf={}", objBuf);
+            log.trace("retrieveArrayOfArrayElements(): objBuf={}", objBuf);
             ArrayList<byte[]> vlElements = ((ArrayList[])objBuf)[startRowIndex];
-            log.debug("retrieveArrayOfArrayElements(): vlElements={}", vlElements);
+            log.trace("retrieveArrayOfArrayElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
-            log.debug("retrieveArrayOfArrayElements(): vlSize={} length={}", vlSize, vlElements.size());
+            log.trace("retrieveArrayOfArrayElements(): vlSize={} length={}", vlSize, vlElements.size());
             Object[] tempArray = new Object[(int)vlSize];
 
             for (int i = 0; i < vlSize; i++) {
@@ -1472,11 +1470,11 @@ public class DataProviderFactory {
 
         private Object[] retrieveArrayOfComplexElements(Object objBuf, int columnIndex, int startRowIndex)
         {
-            log.debug("retrieveArrayOfComplexElements(): objBuf={}", objBuf);
+            log.trace("retrieveArrayOfComplexElements(): objBuf={}", objBuf);
             ArrayList<byte[]> vlElements = ((ArrayList[])objBuf)[startRowIndex];
-            log.debug("retrieveArrayOfComplexElements(): vlElements={}", vlElements);
+            log.trace("retrieveArrayOfComplexElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
-            log.debug("retrieveArrayOfComplexElements(): vlSize={} length={}", vlSize, vlElements.size());
+            log.trace("retrieveArrayOfComplexElements(): vlSize={} length={}", vlSize, vlElements.size());
             Object[] tempArray = new Object[(int)vlSize];
 
             for (int i = 0; i < vlSize; i++) {
@@ -1502,7 +1500,7 @@ public class DataProviderFactory {
         {
             ArrayList vlElements = ((ArrayList[])objBuf)[rowStartIdx];
             long vlSize          = vlElements.size();
-            log.debug("retrieveArrayOfAtomicElements(): vlSize={}", vlSize);
+            log.trace("retrieveArrayOfAtomicElements(): vlSize={}", vlSize);
             Object[] tempArray = new Object[(int)vlSize];
 
             for (int i = 0; i < vlSize; i++)
@@ -1525,7 +1523,7 @@ public class DataProviderFactory {
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
                 long vlSize = Array.getLength(dataBuf);
-                log.debug("setDataValue(): vlSize={}", vlSize);
+                log.trace("setDataValue(): vlSize={}", vlSize);
 
                 updateArrayElements(dataBuf, newValue, columnIndex, rowIndex);
             }
@@ -1542,7 +1540,7 @@ public class DataProviderFactory {
         {
             try {
                 long vlSize = Array.getLength(bufObject);
-                log.debug("setDataValue(): vlSize={} for [c{}, r{}]", vlSize, columnIndex, rowIndex);
+                log.trace("setDataValue(): vlSize={} for [c{}, r{}]", vlSize, columnIndex, rowIndex);
 
                 updateArrayElements(bufObject, newValue, columnIndex, rowIndex);
             }
@@ -1565,7 +1563,7 @@ public class DataProviderFactory {
         private void updateArrayElements(Object curBuf, Object newValue, int columnIndex, int rowStartIndex)
         {
             long vlSize = Array.getLength(curBuf);
-            log.debug("updateArrayElements(): vlSize={}", vlSize);
+            log.trace("updateArrayElements(): vlSize={}", vlSize);
 
             if (baseTypeDataProvider instanceof CompoundDataProvider)
                 updateArrayOfCompoundElements(newValue, curBuf, columnIndex, rowStartIndex);
@@ -1581,7 +1579,7 @@ public class DataProviderFactory {
                                                    int rowIndex)
         {
             long vlSize = Array.getLength(curBuf);
-            log.debug("updateArrayOfCompoundElements(): vlSize={}", vlSize);
+            log.trace("updateArrayOfCompoundElements(): vlSize={}", vlSize);
             long adjustedRowIdx =
                 (rowIndex * vlSize * colCount) +
                 (columnIndex / ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size());
@@ -1598,9 +1596,9 @@ public class DataProviderFactory {
         private void updateArrayOfArrayElements(Object newValue, Object curBuf, int columnIndex, int rowIndex)
         {
             ArrayList vlElements = ((ArrayList[])curBuf)[rowIndex];
-            log.debug("updateArrayOfArrayElements(): vlElements={}", vlElements);
+            log.trace("updateArrayOfArrayElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
-            log.debug("updateArrayOfArrayElements(): vlSize={}", vlSize);
+            log.trace("updateArrayOfArrayElements(): vlSize={}", vlSize);
 
             StringTokenizer st = new StringTokenizer((String)newValue, ",[]");
             int newcnt         = st.countTokens();
@@ -1643,11 +1641,11 @@ public class DataProviderFactory {
         {
             ArrayList vlElements = ((ArrayList[])curBuf)[rowStartIdx];
             long vlSize          = vlElements.size();
-            log.debug("updateArrayOfAtomicElements(): vlSize={}", vlSize);
+            log.trace("updateArrayOfAtomicElements(): vlSize={}", vlSize);
 
             StringTokenizer st = new StringTokenizer((String)newValue, ",[]");
             int newcnt         = st.countTokens();
-            log.debug("updateArrayOfAtomicElements(): count={}", newcnt);
+            log.trace("updateArrayOfAtomicElements(): count={}", newcnt);
             Object[] buffer = null;
             switch (baseTypeClass) {
             case Datatype.CLASS_CHAR:
@@ -1682,7 +1680,7 @@ public class DataProviderFactory {
             String cname = curBuf.getClass().getName();
             log.trace("updateArrayOfAtomicElements(): buffer cname={} of data cname={}", bname, cname);
             vlElements = new ArrayList<>(Arrays.asList(buffer));
-            log.debug("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
+            log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
             ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
         }
     }
@@ -2224,17 +2222,17 @@ public class DataProviderFactory {
 
         private Object[] retrieveArrayOfAtomicElements(Object objBuf, int rowStartIdx)
         {
-            log.debug("retrieveArrayOfAtomicElements(): objBuf={}", objBuf);
+            log.trace("retrieveArrayOfAtomicElements(): objBuf={}", objBuf);
             Object[] tempArray = new Object[(int)2];
             Object realElement = Array.get(objBuf, rowStartIdx);
             Object imgElement  = Array.get(objBuf, rowStartIdx + 1);
-            log.debug("retrieveArrayOfAtomicElements(): realElement={} imgElement={}", realElement,
+            log.trace("retrieveArrayOfAtomicElements(): realElement={} imgElement={}", realElement,
                       imgElement);
 
             tempArray[0] = baseTypeDataProvider.getDataValue(objBuf, rowStartIdx);
             tempArray[1] = baseTypeDataProvider.getDataValue(objBuf, rowStartIdx + 1);
 
-            log.debug("retrieveArrayOfAtomicElements(): tempArray[0]={} tempArray[1]={}", tempArray[0],
+            log.trace("retrieveArrayOfAtomicElements(): tempArray[0]={} tempArray[1]={}", tempArray[0],
                       tempArray[1]);
             return tempArray;
         }
@@ -2290,7 +2288,7 @@ public class DataProviderFactory {
             String cname = curBuf.getClass().getName();
             log.trace("updateArrayOfAtomicElements(): buffer cname={} of data cname={}", bname, cname);
             vlElements = new ArrayList<>(Arrays.asList(buffer));
-            log.debug("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
+            log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
             ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
         }
     }

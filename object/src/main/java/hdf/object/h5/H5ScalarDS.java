@@ -886,7 +886,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
             scalarDatasetCommonIO(H5File.IO_TYPE.WRITE, buf);
             // Clear the data cache after writing to ensure fresh reads
             clearData();
-            log.debug("write(Object): data cache cleared after successful write");
+            log.trace("write(Object): data cache cleared after successful write");
         }
         catch (Exception ex) {
             log.debug("write(Object): failed to write to scalar dataset: ", ex);
@@ -925,10 +925,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                  */
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(
                     did, dims, startDims, selectedStride, selectedDims, spaceIDs);
-
-                // NOTE: BFLOAT16 crash protection removed - now properly handled in
-                // H5Datatype.allocateArray() which queries native type size for buffer allocation. See Issue
-                // #383.
 
                 if (ioType == H5File.IO_TYPE.READ) {
                     log.trace(

@@ -491,8 +491,7 @@ public class H5Datatype extends Datatype {
             inSize = 1;
 
         if (inSize <= 0) {
-            log.debug("convertEnumValueToName() failure: inSize length invalid");
-            log.debug("convertEnumValueToName(): inValues={} inSize={}", inValues, inSize);
+            log.debug("convertEnumValueToName() failure: inSize length invalid: inValues={} inSize={}", inValues, inSize);
             return null;
         }
 
@@ -1550,18 +1549,18 @@ public class H5Datatype extends Datatype {
                 long objRefTypeSize  = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ);
                 long dsetRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_DSETREG);
                 // use datatypeSize as which type to copy
-                log.debug("createNative(): datatypeSize:{} ", datatypeSize);
+                log.trace("createNative(): datatypeSize:{} ", datatypeSize);
                 if (datatypeSize < 0 || datatypeSize > dsetRefTypeSize) {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF);
-                    log.debug("createNative(): HDF5Constants.H5T_STD_REF");
+                    log.trace("createNative(): HDF5Constants.H5T_STD_REF");
                 }
                 else if (datatypeSize > objRefTypeSize) {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_DSETREG);
-                    log.debug("createNative(): HDF5Constants.H5T_STD_REF_DSETREG");
+                    log.trace("createNative(): HDF5Constants.H5T_STD_REF_DSETREG");
                 }
                 else {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_OBJ);
-                    log.debug("createNative(): HDF5Constants.H5T_STD_REF_OBJ");
+                    log.trace("createNative(): HDF5Constants.H5T_STD_REF_OBJ");
                 }
             }
             catch (Exception ex) {
@@ -1860,8 +1859,6 @@ public class H5Datatype extends Datatype {
             data = new ArrayList<>(dtype.getCompoundMemberTypes().size());
         }
         else if (typeClass == CLASS_FLOAT) {
-            log.trace("allocateArray(): class CLASS_FLOAT");
-            System.out.println("DEBUG: After CLASS_FLOAT log, typeSize=" + typeSize);
             log.trace("allocateArray(): CLASS_FLOAT typeSize={}", typeSize);
 
             // For float types, we need to use NATIVE type size for buffer allocation,
@@ -1870,9 +1867,7 @@ public class H5Datatype extends Datatype {
             long bufferTypeSize = typeSize;
             log.trace("allocateArray(): bufferTypeSize initialized to {}", bufferTypeSize);
 
-            log.trace("allocateArray(): checking typeSize conditions");
             if (typeSize == NATIVE) {
-                log.trace("allocateArray(): typeSize == NATIVE branch taken");
                 bufferTypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
                 log.trace("allocateArray(): typeSize was NATIVE, resolved to: {}", bufferTypeSize);
             }
@@ -1889,7 +1884,6 @@ public class H5Datatype extends Datatype {
                           bufferTypeSize);
             }
 
-            log.trace("allocateArray(): about to switch on bufferTypeSize={}", bufferTypeSize);
             switch ((int)bufferTypeSize) {
             case 1:
                 log.trace("allocateArray(): allocating byte array for 1-byte float");
@@ -2513,7 +2507,7 @@ public class H5Datatype extends Datatype {
                 new_obj_sid = H5.H5Rget_region(container, HDF5Constants.H5R_DATASET_REGION, refarr);
                 try {
                     int region_type = H5.H5Sget_select_type(new_obj_sid);
-                    log.debug("descRegionDataset Reference Region Type {}", region_type);
+                    log.trace("descRegionDataset Reference Region Type {}", region_type);
                     long reg_ndims   = H5.H5Sget_simple_extent_ndims(new_obj_sid);
                     StringBuilder sb = new StringBuilder();
                     if (HDF5Constants.H5S_SEL_POINTS == region_type) {

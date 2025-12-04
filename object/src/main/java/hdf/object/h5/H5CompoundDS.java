@@ -1030,16 +1030,16 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                               memberType.getDescription());
 
                     if (ioType == H5File.IO_TYPE.READ) {
-                        log.debug("=== READ COMPOUND MEMBER {} ===", i);
-                        log.debug("  memberName='{}', memberType={}", memberName,
+                        log.trace("=== READ COMPOUND MEMBER {} ===", i);
+                        log.trace("  memberName='{}', memberType={}", memberName,
                                   memberType.getDescription());
-                        log.debug("  BEFORE READ: globalMemberIndex[0]={}", globalMemberIndex[0]);
-                        log.debug("  memberDataList.size()={} (will add at index {})", memberDataList.size(),
+                        log.trace("  BEFORE READ: globalMemberIndex[0]={}", globalMemberIndex[0]);
+                        log.trace("  memberDataList.size()={} (will add at index {})", memberDataList.size(),
                                   memberDataList.size());
 
                         try {
                             if (memberType.isCompound()) {
-                                log.debug("  Member is COMPOUND type - recursing");
+                                log.trace("  Member is COMPOUND type - recursing");
                                 memberData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType,
                                                             writeBuf, globalMemberIndex);
                             }
@@ -1063,7 +1063,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                                     /*
                                      * Skip the top-level array/vlen type.
                                      */
-                                    log.debug(
+                                    log.trace(
                                         "  Array of compound - skipping top-level, incrementing globalMemberIndex");
                                     globalMemberIndex[0]++;
 
@@ -1071,23 +1071,23 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                                                                 writeBuf, globalMemberIndex);
                                 }
                                 else {
-                                    log.debug("  Member is ARRAY type - calling readSingleCompoundMember");
+                                    log.trace("  Member is ARRAY type - calling readSingleCompoundMember");
                                     memberData = readSingleCompoundMember(did, spaceIDs, nSelPoints,
                                                                           memberType, memberName);
                                     globalMemberIndex[0]++;
-                                    log.debug("  AFTER READ: globalMemberIndex[0]={}", globalMemberIndex[0]);
+                                    log.trace("  AFTER READ: globalMemberIndex[0]={}", globalMemberIndex[0]);
                                 }
                             }
                             else {
-                                log.debug("  Member is ATOMIC type - calling readSingleCompoundMember");
+                                log.trace("  Member is ATOMIC type - calling readSingleCompoundMember");
                                 memberData = readSingleCompoundMember(did, spaceIDs, nSelPoints, memberType,
                                                                       memberName);
                                 globalMemberIndex[0]++;
-                                log.debug("  AFTER READ: globalMemberIndex[0]={}", globalMemberIndex[0]);
+                                log.trace("  AFTER READ: globalMemberIndex[0]={}", globalMemberIndex[0]);
 
                                 // Log first value for debugging
                                 if (memberData != null && Array.getLength(memberData) > 0) {
-                                    log.debug("  memberData type={}, first value={}",
+                                    log.trace("  memberData type={}, first value={}",
                                               memberData.getClass().getSimpleName(),
                                               Array.get(memberData, 0));
                                 }
@@ -1107,19 +1107,19 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                                 errVal[j] = errStr;
 
                             memberData = errVal;
-                            log.debug("  memberData was null, created error array");
+                            log.trace("  memberData was null, created error array");
                         }
 
-                        log.debug("  ADDING to memberDataList[{}]: memberName='{}', dataType={}",
+                        log.trace("  ADDING to memberDataList[{}]: memberName='{}', dataType={}",
                                   memberDataList.size(), memberName, memberData.getClass().getSimpleName());
                         memberDataList.add(memberData);
-                        log.debug("  memberDataList.size() now = {}", memberDataList.size());
+                        log.trace("  memberDataList.size() now = {}", memberDataList.size());
                     }
                     else {
-                        log.debug("=== WRITE COMPOUND MEMBER {} ===", i);
-                        log.debug("  memberName='{}', memberType={}", memberName,
+                        log.trace("=== WRITE COMPOUND MEMBER {} ===", i);
+                        log.trace("  memberName='{}', memberType={}", memberName,
                                   memberType.getDescription());
-                        log.debug("  BEFORE: writeListIndex={}, globalMemberIndex[0]={}", writeListIndex,
+                        log.trace("  BEFORE: writeListIndex={}, globalMemberIndex[0]={}", writeListIndex,
                                   globalMemberIndex[0]);
 
                         try {
@@ -1127,7 +1127,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                              * TODO: currently doesn't correctly handle non-selected compound members.
                              */
                             memberData = ((List<?>)writeBuf).get(writeListIndex++);
-                            log.debug("  Retrieved memberData from writeBuf[{}] (now writeListIndex={})",
+                            log.trace("  Retrieved memberData from writeBuf[{}] (now writeListIndex={})",
                                       writeListIndex - 1, writeListIndex);
                         }
                         catch (Exception ex) {
@@ -1144,22 +1144,22 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
 
                         try {
                             if (memberType.isCompound()) {
-                                log.debug("  Member is COMPOUND type - recursing");
+                                log.trace("  Member is COMPOUND type - recursing");
                                 List<?> nestedList = (List<?>)((List<?>)writeBuf).get(writeListIndex++);
-                                log.debug("  Retrieved nestedList from writeBuf[{}] (now writeListIndex={})",
+                                log.trace("  Retrieved nestedList from writeBuf[{}] (now writeListIndex={})",
                                           writeListIndex - 1, writeListIndex);
                                 compoundTypeIO(ioType, did, spaceIDs, nSelPoints, memberType, nestedList,
                                                globalMemberIndex);
                             }
                             else {
-                                log.debug("  Member is ATOMIC type - calling writeSingleCompoundMember");
-                                log.debug(
+                                log.trace("  Member is ATOMIC type - calling writeSingleCompoundMember");
+                                log.trace(
                                     "  Calling writeSingleCompoundMember(memberName='{}', globalMemberIndex={})",
                                     memberName, globalMemberIndex[0]);
                                 writeSingleCompoundMember(did, spaceIDs, nSelPoints, memberType, memberName,
                                                           memberData);
                                 globalMemberIndex[0]++;
-                                log.debug("  AFTER write: globalMemberIndex[0]={}", globalMemberIndex[0]);
+                                log.trace("  AFTER write: globalMemberIndex[0]={}", globalMemberIndex[0]);
                             }
                         }
                         catch (Exception ex) {
@@ -1189,9 +1189,6 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
     {
         H5Datatype dsDatatype = (H5Datatype)this.getDatatype();
         Object memberData     = null;
-
-        // NOTE: BFLOAT16 crash protection removed - now properly handled in H5Datatype.allocateArray()
-        // which queries native type size for buffer allocation. See Issue #383.
 
         try {
             memberData = H5Datatype.allocateArray(memberType, nSelPoints);
@@ -1300,9 +1297,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                                            final H5Datatype memberType, String memberName, Object theData)
         throws Exception
     {
-        log.debug(">>> writeSingleCompoundMember: memberName='{}', memberType={}, nSelPoints={}", memberName,
+        log.trace(">>> writeSingleCompoundMember: memberName='{}', memberType={}, nSelPoints={}", memberName,
                   memberType.getDescription(), nSelPoints);
-        log.debug("    theData type: {}, length: {}", theData.getClass().getName(), Array.getLength(theData));
+        log.trace("    theData type: {}, length: {}", theData.getClass().getName(), Array.getLength(theData));
         // Log first few data values for debugging
         if (Array.getLength(theData) > 0) {
             StringBuilder dataSample = new StringBuilder();
@@ -1312,7 +1309,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                     dataSample.append(", ");
                 dataSample.append(Array.get(theData, i));
             }
-            log.debug("    Data sample (first {} values): [{}]", sampleSize, dataSample);
+            log.trace("    Data sample (first {} values): [{}]", sampleSize, dataSample);
         }
 
         H5Datatype dsDatatype = (H5Datatype)this.getDatatype();
@@ -1704,7 +1701,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                                         filters.append(", ");
                                     filters.append(cdValues[j]);
                                 }
-                                log.debug("getMetadata(): filter[{}] is user defined compression", i);
+                                log.trace("getMetadata(): filter[{}] is user defined compression", i);
                             }
                         } //  (int i=0; i<nfilt; i++)
                     }
