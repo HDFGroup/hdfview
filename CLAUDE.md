@@ -54,6 +54,84 @@ Both scripts provide:
 run-hdfview.bat
 ```
 
+### Development Helper Scripts
+
+Additional scripts in `scripts/` directory for common development tasks:
+
+#### Clean All (`scripts/clean-all.sh`)
+Deep clean to pristine state - removes all build artifacts, Maven cache, and stale files.
+Useful for resolving classloading issues and stale dependency problems.
+
+```bash
+./scripts/clean-all.sh
+```
+
+This removes:
+- All Maven `target/` directories
+- Maven local repository cache (`~/.m2/repository/org/hdfgroup/hdfview`)
+- Maven resolver status files
+- `libs/` directory
+- Any stale `.class` files
+
+#### Build for Development (`scripts/build-dev.sh`)
+Quick build to ready-to-run state, skipping tests and quality checks by default.
+
+```bash
+# Quick development build
+./scripts/build-dev.sh
+
+# Build with tests
+./scripts/build-dev.sh --with-tests
+
+# Clean and build
+./scripts/build-dev.sh --clean
+
+# Full build with quality checks (slower)
+./scripts/build-dev.sh --with-quality
+```
+
+The script:
+1. Compiles object module
+2. Packages object JAR to `libs/`
+3. Installs to `~/.m2/repository`
+4. Compiles hdfview module
+5. Compiles test classes
+
+#### Debug Logging Switcher (`scripts/set-debug-logging.sh`)
+Quick switch between pre-configured logging levels for different debugging scenarios.
+
+```bash
+# List available configurations
+./scripts/set-debug-logging.sh list
+
+# Switch to Float16/BFLOAT16 debug logging
+./scripts/set-debug-logging.sh float16
+
+# Restore default minimal logging
+./scripts/set-debug-logging.sh default
+```
+
+Debug configurations are stored in `.claude/debug-configs/` (local only, not in git).
+
+**Common Workflow for New Developers:**
+```bash
+# 1. Deep clean (first time or when having issues)
+./scripts/clean-all.sh
+
+# 2. Build for development
+./scripts/build-dev.sh
+
+# 3. Run HDFView
+./run-hdfview.sh
+
+# 4. Enable debug logging when needed
+./scripts/set-debug-logging.sh float16
+mvn test-compile -pl hdfview -DskipTests
+
+# 5. Run tests
+mvn test -pl hdfview -Dtest=TestClassName
+```
+
 ### Key Build Configuration
 
 - **Java Version**: Java 21 (set via `maven.compiler.source` and `maven.compiler.release`)
