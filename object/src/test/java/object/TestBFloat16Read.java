@@ -2,17 +2,17 @@ package object;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.DisplayName;
+import java.io.File;
 
 import hdf.object.FileFormat;
 import hdf.object.h5.H5File;
 import hdf.object.h5.H5ScalarDS;
 
-import java.io.File;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test to verify BFLOAT16 dataset can be read without JVM crash.
@@ -24,13 +24,14 @@ import java.io.File;
 @DisplayName("BFLOAT16 Dataset Read Test")
 public class TestBFloat16Read {
 
-    private static final String TEST_FILE = "../hdfview/src/test/resources/uitest/tbfloat16.h5";
+    private static final String TEST_FILE    = "../hdfview/src/test/resources/uitest/tbfloat16.h5";
     private static final String DATASET_NAME = "/DS16BITS";
 
     private H5File testFile;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() throws Exception
+    {
         // Verify test file exists
         File file = new File(TEST_FILE);
         assertTrue(file.exists(), "Test file not found: " + TEST_FILE);
@@ -42,7 +43,8 @@ public class TestBFloat16Read {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() throws Exception
+    {
         if (testFile != null) {
             testFile.close();
         }
@@ -50,9 +52,10 @@ public class TestBFloat16Read {
 
     @Test
     @DisplayName("BFLOAT16 dataset should read without crash")
-    public void testBFloat16DatasetRead() throws Exception {
+    public void testBFloat16DatasetRead() throws Exception
+    {
         // Get the dataset
-        H5ScalarDS dataset = (H5ScalarDS) testFile.get(DATASET_NAME);
+        H5ScalarDS dataset = (H5ScalarDS)testFile.get(DATASET_NAME);
         assertNotNull(dataset, "Dataset not found: " + DATASET_NAME);
 
         System.out.println("=== BFLOAT16 Dataset Read Test ===");
@@ -70,7 +73,7 @@ public class TestBFloat16Read {
 
         // For BFLOAT16, buffer should be float[] (4-byte elements)
         assertTrue(data instanceof float[], "Expected float[] buffer for BFLOAT16");
-        float[] floatData = (float[]) data;
+        float[] floatData = (float[])data;
         System.out.println("Data length: " + floatData.length);
 
         // Print first few values
@@ -84,9 +87,10 @@ public class TestBFloat16Read {
 
     @Test
     @DisplayName("BFLOAT16 attribute should read without crash")
-    public void testBFloat16AttributeRead() throws Exception {
+    public void testBFloat16AttributeRead() throws Exception
+    {
         // Get the dataset (attributes are on the dataset)
-        H5ScalarDS dataset = (H5ScalarDS) testFile.get(DATASET_NAME);
+        H5ScalarDS dataset = (H5ScalarDS)testFile.get(DATASET_NAME);
         assertNotNull(dataset, "Dataset not found");
 
         // Get attribute metadata

@@ -940,8 +940,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(
                     did, dims, startDims, selectedStride, selectedDims, spaceIDs);
 
-                // NOTE: BFLOAT16 crash protection removed - now properly handled in H5Datatype.allocateArray()
-                // which queries native type size for buffer allocation. See Issue #383.
+                // NOTE: BFLOAT16 crash protection removed - now properly handled in
+                // H5Datatype.allocateArray() which queries native type size for buffer allocation. See Issue
+                // #383.
 
                 if (ioType == H5File.IO_TYPE.READ) {
                     log.trace(
@@ -991,7 +992,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                             // For Float8 (1-byte float), createNative() fails in HDF5 2.0
                             // Use H5T_NATIVE_FLOAT directly to request conversion
                             if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 1) {
-                                log.trace("scalarDatasetCommonIO(): Float8 - using H5T_NATIVE_FLOAT for conversion");
+                                log.trace(
+                                    "scalarDatasetCommonIO(): Float8 - using H5T_NATIVE_FLOAT for conversion");
                                 tid = HDF5Constants.H5T_NATIVE_FLOAT;
                             }
                             else {
