@@ -491,7 +491,8 @@ public class H5Datatype extends Datatype {
             inSize = 1;
 
         if (inSize <= 0) {
-            log.debug("convertEnumValueToName() failure: inSize length invalid: inValues={} inSize={}", inValues, inSize);
+            log.debug("convertEnumValueToName() failure: inSize length invalid: inValues={} inSize={}",
+                      inValues, inSize);
             return null;
         }
 
