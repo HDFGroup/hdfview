@@ -179,16 +179,16 @@ jobs:
         fi
 
         # Install fits.jar
-        if [ -f lib/fits.jar ]; then
-          mvn install:install-file -Dfile=lib/fits.jar \
+        if [ -f repository/lib/fits.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
             -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: fits.jar"
         fi
 
         # Install netcdf.jar
-        if [ -f lib/netcdf.jar ]; then
-          mvn install:install-file -Dfile=lib/netcdf.jar \
+        if [ -f repository/lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
             -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: netcdf.jar"
