@@ -1,10 +1,12 @@
 name: Maven Quality Gates
 
 on:
+  workflow_call:
+  workflow_dispatch:
   push:
-    branches: [ master, master-maven, main ]
+    branches: [ master ]
   pull_request:
-    branches: [ master, master-maven, main ]
+    branches: [ master ]
   schedule:
     # Run quality analysis daily at 2 AM UTC
     - cron: '0 2 * * *'
