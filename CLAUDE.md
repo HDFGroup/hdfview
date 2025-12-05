@@ -54,6 +54,84 @@ Both scripts provide:
 run-hdfview.bat
 ```
 
+### Development Helper Scripts
+
+Additional scripts in `scripts/` directory for common development tasks:
+
+#### Clean All (`scripts/clean-all.sh`)
+Deep clean to pristine state - removes all build artifacts, Maven cache, and stale files.
+Useful for resolving classloading issues and stale dependency problems.
+
+```bash
+./scripts/clean-all.sh
+```
+
+This removes:
+- All Maven `target/` directories
+- Maven local repository cache (`~/.m2/repository/org/hdfgroup/hdfview`)
+- Maven resolver status files
+- `libs/` directory
+- Any stale `.class` files
+
+#### Build for Development (`scripts/build-dev.sh`)
+Quick build to ready-to-run state, skipping tests and quality checks by default.
+
+```bash
+# Quick development build
+./scripts/build-dev.sh
+
+# Build with tests
+./scripts/build-dev.sh --with-tests
+
+# Clean and build
+./scripts/build-dev.sh --clean
+
+# Full build with quality checks (slower)
+./scripts/build-dev.sh --with-quality
+```
+
+The script:
+1. Compiles object module
+2. Packages object JAR to `libs/`
+3. Installs to `~/.m2/repository`
+4. Compiles hdfview module
+5. Compiles test classes
+
+#### Debug Logging Switcher (`scripts/set-debug-logging.sh`)
+Quick switch between pre-configured logging levels for different debugging scenarios.
+
+```bash
+# List available configurations
+./scripts/set-debug-logging.sh list
+
+# Switch to Float16/BFLOAT16 debug logging
+./scripts/set-debug-logging.sh float16
+
+# Restore default minimal logging
+./scripts/set-debug-logging.sh default
+```
+
+Debug configurations are stored in `.claude/debug-configs/` (local only, not in git).
+
+**Common Workflow for New Developers:**
+```bash
+# 1. Deep clean (first time or when having issues)
+./scripts/clean-all.sh
+
+# 2. Build for development
+./scripts/build-dev.sh
+
+# 3. Run HDFView
+./run-hdfview.sh
+
+# 4. Enable debug logging when needed
+./scripts/set-debug-logging.sh float16
+mvn test-compile -pl hdfview -DskipTests
+
+# 5. Run tests
+mvn test -pl hdfview -Dtest=TestClassName
+```
+
 ### Key Build Configuration
 
 - **Java Version**: Java 21 (set via `maven.compiler.source` and `maven.compiler.release`)
@@ -246,8 +324,8 @@ Located in `scripts/`:
 - Focus on JavaFX evaluation for large dataset performance
 - Planned but deferred to prioritize test migration completion
 
-### 🎯 Current Status (December 1, 2025)
-**Active Work**: Implementing fix for Issue #386 (compound dataset index mapping bug)
+### 🎯 Current Status (December 5, 2025)
+**Active Work**: All CI workflows fixed and operational across all platforms
 
 - **JUnit 5 Migration**: ✅ **100% COMPLETE** across entire project
 - **CI Strategy**: ✅ Object tests only in CI (UI tests require real display)
@@ -281,6 +359,10 @@ Located in `scripts/`:
 - ✅ **November 25, 2025**: Comprehensive debug logging added to data flow
 - ✅ **December 1, 2025**: Issue #386 fix implemented
 - ✅ **December 2, 2025**: Issue #383 resolved - BFLOAT16 crash protection added
+- ✅ **December 5, 2025**: Comprehensive CI workflow fixes - all platforms operational
+- ✅ **December 5, 2025**: Repository library JARs committed to version control
+- ✅ **December 5, 2025**: Fixed Float16/BFLOAT16 root cause in H5Datatype.createNative()
+- ✅ **December 5, 2025**: Fixed undefined repository.basedir property in POMs
 
 **Launcher Script Usage:**
 ```bash
@@ -290,20 +372,51 @@ Located in `scripts/`:
 ./run-hdfview.sh --validate   # Validate environment only
 ```
 
-**Current Work (December 2, 2025):**
-1. ✅ **COMPLETE**: Issue #383 - BFLOAT16 crash protection
-   - Protection added to H5ScalarDS and H5CompoundDS
-   - Upstream issue filed: HDFGroup/hdf5#6076
-   - Regression confirmed: worked in 1.14.6, broken in 2.0.0
-   - PR #397 updated with fix
-2. ✅ **COMPLETE**: Issue #386 - Compound dataset fix
-   - Test framework viewport quirk documented
-   - PR #397 ready for merge
-3. Verify full test suite passes
-4. Merge PR #397 (contains both fixes)
-5. Scalar vs compound code consistency analysis (future)
-6. Add new datatype testing (future)
-7. Improve code coverage (future)
+**Previous Work:**
+- ✅ Issue #383 - BFLOAT16 crash protection (December 2)
+- ✅ Issue #386 - Compound dataset fix (December 1)
+- ✅ PR #397 merged with both fixes
+
+**Session: December 5, 2025 - Comprehensive CI/CD Fixes**
+
+**Issues Fixed:**
+1. ✅ HDF5 version parsing errors (Linux/macOS tar verbose output)
+2. ✅ Excessive Checkstyle whitespace warnings (disabled - using clang-format)
+3. ✅ PMD ASM errors with Java 25 dependencies
+4. ✅ Missing repository library JARs (fits, netcdf, Eclipse, SWTBot)
+5. ✅ SWTBot dependency mismatches (groupId and version)
+6. ✅ ci-windows SWTBot artifactId typos
+7. ✅ maven-release missing Java dependencies
+8. ✅ maven-quality PR comment permissions
+9. ✅ Float16/BFLOAT16 root cause bug in H5Datatype.createNative()
+10. ✅ Undefined repository.basedir property in object/hdfview POMs
+
+**Workflows Updated:**
+- ✅ ci-linux.yml - JAR installation, SWTBot support
+- ✅ ci-macos.yml - JAR installation, SWTBot support
+- ✅ ci-windows.yml - Fixed SWTBot artifactIds
+- ✅ maven-quality.yml - JAR installation, PR comment error handling
+- ✅ maven-build.yml - Flexible HDF version handling
+- ✅ maven-release.yml - Java dependencies from system packages + GitHub fallback
+- ✅ checkstyle-rules.xml - Disabled whitespace/brace rules (clang-format)
+- ✅ pom.xml - Relaxed HDF5 plugin enforcer, PMD configuration
+- ✅ object/pom.xml - Fixed repository path
+- ✅ hdfview/pom.xml - Fixed repository path, SWTBot version
+
+**Repository Changes:**
+- ✅ Added .gitignore exception for repository/lib/*.jar
+- ✅ Committed 22 stable dependency JARs to version control:
+  - fits.jar, netcdf.jar (file format support)
+  - Eclipse/SWT libraries (UI framework)
+  - SWTBot testing framework
+  - NatTable widgets, imaging libraries
+
+**Code Fixes:**
+- ✅ H5Datatype.createNative() - Fixed invalid HID bug for Float16
+- ✅ H5Datatype.createNative() - Added Float8 support
+- ✅ Removed Float16/BFLOAT16 workarounds (root cause fixed)
+
+**Result:** All CI workflows now operational across Linux, macOS, and Windows platforms
 
 ## Documentation
 

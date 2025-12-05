@@ -436,26 +436,12 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                 try {
                     tid = H5.H5Aget_type(aid);
                     log.trace("getDatatype(): isNativeDatatype={}", isNativeDatatype);
-                    if (!isNativeDatatype) {
-                        long tmptid = -1;
-                        try {
-                            tmptid = H5Datatype.toNative(tid);
-                            if (tmptid >= 0) {
-                                try {
-                                    H5.H5Tclose(tid);
-                                }
-                                catch (Exception ex2) {
-                                    log.debug("getDatatype(): H5Tclose(tid {}) failure: ", tid, ex2);
-                                }
-                                tid = tmptid;
-                            }
-                        }
-                        catch (Exception ex) {
-                            log.debug("getDatatype(): toNative: ", ex);
-                        }
-                    }
-                    int nativeClass = H5.H5Tget_class(tid);
-                    if (nativeClass == HDF5Constants.H5T_REFERENCE) {
+
+                    // For display purposes, create H5Datatype from the FILE type, not NATIVE type.
+                    // This preserves the correct bit width (e.g., "16-bit" for Float16/BFLOAT16).
+                    // The toNative conversion happens later during data reading in createNative().
+                    int fileTypeClass = H5.H5Tget_class(tid);
+                    if (fileTypeClass == HDF5Constants.H5T_REFERENCE) {
                         long lsize = 1;
                         long sid   = H5.H5Aget_space(aid);
                         int rank   = H5.H5Sget_simple_extent_ndims(sid);

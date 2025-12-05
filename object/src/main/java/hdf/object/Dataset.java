@@ -1598,8 +1598,16 @@ public abstract class Dataset extends HObject implements DataFormat {
 
             if (value == null)
                 strValue = "null";
-            else
-                strValue = Float.toString(Float.float16ToFloat((short)value));
+            else {
+                // NOTE: For Float16/BFLOAT16, data may already be in Float format if native
+                // representation required it. Only convert if still in Short format.
+                if (value instanceof Short)
+                    strValue = Float.toString(Float.float16ToFloat((short)value));
+                else if (value instanceof Float)
+                    strValue = Float.toString((float)value);
+                else
+                    strValue = value.toString();
+            }
 
             // if (count > 0 && strValue.length() > count)
             // truncate the extra characters
@@ -1612,8 +1620,16 @@ public abstract class Dataset extends HObject implements DataFormat {
 
                 if (value == null)
                     strValue = "null";
-                else
-                    strValue = Float.toString(Float.float16ToFloat((short)value));
+                else {
+                    // NOTE: For Float16/BFLOAT16, data may already be in Float format if native
+                    // representation required it. Only convert if still in Short format.
+                    if (value instanceof Short)
+                        strValue = Float.toString(Float.float16ToFloat((short)value));
+                    else if (value instanceof Float)
+                        strValue = Float.toString((float)value);
+                    else
+                        strValue = value.toString();
+                }
 
                 if (count > 0 && strValue.length() > count)
                     // truncate the extra characters

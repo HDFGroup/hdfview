@@ -41,6 +41,8 @@ Thumbs.db
 # Java
 *.class
 *.jar
+# Exception: Allow repository library JARs (fits, netcdf, Eclipse, SWTBot)
+!repository/lib/*.jar
 *.war
 *.ear
 

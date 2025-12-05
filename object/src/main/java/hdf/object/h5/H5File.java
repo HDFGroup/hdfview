@@ -497,33 +497,28 @@ public class H5File extends FileFormat {
                         String nameA = H5.H5Aget_name(aid);
                         log.trace("getAttribute(): Attribute[{}] is {} with lsize={}", i, nameA, lsize);
 
-                        long tmptid = -1;
+                        // Get the FILE type for creating H5Datatype with correct bit width.
+                        // The toNative conversion happens later in createNative() during data reading.
                         try {
-                            tmptid = H5.H5Aget_type(aid);
-                            tid    = H5.H5Tget_native_type(tmptid);
-                            log.trace("getAttribute(): Attribute[{}] tid={} native tmptid={} from aid={}", i,
-                                      tid, tmptid, aid);
+                            tid        = H5.H5Aget_type(aid);
+                            long tsize = H5.H5Tget_size(tid);
+                            log.trace("getAttribute(): Attribute[{}] tid={} FILE TYPE SIZE={} from aid={}", i,
+                                      tid, tsize, aid);
                         }
-                        finally {
-                            try {
-                                H5.H5Tclose(tmptid);
-                            }
-                            catch (Exception ex) {
-                                log.debug("getAttribute(): Attribute[{}] H5Tclose(tmptid {}) failure: ", i,
-                                          tmptid, ex);
-                            }
+                        catch (Exception ex) {
+                            log.debug("getAttribute(): Attribute[{}] H5Aget_type failure: ", i, ex);
                         }
 
                         H5Datatype attrType = null;
                         try {
-                            int nativeClass = H5.H5Tget_class(tid);
-                            if (nativeClass == HDF5Constants.H5T_REFERENCE)
+                            int fileTypeClass = H5.H5Tget_class(tid);
+                            if (fileTypeClass == HDF5Constants.H5T_REFERENCE)
                                 attrType = new H5ReferenceType(obj.getFileFormat(), lsize, tid);
                             else
                                 attrType = new H5Datatype(obj.getFileFormat(), tid);
 
-                            log.trace("getAttribute(): Attribute[{}] Datatype={}", i,
-                                      attrType.getDescription());
+                            log.trace("getAttribute(): Attribute[{}] Datatype={} SIZE={}", i,
+                                      attrType.getDescription(), attrType.getDatatypeSize());
                             log.trace(
                                 "getAttribute(): Attribute[{}] has size={} isCompound={} is_variable_str={} isVLEN={}",
                                 i, lsize, attrType.isCompound(), attrType.isVarStr(), attrType.isVLEN());
@@ -939,7 +934,7 @@ public class H5File extends FileFormat {
         }
 
         ver += vers[0] + "." + vers[1] + "." + vers[2];
-        log.debug("getLibversion(): libversion is {}", ver);
+        log.trace("getLibversion(): libversion is {}", ver);
 
         return ver;
     }
@@ -2621,7 +2616,7 @@ public class H5File extends FileFormat {
 
         pgroup.close(gid);
 
-        log.debug("depth_first({}): nTotal={}", parentObject, nTotal);
+        log.trace("depth_first({}): nTotal={}", parentObject, nTotal);
         return nTotal;
     } // private depth_first()
 
