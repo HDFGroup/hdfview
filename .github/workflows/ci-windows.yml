@@ -182,6 +182,24 @@ jobs:
           Write-Host "Installed: $($jarhdf.Name)"
         }
 
+        # Install fits.jar
+        $jarfits = Get-ChildItem "repository\lib\fits.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($jarfits) {
+          mvn install:install-file "-Dfile=$($jarfits.FullName)" `
+            "-DgroupId=jarfits" "-DartifactId=jarfits" "-Dversion=1.0.0" `
+            "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($jarfits.Name)"
+        }
+
+        # Install netcdf.jar
+        $jarnetcdf = Get-ChildItem "repository\lib\netcdf.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($jarnetcdf) {
+          mvn install:install-file "-Dfile=$($jarnetcdf.FullName)" `
+            "-DgroupId=jarnetcdf" "-DartifactId=jarnetcdf" "-Dversion=1.0.0" `
+            "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($jarnetcdf.Name)"
+        }
+
         # Install slf4j-api if present
         $slf4j = Get-ChildItem "repository\lib\slf4j-api-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($slf4j) {
