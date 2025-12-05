@@ -69,7 +69,44 @@ jobs:
     - name: Install HDF Libraries
       run: |
         sudo apt-get update
-        sudo apt-get install -y libhdf5-dev libhdf4-dev
+        sudo apt-get install -y libhdf5-dev libhdf4-dev libhdf5-java libhdf4-java
+
+    - name: Install Java Dependencies to Maven Local Repository
+      run: |
+        echo "Installing Java dependencies..."
+
+        # Install fits.jar and netcdf.jar from repository
+        mvn install:install-file -Dfile=repository/lib/fits.jar \
+          -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
+          -Dpackaging=jar -DgeneratePom=true
+
+        mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+          -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
+          -Dpackaging=jar -DgeneratePom=true
+
+        # Install HDF JARs from system packages (/usr/share/java/)
+        if [ -f /usr/share/java/jarhdf5.jar ]; then
+          mvn install:install-file -Dfile=/usr/share/java/jarhdf5.jar \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+        fi
+
+        if [ -f /usr/share/java/jarhdf.jar ]; then
+          mvn install:install-file -Dfile=/usr/share/java/jarhdf.jar \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+            -Dpackaging=jar -DgeneratePom=true
+        fi
+
+        # Install SWTBot JARs for UI testing
+        mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+          -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
+          -Dpackaging=jar -DgeneratePom=true
+
+        mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+          -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.nebula.nattable.finder -Dversion=4.2.1 \
+          -Dpackaging=jar -DgeneratePom=true
+
+        echo "All Java dependencies installed successfully"
 
     - name: Set up build.properties
       run: |
@@ -288,7 +325,44 @@ jobs:
     - name: Install HDF Libraries
       run: |
         sudo apt-get update
-        sudo apt-get install -y libhdf5-dev libhdf4-dev
+        sudo apt-get install -y libhdf5-dev libhdf4-dev libhdf5-java libhdf4-java
+
+    - name: Install Java Dependencies to Maven Local Repository
+      run: |
+        echo "Installing Java dependencies..."
+
+        # Install fits.jar and netcdf.jar from repository
+        mvn install:install-file -Dfile=repository/lib/fits.jar \
+          -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
+          -Dpackaging=jar -DgeneratePom=true
+
+        mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+          -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
+          -Dpackaging=jar -DgeneratePom=true
+
+        # Install HDF JARs from system packages (/usr/share/java/)
+        if [ -f /usr/share/java/jarhdf5.jar ]; then
+          mvn install:install-file -Dfile=/usr/share/java/jarhdf5.jar \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+        fi
+
+        if [ -f /usr/share/java/jarhdf.jar ]; then
+          mvn install:install-file -Dfile=/usr/share/java/jarhdf.jar \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+            -Dpackaging=jar -DgeneratePom=true
+        fi
+
+        # Install SWTBot JARs for UI testing
+        mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+          -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
+          -Dpackaging=jar -DgeneratePom=true
+
+        mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+          -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.nebula.nattable.finder -Dversion=4.2.1 \
+          -Dpackaging=jar -DgeneratePom=true
+
+        echo "All Java dependencies installed successfully"
 
     - name: Set up build.properties
       run: |
