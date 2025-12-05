@@ -204,6 +204,21 @@ jobs:
           echo "Installed: $JAR_FILE"
         fi
 
+        # Install SWTBot JARs for UI testing
+        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.swt.finder.jar"
+        fi
+
+        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.nebula.nattable.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.nebula.nattable.finder.jar"
+        fi
+
     - name: Set up Xvfb for Headless GUI Testing
       run: |
         echo "Installing Xvfb and GTK dependencies for headless SWT testing..."
