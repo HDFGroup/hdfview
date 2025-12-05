@@ -164,6 +164,22 @@ jobs:
           echo "Installed: $JAR_FILE"
         fi
 
+        # Install fits.jar
+        if [ -f repository/lib/fits.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: fits.jar"
+        fi
+
+        # Install netcdf.jar
+        if [ -f repository/lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: netcdf.jar"
+        fi
+
         # Install slf4j-api if present
         if [ -f repository/lib/slf4j-api-*.jar ]; then
           JAR_FILE=$(ls repository/lib/slf4j-api-*.jar | head -1)
@@ -172,6 +188,21 @@ jobs:
             -DgroupId=org.slf4j -DartifactId=slf4j-api -Dversion="$VERSION" \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE"
+        fi
+
+        # Install SWTBot JARs for UI testing
+        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.swt.finder.jar"
+        fi
+
+        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.nebula.nattable.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.nebula.nattable.finder.jar"
         fi
 
     - name: Set up build.properties

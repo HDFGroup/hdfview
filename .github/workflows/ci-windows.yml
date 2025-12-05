@@ -192,6 +192,23 @@ jobs:
           Write-Host "Installed: $($slf4j.Name)"
         }
 
+        # Install SWTBot JARs for UI testing
+        $finderjar = Get-ChildItem "repository\lib\org.eclipse.swtbot.swt.finder.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($finderjar) {
+          mvn install:install-file "-Dfile=$($finderjar.FullName)" `
+            "-DgroupId=finderjar" "-DartifactId=finderjar" "-Dversion=4.2.1" `
+            "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($finderjar.Name)"
+        }
+
+        $nattablejar = Get-ChildItem "repository\lib\org.eclipse.swtbot..nebula.nattable.finder.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($nattablejar) {
+          mvn install:install-file "-Dfile=$($nattablejar.FullName)" `
+            "-DgroupId=nattablejar" "-DartifactId=nattablejar" "-Dversion=4.2.1" `
+            "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($nattablejar.Name)"
+        }
+
     - name: Set up build.properties
       shell: pwsh
       run: |
