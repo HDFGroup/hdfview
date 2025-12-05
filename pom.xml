@@ -515,20 +515,17 @@ Common locations:
 
 You can also set HDF5_HOME environment variable and use: hdf5.lib.dir=${env.HDF5_HOME}/lib</message>
                   </requireFilesExist>
-                  <!-- Hard validation: HDF5 plugin directory should exist -->
+                  <!-- Soft validation: HDF5 plugin directory (can be skipped in CI with -Denforcer.skip=true) -->
                   <requireProperty>
                     <property>hdf5.plugin.dir</property>
-                    <message>ERROR: hdf5.plugin.dir property is required for full HDF5 functionality.</message>
+                    <message>WARNING: hdf5.plugin.dir property is not set. Some HDF5 features may not work.
+You can set: hdf5.plugin.dir=${env.HDF5_HOME}/lib/plugin
+Or skip this check in CI with: -Denforcer.skip=true</message>
+                    <!-- Allow to be unset - just warn -->
+                    <regex>.*</regex>
                   </requireProperty>
-                  <requireFilesExist>
-                    <files>
-                      <file>${hdf5.plugin.dir}</file>
-                    </files>
-                    <message>ERROR: HDF5 plugin directory does not exist: ${hdf5.plugin.dir}
-
-HDF5 plugins are required for full functionality. Please ensure the plugin directory exists.
-You can also use: hdf5.plugin.dir=${env.HDF5_HOME}/lib/plugin</message>
-                  </requireFilesExist>
+                  <!-- NOTE: Not checking if plugin directory exists - allows CI builds without plugins -->
+                  <!-- For full functionality, ensure hdf5.plugin.dir points to a valid directory -->
                 </rules>
               </configuration>
             </execution>

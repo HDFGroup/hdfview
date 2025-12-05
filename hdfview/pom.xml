@@ -121,18 +121,17 @@
     </dependency>
 -->
     <!-- SWTBot dependencies for UI testing -->
-    <!-- Installed to local Maven repository from Eclipse P2 repository -->
-    <!-- See scripts/install-swtbot.sh for installation -->
+    <!-- Installed to local Maven repository from repository/lib/ -->
     <dependency>
-      <groupId>org.eclipse.swtbot</groupId>
+      <groupId>org.eclipse.local</groupId>
       <artifactId>org.eclipse.swtbot.swt.finder</artifactId>
-      <version>4.3.0</version>
+      <version>4.2.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.swtbot</groupId>
+      <groupId>org.eclipse.local</groupId>
       <artifactId>org.eclipse.swtbot.nebula.nattable.finder</artifactId>
-      <version>4.3.0</version>
+      <version>4.2.1</version>
       <scope>test</scope>
     </dependency>
     <!-- Hamcrest matchers (required by SWTBot) -->
