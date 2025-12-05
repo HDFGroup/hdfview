@@ -214,7 +214,7 @@ jobs:
         $finderjar = Get-ChildItem "repository\lib\org.eclipse.swtbot.swt.finder.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($finderjar) {
           mvn install:install-file "-Dfile=$($finderjar.FullName)" `
-            "-DgroupId=org.eclipse.local" "-DartifactId=finderjar" "-Dversion=4.2.1" `
+            "-DgroupId=org.eclipse.local" "-DartifactId=org.eclipse.swtbot.swt.finder" "-Dversion=4.2.1" `
             "-Dpackaging=jar" "-DgeneratePom=true"
           Write-Host "Installed: $($finderjar.Name)"
         }
@@ -222,7 +222,7 @@ jobs:
         $nattablejar = Get-ChildItem "repository\lib\org.eclipse.swtbot.nebula.nattable.finder.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($nattablejar) {
           mvn install:install-file "-Dfile=$($nattablejar.FullName)" `
-            "-DgroupId=org.eclipse.local" "-DartifactId=nattablejar" "-Dversion=4.2.1" `
+            "-DgroupId=org.eclipse.local" "-DartifactId=org.eclipse.swtbot.nebula.nattable.finder" "-Dversion=4.2.1" `
             "-Dpackaging=jar" "-DgeneratePom=true"
           Write-Host "Installed: $($nattablejar.Name)"
         }
