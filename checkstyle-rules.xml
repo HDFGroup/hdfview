@@ -130,6 +130,8 @@
             <property name="option" value="TEXT"/>
             <property name="tokens" value="LITERAL_TRY, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
         </module>
+        <!-- Brace placement checks DISABLED: Using clang-format for code formatting -->
+        <!--
         <module name="LeftCurly">
             <property name="option" value="eol"/>
         </module>
@@ -140,6 +142,7 @@
             <property name="option" value="same"/>
             <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_DO"/>
         </module>
+        -->
 
         <!-- Common coding problems -->
         <module name="EmptyStatement"/>
