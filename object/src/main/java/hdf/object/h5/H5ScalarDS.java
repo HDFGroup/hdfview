@@ -926,15 +926,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(
                     did, dims, startDims, selectedStride, selectedDims, spaceIDs);
 
-                // Check for BFLOAT16 which causes JVM crash due to HDF5 Java bindings bug
-                // See https://github.com/HDFGroup/hdf5/issues/6076
-                if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 2) {
-                    throw new Exception(
-                        "BFLOAT16 (16-bit floating-point) datasets are not supported due to a bug in HDF5 Java bindings. "
-                        +
-                        "Reading this datatype causes a JVM crash. See https://github.com/HDFGroup/hdf5/issues/6076 for details.");
-                }
-
                 if (ioType == H5File.IO_TYPE.READ) {
                     log.trace(
                         "scalarDatasetCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}",

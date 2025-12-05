@@ -1469,11 +1469,15 @@ public class H5Datatype extends Datatype {
                 else if (datatypeSize == 2)
                     // HDF5Constants.H5T_NATIVE_FLOAT16 is not available in all versions of HDF5
                     // so we need to check if it is available before using it.
-                    // If not available, fall back to FLOAT32 for reading 16-bit float types.
+                    // If not available, fall back to FLOAT32 for reading 16-bit float types (Float16/BFLOAT16).
                     if (HDF5Constants.H5T_NATIVE_FLOAT16 == HDF5Constants.H5I_INVALID_HID)
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
                     else
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT16);
+                else if (datatypeSize == 1)
+                    // For Float8 (1-byte floats), fall back to FLOAT32 for reading
+                    // as there is no native Float8 type in most HDF5 versions
+                    tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
                 else
                     tid = -1;
 
