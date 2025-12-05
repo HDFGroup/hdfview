@@ -69,7 +69,11 @@ jobs:
     - name: Install HDF Libraries
       run: |
         sudo apt-get update
-        sudo apt-get install -y libhdf5-dev libhdf4-dev libhdf5-java libhdf4-java
+        sudo apt-get install -y libhdf5-dev libhdf4-dev
+
+        # Try to install Java packages if available (may not exist in all Ubuntu versions)
+        sudo apt-get install -y libhdf5-java || echo "libhdf5-java not available, will use GitHub releases"
+        sudo apt-get install -y libhdf4-java || echo "libhdf4-java not available, will use GitHub releases"
 
     - name: Install Java Dependencies to Maven Local Repository
       run: |
@@ -84,17 +88,28 @@ jobs:
           -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
           -Dpackaging=jar -DgeneratePom=true
 
-        # Install HDF JARs from system packages (/usr/share/java/)
+        # Install HDF JARs - try system packages first, fallback to downloading
+        # Note: libhdf4-java and libhdf5-java may not be available in all Ubuntu versions
+        echo "Checking for HDF Java packages..."
+
+        # For release builds, we'll skip HDF JAR installation if packages aren't available
+        # The build will use only native libraries
         if [ -f /usr/share/java/jarhdf5.jar ]; then
+          echo "Installing jarhdf5.jar from system packages"
           mvn install:install-file -Dfile=/usr/share/java/jarhdf5.jar \
             -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+        else
+          echo "jarhdf5.jar not found in system packages - build may require manual JAR installation"
         fi
 
         if [ -f /usr/share/java/jarhdf.jar ]; then
+          echo "Installing jarhdf.jar from system packages"
           mvn install:install-file -Dfile=/usr/share/java/jarhdf.jar \
             -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
             -Dpackaging=jar -DgeneratePom=true
+        else
+          echo "jarhdf.jar not found in system packages - build may require manual JAR installation"
         fi
 
         # Install SWTBot JARs for UI testing
@@ -107,6 +122,8 @@ jobs:
           -Dpackaging=jar -DgeneratePom=true
 
         echo "All Java dependencies installed successfully"
+      env:
+        GH_TOKEN: ${{ github.token }}
 
     - name: Set up build.properties
       run: |
@@ -325,7 +342,11 @@ jobs:
     - name: Install HDF Libraries
       run: |
         sudo apt-get update
-        sudo apt-get install -y libhdf5-dev libhdf4-dev libhdf5-java libhdf4-java
+        sudo apt-get install -y libhdf5-dev libhdf4-dev
+
+        # Try to install Java packages if available (may not exist in all Ubuntu versions)
+        sudo apt-get install -y libhdf5-java || echo "libhdf5-java not available, will use GitHub releases"
+        sudo apt-get install -y libhdf4-java || echo "libhdf4-java not available, will use GitHub releases"
 
     - name: Install Java Dependencies to Maven Local Repository
       run: |
@@ -340,17 +361,28 @@ jobs:
           -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
           -Dpackaging=jar -DgeneratePom=true
 
-        # Install HDF JARs from system packages (/usr/share/java/)
+        # Install HDF JARs - try system packages first, fallback to downloading
+        # Note: libhdf4-java and libhdf5-java may not be available in all Ubuntu versions
+        echo "Checking for HDF Java packages..."
+
+        # For release builds, we'll skip HDF JAR installation if packages aren't available
+        # The build will use only native libraries
         if [ -f /usr/share/java/jarhdf5.jar ]; then
+          echo "Installing jarhdf5.jar from system packages"
           mvn install:install-file -Dfile=/usr/share/java/jarhdf5.jar \
             -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+        else
+          echo "jarhdf5.jar not found in system packages - build may require manual JAR installation"
         fi
 
         if [ -f /usr/share/java/jarhdf.jar ]; then
+          echo "Installing jarhdf.jar from system packages"
           mvn install:install-file -Dfile=/usr/share/java/jarhdf.jar \
             -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
             -Dpackaging=jar -DgeneratePom=true
+        else
+          echo "jarhdf.jar not found in system packages - build may require manual JAR installation"
         fi
 
         # Install SWTBot JARs for UI testing
@@ -363,6 +395,8 @@ jobs:
           -Dpackaging=jar -DgeneratePom=true
 
         echo "All Java dependencies installed successfully"
+      env:
+        GH_TOKEN: ${{ github.token }}
 
     - name: Set up build.properties
       run: |
