@@ -82,9 +82,9 @@ jobs:
           --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz"
 
         echo "Extracting HDF4..."
-        tar -zxvf hdf4-master-*-ubuntu-2404_gcc.tar.gz
+        tar -zxf hdf4-master-*-ubuntu-2404_gcc.tar.gz
         cd hdf4
-        tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
+        tar -zxf HDF-*-Linux.tar.gz --strip-components 1
 
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
         FILE_NAME_HDF=$(ls $HDF4DIR)
@@ -115,13 +115,13 @@ jobs:
         done
 
         echo "Extracting HDF5..."
-        tar -zxvf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
+        tar -zxf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
         cd hdf5
 
         # Select first tarball if multiple exist (snapshot releases can have multiple versions)
         HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
         echo "Using tarball: $HDF5_TARBALL"
-        tar -zxvf "$HDF5_TARBALL" --strip-components 1
+        tar -zxf "$HDF5_TARBALL" --strip-components 1
 
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
         FILE_NAME_HDF5=$(ls $HDF5DIR)

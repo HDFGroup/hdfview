@@ -425,9 +425,12 @@
             </excludes>
             <includeTests>false</includeTests>
             <failOnViolation>false</failOnViolation>
-            <verbose>true</verbose>
+            <verbose>false</verbose>
             <analysisCache>true</analysisCache>
             <analysisCacheLocation>target/pmd-cache</analysisCacheLocation>
+            <!-- Skip auxclasspath to avoid ASM errors with Java 25 dependencies -->
+            <skipPmdError>true</skipPmdError>
+            <typeResolution>false</typeResolution>
           </configuration>
         </plugin>
 
