@@ -182,6 +182,10 @@ jobs:
           mvn install:install-file -Dfile=repository/lib/fits.jar \
             -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: fits.jar"
+        else
+          echo "ERROR: fits.jar not found in repository/lib/"
+          exit 1
         fi
 
         # Install netcdf
@@ -189,6 +193,10 @@ jobs:
           mvn install:install-file -Dfile=repository/lib/netcdf.jar \
             -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: netcdf.jar"
+        else
+          echo "ERROR: netcdf.jar not found in repository/lib/"
+          exit 1
         fi
 
     - name: Build with Maven
@@ -370,6 +378,10 @@ jobs:
           mvn install:install-file -Dfile=repository/lib/fits.jar \
             -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: fits.jar"
+        else
+          echo "ERROR: fits.jar not found in repository/lib/"
+          exit 1
         fi
 
         # Install netcdf
@@ -377,6 +389,10 @@ jobs:
           mvn install:install-file -Dfile=repository/lib/netcdf.jar \
             -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: netcdf.jar"
+        else
+          echo "ERROR: netcdf.jar not found in repository/lib/"
+          exit 1
         fi
 
     - name: Build Application Package
@@ -879,6 +895,10 @@ jobs:
           mvn install:install-file -Dfile=repository/lib/fits.jar \
             -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: fits.jar"
+        else
+          echo "ERROR: fits.jar not found in repository/lib/"
+          exit 1
         fi
 
         # Install netcdf
@@ -886,6 +906,10 @@ jobs:
           mvn install:install-file -Dfile=repository/lib/netcdf.jar \
             -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: netcdf.jar"
+        else
+          echo "ERROR: netcdf.jar not found in repository/lib/"
+          exit 1
         fi
 
     - name: Build repository module (copies platform SWT JAR)
