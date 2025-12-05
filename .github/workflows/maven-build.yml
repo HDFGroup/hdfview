@@ -151,8 +151,6 @@ jobs:
         mkdir -p repository/lib
         cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs found"
         cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs found"
-        cp lib/fits.jar repository/lib/ 2>/dev/null || echo "fits.jar not found"
-        cp lib/netcdf.jar repository/lib/ 2>/dev/null || echo "netcdf.jar not found"
 
         # List what we have
         echo "JARs in repository/lib:"
@@ -161,18 +159,22 @@ jobs:
         # Manually install each JAR to local Maven repository
         # This bypasses the repository module's POM and avoids PMD issues
 
-        # Install jarhdf5
-        if [ -f repository/lib/jarhdf5-2.0.0.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/jarhdf5-2.0.0.jar \
+        # Install jarhdf5 (find any version)
+        if [ -f repository/lib/jarhdf5-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          mvn install:install-file -Dfile="$JAR_FILE" \
             -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE"
         fi
 
-        # Install jarhdf
-        if [ -f repository/lib/jarhdf-4.3.1.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/jarhdf-4.3.1.jar \
+        # Install jarhdf (find any version)
+        if [ -f repository/lib/jarhdf-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          mvn install:install-file -Dfile="$JAR_FILE" \
             -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE"
         fi
 
         # Install fits
@@ -337,8 +339,6 @@ jobs:
         mkdir -p repository/lib
         cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs found"
         cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs found"
-        cp lib/fits.jar repository/lib/ 2>/dev/null || echo "fits.jar not found"
-        cp lib/netcdf.jar repository/lib/ 2>/dev/null || echo "netcdf.jar not found"
 
         # List what we have
         echo "JARs in repository/lib:"
@@ -347,18 +347,22 @@ jobs:
         # Manually install each JAR to local Maven repository
         # This bypasses the repository module's POM and avoids PMD issues
 
-        # Install jarhdf5
-        if [ -f repository/lib/jarhdf5-2.0.0.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/jarhdf5-2.0.0.jar \
+        # Install jarhdf5 (find any version)
+        if [ -f repository/lib/jarhdf5-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          mvn install:install-file -Dfile="$JAR_FILE" \
             -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE"
         fi
 
-        # Install jarhdf
-        if [ -f repository/lib/jarhdf-4.3.1.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/jarhdf-4.3.1.jar \
+        # Install jarhdf (find any version)
+        if [ -f repository/lib/jarhdf-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          mvn install:install-file -Dfile="$JAR_FILE" \
             -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE"
         fi
 
         # Install fits
