@@ -21,7 +21,7 @@
   <repositories>
     <repository>
       <id>id-local</id>
-      <url>file:${project.parent.basedir}/repository/lib</url>
+      <url>file:${session.executionRootDirectory}/repository/lib</url>
     </repository>
   </repositories>
 
