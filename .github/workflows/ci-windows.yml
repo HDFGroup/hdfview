@@ -186,7 +186,7 @@ jobs:
         $jarfits = Get-ChildItem "repository\lib\fits.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarfits) {
           mvn install:install-file "-Dfile=$($jarfits.FullName)" `
-            "-DgroupId=jarfits" "-DartifactId=jarfits" "-Dversion=1.0.0" `
+            "-DgroupId=fits" "-DartifactId=fits" "-Dversion=1.0.0" `
             "-Dpackaging=jar" "-DgeneratePom=true"
           Write-Host "Installed: $($jarfits.Name)"
         }
@@ -195,7 +195,7 @@ jobs:
         $jarnetcdf = Get-ChildItem "repository\lib\netcdf.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarnetcdf) {
           mvn install:install-file "-Dfile=$($jarnetcdf.FullName)" `
-            "-DgroupId=jarnetcdf" "-DartifactId=jarnetcdf" "-Dversion=1.0.0" `
+            "-DgroupId=netcdf" "-DartifactId=netcdf" "-Dversion=1.0.0" `
             "-Dpackaging=jar" "-DgeneratePom=true"
           Write-Host "Installed: $($jarnetcdf.Name)"
         }

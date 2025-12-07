@@ -19,13 +19,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>id-local</id>
-            <url>file:${session.executionRootDirectory}/repository/lib</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
