@@ -66,20 +66,85 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
-    - name: Install HDF Libraries
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libhdf5-dev libhdf4-dev
+    - name: Cache HDF Libraries
+      id: cache-hdf
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/hdf4
+          ${{ github.workspace }}/hdf5
+        key: ${{ runner.os }}-hdf-github-${{ github.run_id }}
+        restore-keys: |
+          ${{ runner.os }}-hdf-github-
 
-        # Try to install Java packages if available (may not exist in all Ubuntu versions)
-        sudo apt-get install -y libhdf5-java || echo "libhdf5-java not available, will use GitHub releases"
-        sudo apt-get install -y libhdf4-java || echo "libhdf4-java not available, will use GitHub releases"
+    - name: Download and Install HDF4 from GitHub
+      if: steps.cache-hdf.outputs.cache-hit != 'true'
+      run: |
+        echo "Downloading HDF4 from GitHub releases..."
+        gh release download snapshot \
+          --repo HDFGroup/hdf4 \
+          --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz"
+
+        echo "Extracting HDF4..."
+        tar -zxf hdf4-master-*-ubuntu-2404_gcc.tar.gz
+        cd hdf4
+        tar -zxf HDF-*-Linux.tar.gz --strip-components 1
+
+        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
+        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Download and Install HDF5 from GitHub
+      if: steps.cache-hdf.outputs.cache-hit != 'true'
+      run: |
+        echo "Downloading HDF5 from GitHub releases..."
+        gh release download snapshot \
+          --repo HDFGroup/hdf5 \
+          --pattern "hdf5-develop-*-ubuntu-2404_gcc.tar.gz"
+
+        echo "Extracting HDF5..."
+        tar -zxf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
+        cd hdf5
+
+        HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
+        echo "Extracting $HDF5_TARBALL..."
+        tar -zxf "$HDF5_TARBALL" --strip-components 1
+
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
+        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Set Environment Variables from Cache
+      if: steps.cache-hdf.outputs.cache-hit == 'true'
+      run: |
+        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
+        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
+        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+
+        echo "Using cached HDF libraries:"
+        echo "HDF4: $HDF4DIR$FILE_NAME_HDF"
+        echo "HDF5: $HDF5DIR$FILE_NAME_HDF5"
 
     - name: Install Java Dependencies to Maven Local Repository
       run: |
-        echo "Installing Java dependencies..."
+        echo "Installing Java dependencies from GitHub downloads..."
 
-        # Install fits.jar and netcdf.jar from repository
+        # Copy HDF JARs from downloaded GitHub distributions
+        mkdir -p repository/lib
+        cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs found"
+        cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs found"
+
+        # Install fits.jar and netcdf.jar
         mvn install:install-file -Dfile=repository/lib/fits.jar \
           -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
           -Dpackaging=jar -DgeneratePom=true
@@ -88,66 +153,25 @@ jobs:
           -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
           -Dpackaging=jar -DgeneratePom=true
 
-        # Install HDF JARs - try system packages first, fallback to downloading
-        # Note: libhdf4-java and libhdf5-java may not be available in all Ubuntu versions
-        echo "Checking for HDF Java packages..."
-
-        # Always download jarhdf5 from GitHub (system packages are outdated)
-        echo "Downloading jarhdf5.jar from GitHub..."
-        mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
-          gh release download snapshot --repo HDFGroup/hdf5 --pattern "*ubuntu-2404_gcc.tar.gz"
-          tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
-          cd hdf5
-
-          # Extract inner tar.gz
-          HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
-          tar -zxf "$HDF5_TARBALL" --strip-components 1
-
-          # Find JAR in HDF_Group/HDF5/version/lib structure
-          if [ -d HDF_Group/HDF5 ]; then
-            VERSION_DIR=$(ls HDF_Group/HDF5 | head -1)
-            JAR_FILE=$(ls HDF_Group/HDF5/$VERSION_DIR/lib/jarhdf5*.jar 2>/dev/null | head -1)
-            if [ -f "$JAR_FILE" ]; then
-              mvn install:install-file -Dfile="$JAR_FILE" \
-                -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
-                -Dpackaging=jar -DgeneratePom=true
-              echo "Installed jarhdf5.jar from GitHub: $JAR_FILE"
-            fi
-          fi
-          cd ${{ github.workspace }}
-
-        # Try jarhdf from system packages, fallback to GitHub download
-        if [ -f /usr/share/java/jarhdf.jar ]; then
-          echo "Installing jarhdf.jar from system packages"
-          mvn install:install-file -Dfile=/usr/share/java/jarhdf.jar \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+        # Install jarhdf5
+        if [ -f repository/lib/jarhdf5-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          mvn install:install-file -Dfile="$JAR_FILE" \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
             -Dpackaging=jar -DgeneratePom=true
-        else
-          echo "System packages don't provide jarhdf.jar, downloading from GitHub..."
-          mkdir -p /tmp/hdf4-download && cd /tmp/hdf4-download
-          gh release download snapshot --repo HDFGroup/hdf4 --pattern "*ubuntu-2404_gcc.tar.gz"
-          tar -zxf hdf4-*-ubuntu-2404_gcc.tar.gz
-          cd hdf4
-
-          # Extract inner tar.gz
-          HDF4_TARBALL=$(ls HDF-*-Linux.tar.gz | head -1)
-          tar -zxf "$HDF4_TARBALL" --strip-components 1
-
-          # Find JAR in HDF_Group/HDF/version/lib structure
-          if [ -d HDF_Group/HDF ]; then
-            VERSION_DIR=$(ls HDF_Group/HDF | head -1)
-            JAR_FILE=$(ls HDF_Group/HDF/$VERSION_DIR/lib/jarhdf-*.jar 2>/dev/null | head -1)
-            if [ -f "$JAR_FILE" ]; then
-              mvn install:install-file -Dfile="$JAR_FILE" \
-                -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
-                -Dpackaging=jar -DgeneratePom=true
-              echo "Installed jarhdf.jar from GitHub: $JAR_FILE"
-            fi
-          fi
-          cd ${{ github.workspace }}
+          echo "Installed: $JAR_FILE"
         fi
 
-        # Install SWTBot JARs for UI testing
+        # Install jarhdf
+        if [ -f repository/lib/jarhdf-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          mvn install:install-file -Dfile="$JAR_FILE" \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE"
+        fi
+
+        # Install SWTBot JARs
         mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
           -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
           -Dpackaging=jar -DgeneratePom=true
@@ -157,19 +181,33 @@ jobs:
           -Dpackaging=jar -DgeneratePom=true
 
         echo "All Java dependencies installed successfully"
-      env:
-        GH_TOKEN: ${{ github.token }}
 
     - name: Set up build.properties
       run: |
         cat > build.properties << EOF
-        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
-        hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/hdf5/plugins
-        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
-        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
+        # Release Build Properties for HDFView
+        # Using HDF libraries from GitHub releases
+
+        # HDF5 Configuration
+        hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
+        hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
+
+        # HDF4 Configuration
+        hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
+
+        # Platform Configuration
+        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
+
+        # Build flags
         ci.build=true
         release.build=true
         EOF
+
+        echo "Generated build.properties for Release:"
+        cat build.properties
+
+        # Set LD_LIBRARY_PATH for test execution
+        echo "LD_LIBRARY_PATH=${{ env.HDF5LIB_PATH }}/lib:${{ env.HDF4LIB_PATH }}/lib" >> $GITHUB_ENV
 
     - name: Determine Version and Release Type
       id: version
