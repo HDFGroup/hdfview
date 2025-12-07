@@ -257,8 +257,11 @@ jobs:
     - name: Build All Modules
       run: |
         echo "::group::Build and Install Dependencies"
+        # Install parent POM first (required for properties plugin and child module resolution)
+        mvn install -B -N -Ddependency-check.skip=true
+
         # Build repository module (needed by object) but don't install it
-        mvn clean compile -pl repository -B
+        mvn compile -pl repository -B -Ddependency-check.skip=true
 
         # Install only object and hdfview modules
         # This avoids repository module's install-file executions

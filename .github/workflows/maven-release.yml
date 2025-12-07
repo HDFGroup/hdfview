@@ -196,12 +196,25 @@ jobs:
         echo "Tag: ${TAG}"
         echo "Is release: ${IS_RELEASE}"
 
+    - name: Build and Install Modules
+      run: |
+        echo "::group::Build and Install Dependencies"
+        # Install parent POM first (required for properties plugin)
+        mvn install -B -N -Ddependency-check.skip=true
+
+        # Compile repository module
+        mvn compile -pl repository -B -Ddependency-check.skip=true
+
+        # Install object and hdfview modules
+        mvn install -pl object,hdfview -DskipTests -Ddependency-check.skip=true -B
+        echo "::endgroup::"
+
     - name: Run Quality Checks
       run: |
         echo "::group::Quality Validation for Release"
 
-        # Run tests
-        mvn test -B -Dmaven.test.failure.ignore=false
+        # Run tests (object module only - 149 tests)
+        mvn test -B -pl object -Dmaven.test.failure.ignore=false
 
         # Run quality analysis
         mvn jacoco:prepare-agent test jacoco:report -B
