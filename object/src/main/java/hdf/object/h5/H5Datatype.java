@@ -1880,10 +1880,36 @@ public class H5Datatype extends Datatype {
             else if (typeSize == 1 || typeSize == 2) {
                 log.trace("allocateArray(): typeSize == 1 or 2 branch taken (typeSize={})", typeSize);
                 // For 1-byte (Float8) and 2-byte (Float16/BFLOAT16) floats, the native representation
-                // may be larger than the file storage size. Use 4 bytes (float) for safety.
-                // This prevents JVM crashes when the HDF5 library expects a larger buffer.
-                bufferTypeSize = 4;
-                log.trace("allocateArray(): small float type (size {}), using 4-byte buffer", typeSize);
+                // may be larger than the file storage size. Query the actual native type size
+                // to support future native Float8/Float16 types without being wasteful.
+                long nativeTypeId = HDF5Constants.H5I_INVALID_HID;
+                try {
+                    nativeTypeId = dtype.createNative();
+                    if (nativeTypeId >= 0) {
+                        bufferTypeSize = H5.H5Tget_size(nativeTypeId);
+                        log.trace("allocateArray(): small float type (file size {}), native buffer size: {}",
+                                  typeSize, bufferTypeSize);
+                    }
+                    else {
+                        // Fallback if native type creation fails
+                        bufferTypeSize = 4;
+                        log.warn("allocateArray(): Failed to create native type, using 4-byte fallback");
+                    }
+                }
+                catch (Exception ex) {
+                    log.warn("allocateArray(): Error querying native type size: {}", ex.getMessage());
+                    bufferTypeSize = 4;
+                }
+                finally {
+                    if (nativeTypeId >= 0) {
+                        try {
+                            H5.H5Tclose(nativeTypeId);
+                        }
+                        catch (Exception ex) {
+                            log.debug("allocateArray(): Error closing native type: {}", ex.getMessage());
+                        }
+                    }
+                }
             }
             else {
                 log.trace("allocateArray(): no typeSize condition matched, bufferTypeSize remains {}",
