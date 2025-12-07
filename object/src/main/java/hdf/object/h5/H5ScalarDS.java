@@ -971,18 +971,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                          */
                         long tid = HDF5Constants.H5I_INVALID_HID;
                         try {
-                            // For Float8 (1-byte float), createNative() fails in HDF5 2.0
-                            // Use H5T_NATIVE_FLOAT directly to request conversion
-                            if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 1) {
-                                log.trace(
-                                    "scalarDatasetCommonIO(): Float8 - using H5T_NATIVE_FLOAT for conversion");
-                                tid = HDF5Constants.H5T_NATIVE_FLOAT;
-                            }
-                            else {
-                                log.trace("scalarDatasetCommonIO():read ioType create native");
-                                tid = dsDatatype.createNative();
-                                log.trace("scalarDatasetCommonIO(): native type created tid={}", tid);
-                            }
+                            log.trace("scalarDatasetCommonIO():read ioType create native");
+                            tid = dsDatatype.createNative();
+                            log.trace("scalarDatasetCommonIO(): native type created tid={}", tid);
 
                             if (dsDatatype.isVarStr()) {
                                 log.trace(
@@ -1026,9 +1017,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                             throw new Exception(ex.getMessage(), ex);
                         }
                         finally {
-                            // Don't close predefined types like H5T_NATIVE_FLOAT
-                            if (!(dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 1))
-                                dsDatatype.close(tid);
+                            dsDatatype.close(tid);
                         }
 
                         /*
