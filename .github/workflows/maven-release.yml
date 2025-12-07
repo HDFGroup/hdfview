@@ -92,15 +92,9 @@ jobs:
         # Note: libhdf4-java and libhdf5-java may not be available in all Ubuntu versions
         echo "Checking for HDF Java packages..."
 
-        # Try jarhdf5 from system packages, fallback to GitHub download
-        if [ -f /usr/share/java/jarhdf5.jar ]; then
-          echo "Installing jarhdf5.jar from system packages"
-          mvn install:install-file -Dfile=/usr/share/java/jarhdf5.jar \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-        else
-          echo "System packages don't provide jarhdf5.jar, downloading from GitHub..."
-          mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
+        # Always download jarhdf5 from GitHub (system packages are outdated)
+        echo "Downloading jarhdf5.jar from GitHub..."
+        mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
           gh release download snapshot --repo HDFGroup/hdf5 --pattern "*ubuntu-2404_gcc.tar.gz"
           tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
           cd hdf5
@@ -121,7 +115,6 @@ jobs:
             fi
           fi
           cd ${{ github.workspace }}
-        fi
 
         # Try jarhdf from system packages, fallback to GitHub download
         if [ -f /usr/share/java/jarhdf.jar ]; then
@@ -407,15 +400,9 @@ jobs:
         # Note: libhdf4-java and libhdf5-java may not be available in all Ubuntu versions
         echo "Checking for HDF Java packages..."
 
-        # Try jarhdf5 from system packages, fallback to GitHub download
-        if [ -f /usr/share/java/jarhdf5.jar ]; then
-          echo "Installing jarhdf5.jar from system packages"
-          mvn install:install-file -Dfile=/usr/share/java/jarhdf5.jar \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-        else
-          echo "System packages don't provide jarhdf5.jar, downloading from GitHub..."
-          mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
+        # Always download jarhdf5 from GitHub (system packages are outdated)
+        echo "Downloading jarhdf5.jar from GitHub..."
+        mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
           gh release download snapshot --repo HDFGroup/hdf5 --pattern "*ubuntu-2404_gcc.tar.gz"
           tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
           cd hdf5
@@ -436,7 +423,6 @@ jobs:
             fi
           fi
           cd ${{ github.workspace }}
-        fi
 
         # Try jarhdf from system packages, fallback to GitHub download
         if [ -f /usr/share/java/jarhdf.jar ]; then
