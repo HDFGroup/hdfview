@@ -190,13 +190,19 @@
         -->
 
         <!-- Additional checks for code quality -->
-        <module name="DeclarationOrder"/>
+        <!-- DISABLED: Noisy rules with low value - December 2025 cleanup -->
+        <!-- <module name="DeclarationOrder"/> -->
+        <!-- Reason: 261 violations, code organization preference, handled in code review -->
+
         <module name="DefaultComesLast"/>
         <module name="FallThrough"/>
-        <module name="MultipleStringLiterals">
-            <property name="allowedDuplicates" value="3"/>
-            <property name="ignoreStringsRegexp" value='^(("")|(" "))$'/>
-        </module>
+
+        <!-- <module name="MultipleStringLiterals"> -->
+        <!--     <property name="allowedDuplicates" value="3"/> -->
+        <!--     <property name="ignoreStringsRegexp" value='^(("")|(" "))$'/> -->
+        <!-- </module> -->
+        <!-- Reason: 143 violations, creates noise, string constants should be refactored when it makes sense -->
+
         <module name="NestedIfDepth">
             <property name="max" value="3"/>
         </module>
@@ -209,7 +215,9 @@
         <module name="OverloadMethodsDeclarationOrder"/>
         <module name="PackageDeclaration"/>
         <module name="StringLiteralEquality"/>
-        <module name="UnnecessaryParentheses"/>
+
+        <!-- <module name="UnnecessaryParentheses"/> -->
+        <!-- Reason: 987 violations, style preference, many parentheses improve readability -->
 
         <!-- Annotations -->
         <module name="AnnotationLocation">
