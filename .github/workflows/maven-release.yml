@@ -103,13 +103,22 @@ jobs:
           mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
           gh release download snapshot --repo HDFGroup/hdf5 --pattern "*ubuntu-2404_gcc.tar.gz"
           tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
-          cd hdf5 && tar -zxf HDF5-*-Linux.tar.gz --strip-components 1
-          if [ -f lib/jarhdf5*.jar ]; then
-            JAR_FILE=$(ls lib/jarhdf5*.jar | head -1)
-            mvn install:install-file -Dfile="$JAR_FILE" \
-              -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
-              -Dpackaging=jar -DgeneratePom=true
-            echo "Installed jarhdf5.jar from GitHub release"
+          cd hdf5
+
+          # Extract inner tar.gz
+          HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
+          tar -zxf "$HDF5_TARBALL" --strip-components 1
+
+          # Find JAR in HDF_Group/HDF5/version/lib structure
+          if [ -d HDF_Group/HDF5 ]; then
+            VERSION_DIR=$(ls HDF_Group/HDF5 | head -1)
+            JAR_FILE=$(ls HDF_Group/HDF5/$VERSION_DIR/lib/jarhdf5*.jar 2>/dev/null | head -1)
+            if [ -f "$JAR_FILE" ]; then
+              mvn install:install-file -Dfile="$JAR_FILE" \
+                -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+                -Dpackaging=jar -DgeneratePom=true
+              echo "Installed jarhdf5.jar from GitHub: $JAR_FILE"
+            fi
           fi
           cd ${{ github.workspace }}
         fi
@@ -125,13 +134,22 @@ jobs:
           mkdir -p /tmp/hdf4-download && cd /tmp/hdf4-download
           gh release download snapshot --repo HDFGroup/hdf4 --pattern "*ubuntu-2404_gcc.tar.gz"
           tar -zxf hdf4-*-ubuntu-2404_gcc.tar.gz
-          cd hdf4 && tar -zxf HDF-*-Linux.tar.gz --strip-components 1
-          if [ -f lib/jarhdf*.jar ]; then
-            JAR_FILE=$(ls lib/jarhdf*.jar | head -1)
-            mvn install:install-file -Dfile="$JAR_FILE" \
-              -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
-              -Dpackaging=jar -DgeneratePom=true
-            echo "Installed jarhdf.jar from GitHub release"
+          cd hdf4
+
+          # Extract inner tar.gz
+          HDF4_TARBALL=$(ls HDF-*-Linux.tar.gz | head -1)
+          tar -zxf "$HDF4_TARBALL" --strip-components 1
+
+          # Find JAR in HDF_Group/HDF/version/lib structure
+          if [ -d HDF_Group/HDF ]; then
+            VERSION_DIR=$(ls HDF_Group/HDF | head -1)
+            JAR_FILE=$(ls HDF_Group/HDF/$VERSION_DIR/lib/jarhdf-*.jar 2>/dev/null | head -1)
+            if [ -f "$JAR_FILE" ]; then
+              mvn install:install-file -Dfile="$JAR_FILE" \
+                -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+                -Dpackaging=jar -DgeneratePom=true
+              echo "Installed jarhdf.jar from GitHub: $JAR_FILE"
+            fi
           fi
           cd ${{ github.workspace }}
         fi
@@ -400,13 +418,22 @@ jobs:
           mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
           gh release download snapshot --repo HDFGroup/hdf5 --pattern "*ubuntu-2404_gcc.tar.gz"
           tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
-          cd hdf5 && tar -zxf HDF5-*-Linux.tar.gz --strip-components 1
-          if [ -f lib/jarhdf5*.jar ]; then
-            JAR_FILE=$(ls lib/jarhdf5*.jar | head -1)
-            mvn install:install-file -Dfile="$JAR_FILE" \
-              -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
-              -Dpackaging=jar -DgeneratePom=true
-            echo "Installed jarhdf5.jar from GitHub release"
+          cd hdf5
+
+          # Extract inner tar.gz
+          HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
+          tar -zxf "$HDF5_TARBALL" --strip-components 1
+
+          # Find JAR in HDF_Group/HDF5/version/lib structure
+          if [ -d HDF_Group/HDF5 ]; then
+            VERSION_DIR=$(ls HDF_Group/HDF5 | head -1)
+            JAR_FILE=$(ls HDF_Group/HDF5/$VERSION_DIR/lib/jarhdf5*.jar 2>/dev/null | head -1)
+            if [ -f "$JAR_FILE" ]; then
+              mvn install:install-file -Dfile="$JAR_FILE" \
+                -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+                -Dpackaging=jar -DgeneratePom=true
+              echo "Installed jarhdf5.jar from GitHub: $JAR_FILE"
+            fi
           fi
           cd ${{ github.workspace }}
         fi
@@ -422,13 +449,22 @@ jobs:
           mkdir -p /tmp/hdf4-download && cd /tmp/hdf4-download
           gh release download snapshot --repo HDFGroup/hdf4 --pattern "*ubuntu-2404_gcc.tar.gz"
           tar -zxf hdf4-*-ubuntu-2404_gcc.tar.gz
-          cd hdf4 && tar -zxf HDF-*-Linux.tar.gz --strip-components 1
-          if [ -f lib/jarhdf*.jar ]; then
-            JAR_FILE=$(ls lib/jarhdf*.jar | head -1)
-            mvn install:install-file -Dfile="$JAR_FILE" \
-              -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
-              -Dpackaging=jar -DgeneratePom=true
-            echo "Installed jarhdf.jar from GitHub release"
+          cd hdf4
+
+          # Extract inner tar.gz
+          HDF4_TARBALL=$(ls HDF-*-Linux.tar.gz | head -1)
+          tar -zxf "$HDF4_TARBALL" --strip-components 1
+
+          # Find JAR in HDF_Group/HDF/version/lib structure
+          if [ -d HDF_Group/HDF ]; then
+            VERSION_DIR=$(ls HDF_Group/HDF | head -1)
+            JAR_FILE=$(ls HDF_Group/HDF/$VERSION_DIR/lib/jarhdf-*.jar 2>/dev/null | head -1)
+            if [ -f "$JAR_FILE" ]; then
+              mvn install:install-file -Dfile="$JAR_FILE" \
+                -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+                -Dpackaging=jar -DgeneratePom=true
+              echo "Installed jarhdf.jar from GitHub: $JAR_FILE"
+            fi
           fi
           cd ${{ github.workspace }}
         fi
