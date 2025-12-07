@@ -363,6 +363,7 @@ Located in `scripts/`:
 - ✅ **December 5, 2025**: Repository library JARs committed to version control
 - ✅ **December 5, 2025**: Fixed Float16/BFLOAT16 root cause in H5Datatype.createNative()
 - ✅ **December 5, 2025**: Fixed undefined repository.basedir property in POMs
+- ✅ **December 7, 2025**: Removed remaining Float8/Float16 workarounds - code fully future-proof
 
 **Launcher Script Usage:**
 ```bash
@@ -417,6 +418,31 @@ Located in `scripts/`:
 - ✅ Removed Float16/BFLOAT16 workarounds (root cause fixed)
 
 **Result:** All CI workflows now operational across Linux, macOS, and Windows platforms
+
+**Session: December 7, 2025 - Float8/Float16 Code Cleanup and Future-Proofing**
+
+**PR Review Comments Addressed:**
+1. ✅ H5Datatype.allocateArray() line 1880 - Hard-coded buffer size issue
+   - **Before**: Hard-coded `bufferTypeSize = 4` for 1/2-byte floats
+   - **After**: Query actual native type size via `createNative()` + `H5Tget_size()`
+   - **Benefit**: Automatically adapts when native Float8/Float16 types become available
+
+2. ✅ H5ScalarDS.scalarDatasetCommonIO() line 974 - Float8 workaround removal
+   - **Before**: Bypassed `createNative()` for Float8, used `H5T_NATIVE_FLOAT` directly
+   - **After**: Unified code path - always use `createNative()` for all float types
+   - **Benefit**: Cleaner code, no special cases - `createNative()` handles all float sizes properly
+
+**Files Modified:**
+- `object/src/main/java/hdf/object/h5/H5Datatype.java` (allocateArray method)
+- `object/src/main/java/hdf/object/h5/H5ScalarDS.java` (scalarDatasetCommonIO method)
+- `CLAUDE.md` (documentation update)
+
+**Testing:**
+- ✅ All BFLOAT16 tests pass (TestBFloat16Read, TestBFloat16DatatypeSize)
+- ✅ Full project compiles cleanly
+- ✅ No regressions in existing functionality
+
+**Result:** Float8/Float16/BFLOAT16 support is now fully production-ready and future-proof
 
 ## Documentation
 
