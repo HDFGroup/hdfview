@@ -28,14 +28,14 @@ import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 
 /**
- * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group or named
- * datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group
+ * or named datatype.
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
  * For more details on attributes, read
- * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in
- * HDF5 User Guide</a>
+ * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5
+ * Attributes in HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
  *
@@ -61,7 +61,8 @@ import hdf.object.ScalarDS;
  * </pre>
  *
  *
- * For an atomic datatype, the value of an H4ScalarAttribute will be a 1D array of integers, floats and strings.
+ * For an atomic datatype, the value of an H4ScalarAttribute will be a 1D array of integers, floats and
+ * strings.
  *
  * @see hdf.object.Datatype
  *

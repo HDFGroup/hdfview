@@ -91,9 +91,9 @@ public abstract class Group extends HObject implements MetaDataContainer {
     }
 
     /**
-     * Constructs an instance of the group with specific name, path, parent group and id. An HDF data object must have a
-     * name. The path is the group path starting from the root. The parent group is the group where this group is
-     * located.
+     * Constructs an instance of the group with specific name, path, parent group and id. An HDF data object
+     * must have a name. The path is the group path starting from the root. The parent group is the group
+     * where this group is located.
      *
      * @param theFile   the file containing the group.
      * @param grpName   the name of this group, e.g. "grp01".

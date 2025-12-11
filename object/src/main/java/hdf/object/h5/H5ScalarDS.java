@@ -42,12 +42,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * H5ScalarDS describes a multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
- * float, double and string, and operations performed on the scalar dataset.
+ * H5ScalarDS describes a multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short,
+ * long, float, double and string, and operations performed on the scalar dataset.
  *
  * The library predefines a modest number of datatypes. For details, read
- * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5
- * User Guide</a>
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5
+ * Datatypes in HDF5 User Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -327,8 +327,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
             NumberOfPalettes = readNumberOfPalette(did);
 
             try {
-                sid        = H5.H5Dget_space(did);
-                rank       = H5.H5Sget_simple_extent_ndims(sid);
+                sid       = H5.H5Dget_space(did);
+                rank      = H5.H5Sget_simple_extent_ndims(sid);
                 spaceType = H5.H5Sget_simple_extent_type(sid);
                 if (spaceType == HDF5Constants.H5S_NULL)
                     isNULL = true;
@@ -371,7 +371,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                               datatype.getDatatypeClass(), ((H5Datatype)datatype).isText(),
                               datatype.isNamed(), datatype.isUnsigned());
                     log.trace(
-                            "init(): tid={} is tclass={} has isVLEN={}: isEnum={}: isStdRef={}: isRegRef={}: isComplex={}",
+                        "init(): tid={} is tclass={} has isVLEN={}: isEnum={}: isStdRef={}: isRegRef={}: isComplex={}",
                         tid, datatype.getDatatypeClass(), datatype.isVLEN(), datatype.isEnum(),
                         ((H5Datatype)datatype).isStdRef(), ((H5Datatype)datatype).isRegRef(),
                         ((H5Datatype)datatype).isComplex());
@@ -891,7 +891,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
     {
         H5Datatype dsDatatype     = (H5Datatype)getDatatype();
         H5Datatype dsBaseDatatype = (H5Datatype)getDatatype().getDatatypeBase();
-        boolean    dsBDTisRef     = false;
+        boolean dsBDTisRef        = false;
         if (dsBaseDatatype != null)
             dsBDTisRef = dsBaseDatatype.isStdRef();
         Object theData = null;
@@ -1022,15 +1022,14 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                             theData = byteToString((byte[])theData, (int)dsDatatype.getDatatypeSize());
                         }
                         else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
-                            log.trace(
-                                    "scalarDatasetCommonIO(): isFloat: byte array to BigDecimal array");
+                            log.trace("scalarDatasetCommonIO(): isFloat: byte array to BigDecimal array");
                             theData = dsDatatype.byteToBigDecimal(0, (int)totalSelectedSpacePoints,
                                                                   (byte[])theData);
                         }
                         else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() &&
                                  dsDatatype.getDatatypeBase().getDatatypeSize() == 16) {
                             log.trace(
-                                    "scalarDatasetCommonIO(): isArray and isFloat: byte array to BigDecimal array");
+                                "scalarDatasetCommonIO(): isArray and isFloat: byte array to BigDecimal array");
                             long[] arrayDims = dsDatatype.getArrayDims();
                             int asize        = (int)totalSelectedSpacePoints;
                             for (int j = 0; j < arrayDims.length; j++) {
@@ -1041,7 +1040,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         }
                         else if (dsDatatype.isRef() && (theData instanceof byte[])) {
                             log.trace(
-                                    "scalarDatasetCommonIO():read ioType isRef: byte array to List of bytes");
+                                "scalarDatasetCommonIO():read ioType isRef: byte array to List of bytes");
                             ArrayList<byte[]> theListData = new ArrayList<>((int)totalSelectedSpacePoints);
                             for (int m = 0; m < (int)totalSelectedSpacePoints; m++) {
                                 byte[] curBytes = new byte[(int)dsDatatype.getDatatypeSize()];
@@ -1078,8 +1077,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                              (dsDatatype.isUnsigned() && unsignedConverted));
 
                         if (doIntConversion) {
-                            log.trace(
-                                    "scalarDatasetCommonIO(): integer data to unsigned C-type integers");
+                            log.trace("scalarDatasetCommonIO(): integer data to unsigned C-type integers");
                             tmpData = convertToUnsignedC(writeBuf, null);
                         }
                         else if (dsDatatype.isText() && !dsDatatype.isVarStr() && convertByteToString &&
@@ -1092,8 +1090,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                             tmpData = dsDatatype.convertEnumNameToValue((String[])writeBuf);
                         }
                         else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
-                            log.trace(
-                                    "scalarDatasetCommonIO(): isFloat: BigDecimal array to byte array");
+                            log.trace("scalarDatasetCommonIO(): isFloat: BigDecimal array to byte array");
                             throw new Exception("data conversion failure: cannot write BigDecimal values");
                             // tmpData = dsDatatype.bigDecimalToByte(0, (int)totalSelectedSpacePoints,
                             // (BigDecimal[]) writeBuf);
@@ -2491,8 +2488,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
     }
 
     /**
-     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore, the array
-     * length is 8*numberOfPalettes.
+     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore,
+     * the array length is 8*numberOfPalettes.
      *
      * @param did - dataset ID
      *

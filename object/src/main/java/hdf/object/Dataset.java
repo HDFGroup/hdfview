@@ -16,7 +16,6 @@ package hdf.object;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
-
 import java.util.List;
 import java.util.Map;
 
@@ -27,14 +26,15 @@ import org.slf4j.LoggerFactory;
  * The abstract class provides general APIs to create and manipulate dataset/attribute objects, and retrieve
  * dataset/attribute properties, datatype and dimension sizes.
  *
- * This class provides two convenient functions, read()/write(), to read/write data values. Reading/writing data may
- * take many library calls if we use the library APIs directly. The read() and write functions hide all the details of
- * these calls from users.
+ * This class provides two convenient functions, read()/write(), to read/write data values. Reading/writing
+ * data may take many library calls if we use the library APIs directly. The read() and write functions hide
+ * all the details of these calls from users.
  *
  * For more details on dataset and attributes, See
- * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_d__u_g.html#sec_dataset">HDF5 Datasets in HDF5
- * User Guide</a> <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5
- * Attributes in HDF5 User Guide</a>
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_d__u_g.html#sec_dataset">HDF5 Datasets
+ * in HDF5 User Guide</a> <a href=
+ * "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in
+ * HDF5 User Guide</a>
  *
  * @see hdf.object.ScalarDS
  * @see hdf.object.CompoundDS
@@ -236,7 +236,7 @@ public abstract class Dataset extends HObject implements DataFormat {
 
         datatype       = null;
         rank           = -1;
-        spaceType = -1;
+        spaceType      = -1;
         data           = null;
         dims           = null;
         maxDims        = null;
@@ -495,8 +495,8 @@ public abstract class Dataset extends HObject implements DataFormat {
     /**
      * Creates a new dataset and writes the data buffer to the new dataset.
      *
-     * This function allows applications to create a new dataset for a given data buffer. For example, users can select
-     * a specific interesting part from a large image and create a new image with the selection.
+     * This function allows applications to create a new dataset for a given data buffer. For example, users
+     * can select a specific interesting part from a large image and create a new image with the selection.
      *
      * The new dataset retains the datatype and dataset creation properties of this dataset.
      *
@@ -509,7 +509,8 @@ public abstract class Dataset extends HObject implements DataFormat {
      *
      * @throws Exception if dataset can not be copied
      */
-    public abstract Dataset copy(Group pgroup, String name, long[] copydims, Object copydata) throws Exception;
+    public abstract Dataset copy(Group pgroup, String name, long[] copydims, Object copydata)
+        throws Exception;
 
     /**
      * The status of initialization for this object.
@@ -966,7 +967,8 @@ public abstract class Dataset extends HObject implements DataFormat {
     }
 
     /**
-     * Converts one-dimension array of unsigned C-type integers to a new array of appropriate Java integer in memory.
+     * Converts one-dimension array of unsigned C-type integers to a new array of appropriate Java integer in
+     * memory.
      *
      * @param dataIN the object data
      *

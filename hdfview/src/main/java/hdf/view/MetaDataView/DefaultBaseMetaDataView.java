@@ -466,8 +466,8 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         if (goparent == null || godataObject == null)
             return null;
 
-        FileFormat theFile    = godataObject.getFileFormat();
-        boolean    isRoot     = ((godataObject instanceof Group) && ((Group) godataObject).isRoot());
+        FileFormat theFile = godataObject.getFileFormat();
+        boolean isRoot     = ((godataObject instanceof Group) && ((Group)godataObject).isRoot());
         String objTypeStr  = "Unknown";
         Label label;
         Text text;
@@ -498,9 +498,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         text.setEditable(false);
         text.setFont(curFont);
         text.setText(
-                godataObject.getPath() == null
+            godataObject.getPath() == null
                 ? "/"
-                        : godataObject.getPath()); /* TODO: temporary workaround until Object Library is fixed */
+                : godataObject.getPath()); /* TODO: temporary workaround until Object Library is fixed */
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         /* Object Type section */
@@ -530,7 +530,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 objTypeStr = "HDF4 Group";
             }
             else if (godataObject instanceof ScalarDS) {
-                ScalarDS ds = (ScalarDS) godataObject;
+                ScalarDS ds = (ScalarDS)godataObject;
                 if (ds.isImage()) {
                     objTypeStr = "HDF4 Raster Image";
                 }

@@ -27,18 +27,20 @@ import org.slf4j.LoggerFactory;
 /**
  * Datatype is an abstract class that defines datatype characteristics and APIs for a data type.
  *
- * A datatype has four basic characteristics: class, size, byte order and sign. These characteristics are defined in the
- * See <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in
- * HDF5 User Guide</a>
+ * A datatype has four basic characteristics: class, size, byte order and sign. These characteristics are
+ * defined in the See <a
+ * href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes
+ * in HDF5 User Guide</a>
  *
- * These characteristics apply to all the sub-classes. The sub-classes may have different ways to describe a datatype.
- * We here define the <strong> native datatype</strong> to the datatype used by the sub-class. For example, H5Datatype
- * uses a datatype identifier (hid_t) to specify a datatype. NC2Datatype uses ucar.nc2.DataType object to describe its
- * datatype. "Native" here is different from the "native" definition in the HDF5 library.
+ * These characteristics apply to all the sub-classes. The sub-classes may have different ways to describe a
+ * datatype. We here define the <strong> native datatype</strong> to the datatype used by the sub-class. For
+ * example, H5Datatype uses a datatype identifier (hid_t) to specify a datatype. NC2Datatype uses
+ * ucar.nc2.DataType object to describe its datatype. "Native" here is different from the "native" definition
+ * in the HDF5 library.
  *
- * Two functions, createNative() and fromNative(), are defined to convert the general characteristics to/from the native
- * datatype. Sub-classes must implement these functions so that the conversion will be done correctly. The values of the
- * CLASS member are not identical to HDF5 values for a datatype class.
+ * Two functions, createNative() and fromNative(), are defined to convert the general characteristics to/from
+ * the native datatype. Sub-classes must implement these functions so that the conversion will be done
+ * correctly. The values of the CLASS member are not identical to HDF5 values for a datatype class.
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao

@@ -37,14 +37,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group or named
- * datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group
+ * or named datatype.
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
  * For more details on attributes,
- * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in
- * HDF5 User Guide</a>
+ * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5
+ * Attributes in HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
  *
@@ -299,8 +299,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         aid = open();
         if (aid >= 0) {
             try {
-                sid        = H5.H5Aget_space(aid);
-                rank       = H5.H5Sget_simple_extent_ndims(sid);
+                sid       = H5.H5Aget_space(aid);
+                rank      = H5.H5Sget_simple_extent_ndims(sid);
                 spaceType = H5.H5Sget_simple_extent_type(sid);
                 if (spaceType == HDF5Constants.H5S_NULL)
                     isNULL = true;
@@ -341,7 +341,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                             datatype = new H5Datatype(getFileFormat(), tid);
 
                         log.trace(
-                                "init(): tid={} is tclass={} has isText={}: isNamed={}:  isVLEN={}: isEnum={}: isUnsigned={}: isRegRef={}",
+                            "init(): tid={} is tclass={} has isText={}: isNamed={}:  isVLEN={}: isEnum={}: isUnsigned={}: isRegRef={}",
                             tid, datatype.getDatatypeClass(), ((H5Datatype)datatype).isText(),
                             datatype.isNamed(), datatype.isVLEN(), datatype.isEnum(), datatype.isUnsigned(),
                             ((H5Datatype)datatype).isRegRef());
@@ -1259,7 +1259,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                     else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() &&
                              dsDatatype.getDatatypeBase().getDatatypeSize() == 16) {
                         log.trace(
-                                "attributeCommonIO():read ioType isArray and isFloat: byte array to BigDecimal array");
+                            "attributeCommonIO():read ioType isArray and isFloat: byte array to BigDecimal array");
                         long[] arrayDims = dsDatatype.getArrayDims();
                         int asize        = (int)nPoints;
                         for (int j = 0; j < arrayDims.length; j++) {
@@ -1427,7 +1427,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         }
         else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() && dsSize == 16) {
             log.trace(
-                    "scalar attributeSelection(): isArray and isFloat: converting byte array to BigDecimal array");
+                "scalar attributeSelection(): isArray and isFloat: converting byte array to BigDecimal array");
             long[] arrayDims = dsDatatype.getArrayDims();
             int asize        = (int)nPoints;
             for (int j = 0; j < arrayDims.length; j++) {

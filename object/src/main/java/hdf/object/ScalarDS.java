@@ -120,8 +120,8 @@ public abstract class ScalarDS extends Dataset {
     }
 
     /**
-     * Constructs an instance of a ScalarDS with specific name, path and id. An HDF data object must have a name. The
-     * path is the group path starting from the root.
+     * Constructs an instance of a ScalarDS with specific name, path and id. An HDF data object must have a
+     * name. The path is the group path starting from the root.
      *
      * @param theFile the file that contains the data object.
      * @param theName the name of the data object, e.g. "dset".
@@ -300,9 +300,9 @@ public abstract class ScalarDS extends Dataset {
     /**
      * Returns true if this dataset is an image.
      *
-     * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For more
-     * details, read <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_i_m_g.html"> HDF5 Image and
-     * Palette Specification</a>
+     * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For
+     * more details, read <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_i_m_g.html"> HDF5
+     * Image and Palette Specification</a>
      *
      * @return true if the dataset is an image; otherwise, returns false.
      */

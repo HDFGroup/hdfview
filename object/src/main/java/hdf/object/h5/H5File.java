@@ -149,7 +149,8 @@ public class H5File extends FileFormat {
         READ,
         /** write IO type. */
         WRITE
-    };
+    }
+    ;
 
     /**
      * Constructs an H5File instance with an empty file name and read-only access.
@@ -274,15 +275,15 @@ public class H5File extends FileFormat {
     /**
      * Copies the attributes of one object to another object.
      *
-     * This method copies all the attributes from one object (source object) to another (destination object). If an
-     * attribute already exists in the destination object, the attribute will not be copied. Attribute names exceeding
-     * 256 characters will be truncated in the destination object.
+     * This method copies all the attributes from one object (source object) to another (destination object).
+     * If an attribute already exists in the destination object, the attribute will not be copied. Attribute
+     * names exceeding 256 characters will be truncated in the destination object.
      *
-     * The object can be an H5Group, an H5Dataset, or a named H5Datatype. This method is in the H5File class because
-     * there is no H5Object class and it is specific to HDF5 objects.
+     * The object can be an H5Group, an H5Dataset, or a named H5Datatype. This method is in the H5File class
+     * because there is no H5Object class and it is specific to HDF5 objects.
      *
-     * The copy can fail for a number of reasons, including an invalid source or destination object identifier, but no
-     * exceptions are thrown.
+     * The copy can fail for a number of reasons, including an invalid source or destination object
+     * identifier, but no exceptions are thrown.
      *
      * @param srcID The identifier of the source object.
      * @param dstID The identifier of the destination object.
@@ -290,11 +291,11 @@ public class H5File extends FileFormat {
     public static final void copyAttributes(long srcID, long dstID)
     {
         log.trace("copyAttributes(): start: srcID={} dstID={}", srcID, dstID);
-        long       aidSrc   = -1;
-        long       aidDst   = -1;
-        long       asid     = -1;
-        long       atid     = -1;
-        String     aName    = null;
+        long aidSrc        = -1;
+        long aidDst        = -1;
+        long asid          = -1;
+        long atid          = -1;
+        String aName       = null;
         H5O_info_t objInfo = null;
 
         try {
@@ -311,15 +312,15 @@ public class H5File extends FileFormat {
 
         for (int i = 0; i < objInfo.num_attrs; i++) {
             try {
-                aidSrc = H5.H5Aopen_by_idx(srcID, ".", HDF5Constants.H5_INDEX_CRT_ORDER,
-                                            HDF5Constants.H5_ITER_INC, i, HDF5Constants.H5P_DEFAULT,
-                                            HDF5Constants.H5P_DEFAULT);
+                aidSrc =
+                    H5.H5Aopen_by_idx(srcID, ".", HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC,
+                                      i, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 aName = H5.H5Aget_name(aidSrc);
-                atid = H5.H5Aget_type(aidSrc);
-                asid = H5.H5Aget_space(aidSrc);
+                atid  = H5.H5Aget_type(aidSrc);
+                asid  = H5.H5Aget_space(aidSrc);
 
                 aidDst = H5.H5Acreate(dstID, aName, atid, asid, HDF5Constants.H5P_DEFAULT,
-                                       HDF5Constants.H5P_DEFAULT);
+                                      HDF5Constants.H5P_DEFAULT);
 
                 // use native data copy
                 H5.H5Acopy(aidSrc, aidDst);
@@ -420,8 +421,7 @@ public class H5File extends FileFormat {
      *             this exception.
      */
 
-    public static final List<Attribute> getAttribute(HObject obj, int idxType, int order)
-        throws HDF5Exception
+    public static final List<Attribute> getAttribute(HObject obj, int idxType, int order) throws HDF5Exception
     {
         log.trace("getAttribute(): start: obj={} idxType={} order={}", obj, idxType, order);
         List<Attribute> attributeList = null;
@@ -429,7 +429,7 @@ public class H5File extends FileFormat {
         long aid                      = -1;
         long sid                      = -1;
         long tid                      = -1;
-        H5O_info_t objInfo           = null;
+        H5O_info_t objInfo            = null;
 
         objID = obj.open();
         if (objID >= 0) {
@@ -567,10 +567,10 @@ public class H5File extends FileFormat {
                     }
                 } // (int i=0; i<objInfo.num_attrs; i++)
                 for (int i = 0; i < n; i++) {
-                    Attribute  attr      = (Attribute) attributeList.get(i);
+                    Attribute attr       = (Attribute)attributeList.get(i);
                     H5Datatype atype     = (H5Datatype)attr.getAttributeDatatype();
                     H5Datatype aBasetype = (H5Datatype)atype.getDatatypeBase();
-                    boolean    aBDTisRef = false;
+                    boolean aBDTisRef    = false;
                     if (aBasetype != null)
                         aBDTisRef = aBasetype.isRef();
                     if (atype.isRef() || aBDTisRef) {
@@ -580,7 +580,7 @@ public class H5File extends FileFormat {
                         else
                             rtype = (H5ReferenceType)atype;
                         try {
-                            List<H5ReferenceType.H5ReferenceData> refdata = (List) rtype.getData();
+                            List<H5ReferenceType.H5ReferenceData> refdata = (List)rtype.getData();
                             for (int r = 0; r < (int)rtype.getRefSize(); r++) {
                                 H5ReferenceType.H5ReferenceData rf = refdata.get(r);
                                 log.trace("getAttribute(): refdata {}", rf.refArray);
@@ -603,9 +603,9 @@ public class H5File extends FileFormat {
     /**
      * Creates attributes for an HDF5 image dataset.
      *
-     * This method creates attributes for two common types of HDF5 images. It provides a way of adding multiple
-     * attributes to an HDF5 image dataset with a single call. The {@link #writeAttribute(HObject, Attribute, boolean)}
-     * method may be used to write image attributes that are not handled by this method.
+     * This method creates attributes for two common types of HDF5 images. It provides a way of adding
+     * multiple attributes to an HDF5 image dataset with a single call. The {@link #writeAttribute(HObject,
+     * Attribute, boolean)} method may be used to write image attributes that are not handled by this method.
      *
      * For more information about HDF5 image attributes, read
      * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_i_m_g.html">HDF5 Image and Palette
@@ -614,8 +614,8 @@ public class H5File extends FileFormat {
      * This method can be called to create attributes for 24-bit true color and indexed images. The
      * <code>selectionFlag</code> parameter controls whether this will be an indexed or true color image. If
      * <code>selectionFlag</code> is <code>-1</code>, this will be an indexed image. If the value is
-     * <code>ScalarDS.INTERLACE_PIXEL</code> or <code>ScalarDS.INTERLACE_PLANE</code>, it will be a 24-bit true color
-     * image with the indicated interlace mode.
+     * <code>ScalarDS.INTERLACE_PIXEL</code> or <code>ScalarDS.INTERLACE_PLANE</code>, it will be a 24-bit
+     * true color image with the indicated interlace mode.
      *
      * <ul>
      * The created attribute descriptions, names, and values are:
@@ -623,23 +623,23 @@ public class H5File extends FileFormat {
      * <li>The version of image: name="IMAGE_VERSION", value="1.2"
      * <li>The range of data values: name="IMAGE_MINMAXRANGE", value=[0, 255]
      * <li>The type of the image: name="IMAGE_SUBCLASS", value="IMAGE_TRUECOLOR" or "IMAGE_INDEXED"
-     * <li>For IMAGE_TRUECOLOR, the interlace mode: name="INTERLACE_MODE", value="INTERLACE_PIXEL" or "INTERLACE_PLANE"
-     * <li>For IMAGE_INDEXED, the palettes to use in viewing the image: name="PALETTE", value= 1-d array of references
-     * to the palette datasets, with initial value of {-1}
+     * <li>For IMAGE_TRUECOLOR, the interlace mode: name="INTERLACE_MODE", value="INTERLACE_PIXEL" or
+     * "INTERLACE_PLANE" <li>For IMAGE_INDEXED, the palettes to use in viewing the image: name="PALETTE",
+     * value= 1-d array of references to the palette datasets, with initial value of {-1}
      * </ul>
      *
-     * This method is in the H5File class rather than H5ScalarDS because images are typically thought of at the File
-     * Format implementation level.
+     * This method is in the H5File class rather than H5ScalarDS because images are typically thought of at
+     * the File Format implementation level.
      *
      * @param dataset       The image dataset the attributes are added to.
-     * @param selectionFlag Selects the image type and, for 24-bit true color images, the interlace mode. Valid values
+     * @param selectionFlag Selects the image type and, for 24-bit true color images, the interlace mode.
+     *     Valid values
      *                      are:
      *                      <ul>
      *                      <li>-1: Indexed Image.
-     *                      <li>ScalarDS.INTERLACE_PIXEL: True Color Image. The component values for a pixel are stored
-     *                      contiguously.
-     *                      <li>ScalarDS.INTERLACE_PLANE: True Color Image. Each component is stored in a separate
-     *                      plane.
+     *                      <li>ScalarDS.INTERLACE_PIXEL: True Color Image. The component values for a pixel
+     * are stored contiguously. <li>ScalarDS.INTERLACE_PLANE: True Color Image. Each component is stored in a
+     * separate plane.
      *                      </ul>
      *
      * @throws Exception If there is a problem creating the attributes, or if the selectionFlag is invalid.
@@ -760,8 +760,8 @@ public class H5File extends FileFormat {
         // build one-to-one table of between objects in
         // the source file and new file
         long tid = -1;
-        HObject                   srcObj;
-        HObject                   newObj;
+        HObject srcObj;
+        HObject newObj;
         Hashtable<String, long[]> oidMap = new Hashtable<>();
         List<ScalarDS> refDatasets       = new Vector<>();
         while (newIt.hasNext() && srcIt.hasNext()) {
@@ -805,30 +805,31 @@ public class H5File extends FileFormat {
         // Update the references in the scalar datasets in the dest file.
         H5ScalarDS dest = null;
 
-        long sid       = -1;
-        int  size      = 0;
-        int  rank      = 0;
-        int  spaceType = -1;
-        int  n         = refDatasets.size();
+        long sid      = -1;
+        int size      = 0;
+        int rank      = 0;
+        int spaceType = -1;
+        int n         = refDatasets.size();
         for (int i = 0; i < n; i++) {
             log.trace(
                 "updateReferenceDataset(): Update the references in the scalar datasets in the dest file");
-            dest = (H5ScalarDS) refDatasets.get(i);
+            dest        = (H5ScalarDS)refDatasets.get(i);
             byte[] buf  = null;
             long[] refs = null;
 
             try {
                 did = dest.open();
                 if (did >= 0) {
-                    tid        = H5.H5Dget_type(did);
-                    sid        = H5.H5Dget_space(did);
-                    rank       = H5.H5Sget_simple_extent_ndims(sid);
+                    tid       = H5.H5Dget_type(did);
+                    sid       = H5.H5Dget_space(did);
+                    rank      = H5.H5Sget_simple_extent_ndims(sid);
                     spaceType = H5.H5Sget_simple_extent_type(sid);
-                    size       = 1;
+                    size      = 1;
                     if (rank > 0) {
                         long[] dims = new long[rank];
                         H5.H5Sget_simple_extent_dims(sid, dims, null);
-                        log.trace("updateReferenceDataset(): rank={}, dims={}, spaceType={}", rank, dims, spaceType);
+                        log.trace("updateReferenceDataset(): rank={}, dims={}, spaceType={}", rank, dims,
+                                  spaceType);
                         for (int j = 0; j < rank; j++) {
                             size *= (int)dims[j];
                         }
@@ -1341,7 +1342,7 @@ public class H5File extends FileFormat {
                     else if (HDF5Constants.H5I_FILE == type) {
                         int fileRef = H5.H5Iget_ref(objids[i]);
                         log.debug("close(): Object[{}] objids[{}] is type File with ref count of {}", i, i,
-                                fileRef);
+                                  fileRef);
                     }
                     else {
                         log.debug("close(): Object[{}] objids[{}] is type {}", i, i, type);
@@ -1439,7 +1440,7 @@ public class H5File extends FileFormat {
 
         // do not open the full tree structure, only the file handler
         long fidBeforeOpen = fid;
-        fid                  = open(false);
+        fid                = open(false);
         if (fid < 0) {
             log.debug("get(): Invalid FID");
             System.err.println("Could not open file handler");
@@ -1659,8 +1660,8 @@ public class H5File extends FileFormat {
     {
         log.trace("createCompoundDS(): start: name={}", name);
         int nMembers        = memberNames.length;
-        int[]    memberRanks = new int[nMembers];
-        long[][] memberDims  = new long[nMembers][1];
+        int[] memberRanks   = new int[nMembers];
+        long[][] memberDims = new long[nMembers][1];
         Dataset ds          = null;
 
         for (int i = 0; i < nMembers; i++) {
@@ -1813,11 +1814,11 @@ public class H5File extends FileFormat {
     public HObject createLink(Group parentGroup, String name, HObject currentObj, int lType) throws Exception
     {
         log.trace("createLink(): start: name={}", name);
-        HObject obj              = null;
-        int type                 = 0;
-        String  currentFullName = null;
-        String  newFullName     = null;
-        String  parentPath      = null;
+        HObject obj            = null;
+        int type               = 0;
+        String currentFullName = null;
+        String newFullName     = null;
+        String parentPath      = null;
 
         if (currentObj == null) {
             log.debug("createLink(): Link target is null");
@@ -1861,14 +1862,14 @@ public class H5File extends FileFormat {
 
         else if (type == HDF5Constants.H5L_TYPE_SOFT) {
             log.trace("createLink(): H5Lcreate_soft: {} in {} as {}", currentObj.getFullName(), fid,
-                    newFullName);
+                      newFullName);
             H5.H5Lcreate_soft(currentObj.getFullName(), fid, newFullName, HDF5Constants.H5P_DEFAULT,
                               HDF5Constants.H5P_DEFAULT);
         }
 
         else if (type == HDF5Constants.H5L_TYPE_EXTERNAL) {
             log.trace("createLink(): H5Lcreate_external: File={} {} in {} as {}", currentObj.getFile(),
-                    currentObj.getFullName(), fid, newFullName);
+                      currentObj.getFullName(), fid, newFullName);
             H5.H5Lcreate_external(currentObj.getFile(), currentObj.getFullName(), fid, newFullName,
                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
@@ -1921,10 +1922,10 @@ public class H5File extends FileFormat {
     public HObject createLink(Group parentGroup, String name, String currentObj, int lType) throws Exception
     {
         log.trace("createLink(): start: name={}", name);
-        HObject obj          = null;
-        int type             = 0;
-        String  newFullName = null;
-        String  parentPath  = null;
+        HObject obj        = null;
+        int type           = 0;
+        String newFullName = null;
+        String parentPath  = null;
 
         if (currentObj == null) {
             log.debug("createLink(): Link target is null");
@@ -2070,10 +2071,10 @@ public class H5File extends FileFormat {
     public void writeAttribute(HObject obj, Attribute attr, boolean attrExisted) throws HDF5Exception
     {
         String objName = obj.getFullName();
-        String name     = attr.getAttributeName();
-        long tid        = -1;
-        long sid        = -1;
-        long aid        = -1;
+        String name    = attr.getAttributeName();
+        long tid       = -1;
+        long sid       = -1;
+        long aid       = -1;
         log.trace("writeAttribute(): name is {}", name);
 
         long objID = obj.open();
@@ -2208,7 +2209,8 @@ public class H5File extends FileFormat {
     /**
      * Opens access to this file.
      *
-     * @param loadFullHierarchy if true, load the full hierarchy into memory; otherwise just opens the file identifier.
+     * @param loadFullHierarchy if true, load the full hierarchy into memory; otherwise just opens the file
+     *     identifier.
      * @param plist             the property list
      *
      * @return the file identifier if successful; otherwise returns negative value.
@@ -2366,15 +2368,15 @@ public class H5File extends FileFormat {
     }
 
     /**
-     * Retrieves the file structure by depth-first order, recursively. The current implementation retrieves groups and
-     * datasets only. It does not include named datatypes and soft links.
+     * Retrieves the file structure by depth-first order, recursively. The current implementation retrieves
+     * groups and datasets only. It does not include named datatypes and soft links.
      *
-     * It also detects and stops loops. A loop is detected if there exists an object with the same object ID by tracing
-     * a path back up to the root.
+     * It also detects and stops loops. A loop is detected if there exists an object with the same object ID
+     * by tracing a path back up to the root.
      *
      * @param parentObject the parent object.
      * @param nTotal       the maximum number objects.
-     * 
+     *
      * @ return the number of objects found
      */
     @SuppressWarnings("deprecation")
@@ -2435,7 +2437,7 @@ public class H5File extends FileFormat {
         int nMax   = getMaxMembers();
 
         String objname;
-        int    objtype;
+        int objtype;
 
         // Iterate through the file to see members of the group
         for (int i = 0; i < nelems; i++) {
@@ -2517,7 +2519,7 @@ public class H5File extends FileFormat {
                             }
                             catch (Exception ex) {
                                 log.debug("depth_first({})[{}] dataset {} H5Tclose(btid {}) failure: ",
-                                        parentObject, i, objname, btid, ex);
+                                          parentObject, i, objname, btid, ex);
                             }
                         }
                     }
@@ -2535,14 +2537,14 @@ public class H5File extends FileFormat {
                     }
                     catch (Exception ex) {
                         log.debug("depth_first({})[{}] daatset {} H5Tclose(tid {}) failure: ", parentObject,
-                                i, objname, tid, ex);
+                                  i, objname, tid, ex);
                     }
                     try {
                         H5.H5Dclose(did);
                     }
                     catch (Exception ex) {
                         log.debug("depth_first({})[{}] dataset {} H5Dclose(did {}) failure: ", parentObject,
-                                i, objname, did, ex);
+                                  i, objname, did, ex);
                     }
                 }
                 Dataset dset = null;
@@ -2581,8 +2583,8 @@ public class H5File extends FileFormat {
     } // private depth_first()
 
     /**
-     * Returns a list of all the members of this H5File in a breadth-first ordering that are rooted at the specified
-     * object.
+     * Returns a list of all the members of this H5File in a breadth-first ordering that are rooted at the
+     * specified object.
      *
      * @param obj - file object
      *
@@ -2610,12 +2612,12 @@ public class H5File extends FileFormat {
 
     private HObject copyDataset(Dataset srcDataset, H5Group pgroup, String dstName) throws Exception
     {
-        Dataset dataset   = null;
-        long srcdid       = -1;
-        long dstdid       = -1;
+        Dataset dataset = null;
+        long srcdid     = -1;
+        long dstdid     = -1;
         long ocpPlistId = -1;
-        String dname      = null;
-        String path       = null;
+        String dname    = null;
+        String path     = null;
 
         if (pgroup.isRoot())
             path = HObject.SEPARATOR;
@@ -2646,8 +2648,7 @@ public class H5File extends FileFormat {
                     H5.H5Pclose(ocpPlistId);
                 }
                 catch (Exception ex) {
-                    log.debug("copyDataset(): {} H5Pclose(ocpPlistId {}) failure: ", dname, ocpPlistId,
-                              ex);
+                    log.debug("copyDataset(): {} H5Pclose(ocpPlistId {}) failure: ", dname, ocpPlistId, ex);
                 }
             }
 
@@ -2747,8 +2748,8 @@ public class H5File extends FileFormat {
     private HObject copyDatatype(Datatype srcType, H5Group pgroup, String dstName) throws Exception
     {
         Datatype datatype = null;
-        long tidSrc      = -1;
-        long gidDst      = -1;
+        long tidSrc       = -1;
+        long gidDst       = -1;
         String path       = null;
 
         if (pgroup.isRoot())
@@ -2810,9 +2811,9 @@ public class H5File extends FileFormat {
     private HObject copyGroup(H5Group srcGroup, H5Group dstGroup, String dstName) throws Exception
     {
         H5Group group = null;
-        long    srcgid = -1;
-        long    dstgid = -1;
-        String path = null;
+        long srcgid   = -1;
+        long dstgid   = -1;
+        String path   = null;
 
         if (dstGroup.isRoot())
             path = HObject.SEPARATOR;
@@ -2900,7 +2901,7 @@ public class H5File extends FileFormat {
 
         H5G_info_t groupInfo = null;
         H5O_info_t objInfo   = null;
-        long objid            = -1;
+        long objid           = -1;
         String linkName      = null;
         try {
             groupInfo = H5.H5Gget_info(gid);
@@ -2920,9 +2921,9 @@ public class H5File extends FileFormat {
         for (int i = 0; i < groupInfo.nlinks; i++) {
             try {
                 linkName = H5.H5Lget_name_by_idx(gid, thisFullName, indexType, indexOrder, i,
-                                                  HDF5Constants.H5P_DEFAULT);
+                                                 HDF5Constants.H5P_DEFAULT);
                 objInfo  = H5.H5Oget_info_by_idx(objid, thisFullName, indexType, indexOrder, i,
-                                                  HDF5Constants.H5P_DEFAULT);
+                                                 HDF5Constants.H5P_DEFAULT);
             }
             catch (HDF5Exception ex) {
                 log.debug("getGroup()[{}]: {} name,info failure: ", i, name, ex);
@@ -2935,7 +2936,7 @@ public class H5File extends FileFormat {
                 group.addToMemberList(g);
             }
             else if (objInfo.type == HDF5Constants.H5O_TYPE_DATASET) {
-                long did  = -1;
+                long did     = -1;
                 Dataset dset = null;
 
                 if ((thisFullName == null) || thisFullName.equals("/"))
@@ -2944,7 +2945,7 @@ public class H5File extends FileFormat {
                     memberFullName = thisFullName + "/" + linkName;
 
                 try {
-                    did = H5.H5Dopen(fid, memberFullName, HDF5Constants.H5P_DEFAULT);
+                    did  = H5.H5Dopen(fid, memberFullName, HDF5Constants.H5P_DEFAULT);
                     dset = getDataset(did, linkName, thisFullName);
                 }
                 finally {
@@ -2986,8 +2987,8 @@ public class H5File extends FileFormat {
      */
     public static String getLinkTargetName(HObject obj) throws Exception
     {
-        String[] linkValue     = { null, null };
-        String   targetObjName = null;
+        String[] linkValue   = {null, null};
+        String targetObjName = null;
 
         if (obj == null) {
             log.debug("getLinkTargetName(): object is null");

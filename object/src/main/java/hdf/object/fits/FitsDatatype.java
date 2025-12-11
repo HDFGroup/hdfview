@@ -16,9 +16,9 @@ package hdf.object.fits;
 
 import java.util.List;
 
-import nom.tam.fits.BasicHDU;
-
 import hdf.object.Datatype;
+
+import nom.tam.fits.BasicHDU;
 
 /**
  * Datatype encapsulates information of a datatype.

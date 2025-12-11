@@ -17,7 +17,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -28,13 +27,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.lang.reflect.Array;
-
 import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -74,18 +70,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
-
 import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
-
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.AbstractUiBindingConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
-
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
-
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.validate.DataValidator;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
@@ -93,12 +85,10 @@ import org.eclipse.nebula.widgets.nattable.edit.action.KeyEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.action.MouseEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditConfiguration;
 import org.eclipse.nebula.widgets.nattable.edit.config.DialogErrorHandling;
-
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
-
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.IUniqueIndexLayer;
@@ -106,19 +96,15 @@ import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderLayer
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultRowHeaderLayerConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultRowHeaderStyleConfiguration;
-
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.BeveledBorderDecorator;
 import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.LineBorderDecorator;
-
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.command.SelectAllCommand;
-
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
-
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.CellEditorMouseEventMatcher;
@@ -128,11 +114,9 @@ import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuAction;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
-
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -140,16 +124,13 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
-
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -251,9 +232,9 @@ public abstract class DefaultBaseTableView implements TableView {
     protected boolean isDataTransposed;
 
     /** reference status. */
-    protected boolean isRegRef  = false;
-    protected boolean isObjRef  = false;
-    protected boolean isStdRef  = false;
+    protected boolean isRegRef = false;
+    protected boolean isObjRef = false;
+    protected boolean isStdRef = false;
     /** show data as status. */
     protected boolean showAsHex = false;
     protected boolean showAsBin = false;
@@ -489,7 +470,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         // Setup subset information
-        int spaceType      = dataObject.getSpaceType();
+        int spaceType       = dataObject.getSpaceType();
         int rank            = dataObject.getRank();
         int[] selectedIndex = dataObject.getSelectedIndex();
         long[] count        = dataObject.getSelectedDims();
@@ -1150,7 +1131,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         // use lazy convert for large number of strings
         if (theDataObject.getHeight() > 10000 && theDataObject instanceof CompoundDS) {
-            ((CompoundDS) theDataObject).setConvertByteToString(false);
+            ((CompoundDS)theDataObject).setConvertByteToString(false);
         }
 
         // Make sure entire dataset is not loaded when looking at 3D
@@ -2605,7 +2586,7 @@ public abstract class DefaultBaseTableView implements TableView {
          */
         public RowHeaderDataProvider(DataFormat theDataObject)
         {
-            this.spaceType    = theDataObject.getSpaceType();
+            this.spaceType     = theDataObject.getSpaceType();
             this.rank          = theDataObject.getRank();
             this.dims          = theDataObject.getSelectedDims();
             this.startArray    = theDataObject.getStartDims();
@@ -2831,7 +2812,7 @@ public abstract class DefaultBaseTableView implements TableView {
         private int ncol;
 
         private int idxXAxis = -1;
-        private int plotType  = -1;
+        private int plotType = -1;
 
         public LinePlotOption(Shell parent, int style, int nrow, int ncol)
         {
@@ -2935,11 +2916,11 @@ public abstract class DefaultBaseTableView implements TableView {
                 {
                     if (colButton.getSelection()) {
                         idxXAxis = colBox.getSelectionIndex() - 1;
-                        plotType  = COLUMN_PLOT;
+                        plotType = COLUMN_PLOT;
                     }
                     else {
                         idxXAxis = rowBox.getSelectionIndex() - 1;
-                        plotType  = ROW_PLOT;
+                        plotType = ROW_PLOT;
                     }
 
                     linePlotOptionShell.dispose();
@@ -2985,10 +2966,7 @@ public abstract class DefaultBaseTableView implements TableView {
                     pdisplay.sleep();
         }
 
-        int getXindex()
-        {
-            return idxXAxis;
-        }
+        int getXindex() { return idxXAxis; }
 
         int getPlotBy() { return plotType; }
     }

@@ -30,7 +30,6 @@ import hdf.HDFVersions;
 import hdf.object.DataFormat;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
-
 import hdf.view.DataView.DataView;
 import hdf.view.DataView.DataViewFactory;
 import hdf.view.DataView.DataViewFactoryProducer;
@@ -41,7 +40,6 @@ import hdf.view.TableView.TableView;
 import hdf.view.TreeView.DefaultTreeView;
 import hdf.view.TreeView.TreeView;
 import hdf.view.ViewProperties.DataViewType;
-
 import hdf.view.dialog.ImageConversionDialog;
 import hdf.view.dialog.InputDialog;
 import hdf.view.dialog.UserOptionsDialog;
@@ -57,31 +55,26 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
-
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
-
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -175,7 +168,7 @@ public class HDFView implements DataViewManager {
     private static final String HDF5_VERSION    = HDFVersions.getPropertyVersionHDF5();
     private static final String HDFVIEW_VERSION = HDFVersions.getPropertyVersionView();
     private static final String HDFVIEW_USERSGUIDE_URL =
-            "https://support.hdfgroup.org/documentation/hdfview/HDFView+3.x+User%27s+Guide";
+        "https://support.hdfgroup.org/documentation/hdfview/HDFView+3.x+User%27s+Guide";
     private static final String JAVA_COMPILER = "jdk " + JAVA_VERSION;
     private static final String JAVA_VER_INFO =
         "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
@@ -251,8 +244,8 @@ public class HDFView implements DataViewManager {
     };
 
     /**
-     * Constructs HDFView with a given root directory, where the HDFView is installed, and opens the given files in the
-     * viewer.
+     * Constructs HDFView with a given root directory, where the HDFView is installed, and opens the given
+     * files in the viewer.
      *
      * @param root      the directory where the HDFView is installed.
      * @param startPath the starting directory for file searches
@@ -2832,12 +2825,12 @@ public class HDFView implements DataViewManager {
         }
 
         final ArrayList<File> theFileList = fList;
-        final String          theRootDir  = rootDir;
-        final String          theStartDir = startDir;
-        final int             theX        = geomX;
-        final int             theY        = geomY;
-        final int             theW        = marginW;
-        final int             theH        = marginH;
+        final String theRootDir           = rootDir;
+        final String theStartDir          = startDir;
+        final int theX                    = geomX;
+        final int theY                    = geomY;
+        final int theW                    = marginW;
+        final int theH                    = marginH;
 
         display.syncExec(new Runnable() {
             @Override

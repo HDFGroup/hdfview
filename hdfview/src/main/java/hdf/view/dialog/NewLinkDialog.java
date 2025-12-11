@@ -376,8 +376,8 @@ public class NewLinkDialog extends Dialog {
         Object obj           = null;
         Iterator<?> iterator = objList.iterator();
         String fullName      = null;
-        int         idxRoot  = -1;
-        int         idx      = -1;
+        int idxRoot          = -1;
+        int idx              = -1;
         while (iterator.hasNext()) {
             obj = iterator.next();
             idx++;
@@ -387,7 +387,7 @@ public class NewLinkDialog extends Dialog {
                 groupList.add(g);
                 if (g.isRoot()) {
                     fullName = HObject.SEPARATOR;
-                    idxRoot = idx;
+                    idxRoot  = idx;
                 }
                 else {
                     fullName = g.getPath() + g.getName() + HObject.SEPARATOR;

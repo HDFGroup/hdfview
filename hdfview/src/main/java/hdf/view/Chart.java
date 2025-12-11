@@ -166,8 +166,8 @@ public class Chart extends Dialog {
             }
             else {
                 this.xData = xData;
-                xmin = xData[0];
-                xmax = xData[0];
+                xmin       = xData[0];
+                xmax       = xData[0];
                 for (int i = 0; i < len; i++) {
                     if (xData[i] < xmin)
                         xmin = xData[i];

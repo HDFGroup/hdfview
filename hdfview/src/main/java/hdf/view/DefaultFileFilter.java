@@ -162,7 +162,8 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get the human readable description of this filter. For example: "JPEG and GIF Image Files (*.jpg, *.gif)".
+     * Get the human readable description of this filter. For example: "JPEG and GIF Image Files (*.jpg,
+     * *.gif)".
      *
      * @return the human readable description of this filter.
      */

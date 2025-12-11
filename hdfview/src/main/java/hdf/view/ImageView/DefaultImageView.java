@@ -117,12 +117,13 @@ import org.eclipse.swt.widgets.TreeItem;
 /**
  * ImageView displays an HDF dataset as an image.
  *
- * A scalar dataset in HDF can be displayed in image or table. By default, an HDF4 GR image and HDF5 image is displayed
- * as an image. Other scalar datasets are display in a two-dimensional table.
+ * A scalar dataset in HDF can be displayed in image or table. By default, an HDF4 GR image and HDF5 image is
+ * displayed as an image. Other scalar datasets are display in a two-dimensional table.
  *
- * Users can also choose to display a scalar dataset as image. Currently this version of the ImageView only supports
- * 8-bit raster image with indexed RGB color model of 256 colors or 24-bit true color raster image. Data of other type
- * will be converted to 8-bit integer. The simple linear conversion is used for this purpose:
+ * Users can also choose to display a scalar dataset as image. Currently this version of the ImageView only
+ * supports 8-bit raster image with indexed RGB color model of 256 colors or 24-bit true color raster image.
+ * Data of other type will be converted to 8-bit integer. The simple linear conversion is used for this
+ * purpose:
  *
  * <pre>
  * y = f * (x - min),
@@ -133,9 +134,10 @@ import org.eclipse.swt.widgets.TreeItem;
  *             min = the minimum of the original data.
  * </pre>
  *
- * A default color table is provided for images without palette attached to it. Current choice of default palettes
- * include Gray, Rainbow, Nature and Wave. For more infomation on palette, read
- * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_i_m_g.html">HDF5 Image and Palette Specification</a>
+ * A default color table is provided for images without palette attached to it. Current choice of default
+ * palettes include Gray, Rainbow, Nature and Wave. For more infomation on palette, read <a
+ * href="https://support.hdfgroup.org/documentation/hdf5/latest/_i_m_g.html">HDF5 Image and Palette
+ * Specification</a>
  *
  * @author Jordan T. Henderson
  * @version 2.4 2//2016
@@ -2156,11 +2158,11 @@ public class DefaultImageView implements ImageView {
     private org.eclipse.swt.graphics.Image convertBufferedImageToSWTImage(BufferedImage buffimage)
     {
         if (buffimage.getColorModel() instanceof DirectColorModel) {
-            DirectColorModel colorModel = (DirectColorModel) buffimage.getColorModel();
+            DirectColorModel colorModel = (DirectColorModel)buffimage.getColorModel();
             PaletteData palette =
                 new PaletteData(colorModel.getRedMask(), colorModel.getGreenMask(), colorModel.getBlueMask());
-            ImageData imgData =
-                    new ImageData(buffimage.getWidth(), buffimage.getHeight(), colorModel.getPixelSize(), palette);
+            ImageData imgData = new ImageData(buffimage.getWidth(), buffimage.getHeight(),
+                                              colorModel.getPixelSize(), palette);
 
             for (int y = 0; y < imgData.height; y++) {
                 for (int x = 0; x < imgData.width; x++) {
@@ -2176,7 +2178,7 @@ public class DefaultImageView implements ImageView {
             return new org.eclipse.swt.graphics.Image(display, imgData);
         }
         else if (buffimage.getColorModel() instanceof IndexColorModel) {
-            IndexColorModel colorModel = (IndexColorModel) buffimage.getColorModel();
+            IndexColorModel colorModel = (IndexColorModel)buffimage.getColorModel();
             int size                   = colorModel.getMapSize();
             byte[] reds                = new byte[size];
             byte[] greens              = new byte[size];
@@ -2188,11 +2190,11 @@ public class DefaultImageView implements ImageView {
             for (int i = 0; i < rgbs.length; i++) {
                 rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF, blues[i] & 0xFF);
             }
-            PaletteData palette = new PaletteData(rgbs);
-            ImageData imgData =
-                    new ImageData(buffimage.getWidth(), buffimage.getHeight(), colorModel.getPixelSize(), palette);
+            PaletteData palette      = new PaletteData(rgbs);
+            ImageData imgData        = new ImageData(buffimage.getWidth(), buffimage.getHeight(),
+                                                     colorModel.getPixelSize(), palette);
             imgData.transparentPixel = colorModel.getTransparentPixel();
-            WritableRaster raster     = buffimage.getRaster();
+            WritableRaster raster    = buffimage.getRaster();
             int[] pixelArray         = new int[1];
             for (int y = 0; y < imgData.height; y++) {
                 for (int x = 0; x < imgData.width; x++) {
@@ -2204,14 +2206,14 @@ public class DefaultImageView implements ImageView {
             return new org.eclipse.swt.graphics.Image(display, imgData);
         }
         else if (buffimage.getColorModel() instanceof ComponentColorModel) {
-            ComponentColorModel colorModel = (ComponentColorModel) buffimage.getColorModel();
+            ComponentColorModel colorModel = (ComponentColorModel)buffimage.getColorModel();
             // ASSUMES: 3 BYTE BGR IMAGE TYPE
             PaletteData palette = new PaletteData(0x0000FF, 0x00FF00, 0xFF0000);
-            ImageData imgData =
-                    new ImageData(buffimage.getWidth(), buffimage.getHeight(), colorModel.getPixelSize(), palette);
+            ImageData imgData   = new ImageData(buffimage.getWidth(), buffimage.getHeight(),
+                                                colorModel.getPixelSize(), palette);
             // This is valid because we are using a 3-byte Data model with no transparent pixels
             imgData.transparentPixel = -1;
-            WritableRaster raster     = buffimage.getRaster();
+            WritableRaster raster    = buffimage.getRaster();
             int[] pixelArray         = new int[3];
             for (int y = 0; y < imgData.height; y++) {
                 for (int x = 0; x < imgData.width; x++) {
@@ -2824,9 +2826,9 @@ public class DefaultImageView implements ImageView {
                 .append(",   value=");
 
             if (isTrueColor) {
-                int    i0;
-                int    i1;
-                int    i2;
+                int i0;
+                int i1;
+                int i2;
                 String r;
                 String g;
                 String b;

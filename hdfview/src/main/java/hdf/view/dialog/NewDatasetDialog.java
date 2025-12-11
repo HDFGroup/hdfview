@@ -554,9 +554,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             return;
         }
 
-        int rank = stDim.countTokens();
-        long   max     = 0;
-        long   dim     = 0;
+        int rank       = stDim.countTokens();
+        long max       = 0;
+        long dim       = 0;
         long[] maxdims = new long[rank];
         for (int i = 0; i < rank; i++) {
             String token = stMax.nextToken().trim();
@@ -1002,9 +1002,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 }
                 else {
                     try {
-                        URL    url      = null;
-                        URL    url2     = null;
-                        URL    url3     = null;
+                        URL url         = null;
+                        URL url2        = null;
+                        URL url3        = null;
                         String rootPath = ViewProperties.getViewRoot();
 
                         try {
@@ -1028,7 +1028,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                             log.debug("help information:", mfu);
                         }
 
-                        URL[] uu = { url, url2, url3 };
+                        URL[] uu = {url, url2, url3};
                         try (URLClassLoader cl = new URLClassLoader(uu)) {
                             URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
 

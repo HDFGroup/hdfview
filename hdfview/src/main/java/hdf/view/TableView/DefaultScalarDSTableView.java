@@ -1217,9 +1217,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             }
         }
         if (((refdata.refType == HDF5Constants.H5R_OBJECT1) &&
-                (refdata.objType == HDF5Constants.H5O_TYPE_DATASET)) ||
+             (refdata.objType == HDF5Constants.H5O_TYPE_DATASET)) ||
             ((refdata.refType == HDF5Constants.H5R_OBJECT2) &&
-                        (refdata.objType == HDF5Constants.H5O_TYPE_DATASET))) {
+             (refdata.objType == HDF5Constants.H5O_TYPE_DATASET))) {
             String refObj = refdata.objName;
             showObjStdRefData(refObj);
         }
@@ -1350,7 +1350,8 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     }
 
     /**
-     * Display data pointed to by attribute references. Data of each object is shown in a separate spreadsheet.
+     * Display data pointed to by attribute references. Data of each object is shown in a separate
+     * spreadsheet.
      *
      * @param refObjName  the string that contain the attribute reference information.
      * @param refAttrName the string that contain the attribute reference information.
@@ -1366,8 +1367,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             return;
         }
 
-        if (refAttrName == null || (refAttrName.length() <= 0) ||
-            (refAttrName.compareTo("NULL") == 0)) {
+        if (refAttrName == null || (refAttrName.length() <= 0) || (refAttrName.compareTo("NULL") == 0)) {
             log.debug("showAttrStdRefData(): refAttrName is null or invalid");
             Tools.showError(shell, "Select",
                             "Could not show attribute reference data: invalid or null attribute name");
@@ -1375,7 +1375,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         }
 
         // find the parent object first
-        HObject obj = FileFormat.findObject(((HObject) dataObject).getFileFormat(), refObjName);
+        HObject obj = FileFormat.findObject(((HObject)dataObject).getFileFormat(), refObjName);
         if (obj == null) {
             log.debug("showAttrStdRefData(): obj is null");
             Tools.showError(shell, "Select", "Could not show attribute reference data: invalid or null data");
@@ -1570,9 +1570,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                                     int idx = 0;
                                     while (st.hasMoreTokens()) {
                                         int spaceType = dset.getSpaceType();
-                                        int rank       = dset.getRank();
-                                        long[] start   = dset.getStartDims();
-                                        long[] count   = dset.getSelectedDims();
+                                        int rank      = dset.getRank();
+                                        long[] start  = dset.getStartDims();
+                                        long[] count  = dset.getSelectedDims();
                                         // long count[] = new long[rank];
 
                                         // set the selected dimension sizes
@@ -1822,7 +1822,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         public ScalarDSColumnHeaderDataProvider(DataFormat theDataObject)
         {
             spaceType = theDataObject.getSpaceType();
-            rank       = theDataObject.getRank();
+            rank      = theDataObject.getRank();
 
             startArray    = theDataObject.getStartDims();
             strideArray   = theDataObject.getStride();

@@ -43,24 +43,27 @@ import org.slf4j.LoggerFactory;
 /**
  * The H5CompoundDS class defines an HDF5 dataset of compound datatypes.
  *
- * An HDF5 dataset is an object composed of a collection of data elements, or raw data, and metadata that stores a
- * description of the data elements, data layout, and all other information necessary to write, read, and interpret the
- * stored data.
+ * An HDF5 dataset is an object composed of a collection of data elements, or raw data, and metadata that
+ * stores a description of the data elements, data layout, and all other information necessary to write, read,
+ * and interpret the stored data.
  *
- * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of one or more
- * atomic types or small arrays of such types. Each member of a compound type has a name which is unique within that
- * type, and a byte offset that determines the first byte (smallest byte address) of that member in a compound datum.
+ * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of
+ * one or more atomic types or small arrays of such types. Each member of a compound type has a name which is
+ * unique within that type, and a byte offset that determines the first byte (smallest byte address) of that
+ * member in a compound datum.
  *
  * For more information on HDF5 datasets and datatypes, read
- * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_d__u_g.html#sec_dataset">HDF5 Datasets in HDF5
- * User Guide</a> <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5
- * Datatypes in HDF5 User Guide</a>
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_d__u_g.html#sec_dataset">HDF5 Datasets
+ * in HDF5 User Guide</a> <a href=
+ * "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in
+ * HDF5 User Guide</a>
  *
- * There are two basic types of compound datasets: simple compound data and nested compound data. Members of a simple
- * compound dataset have atomic datatypes. Members of a nested compound dataset are compound or array of compound data.
+ * There are two basic types of compound datasets: simple compound data and nested compound data. Members of a
+ * simple compound dataset have atomic datatypes. Members of a nested compound dataset are compound or array
+ * of compound data.
  *
- * Since Java does not understand C structures, we cannot directly read/write compound data values as in the following C
- * example.
+ * Since Java does not understand C structures, we cannot directly read/write compound data values as in the
+ * following C example.
  *
  * <pre>
  * typedef struct s1_t {
@@ -74,10 +77,10 @@ import org.slf4j.LoggerFactory;
  *     H5Dread(..., s1);
  * </pre>
  *
- * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by fields
- * instead of compound structure. As for the example above, the java.util.Vector object has three elements: int[LENGTH],
- * float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of int, float and double, we will be
- * able to read/write the compound data by field.
+ * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by
+ * fields instead of compound structure. As for the example above, the java.util.Vector object has three
+ * elements: int[LENGTH], float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of
+ * int, float and double, we will be able to read/write the compound data by field.
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -339,8 +342,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
             }
 
             try {
-                sid        = H5.H5Dget_space(did);
-                rank       = H5.H5Sget_simple_extent_ndims(sid);
+                sid       = H5.H5Dget_space(did);
+                rank      = H5.H5Sget_simple_extent_ndims(sid);
                 spaceType = H5.H5Sget_simple_extent_type(sid);
                 if (spaceType == HDF5Constants.H5S_NULL)
                     isNULL = true;
@@ -380,7 +383,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                         datatype = new H5Datatype(getFileFormat(), tid);
 
                     log.trace(
-                            "init(): tid={} has isText={}: isVLEN={}: isEnum={}: isUnsigned={}: isStdRef={}: isRegRef={}",
+                        "init(): tid={} has isText={}: isVLEN={}: isEnum={}: isUnsigned={}: isStdRef={}: isRegRef={}",
                         tid, datatype.isText(), datatype.isVLEN(), ((H5Datatype)datatype).isEnum(),
                         datatype.isUnsigned(), ((H5Datatype)datatype).isStdRef(),
                         ((H5Datatype)datatype).isRegRef());
@@ -412,8 +415,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                         log.trace("init()[{}]: memberTypes[{}]={}", i, i, memberTypes[i].getDescription());
 
                         if (memberTypes[i].isArray()) {
-                            long[] mdim         = memberTypes[i].getArrayDims();
-                            int[]  idim         = new int[mdim.length];
+                            long[] mdim      = memberTypes[i].getArrayDims();
+                            int[] idim       = new int[mdim.length];
                             int arrayNpoints = 1;
 
                             for (int j = 0; j < idim.length; j++) {
@@ -1856,7 +1859,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
      * @param memberNames     the names of compound datatype
      * @param memberDatatypes the datatypes of the compound datatype
      * @param memberSizes     the dim sizes of the members
-     * @param data            list of data arrays written to the new dataset, null if no data is written to the new
+     * @param data            list of data arrays written to the new dataset, null if no data is written to
+     *     the new
      *                        dataset.
      *
      * @return the new compound dataset if successful; otherwise returns null.
@@ -1865,7 +1869,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
      *
      * @deprecated Not for public use in the future. <br>
      *             Using
-     *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[], long[][], Object)}
+     *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[],
+     * long[][], Object)}
      */
     @Deprecated
     public static Dataset create(String name, Group pgroup, long[] dims, String[] memberNames,
@@ -1877,8 +1882,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
         }
 
         int nMembers        = memberNames.length;
-        int[]    memberRanks = new int[nMembers];
-        long[][] memberDims  = new long[nMembers][1];
+        int[] memberRanks   = new int[nMembers];
+        long[][] memberDims = new long[nMembers][1];
         for (int i = 0; i < nMembers; i++) {
             memberRanks[i]   = 1;
             memberDims[i][0] = memberSizes[i];
@@ -1898,7 +1903,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
      * @param memberDatatypes the datatypes of the compound datatype
      * @param memberRanks     the ranks of the members
      * @param memberDims      the dim sizes of the members
-     * @param data            list of data arrays written to the new dataset, null if no data is written to the new
+     * @param data            list of data arrays written to the new dataset, null if no data is written to
+     *     the new
      *                        dataset.
      *
      * @return the new compound dataset if successful; otherwise returns null.
@@ -1907,7 +1913,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
      *
      * @deprecated Not for public use in the future. <br>
      *             Using
-     *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[], long[][], Object)}
+     *             {@link #create(String, Group, long[], long[], long[], int, String[], Datatype[], int[],
+     * long[][], Object)}
      */
     @Deprecated
     public static Dataset create(String name, Group pgroup, long[] dims, String[] memberNames,
@@ -2303,7 +2310,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
             String cname = valClass.getName();
             char dname   = cname.charAt(cname.lastIndexOf('[') + 1);
             log.trace("toString: isStdRef with cname={} dname={}", cname, dname);
-            String refStr = ((H5ReferenceType) getDatatype()).getObjectReferenceName((byte[]) theData);
+            String refStr = ((H5ReferenceType)getDatatype()).getObjectReferenceName((byte[])theData);
             log.trace("toString: refStr={}", refStr);
             return refStr;
         }

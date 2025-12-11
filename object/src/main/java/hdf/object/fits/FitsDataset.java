@@ -19,13 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import nom.tam.fits.BasicHDU;
-import nom.tam.fits.Header;
-import nom.tam.fits.HeaderCard;
-
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -34,13 +27,20 @@ import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nom.tam.fits.BasicHDU;
+import nom.tam.fits.Header;
+import nom.tam.fits.HeaderCard;
+
 /**
- * FitsDataset describes an multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
- * float, double and string, and operations performed on the scalar dataset
+ * FitsDataset describes an multi-dimension array of HDF5 scalar or atomic data types, such as byte, int,
+ * short, long, float, double and string, and operations performed on the scalar dataset
  *
  * The library predefines a modest number of datatypes. For details, read
- * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5
- * User Guide</a>
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5
+ * Datatypes in HDF5 User Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao

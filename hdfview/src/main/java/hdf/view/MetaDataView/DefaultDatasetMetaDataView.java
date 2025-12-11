@@ -342,10 +342,10 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             }
 
             if (n > 0) {
-                String[][]     rowData = new String[n][3];
-                final String[] names   = compound.getMemberNames();
-                Datatype[]     types   = compound.getMemberTypes();
-                int[]          orders  = compound.getMemberOrders();
+                String[][] rowData   = new String[n][3];
+                final String[] names = compound.getMemberNames();
+                Datatype[] types     = compound.getMemberTypes();
+                int[] orders         = compound.getMemberOrders();
 
                 for (int i = 0; i < n; i++) {
                     rowData[i][0] = new String(names[i]);

@@ -110,7 +110,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         if (ugField != null) {
             String ugPath = ugField.getText();
             if ((ugPath != null) && (ugPath.length() > 0)) {
-                ugPath = ugPath.trim();
+                ugPath             = ugPath.trim();
                 isUserGuideChanged = !ugPath.equals(ViewProperties.getUsersGuide());
                 ViewProperties.setUsersGuide(ugPath);
             }

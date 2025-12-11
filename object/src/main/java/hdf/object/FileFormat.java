@@ -194,7 +194,8 @@ public abstract class FileFormat extends File {
     /**
      * By default, HDF4 and HDF5 file formats are added to the supported formats list.
      */
-    static {
+    static
+    {
         // add HDF4 to default modules
         if (FileFormat.getFileFormat(FILE_TYPE_HDF4) == null) {
             try {
@@ -407,11 +408,11 @@ public abstract class FileFormat extends File {
         if (n <= 0)
             return null;
 
-        int i                     = 0;
-        FileFormat[] fileformats  = new FileFormat[n];
-        Enumeration<?> localEnum   = ((Hashtable) FileList).elements();
+        int i                    = 0;
+        FileFormat[] fileformats = new FileFormat[n];
+        Enumeration<?> localEnum = ((Hashtable)FileList).elements();
         while (localEnum.hasMoreElements())
-            fileformats[i++] = (FileFormat) localEnum.nextElement();
+            fileformats[i++] = (FileFormat)localEnum.nextElement();
 
         return fileformats;
     }
@@ -599,8 +600,8 @@ public abstract class FileFormat extends File {
     /**
      * Checks if the implementing FileFormat class matches the format of the specified file.
      *
-     * For example, if "test.h5" is an HDF5 file, the first call to isThisType() in the code fragment shown will return
-     * <code>false</code>, and the second call will return <code>true</code>.
+     * For example, if "test.h5" is an HDF5 file, the first call to isThisType() in the code fragment shown
+     * will return <code>false</code>, and the second call will return <code>true</code>.
      *
      * <pre>
      * FileFormat ncF = FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3);
@@ -1024,16 +1025,17 @@ public abstract class FileFormat extends File {
     /**
      * Methods related to Datatypes and HObjects in the implementing FileFormat.
      *
-     * Strictly speaking, these methods aren't related to FileFormat and the actions could be carried out through the
-     * HObject and Datatype classes. But, in some cases they allow a null input and expect the generated object to be of
-     * a type that has particular FileFormat. Therefore, we put them in the implementing FileFormat class so that we
-     * create the proper type of HObject... H5Group or H4Group for example.
+     * Strictly speaking, these methods aren't related to FileFormat and the actions could be carried out
+     * through the HObject and Datatype classes. But, in some cases they allow a null input and expect the
+     * generated object to be of a type that has particular FileFormat. Therefore, we put them in the
+     * implementing FileFormat class so that we create the proper type of HObject... H5Group or H4Group for
+     * example.
      *
-     * Here again, if there could be Implementation Class methods we'd use those. But, since we can't override class
-     * methods (they can only be shadowed in Java), these are instance methods.
+     * Here again, if there could be Implementation Class methods we'd use those. But, since we can't override
+     * class methods (they can only be shadowed in Java), these are instance methods.
      *
-     * The non-abstract methods just throw an exception indicating that the implementing class doesn't support the
-     * functionality.
+     * The non-abstract methods just throw an exception indicating that the implementing class doesn't support
+     * the functionality.
      *
      * Creates a new datatype in memory.
      *
@@ -1455,9 +1457,9 @@ public abstract class FileFormat extends File {
     public abstract void writeAttribute(HObject obj, Attribute attr, boolean attrExisted) throws Exception;
 
     /**
-     * The replacement method has an additional parameter that controls the behavior if the file already exists. Use
-     * <code>FileFormat.FILE_CREATE_DELETE</code> as the second argument in the replacement method to mimic the behavior
-     * originally provided by this method.
+     * The replacement method has an additional parameter that controls the behavior if the file already
+     * exists. Use <code>FileFormat.FILE_CREATE_DELETE</code> as the second argument in the replacement method
+     * to mimic the behavior originally provided by this method.
      *
      * @param fileName The filename; a pathname string.
      *
@@ -1474,8 +1476,8 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * The replacement method has identical functionality and a more descriptive name. Since <i>open</i> is used
-     * elsewhere to perform a different function this method has been deprecated.
+     * The replacement method has identical functionality and a more descriptive name. Since <i>open</i> is
+     * used elsewhere to perform a different function this method has been deprecated.
      *
      * @param pathname The pathname string.
      * @param access   The file access properties
@@ -1493,10 +1495,10 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * The replacement method has additional parameters: <code>maxdims, chunks,</code> and <code>gzip</code>. To mimic
-     * the behavior originally provided by this method, call the replacement method with the following parameter list:
-     * <code> ( name, pgroup, dims, null, null, -1,
-     * memberNames, memberDatatypes, memberSizes, data ); </code>
+     * The replacement method has additional parameters: <code>maxdims, chunks,</code> and <code>gzip</code>.
+     * To mimic the behavior originally provided by this method, call the replacement method with the
+     * following parameter list: <code> ( name, pgroup, dims, null, null, -1, memberNames, memberDatatypes,
+     * memberSizes, data ); </code>
      *
      * @param name            The dataset name.
      * @param pgroup          The dataset parent.
@@ -1511,7 +1513,8 @@ public abstract class FileFormat extends File {
      * @throws Exception if the dataset cannot be created
      *
      * @deprecated As of 2.4, replaced by
-     *             {@link #createCompoundDS(String, Group, long[], long[], long[], int, String[], Datatype[], int[], Object)}
+     *             {@link #createCompoundDS(String, Group, long[], long[], long[], int, String[], Datatype[],
+     * int[], Object)}
      */
     @Deprecated
     public final Dataset createCompoundDS(String name, Group pgroup, long[] dims, String[] memberNames,
@@ -1523,8 +1526,8 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * To mimic the behavior originally provided by this method, call the replacement method with <code>null</code> as
-     * the 3rd parameter.
+     * To mimic the behavior originally provided by this method, call the replacement method with
+     * <code>null</code> as the 3rd parameter.
      *
      * @param srcObj   The object to be copied
      * @param dstGroup The group to contain the copied object
@@ -1569,7 +1572,7 @@ public abstract class FileFormat extends File {
 
         String filename = null;
         String path     = null;
-        int idx = fullPath.indexOf(FILE_OBJ_SEP);
+        int idx         = fullPath.indexOf(FILE_OBJ_SEP);
 
         if (idx > 0) {
             filename = fullPath.substring(0, idx);
@@ -1590,10 +1593,10 @@ public abstract class FileFormat extends File {
      *
      * This static method, which as been deprecated, causes two problems:
      * <ul>
-     * <li>It can be very expensive if it is called many times or in a loop because each call to the method creates an
-     * instance of a file.
-     * <li>Since the method does not return the instance of the file, the file cannot be closed directly and may be left
-     * open (memory leak). The only way to close the file is through the object returned by this method, for example:
+     * <li>It can be very expensive if it is called many times or in a loop because each call to the method
+     * creates an instance of a file. <li>Since the method does not return the instance of the file, the file
+     * cannot be closed directly and may be left open (memory leak). The only way to close the file is through
+     * the object returned by this method, for example:
      *
      * <pre>
      * Dataset dset = H5File.getObject("hdf5_test.h5", "/images/iceburg");
@@ -1658,7 +1661,7 @@ public abstract class FileFormat extends File {
             return null;
         }
 
-        Iterator<HObject> memberIt = ((Group) theRoot).breadthFirstMemberList().iterator();
+        Iterator<HObject> memberIt = ((Group)theRoot).breadthFirstMemberList().iterator();
         while (memberIt.hasNext()) {
             theObj = memberIt.next();
             if (theObj.equalsOID(oid))
@@ -1699,10 +1702,10 @@ public abstract class FileFormat extends File {
             return theRoot;
         }
 
-        Iterator<HObject> memberIt = ((Group) theRoot).breadthFirstMemberList().iterator();
-        HObject theObj              = null;
+        Iterator<HObject> memberIt = ((Group)theRoot).breadthFirstMemberList().iterator();
+        HObject theObj             = null;
         while (memberIt.hasNext()) {
-            theObj = memberIt.next();
+            theObj          = memberIt.next();
             String fullPath = theObj.getFullName() + "/";
 
             if (path.equals(fullPath) && theObj.getPath() != null)

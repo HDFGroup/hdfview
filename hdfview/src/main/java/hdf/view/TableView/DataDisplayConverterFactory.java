@@ -137,9 +137,9 @@ public class DataDisplayConverterFactory {
         /**
          * the "container" type row index.
          *
-         * This field is only used for CompoundDataDisplayConverters, but when the top-level DisplayConverter is a
-         * "container" type, such as an ArrayDataDisplayConverter, we have to set this field and pass it through in case
-         * there is a CompoundDataDisplayConverter at the bottom of the chain.
+         * This field is only used for CompoundDataDisplayConverters, but when the top-level DisplayConverter
+         * is a "container" type, such as an ArrayDataDisplayConverter, we have to set this field and pass it
+         * through in case there is a CompoundDataDisplayConverter at the bottom of the chain.
          */
         protected int cellRowIdx;
         /** the "container" type column index. */

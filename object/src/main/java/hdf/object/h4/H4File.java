@@ -23,19 +23,18 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
-
 import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides file level APIs. File access APIs include retrieving the
@@ -842,8 +841,8 @@ public class H4File extends FileFormat {
     }
 
     /**
-     * Retrieves the tree structure of the file by depth-first order. The current implementation only retrieves groups
-     * and datasets. It does not include named datatypes and soft links.
+     * Retrieves the tree structure of the file by depth-first order. The current implementation only
+     * retrieves groups and datasets. It does not include named datatypes and soft links.
      *
      * @param parentObj the parent object.
      */
@@ -963,8 +962,8 @@ public class H4File extends FileFormat {
     }     // private depth_first()
 
     /**
-     * Returns a list of all the members of this H4File in a breadth-first ordering that are rooted at the specified
-     * object.
+     * Returns a list of all the members of this H4File in a breadth-first ordering that are rooted at the
+     * specified object.
      *
      * @param obj - the object to start from
      *
@@ -1975,7 +1974,7 @@ public class H4File extends FileFormat {
         }
 
         if (ref > 0) {
-            long[]  oid = { HDFConstants.DFTAG_VG, ref };
+            long[] oid = {HDFConstants.DFTAG_VG, ref};
             H4Group g  = new H4Group(this, objName[0], path, null, oid);
             depth_first(g);
             return g;

@@ -192,7 +192,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
     {
         String filename    = "tscalarstring.h5";
         String datasetname = "the_str";
-        String attrName   = "attr_str";
+        String attrName    = "attr_str";
         File hdf_file      = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
@@ -822,9 +822,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
     @Test
     public void openHDF5CompoundAttribute()
     {
-        String filename  = "tcmpdattrintsize.h5";
+        String filename = "tcmpdattrintsize.h5";
         String attrName = "CompoundAttrIntSize";
-        File hdf_file    = openFile(filename, FILE_MODE.READ_ONLY);
+        File hdf_file   = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree    = bot.tree();

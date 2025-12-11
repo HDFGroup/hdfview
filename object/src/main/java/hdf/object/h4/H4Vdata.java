@@ -324,12 +324,12 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
             }
 
             try {
-                HDFLibrary.VSread(id, memberData, (int) selectedDims[0], HDFConstants.FULL_INTERLACE);
+                HDFLibrary.VSread(id, memberData, (int)selectedDims[0], HDFConstants.FULL_INTERLACE);
                 if ((memberTIDs[i] == HDFConstants.DFNT_CHAR) ||
                     (memberTIDs[i] == HDFConstants.DFNT_UCHAR8)) {
                     // convert characters to string
                     log.trace("read(): convert characters to string");
-                    memberData = Dataset.byteToString((byte[]) memberData, memberOrders[i]);
+                    memberData = Dataset.byteToString((byte[])memberData, memberOrders[i]);
                     try {
                         memberTypes[i] = new H4Datatype(Datatype.CLASS_STRING, memberOrders[i],
                                                         Datatype.NATIVE, Datatype.NATIVE);

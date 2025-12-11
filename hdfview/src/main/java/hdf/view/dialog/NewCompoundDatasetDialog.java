@@ -106,8 +106,8 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
     private Text maxSizeField;
     private Text chunkSizeField;
 
-    private Combo  compressionLevel;
-    private Combo  rankChoice;
+    private Combo compressionLevel;
+    private Combo rankChoice;
     private Button checkCompression;
     private Button checkContiguous;
     private Button checkChunked;
@@ -259,13 +259,13 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
 
                 String compression = dset.getCompression();
                 if (compression != null) {
-                    int clevel   = -1;
+                    int clevel  = -1;
                     int comppos = Dataset.COMPRESSION_GZIP_TXT.length();
-                    int idx      = compression.indexOf(Dataset.COMPRESSION_GZIP_TXT);
+                    int idx     = compression.indexOf(Dataset.COMPRESSION_GZIP_TXT);
                     if (idx >= 0) {
                         try {
                             clevel =
-                                    Integer.parseInt(compression.substring(idx + comppos, idx + comppos + 1));
+                                Integer.parseInt(compression.substring(idx + comppos, idx + comppos + 1));
                         }
                         catch (NumberFormatException ex) {
                             clevel = -1;
@@ -665,7 +665,7 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
             @Override
             public void handleEvent(Event e)
             {
-                Table atable            = (Table)e.widget;
+                Table atable           = (Table)e.widget;
                 Rectangle area         = atable.getClientArea();
                 int columnCount        = atable.getColumnCount();
                 int totalGridLineWidth = (columnCount - 1) * atable.getGridLineWidth();
@@ -771,9 +771,9 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
     private HObject createCompoundDS() throws Exception
     {
         HObject obj = null;
-        long[]  dims;
-        long[]  maxdims;
-        long[]  chunks;
+        long[] dims;
+        long[] maxdims;
+        long[] chunks;
         int rank;
 
         maxdims = chunks = null;

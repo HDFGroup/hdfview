@@ -17,16 +17,12 @@ package hdf.object.h4;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import hdf.hdflib.HDFChunkInfo;
 import hdf.hdflib.HDFCompInfo;
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFDeflateCompInfo;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
-
 import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -35,6 +31,9 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * H4GRImage describes an HDF4 general raster(GR) image and operations performed on
@@ -152,12 +151,12 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
     public H4GRImage(FileFormat theFile, String name, String path, long[] oid)
     {
         super(theFile, name, path, oid);
-        palette = null;
-        isImage = true;
-        isImageDisplay = true;
+        palette           = null;
+        isImage           = true;
+        isImageDisplay    = true;
         unsignedConverted = false;
 
-        grid = ((H4File) getFileFormat()).getGRAccessID();
+        grid = ((H4File)getFileFormat()).getGRAccessID();
     }
 
     /*

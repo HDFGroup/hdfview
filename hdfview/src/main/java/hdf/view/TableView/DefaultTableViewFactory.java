@@ -137,7 +137,7 @@ public class DefaultTableViewFactory extends TableViewFactory {
                     ((DataFormat)dCopy).init();
 
                     int spaceType = ((DataFormat)dataObject).getSpaceType();
-                    int rank       = ((DataFormat)dataObject).getRank();
+                    int rank      = ((DataFormat)dataObject).getRank();
                     System.arraycopy(((DataFormat)dataObject).getDims(), 0, ((DataFormat)dCopy).getDims(), 0,
                                      rank);
                     System.arraycopy(((DataFormat)dataObject).getStartDims(), 0,

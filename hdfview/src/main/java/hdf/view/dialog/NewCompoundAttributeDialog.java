@@ -270,7 +270,7 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
             @Override
             public void handleEvent(Event e)
             {
-                Table atable            = (Table)e.widget;
+                Table atable           = (Table)e.widget;
                 Rectangle area         = atable.getClientArea();
                 int columnCount        = atable.getColumnCount();
                 int totalGridLineWidth = (columnCount - 1) * atable.getGridLineWidth();

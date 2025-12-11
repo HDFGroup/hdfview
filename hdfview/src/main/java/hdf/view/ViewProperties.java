@@ -1842,10 +1842,7 @@ public class ViewProperties extends PreferenceStore {
      *
      * @return the path of the HDFView users guide
      */
-    public static String getUsersGuide()
-    {
-        return usersGuide;
-    }
+    public static String getUsersGuide() { return usersGuide; }
 
     /**
      * Get the delimiter of data values.

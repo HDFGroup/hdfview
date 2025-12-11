@@ -381,8 +381,8 @@ public class NC2File extends FileFormat {
     }
 
     /**
-     * Retrieves the tree structure of the file by depth-first order. The current implementation only retrieves groups
-     * and datasets.
+     * Retrieves the tree structure of the file by depth-first order. The current implementation only
+     * retrieves groups and datasets.
      *
      * @param parentObj the parent object.
      */
@@ -397,8 +397,8 @@ public class NC2File extends FileFormat {
     } // private depth_first()
 
     /**
-     * Returns a list of all the members of this NetCDF3 in a breadth-first ordering that are rooted at the specified
-     * object.
+     * Returns a list of all the members of this NetCDF3 in a breadth-first ordering that are rooted at the
+     * specified object.
      *
      * @param obj - the start object
      *

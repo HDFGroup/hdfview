@@ -278,7 +278,7 @@ public final class Tools {
         byte[][] p = new byte[3][256];
 
         for (int i = 0; i < 256; i++) {
-            p[0][i] = (byte) (i);
+            p[0][i] = (byte)(i);
             p[1][i] = p[0][i];
             p[2][i] = p[0][i];
         }
@@ -301,7 +301,7 @@ public final class Tools {
         byte[][] p = new byte[3][256];
 
         for (int i = 0; i < 256; i++) {
-            p[0][i] = (byte) (255 - i);
+            p[0][i] = (byte)(255 - i);
             p[1][i] = p[0][i];
             p[2][i] = p[0][i];
         }
@@ -324,8 +324,7 @@ public final class Tools {
         byte[][] p = new byte[3][256];
 
         for (int i = 0; i < 256; i++) {
-            p[0][i] =
-                (byte)((double)255 / 2 + ((double)255 / 2) * Math.sin((i - 32) / 20.3));
+            p[0][i] = (byte)((double)255 / 2 + ((double)255 / 2) * Math.sin((i - 32) / 20.3));
             p[1][i] = p[0][i];
             p[2][i] = p[0][i];
         }
@@ -382,12 +381,12 @@ public final class Tools {
             p[2][i] = b;
         }
 
-        p[0][0] = 0;
-        p[1][0] = 0;
-        p[2][0] = 0;
-        p[0][255] = (byte) 255;
-        p[1][255] = (byte) 255;
-        p[2][255] = (byte) 255;
+        p[0][0]   = 0;
+        p[1][0]   = 0;
+        p[2][0]   = 0;
+        p[0][255] = (byte)255;
+        p[1][255] = (byte)255;
+        p[2][255] = (byte)255;
 
         return p;
     }
@@ -419,12 +418,12 @@ public final class Tools {
             p[2][i] = (byte)200;
         }
 
-        p[0][0] = 0;
-        p[1][0] = 0;
-        p[2][0] = 0;
-        p[0][255] = (byte) 255;
-        p[1][255] = (byte) 255;
-        p[2][255] = (byte) 255;
+        p[0][0]   = 0;
+        p[1][0]   = 0;
+        p[2][0]   = 0;
+        p[0][255] = (byte)255;
+        p[1][255] = (byte)255;
+        p[2][255] = (byte)255;
 
         return p;
     }
@@ -449,12 +448,12 @@ public final class Tools {
             p[2][i] = (byte)((1 - Math.sin(((double)i / 40 - 3.1))) * 128);
         }
 
-        p[0][0] = 0;
-        p[1][0] = 0;
-        p[2][0] = 0;
-        p[0][255] = (byte) 255;
-        p[1][255] = (byte) 255;
-        p[2][255] = (byte) 255;
+        p[0][0]   = 0;
+        p[1][0]   = 0;
+        p[2][0]   = 0;
+        p[0][255] = (byte)255;
+        p[1][255] = (byte)255;
+        p[2][255] = (byte)255;
 
         return p;
     }
@@ -537,8 +536,8 @@ public final class Tools {
                 tbl[idx][3] = b;
 
                 if (idx == 0) {
-                    maxV = v;
-                    minV = v;
+                    maxV     = v;
+                    minV     = v;
                     maxColor = r;
                     minColor = r;
                 }
@@ -611,7 +610,7 @@ public final class Tools {
                 }
                 i = j + 1;
             } // ((p[0][i] + p[1][i] + p[2][i]) == 0)
-        } // (i = 1; i < color256; i++)
+        }     // (i = 1; i < color256; i++)
 
         byte[][] pal = new byte[3][color256];
         for (i = 1; i < color256; i++) {
@@ -1652,8 +1651,8 @@ public final class Tools {
             break;
         case 'D':
             double[] d = (double[])data;
-            minmax[0] = d[0];
-            minmax[1] = d[0];
+            minmax[0]  = d[0];
+            minmax[1]  = d[0];
 
             if (hasFillValue)
                 fill = ((double[])fillValue)[0];
@@ -2433,7 +2432,7 @@ public final class Tools {
      */
     public static final String toHexString(long v, int nbytes)
     {
-        char[] hexCHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+        char[] hexCHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
         if (nbytes <= 0)
             return null;
@@ -2828,7 +2827,7 @@ public final class Tools {
 
     /**
      * look at the first 4 bytes of the file to see if it is a netCDF file.
-     * 
+     *
      * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1
      *
      * @param filename the file to test if netcdf

@@ -27,14 +27,14 @@ import hdf.view.TreeView.TreeView;
 public abstract interface DataViewManager {
     /**
      * Data content is displayed, add the dataview to the main windows.
-     * 
+     *
      * @param dataView the dataView whose presence in the main view is to be added.
      */
     public abstract void addDataView(DataView dataView);
 
     /**
      * Data content is closed, remove the dataview from the main window.
-     * 
+     *
      * @param dataView the dataView whose presence in the main view is to be removed.
      */
     public abstract void removeDataView(DataView dataView);

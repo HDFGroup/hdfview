@@ -144,8 +144,8 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * Constructs an named HDF5 data type object for a given file, dataset name, group path and object id. The datatype
-     * object represents an existing named datatype in file. For example,
+     * Constructs an named HDF5 data type object for a given file, dataset name, group path and object id. The
+     * datatype object represents an existing named datatype in file. For example,
      *
      * @param theFile the file that contains the datatype.
      * @param theName the name of the dataset such as "dset1".
@@ -2519,7 +2519,7 @@ public class H5Datatype extends Datatype {
         try {
             log.trace("descRegionDataset refarr2={}:", refarr);
             newObjID       = H5.H5Rdereference(container, HDF5Constants.H5P_DEFAULT,
-                                                 HDF5Constants.H5R_DATASET_REGION, refarr);
+                                               HDF5Constants.H5R_DATASET_REGION, refarr);
             long newObjSid = HDF5Constants.H5I_INVALID_HID;
             try {
                 log.trace("descRegionDataset refarr3={}:", refarr);
@@ -2527,12 +2527,12 @@ public class H5Datatype extends Datatype {
                 try {
                     int regionType = H5.H5Sget_select_type(newObjSid);
                     log.trace("descRegionDataset Reference Region Type {}", regionType);
-                    long regNDims   = H5.H5Sget_simple_extent_ndims(newObjSid);
+                    long regNDims    = H5.H5Sget_simple_extent_ndims(newObjSid);
                     StringBuilder sb = new StringBuilder();
                     if (HDF5Constants.H5S_SEL_POINTS == regionType) {
                         sb.append(" REGION_TYPE POINT ");
                         long regNPoints = H5.H5Sget_select_elem_npoints(newObjSid);
-                        long[] getCoord   = new long[(int) (regNDims * regNPoints)];
+                        long[] getCoord = new long[(int)(regNDims * regNPoints)];
                         try {
                             H5.H5Sget_select_elem_pointlist(newObjSid, 0, regNPoints, getCoord);
                         }
@@ -2556,8 +2556,8 @@ public class H5Datatype extends Datatype {
                     }
                     else if (HDF5Constants.H5S_SEL_HYPERSLABS == regionType) {
                         sb.append(" REGION_TYPE BLOCK ");
-                        long regNBlocks = H5.H5Sget_select_hyper_nblocks(newObjSid);
-                        long[] getBlocks  = new long[(int) (regNDims * regNBlocks) * 2];
+                        long regNBlocks  = H5.H5Sget_select_hyper_nblocks(newObjSid);
+                        long[] getBlocks = new long[(int)(regNDims * regNBlocks) * 2];
                         try {
                             H5.H5Sget_select_hyper_blocklist(newObjSid, 0, regNBlocks, getBlocks);
                         }
@@ -2620,7 +2620,7 @@ public class H5Datatype extends Datatype {
      */
     public static int typeObjectRef(long container, int objType, byte[] refarr)
     {
-        int  refType  = -1;
+        int refType   = -1;
         long newObjID = HDF5Constants.H5I_INVALID_HID;
         try {
             log.trace("typeObjectRef refarr2={}:", refarr);
@@ -2648,7 +2648,7 @@ public class H5Datatype extends Datatype {
             else {
                 H5O_info_t objInfo;
 
-                objInfo  = H5.H5Oget_info(newObjID);
+                objInfo = H5.H5Oget_info(newObjID);
                 refType = objInfo.type;
             }
             log.trace("typeObjectRef finish");

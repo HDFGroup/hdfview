@@ -42,25 +42,26 @@ import org.slf4j.LoggerFactory;
 /**
  * The H5CompoundAttr class defines an HDF5 attribute of compound datatypes.
  *
- * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group or named
- * datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group
+ * or named datatype.
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of one or more
- * atomic types or small arrays of such types. Each member of a compound type has a name which is unique within that
- * type, and a byte offset that determines the first byte (smallest byte address) of that member in a compound datum.
+ * A HDF5 compound datatype is similar to a struct in C or a common block in Fortran: it is a collection of
+ * one or more atomic types or small arrays of such types. Each member of a compound type has a name which is
+ * unique within that type, and a byte offset that determines the first byte (smallest byte address) of that
+ * member in a compound datum.
  *
  * For more information on HDF5 attributes and datatypes, read the
- * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in
- * HDF5 User Guide</a>
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5
+ * Attributes in HDF5 User Guide</a>
  *
- * There are two basic types of compound attributes: simple compound data and nested compound data. Members of a simple
- * compound attribute have atomic datatypes. Members of a nested compound attribute are compound or array of compound
- * data.
+ * There are two basic types of compound attributes: simple compound data and nested compound data. Members of
+ * a simple compound attribute have atomic datatypes. Members of a nested compound attribute are compound or
+ * array of compound data.
  *
- * Since Java does not understand C structures, we cannot directly read/write compound data values as in the following C
- * example.
+ * Since Java does not understand C structures, we cannot directly read/write compound data values as in the
+ * following C example.
  *
  * <pre>
  * typedef struct s1_t {
@@ -74,10 +75,10 @@ import org.slf4j.LoggerFactory;
  *     H5Dread(..., s1);
  * </pre>
  *
- * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by fields
- * instead of compound structure. As for the example above, the java.util.Vector object has three elements: int[LENGTH],
- * float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of int, float and double, we will be
- * able to read/write the compound data by field.
+ * Values of compound data fields are stored in java.util.Vector object. We read and write compound data by
+ * fields instead of compound structure. As for the example above, the java.util.Vector object has three
+ * elements: int[LENGTH], float[LENGTH] and double[LENGTH]. Since Java understands the primitive datatypes of
+ * int, float and double, we will be able to read/write the compound data by field.
  *
  * @version 1.0 6/15/2021
  * @author Allen Byrne
@@ -300,8 +301,8 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         aid = open();
         if (aid >= 0) {
             try {
-                sid        = H5.H5Aget_space(aid);
-                rank       = H5.H5Sget_simple_extent_ndims(sid);
+                sid       = H5.H5Aget_space(aid);
+                rank      = H5.H5Sget_simple_extent_ndims(sid);
                 spaceType = H5.H5Sget_simple_extent_type(sid);
                 if (spaceType == HDF5Constants.H5S_NULL)
                     isNULL = true;
@@ -947,13 +948,13 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
                               memberType.getDescription(), memberOffset);
 
                     try {
-                        int mtTypesize = (int) memberType.getDatatypeSize();
+                        int mtTypesize = (int)memberType.getDatatypeSize();
                         log.trace("compoundTypeIO(): member[{}] mt_typesize={}", i, mtTypesize);
                         byte[] memberbuf = new byte[nSelPoints * mtTypesize];
                         for (int dimindx = 0; dimindx < nSelPoints; dimindx++)
                             try {
                                 System.arraycopy(dataBuf, (int)memberOffset + dimindx * (int)parentLength,
-                                        memberbuf, dimindx * mtTypesize, mtTypesize);
+                                                 memberbuf, dimindx * mtTypesize, mtTypesize);
                             }
                             catch (Exception err) {
                                 log.trace("compoundTypeIO(): arraycopy failure: ", err);
@@ -1753,7 +1754,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
                     strValue = "null";
                 else {
                     if (dtype.getDatatypeBase().isRef()) {
-                        ArrayList<byte[]> refValue = (ArrayList<byte[]>) value;
+                        ArrayList<byte[]> refValue = (ArrayList<byte[]>)value;
                         log.trace("toString: vlen value={}", refValue);
                         strValue = "{";
                         for (int m = 0; m < refValue.size(); m++) {
@@ -1882,7 +1883,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
             try {
                 // Read data.
-                Object attrData = new byte[(int) (dtSize * lsize)];
+                Object attrData = new byte[(int)(dtSize * lsize)];
 
                 try {
                     H5.H5Aread(attrId, tid, attrData);
@@ -1890,7 +1891,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
                 catch (Exception ex) {
                     log.debug("attributeCommonIO(): H5Aread failure: ", ex);
                 }
-                theData = compoundTypeIO(dsDatatype, (int) lsize, dsDatatype, attrData, new int[] { 0 });
+                theData = compoundTypeIO(dsDatatype, (int)lsize, dsDatatype, attrData, new int[] {0});
             }
             catch (Exception ex) {
                 log.debug("attributeCommonIO():read ioType read failure: ", ex);

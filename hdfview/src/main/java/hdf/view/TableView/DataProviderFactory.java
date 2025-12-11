@@ -1461,7 +1461,7 @@ public class DataProviderFactory {
 
             for (int i = 0; i < vlSize; i++) {
                 ArrayList<byte[]> refValue = vlElements;
-                StringBuilder sb            = new StringBuilder();
+                StringBuilder sb           = new StringBuilder();
                 sb.append("{");
                 for (int m = 0; m < refValue.size(); m++) {
                     if (m > 0)
@@ -1488,7 +1488,7 @@ public class DataProviderFactory {
 
             for (int i = 0; i < vlSize; i++) {
                 ArrayList<byte[]> refValue = vlElements;
-                StringBuilder sb            = new StringBuilder();
+                StringBuilder sb           = new StringBuilder();
                 sb.append("{");
                 for (int m = 0; m < refValue.size(); m++) {
                     if (m > 0)
@@ -1642,7 +1642,7 @@ public class DataProviderFactory {
                 baseTypeDataProvider.setDataValue(columnIndex, i, abuffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
-            vlElements = new ArrayList<>(Arrays.asList(abuffer));
+            vlElements                      = new ArrayList<>(Arrays.asList(abuffer));
             ((ArrayList[])curBuf)[rowIndex] = vlElements;
         }
 
@@ -2288,7 +2288,7 @@ public class DataProviderFactory {
 
             StringTokenizer st = new StringTokenizer((String)newValue, "+i");
             int newcnt         = st.countTokens();
-            Object[]        abuffer = new Double[newcnt];
+            Object[] abuffer   = new Double[newcnt];
             for (int i = 0; i < newcnt; i++) {
                 baseTypeDataProvider.setDataValue(i, abuffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();

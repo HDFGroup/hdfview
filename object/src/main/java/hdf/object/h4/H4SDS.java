@@ -902,8 +902,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer {
         for (int i = 0; i < rank; i++) {
             startDims[i]    = 0;
             selectedDims[i] = 1;
-            dims[i] = idims[i];
-            maxDims[i] = idims[i];
+            dims[i]         = idims[i];
+            maxDims[i]      = idims[i];
         }
 
         if (isUnlimited)

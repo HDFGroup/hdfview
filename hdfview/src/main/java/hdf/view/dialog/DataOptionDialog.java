@@ -1142,7 +1142,7 @@ public class DataOptionDialog extends Dialog {
 
         int h = 1;
         int w = 1;
-        h = (int)dims[selectedIndex[0]];
+        h     = (int)dims[selectedIndex[0]];
         if (rank > 1) {
             w = (int)dims[selectedIndex[1]];
         }
@@ -1572,8 +1572,8 @@ public class DataOptionDialog extends Dialog {
                 transposeChoice.setEnabled(true);
 
             long[] tdims = dataObject.getDims();
-            int    w     = (int) tdims[wIdx];
-            int    h     = (int) tdims[hIdx];
+            int w        = (int)tdims[wIdx];
+            int h        = (int)tdims[hIdx];
 
             if (navigator != null) {
                 navigator.setDimensionSize(w, h);
@@ -1592,10 +1592,10 @@ public class DataOptionDialog extends Dialog {
      */
     private class PreviewNavigator extends Canvas {
         private final int NAVIGATOR_SIZE = 150;
-        private int       dimX;
-        private int       dimY;
-        private int       x;
-        private int       y;
+        private int dimX;
+        private int dimY;
+        private int x;
+        private int y;
         private double r;
         private Point startPosition; // mouse clicked position
         private Rectangle selectedArea;
@@ -1769,8 +1769,8 @@ public class DataOptionDialog extends Dialog {
             long steps                 = (long)Math.ceil(r);
             selected[selectedIndex[0]] = (dims[selectedIndex[0]] / steps);
             selected[selectedIndex[1]] = (dims[selectedIndex[1]] / steps);
-            stride[selectedIndex[0]] = steps;
-            stride[selectedIndex[1]] = steps;
+            stride[selectedIndex[0]]   = steps;
+            stride[selectedIndex[1]]   = steps;
 
             if (selected[selectedIndex[0]] == 0) {
                 selected[selectedIndex[0]] = 1;
@@ -1955,7 +1955,7 @@ public class DataOptionDialog extends Dialog {
 
                 for (int yIdx = 0; yIdx < data.height; yIdx++) {
                     for (int xIdx = 0; xIdx < data.width; xIdx++) {
-                        int rgb   = image.getRGB(xIdx, yIdx);
+                        int rgb = image.getRGB(xIdx, yIdx);
                         int pixel =
                             palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
                         data.setPixel(xIdx, yIdx, pixel);

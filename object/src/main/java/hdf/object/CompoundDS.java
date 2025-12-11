@@ -27,16 +27,17 @@ import org.slf4j.LoggerFactory;
 /**
  * A CompoundDS is a dataset with compound datatype.
  *
- * A compound datatype is an aggregation of one or more datatypes. Each member of a compound type has a name which is
- * unique within that type, and a datatype of that member in a compound datum. Compound datatypes can be nested, i.e.
- * members of a compound datatype can be some other compound datatype.
+ * A compound datatype is an aggregation of one or more datatypes. Each member of a compound type has a name
+ * which is unique within that type, and a datatype of that member in a compound datum. Compound datatypes can
+ * be nested, i.e. members of a compound datatype can be some other compound datatype.
  *
  * For more details on compound datatypes, See
- * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5
- * User Guide</a>
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5
+ * Datatypes in HDF5 User Guide</a>
  *
- * Since Java cannot handle C-structured compound data, data in a compound dataset is loaded in to an Java List. Each
- * element of the list is a data array that corresponds to a compound field. The data is read/written by compound field.
+ * Since Java cannot handle C-structured compound data, data in a compound dataset is loaded in to an Java
+ * List. Each element of the list is a data array that corresponds to a compound field. The data is
+ * read/written by compound field.
  *
  * For example, if compound dataset "comp" has the following nested structure, and member datatypes
  *

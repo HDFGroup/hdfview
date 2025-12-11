@@ -41,7 +41,6 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
-
 import hdf.view.DataView.DataView;
 import hdf.view.DataView.DataViewFactory;
 import hdf.view.DataView.DataViewFactoryProducer;
@@ -67,7 +66,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.eclipse.swt.SWT;
-
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -80,15 +78,12 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -1289,8 +1284,8 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Creates a dialog for the user to select a type of new object to be added to the TreeView, then passes the result
-     * of the dialog on to addObject(HObject newObject, Group parentGroup).
+     * Creates a dialog for the user to select a type of new object to be added to the TreeView, then passes
+     * the result of the dialog on to addObject(HObject newObject, Group parentGroup).
      *
      * @param type The type (GROUP, DATASET, IMAGE, TABLE, DATATYPE, LINK) of object to add.
      */
@@ -1759,8 +1754,9 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Populates the TreeView with TreeItems corresponding to the top-level user objects in the specified file. The rest
-     * of the user objects in the file are populated as TreeItems on demand when the user expands groups.
+     * Populates the TreeView with TreeItems corresponding to the top-level user objects in the specified
+     * file. The rest of the user objects in the file are populated as TreeItems on demand when the user
+     * expands groups.
      *
      * @param theFile - the specified file.
      *
@@ -2012,8 +2008,8 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Returns a list that lists all TreeItems in the current Tree that are children of the specified TreeItem in a
-     * breadth-first manner.
+     * Returns a list that lists all TreeItems in the current Tree that are children of the specified TreeItem
+     * in a breadth-first manner.
      *
      * @param item - the current Tree item
      *
@@ -2049,7 +2045,8 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Returns a list of all user objects that traverses the subtree rooted at this item in breadth-first order.
+     * Returns a list of all user objects that traverses the subtree rooted at this item in breadth-first
+     * order.
      *
      * @param item - the item to start with.
      *
@@ -2148,8 +2145,8 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Save the current file into a new HDF4 file. Since HDF4 does not support packing, the source file is copied into
-     * the new file with the exact same content.
+     * Save the current file into a new HDF4 file. Since HDF4 does not support packing, the source file is
+     * copied into the new file with the exact same content.
      *
      * @param srcFile - the current file
      */
@@ -2253,8 +2250,8 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Copy the current file into a new HDF5 file. The new file does not include the inaccessible objects. Values of
-     * reference dataset are not updated in the new file.
+     * Copy the current file into a new HDF5 file. The new file does not include the inaccessible objects.
+     * Values of reference dataset are not updated in the new file.
      *
      * @param srcFile - the current file
      */
