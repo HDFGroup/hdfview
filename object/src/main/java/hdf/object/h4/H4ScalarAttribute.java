@@ -222,9 +222,10 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
                     log.trace("open(): FILE_TYPE_HDF4");
                     /*
                      * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute retrieval for scalar types.
-                     * Need to determine parent object type (GR, SDS, Vdata) and use appropriate HDFLibrary calls.
-                     * May be limited by HDF4 library capabilities - investigate if full implementation possible.
-                     * Related: H4CompoundAttribute.java line 228 has same stub for compound attributes.
+                     * Need to determine parent object type (GR, SDS, Vdata) and use appropriate HDFLibrary
+                     * calls. May be limited by HDF4 library capabilities - investigate if full implementation
+                     * possible. Related: H4CompoundAttribute.java line 228 has same stub for compound
+                     * attributes.
                      */
                 }
             }

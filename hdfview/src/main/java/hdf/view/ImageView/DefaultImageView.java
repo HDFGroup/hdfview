@@ -3815,7 +3815,7 @@ public class DefaultImageView implements ImageView {
         final DecimalFormat numberFormat = new DecimalFormat("#.##E0");
 
         DataRangeDialog(Shell parent, int style, double[] minmaxCurrent, double[] minmaxOriginal,
-                               final int[] dataDist)
+                        final int[] dataDist)
         {
 
             super(parent, style);

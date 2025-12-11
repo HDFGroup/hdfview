@@ -80,7 +80,7 @@ public class DataProviderFactory {
     }
 
     private static HDFDataProvider getDataProvider(final Datatype dtype, final Object dataBuf,
-                                                         final boolean dataTransposed) throws Exception
+                                                   final boolean dataTransposed) throws Exception
     {
         HDFDataProvider dataProvider = null;
         log.trace("getDataProvider(): Datatype is {}", dtype.getDescription());
@@ -732,8 +732,9 @@ public class DataProviderFactory {
                      * TODO(HDFView) [2025-12]: Replace temporary fix with robust compound-of-array handling.
                      * Current index transformation is a quick workaround for specific file structures.
                      * Need generalized solution for nested compound and array combinations.
-                     * Verify correctness across various nesting patterns: array[compound], compound[array[compound]], etc.
-                     * High priority - temporary fixes tend to break with edge cases.
+                     * Verify correctness across various nesting patterns: array[compound],
+                     * compound[array[compound]], etc. High priority - temporary fixes tend to break with edge
+                     * cases.
                      */
                     int arrCompoundStartIdx = columnIndex;
                     HDFDataProvider theProvider;
@@ -1093,8 +1094,8 @@ public class DataProviderFactory {
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
                     /*
                      * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache.
-                     * Currently retrieves array elements on each call - may benefit from caching in arrayElements.
-                     * Evaluate performance impact for large arrays before implementing.
+                     * Currently retrieves array elements on each call - may benefit from caching in
+                     * arrayElements. Evaluate performance impact for large arrays before implementing.
                      * Related: Lines 1095, 1101, 1370, 1376, 1382, 1388 have same caching consideration.
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
@@ -1380,33 +1381,35 @@ public class DataProviderFactory {
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
                     /*
-                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (array context).
-                     * Currently retrieves array-of-array elements on each call - caching may improve performance.
-                     * Related: Lines 1095, 1101, 1390, 1396, 1402 have same caching opportunity.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (array
+                     * context). Currently retrieves array-of-array elements on each call - caching may
+                     * improve performance. Related: Lines 1095, 1101, 1390, 1396, 1402 have same caching
+                     * opportunity.
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else if (baseTypeDataProvider instanceof RefDataProvider) {
                     /*
-                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (reference context).
-                     * Currently retrieves reference array elements on each call - caching may improve performance.
-                     * Related: Similar pattern for other base type providers.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache
+                     * (reference context). Currently retrieves reference array elements on each call -
+                     * caching may improve performance. Related: Similar pattern for other base type
+                     * providers.
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else if (baseTypeDataProvider instanceof ComplexDataProvider) {
                     /*
-                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (complex context).
-                     * Currently retrieves complex array elements on each call - caching may improve performance.
-                     * Related: Line 1104 for similar complex element retrieval.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache
+                     * (complex context). Currently retrieves complex array elements on each call - caching
+                     * may improve performance. Related: Line 1104 for similar complex element retrieval.
                      */
                     theValue = retrieveArrayOfComplexElements(dataBuf, columnIndex, bufIndex);
                 }
                 else {
                     /*
-                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (atomic context).
-                     * Currently retrieves atomic array elements on each call - likely already fast enough.
-                     * Low priority - simple atomic retrieval doesn't benefit much from caching.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (atomic
+                     * context). Currently retrieves atomic array elements on each call - likely already fast
+                     * enough. Low priority - simple atomic retrieval doesn't benefit much from caching.
                      */
                     theValue = retrieveArrayOfAtomicElements(dataBuf, bufIndex);
                 }

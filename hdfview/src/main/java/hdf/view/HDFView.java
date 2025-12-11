@@ -931,10 +931,10 @@ public class HDFView implements DataViewManager {
                 // Open the dialog
                 userOptionDialog.open();
 
-                // TODO(HDFView) [2025-12]: Fix work directory change detection - isWorkDirChanged() not properly exposed.
-                // Currently unconditionally overwrites currentDir after user options dialog closes.
-                // Should only update if user actually changed the working directory setting.
-                // Need to properly expose isWorkDirChanged() method or add public getter to UserOptionsDialog.
+                // TODO(HDFView) [2025-12]: Fix work directory change detection - isWorkDirChanged() not
+                // properly exposed. Currently unconditionally overwrites currentDir after user options dialog
+                // closes. Should only update if user actually changed the working directory setting. Need to
+                // properly expose isWorkDirChanged() method or add public getter to UserOptionsDialog.
                 // Impact: Unnecessary directory updates may confuse users or cause unexpected behavior.
                 // correctly. if (userOptionDialog.isWorkDirChanged()) this will always overwrite the
                 // currentDir until isWorkDirChanged() is fixed
@@ -2473,10 +2473,7 @@ public class HDFView implements DataViewManager {
     }
 
     private class SupportedFileFormatsDialog extends Dialog {
-        SupportedFileFormatsDialog(Shell parent)
-        {
-            super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-        }
+        SupportedFileFormatsDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
 
         public void open()
         {
@@ -2844,10 +2841,10 @@ public class HDFView implements DataViewManager {
             {
                 HDFView app = new HDFView(theRootDir, theStartDir);
 
-                // TODO(HDFView) [2025-12]: Investigate better solution for native dialog compatibility issues.
-                // Current workaround may not be optimal for cross-platform native file/directory dialogs.
-                // Consider SWT dialog improvements or alternative dialog libraries for better platform integration.
-                // Medium priority - affects user experience on certain platforms.
+                // TODO(HDFView) [2025-12]: Investigate better solution for native dialog compatibility
+                // issues. Current workaround may not be optimal for cross-platform native file/directory
+                // dialogs. Consider SWT dialog improvements or alternative dialog libraries for better
+                // platform integration. Medium priority - affects user experience on certain platforms.
                 app.setTestState(false);
 
                 app.openMainWindow(theFileList, theW, theH, theX, theY);

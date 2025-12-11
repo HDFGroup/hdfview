@@ -225,10 +225,11 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
                 if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                     log.trace("open(): FILE_TYPE_HDF4");
                     /*
-                     * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute retrieval for compound types.
-                     * Need to determine parent object type (GR, SDS, Vdata) and use appropriate HDFLibrary calls.
-                     * May be limited by HDF4 library capabilities - investigate if full implementation possible.
-                     * Related: H4ScalarAttribute.java line 224 has same stub for scalar attributes.
+                     * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute retrieval for compound
+                     * types. Need to determine parent object type (GR, SDS, Vdata) and use appropriate
+                     * HDFLibrary calls. May be limited by HDF4 library capabilities - investigate if full
+                     * implementation possible. Related: H4ScalarAttribute.java line 224 has same stub for
+                     * scalar attributes.
                      */
                 }
             }
@@ -279,8 +280,8 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
         if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             log.trace("init(): FILE_TYPE_HDF4");
             /*
-             * TODO(HDFView) [2025-12]: Determine if HDF4 compound attributes require dependency initialization.
-             * May need to initialize datatype or parent object references before first use.
+             * TODO(HDFView) [2025-12]: Determine if HDF4 compound attributes require dependency
+             * initialization. May need to initialize datatype or parent object references before first use.
              * Currently assumes no initialization needed - verify with HDF4 spec.
              * Related: H4ScalarAttribute.java line 272 for scalar attributes.
              */

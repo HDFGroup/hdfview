@@ -1425,11 +1425,11 @@ public abstract class DefaultBaseTableView implements TableView {
             dataValue = dataObject.getData();
 
             /*
-             * TODO(HDFView) [2025-12]: Implement unsigned-to-signed conversion for table view display of CompoundDS.
-             * Currently compound datasets skip unsigned conversion, causing negative values to appear for unsigned data.
-             * Display layer should handle conversion even if data layer doesn't (see Dataset.java line 738).
-             * May need display-only conversion without modifying underlying data.
-             * Related: Dataset.java line 738 for data-layer conversion logic.
+             * TODO(HDFView) [2025-12]: Implement unsigned-to-signed conversion for table view display of
+             * CompoundDS. Currently compound datasets skip unsigned conversion, causing negative values to
+             * appear for unsigned data. Display layer should handle conversion even if data layer doesn't
+             * (see Dataset.java line 738). May need display-only conversion without modifying underlying
+             * data. Related: Dataset.java line 738 for data-layer conversion logic.
              */
             if (!(dataObject instanceof CompoundDS))
                 dataObject.convertFromUnsignedC();

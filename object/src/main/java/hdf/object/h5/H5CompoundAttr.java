@@ -1044,9 +1044,9 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         }
         else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
             /*
-             * TODO(HDFView) [2025-12]: Implement true variable-length type support for compound attribute writes.
-             * Currently uses placeholder data for non-string variable-length fields.
-             * Related: See read path (line 873) and H5Datatype.java for coordinated fix.
+             * TODO(HDFView) [2025-12]: Implement true variable-length type support for compound attribute
+             * writes. Currently uses placeholder data for non-string variable-length fields. Related: See
+             * read path (line 873) and H5Datatype.java for coordinated fix.
              */
             String errVal = new String("*UNSUPPORTED*");
 
@@ -1119,10 +1119,10 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
                     try {
                         /*
-                         * TODO(HDFView) [2025-12]: Fix compound attribute write when subset of members selected.
-                         * Current member indexing doesn't account for unselected members, causing misalignment.
-                         * Need to map selected member index to actual position in compound type structure.
-                         * Related: Similar issue in H5CompoundDS.java line 1116.
+                         * TODO(HDFView) [2025-12]: Fix compound attribute write when subset of members
+                         * selected. Current member indexing doesn't account for unselected members, causing
+                         * misalignment. Need to map selected member index to actual position in compound type
+                         * structure. Related: Similar issue in H5CompoundDS.java line 1116.
                          */
                         memberData = ((List<?>)dataBuf).get(i);
                     }
@@ -1294,10 +1294,11 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         }
         else if (dtype.isCompound()) {
             /*
-             * TODO(HDFView) [2025-12]: Verify compound member byte conversion logic after read path refactoring.
-             * This code may need validation to ensure it still correctly handles compound member conversion.
-             * Check that nested compounds, variable-length members, and array members convert properly.
-             * Related: CompoundDS.java:615 has similar validation concern for compound byte conversion.
+             * TODO(HDFView) [2025-12]: Verify compound member byte conversion logic after read path
+             * refactoring. This code may need validation to ensure it still correctly handles compound member
+             * conversion. Check that nested compounds, variable-length members, and array members convert
+             * properly. Related: CompoundDS.java:615 has similar validation concern for compound byte
+             * conversion.
              */
             byteData = convertCompoundMemberBytes(dtype, (List<Object>)theObj);
         }

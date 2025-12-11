@@ -1116,10 +1116,11 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
 
                         try {
                             /*
-                             * TODO(HDFView) [2025-12]: Fix compound dataset write when subset of members selected.
-                             * Current member indexing doesn't account for unselected members, causing data misalignment.
-                             * Need to map selected member index to actual position in compound type structure.
-                             * Related: Same issue in H5CompoundAttr.java line 1122 - needs coordinated fix.
+                             * TODO(HDFView) [2025-12]: Fix compound dataset write when subset of members
+                             * selected. Current member indexing doesn't account for unselected members,
+                             * causing data misalignment. Need to map selected member index to actual position
+                             * in compound type structure. Related: Same issue in H5CompoundAttr.java line
+                             * 1122 - needs coordinated fix.
                              */
                             memberData = ((List<?>)writeBuf).get(writeListIndex++);
                             log.trace("  Retrieved memberData from writeBuf[{}] (now writeListIndex={})",

@@ -47,9 +47,8 @@ public final class H5Utils {
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
-    public static long selectHyperslab(long did, long[] dsetDims, long[] startDims,
-                                       long[] selectedStride, long[] selectedDims, long[] spaceIDs)
-        throws HDF5Exception
+    public static long selectHyperslab(long did, long[] dsetDims, long[] startDims, long[] selectedStride,
+                                       long[] selectedDims, long[] spaceIDs) throws HDF5Exception
     {
         if (dsetDims == null) {
             log.debug("selectHyperslab(): dsetDims is null");

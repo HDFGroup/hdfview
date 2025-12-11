@@ -224,9 +224,10 @@ public class NC2Attribute extends ScalarDS implements Attribute {
                     log.trace("open(): FILE_TYPE_NC3");
                     /*
                      * TODO(HDFView) [2025-12]: Implement NetCDF3-specific attribute retrieval.
-                     * Need to determine parent object type (variable, dimension, global) and use appropriate NetCDF library calls.
-                     * May be limited by NetCDF3 library capabilities - investigate if full implementation possible.
-                     * Related: Similar pattern to H4ScalarAttribute.java line 224, H4CompoundAttribute.java line 228.
+                     * Need to determine parent object type (variable, dimension, global) and use appropriate
+                     * NetCDF library calls. May be limited by NetCDF3 library capabilities - investigate if
+                     * full implementation possible. Related: Similar pattern to H4ScalarAttribute.java line
+                     * 224, H4CompoundAttribute.java line 228.
                      */
                 }
             }

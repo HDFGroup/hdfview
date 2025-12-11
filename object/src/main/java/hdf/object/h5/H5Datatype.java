@@ -2771,10 +2771,11 @@ public class H5Datatype extends Datatype {
                  * the nested compound.
                  */
                 /*
-                 * TODO(HDFView) [2025-12]: Don't flatten variable-length compound members once vlen support implemented.
-                 * Currently variable-length types are intentionally excluded from compound flattening (see commented condition).
-                 * When true vlen support is added, uncomment the condition to include non-string vlen types in extraction.
-                 * Related: H5CompoundAttr line 873, H5CompoundDS line 946 - coordinate vlen implementation across all three.
+                 * TODO(HDFView) [2025-12]: Don't flatten variable-length compound members once vlen support
+                 * implemented. Currently variable-length types are intentionally excluded from compound
+                 * flattening (see commented condition). When true vlen support is added, uncomment the
+                 * condition to include non-string vlen types in extraction. Related: H5CompoundAttr line 873,
+                 * H5CompoundDS line 946 - coordinate vlen implementation across all three.
                  */
                 if (mtype.isArray() /* || (mtype.isVLEN() && !mtype.isVarStr()) */) {
                     H5Datatype.extractCompoundInfo((H5Datatype)mtype, mname + CompoundDS.SEPARATOR, names,
