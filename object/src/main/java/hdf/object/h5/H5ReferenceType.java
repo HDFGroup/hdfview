@@ -17,12 +17,7 @@ package hdf.object.h5;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 import java.util.regex.Pattern;
 
 import hdf.object.Datatype;
@@ -53,7 +48,7 @@ public class H5ReferenceType extends H5Datatype {
     /** Flag to indicate if data values are loaded into memory. */
     protected boolean isDataLoaded = false;
 
-    /** Flag to indicate if this dataset has been initialized */
+    /** Flag to indicate if this dataset has been initialized. */
     protected boolean inited = false;
 
     /** The current array size of the reference. */
@@ -89,17 +84,15 @@ public class H5ReferenceType extends H5Datatype {
     }
 
     /**
+     * Constructs a H5ReferenceType with specified class, size, byte order and sign.
+     *
+     * @param theFile the file that contains the datatype.
+     * @param theName the name of the dataset such as "dset1".
+     * @param thePath the group path to the dataset such as "/g0/".
+     * @param oid     the oid of the dataset.
+     *
      * @deprecated Not for public use in the future. <br>
      *             Using {@link #H5ReferenceType(FileFormat, String, String)}
-     *
-     * @param theFile
-     *            the file that contains the datatype.
-     * @param theName
-     *            the name of the dataset such as "dset1".
-     * @param thePath
-     *            the group path to the dataset such as "/g0/".
-     * @param oid
-     *            the oid of the dataset.
      */
     @Deprecated
     public H5ReferenceType(FileFormat theFile, String theName, String thePath, long[] oid)
@@ -259,7 +252,7 @@ public class H5ReferenceType extends H5Datatype {
     }
 
     /**
-     * The status of initialization for this object
+     * The status of initialization for this object.
      *
      * @return true if the data has been initialized
      */
@@ -377,14 +370,12 @@ public class H5ReferenceType extends H5Datatype {
     /**
      * Sets the array size of the reference.
      *
-     * @param current_size
-     *        the array size of the current reference.
+     * @param currentSize the array size of the current reference.
      */
-    public final void setRefSize(long current_size) { refsize = current_size; }
-    //    public byte[] getOriginalrData() {
-    //        if (isDataLoaded)
-    //            return originalRefBuf;
-    //    }
+    public final void setRefSize(long currentSize)
+    {
+        refsize = currentSize;
+    }
 
     /**
      * Retrieves reference information from file into memory.
@@ -399,41 +390,41 @@ public class H5ReferenceType extends H5Datatype {
         log.trace("init(): refsize={}", refsize);
         for (int i = 0; i < (int)refsize; i++) {
             H5ReferenceData rf = refdata.get(i);
-            log.trace("init(): rf.ref_array={}", rf.ref_array);
+            log.trace("init(): rf.refArray={}", rf.refArray);
             byte[] refarr = new byte[(int)datatypeSize];
-            System.arraycopy(rf.ref_array, 0, refarr, 0, (int)datatypeSize);
+            System.arraycopy(rf.refArray, 0, refarr, 0, (int)datatypeSize);
 
             if (zeroArrayCheck(refarr)) {
                 log.trace("init(): refarr is zero");
-                rf.file_fullpath = "NULL";
-                rf.file_name     = "NULL";
-                rf.obj_name      = "NULL";
-                rf.attr_name     = "NULL";
-                rf.region_type   = "NULL";
-                rf.region_desc   = "NULL";
+                rf.fileFullPath = "NULL";
+                rf.fileName     = "NULL";
+                rf.objName      = "NULL";
+                rf.attrName     = "NULL";
+                rf.regionType   = "NULL";
+                rf.regionDesc   = "NULL";
             }
             else {
                 log.trace("init(): refarr={}", refarr);
                 try {
-                    rf.file_fullpath = "NULL";
-                    rf.file_name     = "NULL";
-                    rf.obj_name      = "NULL";
-                    rf.attr_name     = "NULL";
+                    rf.fileFullPath = "NULL";
+                    rf.fileName     = "NULL";
+                    rf.objName      = "NULL";
+                    rf.attrName     = "NULL";
                     if (isStdRef()) {
                         try {
-                            rf.file_fullpath = H5.H5Rget_file_name(refarr);
-                            log.trace("Reference Full File Path {}", rf.file_fullpath);
-                            String[] split = rf.file_fullpath.split(Pattern.quote("/"));
-                            rf.file_name   = split[split.length - 1];
-                            log.trace("Reference File Name {}", rf.file_name);
-                            rf.obj_name = H5.H5Rget_obj_name(refarr, HDF5Constants.H5P_DEFAULT);
-                            log.trace("Reference Object Name {}", rf.obj_name);
+                            rf.fileFullPath = H5.H5Rget_file_name(refarr);
+                            log.trace("Reference Full File Path {}", rf.fileFullPath);
+                            String[] split = rf.fileFullPath.split(Pattern.quote("/"));
+                            rf.fileName   = split[split.length - 1];
+                            log.trace("Reference File Name {}", rf.fileName);
+                            rf.objName = H5.H5Rget_obj_name(refarr, HDF5Constants.H5P_DEFAULT);
+                            log.trace("Reference Object Name {}", rf.objName);
 
                             if (H5.H5Rget_type(refarr) == HDF5Constants.H5R_ATTR)
-                                rf.attr_name = H5.H5Rget_attr_name(refarr);
+                                rf.attrName = H5.H5Rget_attr_name(refarr);
                             else
-                                rf.attr_name = "NULL";
-                            log.trace("Reference Attribute Name {}", rf.attr_name);
+                                rf.attrName = "NULL";
+                            log.trace("Reference Attribute Name {}", rf.attrName);
                         }
                         catch (Exception ex) {
                             log.debug("Reference H5Rget_*_name", ex);
@@ -441,7 +432,7 @@ public class H5ReferenceType extends H5Datatype {
                     }
                     else if (isRegRef()) {
                         try {
-                            rf.obj_name =
+                            rf.objName =
                                 H5.H5Rget_name_string(getFID(), HDF5Constants.H5R_DATASET_REGION, refarr);
                         }
                         catch (Exception ex) {
@@ -450,7 +441,7 @@ public class H5ReferenceType extends H5Datatype {
                     }
                     else {
                         try {
-                            rf.obj_name = H5.H5Rget_name_string(getFID(), HDF5Constants.H5R_OBJECT, refarr);
+                            rf.objName = H5.H5Rget_name_string(getFID(), HDF5Constants.H5R_OBJECT, refarr);
                         }
                         catch (Exception ex) {
                             log.debug("Reference H5Rget_*_name", ex);
@@ -466,9 +457,9 @@ public class H5ReferenceType extends H5Datatype {
         if (isStdRef()) {
             for (int i = 0; i < (int)refsize; i++) {
                 H5ReferenceData rf = refdata.get(i);
-                log.trace("init(): H5Rdestroy {}", rf.ref_array);
+                log.trace("init(): H5Rdestroy {}", rf.refArray);
                 byte[] refarr = new byte[(int)datatypeSize];
-                System.arraycopy(rf.ref_array, 0, refarr, 0, (int)datatypeSize);
+                System.arraycopy(rf.refArray, 0, refarr, 0, (int)datatypeSize);
                 H5.H5Rdestroy(refarr);
             }
         }
@@ -479,99 +470,99 @@ public class H5ReferenceType extends H5Datatype {
     private void initReferenceRegion(int refndx, byte[] refarr, boolean showData)
     {
         H5ReferenceData rf = refdata.get(refndx);
-        rf.ref_type        = HDF5Constants.H5R_BADTYPE;
-        rf.obj_type        = HDF5Constants.H5O_TYPE_UNKNOWN;
-        rf.region_type     = "NULL";
-        rf.region_desc     = "NULL";
+        rf.refType = HDF5Constants.H5R_BADTYPE;
+        rf.objType        = HDF5Constants.H5O_TYPE_UNKNOWN;
+        rf.regionType     = "NULL";
+        rf.regionDesc     = "NULL";
         log.trace("initReferenceRegion start not null");
         if (isStdRef()) {
             try {
-                rf.ref_type = (int)H5.H5Rget_type(refarr);
-                log.debug("initReferenceRegion ref_type={}", rf.ref_type);
+                rf.refType = (int)H5.H5Rget_type(refarr);
+                log.debug("initReferenceRegion refType={}", rf.refType);
                 try {
-                    rf.obj_type = H5.H5Rget_obj_type3(refarr, HDF5Constants.H5P_DEFAULT);
-                    log.debug("initReferenceRegion obj_type={}", rf.obj_type);
+                    rf.objType = H5.H5Rget_obj_type3(refarr, HDF5Constants.H5P_DEFAULT);
+                    log.debug("initReferenceRegion objType={}", rf.objType);
                 }
                 catch (Exception ex2) {
-                    log.debug("initReferenceRegion H5Rget_obj_type3", ex2);
+                    log.debug("initReferenceRegion H5Rget_objType3", ex2);
                 }
             }
             catch (Exception ex1) {
                 log.debug("initReferenceRegion H5Rget_type", ex1);
             }
 
-            if (rf.ref_type > HDF5Constants.H5R_BADTYPE) {
-                if (rf.ref_type == HDF5Constants.H5R_OBJECT1) {
+            if (rf.refType > HDF5Constants.H5R_BADTYPE) {
+                if (rf.refType == HDF5Constants.H5R_OBJECT1) {
                     log.trace("initReferenceRegion H5R_OBJECT1");
-                    if (rf.obj_type == HDF5Constants.H5O_TYPE_DATASET) {
+                    if (rf.objType == HDF5Constants.H5O_TYPE_DATASET) {
                         initRegionDataset(refndx, refarr);
-                    } // obj_type == HDF5Constants.H5O_TYPE_DATASET
+                    } // objType == HDF5Constants.H5O_TYPE_DATASET
                     else {
                         /* Object references -- show the type and OID of the referenced object. */
-                        rf.region_type = "H5O_TYPE_OBJ_REF";
+                        rf.regionType = "H5O_TYPE_OBJ_REF";
                         H5O_info_t objInfo;
-                        long new_obj_id = HDF5Constants.H5I_INVALID_HID;
+                        long newObjID = HDF5Constants.H5I_INVALID_HID;
                         try {
-                            new_obj_id = H5.H5Rdereference(getFID(), HDF5Constants.H5P_DEFAULT,
+                            newObjID = H5.H5Rdereference(getFID(), HDF5Constants.H5P_DEFAULT,
                                                            HDF5Constants.H5R_OBJECT, refarr);
-                            objInfo    = H5.H5Oget_info(new_obj_id);
+                            objInfo    = H5.H5Oget_info(newObjID);
                             if (objInfo.type == HDF5Constants.H5O_TYPE_GROUP)
-                                rf.region_desc = "GROUP";
+                                rf.regionDesc = "GROUP";
                             else if (objInfo.type == HDF5Constants.H5O_TYPE_DATASET)
-                                rf.region_desc = "DATASET";
+                                rf.regionDesc = "DATASET";
                             else if (objInfo.type == HDF5Constants.H5O_TYPE_NAMED_DATATYPE)
-                                rf.region_desc = "DATATYPE";
+                                rf.regionDesc = "DATATYPE";
                             else
-                                rf.region_desc = "UNKNOWN " + objInfo.type;
+                                rf.regionDesc = "UNKNOWN " + objInfo.type;
                         }
                         catch (Exception ex2) {
                             log.debug("typeObjectRef ", ex2);
                         }
                         finally {
-                            H5.H5Dclose(new_obj_id);
+                            H5.H5Dclose(newObjID);
                         }
                     }
                 }
-                else if (rf.ref_type == HDF5Constants.H5R_DATASET_REGION1) {
+                else if (rf.refType == HDF5Constants.H5R_DATASET_REGION1) {
                     log.trace("initReferenceRegion H5R_DATASET_REGION1");
                     initRegionDataset(refndx, refarr);
                 }
-                else if (rf.ref_type == HDF5Constants.H5R_OBJECT2) {
+                else if (rf.refType == HDF5Constants.H5R_OBJECT2) {
                     log.trace("initReferenceRegion H5R_OBJECT2");
-                    rf.region_type = "H5O_TYPE_OBJ_REF";
+                    rf.regionType = "H5O_TYPE_OBJ_REF";
                 }
-                else if (rf.ref_type == HDF5Constants.H5R_DATASET_REGION2) {
+                else if (rf.refType == HDF5Constants.H5R_DATASET_REGION2) {
                     log.trace("initReferenceRegion H5R_DATASET_REGION2");
                     initRegionDataset(refndx, refarr);
                 }
-                else if (rf.ref_type == HDF5Constants.H5R_ATTR) {
+                else if (rf.refType == HDF5Constants.H5R_ATTR) {
                     log.trace("initReferenceRegion H5R_ATTR");
-                    rf.region_type = "H5R_ATTR";
+                    rf.regionType = "H5R_ATTR";
                     initRegionAttribute(refndx, refarr);
                 }
                 else {
                     log.trace("initReferenceRegion OTHER");
-                    rf.region_type = "UNKNOWN";
+                    rf.regionType = "UNKNOWN";
                 }
             }
         }
         else {
             if (isRegRef()) {
-                rf.ref_type     = HDF5Constants.H5R_DATASET_REGION1;
-                rf.obj_type     = HDF5Constants.H5O_TYPE_DATASET;
-                int region_type = typeObjectRef(getFID(), HDF5Constants.H5R_DATASET_REGION, refarr);
-                if (HDF5Constants.H5S_SEL_POINTS == region_type)
-                    rf.region_type = "REGION_TYPE POINT";
-                else if (HDF5Constants.H5S_SEL_HYPERSLABS == region_type)
-                    rf.region_type = "REGION_TYPE BLOCK";
+                rf.refType     = HDF5Constants.H5R_DATASET_REGION1;
+                rf.objType     = HDF5Constants.H5O_TYPE_DATASET;
+                int regionType = typeObjectRef(getFID(), HDF5Constants.H5R_DATASET_REGION, refarr);
+                if (HDF5Constants.H5S_SEL_POINTS == regionType)
+                    rf.regionType = "REGION_TYPE POINT";
+                else if (HDF5Constants.H5S_SEL_HYPERSLABS == regionType)
+                    rf.regionType = "REGION_TYPE BLOCK";
                 else
-                    rf.region_type = "REGION_TYPE UNKNOWN";
-                rf.region_desc = descRegionDataset(getFID(), refarr);
+                    rf.regionType = "REGION_TYPE UNKNOWN";
+                rf.regionDesc = descRegionDataset(getFID(), refarr);
             }
             else {
-                rf.ref_type    = HDF5Constants.H5R_OBJECT1;
-                rf.obj_type    = typeObjectRef(getFID(), HDF5Constants.H5R_OBJECT, refarr);
-                rf.region_type = "H5O_TYPE_OBJ_REF";
+                rf.refType    = HDF5Constants.H5R_OBJECT1;
+                rf.objType    = typeObjectRef(getFID(), HDF5Constants.H5R_OBJECT, refarr);
+                rf.regionType = "H5O_TYPE_OBJ_REF";
             }
         }
         log.trace("initReferenceRegion finish");
@@ -580,21 +571,21 @@ public class H5ReferenceType extends H5Datatype {
     private void initRegionAttribute(int refndx, byte[] refarr)
     {
         H5ReferenceData rf = refdata.get(refndx);
-        long new_obj_id    = HDF5Constants.H5I_INVALID_HID;
+        long newObjID    = HDF5Constants.H5I_INVALID_HID;
         try {
             log.trace("initRegionAttribute refarr2={}:", refarr);
-            new_obj_id       = H5.H5Ropen_attr(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            long new_obj_sid = HDF5Constants.H5I_INVALID_HID;
+            newObjID       = H5.H5Ropen_attr(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            long newObjSID = HDF5Constants.H5I_INVALID_HID;
             try {
-                new_obj_sid    = H5.H5Aget_space(new_obj_id);
-                long reg_ndims = H5.H5Sget_simple_extent_ndims(new_obj_sid);
-                // rf.region_desc = dump_region_attrs(regStr, new_obj_id);
+                newObjSID    = H5.H5Aget_space(newObjID);
+                long regNdims = H5.H5Sget_simple_extent_ndims(newObjSID);
+                // rf.regionDesc = dump_region_attrs(regStr, newObjID);
             }
             catch (Exception ex3) {
                 log.debug("initRegionAttribute Space Open", ex3);
             }
             finally {
-                H5.H5Sclose(new_obj_sid);
+                H5.H5Sclose(newObjSID);
             }
             log.trace("initRegionAttribute finish");
         }
@@ -602,84 +593,84 @@ public class H5ReferenceType extends H5Datatype {
             log.debug("initRegionAttribute ", ex2);
         }
         finally {
-            H5.H5Aclose(new_obj_id);
+            H5.H5Aclose(newObjID);
         }
     }
 
     private void initRegionDataset(int refndx, byte[] refarr)
     {
         H5ReferenceData rf = refdata.get(refndx);
-        long new_obj_id    = HDF5Constants.H5I_INVALID_HID;
+        long newObjID    = HDF5Constants.H5I_INVALID_HID;
         try {
             log.trace("initRegionDataset refarr2={}:", refarr);
-            new_obj_id = H5.H5Ropen_object(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            long new_obj_sid = HDF5Constants.H5I_INVALID_HID;
+            newObjID = H5.H5Ropen_object(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            long newObjSID = HDF5Constants.H5I_INVALID_HID;
             try {
                 log.trace("initRegionDataset refarr3={}:", refarr);
-                new_obj_sid = H5.H5Ropen_region(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                newObjSID = H5.H5Ropen_region(refarr, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 try {
-                    int region_type = H5.H5Sget_select_type(new_obj_sid);
-                    log.debug("Reference Region Type {}", region_type);
-                    long reg_ndims   = H5.H5Sget_simple_extent_ndims(new_obj_sid);
+                    int regionType = H5.H5Sget_select_type(newObjSID);
+                    log.debug("Reference Region Type {}", regionType);
+                    long regNdims   = H5.H5Sget_simple_extent_ndims(newObjSID);
                     StringBuilder sb = new StringBuilder();
-                    if (HDF5Constants.H5S_SEL_POINTS == region_type) {
-                        rf.region_type   = "REGION_TYPE POINT";
-                        long reg_npoints = H5.H5Sget_select_elem_npoints(new_obj_sid);
-                        long getcoord[]  = new long[(int)(reg_ndims * reg_npoints)];
+                    if (HDF5Constants.H5S_SEL_POINTS == regionType) {
+                        rf.regionType   = "REGION_TYPE POINT";
+                        long regNpoints = H5.H5Sget_select_elem_npoints(newObjSID);
+                        long[] getCoord    = new long[(int) (regNdims * regNpoints)];
                         try {
-                            H5.H5Sget_select_elem_pointlist(new_obj_sid, 0, reg_npoints, getcoord);
+                            H5.H5Sget_select_elem_pointlist(newObjSID, 0, regNpoints, getCoord);
                         }
                         catch (Exception ex5) {
                             log.debug("initRegionDataset H5.H5Sget_select_elem_pointlist: ", ex5);
                         }
                         sb.append("{ ");
-                        for (int i = 0; i < (int)reg_npoints; i++) {
+                        for (int i = 0; i < (int)regNpoints; i++) {
                             if (i > 0)
                                 sb.append(" ");
                             sb.append("(");
-                            for (int j = 0; j < (int)reg_ndims; j++) {
+                            for (int j = 0; j < (int)regNdims; j++) {
                                 if (j > 0)
                                     sb.append(",");
-                                sb.append(getcoord[i * (int)reg_ndims + j]);
+                                sb.append(getCoord[i * (int)regNdims + j]);
                             }
                             sb.append(")");
                         }
                         sb.append(" }");
-                        rf.region_desc = sb.toString();
+                        rf.regionDesc = sb.toString();
                     }
-                    else if (HDF5Constants.H5S_SEL_HYPERSLABS == region_type) {
-                        rf.region_type   = "REGION_TYPE BLOCK";
-                        long reg_nblocks = H5.H5Sget_select_hyper_nblocks(new_obj_sid);
-                        long getblocks[] = new long[(int)(reg_ndims * reg_nblocks) * 2];
+                    else if (HDF5Constants.H5S_SEL_HYPERSLABS == regionType) {
+                        rf.regionType   = "REGION_TYPE BLOCK";
+                        long regNblocks = H5.H5Sget_select_hyper_nblocks(newObjSID);
+                        long[] getBlocks   = new long[(int) (regNdims * regNblocks) * 2];
                         try {
-                            H5.H5Sget_select_hyper_blocklist(new_obj_sid, 0, reg_nblocks, getblocks);
+                            H5.H5Sget_select_hyper_blocklist(newObjSID, 0, regNblocks, getBlocks);
                         }
                         catch (Exception ex5) {
                             log.debug("initRegionDataset H5.H5Sget_select_hyper_blocklist: ", ex5);
                         }
                         sb.append("{ ");
-                        for (int i = 0; i < (int)reg_nblocks; i++) {
+                        for (int i = 0; i < (int)regNblocks; i++) {
                             if (i > 0)
                                 sb.append(" ");
                             sb.append("(");
-                            for (int j = 0; j < (int)reg_ndims; j++) {
+                            for (int j = 0; j < (int)regNdims; j++) {
                                 if (j > 0)
                                     sb.append(",");
-                                sb.append(getblocks[i * 2 * (int)reg_ndims + j]);
+                                sb.append(getBlocks[i * 2 * (int)regNdims + j]);
                             }
                             sb.append(")-(");
-                            for (int j = 0; j < (int)reg_ndims; j++) {
+                            for (int j = 0; j < (int)regNdims; j++) {
                                 if (j > 0)
                                     sb.append(",");
-                                sb.append(getblocks[i * 2 * (int)reg_ndims + (int)reg_ndims + j]);
+                                sb.append(getBlocks[i * 2 * (int)regNdims + (int)regNdims + j]);
                             }
                             sb.append(")");
                         }
                         sb.append(" }");
-                        rf.region_desc = sb.toString();
+                        rf.regionDesc = sb.toString();
                     }
                     else
-                        rf.region_type = "REGION_TYPE UNKNOWN";
+                        rf.regionType = "REGION_TYPE UNKNOWN";
                 }
                 catch (Exception ex4) {
                     log.debug("initRegionDataset Region Type", ex4);
@@ -689,7 +680,7 @@ public class H5ReferenceType extends H5Datatype {
                 log.debug("initRegionDataset Space Open", ex3);
             }
             finally {
-                H5.H5Sclose(new_obj_sid);
+                H5.H5Sclose(newObjSID);
             }
             log.trace("initRegionDataset finish");
         }
@@ -697,7 +688,7 @@ public class H5ReferenceType extends H5Datatype {
             log.debug("initRegionDataset ", ex2);
         }
         finally {
-            H5.H5Dclose(new_obj_id);
+            H5.H5Dclose(newObjID);
         }
     }
 
@@ -731,10 +722,10 @@ public class H5ReferenceType extends H5Datatype {
         if (!inited)
             init();
 
-        // find the index that matches refarr and ref_array
+        // find the index that matches refarr and refArray
         H5ReferenceData rf = null;
         for (int i = 0; i < (int)refsize; i++) {
-            byte[] theref = refdata.get(i).ref_array;
+            byte[] theref = refdata.get(i).refArray;
             if (Arrays.equals(theref, refarr)) {
                 rf = refdata.get(i);
                 break;
@@ -744,18 +735,18 @@ public class H5ReferenceType extends H5Datatype {
             return null;
 
         StringBuilder sb = new StringBuilder();
-        if (!rf.obj_name.equals("NULL")) {
-            sb.append(rf.obj_name);
+        if (!rf.objName.equals("NULL")) {
+            sb.append(rf.objName);
         }
-        if (!rf.attr_name.equals("NULL")) {
+        if (!rf.attrName.equals("NULL")) {
             if (sb.length() > 0)
                 sb.append("/");
-            sb.append(rf.attr_name);
+            sb.append(rf.attrName);
         }
-        if (!rf.region_desc.equals("NULL")) {
+        if (!rf.regionDesc.equals("NULL")) {
             if (sb.length() > 0)
                 sb.append(" ");
-            sb.append(rf.region_desc);
+            sb.append(rf.regionDesc);
         }
         log.debug("Reference Object Name {}", sb);
         return sb.toString();
@@ -774,10 +765,10 @@ public class H5ReferenceType extends H5Datatype {
         if (!inited)
             init();
 
-        // find the index that matches refarr and ref_array
+        // find the index that matches refarr and refArray
         H5ReferenceData rf = null;
         for (int i = 0; i < (int)refsize; i++) {
-            byte[] theref = refdata.get(i).ref_array;
+            byte[] theref = refdata.get(i).refArray;
             if (Arrays.equals(theref, refarr)) {
                 rf = refdata.get(i);
                 break;
@@ -787,22 +778,22 @@ public class H5ReferenceType extends H5Datatype {
             return null;
 
         StringBuilder sb = new StringBuilder();
-        if (!rf.file_name.equals("NULL"))
-            sb.append(rf.file_name);
-        if (!rf.obj_name.equals("NULL")) {
+        if (!rf.fileName.equals("NULL"))
+            sb.append(rf.fileName);
+        if (!rf.objName.equals("NULL")) {
             if (sb.length() > 0)
                 sb.append("/");
-            sb.append(rf.obj_name);
+            sb.append(rf.objName);
         }
-        if (!rf.attr_name.equals("NULL")) {
+        if (!rf.attrName.equals("NULL")) {
             if (sb.length() > 0)
                 sb.append("/");
-            sb.append(rf.attr_name);
+            sb.append(rf.attrName);
         }
-        if (!rf.region_desc.equals("NULL")) {
+        if (!rf.regionDesc.equals("NULL")) {
             if (sb.length() > 0)
                 sb.append(" ");
-            sb.append(rf.region_desc);
+            sb.append(rf.regionDesc);
         }
         log.debug("Full Reference Name {}", sb);
         return sb.toString();
@@ -821,10 +812,10 @@ public class H5ReferenceType extends H5Datatype {
         if (!inited)
             init();
 
-        // find the index that matches refarr and ref_array
+        // find the index that matches refarr and refArray
         H5ReferenceData rf = null;
         for (int i = 0; i < (int)refsize; i++) {
-            byte[] theref = refdata.get(i).ref_array;
+            byte[] theref = refdata.get(i).refArray;
             if (Arrays.equals(theref, refarr)) {
                 rf = refdata.get(i);
                 break;
@@ -834,11 +825,11 @@ public class H5ReferenceType extends H5Datatype {
             return null;
 
         StringBuilder sb = new StringBuilder();
-        sb.append(rf.region_type);
-        if (!rf.region_desc.equals("NULL")) {
+        sb.append(rf.regionType);
+        if (!rf.regionDesc.equals("NULL")) {
             if (sb.length() > 0)
                 sb.append(" ");
-            sb.append(rf.region_desc);
+            sb.append(rf.regionDesc);
         }
         log.debug("getRegionDataset Value {}", sb);
         return sb.toString();
@@ -857,10 +848,10 @@ public class H5ReferenceType extends H5Datatype {
         if (!inited)
             init();
 
-        // find the index that matches refarr and ref_array
+        // find the index that matches refarr and refArray
         H5ReferenceData rf = null;
         for (int i = 0; i < (int)refsize; i++) {
-            byte[] theref = refdata.get(i).ref_array;
+            byte[] theref = refdata.get(i).refArray;
             if (Arrays.equals(theref, refarr)) {
                 rf = refdata.get(i);
                 break;
@@ -885,10 +876,10 @@ public class H5ReferenceType extends H5Datatype {
             init();
 
         log.trace("getReferenceRegion refarr {}", refarr);
-        // find the index that matches refarr and ref_array
+        // find the index that matches refarr and refArray
         H5ReferenceData rf = null;
         for (int i = 0; i < (int)refsize; i++) {
-            byte[] theref = refdata.get(i).ref_array;
+            byte[] theref = refdata.get(i).refArray;
             log.trace("getReferenceRegion theref {}", theref);
             if (Arrays.equals(theref, refarr)) {
                 rf = refdata.get(i);
@@ -900,25 +891,25 @@ public class H5ReferenceType extends H5Datatype {
             return null;
 
         StringBuilder objsb = new StringBuilder();
-        if (!rf.file_name.equals("NULL"))
-            objsb.append(rf.file_name);
-        if (!rf.obj_name.equals("NULL")) {
-            objsb.append(rf.obj_name);
+        if (!rf.fileName.equals("NULL"))
+            objsb.append(rf.fileName);
+        if (!rf.objName.equals("NULL")) {
+            objsb.append(rf.objName);
         }
-        if (!rf.attr_name.equals("NULL")) {
+        if (!rf.attrName.equals("NULL")) {
             if (objsb.length() > 0)
                 objsb.append("/");
-            objsb.append(rf.attr_name);
+            objsb.append(rf.attrName);
         }
         log.debug("getReferenceRegion Region Name {}", objsb);
 
         StringBuilder regsb = new StringBuilder();
-        if (!rf.region_type.equals("NULL"))
-            regsb.append(rf.region_type);
-        if (!rf.region_desc.equals("NULL")) {
+        if (!rf.regionType.equals("NULL"))
+            regsb.append(rf.regionType);
+        if (!rf.regionDesc.equals("NULL")) {
             if (regsb.length() > 0)
                 regsb.append(" ");
-            regsb.append(rf.region_desc);
+            regsb.append(rf.regionDesc);
         }
         log.debug("getReferenceRegion Region Type {}", regsb);
         StringBuilder sb = new StringBuilder(objsb);
@@ -999,20 +990,20 @@ public class H5ReferenceType extends H5Datatype {
                 byte[] refarr = new byte[(int)HDF5Constants.H5R_REF_BUF_SIZE];
                 System.arraycopy(theData, refIndex, refarr, 0, (int)HDF5Constants.H5R_REF_BUF_SIZE);
                 log.trace("toString: refarr[{}]={}", i, refarr);
-                String refarr_str     = getReferenceRegion(refarr, false);
-                StringBuilder ref_str = null;
-                if (refarr_str != null) {
-                    ref_str = new StringBuilder(refarr_str);
-                    if ((maxItems > 0) && (ref_str.length() > maxItems)) {
-                        ref_str.setLength(maxItems);
+                String        refarrStr = getReferenceRegion(refarr, false);
+                StringBuilder refStr    = null;
+                if (refarrStr != null) {
+                    refStr = new StringBuilder(refarrStr);
+                    if ((maxItems > 0) && (refStr.length() > maxItems)) {
+                        refStr.setLength(maxItems);
                     }
-                    log.trace("toString: ref_str[{}]={}", i, ref_str);
+                    log.trace("toString: refStr[{}]={}", i, refStr);
                 }
                 else
-                    ref_str = new StringBuilder("NULL");
+                    refStr = new StringBuilder("NULL");
                 if (i > 0)
                     sb.append(", ");
-                sb.append(ref_str);
+                sb.append(refStr);
             }
             return sb.toString();
         }
@@ -1025,38 +1016,38 @@ public class H5ReferenceType extends H5Datatype {
     public static class H5ReferenceData {
         private static final Logger log = LoggerFactory.getLogger(H5ReferenceData.class);
 
-        /** The reference array raw data */
-        public byte[] ref_array = null;
+        /** The reference array raw data. */
+        public byte[] refArray = null;
 
-        /** The the full file path referenced */
-        public String file_fullpath;
+        /** The the full file path referenced. */
+        public String fileFullPath;
 
-        /** The file name referenced */
-        public String file_name;
+        /** The file name referenced. */
+        public String fileName;
 
-        /** The object name referenced */
-        public String obj_name;
+        /** The object name referenced. */
+        public String objName;
 
-        /** The attribute name referenced */
-        public String attr_name;
+        /** The attribute name referenced. */
+        public String attrName;
 
-        /** The type of region referenced */
-        public String region_type;
+        /** The type of region referenced. */
+        public String regionType;
 
-        /** The point/block description of region referenced */
-        public String region_desc;
+        /** The point/block description of region referenced. */
+        public String regionDesc;
 
-        /** The default type of region referenced */
-        public int ref_type = HDF5Constants.H5R_BADTYPE;
+        /** The default type of region referenced. */
+        public int refType = HDF5Constants.H5R_BADTYPE;
 
-        /** The default type of object referenced */
-        public int obj_type = HDF5Constants.H5O_TYPE_UNKNOWN;
+        /** The default type of object referenced. */
+        public int objType = HDF5Constants.H5O_TYPE_UNKNOWN;
 
-        /** The type size of object referenced */
+        /** The type size of object referenced. */
         public long typeSize;
 
         /**
-         * Copy the individual reference array for further processing
+         * Copy the individual reference array for further processing.
          *
          * @param theArray    the reference datatype data to be copied.
          * @param theTypeSize the size of the type for the array
@@ -1064,8 +1055,8 @@ public class H5ReferenceType extends H5Datatype {
         H5ReferenceData(byte[] theArray, long theTypeSize)
         {
             typeSize  = theTypeSize;
-            ref_array = new byte[(int)theTypeSize];
-            System.arraycopy(theArray, 0, ref_array, 0, (int)theTypeSize);
+            refArray = new byte[(int)theTypeSize];
+            System.arraycopy(theArray, 0, refArray, 0, (int)theTypeSize);
         }
     }
 }

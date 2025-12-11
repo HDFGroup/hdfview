@@ -19,7 +19,6 @@ import java.awt.Toolkit;
 import java.awt.image.IndexColorModel;
 import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import hdf.object.FileFormat;
 import hdf.object.HObject;
@@ -165,7 +164,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         createUI();
     }
 
-    /** Create the visual components */
+    /** Create the visual components. */
     public void createUI()
     {
         Shell parent = getParent();
@@ -382,7 +381,11 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         shell.open();
     }
 
-    /** @return the data object displayed in this data viewer */
+    /**
+     * get the data object displayed.
+     *
+     * @return the data object displayed in this data viewer
+     */
     @Override
     public HObject getDataObject()
     {
@@ -447,7 +450,9 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
 
         private final int PALETTE_MAX = 255;
 
-        private int dragX0, dragY0; // starting point of mouse drag
+        // starting point of mouse drag
+        private int dragX0;
+        private int dragY0;
 
         public ChartCanvas(Composite parent, int style)
         {

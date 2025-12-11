@@ -15,19 +15,14 @@
 package hdf.view.dialog;
 
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
 import hdf.object.Attribute;
-import hdf.object.Datatype;
-import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
 import hdf.object.h5.H5CompoundAttr;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5ScalarAttr;
@@ -64,14 +59,14 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
     private static final org.slf4j.Logger log =
         org.slf4j.LoggerFactory.getLogger(NewScalarAttributeDialog.class);
 
-    /** the default length of a string attribute */
+    /** the default length of a string attribute. */
     public static final int DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;
 
     private Text currentSizeField;
 
     private Combo rankChoice;
 
-    /** TextField for entering the name of the attribute */
+    /** TextField for entering the name of the attribute. */
     protected Text nameField;
 
     /**
@@ -246,7 +241,7 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
                 display.sleep();
     }
 
-    /** Check if the dim size is valid */
+    /** Check if the dim size is valid. */
     private void checkDimSize()
     {
         String dimStr         = currentSizeField.getText();
@@ -395,7 +390,9 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
                 }
                 else {
                     try {
-                        URL url = null, url2 = null, url3 = null;
+                        URL    url      = null;
+                        URL    url2     = null;
+                        URL    url3     = null;
                         String rootPath = ViewProperties.getViewRoot();
 
                         try {
@@ -419,7 +416,7 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
                             log.debug("help information:", mfu);
                         }
 
-                        URL uu[] = {url, url2, url3};
+                        URL[] uu = { url, url2, url3 };
                         try (URLClassLoader cl = new URLClassLoader(uu)) {
                             URL u = cl.findResource("hdf/view/NewAttrHelp.html");
 

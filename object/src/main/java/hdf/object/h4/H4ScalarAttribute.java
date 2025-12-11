@@ -14,16 +14,11 @@
 
 package hdf.object.h4;
 
-import java.lang.reflect.Array;
-import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import hdf.object.Attribute;
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -33,14 +28,14 @@ import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
 
 /**
- * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group
- * or named datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group or named
+ * datatype.
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * For more details on attributes, read <a
- * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
- * Attributes in HDF5 User Guide</a>
+ * For more details on attributes, read
+ * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in
+ * HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
  *
@@ -66,8 +61,7 @@ import hdf.object.ScalarDS;
  * </pre>
  *
  *
- * For an atomic datatype, the value of an H4ScalarAttribute will be a 1D array of integers, floats and
- * strings.
+ * For an atomic datatype, the value of an H4ScalarAttribute will be a 1D array of integers, floats and strings.
  *
  * @see hdf.object.Datatype
  *
@@ -80,10 +74,10 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4ScalarAttribute.class);
 
-    /** The HObject to which this NC2Attribute is attached, Attribute interface */
+    /** The HObject to which this NC2Attribute is attached, Attribute interface. */
     protected HObject parentObject;
 
-    /** additional information and properties for the attribute, Attribute interface */
+    /** additional information and properties for the attribute, Attribute interface. */
     private transient Map<String, Object> properties;
 
     /**
@@ -462,6 +456,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
     public final long[] getAttributeDims() { return getDims(); }
 
     /**
+     * Check if the Attribute is null.
+     *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     @Override
@@ -471,6 +467,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
     }
 
     /**
+     * Check if the Attribute is a scalar.
+     *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isAttributeScalar() { return isScalar(); }

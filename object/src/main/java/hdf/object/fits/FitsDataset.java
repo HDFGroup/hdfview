@@ -19,15 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.MetaDataContainer;
-import hdf.object.ScalarDS;
-import hdf.object.fits.FitsAttribute;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +26,21 @@ import nom.tam.fits.BasicHDU;
 import nom.tam.fits.Header;
 import nom.tam.fits.HeaderCard;
 
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.HObject;
+import hdf.object.MetaDataContainer;
+import hdf.object.ScalarDS;
+
 /**
- * FitsDataset describes an multi-dimension array of HDF5 scalar or atomic data types, such as byte, int,
- * short, long, float, double and string, and operations performed on the scalar dataset
+ * FitsDataset describes an multi-dimension array of HDF5 scalar or atomic data types, such as byte, int, short, long,
+ * float, double and string, and operations performed on the scalar dataset
  *
- * The library predefines a modest number of datatypes. For details, read <a href=
- * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
- * Datatypes in HDF5 User Guide</a>
+ * The library predefines a modest number of datatypes. For details, read
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5
+ * User Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -57,7 +56,7 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer {
      */
     private List attributeList;
 
-    /** the native dataset */
+    /** the native dataset. */
     private BasicHDU nativeDataset;
 
     /**
@@ -428,7 +427,15 @@ public class FitsDataset extends ScalarDS implements MetaDataContainer {
         return total;
     }
 
-    /** copy multi-dimension array of fits data into 1D array */
+    /**
+     * copy multi-dimension array of fits data into 1D array.
+     *
+     * @param dataIn  - array object in
+     * @param dataOut - array object out
+     * @param offset  - array offset
+     *
+     * @return offset into array
+     */
     private int to1Darray(Object dataIn, Object dataOut, int offset) throws Exception
     {
         Class component = dataIn.getClass().getComponentType();

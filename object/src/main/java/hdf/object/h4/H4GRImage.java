@@ -17,12 +17,16 @@ package hdf.object.h4;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdflib.HDFChunkInfo;
 import hdf.hdflib.HDFCompInfo;
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFDeflateCompInfo;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
+
 import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
@@ -31,10 +35,6 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
-import hdf.object.h4.H4ScalarAttribute;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * H4GRImage describes an HDF4 general raster(GR) image and operations performed on
@@ -116,19 +116,19 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
     private List attributeList;
 
     /**
-     * The GR interface identifier obtained from GRstart(fid)
+     * The GR interface identifier obtained from GRstart(fid).
      */
     private long grid;
 
     /**
-     * The number of components in the raster image
+     * The number of components in the raster image.
      */
     private int ncomp;
 
-    /** the datatype identifier */
+    /** the datatype identifier. */
     private long datatypeID = -1;
 
-    /** the number of attributes */
+    /** the number of attributes. */
     private int nAttributes = -1;
 
     /**
@@ -153,9 +153,11 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
     {
         super(theFile, name, path, oid);
         palette = null;
-        isImage = isImageDisplay = true;
-        unsignedConverted        = false;
-        grid                     = ((H4File)getFileFormat()).getGRAccessID();
+        isImage = true;
+        isImageDisplay = true;
+        unsignedConverted = false;
+
+        grid = ((H4File) getFileFormat()).getGRAccessID();
     }
 
     /*
@@ -684,10 +686,10 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
 
     // Implementing HObject.
     @Override
-    public void close(long grid)
+    public void close(long theGrid)
     {
         try {
-            HDFLibrary.GRendaccess(grid);
+            HDFLibrary.GRendaccess(theGrid);
         }
         catch (HDFException ex) {
             log.debug("close(): failure: ", ex);
@@ -1041,7 +1043,11 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
     }
 
     /**
-     * copy attributes from one GR image to another GR image
+     * copy attributes from one GR image to another GR image.
+     *
+     * @param srcdid             - the source object id
+     * @param dstdid             - the destination object id
+     * @param numberOfAttributes - the number of attributes to copy
      */
     private void copyAttribute(long srcdid, long dstdid, int numberOfAttributes)
     {

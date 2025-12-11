@@ -56,10 +56,6 @@ public abstract class FileFormat extends File {
 
     private static final Logger log = LoggerFactory.getLogger(FileFormat.class);
 
-    /***************************************************************************
-     * File access flags used in calls to createInstance( String, flag );
-     **************************************************************************/
-
     /**
      * File first time access flag for open file. With this access flag, added
      * to the regular value, indicates this file has no existing state.
@@ -104,10 +100,6 @@ public abstract class FileFormat extends File {
      */
     public static final int MULTIREAD = 80;
 
-    /***************************************************************************
-     * File creation flags used in calls to createFile( String, flag );
-     **************************************************************************/
-
     /**
      * Flag for creating/truncating a file. If the file already exists, it will
      * be truncated when opened. If the file does not exist, it will be created.
@@ -133,10 +125,6 @@ public abstract class FileFormat extends File {
      * @see #createFile(String, int )
      */
     public static final int FILE_CREATE_EARLY_LIB = 40;
-
-    /***************************************************************************
-     * Keys and fields related to supported file formats.
-     **************************************************************************/
 
     /** Key for HDF4 file format. */
     public static final String FILE_TYPE_HDF4 = "HDF4";
@@ -174,23 +162,19 @@ public abstract class FileFormat extends File {
      */
     private static String extensions = "hdf, h4, hdf5, h5, nc, fits";
 
-    /***************************************************************************
-     * Sizing information and class metadata
-     **************************************************************************/
-
     /**
      * Current Java applications, such as HDFView, cannot handle files with
      * large numbers of objects due to JVM memory limitations. For example,
-     * 1,000,000 objects is too many. max_members is defined so that
-     * applications such as HDFView will load up to <i>max_members</i> objects
-     * starting with the <i>start_members</i> -th object. The implementing class
+     * 1,000,000 objects is too many. maxMembers is defined so that
+     * applications such as HDFView will load up to <i>maxMembers</i> objects
+     * starting with the <i>startMembers</i> -th object. The implementing class
      * has freedom in its interpretation of how to "count" objects in the file.
      */
-    private int max_members = 10000; // 10,000 by default
+    private int maxMembers = 10000; // 10,000 by default
     /**
-     * The start number for max_members .
+     * The start number for maxMembers .
      */
-    private int start_members = 0; // 0 by default
+    private int startMembers = 0; // 0 by default
 
     /**
      * File identifier. -1 indicates the file is not open.
@@ -207,16 +191,10 @@ public abstract class FileFormat extends File {
      */
     protected boolean isReadOnly = false;
 
-    /***************************************************************************
-     * Class initialization method
-     **************************************************************************/
-
     /**
-     * By default, HDF4 and HDF5 file formats are added to the supported formats
-     * list.
+     * By default, HDF4 and HDF5 file formats are added to the supported formats list.
      */
-    static
-    {
+    static {
         // add HDF4 to default modules
         if (FileFormat.getFileFormat(FILE_TYPE_HDF4) == null) {
             try {
@@ -282,10 +260,6 @@ public abstract class FileFormat extends File {
         }
     }
 
-    /***************************************************************************
-     * Constructor
-     **************************************************************************/
-
     /**
      * Creates a new FileFormat instance with the given filename.
      *
@@ -327,10 +301,6 @@ public abstract class FileFormat extends File {
         isReadOnly = false;
         log.trace("fullFileName={} isReadOnly={}", fullFileName, isReadOnly);
     }
-
-    /***************************************************************************
-     * Class methods
-     **************************************************************************/
 
     /**
      * Adds a FileFormat with specified key to the list of supported formats.
@@ -439,9 +409,9 @@ public abstract class FileFormat extends File {
 
         int i                     = 0;
         FileFormat[] fileformats  = new FileFormat[n];
-        Enumeration<?> local_enum = ((Hashtable)FileList).elements();
-        while (local_enum.hasMoreElements())
-            fileformats[i++] = (FileFormat)local_enum.nextElement();
+        Enumeration<?> localEnum   = ((Hashtable) FileList).elements();
+        while (localEnum.hasMoreElements())
+            fileformats[i++] = (FileFormat) localEnum.nextElement();
 
         return fileformats;
     }
@@ -584,16 +554,6 @@ public abstract class FileFormat extends File {
         return fileFormat;
     }
 
-    /***************************************************************************
-     * Implementation Class methods. These methods are related to the
-     * implementing FileFormat class, but not to a particular instance of that
-     * class. Since we can't override class methods (they can only be shadowed
-     * in Java), these are instance methods.
-     *
-     * The non-abstract methods just throw an exception indicating that the
-     * implementing class doesn't support the functionality.
-     **************************************************************************/
-
     /**
      * Returns the version of the library for the implementing FileFormat class.
      *
@@ -637,26 +597,21 @@ public abstract class FileFormat extends File {
     public abstract boolean isThisType(FileFormat fileFormat);
 
     /**
-     * Checks if the implementing FileFormat class matches the format of the
-     * specified file.
+     * Checks if the implementing FileFormat class matches the format of the specified file.
      *
-     * For example, if "test.h5" is an HDF5 file, the first call to isThisType()
-     * in the code fragment shown will return <code>false</code>, and the second
-     * call will return <code>true</code>.
+     * For example, if "test.h5" is an HDF5 file, the first call to isThisType() in the code fragment shown will return
+     * <code>false</code>, and the second call will return <code>true</code>.
      *
      * <pre>
      * FileFormat ncF = FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3);
      * FileFormat h4F = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
      * FileFormat h5F = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
      * boolean isH4 = h4F.isThisType(&quot;test.h5&quot;); // false
-     *                                                                                                                                                                                   boolean
-     * isH5 = h5F.isThisType(&quot;test.h5&quot;); // true
+     * boolean isH5 = h5F.isThisType(&quot;test.h5&quot;); // true
      * </pre>
      *
-     * @param filename
-     *            The name of the file to be checked.
-     * @return True if the format of the file matches the format of this
-     *         instance; otherwise returns false.
+     * @param filename The name of the file to be checked.
+     * @return True if the format of the file matches the format of this instance; otherwise returns false.
      * @see #isThisType(FileFormat)
      */
     public abstract boolean isThisType(String filename);
@@ -781,17 +736,6 @@ public abstract class FileFormat extends File {
      */
     public abstract FileFormat createInstance(String filename, int access) throws Exception;
 
-    // REVIEW DOCS for createInstance()
-    // What if READ ONLY in implementation? What if file already open?
-    // Can we doc exceptions better or in implementation methods?
-
-    /***************************************************************************
-     * Final instance methods
-     *
-     * Related to a given instance of the class, but at the FileFormat level,
-     * not at the implementing class level.
-     **************************************************************************/
-
     /**
      * Returns the absolute path for the file.
      *
@@ -847,7 +791,7 @@ public abstract class FileFormat extends File {
      * @see #getMaxMembers()
      * @see #setStartMembers(int)
      */
-    public final void setMaxMembers(int n) { max_members = n; }
+    public final void setMaxMembers(int n) { maxMembers = n; }
 
     /**
      * Returns the maximum number of objects that can be loaded into memory.
@@ -857,10 +801,10 @@ public abstract class FileFormat extends File {
      */
     public final int getMaxMembers()
     {
-        if (max_members < 0)
+        if (maxMembers < 0)
             return Integer.MAX_VALUE; // load the whole file
 
-        return max_members;
+        return maxMembers;
     }
 
     /**
@@ -874,7 +818,7 @@ public abstract class FileFormat extends File {
      * @see #getStartMembers()
      * @see #setMaxMembers(int)
      */
-    public final void setStartMembers(int idx) { start_members = idx; }
+    public final void setStartMembers(int idx) { startMembers = idx; }
 
     /**
      * Returns the index of the starting object to be loaded into memory.
@@ -882,7 +826,7 @@ public abstract class FileFormat extends File {
      * @return The index of the starting object to be loaded into memory.
      * @see #setStartMembers(int)
      */
-    public final int getStartMembers() { return start_members; }
+    public final int getStartMembers() { return startMembers; }
 
     /**
      * Returns the number of objects in memory.
@@ -930,13 +874,6 @@ public abstract class FileFormat extends File {
         return 0;
     }
 
-    /***************************************************************************
-     * Abstract Instance methods
-     *
-     * These methods are related to the Implementing FileFormat class and to
-     * particular instances of objects with those classes.
-     **************************************************************************/
-
     /**
      * Opens file and returns a file identifier.
      *
@@ -975,12 +912,6 @@ public abstract class FileFormat extends File {
      * @see #open()
      */
     public abstract void close() throws Exception;
-
-    // REVIEW DOCS for close()
-    // What if we try to close a file whose fid is -1? Does this set fid to -1?
-    // What if it's not open? What if no file? are structures & root object
-    // still loaded?
-    // Can we doc exceptions better or in implementation methods?
 
     /**
      * Returns the root object for the file associated with this instance.
@@ -1063,10 +994,6 @@ public abstract class FileFormat extends File {
      */
     public abstract HObject get(String path) throws Exception;
 
-    // REVIEW DOCS for get(); What if no file associated w/ instance?
-    // Look at exceptions. Confirm example. Make sure perf tradeoffs
-    // documented properly.
-
     /**
      * Creates a named datatype in a file.
      *
@@ -1094,52 +1021,35 @@ public abstract class FileFormat extends File {
             "Datatype FileFormat.createNamedDatatype(...) is not implemented.");
     }
 
-    // REVIEW DOCS for createDatatype(). Check and document exceptions.
-
-    /***************************************************************************
+    /**
      * Methods related to Datatypes and HObjects in the implementing FileFormat.
      *
-     * Strictly speaking, these methods aren't related to FileFormat and the
-     * actions could be carried out through the HObject and Datatype classes.
-     * But, in some cases they allow a null input and expect the generated
-     * object to be of a type that has particular FileFormat. Therefore, we put
-     * them in the implementing FileFormat class so that we create the proper
-     * type of HObject... H5Group or H4Group for example.
+     * Strictly speaking, these methods aren't related to FileFormat and the actions could be carried out through the
+     * HObject and Datatype classes. But, in some cases they allow a null input and expect the generated object to be of
+     * a type that has particular FileFormat. Therefore, we put them in the implementing FileFormat class so that we
+     * create the proper type of HObject... H5Group or H4Group for example.
      *
-     * Here again, if there could be Implementation Class methods we'd use
-     * those. But, since we can't override class methods (they can only be
-     * shadowed in Java), these are instance methods.
+     * Here again, if there could be Implementation Class methods we'd use those. But, since we can't override class
+     * methods (they can only be shadowed in Java), these are instance methods.
      *
-     * The non-abstract methods just throw an exception indicating that the
-     * implementing class doesn't support the functionality.
-     **************************************************************************/
-
-    /**
+     * The non-abstract methods just throw an exception indicating that the implementing class doesn't support the
+     * functionality.
+     *
      * Creates a new datatype in memory.
      *
      * The following code creates an instance of H5Datatype in memory.
      *
      * <pre>
      * H5File file = (H5File) h5file.createInstance(&quot;test_hdf5.h5&quot;, FileFormat.WRITE);
-     * H5Datatype dtype = file.createDatatype(
-     *                             Datatype.CLASS_INTEGER,
-     *                             4,
-     *                             Datatype.NATIVE,
-     *                             Datatype.NATIVE);
+     * H5Datatype dtype = file.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
      * </pre>
      *
-     * @param tclass
-     *            class of datatype, e.g. Datatype.CLASS_INTEGER
-     * @param tsize
-     *            size of the datatype in bytes, e.g. 4 for 32-bit integer.
-     * @param torder
-     *            order of the byte endian, e.g. Datatype.ORDER_LE.
-     * @param tsign
-     *            signed or unsigned of an integer, e.g. Datatype.SIGN_NONE.
+     * @param tclass class of datatype, e.g. Datatype.CLASS_INTEGER
+     * @param tsize  size of the datatype in bytes, e.g. 4 for 32-bit integer.
+     * @param torder order of the byte endian, e.g. Datatype.ORDER_LE.
+     * @param tsign  signed or unsigned of an integer, e.g. Datatype.SIGN_NONE.
      * @return The new datatype object if successful; otherwise returns null.
-     * @throws Exception
-     *             The exceptions thrown vary depending on the implementing
-     *             class.
+     * @throws Exception The exceptions thrown vary depending on the implementing class.
      */
     public abstract Datatype createDatatype(int tclass, int tsize, int torder, int tsign) throws Exception;
 
@@ -1179,8 +1089,6 @@ public abstract class FileFormat extends File {
         // Derived classes must override this function to use base type option
         return createDatatype(tclass, tsize, torder, tsign);
     }
-
-    // REVIEW DOCS for createDatatype(). Check and document exceptions.
 
     /**
      * Creates a new dataset in a file with/without chunking/compression.
@@ -1260,8 +1168,6 @@ public abstract class FileFormat extends File {
     {
         return createScalarDS(name, pgroup, type, dims, maxdims, chunks, gzip, null, data);
     }
-
-    // REVIEW DOCS for createScalarDS(). Check and document exceptions.
 
     /**
      * Creates a new compound dataset in a file with/without chunking and
@@ -1390,8 +1296,6 @@ public abstract class FileFormat extends File {
                                         long[] chunks, int gzip, int ncomp, int interlace, Object data)
         throws Exception;
 
-    // REVIEW DOCS for createImage(). Check and document exceptions.
-
     /**
      * Creates a new group with specified name in existing group.
      *
@@ -1410,11 +1314,6 @@ public abstract class FileFormat extends File {
      *             class.
      */
     public abstract Group createGroup(String name, Group parentGroup) throws Exception;
-
-    // REVIEW DOCS for createLink().
-    // Verify Implementing classes document these and also
-    // 'do the right thing' if fid is -1, currentObj is non-null, if
-    // object is null, or the root group then what? document & verify!
 
     /**
      * Creates a soft, hard or external link to an existing object in the open file.
@@ -1532,8 +1431,6 @@ public abstract class FileFormat extends File {
      */
     public abstract void delete(HObject obj)throws Exception;
 
-    // REVIEW DOCS for delete(). Check and document exceptions.
-
     /**
      * Attaches a given attribute to an object.
      *
@@ -1557,27 +1454,18 @@ public abstract class FileFormat extends File {
      */
     public abstract void writeAttribute(HObject obj, Attribute attr, boolean attrExisted) throws Exception;
 
-    // REVIEW DOCS for writeAttribute(). Check and document exceptions.
-
-    /***************************************************************************
-     * Deprecated methods.
-     **************************************************************************/
-
     /**
-     * @deprecated As of 2.4, replaced by {@link #createFile(String, int)}
+     * The replacement method has an additional parameter that controls the behavior if the file already exists. Use
+     * <code>FileFormat.FILE_CREATE_DELETE</code> as the second argument in the replacement method to mimic the behavior
+     * originally provided by this method.
      *
-     *             The replacement method has an additional parameter that
-     *             controls the behavior if the file already exists. Use
-     *             <code>FileFormat.FILE_CREATE_DELETE</code> as the second
-     *             argument in the replacement method to mimic the behavior
-     *             originally provided by this method.
-     *
-     * @param fileName
-     *            The filename; a pathname string.
+     * @param fileName The filename; a pathname string.
      *
      * @return the created file object
      *
      * @throws Exception if file cannot be created
+     *
+     * @deprecated As of 2.4, replaced by {@link #createFile(String, int)}
      */
     @Deprecated
     public final FileFormat create(String fileName) throws Exception
@@ -1586,20 +1474,17 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * @deprecated As of 2.4, replaced by {@link #createInstance(String, int)}
+     * The replacement method has identical functionality and a more descriptive name. Since <i>open</i> is used
+     * elsewhere to perform a different function this method has been deprecated.
      *
-     *             The replacement method has identical functionality and a more
-     *             descriptive name. Since <i>open</i> is used elsewhere to
-     *             perform a different function this method has been deprecated.
-     *
-     * @param pathname
-     *            The pathname string.
-     * @param access
-     *            The file access properties
+     * @param pathname The pathname string.
+     * @param access   The file access properties
      *
      * @return the opened file object
      *
      * @throws Exception if the file cannot be opened
+     *
+     * @deprecated As of 2.4, replaced by {@link #createInstance(String, int)}
      */
     @Deprecated
     public final FileFormat open(String pathname, int access) throws Exception
@@ -1608,36 +1493,25 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * @deprecated As of 2.4, replaced by
-     *             {@link #createCompoundDS(String, Group, long[], long[], long[], int, String[], Datatype[],
-     * int[], Object)}
-     *
-     *             The replacement method has additional parameters:
-     *             <code>maxdims, chunks,</code> and <code>gzip</code>. To mimic
-     *             the behavior originally provided by this method, call the
-     *             replacement method with the following parameter list:
-     *             <code> ( name, pgroup, dims, null, null, -1,
+     * The replacement method has additional parameters: <code>maxdims, chunks,</code> and <code>gzip</code>. To mimic
+     * the behavior originally provided by this method, call the replacement method with the following parameter list:
+     * <code> ( name, pgroup, dims, null, null, -1,
      * memberNames, memberDatatypes, memberSizes, data ); </code>
      *
-     * @param name
-     *            The dataset name.
-     * @param pgroup
-     *            The dataset parent.
-     * @param dims
-     *            The dataset dimensions.
-     * @param memberNames
-     *            The dataset compound member names.
-     * @param memberDatatypes
-     *            The dataset compound member datatypes.
-     * @param memberSizes
-     *            The dataset compound member sizes.
-     * @param data
-     *            The dataset data.
+     * @param name            The dataset name.
+     * @param pgroup          The dataset parent.
+     * @param dims            The dataset dimensions.
+     * @param memberNames     The dataset compound member names.
+     * @param memberDatatypes The dataset compound member datatypes.
+     * @param memberSizes     The dataset compound member sizes.
+     * @param data            The dataset data.
      *
-     * @return
-     *            The dataset created.
+     * @return The dataset created.
      *
      * @throws Exception if the dataset cannot be created
+     *
+     * @deprecated As of 2.4, replaced by
+     *             {@link #createCompoundDS(String, Group, long[], long[], long[], int, String[], Datatype[], int[], Object)}
      */
     @Deprecated
     public final Dataset createCompoundDS(String name, Group pgroup, long[] dims, String[] memberNames,
@@ -1649,19 +1523,17 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * @deprecated As of 2.4, replaced by {@link #copy(HObject, Group, String)}
+     * To mimic the behavior originally provided by this method, call the replacement method with <code>null</code> as
+     * the 3rd parameter.
      *
-     *             To mimic the behavior originally provided by this method,
-     *             call the replacement method with <code>null</code> as the 3rd parameter.
-     *
-     * @param srcObj
-     *             The object to be copied
-     * @param dstGroup
-     *             The group to contain the copied object
+     * @param srcObj   The object to be copied
+     * @param dstGroup The group to contain the copied object
      *
      * @return the copied object
      *
      * @throws Exception if object can not be copied
+     *
+     * @deprecated As of 2.4, replaced by {@link #copy(HObject, Group, String)}
      */
     @Deprecated
     public final HObject copy(HObject srcObj, Group dstGroup) throws Exception
@@ -1695,7 +1567,8 @@ public abstract class FileFormat extends File {
         if ((fullPath == null) || (fullPath.length() <= 0))
             return null;
 
-        String filename = null, path = null;
+        String filename = null;
+        String path     = null;
         int idx = fullPath.indexOf(FILE_OBJ_SEP);
 
         if (idx > 0) {
@@ -1713,35 +1586,33 @@ public abstract class FileFormat extends File {
     };
 
     /**
-     * @deprecated As of 2.4, replaced by {@link #get(String)}
+     * Get the object that has the given filename and path
      *
-     *             This static method, which as been deprecated, causes two problems:
-     *             <ul>
-     *             <li>It can be very expensive if it is called many times or in
-     *             a loop because each call to the method creates an instance of
-     *             a file.
-     *             <li>Since the method does not return the instance of the
-     *             file, the file cannot be closed directly and may be left open
-     *             (memory leak). The only way to close the file is through the
-     *             object returned by this method, for example:
-     *             <pre>
+     * This static method, which as been deprecated, causes two problems:
+     * <ul>
+     * <li>It can be very expensive if it is called many times or in a loop because each call to the method creates an
+     * instance of a file.
+     * <li>Since the method does not return the instance of the file, the file cannot be closed directly and may be left
+     * open (memory leak). The only way to close the file is through the object returned by this method, for example:
+     *
+     * <pre>
      * Dataset dset = H5File.getObject("hdf5_test.h5", "/images/iceburg");
      * ...
      * // close the file through dset
      * dset.getFileFormat().close();
      * </pre>
      *
-     *             </li>
-     *             </ul>
+     * </li>
+     * </ul>
      *
-     * @param filename
-     *            The filename string.
-     * @param path
-     *            The path of the file
+     * @param filename The filename string.
+     * @param path     The path of the file
      *
      * @return the object that has the given filename and path returns null
      *
      * @throws Exception if the object can not be found
+     *
+     * @deprecated As of 2.4, replaced by {@link #get(String)}
      */
     @Deprecated
     public static final HObject getHObject(String filename, String path) throws Exception
@@ -1765,12 +1636,10 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * Finds an object by its object ID
+     * Finds an object by its object ID.
      *
-     * @param file
-     *            the file containing the object
-     * @param oid
-     *            the oid to search for
+     * @param file the file containing the object
+     * @param oid  the oid to search for
      *
      * @return the object that has the given OID; otherwise returns null
      */
@@ -1789,9 +1658,9 @@ public abstract class FileFormat extends File {
             return null;
         }
 
-        Iterator<HObject> member_it = ((Group)theRoot).breadthFirstMemberList().iterator();
-        while (member_it.hasNext()) {
-            theObj = member_it.next();
+        Iterator<HObject> memberIt = ((Group) theRoot).breadthFirstMemberList().iterator();
+        while (memberIt.hasNext()) {
+            theObj = memberIt.next();
             if (theObj.equalsOID(oid))
                 break;
         }
@@ -1800,12 +1669,10 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * Finds an object by the full path of the object (path+name)
+     * Finds an object by the full path of the object (path+name).
      *
-     * @param file
-     *            the file containing the object
-     * @param path
-     *            the full path of the object to search for
+     * @param file the file containing the object
+     * @param path the full path of the object to search for
      *
      * @return the object that has the given path; otherwise returns null
      */
@@ -1832,10 +1699,10 @@ public abstract class FileFormat extends File {
             return theRoot;
         }
 
-        Iterator<HObject> member_it = ((Group)theRoot).breadthFirstMemberList().iterator();
+        Iterator<HObject> memberIt = ((Group) theRoot).breadthFirstMemberList().iterator();
         HObject theObj              = null;
-        while (member_it.hasNext()) {
-            theObj          = member_it.next();
+        while (memberIt.hasNext()) {
+            theObj = memberIt.next();
             String fullPath = theObj.getFullName() + "/";
 
             if (path.equals(fullPath) && theObj.getPath() != null)
@@ -1954,17 +1821,13 @@ public abstract class FileFormat extends File {
     /**
      * Export dataset.
      *
-     * @param file_export_name
-     *            The file name to export data into.
-     * @param object
-     *            The HDF5 dataset object.
-     * @param binary_order
-     *            The data byte order
+     * @param fileExportName The file name to export data into.
+     * @param object         The HDF5 dataset object.
+     * @param binaryOrder    The data byte order
      *
-     * @throws Exception
-     *             The exceptions thrown vary depending on the implementing class.
+     * @throws Exception The exceptions thrown vary depending on the implementing class.
      */
-    public void exportDataset(String file_export_name, Dataset object, int binary_order) throws Exception
+    public void exportDataset(String fileExportName, Dataset object, int binaryOrder) throws Exception
     {
         throw new UnsupportedOperationException(
             "Unsupported operation. Subclasses must implement FileFormat:exportDataset.");
@@ -2024,12 +1887,11 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * Gets the bounds of library versions
+     * Gets the bounds of library versions.
      *
      * @return The earliest and latest library versions in an int array.
      *
-     * @throws Exception
-     *             The exceptions thrown vary depending on the implementing class.
+     * @throws Exception The exceptions thrown vary depending on the implementing class.
      */
     public int[] getLibBounds() throws Exception
     {
@@ -2038,10 +1900,9 @@ public abstract class FileFormat extends File {
     }
 
     /**
-     * Initialize the bounds of library versions
+     * Initialize the bounds of library versions.
      *
-     * @throws Exception
-     *             The exceptions thrown vary depending on the implementing class.
+     * @throws Exception The exceptions thrown vary depending on the implementing class.
      */
     public void initLibBounds() throws Exception
     {

@@ -21,7 +21,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** HDF5 utility class */
+/** HDF5 utility class. */
 public final class H5Utils {
 
     private static final Logger log = LoggerFactory.getLogger(H5Utils.class);

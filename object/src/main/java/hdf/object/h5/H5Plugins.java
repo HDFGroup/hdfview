@@ -15,16 +15,14 @@
 package hdf.object.h5;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** HDF5 plugin utility class */
+/** HDF5 plugin utility class. */
 public final class H5Plugins {
 
     private static final Logger log = LoggerFactory.getLogger(H5Plugins.class);

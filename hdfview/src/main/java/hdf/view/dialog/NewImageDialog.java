@@ -53,13 +53,18 @@ import org.eclipse.swt.widgets.Text;
  */
 public class NewImageDialog extends NewDataObjectDialog {
 
-    private Text nameField, widthField, heightField;
+    private Text nameField;
+    private Text widthField;
+    private Text heightField;
 
     private Combo parentChoice;
 
-    private Button checkIndex, checkTrueColor, checkInterlacePixel, checkInterlacePlane;
+    private Button checkIndex;
+    private Button checkTrueColor;
+    private Button checkInterlacePixel;
+    private Button checkInterlacePlane;
 
-    /** A list of current groups */
+    /** A list of current groups. */
     private List<Group> groupList;
 
     /**
@@ -304,7 +309,8 @@ public class NewImageDialog extends NewDataObjectDialog {
             return null;
         }
 
-        int w = 0, h = 0;
+        int w = 0;
+        int h = 0;
         try {
             w = Integer.parseInt(widthField.getText());
             h = Integer.parseInt(heightField.getText());

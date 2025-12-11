@@ -14,24 +14,10 @@
 
 package hdf.object;
 
-import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
-
-import hdf.object.Attribute;
-import hdf.object.CompoundDS;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-import hdf.object.Utils;
 
 import hdf.hdf5lib.HDFNativeData;
 
@@ -41,17 +27,16 @@ import org.slf4j.LoggerFactory;
 /**
  * A CompoundDS is a dataset with compound datatype.
  *
- * A compound datatype is an aggregation of one or more datatypes. Each member of a compound type has a name
- * which is unique within that type, and a datatype of that member in a compound datum. Compound datatypes can
- * be nested, i.e. members of a compound datatype can be some other compound datatype.
+ * A compound datatype is an aggregation of one or more datatypes. Each member of a compound type has a name which is
+ * unique within that type, and a datatype of that member in a compound datum. Compound datatypes can be nested, i.e.
+ * members of a compound datatype can be some other compound datatype.
  *
- * For more details on compound datatypes, See <a href=
- * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
- * Datatypes in HDF5 User Guide</a>
+ * For more details on compound datatypes, See
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes in HDF5
+ * User Guide</a>
  *
- * Since Java cannot handle C-structured compound data, data in a compound dataset is loaded in to an Java
- * List. Each element of the list is a data array that corresponds to a compound field. The data is
- * read/written by compound field.
+ * Since Java cannot handle C-structured compound data, data in a compound dataset is loaded in to an Java List. Each
+ * element of the list is a data array that corresponds to a compound field. The data is read/written by compound field.
  *
  * For example, if compound dataset "comp" has the following nested structure, and member datatypes
  *
@@ -194,17 +179,15 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     }
 
     /**
+     * Constructs a CompoundDS object with the given file, dataset name and path.
+     *
+     * @param theFile the file that contains the data object.
+     * @param dsName  the name of the data object, e.g. "dset".
+     * @param dsPath  the full path of the data object, e.g. "/arrays/".
+     * @param oid     the oid of the data object.
+     *
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #CompoundDS(FileFormat, String, String)}
-     *
-     * @param theFile
-     *            the file that contains the data object.
-     * @param dsName
-     *            the name of the data object, e.g. "dset".
-     * @param dsPath
-     *            the full path of the data object, e.g. "/arrays/".
-     * @param oid
-     *            the oid of the data object.
      */
     @Deprecated
     public CompoundDS(FileFormat theFile, String dsName, String dsPath, long[] oid)
@@ -497,6 +480,8 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     }
 
     /**
+     * Copy dataset.
+     *
      * @deprecated Not implemented for compound dataset.
      */
     @Deprecated

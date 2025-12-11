@@ -35,13 +35,13 @@ public abstract class UserOptionsDefaultPage extends PreferencePage {
 
     private static final Logger log = LoggerFactory.getLogger(UserOptionsDefaultPage.class);
 
-    /** The reference to the visual shell */
+    /** The reference to the visual shell. */
     protected Shell shell;
 
-    /** The setting of the current font */
+    /** The setting of the current font. */
     protected Font curFont;
 
-    /** The setting of the root directory */
+    /** The setting of the root directory. */
     protected String rootDir = null;
 
     /**

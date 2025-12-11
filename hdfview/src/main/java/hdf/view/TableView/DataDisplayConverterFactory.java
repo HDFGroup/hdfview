@@ -56,10 +56,9 @@ public class DataDisplayConverterFactory {
     private static DataFormat dataFormatReference = null;
 
     /**
-     * Get the Data Display Converter for the supplied data object
+     * Get the Data Display Converter for the supplied data object.
      *
-     * @param dataObject
-     *        the data object
+     * @param dataObject the data object
      *
      * @return the converter instance
      *
@@ -112,9 +111,7 @@ public class DataDisplayConverterFactory {
             converter = null;
         }
 
-        /*
-         * Try to use a default converter.
-         */
+        // Try to use a default converter.
         if (converter == null) {
             log.debug("getDataDisplayConverter(Datatype): using a default data display converter");
 
@@ -124,35 +121,34 @@ public class DataDisplayConverterFactory {
         return converter;
     }
 
-    /** the HDF extension for data converters */
+    /** the HDF extension for data converters. */
     public static class HDFDisplayConverter extends DisplayConverter {
         private static final Logger log = LoggerFactory.getLogger(HDFDisplayConverter.class);
 
-        /** the number format type */
+        /** the number format type. */
         protected NumberFormat numberFormat = null;
-        /** if the data shows in hex format */
+        /** if the data shows in hex format. */
         protected boolean showAsHex = false;
-        /** if data shows in binary format */
+        /** if data shows in binary format. */
         protected boolean showAsBin = false;
-        /** if the enum mapped value is shown */
+        /** if the enum mapped value is shown. */
         protected boolean isEnumConverted = false;
 
         /**
-         * This field is only used for CompoundDataDisplayConverters, but when the
-         * top-level DisplayConverter is a "container" type, such as an
-         * ArrayDataDisplayConverter, we have to set this field and pass it through in
-         * case there is a CompoundDataDisplayConverter at the bottom of the chain.
+         * the "container" type row index.
+         *
+         * This field is only used for CompoundDataDisplayConverters, but when the top-level DisplayConverter is a
+         * "container" type, such as an ArrayDataDisplayConverter, we have to set this field and pass it through in case
+         * there is a CompoundDataDisplayConverter at the bottom of the chain.
          */
-        /** the "container" type row index */
         protected int cellRowIdx;
-        /** the "container" type column index */
+        /** the "container" type column index. */
         protected int cellColIdx;
 
         /**
-         * create a HDF data converter
+         * create a HDF data converter.
          *
-         * @param dtype
-         *        the datatype for conversion
+         * @param dtype the datatype for conversion
          */
         HDFDisplayConverter(final Datatype dtype)
         {
@@ -184,34 +180,30 @@ public class DataDisplayConverterFactory {
         }
 
         /**
-         * set the number format type
+         * set the number format type.
          *
-         * @param format
-         *        the data format
+         * @param format the data format
          */
         public void setNumberFormat(NumberFormat format) { numberFormat = format; }
 
         /**
-         * set if the data shows in hex format
+         * set if the data shows in hex format.
          *
-         * @param asHex
-         *        if the data shows as hex format
+         * @param asHex if the data shows as hex format
          */
         public void setShowAsHex(boolean asHex) { showAsHex = asHex; }
 
         /**
-         * set if data shows in binary format
+         * set if data shows in binary format.
          *
-         * @param asBin
-         *        if the data shows as binary format
+         * @param asBin if the data shows as binary format
          */
         public void setShowAsBin(boolean asBin) { showAsBin = asBin; }
 
         /**
-         * set if the enum mapped value is shown
+         * set if the enum mapped value is shown.
          *
-         * @param convert
-         *        if the enum data should be converted
+         * @param convert if the enum data should be converted
          */
         public void setConvertEnum(boolean convert) { isEnumConverted = convert; }
     }

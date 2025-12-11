@@ -14,18 +14,17 @@
 
 package hdf.object.h4;
 
-import java.lang.reflect.Array;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
-import hdf.object.CompoundDataFormat;
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -33,18 +32,15 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group
- * or named datatype.
+ * An attribute is a (name, value) pair of metadata attached to a primary data object such as a dataset, group or named
+ * datatype.
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * For more details on attributes, <a
- * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
- * Attributes in HDF5 User Guide</a>
+ * For more details on attributes,
+ * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in
+ * HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
  *
@@ -69,9 +65,9 @@ import org.slf4j.LoggerFactory;
  * &#64;see hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
  * </pre>
  *
- * For a compound datatype, the value of an H4CompoundAttribute will be a 1D array of strings with field
- * members separated by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of
- * {int, float} of three data points.
+ * For a compound datatype, the value of an H4CompoundAttribute will be a 1D array of strings with field members
+ * separated by a comma. For example, "{0, 10.5}, {255, 20.0}, {512, 30.0}" is a compound attribute of {int, float} of
+ * three data points.
  *
  * @see hdf.object.Datatype
  *
@@ -84,10 +80,10 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
 
     private static final Logger log = LoggerFactory.getLogger(H4CompoundAttribute.class);
 
-    /** The HObject to which this NC2Attribute is attached, Attribute interface */
+    /** The HObject to which this NC2Attribute is attached, Attribute interface. */
     protected HObject parentObject;
 
-    /** additional information and properties for the attribute, Attribute interface */
+    /** additional information and properties for the attribute, Attribute interface. */
     private transient Map<String, Object> properties;
 
     /**
@@ -374,21 +370,16 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
     }
 
     /**
-     * Given an array of bytes representing a compound Datatype and a start index
-     * and length, converts len number of bytes into the correct Object type and
-     * returns it.
+     * Given an array of bytes representing a compound Datatype and a start index and length, converts len number of
+     * bytes into the correct Object type and returns it.
      *
-     * @param data
-     *            The byte array representing the data of the compound Datatype
-     * @param data_type
-     *            The type of data to convert the bytes to
-     * @param start
-     *            The start index of the bytes to get
-     * @param len
-     *            The number of bytes to convert
+     * @param data     The byte array representing the data of the compound Datatype
+     * @param dataType The type of data to convert the bytes to
+     * @param start    The start index of the bytes to get
+     * @param len      The number of bytes to convert
      * @return The converted type of the bytes
      */
-    protected Object convertCompoundByteMember(byte[] data, long data_type, long start, long len)
+    protected Object convertCompoundByteMember(byte[] data, long dataType, long start, long len)
     {
         return null;
     }
@@ -525,6 +516,8 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
     public final long[] getAttributeDims() { return getDims(); }
 
     /**
+     * Check if Attribute is null.
+     *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     @Override
@@ -534,6 +527,8 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
     }
 
     /**
+     * Check if Attribute is a single scalar point.
+     *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isAttributeScalar() { return isScalar(); }

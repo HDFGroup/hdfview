@@ -123,14 +123,14 @@ public interface Attribute {
     int getAttributePlane();
 
     /**
-     * Check if attribute's dataspace is a NULL
+     * Check if attribute's dataspace is a NULL.
      *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     boolean isAttributeNULL();
 
     /**
-     * Check if attribute is a single scalar point
+     * Check if attribute is a single scalar point.
      *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */

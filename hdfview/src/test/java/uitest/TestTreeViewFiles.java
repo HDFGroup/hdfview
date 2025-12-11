@@ -192,7 +192,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
     {
         String filename    = "tscalarstring.h5";
         String datasetname = "the_str";
-        String attr_name   = "attr_str";
+        String attrName   = "attr_str";
         File hdf_file      = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
@@ -237,8 +237,8 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
             val = attrTable.cell(0, 0);
             assertTrue(
-                val.equals(attr_name),
-                constructWrongValueMessage("openHDF5ScalarString()", "wrong attribute name", attr_name, val));
+                val.equals(attrName),
+                constructWrongValueMessage("openHDF5ScalarString()", "wrong attribute name", attrName, val));
 
             val      = attrTable.cell(0, 3);
             expected = "ABCDEFGHBCDEFGHICDEFGHIJDEFGHIJKEFGHIJKLFGHIJKLMGHIJKLMNHIJKLMNO";
@@ -823,7 +823,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
     public void openHDF5CompoundAttribute()
     {
         String filename  = "tcmpdattrintsize.h5";
-        String attr_name = "CompoundAttrIntSize";
+        String attrName = "CompoundAttrIntSize";
         File hdf_file    = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
@@ -844,9 +844,9 @@ public class TestTreeViewFiles extends AbstractWindowTest {
             SWTBotTable attrTable = bot.table();
 
             String val = attrTable.cell(0, 0);
-            assertTrue(val.equals(attr_name),
+            assertTrue(val.equals(attrName),
                        constructWrongValueMessage("openHDF5CompoundAttribute()", "wrong attribute name",
-                                                  attr_name, val));
+                                                  attrName, val));
 
             assertTrue(attrTable.cell(0, 3).matches("^.*[ 255.*].*"),
                        "openHDF5CompoundAttribute() data did not match regex '^.*[ 255.*].*'");

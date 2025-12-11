@@ -51,19 +51,19 @@ public abstract class Group extends HObject implements MetaDataContainer {
      */
     protected int nMembersInFile;
 
-    /** The value of LINK_TYPE_HARD */
+    /** The value of LINK_TYPE_HARD. */
     public static final int LINK_TYPE_HARD = 0;
 
-    /** The value of LINK_TYPE_SOFT */
+    /** The value of LINK_TYPE_SOFT. */
     public static final int LINK_TYPE_SOFT = 1;
 
-    /** The value of LINK_TYPE_EXTERNAL */
+    /** The value of LINK_TYPE_EXTERNAL. */
     public static final int LINK_TYPE_EXTERNAL = 64;
 
-    /** The value of CRT_ORDER_TRACKED */
+    /** The value of CRT_ORDER_TRACKED. */
     public static final int CRT_ORDER_TRACKED = 1;
 
-    /** The value of CRT_ORDER_INDEXED */
+    /** The value of CRT_ORDER_INDEXED. */
     public static final int CRT_ORDER_INDEXED = 2;
 
     /**
@@ -91,19 +91,18 @@ public abstract class Group extends HObject implements MetaDataContainer {
     }
 
     /**
+     * Constructs an instance of the group with specific name, path, parent group and id. An HDF data object must have a
+     * name. The path is the group path starting from the root. The parent group is the group where this group is
+     * located.
+     *
+     * @param theFile   the file containing the group.
+     * @param grpName   the name of this group, e.g. "grp01".
+     * @param grpPath   the full path of this group, e.g. "/groups/".
+     * @param grpParent the parent of this group.
+     * @param oid       the oid of this group.
+     *
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #Group(FileFormat, String, String, Group)}
-     *
-     * @param theFile
-     *            the file containing the group.
-     * @param grpName
-     *            the name of this group, e.g. "grp01".
-     * @param grpPath
-     *            the full path of this group, e.g. "/groups/".
-     * @param grpParent
-     *            the parent of this group.
-     * @param oid
-     *            the oid of this group.
      */
     @Deprecated
     public Group(FileFormat theFile, String grpName, String grpPath, Group grpParent, long[] oid)
@@ -176,7 +175,6 @@ public abstract class Group extends HObject implements MetaDataContainer {
                     theFile.open();
                 } // load the file structure;
                 catch (Exception ex) {
-                    ;
                 }
             }
 
@@ -311,10 +309,10 @@ public abstract class Group extends HObject implements MetaDataContainer {
      *
      * Current Java applications such as HDFView cannot handle files with large
      * numbers of objects (1,000,000 or more objects) due to JVM memory
-     * limitation. The max_members is used so that applications such as HDFView
-     * will load up to <i>max_members</i> number of objects. If the number of
-     * objects in file is larger than <i>max_members</i>, only
-     * <i>max_members</i> are loaded in memory.
+     * limitation. The maxMembers is used so that applications such as HDFView
+     * will load up to <i>maxMembers</i> number of objects. If the number of
+     * objects in file is larger than <i>maxMembers</i>, only
+     * <i>maxMembers</i> are loaded in memory.
      *
      * getNumberOfMembersInFile() returns the number of objects in this group.
      * The number of objects in memory is obtained by getMemberList().size().

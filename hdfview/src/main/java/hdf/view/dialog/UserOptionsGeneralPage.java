@@ -45,13 +45,28 @@ import org.eclipse.swt.widgets.Text;
 public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     private static final Logger log = LoggerFactory.getLogger(UserOptionsGeneralPage.class);
 
-    private Text UGField, workField, maxMemberField, startMemberField, timerRefreshField;
+    private Text ugField;
+    private Text workField;
+    private Text maxMemberField;
+    private Text startMemberField;
+    private Text timerRefreshField;
 
-    private Combo fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
+    private Combo fontSizeChoice;
+    private Combo fontTypeChoice;
+    private Combo delimiterChoice;
+    private Combo imageOriginChoice;
+    private Combo indexBaseChoice;
 
-    private Button checkCurrentUserDir, checkUserHomeDir, checkAutoContrast, checkShowValues;
-    private Button currentDirButton, userHomeButton, rwButton, helpButton;
-    private Button checkReadOnly, checkReadAll;
+    private Button checkCurrentUserDir;
+    private Button checkUserHomeDir;
+    private Button checkAutoContrast;
+    private Button checkShowValues;
+    private Button currentDirButton;
+    private Button userHomeButton;
+    private Button rwButton;
+    private Button helpButton;
+    private Button checkReadOnly;
+    private Button checkReadAll;
 
     private boolean isFontChanged;
     private boolean isUserGuideChanged;
@@ -92,12 +107,12 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
     {
         getPreferenceStore();
 
-        if (UGField != null) {
-            String UGPath = UGField.getText();
-            if ((UGPath != null) && (UGPath.length() > 0)) {
-                UGPath             = UGPath.trim();
-                isUserGuideChanged = !UGPath.equals(ViewProperties.getUsersGuide());
-                ViewProperties.setUsersGuide(UGPath);
+        if (ugField != null) {
+            String ugPath = ugField.getText();
+            if ((ugPath != null) && (ugPath.length() > 0)) {
+                ugPath = ugPath.trim();
+                isUserGuideChanged = !ugPath.equals(ViewProperties.getUsersGuide());
+                ViewProperties.setUsersGuide(ugPath);
             }
         }
 
@@ -258,7 +273,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
         log.trace("UserOptionsGeneralPage: workDir={}", workDir);
 
-        UGField.setText(ViewProperties.getUsersGuide());
+        ugField.setText(ViewProperties.getUsersGuide());
 
         checkReadOnly.setSelection(ViewProperties.isReadOnly());
 
@@ -429,9 +444,9 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         label.setFont(curFont);
         label.setText("User's Guide:  ");
 
-        UGField = new Text(helpDocumentGroup, SWT.SINGLE | SWT.BORDER);
-        UGField.setFont(curFont);
-        UGField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        ugField = new Text(helpDocumentGroup, SWT.SINGLE | SWT.BORDER);
+        ugField.setFont(curFont);
+        ugField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         Button browseButton = new Button(helpDocumentGroup, SWT.PUSH);
         browseButton.setFont(curFont);
@@ -459,7 +474,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
                     return;
                 }
 
-                UGField.setText(chosenFile.getAbsolutePath());
+                ugField.setText(chosenFile.getAbsolutePath());
             }
         });
 

@@ -20,7 +20,6 @@ import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.view.DataView.DataView;
-import hdf.view.MetaDataView.MetaDataView;
 
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -87,20 +86,18 @@ public abstract interface TreeView {
     public abstract FileFormat reopenFile(FileFormat theFile, int newFileAccessMode) throws Exception;
 
     /**
-     * close a file
+     * close a file.
      *
-     * @param file
-     *            the file to close
+     * @param file the file to close
      *
      * @throws Exception if a failure occurred
      */
     public abstract void closeFile(FileFormat file) throws Exception;
 
     /**
-     * save a file
+     * save a file.
      *
-     * @param file
-     *            the file to save
+     * @param file the file to save
      *
      * @throws Exception if a failure occurred
      */
@@ -123,7 +120,7 @@ public abstract interface TreeView {
     public abstract FileFormat getSelectedFile();
 
     /**
-     * Get the current selected object in the tree
+     * Get the current selected object in the tree.
      *
      * @return the current selected object in the tree.
      */
@@ -155,14 +152,14 @@ public abstract interface TreeView {
     public abstract TreeItem addObject(HObject newObject, Group parentGroup);
 
     /**
-     * Get the Tree which holds the file structure
+     * Get the Tree which holds the file structure.
      *
      * @return the Tree which holds the file structure.
      */
     public abstract Tree getTree();
 
     /**
-     * Get the list of currently open files
+     * Get the list of currently open files.
      *
      * @return the list of currently open files.
      */

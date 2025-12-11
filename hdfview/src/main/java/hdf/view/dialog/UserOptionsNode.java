@@ -24,8 +24,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 public class UserOptionsNode extends PreferenceNode {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserOptionsNode.class);
     /**
-     * The name of the class that implements the <code>PreferencePage</code>
-     * bound to this <code>ExtendedPreferenceNode</code>
+     * The name of the class that implements the <code>PreferencePage</code> bound to this
+     * <code>ExtendedPreferenceNode</code>.
      */
     private String classname;
 

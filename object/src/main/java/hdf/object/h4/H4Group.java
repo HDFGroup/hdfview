@@ -25,7 +25,6 @@ import hdf.object.Dataset;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.object.h4.H4ScalarAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +51,10 @@ public class H4Group extends Group {
     @SuppressWarnings("rawtypes")
     private List attributeList;
 
-    /** the number of attributes */
+    /** the number of attributes. */
     private int nAttributes = -1;
 
-    /** The default object ID for HDF4 objects */
+    /** The default object ID for HDF4 objects. */
     private static final long[] DEFAULT_OID = {0, 0};
 
     /**

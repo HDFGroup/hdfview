@@ -19,13 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 
-import hdf.object.Attribute;
-import hdf.object.Dataset;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.Group;
-import hdf.object.HObject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +29,12 @@ import nom.tam.fits.Fits;
 import nom.tam.fits.ImageHDU;
 import nom.tam.fits.RandomGroupsHDU;
 import nom.tam.fits.TableHDU;
+
+import hdf.object.Dataset;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.Group;
+import hdf.object.HObject;
 
 /**
  * This class provides file level APIs. File access APIs include retrieving the
@@ -54,7 +53,7 @@ public class FitsFile extends FileFormat {
      */
     private HObject rootObject;
 
-    /** the fits file */
+    /** the fits file. */
     private Fits fitsFile;
 
     private static boolean isFileOpen;
@@ -108,7 +107,7 @@ public class FitsFile extends FileFormat {
     @Override
     public boolean isThisType(String filename)
     {
-        boolean is_fits      = false;
+        boolean          isFits = false;
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(filename, "r");
@@ -152,8 +151,7 @@ public class FitsFile extends FileFormat {
                 return false;
             }
 
-            is_fits = true;
-            ;
+            isFits = true;
         }
 
         try {
@@ -163,7 +161,7 @@ public class FitsFile extends FileFormat {
             log.debug("closing RandomAccessFile({}):", filename, ex);
         }
 
-        return is_fits;
+        return isFits;
     }
 
     /**
@@ -333,8 +331,6 @@ public class FitsFile extends FileFormat {
      *
      * @param srcDataset the dataset to be copied.
      * @param pgroup the group where the dataset is copied to.
-     *
-     * @return the treeNode containing the new copy of the dataset.
      */
     private void copyDataset(Dataset srcDataset, FitsGroup pgroup) throws Exception
     {

@@ -17,26 +17,18 @@ import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
-import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.Utils;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5ReferenceType;
 import hdf.view.Tools;
-
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,14 +54,11 @@ public class DataProviderFactory {
     private static DataFormat dataFormatReference = null;
 
     /**
-     * Get the Data Display Provider for the supplied data object
+     * Get the Data Display Provider for the supplied data object.
      *
-     * @param dataObject
-     *        the data object
-     * @param dataBuf
-     *        the data buffer to use
-     * @param dataTransposed
-     *        if the data should be transposed
+     * @param dataObject     the data object
+     * @param dataBuf        the data buffer to use
+     * @param dataTransposed if the data should be transposed
      *
      * @return the provider instance
      *
@@ -149,40 +138,37 @@ public class DataProviderFactory {
          */
         protected Object dataBuf;
 
-        /** the data value */
+        /** the data value. */
         protected Object theValue;
 
-        /** the data format class */
+        /** the data format class. */
         protected final Class originalFormatClass;
 
-        /** if the data value has changed */
+        /** if the data value has changed. */
         protected boolean isValueChanged;
 
-        /** the type of the parent */
+        /** the type of the parent. */
         protected final boolean isContainerType;
 
-        /** the rank */
+        /** the rank. */
         protected final int rank;
 
-        /** if the data is in original order */
+        /** if the data is in original order. */
         protected final boolean isNaturalOrder;
-        /** if the data is transposed */
+        /** if the data is transposed. */
         protected final boolean isDataTransposed;
 
-        /** the column */
+        /** the column. */
         protected long colCount;
-        /** the row */
+        /** the row. */
         protected long rowCount;
 
         /**
-         * Create the HDF extended Data Display Provider for the supplied data object
+         * Create the HDF extended Data Display Provider for the supplied data object.
          *
-         * @param dtype
-         *        the datatype object
-         * @param dataBuf
-         *        the data buffer to use
-         * @param dataTransposed
-         *        if the data should be transposed
+         * @param dtype          the datatype object
+         * @param dataBuf        the data buffer to use
+         * @param dataTransposed if the data should be transposed
          *
          * @throws Exception if a failure occurred
          */
@@ -439,9 +425,9 @@ public class DataProviderFactory {
             }
 
             // No need to update if values are the same
-            int buf_size = Array.getLength(bufObject);
-            log.trace("updateAtomicValue(): bufObject size is {}", buf_size);
-            if (buf_size > 0) {
+            int bufsize = Array.getLength(bufObject);
+            log.trace("updateAtomicValue(): bufObject size is {}", bufsize);
+            if (bufsize > 0) {
                 Object oldVal = this.getDataValue(bufObject, bufIndex);
                 if ((oldVal != null) && newValue.equals(oldVal.toString())) {
                     log.debug("updateAtomicValue(): cell value not updated; new value same as old value");
@@ -554,15 +540,14 @@ public class DataProviderFactory {
         }
 
         /**
-         * set if the data value has changed
+         * set if the data value has changed.
          *
-         * @param isChanged
-         *        if the data value is changed
+         * @param isChanged if the data value is changed
          */
         public final void setIsValueChanged(boolean isChanged) { isValueChanged = isChanged; }
 
         /**
-         * Check if the datavalue has changed
+         * Check if the datavalue has changed.
          *
          * @return if the datavalue has changed
          */
@@ -1475,13 +1460,13 @@ public class DataProviderFactory {
             Object[] tempArray = new Object[(int)vlSize];
 
             for (int i = 0; i < vlSize; i++) {
-                ArrayList<byte[]> ref_value = vlElements;
+                ArrayList<byte[]> refValue = vlElements;
                 StringBuilder sb            = new StringBuilder();
                 sb.append("{");
-                for (int m = 0; m < ref_value.size(); m++) {
+                for (int m = 0; m < refValue.size(); m++) {
                     if (m > 0)
                         sb.append(", ");
-                    byte[] byteElements = ref_value.get(m);
+                    byte[] byteElements = refValue.get(m);
                     log.trace("retrieveArrayOfArrayElements byteElements={}", byteElements);
                     sb.append(baseTypeDataProvider.getDataValue(byteElements, columnIndex, i));
                 }
@@ -1502,13 +1487,13 @@ public class DataProviderFactory {
             Object[] tempArray = new Object[(int)vlSize];
 
             for (int i = 0; i < vlSize; i++) {
-                ArrayList<byte[]> ref_value = vlElements;
+                ArrayList<byte[]> refValue = vlElements;
                 StringBuilder sb            = new StringBuilder();
                 sb.append("{");
-                for (int m = 0; m < ref_value.size(); m++) {
+                for (int m = 0; m < refValue.size(); m++) {
                     if (m > 0)
                         sb.append(", ");
-                    byte[] byteElements = ref_value.get(m);
+                    byte[] byteElements = refValue.get(m);
                     log.trace("retrieveArrayOfComplexElements byteElements={}", byteElements);
                     sb.append(baseTypeDataProvider.getDataValue(byteElements, columnIndex, i * 2));
                 }
@@ -1627,19 +1612,19 @@ public class DataProviderFactory {
             StringTokenizer st = new StringTokenizer((String)newValue, ",[]");
             int newcnt         = st.countTokens();
 
-            Object[] buffer = null;
+            Object[] abuffer = null;
             switch (baseTypeClass) {
             case Datatype.CLASS_CHAR:
-                buffer = new Byte[newcnt];
+                abuffer = new Byte[newcnt];
                 break;
             case Datatype.CLASS_INTEGER:
-                buffer = new Integer[newcnt];
+                abuffer = new Integer[newcnt];
                 break;
             case Datatype.CLASS_FLOAT:
-                buffer = new Double[newcnt];
+                abuffer = new Double[newcnt];
                 break;
             case Datatype.CLASS_STRING:
-                buffer = new String[newcnt];
+                abuffer = new String[newcnt];
                 break;
             case Datatype.CLASS_REFERENCE:
             case Datatype.CLASS_OPAQUE:
@@ -1650,14 +1635,14 @@ public class DataProviderFactory {
             case Datatype.CLASS_VLEN:
             case Datatype.CLASS_COMPLEX:
             default:
-                buffer = new Object[newcnt];
+                abuffer = new Object[newcnt];
                 break;
             }
             for (int i = 0; i < newcnt; i++) {
-                baseTypeDataProvider.setDataValue(columnIndex, i, buffer, st.nextToken().trim());
+                baseTypeDataProvider.setDataValue(columnIndex, i, abuffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
-            vlElements                      = new ArrayList<>(Arrays.asList(buffer));
+            vlElements = new ArrayList<>(Arrays.asList(abuffer));
             ((ArrayList[])curBuf)[rowIndex] = vlElements;
         }
 
@@ -1670,19 +1655,19 @@ public class DataProviderFactory {
             StringTokenizer st = new StringTokenizer((String)newValue, ",[]");
             int newcnt         = st.countTokens();
             log.trace("updateArrayOfAtomicElements(): count={}", newcnt);
-            Object[] buffer = null;
+            Object[] abuffer = null;
             switch (baseTypeClass) {
             case Datatype.CLASS_CHAR:
-                buffer = new Byte[newcnt];
+                abuffer = new Byte[newcnt];
                 break;
             case Datatype.CLASS_INTEGER:
-                buffer = new Integer[newcnt];
+                abuffer = new Integer[newcnt];
                 break;
             case Datatype.CLASS_FLOAT:
-                buffer = new Double[newcnt];
+                abuffer = new Double[newcnt];
                 break;
             case Datatype.CLASS_STRING:
-                buffer = new String[newcnt];
+                abuffer = new String[newcnt];
                 break;
             case Datatype.CLASS_REFERENCE:
             case Datatype.CLASS_OPAQUE:
@@ -1693,17 +1678,17 @@ public class DataProviderFactory {
             case Datatype.CLASS_VLEN:
             case Datatype.CLASS_COMPLEX:
             default:
-                buffer = new Object[newcnt];
+                abuffer = new Object[newcnt];
                 break;
             }
             for (int i = 0; i < newcnt; i++) {
-                baseTypeDataProvider.setDataValue(i, buffer, st.nextToken().trim());
+                baseTypeDataProvider.setDataValue(i, abuffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
-            String bname = buffer.getClass().getName();
+            String bname = abuffer.getClass().getName();
             String cname = curBuf.getClass().getName();
-            log.trace("updateArrayOfAtomicElements(): buffer cname={} of data cname={}", bname, cname);
-            vlElements = new ArrayList<>(Arrays.asList(buffer));
+            log.trace("updateArrayOfAtomicElements(): abuffer cname={} of data cname={}", bname, cname);
+            vlElements = new ArrayList<>(Arrays.asList(abuffer));
             log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
             ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
         }
@@ -2303,15 +2288,15 @@ public class DataProviderFactory {
 
             StringTokenizer st = new StringTokenizer((String)newValue, "+i");
             int newcnt         = st.countTokens();
-            Object[] buffer    = new Double[newcnt];
+            Object[]        abuffer = new Double[newcnt];
             for (int i = 0; i < newcnt; i++) {
-                baseTypeDataProvider.setDataValue(i, buffer, st.nextToken().trim());
+                baseTypeDataProvider.setDataValue(i, abuffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
-            String bname = buffer.getClass().getName();
+            String bname = abuffer.getClass().getName();
             String cname = curBuf.getClass().getName();
             log.trace("updateArrayOfAtomicElements(): buffer cname={} of data cname={}", bname, cname);
-            vlElements = new ArrayList<>(Arrays.asList(buffer));
+            vlElements = new ArrayList<>(Arrays.asList(abuffer));
             log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
             ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
         }

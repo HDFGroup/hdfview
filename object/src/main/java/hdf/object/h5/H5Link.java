@@ -23,7 +23,6 @@ import hdf.object.MetaDataContainer;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.HDFArray;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5O_info_t;
@@ -49,7 +48,7 @@ public class H5Link extends HObject implements MetaDataContainer {
 
     private static final Logger log = LoggerFactory.getLogger(H5Link.class);
 
-    /** the object properties */
+    /** the object properties. */
     private H5O_info_t objInfo;
 
     /**

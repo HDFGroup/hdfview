@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,13 +29,12 @@ import java.util.regex.Pattern;
 import hdf.object.CompoundDS;
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
-import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
-import hdf.object.Utils;
 import hdf.object.h5.H5Datatype;
+
 import hdf.view.DataView.DataViewManager;
 import hdf.view.HDFView;
 import hdf.view.Tools;
@@ -70,6 +68,7 @@ import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
@@ -130,12 +129,10 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     }
 
     /**
-     * Creates a NatTable for a Compound dataset
+     * Creates a NatTable for a Compound dataset.
      *
-     * @param parent
-     *            The parent for the NatTable
-     * @param dataObject
-     *            The Compound dataset for the NatTable to display
+     * @param parent     The parent for the NatTable
+     * @param dataObject The Compound dataset for the NatTable to display
      *
      * @return The newly created NatTable
      */
@@ -209,7 +206,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     }
 
     /**
-     * Returns the selected data values of the ScalarDS
+     * Returns the selected data values of the ScalarDS.
      */
     @Override
     public Object getSelectedData()
@@ -670,7 +667,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     }     // end of showRegRefData()
 
     /**
-     * Update cell value label and cell value field when a cell is selected
+     * Update cell value label and cell value field when a cell is selected.
      */
     private class CompoundDSCellSelectionListener implements ILayerListener {
         @Override

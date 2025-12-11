@@ -20,14 +20,14 @@ import java.awt.Rectangle;
 import hdf.view.DataView.DataView;
 
 /**
- * The image view interface for displaying image object
+ * The image view interface for displaying image object.
  *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
 public abstract interface ImageView extends DataView {
     /**
-     * Returns the selected area of the image
+     * Returns the selected area of the image.
      *
      * @return the rectangle of the selected image area.
      */
@@ -48,42 +48,42 @@ public abstract interface ImageView extends DataView {
     public abstract boolean isPlaneInterlace();
 
     /**
-     * Get the array of selected data
+     * Get the array of selected data.
      *
      * @return array of selected data
      */
     public abstract Object getSelectedData();
 
     /**
-     * Get the image displayed in this imageView
+     * Get the image displayed in this imageView.
      *
      * @return the image displayed in this imageView
      */
     public abstract Image getImage();
 
     /**
-     * Sets the image
+     * Sets the image.
      *
      * @param img the image to view
      */
     public abstract void setImage(Image img);
 
     /**
-     * Get the palette of the image
+     * Get the palette of the image.
      *
      * @return the palette of the image
      */
     public abstract byte[][] getPalette();
 
     /**
-     * Sets the image palette
+     * Sets the image palette.
      *
      * @param palette the palette for the image to view
      */
     public abstract void setPalette(byte[][] palette);
 
     /**
-     * Get the byte array of the image data
+     * Get the byte array of the image data.
      *
      * @return the byte array of the image data
      */

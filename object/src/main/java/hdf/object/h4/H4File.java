@@ -23,19 +23,19 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hdf.hdflib.HDFConstants;
 import hdf.hdflib.HDFException;
 import hdf.hdflib.HDFLibrary;
+
 import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.object.h4.H4ScalarAttribute;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class provides file level APIs. File access APIs include retrieving the
@@ -74,7 +74,7 @@ public class H4File extends FileFormat {
      */
     private long grid;
 
-    /** if this is a netcdf file */
+    /** if this is a netcdf file. */
     private boolean isNetCDF = false;
 
     /**
@@ -87,7 +87,7 @@ public class H4File extends FileFormat {
     private long sdid;
 
     /**
-     * secret flag: show CDF0.0, etc., to help debug
+     * secret flag: show CDF0.0, etc., to help debug.
      */
     private boolean showAll = false;
 
@@ -439,13 +439,11 @@ public class H4File extends FileFormat {
     /**
      * Copy an object to a group.
      *
-     * @param srcObj
-     *            the object to copy.
-     * @param dstGroup
-     *            the destination group.
+     * @param srcObj   the object to copy.
+     * @param dstGroup the destination group.
+     * @param dstName  the destination name.
      *
-     * @return the destination group, if the copy was successful, or
-     *            null otherwise.
+     * @return the destination group, if the copy was successful, or null otherwise.
      *
      * @throws Exception if the object can not be copied
      */
@@ -844,12 +842,10 @@ public class H4File extends FileFormat {
     }
 
     /**
-     * Retrieves the tree structure of the file by depth-first order. The
-     * current implementation only retrieves groups and datasets. It does not
-     * include named datatypes and soft links.
+     * Retrieves the tree structure of the file by depth-first order. The current implementation only retrieves groups
+     * and datasets. It does not include named datatypes and soft links.
      *
-     * @param parentObject
-     *            the parent object.
+     * @param parentObj the parent object.
      */
     private void depth_first(HObject parentObj)
     {
@@ -967,9 +963,12 @@ public class H4File extends FileFormat {
     }     // private depth_first()
 
     /**
-     * Returns a list of all the members of this H4File in a
-     * breadth-first ordering that are rooted at the specified
+     * Returns a list of all the members of this H4File in a breadth-first ordering that are rooted at the specified
      * object.
+     *
+     * @param obj - the object to start from
+     *
+     * @return - the list objects that are memebers of the obj
      */
     private static List<HObject> getMembersBreadthFirst(HObject obj)
     {
@@ -1005,7 +1004,7 @@ public class H4File extends FileFormat {
      * @return the new H5GRImage if successful; otherwise returns null.
      */
     @SuppressWarnings("unchecked")
-    private final H4GRImage getGRImage(int tag, int index, String path, boolean copyAllowed)
+    private H4GRImage getGRImage(int tag, int index, String path, boolean copyAllowed)
     {
         log.trace("getGRImage(): start: tag={} index={} path={} copyAllowed={}", tag, index, path,
                   copyAllowed);
@@ -1070,7 +1069,7 @@ public class H4File extends FileFormat {
      * @return the new H4SDS if successful; otherwise returns null.
      */
     @SuppressWarnings("unchecked")
-    private final H4SDS getSDS(int tag, int index, String path, boolean copyAllowed)
+    private H4SDS getSDS(int tag, int index, String path, boolean copyAllowed)
     {
         log.trace("getSDS(): start: tag={} index={} path={} copyAllowed={}", tag, index, path, copyAllowed);
 
@@ -1159,7 +1158,7 @@ public class H4File extends FileFormat {
      * @return the new H4Vdata if successful; otherwise returns null.
      */
     @SuppressWarnings("unchecked")
-    private final H4Vdata getVdata(int tag, int ref, String path, boolean copyAllowed)
+    private H4Vdata getVdata(int tag, int ref, String path, boolean copyAllowed)
     {
         log.trace("getVdata(): start: tag={} ref={} path={} copyAllowed={}", tag, ref, path, copyAllowed);
 
@@ -1235,7 +1234,7 @@ public class H4File extends FileFormat {
      * @return the new H4VGroup if successful; otherwise returns null.
      */
     @SuppressWarnings("unchecked")
-    private final H4Group getVGroup(int tag, int ref, String path, H4Group pgroup, boolean copyAllowed)
+    private H4Group getVGroup(int tag, int ref, String path, H4Group pgroup, boolean copyAllowed)
     {
         log.trace("getVGroup(): start: tag={}, ref={} path={} pgroup={} copyAllowed={}", tag, ref, path,
                   pgroup, copyAllowed);
@@ -1297,9 +1296,13 @@ public class H4File extends FileFormat {
 
     /**
      * Check if object already exists in memory by matching the (tag, ref) pairs.
+     *
+     * @param oid - the id of the object
+     *
+     * @return - true if the object exists
      */
     @SuppressWarnings("unchecked")
-    private final boolean find(long[] oid)
+    private boolean find(long[] oid)
     {
         log.trace("find(): start: oid({}, {})", oid[0], oid[1]);
 
@@ -1480,30 +1483,27 @@ public class H4File extends FileFormat {
     }
 
     /**
-     * Reads GR global attributes into memory. The attributes are stored as
-     * attributes of the root group.
+     * Reads GR global attributes into memory. The attributes are stored as attributes of the root group.
      *
-     * @param grid
-     *            the GR identifier.
-     * @param attrList
-     *            the list of attributes.
+     * @param theGRid  the GR identifier.
+     * @param attrList the list of attributes.
      *
      * @return the updated attribute list.
      *
      * @throws HDFException if the GR attributes can not be read
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private List getGRglobalAttribute(long grid, List attrList) throws HDFException
+    private List getGRglobalAttribute(long theGRid, List attrList) throws HDFException
     {
-        log.trace("getGRglobalAttribute(): start: GRID={}", grid);
+        log.trace("getGRglobalAttribute(): start: GRID={}", theGRid);
 
-        if (grid == HDFConstants.FAIL) {
+        if (theGRid == HDFConstants.FAIL) {
             log.debug("getGRglobalAttribute(): Invalid GRID");
             return attrList;
         }
 
         int[] attrInfo = {0, 0};
-        HDFLibrary.GRfileinfo(grid, attrInfo);
+        HDFLibrary.GRfileinfo(theGRid, attrInfo);
         int numberOfAttributes = attrInfo[1];
 
         if (numberOfAttributes > 0) {
@@ -1515,7 +1515,7 @@ public class H4File extends FileFormat {
                 attrName[0] = "";
                 boolean b   = false;
                 try {
-                    b = HDFLibrary.GRattrinfo(grid, i, attrName, attrInfo);
+                    b = HDFLibrary.GRattrinfo(theGRid, i, attrName, attrInfo);
                     // mask off the litend bit
                     attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
                 }
@@ -1539,7 +1539,7 @@ public class H4File extends FileFormat {
                 }
 
                 try {
-                    HDFLibrary.GRgetattr(grid, i, buf);
+                    HDFLibrary.GRgetattr(theGRid, i, buf);
                 }
                 catch (HDFException ex) {
                     log.debug("getGRglobalAttribute(): GRgetattr failure: ", ex);
@@ -1570,30 +1570,27 @@ public class H4File extends FileFormat {
     }
 
     /**
-     * Reads SDS global attributes into memory. The attributes are stored as
-     * attributes of the root group.
+     * Reads SDS global attributes into memory. The attributes are stored as attributes of the root group.
      *
-     * @param sdid
-     *            the SD identifier.
-     * @param attrList
-     *            the list of attributes.
+     * @param sdsid    the SD identifier.
+     * @param attrList the list of attributes.
      *
      * @return the updated attribute list.
      *
      * @throws HDFException if the SDS attributes can not be read
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private List getSDSglobalAttribute(long sdid, List attrList) throws HDFException
+    private List getSDSglobalAttribute(long sdsid, List attrList) throws HDFException
     {
-        log.trace("getSDSglobalAttribute(): start: SDID:{}", sdid);
+        log.trace("getSDSglobalAttribute(): start: SDID:{}", sdsid);
 
-        if (sdid == HDFConstants.FAIL) {
+        if (sdsid == HDFConstants.FAIL) {
             log.debug("getSDSglobalAttribute(): Invalid SDID");
             return attrList;
         }
 
         int[] attrInfo = {0, 0};
-        HDFLibrary.SDfileinfo(sdid, attrInfo);
+        HDFLibrary.SDfileinfo(sdsid, attrInfo);
 
         int numberOfAttributes = attrInfo[1];
         if (numberOfAttributes > 0) {
@@ -1605,7 +1602,7 @@ public class H4File extends FileFormat {
                 attrName[0] = "";
                 boolean b   = false;
                 try {
-                    b = HDFLibrary.SDattrinfo(sdid, i, attrName, attrInfo);
+                    b = HDFLibrary.SDattrinfo(sdsid, i, attrName, attrInfo);
                     // mask off the litend bit
                     attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
                 }
@@ -1629,7 +1626,7 @@ public class H4File extends FileFormat {
                 }
 
                 try {
-                    HDFLibrary.SDreadattr(sdid, i, buf);
+                    HDFLibrary.SDreadattr(sdsid, i, buf);
                 }
                 catch (HDFException ex) {
                     log.debug("getSDSglobalAttribute(): SDreadattr failure: ", ex);
@@ -1682,7 +1679,13 @@ public class H4File extends FileFormat {
         return ver;
     }
 
-    /** HDF4 library supports netCDF version 2.3.2. It only supports SDS APIs. */
+    /**
+     * HDF4 library supports netCDF version 2.3.2. It only supports SDS APIs.
+     *
+     * @param filename - the name of the file
+     *
+     * @return - true, if the file is a NetCDF file
+     */
     private boolean isNetCDF(String filename)
     {
         log.trace("isNetCDF(): start: filename={}", filename);
@@ -1775,7 +1778,11 @@ public class H4File extends FileFormat {
         return obj;
     }
 
-    /** Get the root group and all the alone objects */
+    /**
+     * Get the root group and all the alone objects.
+     *
+     * @return - the root group object
+     */
     private H4Group getRootGroup()
     {
         long[] oid = {0, 0};
@@ -1912,7 +1919,14 @@ public class H4File extends FileFormat {
         return rootGroup;
     }
 
-    /** Get the object attached to a vgroup */
+    /**
+     * Get the object attached to a vgroup.
+     *
+     * @param path - path to the object
+     * @param name - name of the object
+     *
+     * @return - the object found
+     */
     private HObject getAttachedObject(String path, String name)
     {
         if ((name == null) || (name.length() <= 0)) {
@@ -1961,7 +1975,7 @@ public class H4File extends FileFormat {
         }
 
         if (ref > 0) {
-            long oid[] = {HDFConstants.DFTAG_VG, ref};
+            long[]  oid = { HDFConstants.DFTAG_VG, ref };
             H4Group g  = new H4Group(this, objName[0], path, null, oid);
             depth_first(g);
             return g;

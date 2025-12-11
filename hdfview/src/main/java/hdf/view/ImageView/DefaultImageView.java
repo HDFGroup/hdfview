@@ -117,13 +117,12 @@ import org.eclipse.swt.widgets.TreeItem;
 /**
  * ImageView displays an HDF dataset as an image.
  *
- * A scalar dataset in HDF can be displayed in image or table. By default, an HDF4 GR image and HDF5 image is
- * displayed as an image. Other scalar datasets are display in a two-dimensional table.
+ * A scalar dataset in HDF can be displayed in image or table. By default, an HDF4 GR image and HDF5 image is displayed
+ * as an image. Other scalar datasets are display in a two-dimensional table.
  *
- * Users can also choose to display a scalar dataset as image. Currently this version of the ImageView only
- * supports 8-bit raster image with indexed RGB color model of 256 colors or 24-bit true color raster image.
- * Data of other type will be converted to 8-bit integer. The simple linear conversion is used for this
- * purpose:
+ * Users can also choose to display a scalar dataset as image. Currently this version of the ImageView only supports
+ * 8-bit raster image with indexed RGB color model of 256 colors or 24-bit true color raster image. Data of other type
+ * will be converted to 8-bit integer. The simple linear conversion is used for this purpose:
  *
  * <pre>
  * y = f * (x - min),
@@ -134,10 +133,9 @@ import org.eclipse.swt.widgets.TreeItem;
  *             min = the minimum of the original data.
  * </pre>
  *
- * A default color table is provided for images without palette attached to it. Current choice of default
- * palettes include Gray, Rainbow, Nature and Wave. For more infomation on palette, read <a
- * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_i_m_g.html">HDF5
- * Image and Palette Specification</a>
+ * A default color table is provided for images without palette attached to it. Current choice of default palettes
+ * include Gray, Rainbow, Nature and Wave. For more infomation on palette, read
+ * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_i_m_g.html">HDF5 Image and Palette Specification</a>
  *
  * @author Jordan T. Henderson
  * @version 2.4 2//2016
@@ -211,16 +209,16 @@ public class DefaultImageView implements ImageView {
     /** TextField to show the image value. */
     private Text valueField;
 
-    /** Flag to indicate if the image is a true color image */
+    /** Flag to indicate if the image is a true color image. */
     private boolean isTrueColor;
 
-    /** Flag to indicate if the image is a 3D */
+    /** Flag to indicate if the image is a 3D. */
     private boolean is3D;
 
-    /** Flag to indicate whether to show pixel values in ImageComponent */
+    /** Flag to indicate whether to show pixel values in ImageComponent. */
     private boolean showValues = false;
 
-    /** Flag to indicate if the image is plane interleaved */
+    /** Flag to indicate if the image is plane interleaved. */
     private boolean isPlaneInterlace;
 
     private boolean isHorizontalFlipped = false;
@@ -229,10 +227,10 @@ public class DefaultImageView implements ImageView {
 
     private int rotateCount = 0;
 
-    /** the number type of the image data */
+    /** the number type of the image data. */
     private char NT;
 
-    /** the raw data of the image */
+    /** the raw data of the image. */
     private Object data;
 
     private boolean isUnsignedConverted = false;
@@ -261,15 +259,14 @@ public class DefaultImageView implements ImageView {
     private int[] dataDist = null;
 
     /**
-     * equates to brightness
+     * equates to brightness.
      */
     private boolean doAutoGainContrast = false;
     private double[] gainBias;
     private double[] gainBiasCurrent;
 
     /**
-     * int array to hold unsigned short or signed int data from applying the
-     * autogain
+     * int array to hold unsigned short or signed int data from applying the autogain.
      */
     private Object autoGainData;
 
@@ -618,17 +615,14 @@ public class DefaultImageView implements ImageView {
             }
         });
 
-        /*
-         * ImageIO does not support tiff by default
-         */
-        /**
-         * item = new MenuItem(saveAsMenu, SWT.PUSH); item.setText("TIFF"); item.addSelectionListener(new
-         * SelectionAdapter() { public void widgetSelected(SelectionEvent e) { String filetype =
-         * Tools.FILE_TYPE_TIFF;
-         *
-         * try { saveImageAs(filetype); } catch (Exception ex) { shell.getDisplay().beep();
-         * Tools.showError(shell, "Save", ex.getMessage()); } } });
-         */
+        // ImageIO does not support tiff by default
+        //
+        // item = new MenuItem(saveAsMenu, SWT.PUSH); item.setText("TIFF"); item.addSelectionListener(new
+        // SelectionAdapter() { public void widgetSelected(SelectionEvent e) { String filetype =
+        // Tools.FILE_TYPE_TIFF;
+        //
+        // try { saveImageAs(filetype); } catch (Exception ex) { shell.getDisplay().beep();
+        // Tools.showError(shell, "Save", ex.getMessage()); } } });
 
         item = new MenuItem(saveAsMenu, SWT.PUSH);
         item.setText("PNG");
@@ -1097,9 +1091,9 @@ public class DefaultImageView implements ImageView {
         return menuBar;
     }
 
-    private ToolBar createToolbar(final Shell shell)
+    private ToolBar createToolbar(final Shell ctshell)
     {
-        ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
+        ToolBar toolbar = new ToolBar(ctshell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
         toolbar.setFont(curFont);
         toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -1138,7 +1132,7 @@ public class DefaultImageView implements ImageView {
             public void widgetSelected(SelectionEvent e)
             {
                 if (contrastSlider == null)
-                    contrastSlider = new ContrastSlider(shell, SWT.NONE, image.getSource());
+                    contrastSlider = new ContrastSlider(ctshell, SWT.NONE, image.getSource());
                 contrastSlider.open();
             }
         });
@@ -1179,12 +1173,12 @@ public class DefaultImageView implements ImageView {
                 public void widgetSelected(SelectionEvent e)
                 {
                     try {
-                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
+                        ctshell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         firstPage();
                     }
                     finally {
-                        shell.setCursor(null);
+                        ctshell.setCursor(null);
                     }
                 }
             });
@@ -1198,12 +1192,12 @@ public class DefaultImageView implements ImageView {
                 public void widgetSelected(SelectionEvent e)
                 {
                     try {
-                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
+                        ctshell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         previousPage();
                     }
                     finally {
-                        shell.setCursor(null);
+                        ctshell.setCursor(null);
                     }
                 }
             });
@@ -1219,7 +1213,7 @@ public class DefaultImageView implements ImageView {
                 {
                     if (e.detail == SWT.TRAVERSE_RETURN) {
                         try {
-                            shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
+                            ctshell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                             int page = 0;
 
@@ -1233,7 +1227,7 @@ public class DefaultImageView implements ImageView {
                             gotoPage(page);
                         }
                         finally {
-                            shell.setCursor(null);
+                            ctshell.setCursor(null);
                         }
                     }
                 }
@@ -1268,12 +1262,12 @@ public class DefaultImageView implements ImageView {
                 public void widgetSelected(SelectionEvent e)
                 {
                     try {
-                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
+                        ctshell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         nextPage();
                     }
                     finally {
-                        shell.setCursor(null);
+                        ctshell.setCursor(null);
                     }
                 }
             });
@@ -1287,12 +1281,12 @@ public class DefaultImageView implements ImageView {
                 public void widgetSelected(SelectionEvent e)
                 {
                     try {
-                        shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
+                        ctshell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
 
                         lastPage();
                     }
                     finally {
-                        shell.setCursor(null);
+                        ctshell.setCursor(null);
                     }
                 }
             });
@@ -1305,9 +1299,9 @@ public class DefaultImageView implements ImageView {
                 @Override
                 public void widgetSelected(SelectionEvent e)
                 {
-                    shell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
-                    new Animation(shell, SWT.DOUBLE_BUFFERED, dataset).open();
-                    shell.setCursor(null);
+                    ctshell.setCursor(display.getSystemCursor(SWT.CURSOR_WAIT));
+                    new Animation(ctshell, SWT.DOUBLE_BUFFERED, dataset).open();
+                    ctshell.setCursor(null);
                 }
             });
         }
@@ -1440,7 +1434,9 @@ public class DefaultImageView implements ImageView {
     }
 
     /**
-     * @throws Exception if a failure occurred
+     * Update the image.
+     *
+     * @throws Exception        if a failure occurred
      * @throws OutOfMemoryError if memory is exhausted
      */
     private void getIndexedImage() throws Exception, OutOfMemoryError
@@ -1498,6 +1494,8 @@ public class DefaultImageView implements ImageView {
     }
 
     /**
+     * Update the image.
+     *
      * @throws Exception
      * @throws OutOfMemoryError
      */
@@ -1531,9 +1529,9 @@ public class DefaultImageView implements ImageView {
     }
 
     /**
-     * Compute image data from autogain
+     * Compute image data from autogain.
      *
-     * @param gb the gain bias
+     * @param gb    the gain bias
      * @param range the contrast range to apply
      *
      * @return true if the image buffer is converted
@@ -1758,9 +1756,9 @@ public class DefaultImageView implements ImageView {
     private void contour(int level) { applyImageFilter(new ContourFilter(level)); }
 
     /**
-     * Apply contrast/brightness to unsigned short integer
+     * Apply contrast/brightness to unsigned short integer.
      *
-     * @param gb the gain bias
+     * @param gb    the gain bias
      * @param range the contrast range to apply
      */
     private void applyAutoGain(double[] gb, double[] range)
@@ -1793,11 +1791,11 @@ public class DefaultImageView implements ImageView {
     }
 
     /**
-     * change alpha value for a given list of pixel locations
+     * change alpha value for a given list of pixel locations.
      *
-     * @param img the image to adjust
+     * @param img   the image to adjust
      * @param alpha the alpha value
-     * @param idx the list of indices to adjust
+     * @param idx   the list of indices to adjust
      *
      */
     private void adjustAlpha(BufferedImage img, int alpha, List<Integer> idx)
@@ -1838,9 +1836,8 @@ public class DefaultImageView implements ImageView {
 
         if (type.equals(Tools.FILE_TYPE_JPEG)) {
             filter = DefaultFileFilter.getFileFilterJPEG();
-        } /**
-           * else if (type.equals(Tools.FILE_TYPE_TIFF)) { filter = DefaultFileFilter.getFileFilterTIFF(); }
-           */
+        }
+        // else if (type.equals(Tools.FILE_TYPE_TIFF)) { filter = DefaultFileFilter.getFileFilterTIFF(); }
         else if (type.equals(Tools.FILE_TYPE_PNG)) {
             filter = DefaultFileFilter.getFileFilterPNG();
         }
@@ -2014,7 +2011,7 @@ public class DefaultImageView implements ImageView {
     }
 
     /**
-     * returns the selected area of the image
+     * returns the selected area of the image.
      *
      * @return the rectangle of the selected image area.
      */
@@ -2024,14 +2021,22 @@ public class DefaultImageView implements ImageView {
         return imageComponent.originalSelectedArea;
     }
 
-    /** @return true if the image is a truecolor image. */
+    /**
+     * Check if the image is a truecolor.
+     *
+     * @return true if the image is a truecolor image.
+     */
     @Override
     public boolean isTrueColor()
     {
         return isTrueColor;
     }
 
-    /** @return true if the image interlace is plance interlace. */
+    /**
+     * Check if the image interlace is plane.
+     *
+     * @return true if the image interlace is plane interlace.
+     */
     @Override
     public boolean isPlaneInterlace()
     {
@@ -2142,24 +2147,24 @@ public class DefaultImageView implements ImageView {
     }
 
     /**
-     * Converts a given BufferedImage to ImageData for a SWT-readable Image
+     * Converts a given BufferedImage to ImageData for a SWT-readable Image.
      *
-     * @param image The BufferedImage to be converted
+     * @param buffimage The BufferedImage to be converted
      *
      * @return the image object
      */
-    private org.eclipse.swt.graphics.Image convertBufferedImageToSWTImage(BufferedImage image)
+    private org.eclipse.swt.graphics.Image convertBufferedImageToSWTImage(BufferedImage buffimage)
     {
-        if (image.getColorModel() instanceof DirectColorModel) {
-            DirectColorModel colorModel = (DirectColorModel)image.getColorModel();
+        if (buffimage.getColorModel() instanceof DirectColorModel) {
+            DirectColorModel colorModel = (DirectColorModel) buffimage.getColorModel();
             PaletteData palette =
                 new PaletteData(colorModel.getRedMask(), colorModel.getGreenMask(), colorModel.getBlueMask());
             ImageData imgData =
-                new ImageData(image.getWidth(), image.getHeight(), colorModel.getPixelSize(), palette);
+                    new ImageData(buffimage.getWidth(), buffimage.getHeight(), colorModel.getPixelSize(), palette);
 
             for (int y = 0; y < imgData.height; y++) {
                 for (int x = 0; x < imgData.width; x++) {
-                    int rgb   = image.getRGB(x, y);
+                    int rgb   = buffimage.getRGB(x, y);
                     int pixel = palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
                     imgData.setPixel(x, y, pixel);
                     if (colorModel.hasAlpha()) {
@@ -2170,8 +2175,8 @@ public class DefaultImageView implements ImageView {
 
             return new org.eclipse.swt.graphics.Image(display, imgData);
         }
-        else if (image.getColorModel() instanceof IndexColorModel) {
-            IndexColorModel colorModel = (IndexColorModel)image.getColorModel();
+        else if (buffimage.getColorModel() instanceof IndexColorModel) {
+            IndexColorModel colorModel = (IndexColorModel) buffimage.getColorModel();
             int size                   = colorModel.getMapSize();
             byte[] reds                = new byte[size];
             byte[] greens              = new byte[size];
@@ -2185,9 +2190,9 @@ public class DefaultImageView implements ImageView {
             }
             PaletteData palette = new PaletteData(rgbs);
             ImageData imgData =
-                new ImageData(image.getWidth(), image.getHeight(), colorModel.getPixelSize(), palette);
+                    new ImageData(buffimage.getWidth(), buffimage.getHeight(), colorModel.getPixelSize(), palette);
             imgData.transparentPixel = colorModel.getTransparentPixel();
-            WritableRaster raster    = image.getRaster();
+            WritableRaster raster     = buffimage.getRaster();
             int[] pixelArray         = new int[1];
             for (int y = 0; y < imgData.height; y++) {
                 for (int x = 0; x < imgData.width; x++) {
@@ -2198,15 +2203,15 @@ public class DefaultImageView implements ImageView {
 
             return new org.eclipse.swt.graphics.Image(display, imgData);
         }
-        else if (image.getColorModel() instanceof ComponentColorModel) {
-            ComponentColorModel colorModel = (ComponentColorModel)image.getColorModel();
+        else if (buffimage.getColorModel() instanceof ComponentColorModel) {
+            ComponentColorModel colorModel = (ComponentColorModel) buffimage.getColorModel();
             // ASSUMES: 3 BYTE BGR IMAGE TYPE
             PaletteData palette = new PaletteData(0x0000FF, 0x00FF00, 0xFF0000);
             ImageData imgData =
-                new ImageData(image.getWidth(), image.getHeight(), colorModel.getPixelSize(), palette);
+                    new ImageData(buffimage.getWidth(), buffimage.getHeight(), colorModel.getPixelSize(), palette);
             // This is valid because we are using a 3-byte Data model with no transparent pixels
             imgData.transparentPixel = -1;
-            WritableRaster raster    = image.getRaster();
+            WritableRaster raster     = buffimage.getRaster();
             int[] pixelArray         = new int[3];
             for (int y = 0; y < imgData.height; y++) {
                 for (int x = 0; x < imgData.width; x++) {
@@ -2283,7 +2288,10 @@ public class DefaultImageView implements ImageView {
         final int[] pixels = ((DataBufferInt)bufferedImage.getRaster().getDataBuffer()).getData();
         int len            = pixels.length;
 
-        int idx = 0, r = 0, g = 0, b = 0;
+        int idx = 0;
+        int r   = 0;
+        int g   = 0;
+        int b   = 0;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 if (planeInterlace) {
@@ -2499,7 +2507,9 @@ public class DefaultImageView implements ImageView {
             if ((palette != null) && (dRange != null)) {
                 colors = new org.eclipse.swt.graphics.Color[256];
 
-                int r, g, b;
+                int r;
+                int g;
+                int b;
                 for (int i = 0; i < 256; i++) {
                     r = palette[0][i];
                     if (r < 0) {
@@ -2717,7 +2727,7 @@ public class DefaultImageView implements ImageView {
         }
 
         /**
-         * Create an image using multiple step bilinear, see details at
+         * Create an image using multiple step bilinear. See details at
          * http://today.java.net/pub/a/today/2007/04/03/perils-of-image-getscaledinstance.html
          *
          * @param img          the original image to be scaled
@@ -2814,8 +2824,12 @@ public class DefaultImageView implements ImageView {
                 .append(",   value=");
 
             if (isTrueColor) {
-                int i0, i1, i2;
-                String r, g, b;
+                int    i0;
+                int    i1;
+                int    i2;
+                String r;
+                String g;
+                String b;
 
                 if (isPlaneInterlace) {
                     i0 = y * w + x;      // index for the first plane
@@ -2948,13 +2962,13 @@ public class DefaultImageView implements ImageView {
      * FlipFilter creates image filter to flip image horizontally or vertically.
      */
     public static class FlipFilter extends ImageFilter {
-        /** flip direction */
+        /** flip direction. */
         private int direction;
 
-        /** pixel value */
+        /** pixel value. */
         private int[] raster = null;
 
-        /** width & height */
+        /** width & height. */
         private int imageWidth;
         private int imageHeight;
 
@@ -3337,22 +3351,16 @@ public class DefaultImageView implements ImageView {
         }
 
         /**
-         * draw a contour line based on the current parameter---level, color
+         * draw a contour line based on the current parameter---level, color.
          *
-         * @param raster
-         *            the data of the raster image.
-         * @param pixels
-         *            the pixel value of the image.
-         * @param level
-         *            the contour level.
-         * @param color
-         *            the color of the contour line.
-         * @param w
-         *            the width of the image.
-         * @param h
-         *            the height of the image.
+         * @param contraster the data of the raster image.
+         * @param pixels     the pixel value of the image.
+         * @param contlevel  the contour level.
+         * @param color      the color of the contour line.
+         * @param w          the width of the image.
+         * @param h          the height of the image.
          */
-        private void setContourLine(int[] raster, int[] pixels, int level, int color, int w, int h)
+        private void setContourLine(int[] contraster, int[] pixels, int contlevel, int color, int w, int h)
         {
             int p = 0;               // entrance point
             int q = p + (w * h - 1); // bottom right point
@@ -3361,23 +3369,23 @@ public class DefaultImageView implements ImageView {
             // first round
             while (true) {
                 while (p < u) {
-                    int rgb = raster[p];
-                    if (rgb < level) {
-                        while ((raster[p] < level) && (p < u))
+                    int rgb = contraster[p];
+                    if (rgb < contlevel) {
+                        while ((contraster[p] < contlevel) && (p < u))
                             p++;
-                        if (raster[p] >= level)
+                        if (contraster[p] >= contlevel)
                             pixels[p] = color;
                     }
-                    else if (rgb == level) {
-                        while ((raster[p] == level) && (p < u))
+                    else if (rgb == contlevel) {
+                        while ((contraster[p] == contlevel) && (p < u))
                             p++;
-                        if ((raster[p] < level) || (raster[p] > level))
+                        if ((contraster[p] < contlevel) || (contraster[p] > contlevel))
                             pixels[p] = color;
                     }
                     else {
-                        while ((raster[p] > level) && (p < u))
+                        while ((contraster[p] > contlevel) && (p < u))
                             p++;
-                        if ((raster[p] <= level))
+                        if ((contraster[p] <= contlevel))
                             pixels[p] = color;
                     }
                 }
@@ -3755,11 +3763,7 @@ public class DefaultImageView implements ImageView {
 
             Runnable runnable = new AnimationThread();
 
-            /**
-             * Run the animation. This method is called by class Thread.
-             *
-             * @see java.lang.Thread
-             */
+            // Run the animation. This method is called by class Thread.
             Display.getDefault().timerExec(sleepTime, runnable);
 
             Display openDisplay = parent.getDisplay();
@@ -3771,7 +3775,7 @@ public class DefaultImageView implements ImageView {
             openDisplay.timerExec(-1, runnable);
         }
 
-        private class AnimationThread implements Runnable {
+        private final class AnimationThread implements Runnable {
             @Override
             public void run()
             {

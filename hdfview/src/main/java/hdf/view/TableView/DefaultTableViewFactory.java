@@ -40,12 +40,10 @@ public class DefaultTableViewFactory extends TableViewFactory {
         org.slf4j.LoggerFactory.getLogger(DefaultTableViewFactory.class);
 
     /**
-     * Get the TableView for the data object identified by the data properties mapping
+     * Get the TableView for the data object identified by the data properties mapping.
      *
-     * @param viewer
-     *        the data view manager
-     * @param dataPropertiesMap
-     *        the data properties map
+     * @param viewer            the data view manager
+     * @param dataPropertiesMap the data properties map
      *
      * @return the TableView instance
      *
@@ -138,7 +136,7 @@ public class DefaultTableViewFactory extends TableViewFactory {
                 try {
                     ((DataFormat)dCopy).init();
 
-                    int space_type = ((DataFormat)dataObject).getSpaceType();
+                    int spaceType = ((DataFormat)dataObject).getSpaceType();
                     int rank       = ((DataFormat)dataObject).getRank();
                     System.arraycopy(((DataFormat)dataObject).getDims(), 0, ((DataFormat)dCopy).getDims(), 0,
                                      rank);

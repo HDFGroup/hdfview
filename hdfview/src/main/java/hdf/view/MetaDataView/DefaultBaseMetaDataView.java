@@ -17,7 +17,6 @@ package hdf.view.MetaDataView;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -40,7 +39,6 @@ import hdf.view.TreeView.DefaultTreeView;
 import hdf.view.TreeView.TreeView;
 import hdf.view.ViewProperties;
 import hdf.view.dialog.InputDialog;
-import hdf.view.dialog.NewDataObjectDialog;
 import hdf.view.dialog.NewScalarAttributeDialog;
 import hdf.view.dialog.NewStringAttributeDialog;
 
@@ -80,7 +78,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-// import hdf.view.dialog.NewCompoundAttributeDialog;
 
 /**
  * DefaultBaseMetaDataView is a default implementation of the MetaDataView which
@@ -100,30 +97,30 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultBaseMetaDataView.class);
 
-    /** The default display */
+    /** The default display. */
     protected final Display display = Display.getDefault();
 
-    /** The view manger reference */
+    /** The view manger reference. */
     protected final DataViewManager viewManager;
 
     private final Composite parent;
 
-    /** The metadata container */
+    /** The metadata container. */
     protected final TabFolder contentTabFolder;
 
-    /** The attribute metadata pane */
+    /** The attribute metadata pane. */
     protected final Composite attributeInfoPane;
 
-    /** The general metadata pane */
+    /** The general metadata pane. */
     protected final Composite generalObjectInfoPane;
 
-    /** The current font */
+    /** The current font. */
     protected Font curFont;
 
-    /** The HDF data object */
+    /** The HDF data object. */
     protected HObject dataObject;
 
-    /* The table to hold the list of attributes attached to the HDF object */
+    /** The table to hold the list of attributes attached to the HDF object. */
     private Table attrTable;
 
     private Label attrNumberLabel;
@@ -132,11 +129,11 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
     private int numAttributes;
 
-    /** The HDF data object is hdf5 type */
+    /** The HDF data object is hdf5 type. */
     protected boolean isH5;
-    /** The HDF data object is hdf4 type */
+    /** The HDF data object is hdf4 type. */
     protected boolean isH4;
-    /** The HDF data object is netcdf type */
+    /** The HDF data object is netcdf type. */
     protected boolean isN3;
 
     private static final String[] attrTableColNames = {"Name", "Type", "Array Size", "Value[50](...)"};
@@ -145,14 +142,11 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     private static final int GENERAL_TAB_INDEX = 1;
 
     /**
-     *The metadata view interface for displaying metadata information
+     * The metadata view interface for displaying metadata information.
      *
-     * @param parentComposite
-     *        the parent visual object
-     * @param viewer
-     *        the viewer to use
-     * @param theObj
-     *        the object to display the metadata info
+     * @param parentComposite the parent visual object
+     * @param viewer          the viewer to use
+     * @param theObj          the object to display the metadata info
      */
     public DefaultBaseMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj)
     {
@@ -193,7 +187,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     List<H5ReferenceData> refdata = (List)rtype.getData();
                     for (int r = 0; r < (int)rtype.getRefSize(); r++) {
                         H5ReferenceData rf = refdata.get(r);
-                        log.trace("constructor: refdata {}", rf.ref_array);
+                        log.trace("constructor: refdata {}", rf.refArray);
                     }
                 }
                 catch (Exception ex) {
@@ -258,18 +252,18 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
     }
 
     /**
-     * Additional metadata to display
+     * Additional metadata to display.
      */
     protected abstract void addObjectSpecificContent();
 
-    private Composite createAttributeInfoPane(Composite parent, final HObject dataObject)
+    private Composite createAttributeInfoPane(Composite aparent, final HObject adataObject)
     {
-        if (parent == null || dataObject == null)
+        if (aparent == null || adataObject == null)
             return null;
 
         org.eclipse.swt.widgets.Group attributeInfoGroup = null;
 
-        attributeInfoGroup = new org.eclipse.swt.widgets.Group(parent, SWT.NONE);
+        attributeInfoGroup = new org.eclipse.swt.widgets.Group(aparent, SWT.NONE);
         attributeInfoGroup.setFont(curFont);
         attributeInfoGroup.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
         attributeInfoGroup.setLayout(new GridLayout(3, false));
@@ -281,12 +275,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             long objid                   = -1;
             int creationOrder            = 0;
             try {
-                objid = dataObject.open();
+                objid = adataObject.open();
                 if (objid >= 0) {
-                    if (dataObject instanceof Group) {
+                    if (adataObject instanceof Group) {
                         ocplID = H5.H5Gget_create_plist(objid);
                     }
-                    else if (dataObject instanceof Dataset) {
+                    else if (adataObject instanceof Dataset) {
                         ocplID = H5.H5Dget_create_plist(objid);
                     }
                     if (ocplID >= 0) {
@@ -303,7 +297,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
             finally {
                 H5.H5Pclose(ocplID);
-                dataObject.close(objid);
+                adataObject.close(objid);
             }
 
             /* Creation order section */
@@ -331,13 +325,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         Button addButton = new Button(attributeInfoGroup, SWT.PUSH);
         addButton.setFont(curFont);
         addButton.setText("Add Attribute");
-        addButton.setEnabled(!(dataObject.getFileFormat().isReadOnly()));
+        addButton.setEnabled(!(adataObject.getFileFormat().isReadOnly()));
         addButton.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
         addButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
             {
-                addAttribute(dataObject);
+                addAttribute(adataObject);
             }
         });
 
@@ -345,13 +339,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         Button delButton = new Button(attributeInfoGroup, SWT.PUSH);
         delButton.setFont(curFont);
         delButton.setText("Delete Attribute");
-        delButton.setEnabled(isH5 && !(dataObject.getFileFormat().isReadOnly()));
+        delButton.setEnabled(isH5 && !(adataObject.getFileFormat().isReadOnly()));
         delButton.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false));
         delButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e)
             {
-                deleteAttribute(dataObject);
+                deleteAttribute(adataObject);
             }
         });
 
@@ -467,13 +461,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         return attributeInfoGroup;
     }
 
-    private Composite createGeneralObjectInfoPane(Composite parent, final HObject dataObject)
+    private Composite createGeneralObjectInfoPane(Composite goparent, final HObject godataObject)
     {
-        if (parent == null || dataObject == null)
+        if (goparent == null || godataObject == null)
             return null;
 
-        FileFormat theFile = dataObject.getFileFormat();
-        boolean isRoot     = ((dataObject instanceof Group) && ((Group)dataObject).isRoot());
+        FileFormat theFile    = godataObject.getFileFormat();
+        boolean    isRoot     = ((godataObject instanceof Group) && ((Group) godataObject).isRoot());
         String objTypeStr  = "Unknown";
         Label label;
         Text text;
@@ -492,7 +486,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
         text.setEditable(false);
         text.setFont(curFont);
-        text.setText(dataObject.getName());
+        text.setText(godataObject.getName());
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         /* Object Path section */
@@ -504,9 +498,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         text.setEditable(false);
         text.setFont(curFont);
         text.setText(
-            dataObject.getPath() == null
+                godataObject.getPath() == null
                 ? "/"
-                : dataObject.getPath()); /* TODO: temporary workaround until Object Library is fixed */
+                        : godataObject.getPath()); /* TODO: temporary workaround until Object Library is fixed */
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         /* Object Type section */
@@ -515,16 +509,16 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         label.setText("Type: ");
 
         if (isH5) {
-            if (dataObject instanceof Group) {
+            if (godataObject instanceof Group) {
                 objTypeStr = "HDF5 Group";
             }
-            else if (dataObject instanceof ScalarDS) {
+            else if (godataObject instanceof ScalarDS) {
                 objTypeStr = "HDF5 Dataset";
             }
-            else if (dataObject instanceof CompoundDS) {
+            else if (godataObject instanceof CompoundDS) {
                 objTypeStr = "HDF5 Dataset";
             }
-            else if (dataObject instanceof Datatype) {
+            else if (godataObject instanceof Datatype) {
                 objTypeStr = "HDF5 Named Datatype";
             }
             else {
@@ -532,11 +526,11 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
         }
         else if (isH4) {
-            if (dataObject instanceof Group) {
+            if (godataObject instanceof Group) {
                 objTypeStr = "HDF4 Group";
             }
-            else if (dataObject instanceof ScalarDS) {
-                ScalarDS ds = (ScalarDS)dataObject;
+            else if (godataObject instanceof ScalarDS) {
+                ScalarDS ds = (ScalarDS) godataObject;
                 if (ds.isImage()) {
                     objTypeStr = "HDF4 Raster Image";
                 }
@@ -544,7 +538,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     objTypeStr = "HDF4 SDS";
                 }
             }
-            else if (dataObject instanceof CompoundDS) {
+            else if (godataObject instanceof CompoundDS) {
                 objTypeStr = "HDF4 Vdata";
             }
             else {
@@ -552,10 +546,10 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
         }
         else if (isN3) {
-            if (dataObject instanceof Group) {
+            if (godataObject instanceof Group) {
                 objTypeStr = "netCDF3 Group";
             }
-            else if (dataObject instanceof ScalarDS) {
+            else if (godataObject instanceof ScalarDS) {
                 objTypeStr = "netCDF3 Dataset";
             }
             else {
@@ -563,13 +557,13 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             }
         }
         else {
-            if (dataObject instanceof Group) {
+            if (godataObject instanceof Group) {
                 objTypeStr = "Group";
             }
-            else if (dataObject instanceof ScalarDS) {
+            else if (godataObject instanceof ScalarDS) {
                 objTypeStr = "Dataset";
             }
-            else if (dataObject instanceof CompoundDS) {
+            else if (godataObject instanceof CompoundDS) {
                 objTypeStr = "Dataset";
             }
             else {
@@ -587,7 +581,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
 
         // bug #926 to remove the OID, put it back on Nov. 20, 2008, --PC
         String oidStr = null;
-        long[] oID    = dataObject.getOID();
+        long[] oID    = godataObject.getOID();
         if (oID != null) {
             oidStr = String.valueOf(oID[0]);
             if (isH4)
@@ -619,7 +613,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             /* Get the file's size */
             long fileSize = 0;
             try {
-                fileSize = (new File(dataObject.getFile())).length();
+                fileSize = (new File(godataObject.getFile())).length();
             }
             catch (Exception ex) {
                 fileSize = -1;
@@ -655,7 +649,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
             text.setFont(curFont);
-            text.setText(dataObject.getFileFormat().getName());
+            text.setText(godataObject.getFileFormat().getName());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             /* File Path section */
@@ -666,7 +660,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
             text = new Text(generalInfoGroup, SWT.SINGLE | SWT.BORDER);
             text.setEditable(false);
             text.setFont(curFont);
-            text.setText((new File(dataObject.getFile())).getParent());
+            text.setText((new File(godataObject.getFile())).getParent());
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
             label = new Label(generalInfoGroup, SWT.LEFT);
@@ -692,7 +686,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 log.trace("createGeneralObjectInfoPane(): get Library Version bounds info");
                 String libversion = "";
                 try {
-                    libversion = dataObject.getFileFormat().getLibBoundsDescription();
+                    libversion = godataObject.getFileFormat().getLibBoundsDescription();
                 }
                 catch (Exception ex) {
                     log.debug("Get Library Bounds Description failure: ", ex);
@@ -716,7 +710,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                     @Override
                     public void widgetSelected(SelectionEvent e)
                     {
-                        new UserBlockDialog(display.getShells()[0], SWT.NONE, dataObject).open();
+                        new UserBlockDialog(display.getShells()[0], SWT.NONE, godataObject).open();
                     }
                 });
             }
@@ -1599,12 +1593,12 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
                 shell.dispose();
 
                 try {
-                    int access_mode = FileFormat.WRITE;
+                    int accessMode = FileFormat.WRITE;
                     if (ViewProperties.isReadOnly())
-                        access_mode = FileFormat.READ;
+                        accessMode = FileFormat.READ;
                     else if (ViewProperties.isReadSWMR())
-                        access_mode = FileFormat.READ | FileFormat.MULTIREAD;
-                    view.openFile(fin, access_mode);
+                        accessMode = FileFormat.READ | FileFormat.MULTIREAD;
+                    view.openFile(fin, accessMode);
                 }
                 catch (Exception ex) {
                     log.debug("Error opening file {}", fin);

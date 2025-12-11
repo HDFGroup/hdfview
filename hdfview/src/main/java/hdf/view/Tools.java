@@ -61,7 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -77,21 +76,21 @@ public final class Tools {
 
     private static final Logger log = LoggerFactory.getLogger(Tools.class);
 
-    /** Maximum value or int8 */
+    /** Maximum value or int8. */
     public static final long MAX_INT8 = 127;
-    /** Maximum value or unsigned int8 */
+    /** Maximum value or unsigned int8. */
     public static final long MAX_UINT8 = 255;
-    /** Maximum value or int16 */
+    /** Maximum value or int16. */
     public static final long MAX_INT16 = 32767;
-    /** Maximum value or unsigned int16 */
+    /** Maximum value or unsigned int16. */
     public static final long MAX_UINT16 = 65535;
-    /** Maximum value or int32 */
+    /** Maximum value or int32. */
     public static final long MAX_INT32 = 2147483647;
-    /** Maximum value or unsigned int32 */
+    /** Maximum value or unsigned int32. */
     public static final long MAX_UINT32 = 4294967295L;
-    /** Maximum value or int64 */
+    /** Maximum value or int64. */
     public static final long MAX_INT64 = 9223372036854775807L;
-    /** Maximum value or unsigned int64 */
+    /** Maximum value or unsigned int64. */
     public static final BigInteger MAX_UINT64 = new BigInteger("18446744073709551615");
 
     private static final int FLOAT_BUFFER_SIZE  = 524288;
@@ -278,8 +277,11 @@ public final class Tools {
     {
         byte[][] p = new byte[3][256];
 
-        for (int i = 0; i < 256; i++)
-            p[0][i] = p[1][i] = p[2][i] = (byte)(i);
+        for (int i = 0; i < 256; i++) {
+            p[0][i] = (byte) (i);
+            p[1][i] = p[0][i];
+            p[2][i] = p[0][i];
+        }
 
         return p;
     }
@@ -298,8 +300,11 @@ public final class Tools {
     {
         byte[][] p = new byte[3][256];
 
-        for (int i = 0; i < 256; i++)
-            p[0][i] = p[1][i] = p[2][i] = (byte)(255 - i);
+        for (int i = 0; i < 256; i++) {
+            p[0][i] = (byte) (255 - i);
+            p[1][i] = p[0][i];
+            p[2][i] = p[0][i];
+        }
 
         return p;
     }
@@ -318,9 +323,12 @@ public final class Tools {
     {
         byte[][] p = new byte[3][256];
 
-        for (int i = 0; i < 256; i++)
-            p[0][i] = p[1][i] = p[2][i] =
+        for (int i = 0; i < 256; i++) {
+            p[0][i] =
                 (byte)((double)255 / 2 + ((double)255 / 2) * Math.sin((i - 32) / 20.3));
+            p[1][i] = p[0][i];
+            p[2][i] = p[0][i];
+        }
 
         return p;
     }
@@ -374,8 +382,12 @@ public final class Tools {
             p[2][i] = b;
         }
 
-        p[0][0] = p[1][0] = p[2][0] = 0;
-        p[0][255] = p[1][255] = p[2][255] = (byte)255;
+        p[0][0] = 0;
+        p[1][0] = 0;
+        p[2][0] = 0;
+        p[0][255] = (byte) 255;
+        p[1][255] = (byte) 255;
+        p[2][255] = (byte) 255;
 
         return p;
     }
@@ -407,8 +419,12 @@ public final class Tools {
             p[2][i] = (byte)200;
         }
 
-        p[0][0] = p[1][0] = p[2][0] = 0;
-        p[0][255] = p[1][255] = p[2][255] = (byte)255;
+        p[0][0] = 0;
+        p[1][0] = 0;
+        p[2][0] = 0;
+        p[0][255] = (byte) 255;
+        p[1][255] = (byte) 255;
+        p[2][255] = (byte) 255;
 
         return p;
     }
@@ -433,8 +449,12 @@ public final class Tools {
             p[2][i] = (byte)((1 - Math.sin(((double)i / 40 - 3.1))) * 128);
         }
 
-        p[0][0] = p[1][0] = p[2][0] = 0;
-        p[0][255] = p[1][255] = p[2][255] = (byte)255;
+        p[0][0] = 0;
+        p[1][0] = 0;
+        p[2][0] = 0;
+        p[0][255] = (byte) 255;
+        p[1][255] = (byte) 255;
+        p[2][255] = (byte) 255;
 
         return p;
     }
@@ -460,7 +480,7 @@ public final class Tools {
      */
     public static final byte[][] readPalette(String filename)
     {
-        final int COLOR256 = 256;
+        final int color256 = 256;
         int nentries       = 0;
         int i              = 0;
         int j              = 0;
@@ -474,7 +494,7 @@ public final class Tools {
         float minV         = 0;
         float maxColor     = 0;
         float minColor     = 0;
-        float[][] tbl      = new float[COLOR256][4]; /* value, red, green, blue */
+        float[][] tbl      = new float[color256][4]; /* value, red, green, blue */
 
         if (filename == null)
             return null;
@@ -517,8 +537,10 @@ public final class Tools {
                 tbl[idx][3] = b;
 
                 if (idx == 0) {
-                    maxV = minV = v;
-                    maxColor = minColor = r;
+                    maxV = v;
+                    minV = v;
+                    maxColor = r;
+                    minColor = r;
                 }
 
                 maxV     = Math.max(maxV, v);
@@ -532,7 +554,7 @@ public final class Tools {
                 minColor = Math.min(minColor, b);
 
                 idx++;
-                if (idx >= COLOR256)
+                if (idx >= color256)
                     break; /* only support to 256 colors */
             } while (line != null);
         }
@@ -547,7 +569,7 @@ public final class Tools {
         // convert color table to byte
         nentries = idx;
         if (maxColor <= 1) {
-            ratio = (minColor == maxColor) ? 1.0f : ((COLOR256 - 1.0f) / (maxColor - minColor));
+            ratio = (minColor == maxColor) ? 1.0f : ((color256 - 1.0f) / (maxColor - minColor));
 
             for (i = 0; i < nentries; i++) {
                 for (j = 1; j < 4; j++)
@@ -557,9 +579,9 @@ public final class Tools {
 
         // convert table to 256 entries
         idx   = 0;
-        ratio = (minV == maxV) ? 1.0f : ((COLOR256 - 1.0f) / (maxV - minV));
+        ratio = (minV == maxV) ? 1.0f : ((color256 - 1.0f) / (maxV - minV));
 
-        int[][] p = new int[3][COLOR256];
+        int[][] p = new int[3][color256];
         for (i = 0; i < nentries; i++) {
             idx = (int)((tbl[i][0] - minV) * ratio);
             for (j = 0; j < 3; j++)
@@ -567,15 +589,15 @@ public final class Tools {
         }
 
         /* linear interpolating missing values in the color table */
-        for (i = 1; i < COLOR256; i++) {
+        for (i = 1; i < color256; i++) {
             if ((p[0][i] + p[1][i] + p[2][i]) == 0) {
                 j = i + 1;
 
                 // figure out number of missing points between two given points
-                while (j < COLOR256 && (p[0][j] + p[1][j] + p[2][j]) == 0)
+                while (j < color256 && (p[0][j] + p[1][j] + p[2][j]) == 0)
                     j++;
 
-                if (j >= COLOR256)
+                if (j >= color256)
                     break; // nothing in the table to interpolating
 
                 float d1 = (p[0][j] - p[0][i - 1]) / (float)(j - i);
@@ -589,10 +611,10 @@ public final class Tools {
                 }
                 i = j + 1;
             } // ((p[0][i] + p[1][i] + p[2][i]) == 0)
-        }     // (i = 1; i < COLOR256; i++)
+        } // (i = 1; i < color256; i++)
 
-        byte[][] pal = new byte[3][COLOR256];
-        for (i = 1; i < COLOR256; i++) {
+        byte[][] pal = new byte[3][color256];
+        for (i = 1; i < color256; i++) {
             for (j = 0; j < 3; j++)
                 pal[j][i] = (byte)(p[j][i]);
         }
@@ -921,7 +943,8 @@ public final class Tools {
 
         if (minmax == null) {
             minmax    = new double[2];
-            minmax[0] = minmax[1] = 0;
+            minmax[0] = 0;
+            minmax[1] = 0;
         }
 
         if (dname == 'B')
@@ -952,7 +975,8 @@ public final class Tools {
             short[] s = (short[])rawData;
             for (long i = 0; i < h; i++) {
                 for (long j = 0; j < w; j++) {
-                    idxSrc = idxDst = j * h + i;
+                    idxSrc = j * h + i;
+                    idxDst = j * h + i;
                     if (isTransposed)
                         idxDst = i * w + j;
                     byteData[(int)idxDst] =
@@ -965,7 +989,8 @@ public final class Tools {
             int[] ia = (int[])rawData;
             for (long i = 0; i < h; i++) {
                 for (long j = 0; j < w; j++) {
-                    idxSrc = idxDst = (j * h + i);
+                    idxSrc = (j * h + i);
+                    idxDst = (j * h + i);
                     if (isTransposed)
                         idxDst = i * w + j;
                     byteData[(int)idxDst] =
@@ -978,7 +1003,8 @@ public final class Tools {
             long[] l = (long[])rawData;
             for (long i = 0; i < h; i++) {
                 for (long j = 0; j < w; j++) {
-                    idxSrc = idxDst = j * h + i;
+                    idxSrc = j * h + i;
+                    idxDst = j * h + i;
                     if (isTransposed)
                         idxDst = i * w + j;
                     byteData[(int)idxDst] =
@@ -991,7 +1017,8 @@ public final class Tools {
             float[] f = (float[])rawData;
             for (long i = 0; i < h; i++) {
                 for (long j = 0; j < w; j++) {
-                    idxSrc = idxDst = j * h + i;
+                    idxSrc = j * h + i;
+                    idxDst = j * h + i;
                     if (isTransposed)
                         idxDst = i * w + j;
                     byteData[(int)idxDst] =
@@ -1004,7 +1031,8 @@ public final class Tools {
             double[] d = (double[])rawData;
             for (long i = 0; i < h; i++) {
                 for (long j = 0; j < w; j++) {
-                    idxSrc = idxDst = j * h + i;
+                    idxSrc = j * h + i;
+                    idxDst = j * h + i;
                     if (isTransposed)
                         idxDst = i * w + j;
                     byteData[(int)idxDst] =
@@ -1100,7 +1128,8 @@ public final class Tools {
         long idxDst  = 0;
         for (long i = 0; i < h; i++) {
             for (long j = 0; j < w; j++) {
-                idxSrc = idxDst = j * h + i;
+                idxSrc = j * h + i;
+                idxDst = j * h + i;
                 if (isTransposed)
                     idxDst = i * w + j;
 
@@ -1276,21 +1305,15 @@ public final class Tools {
     }
 
     /**
-     * Apply autocontrast parameters to the original data in place (destructive)
+     * Apply autocontrast parameters to the original data in place (destructive).
      *
-     * @param dataIN
-     *            the original data array of signed/unsigned integers
-     * @param dataOUT
-     *            the converted data array of signed/unsigned integers
-     * @param params
-     *            the auto gain parameter. params[0]=gain, params[1]=bias
-     * @param minmax
-     *            the data range. minmax[0]=min, minmax[1]=max
-     * @param isUnsigned
-     *            the flag to indicate if the data array is unsigned integer
+     * @param dataIN     the original data array of signed/unsigned integers
+     * @param dataOUT    the converted data array of signed/unsigned integers
+     * @param params     the auto gain parameter. params[0]=gain, params[1]=bias
+     * @param minmax     the data range. minmax[0]=min, minmax[1]=max
+     * @param isUnsigned the flag to indicate if the data array is unsigned integer
      *
-     * @return the data array with the auto contrast conversion; otherwise,
-     *         returns null
+     * @return the data array with the auto contrast conversion; otherwise, returns null
      */
     public static Object autoContrastApply(Object dataIN, Object dataOUT, double[] params, double[] minmax,
                                            boolean isUnsigned)
@@ -1486,17 +1509,15 @@ public final class Tools {
     }
 
     /**
-     * Computes autocontrast parameters by
+     * Computes autocontrast parameters.
      *
      * <pre>
      *    min = mean - 3 * std.dev
      *    max = mean + 3 * std.dev
      * </pre>
      *
-     * @param data
-     *            the raw data array
-     * @param minmax
-     *            the min and max values.
+     * @param data   the raw data array
+     * @param minmax the min and max values.
      *
      * @return non-negative if successful; otherwise, returns negative
      */
@@ -1520,15 +1541,11 @@ public final class Tools {
     }
 
     /**
-     * Finds the min and max values of the data array
+     * Finds the min and max values of the data array.
      *
-     * @param data
-     *            the raw data array
-     * @param minmax
-     *            the mmin and max values of the array.
-     * @param fillValue
-     *            the missing value or fill value. Exclude this value when check
-     *            for min/max
+     * @param data      the raw data array
+     * @param minmax    the mmin and max values of the array.
+     * @param fillValue the missing value or fill value. Exclude this value when check for min/max
      *
      * @return non-negative if successful; otherwise, returns negative
      */
@@ -1554,7 +1571,8 @@ public final class Tools {
         switch (dname) {
         case 'B':
             byte[] b  = (byte[])data;
-            minmax[0] = minmax[1] = b[0];
+            minmax[0] = b[0];
+            minmax[1] = b[0];
 
             if (hasFillValue)
                 fill = ((byte[])fillValue)[0];
@@ -1569,7 +1587,8 @@ public final class Tools {
             break;
         case 'S':
             short[] s = (short[])data;
-            minmax[0] = minmax[1] = s[0];
+            minmax[0] = s[0];
+            minmax[1] = s[0];
 
             if (hasFillValue)
                 fill = ((short[])fillValue)[0];
@@ -1584,7 +1603,8 @@ public final class Tools {
             break;
         case 'I':
             int[] ia  = (int[])data;
-            minmax[0] = minmax[1] = ia[0];
+            minmax[0] = ia[0];
+            minmax[1] = ia[0];
 
             if (hasFillValue)
                 fill = ((int[])fillValue)[0];
@@ -1599,7 +1619,8 @@ public final class Tools {
             break;
         case 'J':
             long[] l  = (long[])data;
-            minmax[0] = minmax[1] = l[0];
+            minmax[0] = l[0];
+            minmax[1] = l[0];
 
             if (hasFillValue)
                 fill = ((long[])fillValue)[0];
@@ -1614,7 +1635,8 @@ public final class Tools {
             break;
         case 'F':
             float[] f = (float[])data;
-            minmax[0] = minmax[1] = f[0];
+            minmax[0] = f[0];
+            minmax[1] = f[0];
 
             if (hasFillValue)
                 fill = ((float[])fillValue)[0];
@@ -1630,7 +1652,8 @@ public final class Tools {
             break;
         case 'D':
             double[] d = (double[])data;
-            minmax[0] = minmax[1] = d[0];
+            minmax[0] = d[0];
+            minmax[1] = d[0];
 
             if (hasFillValue)
                 fill = ((double[])fillValue)[0];
@@ -1653,14 +1676,11 @@ public final class Tools {
     }
 
     /**
-     * Finds the distribution of data values
+     * Finds the distribution of data values.
      *
-     * @param data
-     *            the raw data array
-     * @param dataDist
-     *            the data distirbution.
-     * @param minmax
-     *            the data range
+     * @param data     the raw data array
+     * @param dataDist the data distirbution.
+     * @param minmax   the data range
      *
      * @return non-negative if successful; otherwise, returns negative
      */
@@ -1694,15 +1714,11 @@ public final class Tools {
     }
 
     /**
-     * Computes mean and standard deviation of a data array
+     * Computes mean and standard deviation of a data array.
      *
-     * @param data
-     *            the raw data array
-     * @param avgstd
-     *            the statistics: avgstd[0]=mean and avgstd[1]=stdev.
-     * @param fillValue
-     *            the missing value or fill value. Exclude this value when
-     *            compute statistics
+     * @param data      the raw data array
+     * @param avgstd    the statistics: avgstd[0]=mean and avgstd[1]=stdev.
+     * @param fillValue the missing value or fill value. Exclude this value when compute statistics
      *
      * @return non-negative if successful; otherwise, returns negative
      */
@@ -1868,14 +1884,11 @@ public final class Tools {
     }
 
     /**
-     * Save the data as binary
+     * Save the data as binary.
      *
-     * @param out
-     *            the output stream
-     * @param data
-     *            the raw data array
-     * @param order
-     *            the order of bytes
+     * @param out   the output stream
+     * @param data  the raw data array
+     * @param order the order of bytes
      *
      * @throws Exception if a failure occurred
      */
@@ -2420,7 +2433,7 @@ public final class Tools {
      */
     public static final String toHexString(long v, int nbytes)
     {
-        char[] HEXCHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        char[] hexCHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
         if (nbytes <= 0)
             return null;
@@ -2433,7 +2446,7 @@ public final class Tools {
 
         StringBuilder sb = new StringBuilder();
         for (int i = nhex - 1; i >= 0; i--)
-            sb.append(HEXCHARS[hex[i]]);
+            sb.append(hexCHARS[hex[i]]);
 
         return sb.toString();
     }
@@ -2814,8 +2827,9 @@ public final class Tools {
     }
 
     /**
-     * look at the first 4 bytes of the file to see if it is a netCDF file
-     * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1 or
+     * look at the first 4 bytes of the file to see if it is a netCDF file.
+     * 
+     * byte[0]=67, byte[1]=68, byte[2]=70, byte[3]=1
      *
      * @param filename the file to test if netcdf
      *
@@ -2889,16 +2903,12 @@ public final class Tools {
     }
 
     /**
-     * Create a new HDF file with default file creation properties
+     * Create a new HDF file with default file creation properties.
      *
-     * @param filename
-     *          the file to create
-     * @param dir
-     *          the directory for file
-     * @param type
-     *          the type of the file
-     * @param openFiles
-     *          the list of already opened files
+     * @param filename  the file to create
+     * @param dir       the directory for file
+     * @param type      the type of the file
+     * @param openFiles the list of already opened files
      *
      * @return the FileFormat instance of the newly created file
      *

@@ -57,53 +57,53 @@ public class Chart extends Dialog {
 
     private Color barColor;
 
-    /** histogram style chart */
+    /** histogram style chart. */
     public static final int HISTOGRAM = 0;
 
-    /** line style chart */
+    /** line style chart. */
     public static final int LINEPLOT = 1;
 
-    /** The default colors of lines for selected columns */
+    /** The default colors of lines for selected columns. */
     public static final int[] LINE_COLORS = {SWT.COLOR_BLACK,      SWT.COLOR_RED,
                                              SWT.COLOR_DARK_GREEN, SWT.COLOR_BLUE,
                                              SWT.COLOR_MAGENTA, /*Pink*/
                                              SWT.COLOR_YELLOW,     /*Orange*/ SWT.COLOR_GRAY,
                                              SWT.COLOR_CYAN};
 
-    /** the data values of line points or histogram */
-    protected double data[][];
+    /** the data values of line points or histogram. */
+    protected double[][] data;
 
     /** Panel that draws plot of data values. */
     protected ChartCanvas chartP;
 
-    /** number of data points */
+    /** number of data points. */
     protected int numberOfPoints;
 
-    /** the style of chart: histogram or line */
+    /** the style of chart: histogram or line. */
     private int chartStyle;
 
-    /** the maximum value of the Y axis */
+    /** the maximum value of the Y axis. */
     private double ymax;
 
-    /** the minimum value of the Y axis */
+    /** the minimum value of the Y axis. */
     private double ymin;
 
-    /** the maximum value of the X axis */
+    /** the maximum value of the X axis. */
     private double xmax;
 
-    /** the minimum value of the X axis */
+    /** the minimum value of the X axis. */
     private double xmin;
 
-    /** line labels */
+    /** line labels. */
     private String[] lineLabels;
 
-    /** line colors */
+    /** line colors. */
     private int[] lineColors;
 
-    /** number of lines */
+    /** number of lines. */
     private int numberOfLines;
 
-    /** the data to plot against **/
+    /** the data to plot against. **/
     private double[] xData = null;
 
     /**
@@ -166,7 +166,8 @@ public class Chart extends Dialog {
             }
             else {
                 this.xData = xData;
-                xmin = xmax = xData[0];
+                xmin = xData[0];
+                xmax = xData[0];
                 for (int i = 0; i < len; i++) {
                     if (xData[i] < xmin)
                         xmin = xData[i];
@@ -295,7 +296,7 @@ public class Chart extends Dialog {
     }
 
     /**
-     * Sets the color of each line of a line plot
+     * Sets the color of each line of a line plot.
      *
      * @param c the list of colors
      */
@@ -311,13 +312,14 @@ public class Chart extends Dialog {
     /** Sets the data type of the plot data to be integer. */
     public void setTypeToInteger() { isInteger = true; }
 
-    /** Find and set the minimum and maximum values of the data */
+    /** Find and set the minimum and maximum values of the data. */
     private void findDataRange()
     {
         if (data == null)
             return;
 
-        ymin = ymax = data[0][0];
+        ymin = data[0][0];
+        ymax = data[0][0];
         for (int i = 0; i < numberOfLines; i++) {
             for (int j = 0; j < numberOfPoints; j++) {
                 if (data[i][j] < ymin)

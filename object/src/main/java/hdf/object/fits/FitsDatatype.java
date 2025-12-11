@@ -16,9 +16,9 @@ package hdf.object.fits;
 
 import java.util.List;
 
-import hdf.object.Datatype;
-
 import nom.tam.fits.BasicHDU;
+
+import hdf.object.Datatype;
 
 /**
  * Datatype encapsulates information of a datatype.
@@ -30,7 +30,7 @@ import nom.tam.fits.BasicHDU;
 public class FitsDatatype extends Datatype {
     private static final long serialVersionUID = 6545936196104493765L;
 
-    /** the native type */
+    /** the native type. */
     private long nativeType;
 
     /**

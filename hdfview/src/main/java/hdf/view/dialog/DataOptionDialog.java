@@ -86,25 +86,25 @@ import org.eclipse.swt.widgets.Text;
  */
 public class DataOptionDialog extends Dialog {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataOptionDialog.class);
+    private static final Logger log = LoggerFactory.getLogger(DataOptionDialog.class);
 
     private Shell shell;
 
     private Font curFont;
 
-    /** the rank of the dataset/image */
+    /** the rank of the dataset/image. */
     private int rank;
 
-    /** the starting point of selected subset */
+    /** the starting point of selected subset. */
     private long[] start;
 
-    /** the sizes of all dimensions */
+    /** the sizes of all dimensions. */
     private long[] dims;
 
-    /** the selected sizes of all dimensions */
+    /** the selected sizes of all dimensions. */
     private long[] selected;
 
-    /** the stride */
+    /** the stride. */
     private long[] stride;
 
     /** the indices of the selected dimensions. */
@@ -155,7 +155,7 @@ public class DataOptionDialog extends Dialog {
 
     private int numberOfPalettes;
 
-    /** the selected dataset/image */
+    /** the selected dataset/image. */
     private DataFormat dataObject;
 
     /**
@@ -371,7 +371,7 @@ public class DataOptionDialog extends Dialog {
     }
 
     /**
-     * Set the initial state of all the variables
+     * Set the initial state of all the variables.
      */
     private void init()
     {
@@ -603,7 +603,8 @@ public class DataOptionDialog extends Dialog {
             if (!ds.getDatatype().isText()) {
                 StringTokenizer st = new StringTokenizer(dataRangeField.getText(), ",");
                 if (st.countTokens() == 2) {
-                    double min = 0, max = 0;
+                    double min = 0;
+                    double max = 0;
                     try {
                         min = Double.valueOf(st.nextToken());
                         max = Double.valueOf(st.nextToken());
@@ -701,21 +702,21 @@ public class DataOptionDialog extends Dialog {
     }
 
     /**
-     * Check if the display option is image
+     * Check if the display option is image.
      *
      * @return true if the display option is image.
      */
     public boolean isImageDisplay() { return isImageDisplay; }
 
     /**
-     * Check if the index starts with 0
+     * Check if the index starts with 0.
      *
      * @return true if the index starts with 0.
      */
     public boolean isIndexBase1() { return isIndexBase1; }
 
     /**
-     * Get the bitmask value
+     * Get the bitmask value.
      *
      * @return the bitmask.
      */
@@ -741,35 +742,35 @@ public class DataOptionDialog extends Dialog {
     }
 
     /**
-     * Get the name of the datatview
+     * Get the name of the datatview.
      *
      * @return the name of the selected dataview
      */
     public String getDataViewName() { return dataViewName; }
 
     /**
-     * Check if the data should display as characters
+     * Check if the data should display as characters.
      *
      * @return true if display the data as characters; otherwise, display as numbers.
      */
     public boolean isDisplayTypeChar() { return isDisplayTypeChar; }
 
     /**
-     * Check if only the bitmask should be applied
+     * Check if only the bitmask should be applied.
      *
      * @return if it only apply bitmask.
      */
     public boolean isApplyBitmaskOnly() { return isApplyBitmaskOnly; }
 
     /**
-     * Check if the data in 2D table is to be transposed
+     * Check if the data in 2D table is to be transposed.
      *
      * @return true if transpose the data in 2D table; otherwise, do not transpose the data.
      */
     public boolean isTransposed() { return isTransposed; }
 
     /**
-     * Check if the data selection is cancelled
+     * Check if the data selection is cancelled.
      *
      * @return true if the data selection is cancelled.
      */
@@ -972,9 +973,9 @@ public class DataOptionDialog extends Dialog {
             @Override
             public void widgetSelected(SelectionEvent e)
             {
-                boolean selected = extractBitButton.getSelection();
+                boolean bSelected = extractBitButton.getSelection();
 
-                if (selected) {
+                if (bSelected) {
                     if (applyBitmaskButton.getSelection()) {
                         applyBitmaskButton.setSelection(false);
                     }
@@ -1139,7 +1140,8 @@ public class DataOptionDialog extends Dialog {
         dimSubGroup.setLayout(new GridLayout(2, false));
         dimSubGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        int h = 1, w = 1;
+        int h = 1;
+        int w = 1;
         h = (int)dims[selectedIndex[0]];
         if (rank > 1) {
             w = (int)dims[selectedIndex[1]];
@@ -1569,9 +1571,9 @@ public class DataOptionDialog extends Dialog {
             else
                 transposeChoice.setEnabled(true);
 
-            long dims[] = dataObject.getDims();
-            int w       = (int)dims[wIdx];
-            int h       = (int)dims[hIdx];
+            long[] tdims = dataObject.getDims();
+            int    w     = (int) tdims[wIdx];
+            int    h     = (int) tdims[hIdx];
 
             if (navigator != null) {
                 navigator.setDimensionSize(w, h);
@@ -1590,7 +1592,10 @@ public class DataOptionDialog extends Dialog {
      */
     private class PreviewNavigator extends Canvas {
         private final int NAVIGATOR_SIZE = 150;
-        private int dimX, dimY, x, y;
+        private int       dimX;
+        private int       dimY;
+        private int       x;
+        private int       y;
         private double r;
         private Point startPosition; // mouse clicked position
         private Rectangle selectedArea;
@@ -1764,7 +1769,8 @@ public class DataOptionDialog extends Dialog {
             long steps                 = (long)Math.ceil(r);
             selected[selectedIndex[0]] = (dims[selectedIndex[0]] / steps);
             selected[selectedIndex[1]] = (dims[selectedIndex[1]] / steps);
-            stride[selectedIndex[0]] = stride[selectedIndex[1]] = steps;
+            stride[selectedIndex[0]] = steps;
+            stride[selectedIndex[1]] = steps;
 
             if (selected[selectedIndex[0]] == 0) {
                 selected[selectedIndex[0]] = 1;
@@ -1840,7 +1846,8 @@ public class DataOptionDialog extends Dialog {
 
         private void updateSelection(int x0, int y0, int w, int h)
         {
-            int i0 = 0, i1 = 0;
+            int i0 = 0;
+            int i1 = 0;
 
             i0 = (int)(y0 * r);
             if (i0 > dims[currentIndex[0]]) {
@@ -1929,7 +1936,7 @@ public class DataOptionDialog extends Dialog {
         }
 
         /**
-         * Converts a given BufferedImage to ImageData for a SWT-readable Image
+         * Converts a given BufferedImage to ImageData for a SWT-readable Image.
          *
          * @param image The BufferedImage to be converted
          *
@@ -1946,14 +1953,14 @@ public class DataOptionDialog extends Dialog {
                 ImageData data =
                     new ImageData(image.getWidth(), image.getHeight(), colorModel.getPixelSize(), palette);
 
-                for (int y = 0; y < data.height; y++) {
-                    for (int x = 0; x < data.width; x++) {
-                        int rgb = image.getRGB(x, y);
+                for (int yIdx = 0; yIdx < data.height; yIdx++) {
+                    for (int xIdx = 0; xIdx < data.width; xIdx++) {
+                        int rgb   = image.getRGB(xIdx, yIdx);
                         int pixel =
                             palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
-                        data.setPixel(x, y, pixel);
+                        data.setPixel(xIdx, yIdx, pixel);
                         if (colorModel.hasAlpha()) {
-                            data.setAlpha(x, y, (rgb >> 24) & 0xFF);
+                            data.setAlpha(xIdx, yIdx, (rgb >> 24) & 0xFF);
                         }
                     }
                 }
@@ -1979,10 +1986,10 @@ public class DataOptionDialog extends Dialog {
                 data.transparentPixel = colorModel.getTransparentPixel();
                 WritableRaster raster = image.getRaster();
                 int[] pixelArray      = new int[1];
-                for (int y = 0; y < data.height; y++) {
-                    for (int x = 0; x < data.width; x++) {
-                        raster.getPixel(x, y, pixelArray);
-                        data.setPixel(x, y, pixelArray[0]);
+                for (int yidx = 0; yidx < data.height; yidx++) {
+                    for (int xidx = 0; xidx < data.width; xidx++) {
+                        raster.getPixel(xidx, yidx, pixelArray);
+                        data.setPixel(xidx, yidx, pixelArray[0]);
                     }
                 }
 
@@ -1998,11 +2005,11 @@ public class DataOptionDialog extends Dialog {
                 data.transparentPixel = -1;
                 WritableRaster raster = image.getRaster();
                 int[] pixelArray      = new int[3];
-                for (int y = 0; y < data.height; y++) {
-                    for (int x = 0; x < data.width; x++) {
-                        raster.getPixel(x, y, pixelArray);
+                for (int yidx = 0; yidx < data.height; yidx++) {
+                    for (int xidx = 0; xidx < data.width; xidx++) {
+                        raster.getPixel(xidx, yidx, pixelArray);
                         int pixel = palette.getPixel(new RGB(pixelArray[0], pixelArray[1], pixelArray[2]));
-                        data.setPixel(x, y, pixel);
+                        data.setPixel(xidx, yidx, pixel);
                     }
                 }
                 return new org.eclipse.swt.graphics.Image(display, data);

@@ -18,35 +18,35 @@ import hdf.view.DataView.DataView;
 
 /**
  *
- * The table view interface for displaying data in table form
+ * The table view interface for displaying data in table form.
  *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
 public abstract interface TableView extends DataView {
     /**
-     * Get the table
+     * Get the table.
      *
      * @return the table
      */
     public abstract Object getTable();
 
     /**
-     * Get the array of selected data
+     * Get the array of selected data.
      *
      * @return array of selected data
      */
     public abstract Object getSelectedData();
 
     /**
-     * Get the array of selected column count
+     * Get the array of selected column count.
      *
      * @return array of selected column count
      */
     public abstract int getSelectedColumnCount();
 
     /**
-     * Get the array of selected row count
+     * Get the array of selected row count.
      *
      * @return array of selected row count
      */

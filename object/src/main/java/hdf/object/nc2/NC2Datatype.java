@@ -35,7 +35,7 @@ public class NC2Datatype extends Datatype {
 
     private static final Logger log = LoggerFactory.getLogger(NC2Datatype.class);
 
-    /** the native datatype */
+    /** the native datatype. */
     private DataType nativeType = null;
 
     /**

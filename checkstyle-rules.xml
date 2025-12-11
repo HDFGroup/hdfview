@@ -42,7 +42,10 @@
 
     <module name="TreeWalker">
         <!-- Naming conventions -->
-        <module name="ConstantName"/>
+        <module name="ConstantName">
+            <!-- Allow 'log' as a valid constant name for SLF4J loggers -->
+            <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|log)$"/>
+        </module>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
         <module name="MemberName"/>

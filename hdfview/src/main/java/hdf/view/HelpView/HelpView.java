@@ -16,13 +16,13 @@ package hdf.view.HelpView;
 
 /**
  *
- * The helpview interface for displaying user help information
+ * The helpview interface for displaying user help information.
  *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
 public abstract interface HelpView {
-    /** Display help information */
+    /** Display help information. */
     public abstract void show();
 
     /**
