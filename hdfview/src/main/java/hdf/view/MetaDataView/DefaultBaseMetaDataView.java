@@ -500,7 +500,9 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         text.setText(
             godataObject.getPath() == null
                 ? "/"
-                : godataObject.getPath()); /* TODO: temporary workaround until Object Library is fixed */
+                : godataObject.getPath()); /* TODO(HDFView) [2025-12]: Remove null path workaround once Object Library returns "/" for root objects.
+                                            * Currently path can be null for some objects, requiring fallback to "/" in metadata display.
+                                            * Once getPath() guaranteed non-null, simplify to: text.setText(godataObject.getPath()); */
         text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
         /* Object Type section */

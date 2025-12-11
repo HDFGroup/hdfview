@@ -571,7 +571,10 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
             close(id);
         }
 
-        // todo: We shall also load attributes of fields
+        // TODO(HDFView) [2025-12]: Implement field-level attribute loading for HDF4 Vdata objects.
+        // Currently only loads Vdata-level attributes, not attributes attached to individual fields.
+        // Requires HDFLibrary calls to enumerate and retrieve field attributes.
+        // Medium priority - field attributes are less commonly used than Vdata attributes.
 
         return attributeList;
     }

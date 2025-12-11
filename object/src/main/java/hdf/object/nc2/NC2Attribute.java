@@ -223,7 +223,10 @@ public class NC2Attribute extends ScalarDS implements Attribute {
                 if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
                     log.trace("open(): FILE_TYPE_NC3");
                     /*
-                     * TODO: Get type of netcdf3 object this is attached to and retrieve attribute info.
+                     * TODO(HDFView) [2025-12]: Implement NetCDF3-specific attribute retrieval.
+                     * Need to determine parent object type (variable, dimension, global) and use appropriate NetCDF library calls.
+                     * May be limited by NetCDF3 library capabilities - investigate if full implementation possible.
+                     * Related: Similar pattern to H4ScalarAttribute.java line 224, H4CompoundAttribute.java line 228.
                      */
                 }
             }
@@ -253,7 +256,10 @@ public class NC2Attribute extends ScalarDS implements Attribute {
             if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
                 log.trace("close(): FILE_TYPE_NC3");
                 /*
-                 * TODO: Get type of netcdf3 object this is attached to and close attribute.
+                 * TODO(HDFView) [2025-12]: Implement NetCDF3-specific attribute cleanup.
+                 * Need to properly close attribute handle based on parent object type.
+                 * Coordinate with open() implementation once parent object type detection is added.
+                 * Related: H4ScalarAttribute.java line 257, H4CompoundAttribute.java line 260.
                  */
             }
         }
@@ -271,7 +277,10 @@ public class NC2Attribute extends ScalarDS implements Attribute {
         if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
             log.trace("init(): FILE_TYPE_NC3");
             /*
-             * TODO: If netcdf3 attribute object needs to init dependent objects.
+             * TODO(HDFView) [2025-12]: Determine if NetCDF3 attributes require dependency initialization.
+             * May need to initialize datatype or parent object references before first use.
+             * Currently assumes no initialization needed - verify with NetCDF3 spec.
+             * Related: H4ScalarAttribute.java line 278, H4CompoundAttribute.java line 282.
              */
             inited = true;
         }

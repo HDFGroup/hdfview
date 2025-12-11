@@ -843,8 +843,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             public boolean isEditable(int columnIndex, int rowIndex)
             {
                 /*
-                 * TODO: Should be able to edit character-displayed types and datasets when
-                 * displayed as hex/binary.
+                 * TODO(HDFView) [2025-12]: Enable editing for character data displayed as hex/binary.
+                 * Currently prevents editing when display mode is char/hex/binary.
+                 * Should allow editing with proper conversion: hex string → bytes → character data.
+                 * Requires input validation for hex format (0x00-0xFF) and binary format (0b00000000-0b11111111).
+                 * Related: DefaultCompoundDSTableView.java line 320 has same limitation.
                  */
                 return !(isReadOnly || isDisplayTypeChar || showAsBin || showAsHex);
             }
@@ -1009,7 +1012,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             return; // no selection
         }
 
-        // TODO: do we need to do something with what's past the closing bracket
+        // TODO(HDFView) [2025-12]: Determine if post-bracket region reference data needs processing (scalar context).
+        // Currently region string parsing stops at closing bracket - verify if trailing data should be handled.
+        // If no known use cases exist for data after '}', remove this TODO and commented line.
+        // Related: DefaultCompoundDSTableView.java:496, line 1547 below have similar bracket parsing questions.
         // regStr = reg.substring(reg.indexOf('}') + 1);
 
         StringTokenizer st = new StringTokenizer(regStr);
@@ -1541,7 +1547,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             strVal = null;
                         }
                         else {
-                            // TODO: do we need to do something with what's past the closing bracket
+                            // TODO(HDFView) [2025-12]: Determine if post-bracket region reference data needs processing (cell listener context).
+                            // Currently region string parsing stops at closing bracket - verify if trailing data should be handled.
+                            // Third occurrence of this pattern - if no use cases found, clean up all three instances.
+                            // Related: Lines 1015 above, DefaultCompoundDSTableView.java:496.
                             // regStr = reg.substring(reg.indexOf('}') + 1);
 
                             StringTokenizer st = new StringTokenizer(regStr);

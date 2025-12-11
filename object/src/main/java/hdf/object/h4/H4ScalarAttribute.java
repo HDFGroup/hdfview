@@ -221,7 +221,10 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
                 if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                     log.trace("open(): FILE_TYPE_HDF4");
                     /*
-                     * TODO: Get type of HDF4 object this is attached to and retrieve attribute info.
+                     * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute retrieval for scalar types.
+                     * Need to determine parent object type (GR, SDS, Vdata) and use appropriate HDFLibrary calls.
+                     * May be limited by HDF4 library capabilities - investigate if full implementation possible.
+                     * Related: H4CompoundAttribute.java line 228 has same stub for compound attributes.
                      */
                 }
             }
@@ -251,7 +254,10 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
             if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                 log.trace("close(): FILE_TYPE_HDF4");
                 /*
-                 * TODO: Get type of HDF4 object this is attached to and close attribute.
+                 * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute cleanup for scalar types.
+                 * Need to properly close attribute handle based on parent object type.
+                 * Coordinate with open() implementation once parent object type detection is added.
+                 * Related: H4CompoundAttribute.java line 260 for compound attribute cleanup.
                  */
             }
         }
@@ -269,7 +275,10 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
         if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             log.trace("init(): FILE_TYPE_HDF4");
             /*
-             * TODO: If HDF4 attribute object needs to init dependent objects.
+             * TODO(HDFView) [2025-12]: Determine if HDF4 scalar attributes require dependency initialization.
+             * May need to initialize datatype or parent object references before first use.
+             * Currently assumes no initialization needed - verify with HDF4 spec.
+             * Related: H4CompoundAttribute.java line 282 for compound attributes.
              */
             inited = true;
         }

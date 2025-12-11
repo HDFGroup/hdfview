@@ -612,7 +612,12 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
         else if (dtype.isCompound()) {
             log.debug("convertByteMember(): compound datatype class");
             /*
-             * TODO: still valid after reading change?
+             * TODO(HDFView) [2025-12]: Verify compound byte conversion logic is still correct after read path changes.
+             * The convertCompoundByteMembers() call may need validation to ensure proper handling of:
+             * - Nested compound structures
+             * - Variable-length members
+             * - Array members within compounds
+             * Recommend adding comprehensive test coverage for compound byte member conversion.
              */
             theObj = convertCompoundByteMembers(dtype, byteData);
         }

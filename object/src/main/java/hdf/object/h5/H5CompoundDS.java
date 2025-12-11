@@ -943,7 +943,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
         }
         else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
             /*
-             * TODO: true variable-length support.
+             * TODO(HDFView) [2025-12]: Implement true variable-length type support for compound datasets.
+             * Currently returns "*UNSUPPORTED*" placeholder for non-string variable-length fields.
+             * Requires integration with HDF5 H5Tvlen_* APIs for proper memory management.
+             * Related: See H5CompoundAttr.java line 873, H5Datatype.java line 2774.
              */
             String[] errVal = new String[nSelPoints];
             String errStr   = "*UNSUPPORTED*";
@@ -1113,7 +1116,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
 
                         try {
                             /*
-                             * TODO: currently doesn't correctly handle non-selected compound members.
+                             * TODO(HDFView) [2025-12]: Fix compound dataset write when subset of members selected.
+                             * Current member indexing doesn't account for unselected members, causing data misalignment.
+                             * Need to map selected member index to actual position in compound type structure.
+                             * Related: Same issue in H5CompoundAttr.java line 1122 - needs coordinated fix.
                              */
                             memberData = ((List<?>)writeBuf).get(writeListIndex++);
                             log.trace("  Retrieved memberData from writeBuf[{}] (now writeListIndex={})",

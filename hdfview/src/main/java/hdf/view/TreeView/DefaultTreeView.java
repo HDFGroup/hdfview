@@ -1775,8 +1775,10 @@ public class DefaultTreeView implements TreeView {
                 log.trace("populateTree(): FileID={} Null Root={}", theFile.getFID(),
                           (theFile.getRootObject() == null));
             }
-            // TODO: Update FitsFile and NC2File to have a fid other than -1
-            //  so this check isn't needed
+            // TODO(HDFView) [2025-12]: Fix FitsFile and NC2File to use valid file IDs instead of -1.
+            // Currently FITS and NetCDF3 files use -1 as file ID, requiring special case in file type check.
+            // Update FitsFile.java and NC2File.java to assign proper file handles.
+            // Once fixed, remove this conditional and rely on standard file ID validation.
             if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) ||
                 // theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3)) ||
                 theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
@@ -1832,8 +1834,11 @@ public class DefaultTreeView implements TreeView {
      *            Expands the TreeItem and its children if true.
      *            Collapse the TreeItem and its children if false.
      */
-    // TODO: some groups dont get expanded right, likely due to SetData not being
-    //  able to catch up with a large number of expanding
+    // TODO(HDFView) [2025-12]: Fix group expansion race condition for large hierarchies.
+    // Some groups fail to expand correctly when recursiveExpand is called on deep/wide trees.
+    // Likely caused by setData() not completing before expansion triggers child item creation.
+    // Need to investigate: async setData completion, event queue timing, or explicit wait mechanism.
+    // Affects user experience when expanding large group hierarchies.
     private void recursiveExpand(TreeItem item, boolean expand)
     {
         if (item == null || !(item.getData() instanceof Group))

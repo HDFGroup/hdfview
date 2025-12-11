@@ -357,7 +357,10 @@ public class DataProviderFactory {
             log.trace("setDataValue({}, {})=({}): finish", rowIndex, columnIndex, newValue);
 
             /*
-             * TODO: throwing error dialogs when something fails?
+             * TODO(HDFView) [2025-12]: Add user-facing error dialog for data value setting failures.
+             * Currently logs error but doesn't inform user via UI when setValue fails.
+             * Should uncomment Tools.showError to display exception message to user.
+             * Related: Line 952 has same error dialog issue, line 1258 for array operations.
              *
              * Tools.showError(shell, "Select", "Unable to set new value:\n\n " + ex);
              */
@@ -726,9 +729,11 @@ public class DataProviderFactory {
                         base.getDataValue(colValue, fieldIdx - relCmpdStartIndexMap.get(fieldIdx), rowIdx);
                 else if (base instanceof ArrayDataProvider) {
                     /*
-                     * TODO: quick temporary fix for specific compound of array of compound files.
-                     * Transforms the given column index into a relative index from the starting
-                     * index of the array of compound field.
+                     * TODO(HDFView) [2025-12]: Replace temporary fix with robust compound-of-array handling.
+                     * Current index transformation is a quick workaround for specific file structures.
+                     * Need generalized solution for nested compound and array combinations.
+                     * Verify correctness across various nesting patterns: array[compound], compound[array[compound]], etc.
+                     * High priority - temporary fixes tend to break with edge cases.
                      */
                     int arrCompoundStartIdx = columnIndex;
                     HDFDataProvider theProvider;
@@ -947,7 +952,10 @@ public class DataProviderFactory {
                       newValue);
 
             /*
-             * TODO: throwing error dialogs when something fails?
+             * TODO(HDFView) [2025-12]: Add user-facing error dialog for compound data value setting failures.
+             * Currently logs error but doesn't inform user via UI when compound setValue fails.
+             * Should uncomment Tools.showError to display exception message to user.
+             * Related: Line 360 has same error dialog issue for scalar data.
              *
              * Tools.showError(shell, "Select", "Unable to set new value:\n\n " + ex);
              */
@@ -1084,19 +1092,26 @@ public class DataProviderFactory {
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache.
+                     * Currently retrieves array elements on each call - may benefit from caching in arrayElements.
+                     * Evaluate performance impact for large arrays before implementing.
+                     * Related: Lines 1095, 1101, 1370, 1376, 1382, 1388 have same caching consideration.
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else if (baseTypeDataProvider instanceof ComplexDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache.
+                     * Currently retrieves complex elements on each call - may benefit from caching.
+                     * Evaluate performance vs. memory tradeoff before implementing.
                      */
                     theValue = retrieveArrayOfComplexElements(dataBuf, columnIndex, bufIndex);
                 }
                 else {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache.
+                     * Currently retrieves atomic elements on each call - may benefit from caching.
+                     * Low priority - atomic element retrieval is already fast.
                      */
                     theValue = retrieveArrayOfAtomicElements(dataBuf, bufIndex);
                 }
@@ -1253,7 +1268,10 @@ public class DataProviderFactory {
             StringTokenizer st = new StringTokenizer((String)newValue, ",[]");
             if (st.countTokens() < arraySize) {
                 /*
-                 * TODO:
+                 * TODO(HDFView) [2025-12]: Add user-facing error dialog for insufficient array data points.
+                 * Currently logs warning but doesn't inform user via UI. Commented code shows intention.
+                 * Should use proper error dialog to notify user that input has fewer values than array size.
+                 * Related: Lines 360, 950 - other places needing error dialog improvements.
                  */
                 /* Tools.showError(shell, "Select", "Number of data points < " + morder + "."); */
                 log.trace("updateArrayElements(): number of data points ({}) < array size {}",
@@ -1288,7 +1306,10 @@ public class DataProviderFactory {
         {
             for (int i = 0; i < arraySize; i++) {
                 /*
-                 * TODO: not quite right.
+                 * TODO(HDFView) [2025-12]: Review and fix array element data value setting logic.
+                 * Current index calculation (bufStartIndex + i) may be incorrect for nested structures.
+                 * Need to verify proper offset calculation for multi-dimensional and compound arrays.
+                 * Test with various array configurations to ensure data is written to correct positions.
                  */
                 baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, curBuf,
                                                   tokenizer.nextToken().trim());
@@ -1359,25 +1380,33 @@ public class DataProviderFactory {
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (array context).
+                     * Currently retrieves array-of-array elements on each call - caching may improve performance.
+                     * Related: Lines 1095, 1101, 1390, 1396, 1402 have same caching opportunity.
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else if (baseTypeDataProvider instanceof RefDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (reference context).
+                     * Currently retrieves reference array elements on each call - caching may improve performance.
+                     * Related: Similar pattern for other base type providers.
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else if (baseTypeDataProvider instanceof ComplexDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (complex context).
+                     * Currently retrieves complex array elements on each call - caching may improve performance.
+                     * Related: Line 1104 for similar complex element retrieval.
                      */
                     theValue = retrieveArrayOfComplexElements(dataBuf, columnIndex, bufIndex);
                 }
                 else {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (atomic context).
+                     * Currently retrieves atomic array elements on each call - likely already fast enough.
+                     * Low priority - simple atomic retrieval doesn't benefit much from caching.
                      */
                     theValue = retrieveArrayOfAtomicElements(dataBuf, bufIndex);
                 }

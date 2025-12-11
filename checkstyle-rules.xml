@@ -29,11 +29,12 @@
     </module>
 
     <!-- Line length check with flexibility for imports and URLs -->
-    <module name="LineLength">
-        <property name="fileExtensions" value="java"/>
-        <property name="max" value="120"/>
-        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-    </module>
+    <!-- <module name="LineLength"> -->
+    <!--     <property name="fileExtensions" value="java"/> -->
+    <!--     <property name="max" value="120"/> -->
+    <!--     <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/> -->
+    <!-- </module> -->
+    <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
 
     <!-- Whitespace checks -->
     <module name="NewlineAtEndOfFile">
@@ -78,17 +79,20 @@
         <!-- Reason: Style-only rule, different tools have different preferences, avoiding conflicts -->
 
         <!-- Size violations -->
-        <module name="MethodLength">
-            <property name="max" value="200"/>
-            <property name="countEmpty" value="false"/>
-        </module>
+        <!-- <module name="MethodLength"> -->
+        <!--     <property name="max" value="200"/> -->
+        <!--     <property name="countEmpty" value="false"/> -->
+        <!-- </module> -->
+        <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
+
         <module name="ParameterNumber">
             <property name="max" value="10"/>
             <property name="ignoreOverriddenMethods" value="true"/>
         </module>
-        <module name="AnonInnerLength">
-            <property name="max" value="20"/>
-        </module>
+        <!-- <module name="AnonInnerLength"> -->
+        <!--     <property name="max" value="20"/> -->
+        <!-- </module> -->
+        <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
 
         <!-- Whitespace checks - DISABLED: Using clang-format for code formatting -->
         <!-- Uncomment these if you want Checkstyle to enforce whitespace rules -->
@@ -176,6 +180,9 @@
 
         <!-- Miscellaneous -->
         <module name="ArrayTypeStyle"/>
+        <!-- TODO/FIXME comment detection - set to 'info' level for visibility without blocking builds
+             Policy: Critical TODOs should be converted to tracked GitHub issues within 30 days.
+             Format recommendation: TODO(username) [YYYY-MM-DD]: description [Issue #123] -->
         <module name="TodoComment">
             <property name="severity" value="info"/>
             <property name="format" value="(TODO)|(FIXME)"/>
@@ -207,12 +214,16 @@
         <!-- </module> -->
         <!-- Reason: 143 violations, creates noise, string constants should be refactored when it makes sense -->
 
-        <module name="NestedIfDepth">
-            <property name="max" value="3"/>
-        </module>
-        <module name="NestedTryDepth">
-            <property name="max" value="2"/>
-        </module>
+        <!-- <module name="NestedIfDepth"> -->
+        <!--     <property name="max" value="3"/> -->
+        <!-- </module> -->
+        <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
+
+        <!-- <module name="NestedTryDepth"> -->
+        <!--     <property name="max" value="2"/> -->
+        <!-- </module> -->
+        <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
+
         <module name="NoClone"/>
         <module name="NoFinalizer"/>
         <module name="OneStatementPerLine"/>

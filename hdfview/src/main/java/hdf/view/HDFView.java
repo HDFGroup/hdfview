@@ -931,7 +931,11 @@ public class HDFView implements DataViewManager {
                 // Open the dialog
                 userOptionDialog.open();
 
-                // TODO: this functionality is currently broken because isWorkDirChanged() is not exposed
+                // TODO(HDFView) [2025-12]: Fix work directory change detection - isWorkDirChanged() not properly exposed.
+                // Currently unconditionally overwrites currentDir after user options dialog closes.
+                // Should only update if user actually changed the working directory setting.
+                // Need to properly expose isWorkDirChanged() method or add public getter to UserOptionsDialog.
+                // Impact: Unnecessary directory updates may confuse users or cause unexpected behavior.
                 // correctly. if (userOptionDialog.isWorkDirChanged()) this will always overwrite the
                 // currentDir until isWorkDirChanged() is fixed
                 currentDir = ViewProperties.getWorkDir();
@@ -2228,7 +2232,9 @@ public class HDFView implements DataViewManager {
                      + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
                      + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
 
-        // TODO:Add custom HDFLarge icon to dialog
+        // TODO(HDFView) [2025-12]: Add custom HDFLarge branded icon to file format registration dialog.
+        // Currently uses default system dialog icon. Could improve branding with HDF-themed icon.
+        // Low priority - cosmetic enhancement. Related: InputDialog.java:43 for small icon support.
         InputDialog dialog = new InputDialog(mainWindow, "Register a file format", msg, SWT.ICON_INFORMATION);
 
         String str = dialog.open();
@@ -2838,7 +2844,10 @@ public class HDFView implements DataViewManager {
             {
                 HDFView app = new HDFView(theRootDir, theStartDir);
 
-                // TODO: Look for a better solution to native dialog problem
+                // TODO(HDFView) [2025-12]: Investigate better solution for native dialog compatibility issues.
+                // Current workaround may not be optimal for cross-platform native file/directory dialogs.
+                // Consider SWT dialog improvements or alternative dialog libraries for better platform integration.
+                // Medium priority - affects user experience on certain platforms.
                 app.setTestState(false);
 
                 app.openMainWindow(theFileList, theW, theH, theX, theY);

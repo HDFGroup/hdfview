@@ -505,7 +505,11 @@ public class DataValidatorFactory {
                                             ((lenDiff > 1) ? " bytes." : " byte."));
 
                     /*
-                     * TODO: Add Warning about overwriting NULL-terminator character.
+                     * TODO(HDFView) [2025-12]: Add user warning dialog when input may overwrite string NULL terminator.
+                     * When input length exactly matches string field size for NULL-padded HDF5 strings,
+                     * user should be warned that NULL terminator may be lost, causing read errors.
+                     * Should display warning: "Input length matches field size - NULL terminator may be overwritten."
+                     * Medium priority - affects data integrity for fixed-length strings.
                      */
                     if (lenDiff == 0 && isH5String) {
                         H5Datatype h5Type = (H5Datatype)datasetDatatype;

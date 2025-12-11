@@ -225,7 +225,10 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
                 if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                     log.trace("open(): FILE_TYPE_HDF4");
                     /*
-                     * TODO: Get type of HDF4 object this is attached to and retrieve attribute info.
+                     * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute retrieval for compound types.
+                     * Need to determine parent object type (GR, SDS, Vdata) and use appropriate HDFLibrary calls.
+                     * May be limited by HDF4 library capabilities - investigate if full implementation possible.
+                     * Related: H4ScalarAttribute.java line 224 has same stub for scalar attributes.
                      */
                 }
             }
@@ -255,7 +258,10 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
             if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                 log.trace("close(): FILE_TYPE_HDF4");
                 /*
-                 * TODO: Get type of HDF4 object this is attached to and close attribute.
+                 * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute cleanup for compound types.
+                 * Need to properly close attribute handle based on parent object type.
+                 * Coordinate with open() implementation once parent object type detection is added.
+                 * Related: H4ScalarAttribute.java line 254 for scalar attribute cleanup.
                  */
             }
         }
@@ -273,7 +279,10 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
         if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             log.trace("init(): FILE_TYPE_HDF4");
             /*
-             * TODO: If HDF4 attribute object needs to init dependent objects.
+             * TODO(HDFView) [2025-12]: Determine if HDF4 compound attributes require dependency initialization.
+             * May need to initialize datatype or parent object references before first use.
+             * Currently assumes no initialization needed - verify with HDF4 spec.
+             * Related: H4ScalarAttribute.java line 272 for scalar attributes.
              */
             inited = true;
         }
@@ -307,8 +316,10 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
             init();
 
         /*
-         * TODO: For now, convert a compound Attribute's data (String[]) into a List for
-         * convenient processing
+         * TODO(HDFView) [2025-12]: Review whether String[] to List conversion is still necessary.
+         * This conversion was added for backward compatibility with existing HDFView code.
+         * Consider refactoring callers to accept List directly, then remove this conversion.
+         * Low priority - current approach works but adds unnecessary object creation.
          */
         if (getDatatype().isCompound() && !(data instanceof List)) {
             List<String> valueList = Arrays.asList((String[])data);

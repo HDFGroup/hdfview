@@ -757,7 +757,10 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                 Tools.showError(shell, "Browser support",
                                 "Platform doesn't support Browser. Opening external link in web browser...");
 
-                // TODO: Add support for launching in external browser
+                // TODO(HDFView) [2025-12]: Implement fallback external browser launch when SWT Browser unavailable.
+                // Currently shows error message but doesn't actually open URL in system browser.
+                // Use java.awt.Desktop.browse(URI) or platform-specific command (xdg-open, open, start).
+                // Related: NewDatasetDialog.java:1087, NewScalarAttributeDialog.java:475 have same issue.
             }
             catch (Exception ex) {
                 log.debug("Open New Attribute Help failure: ", ex);

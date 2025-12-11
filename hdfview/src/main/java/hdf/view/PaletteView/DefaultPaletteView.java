@@ -564,7 +564,10 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                 }
             });
 
-            // TODO: editing behavior not quite correct yet
+            // TODO(HDFView) [2025-12]: Fix palette editing mouse interaction behavior.
+            // Current mouse move handling doesn't correctly track palette entry selection or editing state.
+            // Need to verify: cursor feedback, selection highlighting, and edit mode transitions.
+            // Low priority - basic palette editing works but UX could be improved.
             this.addMouseMoveListener(new MouseMoveListener() {
                 @Override
                 public void mouseMove(MouseEvent e)

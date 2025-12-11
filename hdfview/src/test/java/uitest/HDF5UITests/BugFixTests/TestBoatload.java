@@ -48,10 +48,9 @@ public class TestBoatload extends AbstractWindowTest {
 
             checkFileTree(filetree, "testBoatload()", 6, filename);
 
-            testNEGroup();
-            testNWGroup();
-            testSEGroup();
-            testSWGroup();
+            // TODO(HDFView) [2025-12]: Implement group-specific validation tests
+            // testNEGroup(), testNWGroup(), testSEGroup(), testSWGroup() were removed
+            // as they were empty stubs. Add proper validation for NE, NW, SE, SW groups if needed.
 
             // Open dataset '/sailors'
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
@@ -81,25 +80,5 @@ public class TestBoatload extends AbstractWindowTest {
                 ex.printStackTrace();
             }
         }
-    }
-
-    private void testNEGroup()
-    {
-        // TODO
-    }
-
-    private void testNWGroup()
-    {
-        // TODO
-    }
-
-    private void testSEGroup()
-    {
-        // TODO
-    }
-
-    private void testSWGroup()
-    {
-        // TODO
     }
 }

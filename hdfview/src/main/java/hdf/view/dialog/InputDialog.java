@@ -40,7 +40,9 @@ import org.eclipse.swt.widgets.Text;
 /**
  * Custom SWT dialog to allow the user to input strings for various uses.
  */
-// TODO: Add ability to have custom HDF icons
+// TODO(HDFView) [2025-12]: Add support for custom HDF-themed dialog icons.
+// Currently uses default SWT dialog icons. Could add branded HDF icons for better UX.
+// Low priority - cosmetic enhancement. Related: HDFView.java:2231 for large icon support.
 public class InputDialog extends Dialog {
     private Text inputField;
     private final String title;
@@ -218,7 +220,10 @@ public class InputDialog extends Dialog {
             }
         }
 
-        // TODO: Display loop should not wait here, but we must wait until
+        // TODO(HDFView) [2025-12]: Consider refactoring display loop to use async/callback pattern.
+        // Current synchronous wait is necessary but blocks event loop - could impact responsiveness.
+        // Modern SWT patterns might allow non-blocking dialog with completion callback.
+        // Low priority - current approach works correctly, just not ideal architecture.
         // an input is given before returning
         return result;
     }

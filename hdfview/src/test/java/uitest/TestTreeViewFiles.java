@@ -692,11 +692,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
 
                 checkFileTree(filetree, "openHDF5CompoundDSints()", 6, filename);
 
-                // TODO:
-                // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName1 + "'",
-                // items[0].getNode(0).getText().compareTo(datasetname1)==0);
-                // assertTrue("openHDF5CompoundDSints() filetree is missing dataset '" + datasetName2 + "'",
-                // items[0].getNode(1).getText().compareTo(datasetname2)==0);
+                // Assertions disabled - dataset ordering not guaranteed in tree view
                 // assertTrue("openHDF5CompoundDSints() filetree is missing file '" + filename2 + "'",
                 // items[1].getText().compareTo(filename2)==0); assertTrue("openHDF5CompoundDSints() filetree
                 // is missing dataset '" + datasetName1 + "'",
@@ -869,8 +865,7 @@ public class TestTreeViewFiles extends AbstractWindowTest {
         }
     }
 
-    @Disabled
-    // TODO: disabled until import from template functionality is fixed
+    @Disabled("Import from template functionality is broken - needs investigation")
     public void openHDF5CompoundArrayImport()
     {
         String filename        = "tcmpdintsize.h5";

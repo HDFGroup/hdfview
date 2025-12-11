@@ -53,7 +53,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             checkFileTree(filetree, "openHDF5Filters()", 17, testFilename);
 
             /*
-             * TODO: SZIP not available
+             * Disabled: SZIP filter not available in test environment
              * tableShell = openTreeviewObject(filetree, testFilename, "all");
              * SWTBotNatTable dataTable = getNatTable(tableShell);
              *
@@ -147,7 +147,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             /*
-             * TODO: verify data in file
+             * Future: Add data verification for nbit filter
              * tableShell = openTreeviewObject(filetree, testFilename, "nbit"); dataTable
              * = getNatTable(tableShell);
              *
@@ -161,7 +161,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
              */
 
             /*
-             * TODO: verify data in file
+             * Future: Add data verification for scaleoffset filter
              * tableShell = openTreeviewObject(filetree, testFilename, "scaleoffset"); dataTable
              * = getNatTable(tableShell);
              *
@@ -185,7 +185,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             bot.waitUntil(Conditions.shellCloses(tableShell));
 
             /*
-             * TODO: SZIP not available
+             * Disabled: SZIP filter not available in test environment
              * tableShell = openTreeviewObject(filetree, testFilename, "szip");
              * dataTable = getNatTable(tableShell);
              *
@@ -355,7 +355,7 @@ public class TestTreeViewFilters extends AbstractWindowTest {
             val = bot.labelInGroup("Miscellaneous Dataset Information", 0).getText();
             assertTrue(val.equals("Storage Layout: "), "label matches");
             /*
-             * TODO: fix regex
+             * Disabled: Regex pattern needs fixing for escaped hyphen in assertion
              * val = bot.labelInGroup("Miscellaneous Dataset Information", 1).getText();
              * assertTrue(constructWrongValueMessage("checkHDF5Filters()", "wrong data",
              * "CONTIGUOUS - EXTERNAL ", val), val.equals("CONTIGUOUS \\- EXTERNAL "));

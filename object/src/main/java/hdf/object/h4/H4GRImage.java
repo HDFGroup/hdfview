@@ -839,7 +839,9 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
         int[] lutInfo = new int[4]; // ncomp, datatype, interlace, num_entries
         try {
             // find the first palette.
-            // Todo: get all the palettes
+            // TODO(HDFView) [2025-12]: Extend palette loading to retrieve all palettes, not just first.
+            // Currently only loads palette at index 0. Need to loop through all available palettes.
+            // Enhancement for users with multi-palette images. Low priority.
             lutid = HDFLibrary.GRgetlutid(id, 0);
             HDFLibrary.GRgetlutinfo(lutid, lutInfo);
         }

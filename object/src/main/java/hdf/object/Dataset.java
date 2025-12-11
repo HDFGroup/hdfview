@@ -735,8 +735,15 @@ public abstract class Dataset extends HObject implements DataFormat {
             dataValue = getData();
 
             /*
-             * TODO: Converting data from unsigned C integers to Java integers
-             *       is currently unsupported for Compound Datasets.
+             * TODO(HDFView) [2025-12]: Implement unsigned-to-signed conversion for CompoundDS members.
+             * Currently unsigned C integer conversion is skipped for compound datasets.
+             * Java lacks native unsigned types, so conversion must use wider types or special handling:
+             * - unsigned byte  -> short
+             * - unsigned short -> int
+             * - unsigned int   -> long
+             * - unsigned long  -> BigInteger or special bit handling
+             * Impact: Compound datasets with unsigned members display incorrect values (appear negative).
+             * Related: DefaultBaseTableView.java line 1428 handles display-side conversion.
              */
             if (!(this instanceof CompoundDS))
                 convertFromUnsignedC();

@@ -357,7 +357,11 @@ public class NewCompoundDatasetDialog extends NewDataObjectDialog {
                     typeCombo.select(typeIdx);
                     typeCombo.notifyListeners(SWT.Selection, new Event());
 
-                    // TODO: Array size is wrong for enums and for array types. Array types such as 8x8
+                    // TODO(HDFView) [2025-12]: Fix array size display to show dimensions instead of total element count.
+                    // Currently shows flattened size (64) instead of dimensional representation (8x8) for array types.
+                    // Also affects enum display - should show enum member count vs. byte size.
+                    // Need to detect array types and format as "NxMx..." instead of total count.
+                    // Medium priority - confuses users about actual array structure.
                     //  show as size 64, not 8x8
                     if (tclass == Datatype.CLASS_STRING) {
                         ((Text)editors[i][2].getEditor()).setText(String.valueOf(tsize));

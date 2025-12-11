@@ -2356,11 +2356,12 @@ public class H5File extends FileFormat {
         }
 
         /*
-         * TODO: Root group's name should be changed to 'this.getName()' and all
-         * previous accesses of this field should now use getPath() instead of getName()
-         * to get the root group. The root group actually does have a path of "/". The
-         * depth_first method will have to be changed to setup other object paths
-         * appropriately, as it currently assumes the root path to be null.
+         * TODO(HDFView) [2025-12]: Fix root group naming inconsistency for proper tree view display.
+         * Root group name should be changed from "/" to this.getName() for consistency.
+         * All code accessing root via getName() should switch to getPath() instead.
+         * The depth_first traversal method assumes null root path and needs updating.
+         * Impact: Affects tree view display and metadata hierarchy presentation.
+         * Related: Same issue in H4File.java line 712 - needs coordinated fix.
          */
         rootObject = new H5Group(this, "/", null, null);
         log.trace("loadIntoMemory(): depth_first on root");

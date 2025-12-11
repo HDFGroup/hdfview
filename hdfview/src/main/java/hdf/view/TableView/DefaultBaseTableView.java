@@ -1425,8 +1425,11 @@ public abstract class DefaultBaseTableView implements TableView {
             dataValue = dataObject.getData();
 
             /*
-             * TODO: Converting data from unsigned C integers to Java integers
-             *       is currently unsupported for Compound Datasets.
+             * TODO(HDFView) [2025-12]: Implement unsigned-to-signed conversion for table view display of CompoundDS.
+             * Currently compound datasets skip unsigned conversion, causing negative values to appear for unsigned data.
+             * Display layer should handle conversion even if data layer doesn't (see Dataset.java line 738).
+             * May need display-only conversion without modifying underlying data.
+             * Related: Dataset.java line 738 for data-layer conversion logic.
              */
             if (!(dataObject instanceof CompoundDS))
                 dataObject.convertFromUnsignedC();
@@ -1737,7 +1740,10 @@ public abstract class DefaultBaseTableView implements TableView {
     // // System.out.println(docFlavors[i]);
     // // }
     //
-    // // TODO: windows url
+    // // TODO(HDFView) [2025-12]: Implement Windows-specific URL handling for printing.
+    // // Commented-out code suggests incomplete Windows URL support for print functionality.
+    // // May need platform-specific file:// URL conversion or Windows print service integration.
+    // // Low priority - printing feature appears to be disabled/incomplete across all platforms.
     // // Get a text DocFlavor
     // InputStream is = null;
     // try {
