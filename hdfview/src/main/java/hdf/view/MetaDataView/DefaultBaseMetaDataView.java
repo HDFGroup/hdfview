@@ -1268,7 +1268,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         private Button jamButton;
         private Text userBlockArea;
 
-        public UserBlockDialog(Shell parent, int style, HObject obj)
+        UserBlockDialog(Shell parent, int style, HObject obj)
         {
             super(parent, style);
 

@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.TreeItem;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface TreeView {
+public interface TreeView {
     /**
      * Opens a file and retrieves the file structure of the file. It also can be
      * used to create a new file by setting the accessID to FileFormat.CREATE.
@@ -61,7 +61,7 @@ public abstract interface TreeView {
      *
      * @throws Exception if a failure occurred
      */
-    public abstract FileFormat openFile(String filename, int accessID) throws Exception;
+    FileFormat openFile(String filename, int accessID) throws Exception;
     /**
      * Reopens a file and retrieves the file structure of the file.
      *
@@ -83,7 +83,7 @@ public abstract interface TreeView {
      *
      * @throws Exception if a failure occurred
      */
-    public abstract FileFormat reopenFile(FileFormat theFile, int newFileAccessMode) throws Exception;
+    FileFormat reopenFile(FileFormat theFile, int newFileAccessMode) throws Exception;
 
     /**
      * close a file.
@@ -92,7 +92,7 @@ public abstract interface TreeView {
      *
      * @throws Exception if a failure occurred
      */
-    public abstract void closeFile(FileFormat file) throws Exception;
+    void closeFile(FileFormat file) throws Exception;
 
     /**
      * save a file.
@@ -101,7 +101,7 @@ public abstract interface TreeView {
      *
      * @throws Exception if a failure occurred
      */
-    public abstract void saveFile(FileFormat file) throws Exception;
+    void saveFile(FileFormat file) throws Exception;
 
     /**
      * change the display option.
@@ -109,7 +109,7 @@ public abstract interface TreeView {
      * @param displaymode
      *            the default displaymode
      */
-    public abstract void setDefaultDisplayMode(boolean displaymode);
+    void setDefaultDisplayMode(boolean displaymode);
 
     /**
      * Gets the selected the file. When multiple files are open, we need to know
@@ -117,14 +117,14 @@ public abstract interface TreeView {
      *
      * @return the FileFormat of the selected file.
      */
-    public abstract FileFormat getSelectedFile();
+    FileFormat getSelectedFile();
 
     /**
      * Get the current selected object in the tree.
      *
      * @return the current selected object in the tree.
      */
-    public abstract HObject getCurrentObject();
+    HObject getCurrentObject();
 
     /**
      * Display the content of a data object.
@@ -136,7 +136,7 @@ public abstract interface TreeView {
      *
      * @throws Exception if a failure occurred
      */
-    public abstract DataView showDataContent(HObject dataObject) throws Exception;
+    DataView showDataContent(HObject dataObject) throws Exception;
 
     /**
      * Adds an already created HObject to the tree under the
@@ -149,21 +149,21 @@ public abstract interface TreeView {
      *
      * @return the TreeItem object
      */
-    public abstract TreeItem addObject(HObject newObject, Group parentGroup);
+    TreeItem addObject(HObject newObject, Group parentGroup);
 
     /**
      * Get the Tree which holds the file structure.
      *
      * @return the Tree which holds the file structure.
      */
-    public abstract Tree getTree();
+    Tree getTree();
 
     /**
      * Get the list of currently open files.
      *
      * @return the list of currently open files.
      */
-    public abstract List<FileFormat> getCurrentFiles();
+    List<FileFormat> getCurrentFiles();
 
     /**
      * Get the tree item that contains the given data object.
@@ -172,5 +172,5 @@ public abstract interface TreeView {
      *
      * @return the tree item that contains the given data object.
      */
-    public abstract TreeItem findTreeItem(HObject obj);
+    TreeItem findTreeItem(HObject obj);
 }

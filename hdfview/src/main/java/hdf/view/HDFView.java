@@ -2330,7 +2330,7 @@ public class HDFView implements DataViewManager {
     private class LibraryVersionDialog extends Dialog {
         private String message;
 
-        public LibraryVersionDialog(Shell parent, String libType)
+        LibraryVersionDialog(Shell parent, String libType)
         {
             super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 
@@ -2410,7 +2410,7 @@ public class HDFView implements DataViewManager {
     }
 
     private class JavaVersionDialog extends Dialog {
-        public JavaVersionDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
+        JavaVersionDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
 
         public void open()
         {
@@ -2473,7 +2473,7 @@ public class HDFView implements DataViewManager {
     }
 
     private class SupportedFileFormatsDialog extends Dialog {
-        public SupportedFileFormatsDialog(Shell parent)
+        SupportedFileFormatsDialog(Shell parent)
         {
             super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
         }
@@ -2546,7 +2546,7 @@ public class HDFView implements DataViewManager {
     }
 
     private class AboutDialog extends Dialog {
-        public AboutDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
+        AboutDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
 
         public void open()
         {
@@ -2612,7 +2612,7 @@ public class HDFView implements DataViewManager {
         private List<Object> keyList;
         private String formatChoice = null;
 
-        public UnregisterFileFormatDialog(Shell parent, int style, List<Object> keyList)
+        UnregisterFileFormatDialog(Shell parent, int style, List<Object> keyList)
         {
             super(parent, style);
 

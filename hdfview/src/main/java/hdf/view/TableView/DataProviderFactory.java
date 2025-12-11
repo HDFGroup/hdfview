@@ -79,7 +79,7 @@ public class DataProviderFactory {
         return dataProvider;
     }
 
-    private static final HDFDataProvider getDataProvider(final Datatype dtype, final Object dataBuf,
+    private static HDFDataProvider getDataProvider(final Datatype dtype, final Object dataBuf,
                                                          final boolean dataTransposed) throws Exception
     {
         HDFDataProvider dataProvider = null;

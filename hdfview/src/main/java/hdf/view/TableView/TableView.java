@@ -23,42 +23,42 @@ import hdf.view.DataView.DataView;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface TableView extends DataView {
+public interface TableView extends DataView {
     /**
      * Get the table.
      *
      * @return the table
      */
-    public abstract Object getTable();
+    Object getTable();
 
     /**
      * Get the array of selected data.
      *
      * @return array of selected data
      */
-    public abstract Object getSelectedData();
+    Object getSelectedData();
 
     /**
      * Get the array of selected column count.
      *
      * @return array of selected column count
      */
-    public abstract int getSelectedColumnCount();
+    int getSelectedColumnCount();
 
     /**
      * Get the array of selected row count.
      *
      * @return array of selected row count
      */
-    public abstract int getSelectedRowCount();
+    int getSelectedRowCount();
 
     /**
      * Write the change of a dataset into file.
      */
-    public abstract void updateValueInFile();
+    void updateValueInFile();
 
     /**
      * refresh the data table.
      */
-    public abstract void refreshDataTable();
+    void refreshDataTable();
 }

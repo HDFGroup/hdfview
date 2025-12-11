@@ -144,7 +144,7 @@ public class H5File extends FileFormat {
      * Enum to indicate the type of I/O to perform inside of the common I/O
      * function.
      */
-    public static enum IO_TYPE {
+    public enum IO_TYPE {
         /** read IO type. */
         READ,
         /** write IO type. */
@@ -644,7 +644,7 @@ public class H5File extends FileFormat {
      *
      * @throws Exception If there is a problem creating the attributes, or if the selectionFlag is invalid.
      */
-    private static final void createImageAttributes(Dataset dataset, int selectionFlag) throws Exception
+    private static void createImageAttributes(Dataset dataset, int selectionFlag) throws Exception
     {
         log.trace("createImageAttributes(): start: dataset={}", dataset.toString());
         String subclass      = null;

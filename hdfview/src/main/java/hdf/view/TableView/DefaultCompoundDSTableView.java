@@ -825,7 +825,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         private final int ncols;
         private final int groupSize;
 
-        public CompoundDSColumnHeaderDataProvider(DataFormat dataObject)
+        CompoundDSColumnHeaderDataProvider(DataFormat dataObject)
         {
             CompoundDataFormat dataFormat = (CompoundDataFormat)dataObject;
 
@@ -1055,7 +1055,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      * Implementation of Column Grouping for Compound Datasets with nested members.
      */
     private class CompoundDSNestedColumnHeaderLayer extends ColumnGroupGroupHeaderLayer {
-        public CompoundDSNestedColumnHeaderLayer(ColumnGroupHeaderLayer columnGroupHeaderLayer,
+        CompoundDSNestedColumnHeaderLayer(ColumnGroupHeaderLayer columnGroupHeaderLayer,
                                                  SelectionLayer selectionLayer,
                                                  ColumnGroupModel columnGroupModel)
         {

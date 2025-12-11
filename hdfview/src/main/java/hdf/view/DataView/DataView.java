@@ -22,20 +22,20 @@ import hdf.object.HObject;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface DataView {
+public interface DataView {
     /** The unknown view type. */
-    public static final int DATAVIEW_UNKNOWN = -1;
+    int DATAVIEW_UNKNOWN = -1;
 
     /** The table view type. */
-    public static final int DATAVIEW_TABLE = 1;
+    int DATAVIEW_TABLE = 1;
 
     /** The image view type. */
-    public static final int DATAVIEW_IMAGE = 2;
+    int DATAVIEW_IMAGE = 2;
 
     /**
      * Get the data object displayed in this data viewer.
      *
      * @return the data object displayed in this data viewer
      */
-    public abstract HObject getDataObject();
+    HObject getDataObject();
 }

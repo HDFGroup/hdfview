@@ -25,7 +25,7 @@ import hdf.view.DataView.DataView;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface MetaDataView extends DataView {
+public interface MetaDataView extends DataView {
     /**
      * Add an attribute to a data object.
      *
@@ -33,7 +33,7 @@ public abstract interface MetaDataView extends DataView {
      *
      * @return the Attribute object
      */
-    public abstract Attribute addAttribute(HObject obj);
+    Attribute addAttribute(HObject obj);
 
     /**
      * Delete an attribute from a data object.
@@ -42,5 +42,5 @@ public abstract interface MetaDataView extends DataView {
      *
      * @return the Attribute object
      */
-    public abstract Attribute deleteAttribute(HObject obj);
+    Attribute deleteAttribute(HObject obj);
 }

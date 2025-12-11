@@ -191,9 +191,7 @@ public abstract class FileFormat extends File {
      */
     protected boolean isReadOnly = false;
 
-    /**
-     * By default, HDF4 and HDF5 file formats are added to the supported formats list.
-     */
+    // By default, HDF4 and HDF5 file formats are added to the supported formats list.
     static
     {
         // add HDF4 to default modules

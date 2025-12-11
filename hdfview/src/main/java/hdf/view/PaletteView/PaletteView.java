@@ -23,5 +23,5 @@ import hdf.view.DataView.DataView;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface PaletteView extends DataView {
+public interface PaletteView extends DataView {
 }

@@ -346,7 +346,7 @@ public class Chart extends Dialog {
         private static final int LEGEND_LINE_WIDTH = 10;
         private static final int LEGEND_LINE_GAP   = 30;
 
-        public ChartCanvas(Composite parent, int style)
+        ChartCanvas(Composite parent, int style)
         {
             super(parent, style);
 

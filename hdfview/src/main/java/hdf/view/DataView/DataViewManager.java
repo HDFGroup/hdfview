@@ -24,20 +24,20 @@ import hdf.view.TreeView.TreeView;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface DataViewManager {
+public interface DataViewManager {
     /**
      * Data content is displayed, add the dataview to the main windows.
      *
      * @param dataView the dataView whose presence in the main view is to be added.
      */
-    public abstract void addDataView(DataView dataView);
+    void addDataView(DataView dataView);
 
     /**
      * Data content is closed, remove the dataview from the main window.
      *
      * @param dataView the dataView whose presence in the main view is to be removed.
      */
-    public abstract void removeDataView(DataView dataView);
+    void removeDataView(DataView dataView);
 
     /**
      * Returns DataView that contains the specified data object. It is useful to
@@ -49,28 +49,28 @@ public abstract interface DataViewManager {
      * @return DataView contains the specified data object, null if the data
      *         object is not displayed.
      */
-    public abstract DataView getDataView(HObject dataObject);
+    DataView getDataView(HObject dataObject);
 
     /**
      * Display feedback message.
      *
      * @param msg the status message to display
      */
-    public abstract void showStatus(String msg);
+    void showStatus(String msg);
 
     /**
      * Display error message.
      *
      * @param errMsg the error message to display
      */
-    public abstract void showError(String errMsg);
+    void showError(String errMsg);
 
     /**
      * Get the current TreeView.
      *
      * @return the current TreeView
      */
-    public abstract TreeView getTreeView();
+    TreeView getTreeView();
 
     /**
      * Start stop a timer.
@@ -78,5 +78,5 @@ public abstract interface DataViewManager {
      * @param toggleTimer
      *            -- true: start timer, false stop timer.
      */
-    public abstract void executeTimer(boolean toggleTimer);
+    void executeTimer(boolean toggleTimer);
 }

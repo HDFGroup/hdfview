@@ -2057,7 +2057,7 @@ public class DefaultTreeView implements TreeView {
      *
      * @return the list user objects
      */
-    private final List<Object> breadthFirstUserObjects(TreeItem item)
+    private List<Object> breadthFirstUserObjects(TreeItem item)
     {
         if (item == null)
             return null;
@@ -2084,7 +2084,7 @@ public class DefaultTreeView implements TreeView {
      *
      * @return the object if found, otherwise, returns null.
      */
-    private final HObject find(String objName, TreeItem parentItem)
+    private HObject find(String objName, TreeItem parentItem)
     {
         if (objName == null || objName.length() <= 0 || parentItem == null)
             return null;
@@ -2155,7 +2155,7 @@ public class DefaultTreeView implements TreeView {
      *
      * @param srcFile - the current file
      */
-    private final void saveAsHDF4(FileFormat srcFile)
+    private void saveAsHDF4(FileFormat srcFile)
     {
         if (srcFile == null) {
             shell.getDisplay().beep();
@@ -3353,7 +3353,7 @@ public class DefaultTreeView implements TreeView {
     }
 
     private class ChangeLibVersionDialog extends Dialog {
-        public ChangeLibVersionDialog(Shell parent, int style) { super(parent, style); }
+        ChangeLibVersionDialog(Shell parent, int style) { super(parent, style); }
 
         public void open()
         {

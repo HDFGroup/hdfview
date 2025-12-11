@@ -345,7 +345,7 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
     private class HelpDialog extends Dialog {
         private Shell helpShell;
 
-        public HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
+        HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
 
         public void open()
         {

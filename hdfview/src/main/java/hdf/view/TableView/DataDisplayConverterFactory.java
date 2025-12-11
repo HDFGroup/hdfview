@@ -78,7 +78,7 @@ public class DataDisplayConverterFactory {
         return converter;
     }
 
-    private static final HDFDisplayConverter getDataDisplayConverter(final Datatype dtype) throws Exception
+    private static HDFDisplayConverter getDataDisplayConverter(final Datatype dtype) throws Exception
     {
         HDFDisplayConverter converter = null;
 

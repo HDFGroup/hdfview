@@ -2566,7 +2566,7 @@ public class DefaultImageView implements ImageView {
         private ScrollBar hbar     = null;
         private ScrollBar vbar     = null;
 
-        public ImageComponent(Composite parent, int style, Image img)
+        ImageComponent(Composite parent, int style, Image img)
         {
             super(parent, style);
 
@@ -3105,7 +3105,7 @@ public class DefaultImageView implements ImageView {
         // contrast level [0, 4]
         float contrastLevel = 0;
 
-        public BrightnessFilter(int blevel, int clevel)
+        BrightnessFilter(int blevel, int clevel)
         {
             if (blevel < -100)
                 brightLevel = -100;
@@ -3624,7 +3624,7 @@ public class DefaultImageView implements ImageView {
         private int currentFrame   = 0;
         private int sleepTime      = 200;
 
-        public Animation(Shell parent, int style, ScalarDS dataset)
+        Animation(Shell parent, int style, ScalarDS dataset)
         {
             super(parent, style);
 
@@ -3814,7 +3814,7 @@ public class DefaultImageView implements ImageView {
 
         final DecimalFormat numberFormat = new DecimalFormat("#.##E0");
 
-        public DataRangeDialog(Shell parent, int style, double[] minmaxCurrent, double[] minmaxOriginal,
+        DataRangeDialog(Shell parent, int style, double[] minmaxCurrent, double[] minmaxOriginal,
                                final int[] dataDist)
         {
 
@@ -4113,7 +4113,7 @@ public class DefaultImageView implements ImageView {
         int bLevel            = 0;
         int cLevel            = 0;
 
-        public ContrastSlider(Shell parent, int style, ImageProducer producer)
+        ContrastSlider(Shell parent, int style, ImageProducer producer)
         {
             super(parent, style);
 

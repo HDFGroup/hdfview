@@ -2820,7 +2820,7 @@ public abstract class DefaultBaseTableView implements TableView {
         private int idxXAxis = -1;
         private int plotType = -1;
 
-        public LinePlotOption(Shell parent, int style, int nrow, int ncol)
+        LinePlotOption(Shell parent, int style, int nrow, int ncol)
         {
             super(parent, style);
 

@@ -45,7 +45,7 @@ public final class H5Plugins {
      *
      * @throws HDF5Exception If there is an error at the HDF5 library level.
      */
-    public static final long getTotalPluginPaths() throws HDF5Exception
+    public static long getTotalPluginPaths() throws HDF5Exception
     {
         totalPaths = H5.H5PLsize();
 
@@ -61,7 +61,7 @@ public final class H5Plugins {
      *
      * @throws HDF5Exception If there is an error at the HDF5 library level.
      */
-    public static final ArrayList<String> getPluginPaths() throws HDF5Exception
+    public static ArrayList<String> getPluginPaths() throws HDF5Exception
     {
         ArrayList<String> pathList = new ArrayList<>(5);
         totalPaths                 = H5.H5PLsize();

@@ -596,9 +596,9 @@ public class NewLinkDialog extends Dialog {
             FileFormat targetFileFormat = null;
             int fileAccessID            = FileFormat.FILE_CREATE_OPEN;
 
-            File targetFile = new File(targetFileName);
+            File targetNewFile = new File(targetFileName);
 
-            if (!targetFile.exists()) {
+            if (!targetNewFile.exists()) {
                 return null;
             }
             FileFormat h5format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);

@@ -454,7 +454,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         private int dragX0;
         private int dragY0;
 
-        public ChartCanvas(Composite parent, int style)
+        ChartCanvas(Composite parent, int style)
         {
             super(parent, style);
 
@@ -649,7 +649,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         private static final String RGBNAME = "Color";
         private static final String IDXNAME = "Index";
 
-        public PaletteValueTable(Shell parent, int style) { super(parent, style); }
+        PaletteValueTable(Shell parent, int style) { super(parent, style); }
 
         public void open()
         {

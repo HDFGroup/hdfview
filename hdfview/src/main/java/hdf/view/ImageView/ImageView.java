@@ -25,67 +25,67 @@ import hdf.view.DataView.DataView;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface ImageView extends DataView {
+public interface ImageView extends DataView {
     /**
      * Returns the selected area of the image.
      *
      * @return the rectangle of the selected image area.
      */
-    public abstract Rectangle getSelectedArea();
+    Rectangle getSelectedArea();
 
     /**
      * Check if the image is a truecolor image.
      *
      * @return true if the image is a truecolor image.
      */
-    public abstract boolean isTrueColor();
+    boolean isTrueColor();
 
     /**
      * Check if the image interlace is plane interlace.
      *
      * @return true if the image interlace is plane interlace.
      */
-    public abstract boolean isPlaneInterlace();
+    boolean isPlaneInterlace();
 
     /**
      * Get the array of selected data.
      *
      * @return array of selected data
      */
-    public abstract Object getSelectedData();
+    Object getSelectedData();
 
     /**
      * Get the image displayed in this imageView.
      *
      * @return the image displayed in this imageView
      */
-    public abstract Image getImage();
+    Image getImage();
 
     /**
      * Sets the image.
      *
      * @param img the image to view
      */
-    public abstract void setImage(Image img);
+    void setImage(Image img);
 
     /**
      * Get the palette of the image.
      *
      * @return the palette of the image
      */
-    public abstract byte[][] getPalette();
+    byte[][] getPalette();
 
     /**
      * Sets the image palette.
      *
      * @param palette the palette for the image to view
      */
-    public abstract void setPalette(byte[][] palette);
+    void setPalette(byte[][] palette);
 
     /**
      * Get the byte array of the image data.
      *
      * @return the byte array of the image data
      */
-    public abstract byte[] getImageByteData();
+    byte[] getImageByteData();
 }

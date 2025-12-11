@@ -202,7 +202,7 @@ public abstract class CompoundDS extends Dataset implements CompoundDataFormat {
     }
 
     /**
-     * Resets selection of dataspace
+     * Resets selection of dataspace.
      */
     @Override
     protected void resetSelection()

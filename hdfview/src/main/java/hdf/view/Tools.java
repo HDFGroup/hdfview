@@ -273,7 +273,7 @@ public final class Tools {
      *
      * @return the gray palette in the form of byte[3][256]
      */
-    public static final byte[][] createGrayPalette()
+    public static byte[][] createGrayPalette()
     {
         byte[][] p = new byte[3][256];
 
@@ -296,7 +296,7 @@ public final class Tools {
      *
      * @return the gray palette in the form of byte[3][256]
      */
-    public static final byte[][] createReverseGrayPalette()
+    public static byte[][] createReverseGrayPalette()
     {
         byte[][] p = new byte[3][256];
 
@@ -319,7 +319,7 @@ public final class Tools {
      *
      * @return the gray palette in the form of byte[3][256]
      */
-    public static final byte[][] createGrayWavePalette()
+    public static byte[][] createGrayWavePalette()
     {
         byte[][] p = new byte[3][256];
 
@@ -342,7 +342,7 @@ public final class Tools {
      *
      * @return the rainbow palette in the form of byte[3][256]
      */
-    public static final byte[][] createRainbowPalette()
+    public static byte[][] createRainbowPalette()
     {
         byte r;
         byte g;
@@ -401,7 +401,7 @@ public final class Tools {
      *
      * @return the nature palette in the form of byte[3][256]
      */
-    public static final byte[][] createNaturePalette()
+    public static byte[][] createNaturePalette()
     {
         byte[][] p = new byte[3][256];
 
@@ -438,7 +438,7 @@ public final class Tools {
      *
      * @return the wave palette in the form of byte[3][256]
      */
-    public static final byte[][] createWavePalette()
+    public static byte[][] createWavePalette()
     {
         byte[][] p = new byte[3][256];
 
@@ -477,7 +477,7 @@ public final class Tools {
      *
      * @return the wave palette in the form of byte[3][256]
      */
-    public static final byte[][] readPalette(String filename)
+    public static byte[][] readPalette(String filename)
     {
         final int color256 = 256;
         int nentries       = 0;
@@ -2289,7 +2289,7 @@ public final class Tools {
      * @return the string representation of the unsigned long value represented
      *         by the argument in binary (base 2).
      */
-    public static final String toBinaryString(long v, int nbytes)
+    public static String toBinaryString(long v, int nbytes)
     {
         if (nbytes <= 0)
             return null;
@@ -2378,7 +2378,7 @@ public final class Tools {
      * @return the string representation of the BigDecimal value represented
      *         by the argument in binary (base 2).
      */
-    public static final String toBinaryString(BigDecimal v, int nbytes)
+    public static String toBinaryString(BigDecimal v, int nbytes)
     {
         StringBuilder sb = new StringBuilder();
         /*
@@ -2403,7 +2403,7 @@ public final class Tools {
      * @return the string representation of the BigInteger value represented
      *         by the argument in binary (base 2).
      */
-    public static final String toBinaryString(BigInteger v, int nbytes)
+    public static String toBinaryString(BigInteger v, int nbytes)
     {
         StringBuilder sb = new StringBuilder();
         String val = String.format("%" + (8 * nbytes) + "s", v.toString(2)).replace(" ", "0").toUpperCase();
@@ -2430,7 +2430,7 @@ public final class Tools {
      * @return the string representation of the unsigned long value represented by the argument in
      *         hexadecimal (base 16).
      */
-    public static final String toHexString(long v, int nbytes)
+    public static String toHexString(long v, int nbytes)
     {
         char[] hexCHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
@@ -2462,7 +2462,7 @@ public final class Tools {
      * @return the string representation of the BigInteger value represented by the argument in
      *         hexadecimal (base 16).
      */
-    public static final String toHexString(BigInteger v, int nbytes)
+    public static String toHexString(BigInteger v, int nbytes)
     {
         return String.format("%" + (2 * nbytes) + "s", v.toString(16)).replace(" ", "0").toUpperCase();
     }
@@ -2479,7 +2479,7 @@ public final class Tools {
      * @return the string representation of the BigDecimal value represented by the argument in
      *         hexadecimal (base 16).
      */
-    public static final String toHexString(BigDecimal v, int nbytes)
+    public static String toHexString(BigDecimal v, int nbytes)
     {
         return null; // String.format("%" + (2 * nbytes) + "s", v.toString(16)).replace(" ",
                      // "0").toUpperCase();
@@ -2497,7 +2497,7 @@ public final class Tools {
      *
      * @return true if bitmask is applied successfully; otherwise, false.
      */
-    public static final boolean applyBitmask(Object theData, BitSet theMask, ViewProperties.BITMASK_OP op)
+    public static boolean applyBitmask(Object theData, BitSet theMask, ViewProperties.BITMASK_OP op)
     {
         if (theData == null || !(theData instanceof Array) ||
             ((theData instanceof Array) && (Array.getLength(theData) <= 0)) || theMask == null)
@@ -2863,7 +2863,7 @@ public final class Tools {
      *
      * @throws Exception if a failure occurred
      */
-    public static final void launchBrowser(String url) throws Exception
+    public static void launchBrowser(String url) throws Exception
     {
         String os       = System.getProperty("os.name");
         Runtime runtime = Runtime.getRuntime();
@@ -3008,7 +3008,7 @@ public final class Tools {
      *
      * @return -- the new file.
      */
-    public static final File checkNewFile(String path, String ext)
+    public static File checkNewFile(String path, String ext)
     {
         File file = new File(path + "new" + ext);
         int i     = 1;
@@ -3029,7 +3029,7 @@ public final class Tools {
      *
      * @return true if the number is Nan or INF; otherwise, false.
      */
-    public static final boolean isNaNINF(double val)
+    public static boolean isNaNINF(double val)
     {
         return (Double.isNaN(val) || val == Float.NEGATIVE_INFINITY || val == Float.POSITIVE_INFINITY ||
                 val == Double.NEGATIVE_INFINITY || val == Double.POSITIVE_INFINITY);

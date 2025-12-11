@@ -1828,7 +1828,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         private final int ncols;
 
-        public ScalarDSColumnHeaderDataProvider(DataFormat theDataObject)
+        ScalarDSColumnHeaderDataProvider(DataFormat theDataObject)
         {
             spaceType = theDataObject.getSpaceType();
             rank      = theDataObject.getRank();

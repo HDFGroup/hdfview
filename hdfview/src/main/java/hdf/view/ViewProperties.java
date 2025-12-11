@@ -119,7 +119,7 @@ public class ViewProperties extends PreferenceStore {
     /**
      * Used to create different DataViews for a given HObject.
      */
-    public static enum DataViewType {
+    public enum DataViewType {
         /** table type. */
         TABLE,
         /** image type. */
@@ -135,7 +135,7 @@ public class ViewProperties extends PreferenceStore {
     /**
      * Property keys control how the data is displayed.
      */
-    public static enum DATA_VIEW_KEY {
+    public enum DATA_VIEW_KEY {
         /** data is char. */
         CHAR,
         /** data is converted to byte. */
@@ -163,7 +163,7 @@ public class ViewProperties extends PreferenceStore {
     /**
      * Property keys control how the data is displayed.
      */
-    public static enum BITMASK_OP {
+    public enum BITMASK_OP {
         /** use bitmask and. */
         AND,
         /** use bitmask extract. */
