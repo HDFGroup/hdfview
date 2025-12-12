@@ -1798,7 +1798,8 @@ public class H5Datatype extends Datatype {
      * @throws OutOfMemoryError
      *                          If there is a failure.
      */
-    public static final Object allocateArray(final H5Datatype dtype, int numPoints) throws OutOfMemoryError
+    public static final Object allocateArray(final H5Datatype dtype, int numPoints)
+            throws OutOfMemoryError, HDF5Exception
     {
         log.trace("allocateArray(): start: numPoints={}", numPoints);
 
@@ -1891,12 +1892,12 @@ public class H5Datatype extends Datatype {
                                   typeSize, bufferTypeSize);
                     }
                     else {
-                        throw new Exception("Failed to create native type");
+                        throw new HDF5Exception("Failed to create native type");
                     }
                 }
                 catch (Exception ex) {
                     log.warn("allocateArray(): Error querying native type size: {}", ex.getMessage());
-                    throw new Exception("Failed to create native type");
+                    throw new HDF5Exception("Failed to create native type");
                 }
                 finally {
                     if (nativeTypeId >= 0) {
