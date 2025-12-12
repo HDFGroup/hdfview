@@ -1799,7 +1799,7 @@ public class H5Datatype extends Datatype {
      *                          If there is a failure.
      */
     public static final Object allocateArray(final H5Datatype dtype, int numPoints)
-            throws OutOfMemoryError, HDF5Exception
+        throws OutOfMemoryError, HDF5Exception
     {
         log.trace("allocateArray(): start: numPoints={}", numPoints);
 
