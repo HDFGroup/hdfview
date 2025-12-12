@@ -1477,7 +1477,7 @@ public class H5Datatype extends Datatype {
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT16);
                 else if (datatypeSize == 1)
                     // For Float8 (1-byte floats), fall back to FLOAT32 for reading
-                    // as there is no native Float8 type in most HDF5 versions
+                    // as there is no native Float8 type in any HDF5 versions
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
                 else
                     tid = -1;
@@ -1891,14 +1891,12 @@ public class H5Datatype extends Datatype {
                                   typeSize, bufferTypeSize);
                     }
                     else {
-                        // Fallback if native type creation fails
-                        bufferTypeSize = 4;
-                        log.warn("allocateArray(): Failed to create native type, using 4-byte fallback");
+                        throw new Exception("Failed to create native type");
                     }
                 }
                 catch (Exception ex) {
                     log.warn("allocateArray(): Error querying native type size: {}", ex.getMessage());
-                    bufferTypeSize = 4;
+                    throw new Exception("Failed to create native type");
                 }
                 finally {
                     if (nativeTypeId >= 0) {
