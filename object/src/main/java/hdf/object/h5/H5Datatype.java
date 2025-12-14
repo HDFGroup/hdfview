@@ -394,7 +394,9 @@ public class H5Datatype extends Datatype {
     {
         if (tid >= 0) {
             try {
-                log.trace("close(): H5Tclose(tid={}) - datatype={}", tid, this.getDescription());
+                // NOTE: Avoid calling getDescription() here as it may cause recursion
+                // if called during createNative() cleanup
+                log.trace("close(): H5Tclose(tid={})", tid);
                 H5.H5Tclose(tid);
             }
             catch (HDF5Exception ex) {

@@ -1,2 +1,4 @@
 /target/
 /lib/
+# Exception: Allow library JARs for version control
+!lib/*.jar

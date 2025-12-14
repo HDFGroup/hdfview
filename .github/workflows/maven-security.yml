@@ -2,9 +2,8 @@ name: Security and Dependency Scanning
 
 on:
   push:
-    branches: [ master-maven, main ]
   pull_request:
-    branches: [ master-maven, main ]
+    branches: [ master ]
   schedule:
     # Run security scan weekly on Sundays at 3 AM UTC
     - cron: '0 3 * * 0'
