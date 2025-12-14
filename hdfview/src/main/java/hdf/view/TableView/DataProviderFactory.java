@@ -676,9 +676,16 @@ public class DataProviderFactory {
         @Override
         public Object getDataValue(int columnIndex, int rowIndex)
         {
+            log.trace("=== COMPOUND getDataValue ENTRY ===");
+            log.trace("  Input: columnIndex={}, rowIndex={}", columnIndex, rowIndex);
+
             try {
                 int fieldIdx = columnIndex;
                 int rowIdx   = rowIndex;
+
+                log.trace("  Initial: fieldIdx={}, rowIdx={}", fieldIdx, rowIdx);
+                log.trace("  nSubColumns={}, selectedMemberTypes.length={}", nSubColumns,
+                          selectedMemberTypes.length);
 
                 if (nSubColumns > 1) { // multi-dimension compound dataset
                     /*
@@ -690,19 +697,33 @@ public class DataProviderFactory {
 
                     int realColIdx = columnIndex / selectedMemberTypes.length;
                     rowIdx         = rowIndex * nSubColumns + realColIdx;
+                    log.trace("  Multi-dim adjusted: fieldIdx={}, rowIdx={}, realColIdx={}", fieldIdx, rowIdx,
+                              realColIdx);
                 }
 
                 int providerIndex = baseProviderIndexMap.get(fieldIdx);
-                Object colValue   = ((List<?>)dataBuf).get(providerIndex);
-                if (colValue == null)
+                log.trace("  INDEX MAPPING READ: fieldIdx={} -> providerIndex={}", fieldIdx, providerIndex);
+                log.trace("  baseProviderIndexMap: {}", baseProviderIndexMap);
+
+                Object colValue = ((List<?>)dataBuf).get(providerIndex);
+                if (colValue == null) {
+                    log.trace("  colValue is null, returning nullStr");
                     return DataFactoryUtils.nullStr;
-                log.trace("getDataValue: colValue={}, rowIdx={}, fieldIdx={}", colValue, rowIdx, fieldIdx);
+                }
+                log.trace("  colValue retrieved from dataBuf[{}], type={}", providerIndex,
+                          colValue.getClass().getSimpleName());
 
                 /*
                  * Delegate data retrieval to one of the base DataProviders according to the
                  * index of the relevant compound field.
                  */
                 HDFDataProvider base = baseTypeProviders[providerIndex];
+                log.trace("  Base provider[{}]: type={}, isContainerType={}", providerIndex,
+                          base.getClass().getSimpleName(), base.isContainerType);
+                if (providerIndex < selectedMemberTypes.length) {
+                    log.trace("  Member type: {}", selectedMemberTypes[providerIndex].getDescription());
+                }
+
                 if (base instanceof CompoundDataProvider)
                     /*
                      * Adjust the compound field index by subtracting the starting index of the
@@ -764,8 +785,13 @@ public class DataProviderFactory {
                     log.trace("getDataValue: theValue={}, rowIdx={}, adjustedColIndex={}", theValue, rowIdx,
                               adjustedColIndex);
                 }
-                else
+                else {
+                    log.trace("  Non-container: Calling base.getDataValue(colValue, {})", rowIdx);
                     theValue = base.getDataValue(colValue, rowIdx);
+                    log.trace("  Retrieved value: '{}'", theValue);
+                }
+
+                log.trace("=== COMPOUND getDataValue RETURN: '{}' ===", theValue);
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}, {}): failure: ", rowIndex, columnIndex, ex);
@@ -824,6 +850,9 @@ public class DataProviderFactory {
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue)
         {
+            log.debug("=== COMPOUND setDataValue ENTRY ===");
+            log.debug("  Input: columnIndex={}, rowIndex={}, newValue={}", columnIndex, rowIndex, newValue);
+
             if ((newValue == null) || ((newValue = ((String)newValue).trim()) == null)) {
                 log.debug("setDataValue({}, {})=({}): cell value not updated; new value is null", rowIndex,
                           columnIndex, newValue);
@@ -832,6 +861,7 @@ public class DataProviderFactory {
 
             // No need to update if values are the same
             Object oldVal = this.getDataValue(columnIndex, rowIndex);
+            log.debug("  Old value at ({}, {}): {}", columnIndex, rowIndex, oldVal);
             if ((oldVal != null) && newValue.equals(oldVal.toString())) {
                 log.debug("setDataValue({}, {})=({}): cell value not updated; new value same as old value",
                           rowIndex, columnIndex, newValue);
@@ -841,6 +871,10 @@ public class DataProviderFactory {
             try {
                 int fieldIdx = columnIndex;
                 int rowIdx   = rowIndex;
+
+                log.debug("  Initial: fieldIdx={}, rowIdx={}", fieldIdx, rowIdx);
+                log.debug("  nSubColumns={}, selectedMemberTypes.length={}", nSubColumns,
+                          selectedMemberTypes.length);
 
                 if (nSubColumns > 1) { // multi-dimension compound dataset
                     /*
@@ -852,37 +886,56 @@ public class DataProviderFactory {
 
                     int realColIdx = columnIndex / selectedMemberTypes.length;
                     rowIdx         = rowIndex * nSubColumns + realColIdx;
+                    log.debug("  Multi-dim adjusted: fieldIdx={}, rowIdx={}, realColIdx={}", fieldIdx, rowIdx,
+                              realColIdx);
                 }
 
                 int providerIndex = baseProviderIndexMap.get(fieldIdx);
-                Object colValue   = ((List<?>)dataBuf).get(providerIndex);
+                log.debug("  INDEX MAPPING: fieldIdx={} -> providerIndex={}", fieldIdx, providerIndex);
+                log.debug("  baseProviderIndexMap: {}", baseProviderIndexMap);
+
+                Object colValue = ((List<?>)dataBuf).get(providerIndex);
                 if (colValue == null) {
                     log.debug("setDataValue({}, {})=({}): colValue is null", rowIndex, columnIndex, newValue);
                     return;
                 }
+                log.debug("  colValue retrieved from dataBuf[{}], type={}", providerIndex,
+                          colValue.getClass().getSimpleName());
 
                 /*
                  * Delegate data setting to one of the base DataProviders according to the index
                  * of the relevant compound field.
                  */
                 HDFDataProvider base = baseTypeProviders[providerIndex];
-                if (base.isContainerType)
+                log.debug("  Base provider[{}]: type={}, isContainerType={}", providerIndex,
+                          base.getClass().getSimpleName(), base.isContainerType);
+
+                if (base.isContainerType) {
                     /*
                      * Adjust the compound field index by subtracting the starting index of the
                      * nested compound that we are delegating to. When the nested compound's index
                      * map is setup correctly, this adjusted index should map to the correct field
                      * among the nested compound's members.
                      */
-                    base.setDataValue(fieldIdx - relCmpdStartIndexMap.get(fieldIdx), rowIdx, colValue,
-                                      newValue);
-                else
+                    int adjustedFieldIdx = fieldIdx - relCmpdStartIndexMap.get(fieldIdx);
+                    log.debug("  Container type: adjustedFieldIdx={} (fieldIdx {} - startIdx {})",
+                              adjustedFieldIdx, fieldIdx, relCmpdStartIndexMap.get(fieldIdx));
+                    log.debug("  Calling base.setDataValue({}, {}, colValue, {})", adjustedFieldIdx, rowIdx,
+                              newValue);
+                    base.setDataValue(adjustedFieldIdx, rowIdx, colValue, newValue);
+                }
+                else {
+                    log.debug("  Non-container: Calling base.setDataValue({}, colValue, {})", rowIdx,
+                              newValue);
                     base.setDataValue(rowIdx, colValue, newValue);
+                }
 
                 isValueChanged = true;
+                log.debug("=== COMPOUND setDataValue SUCCESS ===");
             }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {})=({}): cell value update failure: ", rowIndex, columnIndex,
-                          newValue);
+                          newValue, ex);
             }
             log.trace("setDataValue({}, {})=({}): finish", rowIndex, columnIndex, newValue);
 
@@ -896,33 +949,52 @@ public class DataProviderFactory {
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object bufObject, Object newValue)
         {
+            log.debug("=== COMPOUND setDataValue(bufObject) ENTRY ===");
+            log.debug("  Input: columnIndex={}, rowIndex={}, newValue={}", columnIndex, rowIndex, newValue);
+
             try {
                 int providerIndex = baseProviderIndexMap.get(columnIndex);
-                Object colValue   = ((List<?>)bufObject).get(providerIndex);
+                log.debug("  INDEX MAPPING: columnIndex={} -> providerIndex={}", columnIndex, providerIndex);
+                log.debug("  baseProviderIndexMap: {}", baseProviderIndexMap);
+
+                Object colValue = ((List<?>)bufObject).get(providerIndex);
                 if (colValue == null) {
                     log.debug("setDataValue({}, {}, {})=({}): colValue is null", rowIndex, columnIndex,
                               bufObject, newValue);
                     return;
                 }
+                log.debug("  colValue retrieved from bufObject[{}]", providerIndex);
 
                 /*
                  * Delegate data setting to one of the base DataProviders according to the index
                  * of the relevant compound field.
                  */
                 HDFDataProvider base = baseTypeProviders[providerIndex];
-                if (base.isContainerType)
+                log.debug("  Base provider[{}]: type={}, isContainerType={}", providerIndex,
+                          base.getClass().getSimpleName(), base.isContainerType);
+
+                if (base.isContainerType) {
                     /*
                      * Adjust the compound field index by subtracting the starting index of the
                      * nested compound that we are delegating to. When the nested compound's index
                      * map is setup correctly, this adjusted index should map to the correct field
                      * among the nested compound's members.
                      */
-                    base.setDataValue(columnIndex - relCmpdStartIndexMap.get(columnIndex), rowIndex, colValue,
-                                      newValue);
-                else
+                    int adjustedColIdx = columnIndex - relCmpdStartIndexMap.get(columnIndex);
+                    log.debug("  Container type: adjustedColIdx={} (columnIndex {} - startIdx {})",
+                              adjustedColIdx, columnIndex, relCmpdStartIndexMap.get(columnIndex));
+                    log.debug("  Calling base.setDataValue({}, {}, colValue, {})", adjustedColIdx, rowIndex,
+                              newValue);
+                    base.setDataValue(adjustedColIdx, rowIndex, colValue, newValue);
+                }
+                else {
+                    log.debug("  Non-container: Calling base.setDataValue({}, colValue, {})", rowIndex,
+                              newValue);
                     base.setDataValue(rowIndex, colValue, newValue);
+                }
 
                 isValueChanged = true;
+                log.debug("=== COMPOUND setDataValue(bufObject) SUCCESS ===");
             }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {}, {})=({}): cell value update failure: ", rowIndex, columnIndex,

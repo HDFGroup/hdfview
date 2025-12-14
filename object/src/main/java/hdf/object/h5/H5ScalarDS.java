@@ -898,6 +898,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
         try {
             scalarDatasetCommonIO(H5File.IO_TYPE.WRITE, buf);
+            // Clear the data cache after writing to ensure fresh reads
+            clearData();
+            log.debug("write(Object): data cache cleared after successful write");
         }
         catch (Exception ex) {
             log.debug("write(Object): failed to write to scalar dataset: ", ex);
@@ -937,6 +940,15 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(
                     did, dims, startDims, selectedStride, selectedDims, spaceIDs);
 
+                // Check for BFLOAT16 which causes JVM crash due to HDF5 Java bindings bug
+                // See https://github.com/HDFGroup/hdf5/issues/6076
+                if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 2) {
+                    throw new Exception(
+                        "BFLOAT16 (16-bit floating-point) datasets are not supported due to a bug in HDF5 Java bindings. "
+                        +
+                        "Reading this datatype causes a JVM crash. See https://github.com/HDFGroup/hdf5/issues/6076 for details.");
+                }
+
                 if (ioType == H5File.IO_TYPE.READ) {
                     log.trace(
                         "scalarDatasetCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}",
@@ -959,6 +971,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                     else if ((originalBuf == null) || dsDatatype.isEnum() || dsDatatype.isText() ||
                              dsDatatype.isRefObj() ||
                              ((originalBuf != null) && (totalSelectedSpacePoints != nPoints))) {
+                        log.trace("scalarDatasetCommonIO(): allocating buffer for {} with {} points",
+                                  dsDatatype.getDescription(), (int)totalSelectedSpacePoints);
                         try {
                             theData = H5Datatype.allocateArray(dsDatatype, (int)totalSelectedSpacePoints);
                         }
@@ -982,6 +996,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         try {
                             log.trace("scalarDatasetCommonIO():read ioType create native");
                             tid = dsDatatype.createNative();
+                            log.trace("scalarDatasetCommonIO(): native type created tid={}", tid);
 
                             if (dsDatatype.isVarStr()) {
                                 log.trace(
