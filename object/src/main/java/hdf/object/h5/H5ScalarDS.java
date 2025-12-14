@@ -900,7 +900,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
             scalarDatasetCommonIO(H5File.IO_TYPE.WRITE, buf);
             // Clear the data cache after writing to ensure fresh reads
             clearData();
-            log.debug("write(Object): data cache cleared after successful write");
+            log.trace("write(Object): data cache cleared after successful write");
         }
         catch (Exception ex) {
             log.debug("write(Object): failed to write to scalar dataset: ", ex);
@@ -1523,7 +1523,10 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
         List<Attribute> attrlist = null;
         try {
+            log.trace("getMetadata(): calling objMetadata.getMetadata() for object: {}",
+                      getPath() + getName());
             attrlist = objMetadata.getMetadata(attrPropList);
+            log.trace("getMetadata(): returned {} attributes", attrlist == null ? 0 : attrlist.size());
         }
         catch (Exception ex) {
             log.debug("getMetadata(): getMetadata failed: ", ex);

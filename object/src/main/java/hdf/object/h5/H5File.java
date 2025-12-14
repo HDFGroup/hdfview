@@ -522,8 +522,8 @@ public class H5File extends FileFormat {
                             else
                                 attrType = new H5Datatype(obj.getFileFormat(), tid);
 
-                            log.trace("getAttribute(): Attribute[{}] Datatype={}", i,
-                                      attrType.getDescription());
+                            log.trace("getAttribute(): Attribute[{}] Datatype={} SIZE={}", i,
+                                      attrType.getDescription(), attrType.getDatatypeSize());
                             log.trace(
                                 "getAttribute(): Attribute[{}] has size={} isCompound={} is_variable_str={} isVLEN={}",
                                 i, lsize, attrType.isCompound(), attrType.isVarStr(), attrType.isVLEN());
@@ -939,7 +939,7 @@ public class H5File extends FileFormat {
         }
 
         ver += vers[0] + "." + vers[1] + "." + vers[2];
-        log.debug("getLibversion(): libversion is {}", ver);
+        log.trace("getLibversion(): libversion is {}", ver);
 
         return ver;
     }
@@ -2621,7 +2621,7 @@ public class H5File extends FileFormat {
 
         pgroup.close(gid);
 
-        log.debug("depth_first({}): nTotal={}", parentObject, nTotal);
+        log.trace("depth_first({}): nTotal={}", parentObject, nTotal);
         return nTotal;
     } // private depth_first()
 

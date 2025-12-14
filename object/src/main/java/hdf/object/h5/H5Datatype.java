@@ -355,6 +355,7 @@ public class H5Datatype extends Datatype {
         super(theFile, nativeID, pbase);
         fromNative(nativeID);
         datatypeDescription = getDescription();
+        log.trace("H5Datatype constructor: AFTER fromNative() datatypeSize={}", datatypeSize);
     }
 
     /**
@@ -483,8 +484,8 @@ public class H5Datatype extends Datatype {
             inSize = 1;
 
         if (inSize <= 0) {
-            log.debug("convertEnumValueToName() failure: inSize length invalid");
-            log.debug("convertEnumValueToName(): inValues={} inSize={}", inValues, inSize);
+            log.debug("convertEnumValueToName() failure: inSize length invalid: inValues={} inSize={}",
+                      inValues, inSize);
             return null;
         }
 
@@ -1542,18 +1543,18 @@ public class H5Datatype extends Datatype {
                 long objRefTypeSize  = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_OBJ);
                 long dsetRefTypeSize = H5.H5Tget_size(HDF5Constants.H5T_STD_REF_DSETREG);
                 // use datatypeSize as which type to copy
-                log.debug("createNative(): datatypeSize:{} ", datatypeSize);
+                log.trace("createNative(): datatypeSize:{} ", datatypeSize);
                 if (datatypeSize < 0 || datatypeSize > dsetRefTypeSize) {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF);
-                    log.debug("createNative(): HDF5Constants.H5T_STD_REF");
+                    log.trace("createNative(): HDF5Constants.H5T_STD_REF");
                 }
                 else if (datatypeSize > objRefTypeSize) {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_DSETREG);
-                    log.debug("createNative(): HDF5Constants.H5T_STD_REF_DSETREG");
+                    log.trace("createNative(): HDF5Constants.H5T_STD_REF_DSETREG");
                 }
                 else {
                     tid = H5.H5Tcopy(HDF5Constants.H5T_STD_REF_OBJ);
-                    log.debug("createNative(): HDF5Constants.H5T_STD_REF_OBJ");
+                    log.trace("createNative(): HDF5Constants.H5T_STD_REF_OBJ");
                 }
             }
             catch (Exception ex) {
@@ -1785,7 +1786,8 @@ public class H5Datatype extends Datatype {
      * @throws OutOfMemoryError
      *                          If there is a failure.
      */
-    public static final Object allocateArray(final H5Datatype dtype, int numPoints) throws OutOfMemoryError
+    public static final Object allocateArray(final H5Datatype dtype, int numPoints)
+        throws OutOfMemoryError, HDF5Exception
     {
         log.trace("allocateArray(): start: numPoints={}", numPoints);
 
@@ -1858,18 +1860,23 @@ public class H5Datatype extends Datatype {
 
             switch ((int)typeSize) {
             case 2:
+                log.trace("allocateArray(): allocating short array for 2-byte float");
                 data = new short[numPoints];
                 break;
             case 4:
+                log.trace("allocateArray(): allocating float array for 4-byte float");
                 data = new float[numPoints];
                 break;
             case 8:
+                log.trace("allocateArray(): allocating double array for 8-byte float");
                 data = new double[numPoints];
                 break;
             case 16:
+                log.trace("allocateArray(): allocating byte array for 16-byte float");
                 data = new byte[numPoints * 16];
                 break;
             default:
+                log.warn("allocateArray(): unsupported float type size: {}", bufferTypeSize);
                 break;
             }
         }
@@ -2470,7 +2477,7 @@ public class H5Datatype extends Datatype {
                 new_obj_sid = H5.H5Rget_region(container, HDF5Constants.H5R_DATASET_REGION, refarr);
                 try {
                     int region_type = H5.H5Sget_select_type(new_obj_sid);
-                    log.debug("descRegionDataset Reference Region Type {}", region_type);
+                    log.trace("descRegionDataset Reference Region Type {}", region_type);
                     long reg_ndims   = H5.H5Sget_simple_extent_ndims(new_obj_sid);
                     StringBuilder sb = new StringBuilder();
                     if (HDF5Constants.H5S_SEL_POINTS == region_type) {
