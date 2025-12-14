@@ -1,11 +1,10 @@
 name: Maven CI Pipeline
 
 on:
-  push:
-    branches: [ master, master-maven, develop, main ]
-  pull_request:
-    branches: [ master, master-maven, develop, main ]
   workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ master ]
 
 permissions:
   contents: read

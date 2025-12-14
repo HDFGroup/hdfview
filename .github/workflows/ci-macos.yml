@@ -70,9 +70,9 @@ jobs:
           --pattern "hdf4-master-*-macos14_clang.tar.gz"
 
         echo "Extracting HDF4..."
-        tar -zxvf hdf4-master-*-macos14_clang.tar.gz
+        tar -zxf hdf4-master-*-macos14_clang.tar.gz
         cd hdf4
-        tar -zxvf HDF-*-Darwin.tar.gz --strip-components 1
+        tar -zxf HDF-*-Darwin.tar.gz --strip-components 1
 
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
         FILE_NAME_HDF=$(ls $HDF4DIR)
@@ -103,16 +103,16 @@ jobs:
         done
 
         echo "Extracting HDF5..."
-        tar -zxvf hdf5-develop-*-macos14_clang.tar.gz
+        tar -zxf hdf5-develop-*-macos14_clang.tar.gz
         cd hdf5
 
         # Extract inner tar.gz - use first match if multiple exist
         HDF5_TARBALL=$(ls HDF5-*-Darwin.tar.gz | head -1)
         echo "Extracting $HDF5_TARBALL..."
-        tar -zxvf "$HDF5_TARBALL" --strip-components 1
+        tar -zxf "$HDF5_TARBALL" --strip-components 1
 
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR)
+        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
         echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
         echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
       env:
@@ -122,11 +122,11 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit == 'true'
       run: |
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls $HDF4DIR)
+        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
         echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
 
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR)
+        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
         echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
 
         echo "Using cached HDF libraries:"
@@ -155,13 +155,29 @@ jobs:
           echo "Installed: $JAR_FILE"
         fi
 
-        # Install jarhdf
+        # Install jarhdf (version 4.3.1 for HDF4)
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=2.0.0 \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE"
+        fi
+
+        # Install fits.jar
+        if [ -f repository/lib/fits.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: fits.jar"
+        fi
+
+        # Install netcdf.jar
+        if [ -f repository/lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: netcdf.jar"
         fi
 
         # Install slf4j-api if present
@@ -172,6 +188,21 @@ jobs:
             -DgroupId=org.slf4j -DartifactId=slf4j-api -Dversion="$VERSION" \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE"
+        fi
+
+        # Install SWTBot JARs for UI testing
+        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.swt.finder.jar"
+        fi
+
+        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.nebula.nattable.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.nebula.nattable.finder.jar"
         fi
 
     - name: Set up build.properties

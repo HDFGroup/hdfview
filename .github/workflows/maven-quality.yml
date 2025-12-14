@@ -1,10 +1,11 @@
 name: Maven Quality Gates
 
 on:
+  workflow_call:
+  workflow_dispatch:
   push:
-    branches: [ master, master-maven, main ]
   pull_request:
-    branches: [ master, master-maven, main ]
+    branches: [ master ]
   schedule:
     # Run quality analysis daily at 2 AM UTC
     - cron: '0 2 * * *'
@@ -82,12 +83,12 @@ jobs:
           --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz"
 
         echo "Extracting HDF4..."
-        tar -zxvf hdf4-master-*-ubuntu-2404_gcc.tar.gz
+        tar -zxf hdf4-master-*-ubuntu-2404_gcc.tar.gz
         cd hdf4
-        tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
+        tar -zxf HDF-*-Linux.tar.gz --strip-components 1
 
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls $HDF4DIR)
+        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
         echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
         echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
       env:
@@ -115,16 +116,16 @@ jobs:
         done
 
         echo "Extracting HDF5..."
-        tar -zxvf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
+        tar -zxf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
         cd hdf5
 
         # Select first tarball if multiple exist (snapshot releases can have multiple versions)
         HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
         echo "Using tarball: $HDF5_TARBALL"
-        tar -zxvf "$HDF5_TARBALL" --strip-components 1
+        tar -zxf "$HDF5_TARBALL" --strip-components 1
 
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR)
+        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
         echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
         echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
       env:
@@ -134,11 +135,11 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit == 'true'
       run: |
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls $HDF4DIR)
+        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
         echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
 
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR)
+        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
         echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
 
         echo "Using cached HDF libraries:"
@@ -177,16 +178,16 @@ jobs:
         fi
 
         # Install fits.jar
-        if [ -f lib/fits.jar ]; then
-          mvn install:install-file -Dfile=lib/fits.jar \
+        if [ -f repository/lib/fits.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
             -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: fits.jar"
         fi
 
         # Install netcdf.jar
-        if [ -f lib/netcdf.jar ]; then
-          mvn install:install-file -Dfile=lib/netcdf.jar \
+        if [ -f repository/lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
             -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: netcdf.jar"
@@ -200,6 +201,21 @@ jobs:
             -DgroupId=org.slf4j -DartifactId=slf4j-api -Dversion="$VERSION" \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE"
+        fi
+
+        # Install SWTBot JARs for UI testing
+        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.swt.finder.jar"
+        fi
+
+        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.nebula.nattable.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.nebula.nattable.finder.jar"
         fi
 
     - name: Set up Xvfb for Headless GUI Testing
@@ -240,8 +256,11 @@ jobs:
     - name: Build All Modules
       run: |
         echo "::group::Build and Install Dependencies"
+        # Install parent POM first (required for properties plugin and child module resolution)
+        mvn install -B -N -Ddependency-check.skip=true
+
         # Build repository module (needed by object) but don't install it
-        mvn clean compile -pl repository -B
+        mvn compile -pl repository -B -Ddependency-check.skip=true
 
         # Install only object and hdfview modules
         # This avoids repository module's install-file executions
@@ -399,6 +418,7 @@ jobs:
     - name: Comment PR with Quality Report
       uses: actions/github-script@v7
       if: github.event_name == 'pull_request'
+      continue-on-error: true  # May fail on forks due to permissions
       with:
         script: |
           const fs = require('fs');
