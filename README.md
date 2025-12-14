@@ -2,7 +2,15 @@ HDFView version 3.3.3 currently under development
 
 ![HDF5 Logo](src/HDFView.png)
 
-[![Java CI](https://github.com/HDFGroup/hdfview/actions/workflows/ant.yml/badge.svg)](https://github.com/HDFGroup/hdfview/actions/workflows/ant.yml)
+## Build Status
+
+[![CI Orchestrator](https://github.com/HDFGroup/hdfview/actions/workflows/maven-ci-orchestrator.yml/badge.svg)](https://github.com/HDFGroup/hdfview/actions/workflows/maven-ci-orchestrator.yml)
+[![Linux Build](https://github.com/HDFGroup/hdfview/actions/workflows/ci-linux.yml/badge.svg)](https://github.com/HDFGroup/hdfview/actions/workflows/ci-linux.yml)
+[![Windows Build](https://github.com/HDFGroup/hdfview/actions/workflows/ci-windows.yml/badge.svg)](https://github.com/HDFGroup/hdfview/actions/workflows/ci-windows.yml)
+[![macOS Build](https://github.com/HDFGroup/hdfview/actions/workflows/ci-macos.yml/badge.svg)](https://github.com/HDFGroup/hdfview/actions/workflows/ci-macos.yml)
+
+[![Code Quality](https://github.com/HDFGroup/hdfview/actions/workflows/maven-quality.yml/badge.svg)](https://github.com/HDFGroup/hdfview/actions/workflows/maven-quality.yml)
+[![Security Scan](https://github.com/HDFGroup/hdfview/actions/workflows/maven-security.yml/badge.svg)](https://github.com/HDFGroup/hdfview/actions/workflows/maven-security.yml)
 
 The HDF Group is the developer, maintainer, and steward of HDFView. Find more
 information about The HDF Group, the HDFView Community, and other HDF software projects,
