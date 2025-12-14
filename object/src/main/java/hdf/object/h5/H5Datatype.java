@@ -1876,7 +1876,6 @@ public class H5Datatype extends Datatype {
                 data = new byte[numPoints * 16];
                 break;
             default:
-                log.warn("allocateArray(): unsupported float type size: {}", bufferTypeSize);
                 break;
             }
         }
