@@ -275,9 +275,11 @@ jobs:
         # Skip hdfview UI tests until verified locally - only run object tests
         # Run object tests with coverage, no need for Xvfb since object tests are non-GUI
         # Don't use 'clean' here - we need the installed object module
-        mvn test jacoco:report -B -pl object \
+        # WORKAROUND: Pass required JVM args via argLine property (JaCoCo prepends its agent)
+        mvn jacoco:prepare-agent test jacoco:report -B -pl object \
           -Dmaven.test.failure.ignore=false \
-          -Djacoco.excludes="**/Test*,**/Mock*,**/Stub*"
+          -Djacoco.excludes="**/Test*,**/Mock*,**/Stub*" \
+          -DargLine="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.time.format=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --enable-native-access=jarhdf5 -Djava.library.path=${HDF5LIB_PATH}/lib"
         echo "::endgroup::"
 
     - name: Code Coverage Analysis
