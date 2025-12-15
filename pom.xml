@@ -14,6 +14,8 @@
   </modules>
 
   <properties>
+    <!-- Initialize argLine as empty - JaCoCo prepare-agent will set it -->
+    <argLine></argLine>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.release>21</maven.compiler.release>
     <!-- Use classpath instead of module path (module-info.java disabled) -->
@@ -204,12 +206,10 @@
           <executions>
             <execution>
               <id>default-prepare-agent</id>
+              <phase>initialize</phase>
               <goals>
                 <goal>prepare-agent</goal>
               </goals>
-              <configuration>
-                <propertyName>surefireArgLine</propertyName>
-              </configuration>
             </execution>
             <execution>
               <id>default-report</id>
@@ -314,14 +314,8 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.5.3</version>
           <configuration>
-            <argLine>${surefireArgLine}
-              --add-opens java.base/java.lang=ALL-UNNAMED
-              --add-opens java.base/java.time=ALL-UNNAMED
-              --add-opens java.base/java.time.format=ALL-UNNAMED
-              --add-opens java.base/java.util=ALL-UNNAMED
-              --enable-native-access=jarhdf5
-              -Djava.library.path=${platform.hdf.lib}
-            </argLine>
+            <!-- Use @{argLine} for late property evaluation (set by JaCoCo prepare-agent) -->
+            <argLine>@{argLine} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.time.format=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --enable-native-access=jarhdf5 -Djava.library.path=${platform.hdf.lib}</argLine>
             <includes>
               <include>**/*Test.java</include>
               <include>**/Test*.java</include>
