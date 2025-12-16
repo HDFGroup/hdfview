@@ -4,7 +4,7 @@ The current HDFView products can be downloaded at:
 
 HDF Libraries
 =============================================================================
-This release was built and tested with HDF 4.3.x and HDF5 1.15.x.
+This release was built and tested with HDF 4.3.x and HDF5 2.x.y.
 
 
 JDK
@@ -15,6 +15,7 @@ newest jpackage for distribution and adds support for float16 datatypes.
 
 Major Enhancements
 ==============================================================================
+    * Build system converted to Maven
     * GH #117 Add User Option for editing the plugin path and include plugins.
     * GH #138 Add Support for operating with float16 datatypes.
 
