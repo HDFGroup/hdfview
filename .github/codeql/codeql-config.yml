@@ -36,9 +36,3 @@ paths:
   # Include test sources for security analysis
   - hdfview/src/test/java/
   - object/src/test/java/
-
-# Java-specific configuration
-packs:
-  # Include additional security-focused query packs
-  - java/ql/src/codeql-suites/java-security-and-quality.qls
-  - java/ql/src/codeql-suites/java-security-extended.qls
