@@ -2488,8 +2488,8 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
     }
 
     /**
-     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore, the array
-     * length is 8*numberOfPalettes.
+     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore,
+     * the array length is 8*numberOfPalettes.
      *
      * @param did - dataset ID
      *
