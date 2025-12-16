@@ -54,9 +54,13 @@ public class ImageConversionDialog extends Dialog {
 
     private Font curFont;
 
-    private String fileTypeFrom, fileTypeTo;
+    private String fileTypeFrom;
 
-    private Text srcFileField, dstFileField;
+    private String fileTypeTo;
+
+    private Text srcFileField;
+
+    private Text dstFileField;
 
     private boolean isConverted;
 
@@ -71,18 +75,13 @@ public class ImageConversionDialog extends Dialog {
     private String currentDir;
 
     /**
-     * Constructs a FileConversionDialog
+     * Constructs a FileConversionDialog.
      *
-     * @param parent
-     *            The parent shell of the dialog.
-     * @param typeFrom
-     *            source file type
-     * @param typeTo
-     *            destination file type
-     * @param dir
-     *            current file directory
-     * @param openFiles
-     *            The list of currently open files
+     * @param parent    The parent shell of the dialog.
+     * @param typeFrom  source file type
+     * @param typeTo    destination file type
+     * @param dir       current file directory
+     * @param openFiles The list of currently open files
      */
     public ImageConversionDialog(Shell parent, String typeFrom, String typeTo, String dir,
                                  List<FileFormat> openFiles)
@@ -271,7 +270,11 @@ public class ImageConversionDialog extends Dialog {
         }
     }
 
-    /** Convert file */
+    /**
+     * Convert file.
+     *
+     * @return status of convert
+     */
     private boolean convert()
     {
         boolean converted = false;

@@ -42,22 +42,18 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 /**
- *
- * The metadata view interface for displaying dataset metadata information
+ * The metadata view interface for displaying dataset metadata information.
  */
 public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultDatasetMetaDataView.class);
 
     /**
-     *The metadata view interface for displaying dataset metadata information
+     * The metadata view interface for displaying dataset metadata information.
      *
-     * @param parentComposite
-     *        the parent visual object
-     * @param viewer
-     *        the viewer to use
-     * @param theObj
-     *        the object to display the metadata info
+     * @param parentComposite the parent visual object
+     * @param viewer          the viewer to use
+     * @param theObj          the object to display the metadata info
      */
     public DefaultDatasetMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj)
     {
@@ -115,8 +111,8 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             // Set Dimension Size
             String dimStr    = null;
             String maxDimStr = null;
-            long dims[]      = d.getDims();
-            long maxDims[]   = d.getMaxDims();
+            long[] dims      = d.getDims();
+            long[] maxDims   = d.getMaxDims();
             if (dims != null) {
                 String[] dimNames   = d.getDimNames();
                 boolean hasDimNames = ((dimNames != null) && (dimNames.length == dims.length));
@@ -346,10 +342,10 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
             }
 
             if (n > 0) {
-                String rowData[][]   = new String[n][3];
-                final String names[] = compound.getMemberNames();
-                Datatype types[]     = compound.getMemberTypes();
-                int orders[]         = compound.getMemberOrders();
+                String[][] rowData   = new String[n][3];
+                final String[] names = compound.getMemberNames();
+                Datatype[] types     = compound.getMemberTypes();
+                int[] orders         = compound.getMemberOrders();
 
                 for (int i = 0; i < n; i++) {
                     rowData[i][0] = new String(names[i]);
@@ -358,7 +354,7 @@ public class DefaultDatasetMetaDataView extends DefaultLinkMetaDataView implemen
                         rowData[i][0] = rowData[i][0].replaceAll(CompoundDS.SEPARATOR, "->");
                     }
 
-                    int mDims[] = compound.getMemberDims(i);
+                    int[] mDims = compound.getMemberDims(i);
                     if (mDims == null) {
                         rowData[i][2] = String.valueOf(orders[i]);
 

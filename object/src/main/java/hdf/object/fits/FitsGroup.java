@@ -39,7 +39,7 @@ public class FitsGroup extends Group {
      */
     private List attributeList;
 
-    /** The default object ID for HDF5 objects */
+    /** The default object ID for HDF5 objects. */
     private static final long[] DEFAULT_OID = {0};
 
     /**
@@ -146,10 +146,9 @@ public class FitsGroup extends Group {
     }
 
     /**
-     *  close group access
+     * close group access.
      *
-     * @param gid
-     *        the group identifier
+     * @param gid the group identifier
      */
     @Override
     public void close(long gid)

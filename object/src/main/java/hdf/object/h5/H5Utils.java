@@ -21,7 +21,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** HDF5 utility class */
+/** HDF5 utility class. */
 public final class H5Utils {
 
     private static final Logger log = LoggerFactory.getLogger(H5Utils.class);
@@ -47,9 +47,8 @@ public final class H5Utils {
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
-    public static final long selectHyperslab(long did, long[] dsetDims, long[] startDims,
-                                             long[] selectedStride, long[] selectedDims, long[] spaceIDs)
-        throws HDF5Exception
+    public static long selectHyperslab(long did, long[] dsetDims, long[] startDims, long[] selectedStride,
+                                       long[] selectedDims, long[] spaceIDs) throws HDF5Exception
     {
         if (dsetDims == null) {
             log.debug("selectHyperslab(): dsetDims is null");
@@ -123,9 +122,9 @@ public final class H5Utils {
      * @throws HDF5Exception
      *             If there is an error at the HDF5 library level.
      */
-    public static final long getTotalSelectedSpacePoints(long did, long[] dsetDims, long[] startDims,
-                                                         long[] selectedStride, long[] selectedDims,
-                                                         long[] spaceIDs) throws HDF5Exception
+    public static long getTotalSelectedSpacePoints(long did, long[] dsetDims, long[] startDims,
+                                                   long[] selectedStride, long[] selectedDims,
+                                                   long[] spaceIDs) throws HDF5Exception
     {
         long totalSelectedSpacePoints =
             selectHyperslab(did, dsetDims, startDims, selectedStride, selectedDims, spaceIDs);

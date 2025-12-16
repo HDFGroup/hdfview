@@ -14,16 +14,12 @@
 
 package hdf.view;
 
-import java.awt.Desktop;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -51,8 +47,6 @@ import hdf.view.dialog.UserOptionsGeneralPage;
 import hdf.view.dialog.UserOptionsHDFPage;
 import hdf.view.dialog.UserOptionsNode;
 import hdf.view.dialog.UserOptionsViewModulesPage;
-
-import hdf.hdf5lib.H5;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,55 +112,55 @@ public class HDFView implements DataViewManager {
     private static Display display;
     private static Shell mainWindow;
 
-    /* Determines whether HDFView is being executed for GUI testing */
+    /** Determines whether HDFView is being executed for GUI testing. */
     private boolean isTesting = false;
 
-    /* The directory where HDFView is installed */
+    /** The directory where HDFView is installed. */
     private String rootDir;
 
-    /* The initial directory where HDFView looks for files */
+    /** The initial directory where HDFView looks for files. */
     private String startDir;
 
-    /* The current working directory */
+    /** The current working directory. */
     private String currentDir;
 
-    /* The current working file */
+    /** The current working file. */
     private String currentFile = null;
 
-    /* The view properties */
+    /** The view properties. */
     private ViewProperties props;
 
-    /* A list of tree view implementations. */
+    /** A list of tree view implementations. */
     private static List<String> treeViews;
 
-    /* A list of image view implementations. */
+    /** A list of image view implementations. */
     private static List<String> imageViews;
 
-    /* A list of tree table implementations. */
+    /** A list of tree table implementations. */
     private static List<?> tableViews;
 
-    /* A list of metadata view implementations. */
+    /** A list of metadata view implementations. */
     private static List<?> metaDataViews;
 
-    /* A list of palette view implementations. */
+    /** A list of palette view implementations. */
     private static List<?> paletteViews;
 
-    /* A list of help view implementations. */
+    /** A list of help view implementations. */
     private static List<?> helpViews;
 
-    /* The list of GUI components related to NetCDF3 */
+    /** The list of GUI components related to NetCDF3. */
     private final List<MenuItem> n3GUIs = new ArrayList<>();
 
-    /* The list of GUI components related to HDF4 */
+    /** The list of GUI components related to HDF4. */
     private final List<MenuItem> h4GUIs = new ArrayList<>();
 
-    /* The list of GUI components related to HDF5 */
+    /** The list of GUI components related to HDF5. */
     private final List<MenuItem> h5GUIs = new ArrayList<>();
 
     /* The list of GUI components related to editing */
     // private final List<?>            editGUIs;
 
-    /* GUI component: the TreeView */
+    /** GUI component: the TreeView. */
     private TreeView treeView = null;
 
     private static final String JAVA_VERSION    = HDFVersions.getPropertyVersionJava();
@@ -174,7 +168,7 @@ public class HDFView implements DataViewManager {
     private static final String HDF5_VERSION    = HDFVersions.getPropertyVersionHDF5();
     private static final String HDFVIEW_VERSION = HDFVersions.getPropertyVersionView();
     private static final String HDFVIEW_USERSGUIDE_URL =
-        "https://support.hdfgroup.org/documentation/HDFVIEW/HDFView+3.x+User%27s+Guide";
+        "https://support.hdfgroup.org/documentation/hdfview/HDFView+3.x+User%27s+Guide";
     private static final String JAVA_COMPILER = "jdk " + JAVA_VERSION;
     private static final String JAVA_VER_INFO =
         "Compiled at " + JAVA_COMPILER + "\nRunning at " + System.getProperty("java.version");
@@ -185,31 +179,31 @@ public class HDFView implements DataViewManager {
                                                 + "Copyright " + '\u00a9' + " 2006 The HDF Group.\n"
                                                 + "All rights reserved.";
 
-    /* GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information */
+    /** GUI component: The toolbar for open, close, help and hdf4 and hdf5 library information. */
     private ToolBar toolBar;
 
-    /* GUI component: The text area for showing status messages */
+    /** GUI component: The text area for showing status messages. */
     private Text status;
 
-    /* GUI component: The area for object view */
+    /** GUI component: The area for object view. */
     private ScrolledComposite treeArea;
 
-    /* GUI component: The area for quick general view */
+    /** GUI component: The area for quick general view. */
     private ScrolledComposite generalArea;
 
-    /* GUI component: To add and display URLs */
+    /** GUI component: To add and display URLs. */
     private Combo urlBar;
 
     private Button recentFilesButton;
     private Button clearTextButton;
 
-    /* GUI component: A list of current data windows */
+    /** GUI component: A list of current data windows. */
     private Menu windowMenu;
 
     /* GUI component: File menu on the menubar */
     // private final Menu               fileMenu;
 
-    /* The font to be used for display text on all Controls */
+    /** The font to be used for display text on all Controls. */
     private Font currentFont;
 
     private UserOptionsDialog userOptionDialog;
@@ -250,15 +244,13 @@ public class HDFView implements DataViewManager {
     };
 
     /**
-     * Constructs HDFView with a given root directory, where the HDFView is
-     * installed, and opens the given files in the viewer.
+     * Constructs HDFView with a given root directory, where the HDFView is installed, and opens the given
+     * files in the viewer.
      *
-     * @param root
-     *            the directory where the HDFView is installed.
-     * @param start_dir
-     *            the starting directory for file searches
+     * @param root      the directory where the HDFView is installed.
+     * @param startPath the starting directory for file searches
      */
-    public HDFView(String root, String start_dir)
+    public HDFView(String root, String startPath)
     {
         log.debug("Root is {}", root);
 
@@ -266,7 +258,7 @@ public class HDFView implements DataViewManager {
             display = new Display();
 
         rootDir  = root;
-        startDir = start_dir;
+        startDir = startPath;
 
         // editGUIs = new Vector<Object>();
 
@@ -370,12 +362,12 @@ public class HDFView implements DataViewManager {
                 currentFile = theFile.getAbsolutePath();
 
                 try {
-                    int access_mode = FileFormat.WRITE;
+                    int accessMode = FileFormat.WRITE;
                     if (ViewProperties.isReadOnly())
-                        access_mode = FileFormat.READ;
+                        accessMode = FileFormat.READ;
                     else if (ViewProperties.isReadSWMR())
-                        access_mode = FileFormat.READ | FileFormat.MULTIREAD;
-                    treeView.openFile(currentFile, access_mode);
+                        accessMode = FileFormat.READ | FileFormat.MULTIREAD;
+                    treeView.openFile(currentFile, accessMode);
 
                     try {
                         urlBar.remove(currentFile);
@@ -428,7 +420,7 @@ public class HDFView implements DataViewManager {
         return mainWindow;
     }
 
-    /** switch processing to the main application window */
+    /** switch processing to the main application window. */
     public void runMainWindow()
     {
         log.debug("runMainWindow enter");
@@ -466,6 +458,8 @@ public class HDFView implements DataViewManager {
      * ||            Message Area                ||
      * ||========================================||
      * </pre>
+     *
+     * @return the shell object of the main window
      */
     private Shell createMainWindow()
     {
@@ -937,7 +931,11 @@ public class HDFView implements DataViewManager {
                 // Open the dialog
                 userOptionDialog.open();
 
-                // TODO: this functionality is currently broken because isWorkDirChanged() is not exposed
+                // TODO(HDFView) [2025-12]: Fix work directory change detection - isWorkDirChanged() not
+                // properly exposed. Currently unconditionally overwrites currentDir after user options dialog
+                // closes. Should only update if user actually changed the working directory setting. Need to
+                // properly expose isWorkDirChanged() method or add public getter to UserOptionsDialog.
+                // Impact: Unnecessary directory updates may confuse users or cause unexpected behavior.
                 // correctly. if (userOptionDialog.isWorkDirChanged()) this will always overwrite the
                 // currentDir until isWorkDirChanged() is fixed
                 currentDir = ViewProperties.getWorkDir();
@@ -1478,10 +1476,9 @@ public class HDFView implements DataViewManager {
     }
 
     /**
-     * Display error message
+     * Display error message.
      *
-     * @param errMsg
-     *            the error message to display
+     * @param errMsg the error message to display
      */
     @Override
     public void showError(String errMsg)
@@ -1500,10 +1497,9 @@ public class HDFView implements DataViewManager {
     }
 
     /**
-     * Display the metadata view for an object
+     * Display the metadata view for an object.
      *
-     * @param obj
-     *            the object containing the metadata to show
+     * @param obj the object containing the metadata to show
      */
     public void showMetaData(final HObject obj)
     {
@@ -1547,10 +1543,9 @@ public class HDFView implements DataViewManager {
     }
 
     /**
-     * close the file currently selected in the application
+     * close the file currently selected in the application.
      *
-     * @param theFile
-     *        the file selected or specified
+     * @param theFile the file selected or specified
      */
     public void closeFile(FileFormat theFile)
     {
@@ -1753,6 +1748,8 @@ public class HDFView implements DataViewManager {
 
     /**
      * Set default UI fonts.
+     *
+     * @param font - the font to update
      */
     private void updateFont(Font font)
     {
@@ -1812,8 +1809,7 @@ public class HDFView implements DataViewManager {
     /**
      * Bring window to the front.
      *
-     * @param name
-     *               the name of the window to show.
+     * @param shell - the shell of the window to show.
      */
     private void showWindow(final Shell shell)
     {
@@ -1921,7 +1917,12 @@ public class HDFView implements DataViewManager {
             it.next().setEnabled(b);
     }
 
-    /** Open local file */
+    /**
+     * Open local file.
+     *
+     * @param filename     - the name of the file
+     * @param fileAccessID - the file permissions
+     */
     private void openLocalFile(String filename, int fileAccessID)
     {
         log.trace("openLocalFile {},{}", filename, fileAccessID);
@@ -2109,7 +2110,13 @@ public class HDFView implements DataViewManager {
         }
     }
 
-    /** Load remote file and save it to local temporary directory */
+    /**
+     * Load remote file and save it to local temporary directory.
+     *
+     * @param urlStr - the URL
+     *
+     * @return the localized file name
+     */
     private String openRemoteFile(String urlStr)
     {
         if (urlStr == null)
@@ -2225,7 +2232,9 @@ public class HDFView implements DataViewManager {
                      + "\n\t to add NetCDF, \"NetCDF:hdf.object.nc2.NC2File:nc\""
                      + "\n\t to add FITS, \"FITS:hdf.object.fits.FitsFile:fits\"\n\n";
 
-        // TODO:Add custom HDFLarge icon to dialog
+        // TODO(HDFView) [2025-12]: Add custom HDFLarge branded icon to file format registration dialog.
+        // Currently uses default system dialog icon. Could improve branding with HDF-themed icon.
+        // Low priority - cosmetic enhancement. Related: InputDialog.java:43 for small icon support.
         InputDialog dialog = new InputDialog(mainWindow, "Register a file format", msg, SWT.ICON_INFORMATION);
 
         String str = dialog.open();
@@ -2321,7 +2330,7 @@ public class HDFView implements DataViewManager {
     private class LibraryVersionDialog extends Dialog {
         private String message;
 
-        public LibraryVersionDialog(Shell parent, String libType)
+        LibraryVersionDialog(Shell parent, String libType)
         {
             super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 
@@ -2355,10 +2364,10 @@ public class HDFView implements DataViewManager {
 
             dialog.open();
 
-            Display display = getParent().getDisplay();
+            Display parDisplay = getParent().getDisplay();
             while (!dialog.isDisposed()) {
-                if (!display.readAndDispatch())
-                    display.sleep();
+                if (!parDisplay.readAndDispatch())
+                    parDisplay.sleep();
             }
         }
 
@@ -2401,7 +2410,7 @@ public class HDFView implements DataViewManager {
     }
 
     private class JavaVersionDialog extends Dialog {
-        public JavaVersionDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
+        JavaVersionDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
 
         public void open()
         {
@@ -2464,10 +2473,7 @@ public class HDFView implements DataViewManager {
     }
 
     private class SupportedFileFormatsDialog extends Dialog {
-        public SupportedFileFormatsDialog(Shell parent)
-        {
-            super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-        }
+        SupportedFileFormatsDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
 
         public void open()
         {
@@ -2537,7 +2543,7 @@ public class HDFView implements DataViewManager {
     }
 
     private class AboutDialog extends Dialog {
-        public AboutDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
+        AboutDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM); }
 
         public void open()
         {
@@ -2603,7 +2609,7 @@ public class HDFView implements DataViewManager {
         private List<Object> keyList;
         private String formatChoice = null;
 
-        public UnregisterFileFormatDialog(Shell parent, int style, List<Object> keyList)
+        UnregisterFileFormatDialog(Shell parent, int style, List<Object> keyList)
         {
             super(parent, style);
 
@@ -2718,17 +2724,17 @@ public class HDFView implements DataViewManager {
         Monitor primaryMonitor = display.getPrimaryMonitor();
         Point margin = new Point(primaryMonitor.getBounds().width, primaryMonitor.getBounds().height);
 
-        int j = args.length;
-        int W = margin.x / 2;
-        int H = margin.y;
-        int X = 0;
-        int Y = 0;
+        int argsLen = args.length;
+        int marginW = margin.x / 2;
+        int marginH = margin.y;
+        int geomX   = 0;
+        int geomY   = 0;
 
         for (int i = 0; i < args.length; i++) {
             if ("-root".equalsIgnoreCase(args[i])) {
-                j--;
+                argsLen--;
                 try {
-                    j--;
+                    argsLen--;
                     tmpFile = new File(args[++i]);
 
                     if (tmpFile.isDirectory())
@@ -2740,9 +2746,9 @@ public class HDFView implements DataViewManager {
                 }
             }
             else if ("-start".equalsIgnoreCase(args[i])) {
-                j--;
+                argsLen--;
                 try {
-                    j--;
+                    argsLen--;
                     tmpFile = new File(args[++i]);
 
                     if (tmpFile.isDirectory())
@@ -2754,11 +2760,11 @@ public class HDFView implements DataViewManager {
                 }
             }
             else if ("-g".equalsIgnoreCase(args[i]) || "-geometry".equalsIgnoreCase(args[i])) {
-                j--;
+                argsLen--;
                 // -geometry WIDTHxHEIGHT+XOFF+YOFF
                 try {
                     String geom = args[++i];
-                    j--;
+                    argsLen--;
 
                     int idx  = 0;
                     int idx2 = geom.lastIndexOf('-');
@@ -2766,10 +2772,10 @@ public class HDFView implements DataViewManager {
 
                     idx = Math.max(idx2, idx3);
                     if (idx > 0) {
-                        Y = Integer.parseInt(geom.substring(idx + 1));
+                        geomY = Integer.parseInt(geom.substring(idx + 1));
 
                         if (idx == idx2)
-                            Y = -Y;
+                            geomY = -geomY;
 
                         geom = geom.substring(0, idx);
                         idx2 = geom.lastIndexOf('-');
@@ -2777,10 +2783,10 @@ public class HDFView implements DataViewManager {
                         idx  = Math.max(idx2, idx3);
 
                         if (idx > 0) {
-                            X = Integer.parseInt(geom.substring(idx + 1));
+                            geomX = Integer.parseInt(geom.substring(idx + 1));
 
                             if (idx == idx2)
-                                X = -X;
+                                geomX = -geomX;
 
                             geom = geom.substring(0, idx);
                         }
@@ -2789,8 +2795,8 @@ public class HDFView implements DataViewManager {
                     idx = geom.indexOf('x');
 
                     if (idx > 0) {
-                        W = Integer.parseInt(geom.substring(0, idx));
-                        H = Integer.parseInt(geom.substring(idx + 1));
+                        marginW = Integer.parseInt(geom.substring(0, idx));
+                        marginH = Integer.parseInt(geom.substring(idx + 1));
                     }
                 }
                 catch (Exception ex) {
@@ -2806,8 +2812,8 @@ public class HDFView implements DataViewManager {
 
         ArrayList<File> fList = new ArrayList<>();
 
-        if (j >= 0) {
-            for (int i = args.length - j; i < args.length; i++) {
+        if (argsLen >= 0) {
+            for (int i = args.length - argsLen; i < args.length; i++) {
                 tmpFile = new File(args[i]);
                 if (!tmpFile.isAbsolute())
                     tmpFile = new File(startDir, args[i]);
@@ -2822,20 +2828,26 @@ public class HDFView implements DataViewManager {
         }
 
         final ArrayList<File> theFileList = fList;
-        final String the_rootDir          = rootDir;
-        final String the_startDir         = startDir;
-        final int the_X = X, the_Y = Y, the_W = W, the_H = H;
+        final String theRootDir           = rootDir;
+        final String theStartDir          = startDir;
+        final int theX                    = geomX;
+        final int theY                    = geomY;
+        final int theW                    = marginW;
+        final int theH                    = marginH;
 
         display.syncExec(new Runnable() {
             @Override
             public void run()
             {
-                HDFView app = new HDFView(the_rootDir, the_startDir);
+                HDFView app = new HDFView(theRootDir, theStartDir);
 
-                // TODO: Look for a better solution to native dialog problem
+                // TODO(HDFView) [2025-12]: Investigate better solution for native dialog compatibility
+                // issues. Current workaround may not be optimal for cross-platform native file/directory
+                // dialogs. Consider SWT dialog improvements or alternative dialog libraries for better
+                // platform integration. Medium priority - affects user experience on certain platforms.
                 app.setTestState(false);
 
-                app.openMainWindow(theFileList, the_W, the_H, the_X, the_Y);
+                app.openMainWindow(theFileList, theW, theH, theX, theY);
                 app.runMainWindow();
             }
         });

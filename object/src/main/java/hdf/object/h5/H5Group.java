@@ -15,17 +15,14 @@
 package hdf.object.h5;
 
 import java.util.List;
-import java.util.Vector;
 
 import hdf.object.Attribute;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.HObject;
-import hdf.object.h5.H5MetaDataContainer;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.HDFArray;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.structs.H5G_info_t;
@@ -45,9 +42,8 @@ import org.slf4j.LoggerFactory;
  *
  * For more information on HDF5 Groups,
  *
- * <a href=
- * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_g__u_g.html#sec_group">HDF5
- * Groups in HDF5 User Guide</a>
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_g__u_g.html#sec_group">HDF5 Groups in
+ * HDF5 User Guide</a>
  *
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -62,7 +58,7 @@ public class H5Group extends Group {
      */
     private H5MetaDataContainer objMetadata;
 
-    /** the object properties */
+    /** the object properties. */
     private H5O_info_t objInfo;
 
     /**
@@ -83,19 +79,16 @@ public class H5Group extends Group {
     }
 
     /**
+     * Constructs an HDF5 group with specific name, path, and parent.
+     *
+     * @param theFile   the file that contains the group.
+     * @param theName   the name of this group, e.g. "grp01".
+     * @param thePath   the full path of this group, e.g. "/groups/".
+     * @param theParent the parent of this group.
+     * @param oid       the oid of this group.
+     *
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #H5Group(FileFormat, String, String, Group)}
-     *
-     * @param theFile
-     *            the file that contains the group.
-     * @param theName
-     *            the name of this group, e.g. "grp01".
-     * @param thePath
-     *            the full path of this group, e.g. "/groups/".
-     * @param theParent
-     *            the parent of this group.
-     * @param oid
-     *            the oid of this group.
      */
     @Deprecated
     public H5Group(FileFormat theFile, String theName, String thePath, Group theParent, long[] oid)
@@ -240,9 +233,9 @@ public class H5Group extends Group {
             long gid = open();
             if (gid > 0) {
                 try {
-                    H5G_info_t group_info = null;
-                    group_info            = H5.H5Gget_info(gid);
-                    nMembersInFile        = (int)group_info.nlinks;
+                    H5G_info_t groupInfo = null;
+                    groupInfo            = H5.H5Gget_info(gid);
+                    nMembersInFile       = (int)groupInfo.nlinks;
                 }
                 catch (Exception ex) {
                     nMembersInFile = 0;

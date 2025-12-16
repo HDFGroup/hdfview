@@ -27,7 +27,6 @@ import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.MetaDataContainer;
-import hdf.object.h4.H4CompoundAttribute;
 
 /**
  * H4Vdata describes a multi-dimension array of HDF4 vdata, inheriting CompoundDS.
@@ -110,7 +109,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
      */
     private long[] memberTIDs;
 
-    /** the number of attributes */
+    /** the number of attributes. */
     private int nAttributes = -1;
 
     /**
@@ -293,7 +292,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
         // assume external data files are located in the same directory as the main file.
         HDFLibrary.HXsetdir(getFileFormat().getParent());
 
-        Object member_data = null;
+        Object memberData = null;
         for (int i = 0; i < numberOfMembers; i++) {
             if (!isMemberSelected[i])
                 continue;
@@ -312,11 +311,11 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
 
             int n = memberOrders[i] * (int)selectedDims[0];
 
-            member_data = H4Datatype.allocateArray(memberTIDs[i], n);
+            memberData = H4Datatype.allocateArray(memberTIDs[i], n);
 
             log.trace("read(): index={} isMemberSelected[i]={} memberOrders[i]={} array size={}", i,
                       isMemberSelected[i], memberOrders[i], n);
-            if (member_data == null) {
+            if (memberData == null) {
                 String[] nullValues = new String[n];
                 for (int j = 0; j < n; j++)
                     nullValues[j] = "*ERROR*";
@@ -325,12 +324,12 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
             }
 
             try {
-                HDFLibrary.VSread(id, member_data, (int)selectedDims[0], HDFConstants.FULL_INTERLACE);
+                HDFLibrary.VSread(id, memberData, (int)selectedDims[0], HDFConstants.FULL_INTERLACE);
                 if ((memberTIDs[i] == HDFConstants.DFNT_CHAR) ||
                     (memberTIDs[i] == HDFConstants.DFNT_UCHAR8)) {
                     // convert characters to string
                     log.trace("read(): convert characters to string");
-                    member_data = Dataset.byteToString((byte[])member_data, memberOrders[i]);
+                    memberData = Dataset.byteToString((byte[])memberData, memberOrders[i]);
                     try {
                         memberTypes[i] = new H4Datatype(Datatype.CLASS_STRING, memberOrders[i],
                                                         Datatype.NATIVE, Datatype.NATIVE);
@@ -344,7 +343,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
                 else if (H4Datatype.isUnsigned(memberTIDs[i])) {
                     // convert unsigned integer to appropriate Java integer
                     log.trace("read(): convert unsigned integer to appropriate Java integer");
-                    member_data = Dataset.convertFromUnsignedC(member_data);
+                    memberData = Dataset.convertFromUnsignedC(memberData);
                 }
             }
             catch (HDFException ex) {
@@ -355,7 +354,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
                 continue;
             }
 
-            list.add(member_data);
+            list.add(memberData);
         } //  (int i=0; i<numberOfMembers; i++)
 
         close(id);
@@ -572,7 +571,10 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
             close(id);
         }
 
-        // todo: We shall also load attributes of fields
+        // TODO(HDFView) [2025-12]: Implement field-level attribute loading for HDF4 Vdata objects.
+        // Currently only loads Vdata-level attributes, not attributes attached to individual fields.
+        // Requires HDFLibrary calls to enumerate and retrieve field attributes.
+        // Medium priority - field attributes are less commonly used than Vdata attributes.
 
         return attributeList;
     }
@@ -801,7 +803,7 @@ public class H4Vdata extends CompoundDS implements MetaDataContainer {
     public int getFieldCount() { return numberOfMembers; }
 
     /**
-     * Returns the orders of fields
+     * Returns the orders of fields.
      *
      * @return the orders of fields
      */

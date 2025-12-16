@@ -41,14 +41,12 @@ public class DataViewFactoryProducer {
     private static final Logger log = LoggerFactory.getLogger(DataViewFactoryProducer.class);
 
     /**
-     * get the requested DataViewFactory
+     * get the requested DataViewFactory.
      *
      *
-     * @param viewType
-     *             The data view type requested
+     * @param viewType The data view type requested
      *
-     * @throws Exception
-     *             If there is an error getting the class for a data view factory.
+     * @throws Exception If there is an error getting the class for a data view factory.
      *
      * @return the data view factory.
      */

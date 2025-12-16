@@ -42,180 +42,176 @@ import org.slf4j.LoggerFactory;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.graphics.Image;
 
-/** A class to maintain the list of preferences for data and display */
+/** A class to maintain the list of preferences for data and display. */
 public class ViewProperties extends PreferenceStore {
     private static final long serialVersionUID = -6411465283887959066L;
 
     private static final Logger log = LoggerFactory.getLogger(ViewProperties.class);
 
-    /** the version of the HDFViewer */
+    /** the version of the HDFViewer. */
     public static final String VERSION = HDFVersions.getPropertyVersionView();
 
-    /** the local property file name */
+    /** the local property file name. */
     private static final String USER_PROPERTY_FILE = ".hdfview" + VERSION;
 
-    /** the maximum number of most recent files */
+    /** the maximum number of most recent files. */
     public static final int MAX_RECENT_FILES = 15;
 
-    /** name of the tab delimiter */
+    /** name of the tab delimiter. */
     public static final String DELIMITER_TAB = "Tab";
 
-    /** name of the tab delimiter */
+    /** name of the tab delimiter. */
     public static final String DELIMITER_COMMA = "Comma";
 
-    /** name of the tab delimiter */
+    /** name of the tab delimiter. */
     public static final String DELIMITER_SPACE = "Space";
 
-    /** name of the tab delimiter */
+    /** name of the tab delimiter. */
     public static final String DELIMITER_COLON = "Colon";
 
-    /** image origin: UpperLeft */
+    /** image origin: UpperLeft. */
     public static final String ORIGIN_UL = "UpperLeft";
 
-    /** image origin: LowerLeft */
+    /** image origin: LowerLeft. */
     public static final String ORIGIN_LL = "LowerLeft";
 
-    /** image origin: UpperRight */
+    /** image origin: UpperRight. */
     public static final String ORIGIN_UR = "UpperRight";
 
-    /** image origin: LowerRight */
+    /** image origin: LowerRight. */
     public static final String ORIGIN_LR = "LowerRight";
 
-    /** name of the tab delimiter */
+    /** name of the tab delimiter. */
     public static final String DELIMITER_SEMI_COLON = "Semi-Colon";
 
-    /**
-     * The names of the various default classes for each HDFView module interface
-     */
-
-    /** Text for default selection of modules */
+    /** Text for default selection of modules. */
     public static final String DEFAULT_MODULE_TEXT = "Default";
 
-    /** Default TreeView class names */
+    /** Default TreeView class names. */
     public static final String DEFAULT_TREEVIEW_NAME = "hdf.view.TreeView.DefaultTreeView";
 
-    /** Default Scalar TableView class names */
+    /** Default Scalar TableView class names. */
     public static final String DEFAULT_SCALAR_DATASET_TABLEVIEW_NAME =
         "hdf.view.TableView.DefaultScalarDSTableView";
-    /** Default Compound TableView class names */
+    /** Default Compound TableView class names. */
     public static final String DEFAULT_COMPOUND_DATASET_TABLEVIEW_NAME =
         "hdf.view.TableView.DefaultCompoundDSTableView";
 
-    /** Default Group MetaDataView class names */
+    /** Default Group MetaDataView class names. */
     public static final String DEFAULT_GROUP_METADATAVIEW_NAME =
         "hdf.view.MetaDataView.DefaultGroupMetaDataView";
-    /** Default Dataset MetaDataView class names */
+    /** Default Dataset MetaDataView class names. */
     public static final String DEFAULT_DATASET_METADATAVIEW_NAME =
         "hdf.view.MetaDataView.DefaultDatasetMetaDataView";
-    /** Default Datatype MetaDataView class names */
+    /** Default Datatype MetaDataView class names. */
     public static final String DEFAULT_DATATYPE_METADATAVIEW_NAME =
         "hdf.view.MetaDataView.DefaultDatatypeMetaDataView";
-    /** Default Link MetaDataView class names */
+    /** Default Link MetaDataView class names. */
     public static final String DEFAULT_LINK_METADATAVIEW_NAME =
         "hdf.view.MetaDataView.DefaultLinkMetaDataView";
 
-    /** Default ImageView class names */
+    /** Default ImageView class names. */
     public static final String DEFAULT_IMAGEVIEW_NAME = "hdf.view.ImageView.DefaultImageView";
 
-    /** Default PaletteView class names */
+    /** Default PaletteView class names. */
     public static final String DEFAULT_PALETTEVIEW_NAME = "hdf.view.PaletteView.DefaultPaletteView";
 
     /**
      * Used to create different DataViews for a given HObject.
      */
-    public static enum DataViewType {
-        /** table type */
+    public enum DataViewType {
+        /** table type. */
         TABLE,
-        /** image type */
+        /** image type. */
         IMAGE,
-        /** palette type */
+        /** palette type. */
         PALETTE,
-        /** metadata type */
+        /** metadata type. */
         METADATA,
-        /** treeview type */
+        /** treeview type. */
         TREEVIEW
     }
 
     /**
      * Property keys control how the data is displayed.
      */
-    public static enum DATA_VIEW_KEY {
-        /** data is char */
+    public enum DATA_VIEW_KEY {
+        /** data is char. */
         CHAR,
-        /** data is converted to byte */
+        /** data is converted to byte. */
         CONVERTBYTE,
-        /** data is transposed */
+        /** data is transposed. */
         TRANSPOSED,
-        /** data is read only */
+        /** data is read only. */
         READONLY,
-        /** data is object */
+        /** data is object. */
         OBJECT,
-        /** data is bitmask */
+        /** data is bitmask. */
         BITMASK,
-        /** data is bitmask op */
+        /** data is bitmask op. */
         BITMASKOP,
-        /** data is border */
+        /** data is border. */
         BORDER,
-        /** data is info */
+        /** data is info. */
         INFO,
-        /** data is index based 1 */
+        /** data is index based 1. */
         INDEXBASE1,
-        /** data is view name */
+        /** data is view name. */
         VIEW_NAME
     }
 
     /**
      * Property keys control how the data is displayed.
      */
-    public static enum BITMASK_OP {
-        /** use bitmask and */
+    public enum BITMASK_OP {
+        /** use bitmask and. */
         AND,
-        /** use bitmask extract */
+        /** use bitmask extract. */
         EXTRACT
     }
 
-    /** the root directory of the HDFView */
+    /** the root directory of the HDFView. */
     private static String rootDir = System.getProperty("user.dir");
 
-    /** user's guide */
+    /** user's guide. */
     private static String usersGuide = "/share/doc/UsersGuide/index.html";
 
-    /** the font size */
+    /** the font size. */
     private static int fontSize = 12;
 
-    /** the font type */
+    /** the font type. */
     private static String fontType = "Serif";
 
-    /** the full path of H4toH5 converter */
+    /** the full path of H4toH5 converter. */
     private static String h4toh5 = "";
 
-    /** data delimiter */
+    /** data delimiter. */
     private static String delimiter = DELIMITER_TAB;
 
-    /** image origin */
+    /** image origin. */
     private static String origin = ORIGIN_UL;
 
-    /** default index type */
+    /** default index type. */
     private static String indexType = "H5_INDEX_NAME";
 
-    /** default index order */
+    /** default index order. */
     private static String indexOrder = "H5_ITER_INC";
 
-    /** a list of most recent files */
+    /** a list of most recent files. */
     private static ArrayList<String> recentFiles = new ArrayList<>(MAX_RECENT_FILES + 5);
 
-    /** default starting file directory */
+    /** default starting file directory. */
     private static String workDir = System.getProperty("user.dir");
 
-    /** default HDF file extensions */
+    /** default HDF file extensions. */
     private static String fileExt = "hdf, h4, hdf4, h5, hdf5, he2, he5";
 
     private static ClassLoader extClassLoader = null;
 
-    /** a list of srb accounts */
+    /** a list of srb accounts. */
     private static ArrayList<String[]> srbAccountList = new ArrayList<>(5);
 
-    /** the timer refreshrate in msec */
+    /** the timer refreshrate in msec. */
     private static int timerRefresh = 10000;
 
     private static boolean isMac = System.getProperty("os.name").toLowerCase().contains("mac");
@@ -245,27 +241,27 @@ public class ViewProperties extends PreferenceStore {
 
     private static String LateLib = "Latest";
 
-    /** a list of palette files */
+    /** a list of palette files. */
     private static ArrayList<String> paletteList = new ArrayList<>(5);
 
-    /** a list of plugin paths */
+    /** a list of plugin paths. */
     private static ArrayList<String> pluginPathList = new ArrayList<>(5);
 
-    /** flag to indicate if enum data is converted to strings */
+    /** flag to indicate if enum data is converted to strings. */
     private static boolean convertEnum = true;
 
-    /** flag to indicate if data is 1-based index */
+    /** flag to indicate if data is 1-based index. */
     private static boolean isIndexBase1 = false;
 
     /**
      * Current Java applications such as HDFView cannot handle files with a large
-     * number of objects such as 1,000,000 objects. max_members defines the maximum
+     * number of objects such as 1,000,000 objects. maxMembers defines the maximum
      * number of objects that will be loaded into memory.
      */
     private static int maxMembers = Integer.MAX_VALUE; // load all by default
     /**
      * Current Java applications such as HDFView cannot handle files with a large
-     * number of objects such 1,000,000 objects. start_members defines the
+     * number of objects such 1,000,000 objects. startMembers defines the
      * starting index of objects that will be loaded into memory.
      */
     private static int startMembers = 0;
@@ -282,22 +278,22 @@ public class ViewProperties extends PreferenceStore {
 
     private static String propertyFile;
 
-    /** a list of treeview modules */
+    /** a list of treeview modules. */
     private static ArrayList<String> moduleListTreeView = new ArrayList<>(5);
 
-    /** a list of metaview modules */
+    /** a list of metaview modules. */
     private static ArrayList<String> moduleListMetaDataView = new ArrayList<>(5);
 
-    /** a list of tableview modules */
+    /** a list of tableview modules. */
     private static ArrayList<String> moduleListTableView = new ArrayList<>(5);
 
-    /** a list of imageview modules */
+    /** a list of imageview modules. */
     private static ArrayList<String> moduleListImageView = new ArrayList<>(5);
 
-    /** a list of paletteview modules */
+    /** a list of paletteview modules. */
     private static ArrayList<String> moduleListPaletteView = new ArrayList<>(5);
 
-    /** a list of helpview modules */
+    /** a list of helpview modules. */
     private static ArrayList<String> moduleListHelpView = new ArrayList<>(5);
 
     /**
@@ -407,7 +403,7 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * load module classes
+     * load module classes.
      *
      * @return the ClassLoader
      */
@@ -550,370 +546,370 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * Get the Folder Close Icon
+     * Get the Folder Close Icon.
      *
      * @return the Folder Close Icon
      */
     public static Image getFoldercloseIcon() { return foldercloseIcon; }
 
     /**
-     * Get the Folder Close with Attribute Icon
+     * Get the Folder Close with Attribute Icon.
      *
      * @return the Folder Close with Attribute Icon
      */
     public static Image getFoldercloseIconA() { return foldercloseIconA; }
 
     /**
-     * Get the Folder Open Icon
+     * Get the Folder Open Icon.
      *
      * @return the Folder Open Icon
      */
     public static Image getFolderopenIcon() { return folderopenIcon; }
 
     /**
-     * Get the Folder Open with Attribute Icon
+     * Get the Folder Open with Attribute Icon.
      *
      * @return the Folder Open with Attribute Icon
      */
     public static Image getFolderopenIconA() { return folderopenIconA; }
 
     /**
-     * Get the HDF Icon
+     * Get the HDF Icon.
      *
      * @return the HDF Icon
      */
     public static Image getHdfIcon() { return hdfIcons[1]; }
 
     /**
-     * Get the HDF Icons
+     * Get the HDF Icons.
      *
      * @return the HDF Icons
      */
     public static Image[] getHdfIcons() { return hdfIcons; }
 
     /**
-     * Get the HDF4 Icon
+     * Get the HDF4 Icon.
      *
      * @return the HDF4 Icon
      */
     public static Image getH4Icon() { return h4Icon; }
 
     /**
-     * Get the read-only HDF4 Icon
+     * Get the read-only HDF4 Icon.
      *
      * @return the read-only HDF4 Icon
      */
     public static Image getH4IconR() { return h4IconR; }
 
     /**
-     * Get the HDF5 Icon
+     * Get the HDF5 Icon.
      *
      * @return the HDF5 Icon
      */
     public static Image getH5Icon() { return h5Icon; }
 
     /**
-     * Get the read-only HDF5 Icon
+     * Get the read-only HDF5 Icon.
      *
      * @return the read-only HDF5 Icon
      */
     public static Image getH5IconR() { return h5IconR; }
 
     /**
-     * Get the netcdf Icon
+     * Get the netcdf Icon.
      *
      * @return the netcdf Icon
      */
     public static Image getNC3Icon() { return ncIcon; }
 
     /**
-     * Get the read-only netcdf Icon
+     * Get the read-only netcdf Icon.
      *
      * @return the read-only netcdf Icon
      */
     public static Image getNC3IconR() { return ncIconR; }
 
     /**
-     * Get the Dataset Icon
+     * Get the Dataset Icon.
      *
      * @return the Dataset Icon
      */
     public static Image getDatasetIcon() { return datasetIcon; }
 
     /**
-     * Get the Dataset with Attribute Icon
+     * Get the Dataset with Attribute Icon.
      *
      * @return the Dataset with Attribute Icon
      */
     public static Image getDatasetIconA() { return datasetIconA; }
 
     /**
-     * Get the Datatype Icon
+     * Get the Datatype Icon.
      *
      * @return the Datatype Icon
      */
     public static Image getDatatypeIcon() { return datatypeIcon; }
 
     /**
-     * Get the Datatype with Attribute Icon
+     * Get the Datatype with Attribute Icon.
      *
      * @return the Datatype with Attribute Icon
      */
     public static Image getDatatypeIconA() { return datatypeIconA; }
 
     /**
-     * Get the Link Icon
+     * Get the Link Icon.
      *
      * @return the Link Icon
      */
     public static Image getLinkIcon() { return linkIcon; }
 
     /**
-     * Get the File Open Icon
+     * Get the File Open Icon.
      *
      * @return the File Open Icon
      */
     public static Image getFileopenIcon() { return fileopenIcon; }
 
     /**
-     * Get the File Save Icon
+     * Get the File Save Icon.
      *
      * @return the File Save Icon
      */
     public static Image getFilesaveIcon() { return filesaveIcon; }
 
     /**
-     * Get the File New Icon
+     * Get the File New Icon.
      *
      * @return the File New Icon
      */
     public static Image getFilenewIcon() { return filenewIcon; }
 
     /**
-     * Get the File Close Icon
+     * Get the File Close Icon.
      *
      * @return the File Close Icon
      */
     public static Image getFilecloseIcon() { return filecloseIcon; }
 
     /**
-     * Get the Palette Icon
+     * Get the Palette Icon.
      *
      * @return the Palette Icon
      */
     public static Image getPaletteIcon() { return paletteIcon; }
 
     /**
-     * Get the Bright Icon
+     * Get the Bright Icon.
      *
      * @return the Bright Icon
      */
     public static Image getBrightIcon() { return brightIcon; }
 
     /**
-     * Get the Autocontrast Icon
+     * Get the Autocontrast Icon.
      *
      * @return the Autocontrast Icon
      */
     public static Image getAutocontrastIcon() { return autocontrastIcon; }
 
     /**
-     * Get the Image Icon
+     * Get the Image Icon.
      *
      * @return the Image Icon
      */
     public static Image getImageIcon() { return imageIcon; }
 
     /**
-     * Get the Table Icon
+     * Get the Table Icon.
      *
      * @return the Table Icon
      */
     public static Image getTableIcon() { return tableIcon; }
 
     /**
-     * Get the Text Icon
+     * Get the Text Icon.
      *
      * @return the Text Icon
      */
     public static Image getTextIcon() { return textIcon; }
 
     /**
-     * Get the Image with Attribute Icon
+     * Get the Image with Attribute Icon.
      *
      * @return the Image with Attribute Icon
      */
     public static Image getImageIconA() { return imageIconA; }
 
     /**
-     * Get the Table with Attribute Icon
+     * Get the Table with Attribute Icon.
      *
      * @return the Table with Attribute Icon
      */
     public static Image getTableIconA() { return tableIconA; }
 
     /**
-     * Get the Text with Attribute Icon
+     * Get the Text with Attribute Icon.
      *
      * @return the Text with Attribute Icon
      **/
     public static Image getTextIconA() { return textIconA; }
 
     /**
-     * Get the Zoom In Icon
+     * Get the Zoom In Icon.
      *
      * @return the Zoom In Icon
      */
     public static Image getZoominIcon() { return zoominIcon; }
 
     /**
-     * Get the Zoom Out Icon
+     * Get the Zoom Out Icon.
      *
      * @return the Zoom Out Icon
      */
     public static Image getZoomoutIcon() { return zoomoutIcon; }
 
     /**
-     * Get the Blank Icon
+     * Get the Blank Icon.
      *
      * @return the Blank Icon
      */
     public static Image getBlankIcon() { return blankIcon; }
 
     /**
-     * Get the Help Icon
+     * Get the Help Icon.
      *
      * @return the Help Icon
      */
     public static Image getHelpIcon() { return helpIcon; }
 
     /**
-     * Get the Copy Icon
+     * Get the Copy Icon.
      *
      * @return the Copy Icon
      */
     public static Image getCopyIcon() { return copyIcon; }
 
     /**
-     * Get the Cut Icon
+     * Get the Cut Icon.
      *
      * @return the Cut Icon
      */
     public static Image getCutIcon() { return cutIcon; }
 
     /**
-     * Getthe Paste Icon
+     * Getthe Paste Icon.
      *
      * @return the Paste Icon
      */
     public static Image getPasteIcon() { return pasteIcon; }
 
     /**
-     * Get the HDFView Icon
+     * Get the HDFView Icon.
      *
      * @return the HDFView Icon
      */
     public static Image getHDFViewIcon() { return hdfviewIcon; }
 
     /**
-     * Get the Large HDF Icon
+     * Get the Large HDF Icon.
      *
      * @return the Large HDF Icon
      */
     public static Image getLargeHdfIcon() { return hdfIcons[2]; }
 
     /**
-     * Get the Previous Icon
+     * Get the Previous Icon.
      *
      * @return the Previous Icon
      */
     public static Image getPreviousIcon() { return previousIcon; }
 
     /**
-     * Get the Next Icon
+     * Get the Next Icon.
      *
      * @return the Next Icon
      */
     public static Image getNextIcon() { return nextIcon; }
 
     /**
-     * Get the First Icon
+     * Get the First Icon.
      *
      * @return the First Icon
      */
     public static Image getFirstIcon() { return firstIcon; }
 
     /**
-     * Get the Last Icon
+     * Get the Last Icon.
      *
      * @return the Last Icon
      */
     public static Image getLastIcon() { return lastIcon; }
 
     /**
-     * Get the Chart Icon
+     * Get the Chart Icon.
      *
      * @return the Chart Icon
      */
     public static Image getChartIcon() { return chartIcon; }
 
     /**
-     * Get the Animation Icon
+     * Get the Animation Icon.
      *
      * @return the Animation Icon
      */
     public static Image getAnimationIcon() { return animationIcon; }
 
     /**
-     * Get the Apps Icon
+     * Get the Apps Icon.
      *
      * @return the Apps Icon
      */
     public static Image getAppsIcon() { return iconAPPS; }
 
     /**
-     * Get the Url Icon
+     * Get the Url Icon.
      *
      * @return the Url Icon
      */
     public static Image getUrlIcon() { return iconURL; }
 
     /**
-     * Get the Video Icon
+     * Get the Video Icon.
      *
      * @return the Video Icon
      */
     public static Image getVideoIcon() { return iconVIDEO; }
 
     /**
-     * Get the Xls Icon
+     * Get the Xls Icon.
      *
      * @return the Xls Icon
      */
     public static Image getXlsIcon() { return iconXLS; }
 
     /**
-     * Get the Pdf Icon
+     * Get the Pdf Icon.
      *
      * @return the Pdf Icon
      */
     public static Image getPdfIcon() { return iconPDF; }
 
     /**
-     * Get the Audio Icon
+     * Get the Audio Icon.
      *
      * @return the Audio Icon
      */
     public static Image getAudioIcon() { return iconAUDIO; }
 
     /**
-     * Get the Question Icon
+     * Get the Question Icon.
      *
      * @return the Question Icon
      */
     public static Image getQuestionIcon() { return questionIcon; }
 
-    /** Load the Icons */
+    /** Load the Icons. */
     public static void loadIcons()
     {
         InputStream s = null;
@@ -1415,10 +1411,9 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * Load user properties from property file
+     * Load user properties from property file.
      *
-     * @throws IOException
-     *             if a failure occurred
+     * @throws IOException if a failure occurred
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -1644,10 +1639,9 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * Save user properties into property file
+     * Save user properties into property file.
      *
-     * @throws IOException
-     *             if a failure occurred
+     * @throws IOException if a failure occurred
      */
     @Override
     public void save() throws IOException
@@ -1803,7 +1797,7 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * Get the name of the user property file
+     * Get the name of the user property file.
      *
      * @return the name of the user property file
      */
@@ -1837,88 +1831,86 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * Get the maximum number of the most recent file
+     * Get the maximum number of the most recent file.
      *
      * @return the maximum number of the most recent file
      */
     public static int getMaxRecentFiles() { return MAX_RECENT_FILES; }
 
     /**
-     * Get the path of the HDFView users guide
+     * Get the path of the HDFView users guide.
      *
      * @return the path of the HDFView users guide
      */
-    public static String getUsersGuide() { return usersGuide; };
+    public static String getUsersGuide() { return usersGuide; }
 
     /**
-     * Get the delimiter of data values
+     * Get the delimiter of data values.
      *
      * @return the delimiter of data values
      */
     public static String getDataDelimiter() { return delimiter; }
 
     /**
-     * Get the image origin
+     * Get the image origin.
      *
      * @return the image origin
      */
     public static String getImageOrigin() { return origin; }
 
     /**
-     * Get the default index type for display
+     * Get the default index type for display.
      *
      * @return the default index type for display
      */
     public static String getIndexType() { return indexType; }
 
     /**
-     * Get the default index order for display
+     * Get the default index order for display.
      *
      * @return the default index order for display
      */
     public static String getIndexOrder() { return indexOrder; }
 
     /**
-     * Get the timer refresh size
+     * Get the timer refresh size.
      *
      * @return the timer refresh size
      */
     public static int getTimerRefresh() { return timerRefresh; }
 
     /**
-     * sets the timer refresh
+     * sets the timer refresh.
      *
-     * @param trefresh
-     *            the timer refresh
+     * @param trefresh the timer refresh
      */
     public static void setTimerRefresh(int trefresh) { timerRefresh = trefresh; }
 
     /**
-     * Get the font size
+     * Get the font size.
      *
      * @return the font size
      */
     public static int getFontSize() { return fontSize; }
 
     /**
-     * Get the font type
+     * Get the font type.
      *
      * @return the font type
      */
     public static String getFontType() { return fontType; }
 
     /**
-     * Get the file extensions of supported file formats
+     * Get the file extensions of supported file formats.
      *
      * @return the file extensions of supported file formats
      */
     public static String getFileExtension() { return fileExt; }
 
     /**
-     * sets the font size
+     * sets the font size.
      *
-     * @param fsize
-     *            the font size
+     * @param fsize the font size
      */
     public static void setFontSize(int fsize)
     {
@@ -1930,10 +1922,9 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * sets the font type
+     * sets the font type.
      *
-     * @param ftype
-     *            the font type
+     * @param ftype the font type
      */
     public static void setFontType(String ftype)
     {
@@ -1943,87 +1934,86 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * Get the path of the H5toH5 converter
+     * Get the path of the H5toH5 converter.
      *
      * @return the path of the H5toH5 converter
      */
     public static String getH4toH5() { return h4toh5; }
 
     /**
-     * Get the list of most recent files
+     * Get the list of most recent files.
      *
      * @return the list of most recent files
      */
     public static List<String> getMRF() { return recentFiles; }
 
     /**
-     * Get the list of palette files
+     * Get the list of palette files.
      *
      * @return the list of palette files
      */
     public static List<String> getPaletteList() { return paletteList; }
 
     /**
-     * Get the plugin path list
+     * Get the plugin path list.
      *
      * @return the plugin path list
      */
     public static String[] getPluginPaths() { return pluginPathList.toArray(new String[0]); }
 
     /**
-     * Get the SRB account list
+     * Get the SRB account list.
      *
      * @return the SRB account list
      */
     public static List<String[]> getSrbAccount() { return srbAccountList; }
 
     /**
-     * Get a list of treeview modules
+     * Get a list of treeview modules.
      *
      * @return a list of treeview modules
      */
     public static List<String> getTreeViewList() { return moduleListTreeView; }
 
     /**
-     * Get a list of metadataview modules
+     * Get a list of metadataview modules.
      *
      * @return a list of metadataview modules
      */
     public static List<String> getMetaDataViewList() { return moduleListMetaDataView; }
 
     /**
-     * Get a list of tableview modules
+     * Get a list of tableview modules.
      *
      * @return a list of tableview modules
      */
     public static List<String> getTableViewList() { return moduleListTableView; }
 
     /**
-     * Get a list of imageview modules
+     * Get a list of imageview modules.
      *
      * @return a list of imageview modules
      */
     public static List<String> getImageViewList() { return moduleListImageView; }
 
     /**
-     * Get a list of paletteview modules
+     * Get a list of paletteview modules.
      *
      * @return a list of paletteview modules
      */
     public static List<String> getPaletteViewList() { return moduleListPaletteView; }
 
     /**
-     * Get a list of helpview modules
+     * Get a list of helpview modules.
      *
      * @return a list of helpview modules
      */
     public static List<String> getHelpViewList() { return moduleListHelpView; }
 
     /**
-     * set the path of H5View User's guide
+     * set the path of H5View User's guide.
      *
-     * @param str
-     *            the path
+     * @param str the path
      */
     public static void setUsersGuide(String str)
     {
@@ -2034,18 +2024,16 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * set the path of the H4 to H5 converter
+     * set the path of the H4 to H5 converter.
      *
-     * @param tool
-     *            the path of the H4 to H5 converter
+     * @param tool the path of the H4 to H5 converter
      */
     public static void setH4toH5(String tool) { h4toh5 = tool; }
 
     /**
-     * set the path of the default root directory
+     * set the path of the default root directory.
      *
-     * @param rDir
-     *            the default root directory
+     * @param rDir the default root directory
      */
     public static void setRootDir(String rDir)
     {
@@ -2054,10 +2042,9 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * set the path of the default work directory
+     * set the path of the default work directory.
      *
-     * @param wDir
-     *            the default work directory
+     * @param wDir the default work directory
      */
     public static void setWorkDir(String wDir)
     {
@@ -2066,7 +2053,7 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * Load the paths of the default plugin directories
+     * Load the paths of the default plugin directories.
      *
      * @return the array of paths
      */
@@ -2143,42 +2130,37 @@ public class ViewProperties extends PreferenceStore {
     }
 
     /**
-     * set the file extension
+     * set the file extension.
      *
-     * @param ext
-     *            the file extension
+     * @param ext the file extension
      */
     public static void setFileExtension(String ext) { fileExt = ext; }
 
     /**
-     * set the delimiter of data values
+     * set the delimiter of data values.
      *
-     * @param delim
-     *            the delimiter of data values
+     * @param delim the delimiter of data values
      */
     public static void setDataDelimiter(String delim) { delimiter = delim; }
 
     /**
-     * set the image origin
+     * set the image origin.
      *
-     * @param o
-     *            the image origin
+     * @param o the image origin
      */
     public static void setImageOrigin(String o) { origin = o; }
 
     /**
-     * set the index type
+     * set the index type.
      *
-     * @param idxType
-     *            the index type
+     * @param idxType the index type
      */
     public static void setIndexType(String idxType) { indexType = idxType; }
 
     /**
-     * set the index order
+     * set the index order.
      *
-     * @param idxOrder
-     *            the index order
+     * @param idxOrder the index order
      */
     public static void setIndexOrder(String idxOrder) { indexOrder = idxOrder; }
 
@@ -2328,7 +2310,7 @@ public class ViewProperties extends PreferenceStore {
     public static void setLateLib(String vers) { LateLib = vers; }
 
     /**
-     * Check if the enum value is to be converted
+     * Check if the enum value is to be converted.
      *
      * @return true if the enum value is to be converted
      */
@@ -2342,14 +2324,14 @@ public class ViewProperties extends PreferenceStore {
     public static boolean showRegRefValues() { return showRegRefValues; }
 
     /**
-     * Check if the data index starts at 1
+     * Check if the data index starts at 1.
      *
      * @return true if the data index starts at 1
      */
     public static boolean isIndexBase1() { return isIndexBase1; }
 
     /**
-     * Set enum data to be converted
+     * Set enum data to be converted.
      *
      * @param convertEnum true to set enum data conversion
      */

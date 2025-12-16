@@ -28,7 +28,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
 import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -87,7 +86,6 @@ import org.eclipse.nebula.widgets.nattable.edit.action.MouseEditAction;
 import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditConfiguration;
 import org.eclipse.nebula.widgets.nattable.edit.config.DialogErrorHandling;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
-import org.eclipse.nebula.widgets.nattable.grid.command.ClientAreaResizeCommand;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
@@ -161,121 +159,121 @@ public abstract class DefaultBaseTableView implements TableView {
     private static final Logger log = LoggerFactory.getLogger(DefaultBaseTableView.class);
 
     private final Display display = Display.getDefault();
-    /** The reference to the display shell used */
+    /** The reference to the display shell used. */
     protected final Shell shell;
-    /** The current font */
+    /** The current font. */
     protected Font curFont;
 
-    /** The main HDFView */
+    /** The main HDFView. */
     protected final DataViewManager viewer;
 
-    /** The reference to the NAT table used */
+    /** The reference to the NAT table used. */
     protected NatTable dataTable;
 
-    /** The data object to be displayed in the Table */
+    /** The data object to be displayed in the Table. */
     protected final DataFormat dataObject;
 
-    /** The data value of the data object */
+    /** The data value of the data object. */
     protected Object dataValue;
 
-    /** The value used for fill */
+    /** The value used for fill. */
     protected Object fillValue;
 
-    /** the valid types of tableviews */
+    /** the valid types of tableviews. */
     protected enum ViewType {
-        /** The data view is of type spreadsheet */
+        /** The data view is of type spreadsheet. */
         TABLE,
-        /** The data view is of type image */
+        /** The data view is of type image. */
         IMAGE
     }
     ;
 
-    /** The type of view */
+    /** The type of view. */
     protected ViewType viewType = ViewType.TABLE;
 
     /** Changed to use normalized scientific notation (1 is less than coefficient is less than 10). */
     protected final DecimalFormat scientificFormat = new DecimalFormat("0.0###E0###");
-    /** custom format pattern */
+    /** custom format pattern. */
     protected DecimalFormat customFormat = new DecimalFormat("###.#####");
-    /** the normal format to be used for numbers */
+    /** the normal format to be used for numbers. */
     protected final NumberFormat normalFormat = null;
-    /** the format to be used for numbers */
+    /** the format to be used for numbers. */
     protected NumberFormat numberFormat = normalFormat;
 
-    /** Used for bitmask operations on data */
+    /** Used for bitmask operations on data. */
     protected BitSet bitmask = null;
-    /** Used for the type of bitmask operation */
+    /** Used for the type of bitmask operation. */
     protected BITMASK_OP bitmaskOP = BITMASK_OP.EXTRACT;
 
-    /** Fields to keep track of which 'frame' of 3 dimensional data is being displayed */
+    /** Fields to keep track of which 'frame' of 3 dimensional data is being displayed. */
     private Text frameField;
     private long curDataFrame = 0;
     private long maxDataFrame = 1;
 
-    /** The index base used for display row and column numbers of data */
+    /** The index base used for display row and column numbers of data. */
     protected int indexBase = 0;
 
-    /** size of default data length */
+    /** size of default data length. */
     protected int fixedDataLength = -1;
 
-    /** default binary order */
+    /** default binary order. */
     protected int binaryOrder;
 
-    /** status if file is read only */
+    /** status if file is read only. */
     protected boolean isReadOnly = false;
 
-    /** status if the enums are to display converted */
+    /** status if the enums are to display converted. */
     protected boolean isEnumConverted = false;
 
-    /** status if the display type is a char */
+    /** status if the display type is a char. */
     protected boolean isDisplayTypeChar;
 
-    /** status if the data is transposed */
+    /** status if the data is transposed. */
     protected boolean isDataTransposed;
 
-    /** reference status */
-    protected boolean isRegRef = false, isObjRef = false, isStdRef = false;
-    /** show data as status */
-    protected boolean showAsHex = false, showAsBin = false;
+    /** reference status. */
+    protected boolean isRegRef = false;
+    protected boolean isObjRef = false;
+    protected boolean isStdRef = false;
+    /** show data as status. */
+    protected boolean showAsHex = false;
+    protected boolean showAsBin = false;
 
-    /** Keep references to the selection layers for ease of access */
+    /** Keep references to the selection layers for ease of access. */
     protected SelectionLayer selectionLayer;
-    /** Keep references to the data layers for ease of access */
+    /** Keep references to the data layers for ease of access. */
     protected DataLayer dataLayer;
 
-    /** reference to the data provider for the row */
+    /** reference to the data provider for the row. */
     protected IDataProvider rowHeaderDataProvider;
-    /** reference to the data provider for the column */
+    /** reference to the data provider for the column. */
     protected IDataProvider columnHeaderDataProvider;
 
-    /** reference to the data provider */
+    /** reference to the data provider. */
     protected HDFDataProvider dataProvider;
-    /** reference to the display converter */
+    /** reference to the display converter. */
     protected HDFDisplayConverter dataDisplayConverter;
 
-    /**
-     * Global variables for GUI components on the default to show data
-     */
-    /** Checkbox menu item for Fixed Data Length default*/
+    /** Checkbox menu item for Fixed Data Length default. */
     protected MenuItem checkFixedDataLength = null;
-    /** Checkbox menu item for Custom Notation default*/
+    /** Checkbox menu item for Custom Notation default. */
     protected MenuItem checkCustomNotation = null;
-    /** Checkbox menu item for Scientific Notation default */
+    /** Checkbox menu item for Scientific Notation default. */
     protected MenuItem checkScientificNotation = null;
-    /** Checkbox menu item for hex default */
+    /** Checkbox menu item for hex default. */
     protected MenuItem checkHex = null;
-    /** Checkbox menu item for binary default */
+    /** Checkbox menu item for binary default. */
     protected MenuItem checkBin = null;
-    /** Checkbox menu item for enum default*/
+    /** Checkbox menu item for enum default. */
     protected MenuItem checkEnum = null;
 
-    /** Labeled Group to display the index base */
+    /** Labeled Group to display the index base. */
     protected org.eclipse.swt.widgets.Group indexBaseGroup;
 
-    /** Text field to display the value of the currently selected table cell */
+    /** Text field to display the value of the currently selected table cell. */
     protected Text cellValueField;
 
-    /** Label to indicate the current cell location */
+    /** Label to indicate the current cell location. */
     protected Label cellLabel;
 
     /**
@@ -472,7 +470,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         // Setup subset information
-        int space_type      = dataObject.getSpaceType();
+        int spaceType       = dataObject.getSpaceType();
         int rank            = dataObject.getRank();
         int[] selectedIndex = dataObject.getSelectedIndex();
         long[] count        = dataObject.getSelectedDims();
@@ -670,10 +668,14 @@ public abstract class DefaultBaseTableView implements TableView {
 
     /**
      * Creates the toolbar for the Shell.
+     *
+     * @param theShell - the containing shell object.
+     *
+     * @return the new toolbar
      */
-    private ToolBar createToolbar(final Shell shell)
+    private ToolBar createToolbar(final Shell theShell)
     {
-        ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
+        ToolBar toolbar = new ToolBar(theShell, SWT.HORIZONTAL | SWT.RIGHT | SWT.BORDER);
         toolbar.setFont(curFont);
         toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -1004,11 +1006,7 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        /********************************************************************
-         *                                                                  *
-         * Set up MenuItems for refreshing the TableView                    *
-         *                                                                  *
-         ********************************************************************/
+        // Set up MenuItems for refreshing the TableView *
         item = new MenuItem(tableMenu, SWT.PUSH);
         item.setText("Start Timer");
         item.addSelectionListener(new SelectionAdapter() {
@@ -1029,11 +1027,7 @@ public abstract class DefaultBaseTableView implements TableView {
             }
         });
 
-        /********************************************************************
-         *                                                                  *
-         * Set up MenuItems for Importing/Exporting Data from the TableView *
-         *                                                                  *
-         ********************************************************************/
+        // Set up MenuItems for Importing/Exporting Data from the TableView *
         MenuItem importExportMenuItem = new MenuItem(menuBar, SWT.CASCADE);
         importExportMenuItem.setText("&Import/Export Data");
 
@@ -1118,16 +1112,15 @@ public abstract class DefaultBaseTableView implements TableView {
     /**
      * Loads the data buffer of an object.
      *
-     * @param dataObject
-     *        the object that has the buffer for the data.
+     * @param theDataObject the object that has the buffer for the data.
      *
      * @throws Exception if a failure occurred
      */
-    protected void loadData(DataFormat dataObject) throws Exception
+    protected void loadData(DataFormat theDataObject) throws Exception
     {
-        if (!dataObject.isInited()) {
+        if (!theDataObject.isInited()) {
             try {
-                dataObject.init();
+                theDataObject.init();
             }
             catch (Exception ex) {
                 dataValue = null;
@@ -1137,20 +1130,20 @@ public abstract class DefaultBaseTableView implements TableView {
         }
 
         // use lazy convert for large number of strings
-        if (dataObject.getHeight() > 10000 && dataObject instanceof CompoundDS) {
-            ((CompoundDS)dataObject).setConvertByteToString(false);
+        if (theDataObject.getHeight() > 10000 && theDataObject instanceof CompoundDS) {
+            ((CompoundDS)theDataObject).setConvertByteToString(false);
         }
 
         // Make sure entire dataset is not loaded when looking at 3D
         // datasets using the default display mode (double clicking the
         // data object)
-        if (dataObject.getRank() > 2)
-            dataObject.getSelectedDims()[dataObject.getSelectedIndex()[2]] = 1;
+        if (theDataObject.getRank() > 2)
+            theDataObject.getSelectedDims()[theDataObject.getSelectedIndex()[2]] = 1;
 
         dataValue = null;
         try {
             log.trace("loadData(): call getData()");
-            dataValue = dataObject.getData();
+            dataValue = theDataObject.getData();
         }
         catch (Exception ex) {
             dataValue = null;
@@ -1162,14 +1155,12 @@ public abstract class DefaultBaseTableView implements TableView {
     /**
      * Create a data table for a data object.
      *
-     * @param parent
-     *            the parent object this table will be associated with.
-     * @param dataObject
-     *            the data object this table will be associated with.
+     * @param parent        the parent object this table will be associated with.
+     * @param theDataObject the data object this table will be associated with.
      *
      * @return the newly created data table
      */
-    protected abstract NatTable createTable(Composite parent, DataFormat dataObject);
+    protected abstract NatTable createTable(Composite parent, DataFormat theDataObject);
 
     /**
      * Show the object reference data.
@@ -1198,12 +1189,11 @@ public abstract class DefaultBaseTableView implements TableView {
     /**
      * Get the data editing rule for the object.
      *
-     * @param dataObject
-     *        the data object
+     * @param theDataObject the data object
      *
      * @return the rule
      */
-    protected abstract IEditableRule getDataEditingRule(DataFormat dataObject);
+    protected abstract IEditableRule getDataEditingRule(DataFormat theDataObject);
 
     /**
      * Update the display converters.
@@ -1291,21 +1281,21 @@ public abstract class DefaultBaseTableView implements TableView {
     }
 
     /**
-     * Get the selection layer
+     * Get the selection layer.
      *
      * @return the selection layer
      */
     public SelectionLayer getSelectionLayer() { return selectionLayer; }
 
     /**
-     * Get the data layer
+     * Get the data layer.
      *
      * @return the data layer
      */
     public DataLayer getDataLayer() { return dataLayer; }
 
     /**
-     * refresh the data table
+     * refresh the data table.
      */
     @Override
     public void refreshDataTable()
@@ -1435,8 +1425,11 @@ public abstract class DefaultBaseTableView implements TableView {
             dataValue = dataObject.getData();
 
             /*
-             * TODO: Converting data from unsigned C integers to Java integers
-             *       is currently unsupported for Compound Datasets.
+             * TODO(HDFView) [2025-12]: Implement unsigned-to-signed conversion for table view display of
+             * CompoundDS. Currently compound datasets skip unsigned conversion, causing negative values to
+             * appear for unsigned data. Display layer should handle conversion even if data layer doesn't
+             * (see Dataset.java line 738). May need display-only conversion without modifying underlying
+             * data. Related: Dataset.java line 738 for data-layer conversion logic.
              */
             if (!(dataObject instanceof CompoundDS))
                 dataObject.convertFromUnsignedC();
@@ -1672,7 +1665,7 @@ public abstract class DefaultBaseTableView implements TableView {
         viewer.showStatus("Data saved to: " + fname);
     }
 
-    /** Save data as text (from TextView). */
+    // Save data as text (from TextView).
     // private void saveAsTextTextView() throws Exception {
     // FileDialog fChooser = new FileDialog(shell, SWT.SAVE);
     // fChooser.setText("Save Current Data To Text File --- " + dataset.getName());
@@ -1747,7 +1740,10 @@ public abstract class DefaultBaseTableView implements TableView {
     // // System.out.println(docFlavors[i]);
     // // }
     //
-    // // TODO: windows url
+    // // TODO(HDFView) [2025-12]: Implement Windows-specific URL handling for printing.
+    // // Commented-out code suggests incomplete Windows URL support for print functionality.
+    // // May need platform-specific file:// URL conversion or Windows print service integration.
+    // // Low priority - printing feature appears to be disabled/incomplete across all platforms.
     // // Get a text DocFlavor
     // InputStream is = null;
     // try {
@@ -2574,7 +2570,7 @@ public abstract class DefaultBaseTableView implements TableView {
      */
     protected class RowHeaderDataProvider implements IDataProvider {
         private int rank;
-        private int space_type;
+        private int spaceType;
         private long[] dims;
         private long[] startArray;
         private long[] strideArray;
@@ -2596,7 +2592,7 @@ public abstract class DefaultBaseTableView implements TableView {
          */
         public RowHeaderDataProvider(DataFormat theDataObject)
         {
-            this.space_type    = theDataObject.getSpaceType();
+            this.spaceType     = theDataObject.getSpaceType();
             this.rank          = theDataObject.getRank();
             this.dims          = theDataObject.getSelectedDims();
             this.startArray    = theDataObject.getStartDims();
@@ -2693,7 +2689,7 @@ public abstract class DefaultBaseTableView implements TableView {
         }
     }
 
-    /** Context-menu for dealing with region and object references */
+    /** Context-menu for dealing with region and object references. */
     protected class RefContextMenu extends AbstractUiBindingConfiguration {
         private final Menu contextMenu;
 
@@ -2808,20 +2804,23 @@ public abstract class DefaultBaseTableView implements TableView {
     private class LinePlotOption extends Dialog {
         private Shell linePlotOptionShell;
 
-        private Button rowButton, colButton;
+        private Button rowButton;
+        private Button colButton;
 
-        private Combo rowBox, colBox;
+        private Combo rowBox;
+        private Combo colBox;
 
         public static final int NO_PLOT     = -1;
         public static final int ROW_PLOT    = 0;
         public static final int COLUMN_PLOT = 1;
 
-        private int nrow, ncol;
+        private int nrow;
+        private int ncol;
 
-        private int idx_xaxis = -1;
-        private int plotType  = -1;
+        private int idxXAxis = -1;
+        private int plotType = -1;
 
-        public LinePlotOption(Shell parent, int style, int nrow, int ncol)
+        LinePlotOption(Shell parent, int style, int nrow, int ncol)
         {
             super(parent, style);
 
@@ -2922,12 +2921,12 @@ public abstract class DefaultBaseTableView implements TableView {
                 public void widgetSelected(SelectionEvent e)
                 {
                     if (colButton.getSelection()) {
-                        idx_xaxis = colBox.getSelectionIndex() - 1;
-                        plotType  = COLUMN_PLOT;
+                        idxXAxis = colBox.getSelectionIndex() - 1;
+                        plotType = COLUMN_PLOT;
                     }
                     else {
-                        idx_xaxis = rowBox.getSelectionIndex() - 1;
-                        plotType  = ROW_PLOT;
+                        idxXAxis = rowBox.getSelectionIndex() - 1;
+                        plotType = ROW_PLOT;
                     }
 
                     linePlotOptionShell.dispose();
@@ -2967,13 +2966,13 @@ public abstract class DefaultBaseTableView implements TableView {
 
             linePlotOptionShell.open();
 
-            Display display = parent.getDisplay();
+            Display pdisplay = parent.getDisplay();
             while (!linePlotOptionShell.isDisposed())
-                if (!display.readAndDispatch())
-                    display.sleep();
+                if (!pdisplay.readAndDispatch())
+                    pdisplay.sleep();
         }
 
-        int getXindex() { return idx_xaxis; }
+        int getXindex() { return idxXAxis; }
 
         int getPlotBy() { return plotType; }
     }

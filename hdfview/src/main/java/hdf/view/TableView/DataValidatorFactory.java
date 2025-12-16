@@ -24,8 +24,6 @@ import hdf.object.DataFormat;
 import hdf.object.Datatype;
 import hdf.object.h5.H5Datatype;
 
-import hdf.hdf5lib.HDF5Constants;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,10 +52,9 @@ public class DataValidatorFactory {
     private static DataFormat dataFormatReference = null;
 
     /**
-     * Get the Data Validator for the supplied data object
+     * Get the Data Validator for the supplied data object.
      *
-     * @param dataObject
-     *        the data object
+     * @param dataObject the data object
      *
      * @return the validator instance
      *
@@ -124,9 +121,7 @@ public class DataValidatorFactory {
             validator = null;
         }
 
-        /*
-         * By default, never validate if a proper DataValidator was not found.
-         */
+        // By default, never validate if a proper DataValidator was not found.
         if (validator == null) {
             log.debug("getDataValidator(Datatype): using a default data validator");
 
@@ -136,7 +131,7 @@ public class DataValidatorFactory {
         return validator;
     }
 
-    /** The HDF extension of the data valicdation */
+    /** The HDF extension of the data valicdation. */
     public static class HDFDataValidator extends DataValidator {
         private static final Logger log = LoggerFactory.getLogger(HDFDataValidator.class);
 
@@ -149,10 +144,9 @@ public class DataValidatorFactory {
         protected int cellColIdx;
 
         /**
-         * Create the HDF extended Data Validator for the datatype object
+         * Create the HDF extended Data Validator for the datatype object.
          *
-         * @param dtype
-         *        the datatype object
+         * @param dtype the datatype object
          */
         HDFDataValidator(final Datatype dtype) { cellColIdx = -1; }
 
@@ -511,18 +505,22 @@ public class DataValidatorFactory {
                                             ((lenDiff > 1) ? " bytes." : " byte."));
 
                     /*
-                     * TODO: Add Warning about overwriting NULL-terminator character.
+                     * TODO(HDFView) [2025-12]: Add user warning dialog when input may overwrite string NULL
+                     * terminator. When input length exactly matches string field size for NULL-padded HDF5
+                     * strings, user should be warned that NULL terminator may be lost, causing read errors.
+                     * Should display warning: "Input length matches field size - NULL terminator may be
+                     * overwritten." Medium priority - affects data integrity for fixed-length strings.
                      */
                     if (lenDiff == 0 && isH5String) {
                         H5Datatype h5Type = (H5Datatype)datasetDatatype;
                         int strPad        = h5Type.getNativeStrPad();
 
-                        if (strPad == HDF5Constants.H5T_STR_NULLTERM) {
-                        }
-                        else if (strPad == HDF5Constants.H5T_STR_NULLPAD) {
-                        }
-                        else if (strPad == HDF5Constants.H5T_STR_SPACEPAD) {
-                        }
+                        // if (strPad == HDF5Constants.H5T_STR_NULLTERM) {
+                        // }
+                        // else if (strPad == HDF5Constants.H5T_STR_NULLPAD) {
+                        // }
+                        // else if (strPad == HDF5Constants.H5T_STR_SPACEPAD) {
+                        // }
                     }
                 }
             }

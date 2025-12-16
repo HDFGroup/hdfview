@@ -69,18 +69,24 @@ public class NewDatasetDialog extends NewDataObjectDialog {
 
     private String maxSize;
 
-    private Text currentSizeField, chunkSizeField, fillValueField;
+    private Text currentSizeField;
+    private Text chunkSizeField;
+    private Text fillValueField;
 
-    private Combo parentChoice, rankChoice, compressionLevel;
+    private Combo parentChoice;
+    private Combo rankChoice;
+    private Combo compressionLevel;
 
-    private Button checkCompression, checkFillValue;
+    private Button checkCompression;
+    private Button checkFillValue;
 
-    private Button checkContiguous, checkChunked;
+    private Button checkContiguous;
+    private Button checkChunked;
 
-    /** TextField for entering the name of the object */
+    /** TextField for entering the name of the object. */
     protected Text nameField;
 
-    /** A list of current groups */
+    /** A list of current groups. */
     private List<Group> groupList;
 
     private final DataView dataView;
@@ -532,7 +538,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 display.sleep();
     }
 
-    /** Check if the max size is valid */
+    /** Check if the max size is valid. */
     private void checkMaxSize()
     {
         boolean isChunkNeeded = false;
@@ -548,8 +554,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             return;
         }
 
-        int rank = stDim.countTokens();
-        long max = 0, dim = 0;
+        int rank       = stDim.countTokens();
+        long max       = 0;
+        long dim       = 0;
         long[] maxdims = new long[rank];
         for (int i = 0; i < rank; i++) {
             String token = stMax.nextToken().trim();
@@ -950,7 +957,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
     private class HelpDialog extends Dialog {
         private Shell helpShell;
 
-        public HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
+        HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
 
         public void open()
         {
@@ -995,7 +1002,9 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 }
                 else {
                     try {
-                        URL url = null, url2 = null, url3 = null;
+                        URL url         = null;
+                        URL url2        = null;
+                        URL url3        = null;
                         String rootPath = ViewProperties.getViewRoot();
 
                         try {
@@ -1019,7 +1028,7 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                             log.debug("help information:", mfu);
                         }
 
-                        URL uu[] = {url, url2, url3};
+                        URL[] uu = {url, url2, url3};
                         try (URLClassLoader cl = new URLClassLoader(uu)) {
                             URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
 
@@ -1075,7 +1084,11 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 Tools.showError(shell, "Browser support",
                                 "Platform doesn't support Browser. Opening external link in web browser...");
 
-                // TODO: Add support for launching in external browser
+                // TODO(HDFView) [2025-12]: Implement fallback external browser launch when SWT Browser
+                // unavailable. Currently shows error message but doesn't actually open URL in system browser.
+                // Use java.awt.Desktop.browse(URI) or platform-specific command (xdg-open, open, start).
+                // Related: NewScalarAttributeDialog.java:475, NewStringAttributeDialog.java:760 have same
+                // issue.
             }
             catch (Exception ex) {
                 log.debug("Open New Dataset Help failure: ", ex);

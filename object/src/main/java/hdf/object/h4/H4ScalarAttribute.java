@@ -14,16 +14,11 @@
 
 package hdf.object.h4;
 
-import java.lang.reflect.Array;
-import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import hdf.object.Attribute;
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -38,8 +33,8 @@ import hdf.object.ScalarDS;
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * For more details on attributes, read <a
- * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
+ * For more details on attributes, read
+ * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5
  * Attributes in HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
@@ -80,10 +75,10 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4ScalarAttribute.class);
 
-    /** The HObject to which this NC2Attribute is attached, Attribute interface */
+    /** The HObject to which this NC2Attribute is attached, Attribute interface. */
     protected HObject parentObject;
 
-    /** additional information and properties for the attribute, Attribute interface */
+    /** additional information and properties for the attribute, Attribute interface. */
     private transient Map<String, Object> properties;
 
     /**
@@ -226,7 +221,11 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
                 if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                     log.trace("open(): FILE_TYPE_HDF4");
                     /*
-                     * TODO: Get type of HDF4 object this is attached to and retrieve attribute info.
+                     * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute retrieval for scalar types.
+                     * Need to determine parent object type (GR, SDS, Vdata) and use appropriate HDFLibrary
+                     * calls. May be limited by HDF4 library capabilities - investigate if full implementation
+                     * possible. Related: H4CompoundAttribute.java line 228 has same stub for compound
+                     * attributes.
                      */
                 }
             }
@@ -256,7 +255,10 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
             if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                 log.trace("close(): FILE_TYPE_HDF4");
                 /*
-                 * TODO: Get type of HDF4 object this is attached to and close attribute.
+                 * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute cleanup for scalar types.
+                 * Need to properly close attribute handle based on parent object type.
+                 * Coordinate with open() implementation once parent object type detection is added.
+                 * Related: H4CompoundAttribute.java line 260 for compound attribute cleanup.
                  */
             }
         }
@@ -274,7 +276,10 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
         if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             log.trace("init(): FILE_TYPE_HDF4");
             /*
-             * TODO: If HDF4 attribute object needs to init dependent objects.
+             * TODO(HDFView) [2025-12]: Determine if HDF4 scalar attributes require dependency initialization.
+             * May need to initialize datatype or parent object references before first use.
+             * Currently assumes no initialization needed - verify with HDF4 spec.
+             * Related: H4CompoundAttribute.java line 282 for compound attributes.
              */
             inited = true;
         }
@@ -462,6 +467,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
     public final long[] getAttributeDims() { return getDims(); }
 
     /**
+     * Check if the Attribute is null.
+     *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     @Override
@@ -471,6 +478,8 @@ public class H4ScalarAttribute extends ScalarDS implements Attribute {
     }
 
     /**
+     * Check if the Attribute is a scalar.
+     *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isAttributeScalar() { return isScalar(); }

@@ -25,14 +25,14 @@ package hdf.object;
  */
 public interface DataFormat {
     /**
-     * The status of initialization for this object
+     * The status of initialization for this object.
      *
      * @return true if the data has been initialized
      */
     boolean isInited();
 
     /**
-     * Set the initial state of all the variables
+     * Set the initial state of all the variables.
      */
     void init();
 
@@ -187,10 +187,6 @@ public interface DataFormat {
      */
     long[] getDims();
 
-    /****************************************************************
-     * * The following four definitions are used for data subsetting. * *
-     ****************************************************************/
-
     /**
      * Returns the dimension sizes of the selected subset.
      *
@@ -307,10 +303,6 @@ public interface DataFormat {
      * @return the array of the indices of display order.
      */
     int[] getSelectedIndex();
-
-    /**************************************************************************
-     * * The following two definitions are used primarily for GUI applications. * *
-     **************************************************************************/
 
     /**
      * Returns the dimension size of the vertical axis.

@@ -15,16 +15,14 @@
 package hdf.object.h5;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** HDF5 plugin utility class */
+/** HDF5 plugin utility class. */
 public final class H5Plugins {
 
     private static final Logger log = LoggerFactory.getLogger(H5Plugins.class);
@@ -47,7 +45,7 @@ public final class H5Plugins {
      *
      * @throws HDF5Exception If there is an error at the HDF5 library level.
      */
-    public static final long getTotalPluginPaths() throws HDF5Exception
+    public static long getTotalPluginPaths() throws HDF5Exception
     {
         totalPaths = H5.H5PLsize();
 
@@ -63,7 +61,7 @@ public final class H5Plugins {
      *
      * @throws HDF5Exception If there is an error at the HDF5 library level.
      */
-    public static final ArrayList<String> getPluginPaths() throws HDF5Exception
+    public static ArrayList<String> getPluginPaths() throws HDF5Exception
     {
         ArrayList<String> pathList = new ArrayList<>(5);
         totalPaths                 = H5.H5PLsize();

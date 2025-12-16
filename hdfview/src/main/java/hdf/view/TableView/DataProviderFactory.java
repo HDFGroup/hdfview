@@ -17,26 +17,18 @@ import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
 import hdf.object.Datatype;
-import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.Utils;
 import hdf.object.h5.H5Datatype;
 import hdf.object.h5.H5ReferenceType;
 import hdf.view.Tools;
-
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,14 +54,11 @@ public class DataProviderFactory {
     private static DataFormat dataFormatReference = null;
 
     /**
-     * Get the Data Display Provider for the supplied data object
+     * Get the Data Display Provider for the supplied data object.
      *
-     * @param dataObject
-     *        the data object
-     * @param dataBuf
-     *        the data buffer to use
-     * @param dataTransposed
-     *        if the data should be transposed
+     * @param dataObject     the data object
+     * @param dataBuf        the data buffer to use
+     * @param dataTransposed if the data should be transposed
      *
      * @return the provider instance
      *
@@ -90,8 +79,8 @@ public class DataProviderFactory {
         return dataProvider;
     }
 
-    private static final HDFDataProvider getDataProvider(final Datatype dtype, final Object dataBuf,
-                                                         final boolean dataTransposed) throws Exception
+    private static HDFDataProvider getDataProvider(final Datatype dtype, final Object dataBuf,
+                                                   final boolean dataTransposed) throws Exception
     {
         HDFDataProvider dataProvider = null;
         log.trace("getDataProvider(): Datatype is {}", dtype.getDescription());
@@ -149,40 +138,37 @@ public class DataProviderFactory {
          */
         protected Object dataBuf;
 
-        /** the data value */
+        /** the data value. */
         protected Object theValue;
 
-        /** the data format class */
+        /** the data format class. */
         protected final Class originalFormatClass;
 
-        /** if the data value has changed */
+        /** if the data value has changed. */
         protected boolean isValueChanged;
 
-        /** the type of the parent */
+        /** the type of the parent. */
         protected final boolean isContainerType;
 
-        /** the rank */
+        /** the rank. */
         protected final int rank;
 
-        /** if the data is in original order */
+        /** if the data is in original order. */
         protected final boolean isNaturalOrder;
-        /** if the data is transposed */
+        /** if the data is transposed. */
         protected final boolean isDataTransposed;
 
-        /** the column */
+        /** the column. */
         protected long colCount;
-        /** the row */
+        /** the row. */
         protected long rowCount;
 
         /**
-         * Create the HDF extended Data Display Provider for the supplied data object
+         * Create the HDF extended Data Display Provider for the supplied data object.
          *
-         * @param dtype
-         *        the datatype object
-         * @param dataBuf
-         *        the data buffer to use
-         * @param dataTransposed
-         *        if the data should be transposed
+         * @param dtype          the datatype object
+         * @param dataBuf        the data buffer to use
+         * @param dataTransposed if the data should be transposed
          *
          * @throws Exception if a failure occurred
          */
@@ -371,7 +357,10 @@ public class DataProviderFactory {
             log.trace("setDataValue({}, {})=({}): finish", rowIndex, columnIndex, newValue);
 
             /*
-             * TODO: throwing error dialogs when something fails?
+             * TODO(HDFView) [2025-12]: Add user-facing error dialog for data value setting failures.
+             * Currently logs error but doesn't inform user via UI when setValue fails.
+             * Should uncomment Tools.showError to display exception message to user.
+             * Related: Line 952 has same error dialog issue, line 1258 for array operations.
              *
              * Tools.showError(shell, "Select", "Unable to set new value:\n\n " + ex);
              */
@@ -439,9 +428,9 @@ public class DataProviderFactory {
             }
 
             // No need to update if values are the same
-            int buf_size = Array.getLength(bufObject);
-            log.trace("updateAtomicValue(): bufObject size is {}", buf_size);
-            if (buf_size > 0) {
+            int bufsize = Array.getLength(bufObject);
+            log.trace("updateAtomicValue(): bufObject size is {}", bufsize);
+            if (bufsize > 0) {
                 Object oldVal = this.getDataValue(bufObject, bufIndex);
                 if ((oldVal != null) && newValue.equals(oldVal.toString())) {
                     log.debug("updateAtomicValue(): cell value not updated; new value same as old value");
@@ -554,15 +543,14 @@ public class DataProviderFactory {
         }
 
         /**
-         * set if the data value has changed
+         * set if the data value has changed.
          *
-         * @param isChanged
-         *        if the data value is changed
+         * @param isChanged if the data value is changed
          */
         public final void setIsValueChanged(boolean isChanged) { isValueChanged = isChanged; }
 
         /**
-         * Check if the datavalue has changed
+         * Check if the datavalue has changed.
          *
          * @return if the datavalue has changed
          */
@@ -741,9 +729,12 @@ public class DataProviderFactory {
                         base.getDataValue(colValue, fieldIdx - relCmpdStartIndexMap.get(fieldIdx), rowIdx);
                 else if (base instanceof ArrayDataProvider) {
                     /*
-                     * TODO: quick temporary fix for specific compound of array of compound files.
-                     * Transforms the given column index into a relative index from the starting
-                     * index of the array of compound field.
+                     * TODO(HDFView) [2025-12]: Replace temporary fix with robust compound-of-array handling.
+                     * Current index transformation is a quick workaround for specific file structures.
+                     * Need generalized solution for nested compound and array combinations.
+                     * Verify correctness across various nesting patterns: array[compound],
+                     * compound[array[compound]], etc. High priority - temporary fixes tend to break with edge
+                     * cases.
                      */
                     int arrCompoundStartIdx = columnIndex;
                     HDFDataProvider theProvider;
@@ -962,7 +953,10 @@ public class DataProviderFactory {
                       newValue);
 
             /*
-             * TODO: throwing error dialogs when something fails?
+             * TODO(HDFView) [2025-12]: Add user-facing error dialog for compound data value setting failures.
+             * Currently logs error but doesn't inform user via UI when compound setValue fails.
+             * Should uncomment Tools.showError to display exception message to user.
+             * Related: Line 360 has same error dialog issue for scalar data.
              *
              * Tools.showError(shell, "Select", "Unable to set new value:\n\n " + ex);
              */
@@ -1099,19 +1093,26 @@ public class DataProviderFactory {
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache.
+                     * Currently retrieves array elements on each call - may benefit from caching in
+                     * arrayElements. Evaluate performance impact for large arrays before implementing.
+                     * Related: Lines 1095, 1101, 1370, 1376, 1382, 1388 have same caching consideration.
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else if (baseTypeDataProvider instanceof ComplexDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache.
+                     * Currently retrieves complex elements on each call - may benefit from caching.
+                     * Evaluate performance vs. memory tradeoff before implementing.
                      */
                     theValue = retrieveArrayOfComplexElements(dataBuf, columnIndex, bufIndex);
                 }
                 else {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache.
+                     * Currently retrieves atomic elements on each call - may benefit from caching.
+                     * Low priority - atomic element retrieval is already fast.
                      */
                     theValue = retrieveArrayOfAtomicElements(dataBuf, bufIndex);
                 }
@@ -1268,7 +1269,10 @@ public class DataProviderFactory {
             StringTokenizer st = new StringTokenizer((String)newValue, ",[]");
             if (st.countTokens() < arraySize) {
                 /*
-                 * TODO:
+                 * TODO(HDFView) [2025-12]: Add user-facing error dialog for insufficient array data points.
+                 * Currently logs warning but doesn't inform user via UI. Commented code shows intention.
+                 * Should use proper error dialog to notify user that input has fewer values than array size.
+                 * Related: Lines 360, 950 - other places needing error dialog improvements.
                  */
                 /* Tools.showError(shell, "Select", "Number of data points < " + morder + "."); */
                 log.trace("updateArrayElements(): number of data points ({}) < array size {}",
@@ -1303,7 +1307,10 @@ public class DataProviderFactory {
         {
             for (int i = 0; i < arraySize; i++) {
                 /*
-                 * TODO: not quite right.
+                 * TODO(HDFView) [2025-12]: Review and fix array element data value setting logic.
+                 * Current index calculation (bufStartIndex + i) may be incorrect for nested structures.
+                 * Need to verify proper offset calculation for multi-dimensional and compound arrays.
+                 * Test with various array configurations to ensure data is written to correct positions.
                  */
                 baseTypeDataProvider.setDataValue(columnIndex, bufStartIndex + i, curBuf,
                                                   tokenizer.nextToken().trim());
@@ -1374,25 +1381,35 @@ public class DataProviderFactory {
                 }
                 else if (baseTypeDataProvider instanceof ArrayDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (array
+                     * context). Currently retrieves array-of-array elements on each call - caching may
+                     * improve performance. Related: Lines 1095, 1101, 1390, 1396, 1402 have same caching
+                     * opportunity.
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else if (baseTypeDataProvider instanceof RefDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache
+                     * (reference context). Currently retrieves reference array elements on each call -
+                     * caching may improve performance. Related: Similar pattern for other base type
+                     * providers.
                      */
                     theValue = retrieveArrayOfArrayElements(dataBuf, columnIndex, bufIndex);
                 }
                 else if (baseTypeDataProvider instanceof ComplexDataProvider) {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache
+                     * (complex context). Currently retrieves complex array elements on each call - caching
+                     * may improve performance. Related: Line 1104 for similar complex element retrieval.
                      */
                     theValue = retrieveArrayOfComplexElements(dataBuf, columnIndex, bufIndex);
                 }
                 else {
                     /*
-                     * TODO: assign to global arrayElements.
+                     * TODO(HDFView) [2025-12]: Consider refactoring to use global arrayElements cache (atomic
+                     * context). Currently retrieves atomic array elements on each call - likely already fast
+                     * enough. Low priority - simple atomic retrieval doesn't benefit much from caching.
                      */
                     theValue = retrieveArrayOfAtomicElements(dataBuf, bufIndex);
                 }
@@ -1475,13 +1492,13 @@ public class DataProviderFactory {
             Object[] tempArray = new Object[(int)vlSize];
 
             for (int i = 0; i < vlSize; i++) {
-                ArrayList<byte[]> ref_value = vlElements;
-                StringBuilder sb            = new StringBuilder();
+                ArrayList<byte[]> refValue = vlElements;
+                StringBuilder sb           = new StringBuilder();
                 sb.append("{");
-                for (int m = 0; m < ref_value.size(); m++) {
+                for (int m = 0; m < refValue.size(); m++) {
                     if (m > 0)
                         sb.append(", ");
-                    byte[] byteElements = ref_value.get(m);
+                    byte[] byteElements = refValue.get(m);
                     log.trace("retrieveArrayOfArrayElements byteElements={}", byteElements);
                     sb.append(baseTypeDataProvider.getDataValue(byteElements, columnIndex, i));
                 }
@@ -1502,13 +1519,13 @@ public class DataProviderFactory {
             Object[] tempArray = new Object[(int)vlSize];
 
             for (int i = 0; i < vlSize; i++) {
-                ArrayList<byte[]> ref_value = vlElements;
-                StringBuilder sb            = new StringBuilder();
+                ArrayList<byte[]> refValue = vlElements;
+                StringBuilder sb           = new StringBuilder();
                 sb.append("{");
-                for (int m = 0; m < ref_value.size(); m++) {
+                for (int m = 0; m < refValue.size(); m++) {
                     if (m > 0)
                         sb.append(", ");
-                    byte[] byteElements = ref_value.get(m);
+                    byte[] byteElements = refValue.get(m);
                     log.trace("retrieveArrayOfComplexElements byteElements={}", byteElements);
                     sb.append(baseTypeDataProvider.getDataValue(byteElements, columnIndex, i * 2));
                 }
@@ -1627,19 +1644,19 @@ public class DataProviderFactory {
             StringTokenizer st = new StringTokenizer((String)newValue, ",[]");
             int newcnt         = st.countTokens();
 
-            Object[] buffer = null;
+            Object[] abuffer = null;
             switch (baseTypeClass) {
             case Datatype.CLASS_CHAR:
-                buffer = new Byte[newcnt];
+                abuffer = new Byte[newcnt];
                 break;
             case Datatype.CLASS_INTEGER:
-                buffer = new Integer[newcnt];
+                abuffer = new Integer[newcnt];
                 break;
             case Datatype.CLASS_FLOAT:
-                buffer = new Double[newcnt];
+                abuffer = new Double[newcnt];
                 break;
             case Datatype.CLASS_STRING:
-                buffer = new String[newcnt];
+                abuffer = new String[newcnt];
                 break;
             case Datatype.CLASS_REFERENCE:
             case Datatype.CLASS_OPAQUE:
@@ -1650,14 +1667,14 @@ public class DataProviderFactory {
             case Datatype.CLASS_VLEN:
             case Datatype.CLASS_COMPLEX:
             default:
-                buffer = new Object[newcnt];
+                abuffer = new Object[newcnt];
                 break;
             }
             for (int i = 0; i < newcnt; i++) {
-                baseTypeDataProvider.setDataValue(columnIndex, i, buffer, st.nextToken().trim());
+                baseTypeDataProvider.setDataValue(columnIndex, i, abuffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
-            vlElements                      = new ArrayList<>(Arrays.asList(buffer));
+            vlElements                      = new ArrayList<>(Arrays.asList(abuffer));
             ((ArrayList[])curBuf)[rowIndex] = vlElements;
         }
 
@@ -1670,19 +1687,19 @@ public class DataProviderFactory {
             StringTokenizer st = new StringTokenizer((String)newValue, ",[]");
             int newcnt         = st.countTokens();
             log.trace("updateArrayOfAtomicElements(): count={}", newcnt);
-            Object[] buffer = null;
+            Object[] abuffer = null;
             switch (baseTypeClass) {
             case Datatype.CLASS_CHAR:
-                buffer = new Byte[newcnt];
+                abuffer = new Byte[newcnt];
                 break;
             case Datatype.CLASS_INTEGER:
-                buffer = new Integer[newcnt];
+                abuffer = new Integer[newcnt];
                 break;
             case Datatype.CLASS_FLOAT:
-                buffer = new Double[newcnt];
+                abuffer = new Double[newcnt];
                 break;
             case Datatype.CLASS_STRING:
-                buffer = new String[newcnt];
+                abuffer = new String[newcnt];
                 break;
             case Datatype.CLASS_REFERENCE:
             case Datatype.CLASS_OPAQUE:
@@ -1693,17 +1710,17 @@ public class DataProviderFactory {
             case Datatype.CLASS_VLEN:
             case Datatype.CLASS_COMPLEX:
             default:
-                buffer = new Object[newcnt];
+                abuffer = new Object[newcnt];
                 break;
             }
             for (int i = 0; i < newcnt; i++) {
-                baseTypeDataProvider.setDataValue(i, buffer, st.nextToken().trim());
+                baseTypeDataProvider.setDataValue(i, abuffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
-            String bname = buffer.getClass().getName();
+            String bname = abuffer.getClass().getName();
             String cname = curBuf.getClass().getName();
-            log.trace("updateArrayOfAtomicElements(): buffer cname={} of data cname={}", bname, cname);
-            vlElements = new ArrayList<>(Arrays.asList(buffer));
+            log.trace("updateArrayOfAtomicElements(): abuffer cname={} of data cname={}", bname, cname);
+            vlElements = new ArrayList<>(Arrays.asList(abuffer));
             log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
             ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
         }
@@ -2303,15 +2320,15 @@ public class DataProviderFactory {
 
             StringTokenizer st = new StringTokenizer((String)newValue, "+i");
             int newcnt         = st.countTokens();
-            Object[] buffer    = new Double[newcnt];
+            Object[] abuffer   = new Double[newcnt];
             for (int i = 0; i < newcnt; i++) {
-                baseTypeDataProvider.setDataValue(i, buffer, st.nextToken().trim());
+                baseTypeDataProvider.setDataValue(i, abuffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
-            String bname = buffer.getClass().getName();
+            String bname = abuffer.getClass().getName();
             String cname = curBuf.getClass().getName();
             log.trace("updateArrayOfAtomicElements(): buffer cname={} of data cname={}", bname, cname);
-            vlElements = new ArrayList<>(Arrays.asList(buffer));
+            vlElements = new ArrayList<>(Arrays.asList(abuffer));
             log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
             ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
         }
