@@ -617,26 +617,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                 try {
                     tid = H5.H5Dget_type(did);
                     log.trace("getDatatype(): isNativeDatatype={}", isNativeDatatype);
-                    if (!isNativeDatatype) {
-                        long tmptid = -1;
-                        try {
-                            tmptid = H5Datatype.toNative(tid);
-                            if (tmptid >= 0) {
-                                try {
-                                    H5.H5Tclose(tid);
-                                }
-                                catch (Exception ex2) {
-                                    log.debug("getDatatype(): H5Tclose(tid {}) failure: ", tid, ex2);
-                                }
-                                tid = tmptid;
-                            }
-                        }
-                        catch (Exception ex) {
-                            log.debug("getDatatype(): toNative: ", ex);
-                        }
-                    }
-                    int nativeClass = H5.H5Tget_class(tid);
-                    if (nativeClass == HDF5Constants.H5T_REFERENCE) {
+
+                    // For display purposes, create H5Datatype from the FILE type, not NATIVE type.
+                    // This preserves the correct bit width (e.g., "16-bit" for Float16/BFLOAT16).
+                    // The toNative conversion happens later during data reading in createNative().
+                    int fileTypeClass = H5.H5Tget_class(tid);
+                    if (fileTypeClass == HDF5Constants.H5T_REFERENCE) {
                         long lsize = 1;
                         if (rank > 0) {
                             log.trace("getDatatype(): rank={}, dims={}", rank, dims);
@@ -939,15 +925,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                  */
                 long totalSelectedSpacePoints = H5Utils.getTotalSelectedSpacePoints(
                     did, dims, startDims, selectedStride, selectedDims, spaceIDs);
-
-                // Check for BFLOAT16 which causes JVM crash due to HDF5 Java bindings bug
-                // See https://github.com/HDFGroup/hdf5/issues/6076
-                if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 2) {
-                    throw new Exception(
-                        "BFLOAT16 (16-bit floating-point) datasets are not supported due to a bug in HDF5 Java bindings. "
-                        +
-                        "Reading this datatype causes a JVM crash. See https://github.com/HDFGroup/hdf5/issues/6076 for details.");
-                }
 
                 if (ioType == H5File.IO_TYPE.READ) {
                     log.trace(
@@ -1967,15 +1944,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
         }
         if (aid > 0) {
             try {
-                atid        = H5.H5Aget_type(aid);
-                long tmptid = atid;
-                atid        = H5.H5Tget_native_type(tmptid);
-                try {
-                    H5.H5Tclose(tmptid);
-                }
-                catch (Exception ex) {
-                    log.debug("getAttrValue(): H5Tclose(tmptid {}) failure: ", tmptid, ex);
-                }
+                // Get the FILE type for creating H5Datatype with correct bit width.
+                // The toNative conversion happens later in createNative() during data reading.
+                atid = H5.H5Aget_type(aid);
 
                 asid         = H5.H5Aget_space(aid);
                 long adims[] = null;

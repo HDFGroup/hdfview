@@ -353,6 +353,13 @@ public class H5Datatype extends Datatype {
     public H5Datatype(FileFormat theFile, long nativeID, Datatype pbase) throws Exception
     {
         super(theFile, nativeID, pbase);
+        try {
+            long tsize = H5.H5Tget_size(nativeID);
+            log.trace("H5Datatype constructor: nativeID={} tsize={} BEFORE fromNative()", nativeID, tsize);
+        }
+        catch (Exception ex) {
+            log.debug("H5Datatype constructor: H5Tget_size failure: ", ex);
+        }
         fromNative(nativeID);
         datatypeDescription = getDescription();
         log.trace("H5Datatype constructor: AFTER fromNative() datatypeSize={}", datatypeSize);
@@ -1460,11 +1467,13 @@ public class H5Datatype extends Datatype {
                 else if (datatypeSize == 4)
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
                 else if (datatypeSize == 2)
-                    // HDF5Constants.H5T_NATIVE_FLOAT16 is not available in all versions of HDF5
-                    // so we need to check if it is available
-                    // before using it.
+                    // Always use the FLOAT32 type for safety
+                    tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
+                else if (datatypeSize == 1)
+                    // For Float8 (1-byte floats), fall back to FLOAT32/16 for reading
+                    // as there is no native Float8 type in any HDF5 versions
                     if (HDF5Constants.H5T_NATIVE_FLOAT16 == HDF5Constants.H5I_INVALID_HID)
-                        tid = H5.H5Tget_native_type(HDF5Constants.H5I_INVALID_HID);
+                        tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
                     else
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT16);
                 else
@@ -1854,11 +1863,60 @@ public class H5Datatype extends Datatype {
             data = new ArrayList<>(dtype.getCompoundMemberTypes().size());
         }
         else if (typeClass == CLASS_FLOAT) {
-            log.trace("allocateArray(): class CLASS_FLOAT");
-            if (typeSize == NATIVE)
-                typeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
+            log.trace("allocateArray(): CLASS_FLOAT typeSize={}", typeSize);
 
-            switch ((int)typeSize) {
+            // For float types, we need to use NATIVE type size for buffer allocation,
+            // not file storage size, because H5Dread/H5Aread expect native-sized buffers.
+            // This is critical for types like BFLOAT16 where file size=2 but native size=4.
+            long bufferTypeSize = typeSize;
+            log.trace("allocateArray(): bufferTypeSize initialized to {}", bufferTypeSize);
+
+            if (typeSize == NATIVE) {
+                bufferTypeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
+                log.trace("allocateArray(): typeSize was NATIVE, resolved to: {}", bufferTypeSize);
+            }
+            else if (typeSize == 1 || typeSize == 2) {
+                log.trace("allocateArray(): typeSize == 1 or 2 branch taken (typeSize={})", typeSize);
+                // For 1-byte (Float8) and 2-byte (Float16/BFLOAT16) floats, the native representation
+                // may be larger than the file storage size. Query the actual native type size
+                // to support future native Float8/Float16 types without being wasteful.
+                long nativeTypeId = HDF5Constants.H5I_INVALID_HID;
+                try {
+                    nativeTypeId = dtype.createNative();
+                    if (nativeTypeId >= 0) {
+                        bufferTypeSize = H5.H5Tget_size(nativeTypeId);
+                        log.trace("allocateArray(): small float type (file size {}), native buffer size: {}",
+                                  typeSize, bufferTypeSize);
+                    }
+                    else {
+                        throw new HDF5Exception("Failed to create native type");
+                    }
+                }
+                catch (Exception ex) {
+                    log.warn("allocateArray(): Error querying native type size: {}", ex.getMessage());
+                    throw new HDF5Exception("Failed to create native type");
+                }
+                finally {
+                    if (nativeTypeId >= 0) {
+                        try {
+                            H5.H5Tclose(nativeTypeId);
+                        }
+                        catch (Exception ex) {
+                            log.debug("allocateArray(): Error closing native type: {}", ex.getMessage());
+                        }
+                    }
+                }
+            }
+            else {
+                log.trace("allocateArray(): no typeSize condition matched, bufferTypeSize remains {}",
+                          bufferTypeSize);
+            }
+
+            switch ((int)bufferTypeSize) {
+            case 1:
+                log.trace("allocateArray(): allocating byte array for 1-byte float");
+                data = new byte[numPoints];
+                break;
             case 2:
                 log.trace("allocateArray(): allocating short array for 2-byte float");
                 data = new short[numPoints];
@@ -1876,6 +1934,7 @@ public class H5Datatype extends Datatype {
                 data = new byte[numPoints * 16];
                 break;
             default:
+                log.warn("allocateArray(): unsupported float type size: {}", bufferTypeSize);
                 break;
             }
         }
