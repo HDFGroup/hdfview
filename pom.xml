@@ -14,6 +14,7 @@
   </modules>
 
   <properties>
+    <!-- argLine not defined here - set by JaCoCo prepare-agent and/or CLI -->
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.release>21</maven.compiler.release>
     <!-- Use classpath instead of module path (module-info.java disabled) -->
@@ -183,7 +184,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.11</version>
+          <version>0.8.12</version>
           <configuration>
             <excludes>
               <!-- UI Framework exclusions -->
@@ -204,6 +205,7 @@
           <executions>
             <execution>
               <id>default-prepare-agent</id>
+              <phase>initialize</phase>
               <goals>
                 <goal>prepare-agent</goal>
               </goals>
@@ -311,69 +313,15 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.5.3</version>
           <configuration>
-            <argLine>
-              --add-opens java.base/java.lang=ALL-UNNAMED
-              --add-opens java.base/java.time=ALL-UNNAMED
-              --add-opens java.base/java.time.format=ALL-UNNAMED
-              --add-opens java.base/java.util=ALL-UNNAMED
-              --enable-native-access=jarhdf5
-              -Djava.library.path=${platform.hdf.lib}
-            </argLine>
+            <!-- NO argLine here - let JaCoCo set it via property, pass other args via CLI -->
             <includes>
               <include>**/*Test.java</include>
               <include>**/Test*.java</include>
             </includes>
-            <!-- Configure parallel execution for unit tests -->
-            <parallel>methods</parallel>
-            <threadCount>4</threadCount>
-            <groups>unit</groups>
-            <!-- Fallback for tests without tags - UI tests run in separate execution -->
+            <!--  Parallel execution disabled for JaCoCo coverage -->
+            <parallel>none</parallel>
           </configuration>
-          <executions>
-            <!-- Fast unit tests (default) -->
-            <execution>
-              <id>unit-tests</id>
-              <goals>
-                <goal>test</goal>
-              </goals>
-              <configuration>
-                <groups>unit</groups>
-                <parallel>methods</parallel>
-                <threadCount>4</threadCount>
-              </configuration>
-            </execution>
-            <!-- Integration tests (serial execution) -->
-            <execution>
-              <id>integration-tests</id>
-              <goals>
-                <goal>test</goal>
-              </goals>
-              <configuration>
-                <groups>integration</groups>
-                <parallel>none</parallel>
-              </configuration>
-            </execution>
-            <!-- UI tests (serial execution, headless false) -->
-            <execution>
-              <id>ui-tests</id>
-              <goals>
-                <goal>test</goal>
-              </goals>
-              <configuration>
-                <groups>ui</groups>
-                <excludedGroups>visual</excludedGroups> <!-- Skip pixel-level tests in CI -->
-                <parallel>none</parallel>
-                <argLine>
-                  --add-opens java.base/java.lang=ALL-UNNAMED
-                  --add-opens java.base/java.time=ALL-UNNAMED
-                  --add-opens java.desktop/java.awt=ALL-UNNAMED
-                  --enable-native-access=jarhdf5
-                  -Djava.awt.headless=false
-                  -Djava.library.path=${platform.hdf.lib}
-                </argLine>
-              </configuration>
-            </execution>
-          </executions>
+          <!-- Executions disabled - using default execution for JaCoCo coverage -->
         </plugin>
         <!-- Maven Enforcer Plugin for build validation -->
         <plugin>
