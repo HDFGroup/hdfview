@@ -1849,8 +1849,14 @@ public class DataProviderFactory {
             super.getDataValue(columnIndex, rowIndex);
 
             try {
-                if (isFLT16)
-                    theValue = Float.float16ToFloat((short)theValue);
+                if (isFLT16) {
+                    // NOTE: For Float16/BFLOAT16, the data may already be in float format
+                    // (4-byte) if the native representation required it. In that case,
+                    // no conversion is needed. Only convert if still in short format.
+                    if (theValue instanceof Short)
+                        theValue = Float.float16ToFloat((short)theValue);
+                    // else: already a Float, no conversion needed
+                }
                 else if (isUINT64)
                     theValue = Tools.convertUINT64toBigInt(Long.valueOf((long)theValue));
             }
@@ -1870,8 +1876,14 @@ public class DataProviderFactory {
             super.getDataValue(obj, index);
 
             try {
-                if (isFLT16)
-                    theValue = Float.float16ToFloat((short)theValue);
+                if (isFLT16) {
+                    // NOTE: For Float16/BFLOAT16, the data may already be in float format
+                    // (4-byte) if the native representation required it. In that case,
+                    // no conversion is needed. Only convert if still in short format.
+                    if (theValue instanceof Short)
+                        theValue = Float.float16ToFloat((short)theValue);
+                    // else: already a Float, no conversion needed
+                }
                 else if (isUINT64)
                     theValue = Tools.convertUINT64toBigInt(Long.valueOf((long)theValue));
             }
