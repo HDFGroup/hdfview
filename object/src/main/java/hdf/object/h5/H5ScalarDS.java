@@ -82,7 +82,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
     protected boolean refresh = false;
 
     /**
-     * flag to indicate if the datatype in file is the same as dataype in memory.
+     * flag to indicate if the datatype in file is the same as datatype in memory.
      */
     protected boolean isNativeDatatype = false;
 
@@ -2426,7 +2426,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
      *
      * @param did - dataset ID
      *
-     * @return the palattes array count
+     * @return the palettes array count
      */
     private int readNumberOfPalette(long did)
     {
@@ -2488,12 +2488,12 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
     }
 
     /**
-     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore,
-     * the array length is 8*numberOfPalettes.
+     * reads references of palettes into a byte array Each reference requires eight bytes storage. Therefore, the array
+     * length is 8*numberOfPalettes.
      *
      * @param did - dataset ID
      *
-     * @return the palattes array
+     * @return the palettes array
      */
     private byte[][] getPaletteRefs(long did)
     {

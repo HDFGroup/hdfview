@@ -75,7 +75,7 @@ public abstract class DataViewFactory {
     /**
      * Get an instance of MetaDataView given the appropriate constructor parameters.
      *
-     * @param parent The parent composite for the maetadata view
+     * @param parent The parent composite for the metadata view
      * @param viewer The data view manager
      * @param theObj The object for the metadata view
      *
