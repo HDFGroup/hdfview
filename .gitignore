@@ -8,6 +8,8 @@ antoutput.log
 /target/
 */target/
 /libs/
+/build/
+/tmp/
 
 # Claude Code documentation
 /.claude/
