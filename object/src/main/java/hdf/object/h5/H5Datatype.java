@@ -32,9 +32,11 @@ import hdf.object.Attribute;
 import hdf.object.CompoundDS;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
+import hdf.object.h5.H5MetaDataContainer;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.HDFArray;
 import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
@@ -64,20 +66,20 @@ public class H5Datatype extends Datatype {
     private H5MetaDataContainer objMetadata;
 
     /**
-     * The dimension sizes of the reference object.
+     * The dimension sizes of the reference object
      */
     protected long[] refdims;
 
-    /** the datatype is an object reference. */
+    /** the datatype is an object reference */
     private boolean isRefObj = false;
 
-    /** the datatype is a region reference. */
+    /** the datatype is a region reference */
     private boolean isRegRef = false;
 
-    /** the datatype is a standard reference. */
+    /** the datatype is a standard reference */
     private boolean isStdRef = false;
 
-    /** the object properties. */
+    /** the object properties */
     private H5O_info_t objInfo;
 
     /**
@@ -144,16 +146,16 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * Constructs an named HDF5 data type object for a given file, dataset name, group path and object id. The
-     * datatype object represents an existing named datatype in file. For example,
-     *
-     * @param theFile the file that contains the datatype.
-     * @param theName the name of the dataset such as "dset1".
-     * @param thePath the group path to the dataset such as "/g0/".
-     * @param oid     the oid of the dataset.
-     *
      * @deprecated Not for public use in the future. <br>
      *             Using {@link #H5Datatype(FileFormat, String, String)}
+     * @param theFile
+     *                the file that contains the datatype.
+     * @param theName
+     *                the name of the dataset such as "dset1".
+     * @param thePath
+     *                the group path to the dataset such as "/g0/".
+     * @param oid
+     *                the oid of the dataset.
      */
     @Deprecated
     public H5Datatype(FileFormat theFile, String theName, String thePath, long[] oid)
@@ -597,11 +599,14 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * Convert from an array of BigDecimal into an array of bytes.
+     * Convert from an array of BigDecimal into an array of bytes
      *
-     * @param start The position in the input array of BigDecimal to start
-     * @param len   The number of 'BigDecimal' to convert
-     * @param data  The input array of BigDecimal
+     * @param start
+     *              The position in the input array of BigDecimal to start
+     * @param len
+     *              The number of 'BigDecimal' to convert
+     * @param data
+     *              The input array of BigDecimal
      * @return an array of bytes
      */
     public byte[] bigDecimalToByte(int start, int len, BigDecimal[] data)
@@ -639,10 +644,12 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * Convert from a single BigDecimal object from an array of BigDecimal into an array of bytes.
+     * Convert from a single BigDecimal object from an array of BigDecimal into an array of bytes
      *
-     * @param start The position in the input array of BigDecimal to start
-     * @param data  The input Float
+     * @param start
+     *              The position in the input array of BigDecimal to start
+     * @param data
+     *              The input Float
      * @return an array of bytes
      */
     public byte[] bigDecimalToByte(BigDecimal[] data, int start)
@@ -653,9 +660,10 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * Convert a BigDecimal to a byte array.
+     * Convert a BigDecimal to a byte array .
      *
-     * @param num The BigDecimal number to convert
+     * @param num
+     *            The BigDecimal number to convert
      * @return A byte array representing the BigDecimal.
      */
     public byte[] convertBigDecimalToByte(BigDecimal num)
@@ -677,18 +685,21 @@ public class H5Datatype extends Datatype {
     }
 
     /**
-     * Convert a range from an array of bytes into an array of BigDecimal.
+     * Convert a range from an array of bytes into an array of BigDecimal
      *
-     * @param start The position in the input array of bytes to start
-     * @param len   The number of 'BigDecimal' to convert
-     * @param data  The input array of bytes
+     * @param start
+     *              The position in the input array of bytes to start
+     * @param len
+     *              The number of 'BigDecimal' to convert
+     * @param data
+     *              The input array of bytes
      * @return an array of 'len' BigDecimal
      */
     public BigDecimal[] byteToBigDecimal(int start, int len, byte[] data)
     {
         int ii;
         byte[] bd            = new byte[(int)datatypeSize];
-        BigDecimal[] bdArray = new BigDecimal[len];
+        BigDecimal[] BDarray = new BigDecimal[len];
 
         for (ii = 0; ii < len; ii++) {
             int rawpos = (start + ii) * (int)datatypeSize;
@@ -706,16 +717,18 @@ public class H5Datatype extends Datatype {
                     log.trace("byteToBigDecimal(): arraycopy failure: ", err);
                 }
             }
-            bdArray[ii] = convertByteToBigDecimal(bd);
+            BDarray[ii] = convertByteToBigDecimal(bd);
         }
-        return bdArray;
+        return BDarray;
     }
 
     /**
-     * Convert 4 bytes from an array of bytes into a single BigDecimal.
+     * Convert 4 bytes from an array of bytes into a single BigDecimal
      *
-     * @param start The position in the input array of bytes to start
-     * @param data  The input array of bytes
+     * @param start
+     *              The position in the input array of bytes to start
+     * @param data
+     *              The input array of bytes
      * @return The BigDecimal value of the bytes.
      */
     public BigDecimal byteToBigDecimal(byte[] data, int start)
@@ -847,8 +860,8 @@ public class H5Datatype extends Datatype {
             }
 
             datatypeOrder    = HDF5Constants.H5T_ORDER_NONE;
-            boolean isAtomic = datatypeClassIsAtomic(nativeClass);
-            if (isAtomic || (nativeClass == HDF5Constants.H5T_COMPOUND)) {
+            boolean IsAtomic = datatypeClassIsAtomic(nativeClass);
+            if (IsAtomic || (nativeClass == HDF5Constants.H5T_COMPOUND)) {
                 try {
                     torder        = H5.H5Tget_order(tid);
                     datatypeOrder = (torder == HDF5Constants.H5T_ORDER_BE) ? ORDER_BE : ORDER_LE;
@@ -858,7 +871,7 @@ public class H5Datatype extends Datatype {
                 }
             }
 
-            if (isAtomic && !datatypeClassIsOpaque(nativeClass)) {
+            if (IsAtomic && !datatypeClassIsOpaque(nativeClass)) {
                 try {
                     nativePrecision = H5.H5Tget_precision_long(tid);
                 }
@@ -1237,18 +1250,18 @@ public class H5Datatype extends Datatype {
         long tid    = HDF5Constants.H5I_INVALID_HID;
         long tmptid = HDF5Constants.H5I_INVALID_HID;
 
-        String thePath = getFullName();
+        String the_path = getFullName();
         // isNamed == true should have non-null fileFormat
         if (isNamed()) {
             try {
-                tid = H5.H5Topen(getFID(), thePath, HDF5Constants.H5P_DEFAULT);
+                tid = H5.H5Topen(getFID(), the_path, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
-                log.debug("createNative(): name {} H5Topen failure: ", thePath, ex);
+                log.debug("createNative(): name {} H5Topen failure: ", the_path, ex);
             }
         }
         else
-            log.debug("createNative(): isNamed={} and named path={}", isNamed(), thePath);
+            log.debug("createNative(): isNamed={} and named path={}", isNamed(), the_path);
 
         if (tid >= 0)
             return tid;
@@ -1454,18 +1467,15 @@ public class H5Datatype extends Datatype {
                 else if (datatypeSize == 4)
                     tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
                 else if (datatypeSize == 2)
-                    // HDF5Constants.H5T_NATIVE_FLOAT16 is not available in all versions of HDF5
-                    // so we need to check if it is available before using it.
-                    // If not available, fall back to FLOAT32 for reading 16-bit float types
-                    // (Float16/BFLOAT16).
+                    // Always use the FLOAT32 type for safety
+                    tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
+                else if (datatypeSize == 1)
+                    // For Float8 (1-byte floats), fall back to FLOAT32/16 for reading
+                    // as there is no native Float8 type in any HDF5 versions
                     if (HDF5Constants.H5T_NATIVE_FLOAT16 == HDF5Constants.H5I_INVALID_HID)
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
                     else
                         tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT16);
-                else if (datatypeSize == 1)
-                    // For Float8 (1-byte floats), fall back to FLOAT32 for reading
-                    // as there is no native Float8 type in most HDF5 versions
-                    tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_FLOAT);
                 else
                     tid = -1;
 
@@ -1785,7 +1795,8 @@ public class H5Datatype extends Datatype {
      * @throws OutOfMemoryError
      *                          If there is a failure.
      */
-    public static final Object allocateArray(final H5Datatype dtype, int numPoints) throws OutOfMemoryError
+    public static final Object allocateArray(final H5Datatype dtype, int numPoints)
+        throws OutOfMemoryError, HDF5Exception
     {
         log.trace("allocateArray(): start: numPoints={}", numPoints);
 
@@ -1878,14 +1889,12 @@ public class H5Datatype extends Datatype {
                                   typeSize, bufferTypeSize);
                     }
                     else {
-                        // Fallback if native type creation fails
-                        bufferTypeSize = 4;
-                        log.warn("allocateArray(): Failed to create native type, using 4-byte fallback");
+                        throw new HDF5Exception("Failed to create native type");
                     }
                 }
                 catch (Exception ex) {
                     log.warn("allocateArray(): Error querying native type size: {}", ex.getMessage());
-                    bufferTypeSize = 4;
+                    throw new HDF5Exception("Failed to create native type");
                 }
                 finally {
                     if (nativeTypeId >= 0) {
@@ -2495,10 +2504,10 @@ public class H5Datatype extends Datatype {
      */
     public static String descReferenceObject(long container, byte[] refarr)
     {
-        String regionDesc = H5.H5Rget_name_string(container, HDF5Constants.H5R_OBJECT, refarr);
-        regionDesc += " H5O_TYPE_OBJ_REF";
-        log.trace("descReferenceObject regionDesc={}:", regionDesc);
-        return regionDesc;
+        String region_desc = H5.H5Rget_name_string(container, HDF5Constants.H5R_OBJECT, refarr);
+        region_desc += " H5O_TYPE_OBJ_REF";
+        log.trace("descReferenceObject region_desc={}:", region_desc);
+        return region_desc;
     }
 
     /**
@@ -2513,80 +2522,80 @@ public class H5Datatype extends Datatype {
      */
     public static String descRegionDataset(long container, byte[] refarr)
     {
-        String regionDesc = H5.H5Rget_name_string(container, HDF5Constants.H5R_DATASET_REGION, refarr);
-        log.trace("descRegionDataset regionDesc={}:", regionDesc);
-        long newObjID = HDF5Constants.H5I_INVALID_HID;
+        String region_desc = H5.H5Rget_name_string(container, HDF5Constants.H5R_DATASET_REGION, refarr);
+        log.trace("descRegionDataset region_desc={}:", region_desc);
+        long new_obj_id = HDF5Constants.H5I_INVALID_HID;
         try {
             log.trace("descRegionDataset refarr2={}:", refarr);
-            newObjID       = H5.H5Rdereference(container, HDF5Constants.H5P_DEFAULT,
-                                               HDF5Constants.H5R_DATASET_REGION, refarr);
-            long newObjSid = HDF5Constants.H5I_INVALID_HID;
+            new_obj_id       = H5.H5Rdereference(container, HDF5Constants.H5P_DEFAULT,
+                                                 HDF5Constants.H5R_DATASET_REGION, refarr);
+            long new_obj_sid = HDF5Constants.H5I_INVALID_HID;
             try {
                 log.trace("descRegionDataset refarr3={}:", refarr);
-                newObjSid = H5.H5Rget_region(container, HDF5Constants.H5R_DATASET_REGION, refarr);
+                new_obj_sid = H5.H5Rget_region(container, HDF5Constants.H5R_DATASET_REGION, refarr);
                 try {
-                    int regionType = H5.H5Sget_select_type(newObjSid);
-                    log.trace("descRegionDataset Reference Region Type {}", regionType);
-                    long regNDims    = H5.H5Sget_simple_extent_ndims(newObjSid);
+                    int region_type = H5.H5Sget_select_type(new_obj_sid);
+                    log.trace("descRegionDataset Reference Region Type {}", region_type);
+                    long reg_ndims   = H5.H5Sget_simple_extent_ndims(new_obj_sid);
                     StringBuilder sb = new StringBuilder();
-                    if (HDF5Constants.H5S_SEL_POINTS == regionType) {
+                    if (HDF5Constants.H5S_SEL_POINTS == region_type) {
                         sb.append(" REGION_TYPE POINT ");
-                        long regNPoints = H5.H5Sget_select_elem_npoints(newObjSid);
-                        long[] getCoord = new long[(int)(regNDims * regNPoints)];
+                        long reg_npoints = H5.H5Sget_select_elem_npoints(new_obj_sid);
+                        long getcoord[]  = new long[(int)(reg_ndims * reg_npoints)];
                         try {
-                            H5.H5Sget_select_elem_pointlist(newObjSid, 0, regNPoints, getCoord);
+                            H5.H5Sget_select_elem_pointlist(new_obj_sid, 0, reg_npoints, getcoord);
                         }
                         catch (Exception ex5) {
                             log.debug("descRegionDataset H5.H5Sget_select_elem_pointlist: ", ex5);
                         }
                         sb.append("{ ");
-                        for (int i = 0; i < (int)regNPoints; i++) {
+                        for (int i = 0; i < (int)reg_npoints; i++) {
                             if (i > 0)
                                 sb.append(" ");
                             sb.append("(");
-                            for (int j = 0; j < (int)regNDims; j++) {
+                            for (int j = 0; j < (int)reg_ndims; j++) {
                                 if (j > 0)
                                     sb.append(",");
-                                sb.append(getCoord[i * (int)regNDims + j]);
+                                sb.append(getcoord[i * (int)reg_ndims + j]);
                             }
                             sb.append(")");
                         }
                         sb.append(" }");
-                        regionDesc += sb.toString();
+                        region_desc += sb.toString();
                     }
-                    else if (HDF5Constants.H5S_SEL_HYPERSLABS == regionType) {
+                    else if (HDF5Constants.H5S_SEL_HYPERSLABS == region_type) {
                         sb.append(" REGION_TYPE BLOCK ");
-                        long regNBlocks  = H5.H5Sget_select_hyper_nblocks(newObjSid);
-                        long[] getBlocks = new long[(int)(regNDims * regNBlocks) * 2];
+                        long reg_nblocks = H5.H5Sget_select_hyper_nblocks(new_obj_sid);
+                        long getblocks[] = new long[(int)(reg_ndims * reg_nblocks) * 2];
                         try {
-                            H5.H5Sget_select_hyper_blocklist(newObjSid, 0, regNBlocks, getBlocks);
+                            H5.H5Sget_select_hyper_blocklist(new_obj_sid, 0, reg_nblocks, getblocks);
                         }
                         catch (Exception ex5) {
                             log.debug("descRegionDataset H5.H5Sget_select_hyper_blocklist: ", ex5);
                         }
                         sb.append("{ ");
-                        for (int i = 0; i < (int)regNBlocks; i++) {
+                        for (int i = 0; i < (int)reg_nblocks; i++) {
                             if (i > 0)
                                 sb.append(" ");
                             sb.append("(");
-                            for (int j = 0; j < (int)regNDims; j++) {
+                            for (int j = 0; j < (int)reg_ndims; j++) {
                                 if (j > 0)
                                     sb.append(",");
-                                sb.append(getBlocks[i * 2 * (int)regNDims + j]);
+                                sb.append(getblocks[i * 2 * (int)reg_ndims + j]);
                             }
                             sb.append(")-(");
-                            for (int j = 0; j < (int)regNDims; j++) {
+                            for (int j = 0; j < (int)reg_ndims; j++) {
                                 if (j > 0)
                                     sb.append(",");
-                                sb.append(getBlocks[i * 2 * (int)regNDims + (int)regNDims + j]);
+                                sb.append(getblocks[i * 2 * (int)reg_ndims + (int)reg_ndims + j]);
                             }
                             sb.append(")");
                         }
                         sb.append(" }");
-                        regionDesc += sb.toString();
+                        region_desc += sb.toString();
                     }
                     else
-                        regionDesc += " REGION_TYPE UNKNOWN";
+                        region_desc += " REGION_TYPE UNKNOWN";
                 }
                 catch (Exception ex4) {
                     log.debug("descRegionDataset Region Type", ex4);
@@ -2596,7 +2605,7 @@ public class H5Datatype extends Datatype {
                 log.debug("descRegionDataset Space Open", ex3);
             }
             finally {
-                H5.H5Sclose(newObjSid);
+                H5.H5Sclose(new_obj_sid);
             }
             log.trace("descRegionDataset finish");
         }
@@ -2604,35 +2613,35 @@ public class H5Datatype extends Datatype {
             log.debug("descRegionDataset ", ex2);
         }
         finally {
-            H5.H5Dclose(newObjID);
+            H5.H5Dclose(new_obj_id);
         }
-        return regionDesc;
+        return region_desc;
     }
 
     /**
      * Gets the dataset reference type for a 1.10 reference.
      *
      * @param container the dataset/attribute with the reference
-     * @param objType   the dataset/attribute object type
+     * @param obj_type  the dataset/attribute object type
      * @param refarr    the reference datatype data to be checked.
      *
      * @return the dataset reference type.
      */
-    public static int typeObjectRef(long container, int objType, byte[] refarr)
+    public static int typeObjectRef(long container, int obj_type, byte[] refarr)
     {
-        int refType   = -1;
-        long newObjID = HDF5Constants.H5I_INVALID_HID;
+        int ref_type    = -1;
+        long new_obj_id = HDF5Constants.H5I_INVALID_HID;
         try {
             log.trace("typeObjectRef refarr2={}:", refarr);
-            newObjID = H5.H5Rdereference(container, HDF5Constants.H5P_DEFAULT, objType, refarr);
-            if (HDF5Constants.H5R_DATASET_REGION == objType) {
-                long newObjSid = HDF5Constants.H5I_INVALID_HID;
+            new_obj_id = H5.H5Rdereference(container, HDF5Constants.H5P_DEFAULT, obj_type, refarr);
+            if (HDF5Constants.H5R_DATASET_REGION == obj_type) {
+                long new_obj_sid = HDF5Constants.H5I_INVALID_HID;
                 try {
                     log.trace("typeObjectRef refarr3={}:", refarr);
-                    newObjSid = H5.H5Rget_region(container, HDF5Constants.H5R_DATASET_REGION, refarr);
+                    new_obj_sid = H5.H5Rget_region(container, HDF5Constants.H5R_DATASET_REGION, refarr);
                     try {
-                        refType = H5.H5Sget_select_type(newObjSid);
-                        log.debug("typeObjectRef Reference Region Type {}", refType);
+                        ref_type = H5.H5Sget_select_type(new_obj_sid);
+                        log.debug("typeObjectRef Reference Region Type {}", ref_type);
                     }
                     catch (Exception ex4) {
                         log.debug("typeObjectRef Region Type", ex4);
@@ -2642,14 +2651,14 @@ public class H5Datatype extends Datatype {
                     log.debug("typeObjectRef Space Open", ex3);
                 }
                 finally {
-                    H5.H5Sclose(newObjSid);
+                    H5.H5Sclose(new_obj_sid);
                 }
             }
             else {
                 H5O_info_t objInfo;
 
-                objInfo = H5.H5Oget_info(newObjID);
-                refType = objInfo.type;
+                objInfo  = H5.H5Oget_info(new_obj_id);
+                ref_type = objInfo.type;
             }
             log.trace("typeObjectRef finish");
         }
@@ -2657,9 +2666,9 @@ public class H5Datatype extends Datatype {
             log.debug("typeObjectRef ", ex2);
         }
         finally {
-            H5.H5Dclose(newObjID);
+            H5.H5Dclose(new_obj_id);
         }
-        return refType;
+        return ref_type;
     }
 
     /**
@@ -2771,11 +2780,8 @@ public class H5Datatype extends Datatype {
                  * the nested compound.
                  */
                 /*
-                 * TODO(HDFView) [2025-12]: Don't flatten variable-length compound members once vlen support
-                 * implemented. Currently variable-length types are intentionally excluded from compound
-                 * flattening (see commented condition). When true vlen support is added, uncomment the
-                 * condition to include non-string vlen types in extraction. Related: H5CompoundAttr line 873,
-                 * H5CompoundDS line 946 - coordinate vlen implementation across all three.
+                 * TODO: Don't flatten variable-length types until true variable-length support is
+                 * implemented.
                  */
                 if (mtype.isArray() /* || (mtype.isVLEN() && !mtype.isVarStr()) */) {
                     H5Datatype.extractCompoundInfo((H5Datatype)mtype, mname + CompoundDS.SEPARATOR, names,
