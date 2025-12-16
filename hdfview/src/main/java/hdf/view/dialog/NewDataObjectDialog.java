@@ -50,68 +50,65 @@ public class NewDataObjectDialog extends Dialog {
 
     private static final Logger log = LoggerFactory.getLogger(NewDataObjectDialog.class);
 
-    /** the visual shell for the dialog */
+    /** the visual shell for the dialog. */
     protected Shell shell;
 
-    /** the current font */
+    /** the current font. */
     protected Font curFont;
 
-    /** the object which the this object is attached */
+    /** the object which the this object is attached. */
     protected HObject parentObj;
 
-    /** the object referenced */
+    /** the object referenced. */
     protected HObject refObject;
 
-    /** the object created */
+    /** the object created. */
     protected HObject newObject;
 
     /** TextField for entering the length of the data array or string. */
     protected Text lengthField;
 
-    /** The Choice of the datatypes */
-    /** The named datatype combobox for the object */
+    /** The named datatype combobox for the object. */
     protected Combo namedChoice;
-    /** The class combobox for the object */
+    /** The class combobox for the object. */
     protected Combo classChoice;
-    /** The size combobox for the object */
+    /** The size combobox for the object. */
     protected Combo sizeChoice;
-    /** The endianess combobox for the object */
+    /** The endianess combobox for the object. */
     protected Combo endianChoice;
 
-    /** The Choice of the object list */
-    /** The committed datatype button for the object */
+    /** The committed datatype button for the object. */
     protected Button useCommittedType;
-    /** The unsigned data button for the object */
+    /** The unsigned data button for the object. */
     protected Button checkUnsigned;
-    /** The list of objects for the object */
+    /** The list of objects for the object. */
     protected List<?> objList;
-    /** The list of datatypes for the object */
+    /** The list of datatypes for the object. */
     protected List<Datatype> namedList;
-    /** The length label for the object */
+    /** The length label for the object. */
     protected Label arrayLengthLabel;
 
-    /** The attributes of the datatype */
-    /** The default class for the object */
+    /** The default class for the object. */
     public int tclass = Datatype.CLASS_NO_CLASS;
-    /** The default size for the object */
+    /** The default size for the object. */
     public int tsize = Datatype.NATIVE;
-    /** The default  byte order for the object */
+    /** The default byte order for the object. */
     public int torder = Datatype.NATIVE;
-    /** The default sign for the object */
+    /** The default sign for the object. */
     public int tsign = Datatype.NATIVE;
-    /** If the object is an enum object */
+    /** If the object is an enum object. */
     public boolean isEnum = false;
-    /** The enum mapping for the object */
+    /** The enum mapping for the object. */
     public String strEnumMap = null;
-    /** If the object is a variable length data object */
+    /** If the object is a variable length data object. */
     public boolean isVLen = false;
-    /** If the object is a variable length string */
+    /** If the object is a variable length string. */
     public boolean isVlenStr = false;
 
-    /** The file format associated with this object */
+    /** The file format associated with this object. */
     protected FileFormat fileFormat;
 
-    /** If the object should be attached to a hdf5 object */
+    /** If the object should be attached to a hdf5 object. */
     protected boolean isH5;
 
     /**

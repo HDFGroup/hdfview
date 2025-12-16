@@ -105,7 +105,7 @@ public abstract class HObject implements Serializable {
     private String filename;
 
     /**
-     * The file which contains the object
+     * The file which contains the object.
      */
     protected final FileFormat fileFormat;
 
@@ -139,11 +139,6 @@ public abstract class HObject implements Serializable {
      * The name of the Target Object that is being linked to.
      */
     protected String linkTargetObjName;
-
-    /**
-     * Number of attributes attached to the object.
-     */
-    // protected int nAttributes = -1;
 
     /**
      * Constructs an instance of a data object without name and path.
@@ -203,10 +198,9 @@ public abstract class HObject implements Serializable {
     }
 
     /**
-     * Print out debug information
+     * Print out debug information.
      *
-     * @param msg
-     *            the debug message to print
+     * @param msg the debug message to print
      */
     protected final void debug(Object msg)
     {

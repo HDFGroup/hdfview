@@ -16,26 +16,26 @@ package hdf.view.HelpView;
 
 /**
  *
- * The helpview interface for displaying user help information
+ * The helpview interface for displaying user help information.
  *
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public abstract interface HelpView {
-    /** Display help information */
-    public abstract void show();
+public interface HelpView {
+    /** Display help information. */
+    void show();
 
     /**
      * Get the HelpView's label, which is displayed in the HDFView help menu.
      *
      * @return the HelpView's label
      */
-    public abstract String getLabel();
+    String getLabel();
 
     /**
      * Get the action command for this HelpView.
      *
      * @return the action command for this HelpView.
      */
-    public abstract String getActionCommand();
+    String getActionCommand();
 }

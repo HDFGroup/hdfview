@@ -44,21 +44,18 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  *
- * The metadata view interface for displaying group metadata information
+ * The metadata view interface for displaying group metadata information.
  */
 public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultGroupMetaDataView.class);
 
     /**
-     *The metadata view interface for displaying metadata information
+     * The metadata view interface for displaying metadata information.
      *
-     * @param parentComposite
-     *        the parent visual object
-     * @param viewer
-     *        the viewer to use
-     * @param theObj
-     *        the object to display the metadata info
+     * @param parentComposite the parent visual object
+     * @param viewer          the viewer to use
+     * @param theObj          the object to display the metadata info
      */
     public DefaultGroupMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj)
     {
@@ -235,7 +232,7 @@ public class DefaultGroupMetaDataView extends DefaultLinkMetaDataView implements
         }
 
         if (mlist != null && n > 0) {
-            String rowData[][] = new String[n][2];
+            String[][] rowData = new String[n][2];
             for (int i = 0; i < n; i++) {
                 HObject theObj = (HObject)mlist.get(i);
                 rowData[i][0]  = theObj.getName();

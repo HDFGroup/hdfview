@@ -35,7 +35,6 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
-import hdf.object.h4.H4ScalarAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,14 +120,14 @@ public class H4SDS extends ScalarDS implements MetaDataContainer {
     private List attributeList;
 
     /**
-     * The SDS interface identifier obtained from SDstart(filename, access)
+     * The SDS interface identifier obtained from SDstart(filename, access).
      */
     private long sdid;
 
-    /** the datatype identifier */
+    /** the datatype identifier. */
     private long datatypeID = -1;
 
-    /** the number of attributes */
+    /** the number of attributes. */
     private int nAttributes = -1;
 
     /**
@@ -610,10 +609,10 @@ public class H4SDS extends ScalarDS implements MetaDataContainer {
 
             // retrieve attribute of dimension
             // BUG !! HDFLibrary.SDgetdimstrs(dimID, argv, 80) does not return anything
-            /**
-             * for (int i=0; i< rank; i++) { int dimID = HDFLibrary.SDgetdimid(id, i); String[] argv = {" ", "
-             * ", " "}; HDFLibrary.SDgetdimstrs(dimID, argv, 80); }
-             */
+            //
+            // for (int i=0; i< rank; i++) { int dimID = HDFLibrary.SDgetdimid(id, i); String[] argv = {" ", "
+            // ", " "}; HDFLibrary.SDgetdimstrs(dimID, argv, 80); }
+            //
         }
         catch (Exception ex) {
             log.debug("getMetadata(): failure: ", ex);
@@ -625,7 +624,6 @@ public class H4SDS extends ScalarDS implements MetaDataContainer {
         return attributeList;
     }
 
-    // To do: implementing DataFormat
     /**
      * Writes a specific piece of metadata (such as an attribute) into the file.
      *
@@ -904,7 +902,8 @@ public class H4SDS extends ScalarDS implements MetaDataContainer {
         for (int i = 0; i < rank; i++) {
             startDims[i]    = 0;
             selectedDims[i] = 1;
-            dims[i] = maxDims[i] = idims[i];
+            dims[i]         = idims[i];
+            maxDims[i]      = idims[i];
         }
 
         if (isUnlimited)
@@ -1111,7 +1110,10 @@ public class H4SDS extends ScalarDS implements MetaDataContainer {
     }
 
     /**
-     * copy attributes from one SDS to another SDS
+     * copy attributes from one SDS to another SDS.
+     *
+     * @param srcdid - the source object id
+     * @param dstdid - the destination object id
      */
     private void copyAttribute(long srcdid, long dstdid)
     {

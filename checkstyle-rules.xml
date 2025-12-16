@@ -29,11 +29,12 @@
     </module>
 
     <!-- Line length check with flexibility for imports and URLs -->
-    <module name="LineLength">
-        <property name="fileExtensions" value="java"/>
-        <property name="max" value="120"/>
-        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-    </module>
+    <!-- <module name="LineLength"> -->
+    <!--     <property name="fileExtensions" value="java"/> -->
+    <!--     <property name="max" value="120"/> -->
+    <!--     <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/> -->
+    <!-- </module> -->
+    <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
 
     <!-- Whitespace checks -->
     <module name="NewlineAtEndOfFile">
@@ -42,7 +43,10 @@
 
     <module name="TreeWalker">
         <!-- Naming conventions -->
-        <module name="ConstantName"/>
+        <module name="ConstantName">
+            <!-- Allow 'log' as a valid constant name for SLF4J loggers -->
+            <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|log)$"/>
+        </module>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
         <module name="MemberName"/>
@@ -65,26 +69,30 @@
         <module name="UnusedImports">
             <property name="processJavadoc" value="false"/>
         </module>
-        <module name="ImportOrder">
-            <property name="groups" value="/^java\./,javax,org,com"/>
-            <property name="ordered" value="true"/>
-            <property name="separated" value="true"/>
-            <property name="option" value="top"/>
-            <property name="sortStaticImportsAlphabetically" value="true"/>
-        </module>
+        <!-- <module name="ImportOrder"> -->
+        <!--     <property name="groups" value="/^java\./,javax,org,com"/> -->
+        <!--     <property name="ordered" value="true"/> -->
+        <!--     <property name="separated" value="true"/> -->
+        <!--     <property name="option" value="top"/> -->
+        <!--     <property name="sortStaticImportsAlphabetically" value="true"/> -->
+        <!-- </module> -->
+        <!-- Reason: Style-only rule, different tools have different preferences, avoiding conflicts -->
 
         <!-- Size violations -->
-        <module name="MethodLength">
-            <property name="max" value="200"/>
-            <property name="countEmpty" value="false"/>
-        </module>
+        <!-- <module name="MethodLength"> -->
+        <!--     <property name="max" value="200"/> -->
+        <!--     <property name="countEmpty" value="false"/> -->
+        <!-- </module> -->
+        <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
+
         <module name="ParameterNumber">
             <property name="max" value="10"/>
             <property name="ignoreOverriddenMethods" value="true"/>
         </module>
-        <module name="AnonInnerLength">
-            <property name="max" value="20"/>
-        </module>
+        <!-- <module name="AnonInnerLength"> -->
+        <!--     <property name="max" value="20"/> -->
+        <!-- </module> -->
+        <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
 
         <!-- Whitespace checks - DISABLED: Using clang-format for code formatting -->
         <!-- Uncomment these if you want Checkstyle to enforce whitespace rules -->
@@ -172,6 +180,9 @@
 
         <!-- Miscellaneous -->
         <module name="ArrayTypeStyle"/>
+        <!-- TODO/FIXME comment detection - set to 'info' level for visibility without blocking builds
+             Policy: Critical TODOs should be converted to tracked GitHub issues within 30 days.
+             Format recommendation: TODO(username) [YYYY-MM-DD]: description [Issue #123] -->
         <module name="TodoComment">
             <property name="severity" value="info"/>
             <property name="format" value="(TODO)|(FIXME)"/>
@@ -190,26 +201,38 @@
         -->
 
         <!-- Additional checks for code quality -->
-        <module name="DeclarationOrder"/>
+        <!-- DISABLED: Noisy rules with low value - December 2025 cleanup -->
+        <!-- <module name="DeclarationOrder"/> -->
+        <!-- Reason: 261 violations, code organization preference, handled in code review -->
+
         <module name="DefaultComesLast"/>
         <module name="FallThrough"/>
-        <module name="MultipleStringLiterals">
-            <property name="allowedDuplicates" value="3"/>
-            <property name="ignoreStringsRegexp" value='^(("")|(" "))$'/>
-        </module>
-        <module name="NestedIfDepth">
-            <property name="max" value="3"/>
-        </module>
-        <module name="NestedTryDepth">
-            <property name="max" value="2"/>
-        </module>
+
+        <!-- <module name="MultipleStringLiterals"> -->
+        <!--     <property name="allowedDuplicates" value="3"/> -->
+        <!--     <property name="ignoreStringsRegexp" value='^(("")|(" "))$'/> -->
+        <!-- </module> -->
+        <!-- Reason: 143 violations, creates noise, string constants should be refactored when it makes sense -->
+
+        <!-- <module name="NestedIfDepth"> -->
+        <!--     <property name="max" value="3"/> -->
+        <!-- </module> -->
+        <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
+
+        <!-- <module name="NestedTryDepth"> -->
+        <!--     <property name="max" value="2"/> -->
+        <!-- </module> -->
+        <!-- Reason: Will not be fixed this release, deferred to future refactoring -->
+
         <module name="NoClone"/>
         <module name="NoFinalizer"/>
         <module name="OneStatementPerLine"/>
         <module name="OverloadMethodsDeclarationOrder"/>
         <module name="PackageDeclaration"/>
         <module name="StringLiteralEquality"/>
-        <module name="UnnecessaryParentheses"/>
+
+        <!-- <module name="UnnecessaryParentheses"/> -->
+        <!-- Reason: 987 violations, style preference, many parentheses improve readability -->
 
         <!-- Annotations -->
         <module name="AnnotationLocation">

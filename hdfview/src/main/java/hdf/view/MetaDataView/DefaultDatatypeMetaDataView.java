@@ -29,21 +29,18 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  *
- *The metadata view interface for displaying datatype metadata information
+ * The metadata view interface for displaying datatype metadata information.
  */
 public class DefaultDatatypeMetaDataView extends DefaultLinkMetaDataView implements MetaDataView {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultDatatypeMetaDataView.class);
 
     /**
-     *The metadata view interface for displaying datatype metadata information
+     * The metadata view interface for displaying datatype metadata information.
      *
-     * @param parentComposite
-     *        the parent visual object
-     * @param viewer
-     *        the viewer to use
-     * @param theObj
-     *        the object to display the metadata info
+     * @param parentComposite the parent visual object
+     * @param viewer          the viewer to use
+     * @param theObj          the object to display the metadata info
      */
     public DefaultDatatypeMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj)
     {

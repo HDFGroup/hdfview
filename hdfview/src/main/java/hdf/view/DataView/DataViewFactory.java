@@ -27,19 +27,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 /**
- * The data view factory interface for displaying data objects
+ * The data view factory interface for displaying data objects.
  */
 public abstract class DataViewFactory {
     /**
-     * Get an instance of TableView given the appropriate constructor parameters
+     * Get an instance of TableView given the appropriate constructor parameters.
      *
-     * @param viewer
-     *             The data view manager
-     * @param dataPropertiesMap
-     *             The properties for the table view
+     * @param viewer            The data view manager
+     * @param dataPropertiesMap The properties for the table view
      *
-     * @throws ClassNotFoundException
-     *             If there is an error getting the class for a table view.
+     * @throws ClassNotFoundException If there is an error getting the class for a table view.
      *
      * @return the table view.
      */
@@ -48,15 +45,12 @@ public abstract class DataViewFactory {
         throws ClassNotFoundException;
 
     /**
-     * Get an instance of ImageView given the appropriate constructor parameters
+     * Get an instance of ImageView given the appropriate constructor parameters.
      *
-     * @param viewer
-     *             The data view manager
-     * @param dataPropertiesMap
-     *             The properties for the image view
+     * @param viewer            The data view manager
+     * @param dataPropertiesMap The properties for the image view
      *
-     * @throws ClassNotFoundException
-     *             If there is an error getting the class for a image view.
+     * @throws ClassNotFoundException If there is an error getting the class for a image view.
      *
      * @return the image view.
      */
@@ -65,17 +59,13 @@ public abstract class DataViewFactory {
         throws ClassNotFoundException;
 
     /**
-     * Get an instance of PaletteView given the appropriate constructor parameters
+     * Get an instance of PaletteView given the appropriate constructor parameters.
      *
-     * @param parent
-     *             The parent shell for the palette view
-     * @param viewer
-     *             The data view manager
-     * @param theImageView
-     *             The image view for the palette view
+     * @param parent       The parent shell for the palette view
+     * @param viewer       The data view manager
+     * @param theImageView The image view for the palette view
      *
-     * @throws ClassNotFoundException
-     *             If there is an error getting the class for a palette view.
+     * @throws ClassNotFoundException If there is an error getting the class for a palette view.
      *
      * @return the palette view.
      */
@@ -83,17 +73,13 @@ public abstract class DataViewFactory {
         throws ClassNotFoundException;
 
     /**
-     * Get an instance of MetaDataView given the appropriate constructor parameters
+     * Get an instance of MetaDataView given the appropriate constructor parameters.
      *
-     * @param parent
-     *             The parent composite for the maetadata view
-     * @param viewer
-     *             The data view manager
-     * @param theObj
-     *             The object for the metadata view
+     * @param parent The parent composite for the metadata view
+     * @param viewer The data view manager
+     * @param theObj The object for the metadata view
      *
-     * @throws ClassNotFoundException
-     *             If there is an error getting the class for a metadata view.
+     * @throws ClassNotFoundException If there is an error getting the class for a metadata view.
      *
      * @return the metadata view.
      */
@@ -101,15 +87,12 @@ public abstract class DataViewFactory {
         throws ClassNotFoundException;
 
     /**
-     * Get an instance of TreeView given the appropriate constructor parameters
+     * Get an instance of TreeView given the appropriate constructor parameters.
      *
-     * @param parent
-     *             The parent composite for the tree view
-     * @param viewer
-     *             The data view manager
+     * @param parent The parent composite for the tree view
+     * @param viewer The data view manager
      *
-     * @throws ClassNotFoundException
-     *             If there is an error getting the class for a tree view.
+     * @throws ClassNotFoundException If there is an error getting the class for a tree view.
      *
      * @return the tree view.
      */

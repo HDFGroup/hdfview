@@ -40,7 +40,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
 
     private static final Logger log = LoggerFactory.getLogger(H5Group.class);
 
-    /** The HObject to which this MetaDataContainer is attached */
+    /** The HObject to which this MetaDataContainer is attached. */
     protected HObject parentObject;
 
     /**
@@ -50,7 +50,7 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
     @SuppressWarnings("rawtypes")
     protected List attributeList;
 
-    /** the number of attributes */
+    /** the number of attributes. */
     private int nAttributes = -1;
 
     /**
@@ -71,18 +71,15 @@ public class H5MetaDataContainer extends HObject implements MetaDataContainer {
     }
 
     /**
-     * @deprecated Not for public use in the future.<br>
+     * Constructs an HDF5 group with specific name, path, and parent.
      *
-     * @param theFile
-     *            the file which containing the group.
-     * @param name
-     *            the name of this group, e.g. "grp01".
-     * @param path
-     *            the full path of this group, e.g. "/groups/".
-     * @param parent
-     *            the parent of this group.
-     * @param oid
-     *            the oid of this group.
+     * @param theFile the file which containing the group.
+     * @param name    the name of this group, e.g. "grp01".
+     * @param path    the full path of this group, e.g. "/groups/".
+     * @param parent  the parent of this group.
+     * @param oid     the oid of this group.
+     *
+     * @deprecated Not for public use in the future.<br>
      */
     @Deprecated
     public H5MetaDataContainer(FileFormat theFile, String name, String path, HObject parent, long[] oid)

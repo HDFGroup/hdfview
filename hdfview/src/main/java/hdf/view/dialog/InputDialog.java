@@ -38,10 +38,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * Custom SWT dialog to allow the user to input strings
- * for various uses.
+ * Custom SWT dialog to allow the user to input strings for various uses.
  */
-// TODO: Add ability to have custom HDF icons
+// TODO(HDFView) [2025-12]: Add support for custom HDF-themed dialog icons.
+// Currently uses default SWT dialog icons. Could add branded HDF icons for better UX.
+// Low priority - cosmetic enhancement. Related: HDFView.java:2231 for large icon support.
 public class InputDialog extends Dialog {
     private Text inputField;
     private final String title;
@@ -51,39 +52,29 @@ public class InputDialog extends Dialog {
     private Font curFont;
 
     /**
-     * Custom SWT dialog to allow the user to input strings
-     * for a parent object.
+     * Custom SWT dialog to allow the user to input strings for a parent object.
      *
-     * @param parent
-     *        the dialog parent shell
+     * @param parent the dialog parent shell
      */
     public InputDialog(Shell parent) { this(parent, "HDFView " + HDFVersions.getPropertyVersionView(), ""); }
 
     /**
-     * Custom SWT dialog to allow the user to input strings
-     * for a parent object with a title and message.
+     * Custom SWT dialog to allow the user to input strings for a parent object with a title and message.
      *
-     * @param parent
-     *        the dialog parent shell
-     * @param title
-     *        the dialog title
-     * @param message
-     *        the dialog message
+     * @param parent  the dialog parent shell
+     * @param title   the dialog title
+     * @param message the dialog message
      */
     public InputDialog(Shell parent, String title, String message) { this(parent, title, message, ""); }
 
     /**
-     * Custom SWT dialog to allow the user to input strings
-     * for a parent object with a title, message and style.
+     * Custom SWT dialog to allow the user to input strings for a parent object with a title, message and
+     * style.
      *
-     * @param parent
-     *        the dialog parent shell
-     * @param title
-     *        the dialog title
-     * @param message
-     *        the dialog message
-     * @param style
-     *        the dialog style
+     * @param parent  the dialog parent shell
+     * @param title   the dialog title
+     * @param message the dialog message
+     * @param style   the dialog style
      */
     public InputDialog(Shell parent, String title, String message, int style)
     {
@@ -91,17 +82,13 @@ public class InputDialog extends Dialog {
     }
 
     /**
-     * Custom SWT dialog to allow the user to input strings
-     * for a parent object with a title, message and initial text to be displayed.
+     * Custom SWT dialog to allow the user to input strings for a parent object with a title, message and
+     * initial text to be displayed.
      *
-     * @param parent
-     *        the dialog parent shell
-     * @param title
-     *        the dialog title
-     * @param message
-     *        the dialog message
-     * @param initialText
-     *        the dialog initialText
+     * @param parent      the dialog parent shell
+     * @param title       the dialog title
+     * @param message     the dialog message
+     * @param initialText the dialog initialText
      */
     public InputDialog(Shell parent, String title, String message, String initialText)
     {
@@ -109,19 +96,14 @@ public class InputDialog extends Dialog {
     }
 
     /**
-     * Custom SWT dialog to allow the user to input strings
-     * for a parent object with a title, message, style and initial text to be displayed.
+     * Custom SWT dialog to allow the user to input strings for a parent object with a title, message, style
+     * and initial text to be displayed.
      *
-     * @param parent
-     *        the dialog parent shell
-     * @param title
-     *        the dialog title
-     * @param message
-     *        the dialog message
-     * @param initialText
-     *        the dialog initialText
-     * @param style
-     *        the dialog style
+     * @param parent      the dialog parent shell
+     * @param title       the dialog title
+     * @param message     the dialog message
+     * @param initialText the dialog initialText
+     * @param style       the dialog style
      */
     public InputDialog(Shell parent, String title, String message, String initialText, int style)
     {
@@ -140,8 +122,7 @@ public class InputDialog extends Dialog {
     }
 
     /**
-     * Opens the InputDialog and returns the user's input
-     * when the dialog closes.
+     * Opens the InputDialog and returns the user's input when the dialog closes.
      *
      * @return the user input data
      */
@@ -206,8 +187,9 @@ public class InputDialog extends Dialog {
         shell.addListener(SWT.Traverse, new Listener() {
             public void handleEvent(Event event)
             {
-                if (event.detail == SWT.TRAVERSE_ESCAPE)
+                if (event.detail == SWT.TRAVERSE_ESCAPE) {
                     event.doit = false;
+                }
             }
         });
 
@@ -216,8 +198,9 @@ public class InputDialog extends Dialog {
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e)
             {
-                if (curFont != null)
+                if (curFont != null) {
                     curFont.dispose();
+                }
             }
         });
 
@@ -232,11 +215,15 @@ public class InputDialog extends Dialog {
 
         Display display = parent.getDisplay();
         while (!shell.isDisposed()) {
-            if (!display.readAndDispatch())
+            if (!display.readAndDispatch()) {
                 display.sleep();
+            }
         }
 
-        // TODO: Display loop should not wait here, but we must wait until
+        // TODO(HDFView) [2025-12]: Consider refactoring display loop to use async/callback pattern.
+        // Current synchronous wait is necessary but blocks event loop - could impact responsiveness.
+        // Modern SWT patterns might allow non-blocking dialog with completion callback.
+        // Low priority - current approach works correctly, just not ideal architecture.
         // an input is given before returning
         return result;
     }

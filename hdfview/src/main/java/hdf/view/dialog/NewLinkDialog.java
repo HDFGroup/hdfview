@@ -84,12 +84,14 @@ public class NewLinkDialog extends Dialog {
 
     private Button targetFileButton;
 
-    private Button hardLink, softLink, externalLink;
+    private Button hardLink;
+    private Button softLink;
+    private Button externalLink;
 
-    /** a list of current groups */
+    /** a list of current groups. */
     private List<Group> groupList;
 
-    /** a list of current objects */
+    /** a list of current objects. */
     private List<?> objList;
 
     private HObject newObject;
@@ -374,7 +376,8 @@ public class NewLinkDialog extends Dialog {
         Object obj           = null;
         Iterator<?> iterator = objList.iterator();
         String fullName      = null;
-        int idx_root = -1, idx = -1;
+        int idxRoot          = -1;
+        int idx              = -1;
         while (iterator.hasNext()) {
             obj = iterator.next();
             idx++;
@@ -384,7 +387,7 @@ public class NewLinkDialog extends Dialog {
                 groupList.add(g);
                 if (g.isRoot()) {
                     fullName = HObject.SEPARATOR;
-                    idx_root = idx;
+                    idxRoot  = idx;
                 }
                 else {
                     fullName = g.getPath() + g.getName() + HObject.SEPARATOR;
@@ -398,8 +401,8 @@ public class NewLinkDialog extends Dialog {
             targetObject.add(fullName);
         }
 
-        targetObject.remove(idx_root);
-        objList.remove(idx_root);
+        targetObject.remove(idxRoot);
+        objList.remove(idxRoot);
 
         if (parentGroup.isRoot()) {
             parentChoice.select(parentChoice.indexOf(HObject.SEPARATOR));
@@ -530,8 +533,8 @@ public class NewLinkDialog extends Dialog {
             }
         }
         else if (softLink.getSelection()) {
-            String target_name = targetObject.getText();
-            if (target_name.length() < 1) {
+            String targetName = targetObject.getText();
+            if (targetName.length() < 1) {
                 shell.getDisplay().beep();
                 Tools.showError(shell, "Create", "Target object name is not specified.");
                 return null;
@@ -546,7 +549,7 @@ public class NewLinkDialog extends Dialog {
             HObject targetObj = null;
             try {
                 H5.H5error_off();
-                targetObj = fileFormat.get(target_name);
+                targetObj = fileFormat.get(targetName);
             }
             catch (Exception ex) {
                 /* It is possible that this is a soft link to a non-existent
@@ -562,7 +565,7 @@ public class NewLinkDialog extends Dialog {
 
             String tObj = null;
             if (targetObj == null) {
-                tObj = target_name;
+                tObj = targetName;
 
                 if (!tObj.startsWith(HObject.SEPARATOR)) {
                     tObj = HObject.SEPARATOR + tObj;
@@ -589,19 +592,19 @@ public class NewLinkDialog extends Dialog {
             }
         }
         else if (externalLink.getSelection()) {
-            String TargetFileName       = targetFile.getText();
-            FileFormat TargetFileFormat = null;
+            String targetFileName       = targetFile.getText();
+            FileFormat targetFileFormat = null;
             int fileAccessID            = FileFormat.FILE_CREATE_OPEN;
 
-            File TargetFile = new File(TargetFileName);
+            File targetNewFile = new File(targetFileName);
 
-            if (!TargetFile.exists()) {
+            if (!targetNewFile.exists()) {
                 return null;
             }
             FileFormat h5format = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
             try {
-                TargetFileFormat = h5format.createInstance(TargetFileName, fileAccessID);
-                TargetFileFormat.open(); // open the file
+                targetFileFormat = h5format.createInstance(targetFileName, fileAccessID);
+                targetFileFormat.open(); // open the file
             }
             catch (Exception ex) {
                 log.debug("external link:", ex);
@@ -610,14 +613,14 @@ public class NewLinkDialog extends Dialog {
 
             HObject targetObj = null;
             try {
-                targetObj = TargetFileFormat.get(targetObject.getText());
+                targetObj = targetFileFormat.get(targetObject.getText());
             }
             catch (Exception ex) {
                 ex.printStackTrace();
             }
 
             try {
-                TargetFileFormat.close();
+                targetFileFormat.close();
             }
             catch (Exception ex) {
                 log.debug("external link:", ex);
@@ -632,7 +635,7 @@ public class NewLinkDialog extends Dialog {
                     Tools.showError(shell, "Create", "Target object name not specified.");
                     return null;
                 }
-                tFileObj = TargetFileName + FileFormat.FILE_OBJ_SEP + tObj;
+                tFileObj = targetFileName + FileFormat.FILE_OBJ_SEP + tObj;
             }
 
             try {

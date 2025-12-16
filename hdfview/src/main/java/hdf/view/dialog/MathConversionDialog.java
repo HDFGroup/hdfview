@@ -266,7 +266,8 @@ public class MathConversionDialog extends Dialog {
 
     private boolean convertData()
     {
-        double a = 0, b = 1;
+        double a = 0;
+        double b = 1;
 
         int index = functionList.getSelectionIndex();
 
@@ -294,7 +295,8 @@ public class MathConversionDialog extends Dialog {
         }
 
         int n        = Array.getLength(dataValue);
-        double value = 0, x = 0;
+        double value = 0;
+        double x     = 0;
 
         switch (NT) {
         case 'B':

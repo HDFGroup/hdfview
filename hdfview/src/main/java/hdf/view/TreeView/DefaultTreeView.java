@@ -47,7 +47,6 @@ import hdf.view.DataView.DataViewFactoryProducer;
 import hdf.view.DataView.DataViewManager;
 import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
-import hdf.view.MetaDataView.MetaDataView;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 import hdf.view.ViewProperties.DATA_VIEW_KEY;
@@ -122,10 +121,10 @@ public class DefaultTreeView implements TreeView {
 
     private Font curFont;
 
-    /** The owner of this TreeView */
+    /** The owner of this TreeView. */
     private DataViewManager viewer;
 
-    /** Thread to load TableView Data in the background */
+    /** Thread to load TableView Data in the background. */
     private LoadDataThread loadDataThread;
 
     /**
@@ -133,30 +132,28 @@ public class DefaultTreeView implements TreeView {
      */
     private final Tree tree;
 
-    /** The currently selected tree item */
+    /** The currently selected tree item. */
     private TreeItem selectedItem = null;
 
-    /** The list of current selected objects for copying */
+    /** The list of current selected objects for copying. */
     private TreeItem[] objectsToCopy = null;
 
     private TreeItem[] currentSelectionsForMove = null;
 
-    /** The currently selected object */
+    /** The currently selected object. */
     private HObject selectedObject;
 
-    /** The currently selected file */
+    /** The currently selected file. */
     private FileFormat selectedFile;
 
-    /**
-     * Maintains a list of TreeItems in the tree in breadth-first order
-     * to prevent many calls of getAllItemsBreadthFirst.
-     */
+    // Maintains a list of TreeItems in the tree in breadth-first order
+    // to prevent many calls of getAllItemsBreadthFirst.
     // private ArrayList<TreeItem>         breadthFirstItems = null;
 
-    /** A list of currently open files */
+    /** A list of currently open files. */
     private final List<FileFormat> fileList = new ArrayList<>();
 
-    /** A list of editing GUI components */
+    /** A list of editing GUI components. */
     private List<MenuItem> editGUIs = new ArrayList<>();
 
     /**
@@ -176,7 +173,7 @@ public class DefaultTreeView implements TreeView {
     private MenuItem setLibVerBoundsItem;
     private MenuItem changeIndexItem;
 
-    /** Keep Image instances to prevent many calls to ViewProperties.getTypeIcon() */
+    /** Keep Image instances to prevent many calls to ViewProperties.getTypeIcon(). */
     private Image h4Icon           = ViewProperties.getH4Icon();
     private Image h4IconR          = ViewProperties.getH4IconR();
     private Image h5Icon           = ViewProperties.getH5Icon();
@@ -199,10 +196,10 @@ public class DefaultTreeView implements TreeView {
     private Image folderOpenIconA  = ViewProperties.getFolderopenIconA();
     private Image questionIcon     = ViewProperties.getQuestionIcon();
 
-    /** Flag to indicate if the dataset is displayed as default */
+    /** Flag to indicate if the dataset is displayed as default. */
     private boolean isDefaultDisplay = true;
 
-    /** Flag to indicate if TreeItems are being moved */
+    /** Flag to indicate if TreeItems are being moved. */
     private boolean moveFlag = false;
 
     private boolean isApplyBitmaskOnly = false;
@@ -211,7 +208,7 @@ public class DefaultTreeView implements TreeView {
 
     private String currentSearchPhrase = null;
 
-    /** Used to open a File using a temporary indexing type and order */
+    /** Used to open a File using a temporary indexing type and order. */
     private int tempIdxType  = -1;
     private int tempIdxOrder = -1;
 
@@ -298,10 +295,8 @@ public class DefaultTreeView implements TreeView {
             }
         });
 
-        /**
-         * If user presses Enter on a TreeItem, expand/collapse the item if it
-         * is a group, or try to show the data content if it is a data object.
-         */
+        // If user presses Enter on a TreeItem, expand/collapse the item if it
+        // is a group, or try to show the data content if it is a data object.
         tree.addListener(SWT.Traverse, new Listener() {
             @Override
             public void handleEvent(Event event)
@@ -349,12 +344,10 @@ public class DefaultTreeView implements TreeView {
             }
         });
 
-        /**
-         * Handle mouse clicks on data objects in the tree view. A right mouse-click
-         * to show the popup menu for user choice. A double left-mouse-click to
-         * display the data content. A single left-mouse-click to select the current
-         * data object.
-         */
+        // Handle mouse clicks on data objects in the tree view. A right mouse-click
+        // to show the popup menu for user choice. A double left-mouse-click to
+        // display the data content. A single left-mouse-click to select the current
+        // data object.
         tree.addMouseListener(new MouseAdapter() {
             // Double click opens data content of selected data object
             @Override
@@ -593,7 +586,11 @@ public class DefaultTreeView implements TreeView {
         });
     }
 
-    /** Creates a popup menu for a right mouse click on a data object */
+    /**
+     * Creates a popup menu for a right mouse click on a data object.
+     *
+     * @return the popmenu
+     */
     private Menu createPopupMenu()
     {
         Menu menu = new Menu(tree);
@@ -1287,12 +1284,10 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Creates a dialog for the user to select a type of new
-     * object to be added to the TreeView, then passes the
-     * result of the dialog on to addObject(HObject newObject, Group parentGroup)
+     * Creates a dialog for the user to select a type of new object to be added to the TreeView, then passes
+     * the result of the dialog on to addObject(HObject newObject, Group parentGroup).
      *
-     * @param type
-     *          The type (GROUP, DATASET, IMAGE, TABLE, DATATYPE, LINK) of object to add.
+     * @param type The type (GROUP, DATASET, IMAGE, TABLE, DATATYPE, LINK) of object to add.
      */
     private void addNewObject(OBJECT_TYPE type)
     {
@@ -1354,6 +1349,9 @@ public class DefaultTreeView implements TreeView {
             linkDialog.open();
             obj        = linkDialog.getObject();
             parentItem = findTreeItem(linkDialog.getParentGroup());
+            break;
+        default:
+            obj = null;
             break;
         }
 
@@ -1424,7 +1422,7 @@ public class DefaultTreeView implements TreeView {
         return item;
     }
 
-    /** Move selected objects */
+    /** Move selected objects. */
     private void moveObject()
     {
         objectsToCopy            = tree.getSelection();
@@ -1432,7 +1430,7 @@ public class DefaultTreeView implements TreeView {
         currentSelectionsForMove = tree.getSelection();
     }
 
-    /** Copy selected objects */
+    /** Copy selected objects. */
     private void copyObject()
     {
         if (moveFlag)
@@ -1444,7 +1442,7 @@ public class DefaultTreeView implements TreeView {
         objectsToCopy            = tree.getSelection();
     }
 
-    /** Delete selected objects */
+    /** Delete selected objects. */
     private void cutObject()
     {
         if (moveFlag)
@@ -1457,7 +1455,7 @@ public class DefaultTreeView implements TreeView {
         removeSelectedObjects();
     }
 
-    /** Paste selected objects */
+    /** Paste selected objects. */
     private void pasteObject()
     {
         if (moveFlag) {
@@ -1568,7 +1566,6 @@ public class DefaultTreeView implements TreeView {
         }
     }
 
-    /** Paste selected objects */
     private void pasteObject(TreeItem[] objList, TreeItem pobj, FileFormat dstFile)
     {
         if ((objList == null) || (objList.length <= 0) || (pobj == null))
@@ -1757,13 +1754,13 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Populates the TreeView with TreeItems corresponding to
-     * the top-level user objects in the specified file. The rest
-     * of the user objects in the file are populated as TreeItems
-     * on demand when the user expands groups.
+     * Populates the TreeView with TreeItems corresponding to the top-level user objects in the specified
+     * file. The rest of the user objects in the file are populated as TreeItems on demand when the user
+     * expands groups.
      *
-     * @return the root TreeItem created in the Tree corresponding
-     * to the file object.
+     * @param theFile - the specified file.
+     *
+     * @return the root TreeItem created in the Tree corresponding to the file object.
      */
     private TreeItem populateTree(FileFormat theFile)
     {
@@ -1778,8 +1775,10 @@ public class DefaultTreeView implements TreeView {
                 log.trace("populateTree(): FileID={} Null Root={}", theFile.getFID(),
                           (theFile.getRootObject() == null));
             }
-            // TODO: Update FitsFile and NC2File to have a fid other than -1
-            //  so this check isn't needed
+            // TODO(HDFView) [2025-12]: Fix FitsFile and NC2File to use valid file IDs instead of -1.
+            // Currently FITS and NetCDF3 files use -1 as file ID, requiring special case in file type check.
+            // Update FitsFile.java and NC2File.java to assign proper file handles.
+            // Once fixed, remove this conditional and rely on standard file ID validation.
             if (theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4)) ||
                 // theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3)) ||
                 theFile.isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5))) {
@@ -1835,8 +1834,11 @@ public class DefaultTreeView implements TreeView {
      *            Expands the TreeItem and its children if true.
      *            Collapse the TreeItem and its children if false.
      */
-    // TODO: some groups dont get expanded right, likely due to SetData not being
-    //  able to catch up with a large number of expanding
+    // TODO(HDFView) [2025-12]: Fix group expansion race condition for large hierarchies.
+    // Some groups fail to expand correctly when recursiveExpand is called on deep/wide trees.
+    // Likely caused by setData() not completing before expansion triggers child item creation.
+    // Need to investigate: async setData completion, event queue timing, or explicit wait mechanism.
+    // Affects user experience when expanding large group hierarchies.
     private void recursiveExpand(TreeItem item, boolean expand)
     {
         if (item == null || !(item.getData() instanceof Group))
@@ -1978,6 +1980,10 @@ public class DefaultTreeView implements TreeView {
 
     /**
      * Checks if an object is already open.
+     *
+     * @param obj - the current object
+     *
+     * @return the open state of the object
      */
     private boolean isObjectOpen(HObject obj)
     {
@@ -2007,11 +2013,10 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Returns a list that lists all TreeItems in the
-     * current Tree that are children of the specified
-     * TreeItem in a breadth-first manner.
+     * Returns a list that lists all TreeItems in the current Tree that are children of the specified TreeItem
+     * in a breadth-first manner.
      *
-     * @param the current Tree item
+     * @param item - the current Tree item
      *
      * @return list of TreeItems
      */
@@ -2045,13 +2050,14 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Returns a list of all user objects that traverses the subtree rooted at
-     * this item in breadth-first order..
+     * Returns a list of all user objects that traverses the subtree rooted at this item in breadth-first
+     * order.
      *
-     * @param item
-     *            the item to start with.
+     * @param item - the item to start with.
+     *
+     * @return the list user objects
      */
-    private final List<Object> breadthFirstUserObjects(TreeItem item)
+    private List<Object> breadthFirstUserObjects(TreeItem item)
     {
         if (item == null)
             return null;
@@ -2071,14 +2077,14 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Find first object that is matched by name under the specified
-     * TreeItem.
+     * Find first object that is matched by name under the specified TreeItem.
      *
-     * @param objName
-     *            -- the object name.
+     * @param objName    - the object name.
+     * @param parentItem - the current TreeItem
+     *
      * @return the object if found, otherwise, returns null.
      */
-    private final HObject find(String objName, TreeItem parentItem)
+    private HObject find(String objName, TreeItem parentItem)
     {
         if (objName == null || objName.length() <= 0 || parentItem == null)
             return null;
@@ -2144,11 +2150,12 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Save the current file into a new HDF4 file. Since HDF4 does not
-     * support packing, the source file is copied into the new file with
-     * the exact same content.
+     * Save the current file into a new HDF4 file. Since HDF4 does not support packing, the source file is
+     * copied into the new file with the exact same content.
+     *
+     * @param srcFile - the current file
      */
-    private final void saveAsHDF4(FileFormat srcFile)
+    private void saveAsHDF4(FileFormat srcFile)
     {
         if (srcFile == null) {
             shell.getDisplay().beep();
@@ -2248,9 +2255,10 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Copy the current file into a new HDF5 file. The new file does not include the
-     * inaccessible objects. Values of reference dataset are not updated in the
-     * new file.
+     * Copy the current file into a new HDF5 file. The new file does not include the inaccessible objects.
+     * Values of reference dataset are not updated in the new file.
+     *
+     * @param srcFile - the current file
      */
     private void saveAsHDF5(FileFormat srcFile)
     {
@@ -2353,7 +2361,8 @@ public class DefaultTreeView implements TreeView {
         // Update reference datasets
         parameter[0]      = srcGroup.getFileFormat();
         parameter[1]      = newFile;
-        parameterClass[0] = parameterClass[1] = parameter[0].getClass();
+        parameterClass[0] = parameter[0].getClass();
+        parameterClass[1] = parameter[0].getClass();
         try {
             method = newFile.getClass().getMethod("updateReferenceDataset", parameterClass);
             method.invoke(newFile, parameter);
@@ -2462,7 +2471,12 @@ public class DefaultTreeView implements TreeView {
         }
     }
 
-    /** enable/disable GUI components */
+    /**
+     * enable/disable GUI components.
+     *
+     * @param list - list of GUI components,
+     * @param b    - the desired boolean state.
+     */
     private static void setEnabled(List<MenuItem> list, boolean b)
     {
         if (list == null)
@@ -2693,10 +2707,9 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Close a file
+     * Close a file.
      *
-     * @param file
-     *            the file to close
+     * @param file the file to close
      *
      * @throws Exception if a failure occurred
      */
@@ -2738,10 +2751,9 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
-     * Save a file
+     * Save a file.
      *
-     * @param file
-     *            the file to save
+     * @param file the file to save
      *
      * @throws Exception if a failure occurred
      */
@@ -2852,6 +2864,8 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
+     * Get the currently selected object in the tree.
+     *
      * @return the currently selected object in the tree.
      */
     @Override
@@ -2861,6 +2875,8 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
+     * Get the Tree which holds the file structure.
+     *
      * @return the Tree which holds the file structure.
      */
     @Override
@@ -2870,6 +2886,8 @@ public class DefaultTreeView implements TreeView {
     }
 
     /**
+     * Get the list of currently open files.
+     *
      * @return the list of currently open files.
      */
     @Override
@@ -3171,13 +3189,25 @@ public class DefaultTreeView implements TreeView {
             reloadFile = true;
         }
 
-        /** @return the current value of the index type. */
+        /**
+         * Get the current value of the index type.
+         *
+         * @return the current value of the index type.
+         */
         public int getIndexType() { return indexType; }
 
-        /** @return the current value of the index order. */
+        /**
+         * Get the current value of the index order.
+         *
+         * @return the current value of the index order.
+         */
         public int getIndexOrder() { return indexOrder; }
 
-        /** @return the current value of the reloadFile. */
+        /**
+         * Check the current value of the reloadFile.
+         *
+         * @return the current value of the reloadFile.
+         */
         public boolean isReloadFile() { return reloadFile; }
 
         /** open the ChangeIndexingDialog for setting the indexing values. */
@@ -3323,7 +3353,7 @@ public class DefaultTreeView implements TreeView {
     }
 
     private class ChangeLibVersionDialog extends Dialog {
-        public ChangeLibVersionDialog(Shell parent, int style) { super(parent, style); }
+        ChangeLibVersionDialog(Shell parent, int style) { super(parent, style); }
 
         public void open()
         {

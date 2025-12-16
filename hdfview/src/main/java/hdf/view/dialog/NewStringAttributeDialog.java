@@ -64,25 +64,25 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
 
     private static final Logger log = LoggerFactory.getLogger(NewStringAttributeDialog.class);
 
-    /** the default length of a string attribute */
+    /** the default length of a string attribute. */
     public static final int DEFAULT_STRING_ATTRIBUTE_LENGTH = 256;
 
-    /** TextField for entering the name of the dataset */
+    /** TextField for entering the name of the dataset. */
     private Text nameField;
 
     /** TextField for entering the attribute value. */
     private Text valueField;
 
-    /** The Choice of the object list */
+    /** The Choice of the object list. */
     private Combo objChoice;
 
     private Button h4GrAttrRadioButton;
 
     private Label arrayLengthLabel;
 
-    /** If the attribute should be attached to a hdf4 object */
+    /** If the attribute should be attached to a hdf4 object. */
     protected boolean isH4;
-    /** If the attribute should be attached to a netcdf object */
+    /** If the attribute should be attached to a netcdf object. */
     protected boolean isN3;
 
     /**
@@ -630,7 +630,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
     private class HelpDialog extends Dialog {
         private Shell helpShell;
 
-        public HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
+        HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
 
         public void open()
         {
@@ -675,7 +675,9 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                 }
                 else {
                     try {
-                        URL url = null, url2 = null, url3 = null;
+                        URL url         = null;
+                        URL url2        = null;
+                        URL url3        = null;
                         String rootPath = ViewProperties.getViewRoot();
 
                         try {
@@ -699,7 +701,7 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                             log.debug("help information:", mfu);
                         }
 
-                        URL uu[] = {url, url2, url3};
+                        URL[] uu = {url, url2, url3};
                         try (URLClassLoader cl = new URLClassLoader(uu)) {
                             URL u = cl.findResource("hdf/view/NewAttrHelp.html");
 
@@ -755,7 +757,10 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
                 Tools.showError(shell, "Browser support",
                                 "Platform doesn't support Browser. Opening external link in web browser...");
 
-                // TODO: Add support for launching in external browser
+                // TODO(HDFView) [2025-12]: Implement fallback external browser launch when SWT Browser
+                // unavailable. Currently shows error message but doesn't actually open URL in system browser.
+                // Use java.awt.Desktop.browse(URI) or platform-specific command (xdg-open, open, start).
+                // Related: NewDatasetDialog.java:1087, NewScalarAttributeDialog.java:475 have same issue.
             }
             catch (Exception ex) {
                 log.debug("Open New Attribute Help failure: ", ex);

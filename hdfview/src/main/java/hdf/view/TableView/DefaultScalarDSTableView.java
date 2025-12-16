@@ -218,12 +218,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         MenuItem[] baseMenuItems = baseMenu.getItems();
         MenuItem item            = null;
 
-        /*****************************************************************************
-         *                                                                           *
-         * Add in a few MenuItems for importing/exporting data from/to binary files. *
-         *                                                                           *
-         *****************************************************************************/
-
+        // Add in a few MenuItems for importing/exporting data from/to binary files. *
         MenuItem importExportMenuItem = null;
         for (int i = 0; i < baseMenuItems.length; i++)
             if (baseMenuItems[i].getText().equals("&Import/Export Data"))
@@ -410,12 +405,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             });
         }
 
-        /*****************************************************************************************
-         *                                                                                       *
-         * Add a section for changing the way that data is displayed, e.g. as hexadecimal values *
-         *                                                                                       *
-         *****************************************************************************************/
-
+        // Add a section for changing the way that data is displayed, e.g. as hexadecimal values *
         MenuItem dataDisplayMenuItem = new MenuItem(baseMenu, SWT.CASCADE);
         dataDisplayMenuItem.setText("Data Display");
 
@@ -729,7 +719,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     }
 
     /**
-     * Returns the selected data values of the ScalarDS
+     * Returns the selected data values of the ScalarDS.
      */
     @Override
     public Object getSelectedData()
@@ -853,8 +843,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             public boolean isEditable(int columnIndex, int rowIndex)
             {
                 /*
-                 * TODO: Should be able to edit character-displayed types and datasets when
-                 * displayed as hex/binary.
+                 * TODO(HDFView) [2025-12]: Enable editing for character data displayed as hex/binary.
+                 * Currently prevents editing when display mode is char/hex/binary.
+                 * Should allow editing with proper conversion: hex string → bytes → character data.
+                 * Requires input validation for hex format (0x00-0xFF) and binary format
+                 * (0b00000000-0b11111111). Related: DefaultCompoundDSTableView.java line 320 has same
+                 * limitation.
                  */
                 return !(isReadOnly || isDisplayTypeChar || showAsBin || showAsHex);
             }
@@ -1019,8 +1013,11 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
             return; // no selection
         }
 
-        // TODO: do we need to do something with what's past the closing bracket
-        // regStr = reg.substring(reg.indexOf('}') + 1);
+        // TODO(HDFView) [2025-12]: Determine if post-bracket region reference data needs processing (scalar
+        // context). Currently region string parsing stops at closing bracket - verify if trailing data should
+        // be handled. If no known use cases exist for data after '}', remove this TODO and commented line.
+        // Related: DefaultCompoundDSTableView.java:496, line 1547 below have similar bracket parsing
+        // questions. regStr = reg.substring(reg.indexOf('}') + 1);
 
         StringTokenizer st = new StringTokenizer(regStr);
         int nSelections    = st.countTokens();
@@ -1214,32 +1211,32 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         H5ReferenceType refType = ((H5ReferenceType)dataObject.getDatatype());
         H5ReferenceData refdata = refType.getReferenceData(refarr);
         /* get the filename associated with the reference */
-        String reffile = refdata.file_name;
-        if ((refdata.ref_type == HDF5Constants.H5R_DATASET_REGION1) ||
-            (refdata.ref_type == HDF5Constants.H5R_DATASET_REGION2)) {
-            String ref_ptr = refType.getReferenceRegion(refarr, false);
-            if ("REGION_TYPE UNKNOWN".equals(refdata.region_type)) {
-                String msg = "Reference to " + ref_ptr + " cannot be displayed in a table";
+        String reffile = refdata.fileName;
+        if ((refdata.refType == HDF5Constants.H5R_DATASET_REGION1) ||
+            (refdata.refType == HDF5Constants.H5R_DATASET_REGION2)) {
+            String refptr = refType.getReferenceRegion(refarr, false);
+            if ("REGION_TYPE UNKNOWN".equals(refdata.regionType)) {
+                String msg = "Reference to " + refptr + " cannot be displayed in a table";
                 Tools.showInformation(shell, "Reference", msg);
             }
             else {
                 showRegRefData(refarr);
             }
         }
-        if (((refdata.ref_type == HDF5Constants.H5R_OBJECT1) &&
-             (refdata.obj_type == HDF5Constants.H5O_TYPE_DATASET)) ||
-            ((refdata.ref_type == HDF5Constants.H5R_OBJECT2) &&
-             (refdata.obj_type == HDF5Constants.H5O_TYPE_DATASET))) {
-            String ref_obj = refdata.obj_name;
-            showObjStdRefData(ref_obj);
+        if (((refdata.refType == HDF5Constants.H5R_OBJECT1) &&
+             (refdata.objType == HDF5Constants.H5O_TYPE_DATASET)) ||
+            ((refdata.refType == HDF5Constants.H5R_OBJECT2) &&
+             (refdata.objType == HDF5Constants.H5O_TYPE_DATASET))) {
+            String refObj = refdata.objName;
+            showObjStdRefData(refObj);
         }
-        else if (refdata.ref_type == HDF5Constants.H5R_ATTR) {
-            String ref_attr_name = refdata.attr_name;
-            String ref_obj_name  = refdata.obj_name;
-            showAttrStdRefData(ref_obj_name, ref_attr_name);
+        else if (refdata.refType == HDF5Constants.H5R_ATTR) {
+            String refAttrName = refdata.attrName;
+            String refObjName  = refdata.objName;
+            showAttrStdRefData(refObjName, refAttrName);
         }
-        else if ("H5O_TYPE_OBJ_REF".equals(refdata.region_type)) {
-            String msg = "Reference to " + refdata.obj_name + " cannot be displayed in a table";
+        else if ("H5O_TYPE_OBJ_REF".equals(refdata.regionType)) {
+            String msg = "Reference to " + refdata.objName + " cannot be displayed in a table";
             // String ref_ptr = refType.getObjectReferenceName(refarr);
             Tools.showInformation(shell, "Reference", msg);
         }
@@ -1360,35 +1357,32 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     }
 
     /**
-     * Display data pointed to by attribute references. Data of each object is shown in
-     * a separate spreadsheet.
+     * Display data pointed to by attribute references. Data of each object is shown in a separate
+     * spreadsheet.
      *
-     * @param ref_obj_name
-     *            the string that contain the attribute reference information.
-     * @param ref_attr_name
-     *            the string that contain the attribute reference information.
+     * @param refObjName  the string that contain the attribute reference information.
+     * @param refAttrName the string that contain the attribute reference information.
      *
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    protected void showAttrStdRefData(String ref_obj_name, String ref_attr_name)
+    protected void showAttrStdRefData(String refObjName, String refAttrName)
     {
-        if (ref_obj_name == null || (ref_obj_name.length() <= 0) || (ref_obj_name.compareTo("NULL") == 0)) {
-            log.debug("showAttrStdRefData(): ref_obj_name is null or invalid");
+        if (refObjName == null || (refObjName.length() <= 0) || (refObjName.compareTo("NULL") == 0)) {
+            log.debug("showAttrStdRefData(): refObjName is null or invalid");
             Tools.showError(shell, "Select",
                             "Could not show attribute reference data: invalid or null object name");
             return;
         }
 
-        if (ref_attr_name == null || (ref_attr_name.length() <= 0) ||
-            (ref_attr_name.compareTo("NULL") == 0)) {
-            log.debug("showAttrStdRefData(): ref_attr_name is null or invalid");
+        if (refAttrName == null || (refAttrName.length() <= 0) || (refAttrName.compareTo("NULL") == 0)) {
+            log.debug("showAttrStdRefData(): refAttrName is null or invalid");
             Tools.showError(shell, "Select",
                             "Could not show attribute reference data: invalid or null attribute name");
             return;
         }
 
         // find the parent object first
-        HObject obj = FileFormat.findObject(((HObject)dataObject).getFileFormat(), ref_obj_name);
+        HObject obj = FileFormat.findObject(((HObject)dataObject).getFileFormat(), refObjName);
         if (obj == null) {
             log.debug("showAttrStdRefData(): obj is null");
             Tools.showError(shell, "Select", "Could not show attribute reference data: invalid or null data");
@@ -1405,7 +1399,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         int n                 = attrs.size();
         for (int i = 0; i < n; i++) {
             attr = (H5ScalarAttr)attrs.get(i);
-            if (attr.getAttributeName().equals(ref_attr_name))
+            if (attr.getAttributeName().equals(refAttrName))
                 break;
             else
                 attr = null;
@@ -1496,7 +1490,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
     }
 
     /**
-     * Update cell value label and cell value field when a cell is selected
+     * Update cell value label and cell value field when a cell is selected.
      */
     private class ScalarDSCellSelectionListener implements ILayerListener {
         @Override
@@ -1554,8 +1548,12 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                             strVal = null;
                         }
                         else {
-                            // TODO: do we need to do something with what's past the closing bracket
-                            // regStr = reg.substring(reg.indexOf('}') + 1);
+                            // TODO(HDFView) [2025-12]: Determine if post-bracket region reference data needs
+                            // processing (cell listener context). Currently region string parsing stops at
+                            // closing bracket - verify if trailing data should be handled. Third occurrence
+                            // of this pattern - if no use cases found, clean up all three instances. Related:
+                            // Lines 1015 above, DefaultCompoundDSTableView.java:496. regStr =
+                            // reg.substring(reg.indexOf('}') + 1);
 
                             StringTokenizer st = new StringTokenizer(regStr);
                             int nSelections    = st.countTokens();
@@ -1582,10 +1580,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
                                     int idx = 0;
                                     while (st.hasMoreTokens()) {
-                                        int space_type = dset.getSpaceType();
-                                        int rank       = dset.getRank();
-                                        long[] start   = dset.getStartDims();
-                                        long[] count   = dset.getSelectedDims();
+                                        int spaceType = dset.getSpaceType();
+                                        int rank      = dset.getRank();
+                                        long[] start  = dset.getStartDims();
+                                        long[] count  = dset.getSelectedDims();
                                         // long count[] = new long[rank];
 
                                         // set the selected dimension sizes
@@ -1821,9 +1819,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
      * for Scalar Datasets.
      */
     private class ScalarDSColumnHeaderDataProvider implements IDataProvider {
-        private final String columnNames[];
+        private final String[] columnNames;
 
-        private final int space_type;
+        private final int spaceType;
         private final int rank;
 
         private final long[] startArray;
@@ -1832,10 +1830,10 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
 
         private final int ncols;
 
-        public ScalarDSColumnHeaderDataProvider(DataFormat theDataObject)
+        ScalarDSColumnHeaderDataProvider(DataFormat theDataObject)
         {
-            space_type = theDataObject.getSpaceType();
-            rank       = theDataObject.getRank();
+            spaceType = theDataObject.getSpaceType();
+            rank      = theDataObject.getRank();
 
             startArray    = theDataObject.getStartDims();
             strideArray   = theDataObject.getStride();

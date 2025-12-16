@@ -14,14 +14,12 @@
 
 package hdf.view.dialog;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import hdf.object.Attribute;
 import hdf.object.Datatype;
-import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.h5.H5CompoundAttr;
 import hdf.object.h5.H5Datatype;
@@ -87,7 +85,9 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         "long double (128-bit)"    // 13
     };
 
-    private Combo nFieldBox, templateChoice;
+    private Combo nFieldBox;
+
+    private Combo templateChoice;
 
     private Vector<H5CompoundAttr> compoundAttrList;
 
@@ -97,7 +97,9 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
 
     private TableEditor[][] editors;
 
-    private Text nameField, currentSizeField;
+    private Text nameField;
+
+    private Text currentSizeField;
 
     private Combo rankChoice;
 
@@ -268,19 +270,19 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
             @Override
             public void handleEvent(Event e)
             {
-                Table table            = (Table)e.widget;
-                Rectangle area         = table.getClientArea();
-                int columnCount        = table.getColumnCount();
-                int totalGridLineWidth = (columnCount - 1) * table.getGridLineWidth();
+                Table atable           = (Table)e.widget;
+                Rectangle area         = atable.getClientArea();
+                int columnCount        = atable.getColumnCount();
+                int totalGridLineWidth = (columnCount - 1) * atable.getGridLineWidth();
 
                 int totalColumnWidth = 0;
-                for (TableColumn column : table.getColumns()) {
+                for (TableColumn column : atable.getColumns()) {
                     totalColumnWidth += column.getWidth();
                 }
 
                 int diff = area.width - (totalColumnWidth + totalGridLineWidth);
 
-                TableColumn col = table.getColumns()[columnCount - 1];
+                TableColumn col = atable.getColumns()[columnCount - 1];
                 col.setWidth(diff + col.getWidth());
             }
         });
@@ -591,15 +593,15 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
         numberOfMembers = n;
     }
 
-    private TableEditor[] addMemberTableItem(Table table)
+    private TableEditor[] addMemberTableItem(Table atable)
     {
-        final TableItem item       = new TableItem(table, SWT.NONE);
+        final TableItem item       = new TableItem(atable, SWT.NONE);
         final TableEditor[] editor = new TableEditor[3];
 
         for (int i = 0; i < editor.length; i++)
-            editor[i] = new TableEditor(table);
+            editor[i] = new TableEditor(atable);
 
-        final Text nameText = new Text(table, SWT.SINGLE | SWT.BORDER);
+        final Text nameText = new Text(atable, SWT.SINGLE | SWT.BORDER);
         nameText.setFont(curFont);
 
         editor[0].grabHorizontal      = true;
@@ -617,7 +619,7 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
             }
         });
 
-        final CCombo typeCombo = new CCombo(table, SWT.DROP_DOWN | SWT.READ_ONLY);
+        final CCombo typeCombo = new CCombo(atable, SWT.DROP_DOWN | SWT.READ_ONLY);
         typeCombo.setFont(curFont);
         typeCombo.setItems(DATATYPE_NAMES);
 
@@ -636,7 +638,7 @@ public class NewCompoundAttributeDialog extends NewDataObjectDialog {
             }
         });
 
-        final Text sizeText = new Text(table, SWT.SINGLE | SWT.BORDER);
+        final Text sizeText = new Text(atable, SWT.SINGLE | SWT.BORDER);
         sizeText.setFont(curFont);
 
         editor[2].grabHorizontal      = true;

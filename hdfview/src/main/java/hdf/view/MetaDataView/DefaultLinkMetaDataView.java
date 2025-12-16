@@ -27,7 +27,6 @@ import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -35,7 +34,7 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  *
- * The metadata view interface for displaying link metadata information
+ * The metadata view interface for displaying link metadata information.
  */
 public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements MetaDataView {
 
@@ -43,14 +42,11 @@ public class DefaultLinkMetaDataView extends DefaultBaseMetaDataView implements 
         org.slf4j.LoggerFactory.getLogger(DefaultLinkMetaDataView.class);
 
     /**
-     *The metadata view interface for displaying link metadata information
+     * The metadata view interface for displaying link metadata information.
      *
-     * @param parentComposite
-     *        the parent visual object
-     * @param viewer
-     *        the viewer to use
-     * @param theObj
-     *        the object to display the metadata info
+     * @param parentComposite the parent visual object
+     * @param viewer          the viewer to use
+     * @param theObj          the object to display the metadata info
      */
     public DefaultLinkMetaDataView(Composite parentComposite, DataViewManager viewer, HObject theObj)
     {

@@ -15,7 +15,6 @@
 package hdf.view.dialog;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 import hdf.view.ViewProperties;
 
@@ -37,7 +36,11 @@ import org.eclipse.swt.widgets.Control;
 public class UserOptionsViewModulesPage extends UserOptionsDefaultPage {
     private static final Logger log = LoggerFactory.getLogger(UserOptionsViewModulesPage.class);
 
-    private Combo choiceTreeView, choiceMetaDataView, choiceTableView, choiceImageView, choicePaletteView;
+    private Combo choiceTreeView;
+    private Combo choiceMetaDataView;
+    private Combo choiceTableView;
+    private Combo choiceImageView;
+    private Combo choicePaletteView;
 
     /** A list of Tree view implementations. */
     private static ArrayList<String> treeViews;

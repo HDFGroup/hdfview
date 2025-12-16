@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,12 +29,10 @@ import java.util.regex.Pattern;
 import hdf.object.CompoundDS;
 import hdf.object.CompoundDataFormat;
 import hdf.object.DataFormat;
-import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.HObject;
 import hdf.object.ScalarDS;
-import hdf.object.Utils;
 import hdf.object.h5.H5Datatype;
 import hdf.view.DataView.DataViewManager;
 import hdf.view.HDFView;
@@ -130,12 +127,10 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     }
 
     /**
-     * Creates a NatTable for a Compound dataset
+     * Creates a NatTable for a Compound dataset.
      *
-     * @param parent
-     *            The parent for the NatTable
-     * @param dataObject
-     *            The Compound dataset for the NatTable to display
+     * @param parent     The parent for the NatTable
+     * @param dataObject The Compound dataset for the NatTable to display
      *
      * @return The newly created NatTable
      */
@@ -209,7 +204,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     }
 
     /**
-     * Returns the selected data values of the ScalarDS
+     * Returns the selected data values of the ScalarDS.
      */
     @Override
     public Object getSelectedData()
@@ -322,8 +317,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             public boolean isEditable(int columnIndex, int rowIndex)
             {
                 /*
-                 * TODO: Should be able to edit character-displayed types and datasets when
-                 * displayed as hex/binary.
+                 * TODO(HDFView) [2025-12]: Enable editing for character data displayed as hex/binary.
+                 * Currently editing is disabled when data shown as character/hex/binary (see commented
+                 * condition). Should allow editing with proper conversion: hex string → bytes → character
+                 * data. Requires input validation for hex format (0x00-0xFF) and binary format
+                 * (0b00000000-0b11111111). Related: DefaultScalarDSTableView.java line 846 has same
+                 * limitation.
                  */
                 // return !(isReadOnly || isDisplayTypeChar || showAsBin || showAsHex);
                 return !isReadOnly;
@@ -495,7 +494,10 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
             return; // no selection
         }
 
-        // TODO: do we need to do something with what's past the closing bracket
+        // TODO(HDFView) [2025-12]: Determine if post-bracket region reference data needs processing.
+        // Currently region string parsing stops at closing bracket - verify if trailing data should be
+        // handled. If no known use cases exist for data after '}', remove this TODO and uncommented line.
+        // Related: DefaultScalarDSTableView.java line 1012, 1544 have similar bracket parsing questions.
         // regStr = reg.substring(reg.indexOf('}') + 1);
 
         StringTokenizer st = new StringTokenizer(regStr);
@@ -670,7 +672,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
     }     // end of showRegRefData()
 
     /**
-     * Update cell value label and cell value field when a cell is selected
+     * Update cell value label and cell value field when a cell is selected.
      */
     private class CompoundDSCellSelectionListener implements ILayerListener {
         @Override
@@ -824,7 +826,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         private final int ncols;
         private final int groupSize;
 
-        public CompoundDSColumnHeaderDataProvider(DataFormat dataObject)
+        CompoundDSColumnHeaderDataProvider(DataFormat dataObject)
         {
             CompoundDataFormat dataFormat = (CompoundDataFormat)dataObject;
 
@@ -886,7 +888,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 log.trace("recursiveColumnHeaderSetup(): ARRAY size: {}", arrSize);
 
                 /*
-                 * TODO: Temporary workaround for top-level array of compound types.
+                 * TODO(HDFView) [2025-12]: Replace temporary workaround with robust top-level
+                 * array-of-compound handling. Currently filters member types when memberTypes is empty for
+                 * top-level array of compounds. This is a workaround - should properly handle this case
+                 * during initial type parsing. May be related to compound array fix at
+                 * DataProviderFactory.java:729. Medium priority - workaround functions but indicates
+                 * architectural issue.
                  */
                 if (memberTypes.isEmpty()) {
                     memberTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedCompoundType);
@@ -926,7 +933,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 log.debug("recursiveColumnHeaderSetup: curDtype={} size={}", curDtype,
                           curDtype.getDatatypeSize());
                 /*
-                 * TODO: empty until we have true variable-length support.
+                 * TODO(HDFView) [2025-12]: Implement column header setup for variable-length compound
+                 * members. Currently empty - no column headers generated for non-string variable-length
+                 * fields. Blocked by lack of true variable-length support in core library. Related:
+                 * H5CompoundDS.java:946, H5CompoundAttr.java:873, H5Datatype.java:2774 for vlen core support.
+                 * Cannot implement until variable-length data reading is functional.
                  */
             }
             else if (curDtype.isCompound()) {
@@ -996,7 +1007,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 else if (curType.isArray()) {
                     log.debug("calcArrayOfCompoundLen: curType={} dims={}", curType, curType.getArrayDims());
                     /*
-                     * TODO: nested array of compound length calculation
+                     * TODO(HDFView) [2025-12]: Implement length calculation for nested array-of-compound
+                     * types. Currently doesn't calculate column count for array members within compound
+                     * arrays. Need to recursively calculate: array_size * compound_member_count for nested
+                     * structures. May cause incorrect column counts for complex nested array[compound[array]]
+                     * structures. Medium priority - affects display of deeply nested compound types.
                      */
                 }
                 else
@@ -1042,9 +1057,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
      * Implementation of Column Grouping for Compound Datasets with nested members.
      */
     private class CompoundDSNestedColumnHeaderLayer extends ColumnGroupGroupHeaderLayer {
-        public CompoundDSNestedColumnHeaderLayer(ColumnGroupHeaderLayer columnGroupHeaderLayer,
-                                                 SelectionLayer selectionLayer,
-                                                 ColumnGroupModel columnGroupModel)
+        CompoundDSNestedColumnHeaderLayer(ColumnGroupHeaderLayer columnGroupHeaderLayer,
+                                          SelectionLayer selectionLayer, ColumnGroupModel columnGroupModel)
         {
             super(columnGroupHeaderLayer, selectionLayer, columnGroupModel);
 
