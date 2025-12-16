@@ -39,12 +39,6 @@ public abstract class ScalarDS extends Dataset {
 
     private static final Logger log = LoggerFactory.getLogger(ScalarDS.class);
 
-    /************************************************************
-     * The following constant strings are copied from *
-     *https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_i_m_g.html * to make the
-     *definition consistent with the image specs. *
-     ************************************************************/
-
     /**
      * Indicates that the pixel RGB values are contiguous.
      */
@@ -104,7 +98,7 @@ public abstract class ScalarDS extends Dataset {
     /**
      * Flag to indicate if the FillValue is converted from unsigned C.
      */
-    public boolean isFillValueConverted;
+    protected boolean isFillValueConverted;
 
     /**
      * Constructs an instance of a ScalarDS with specific name and path. An HDF data object must have a name.
@@ -126,17 +120,16 @@ public abstract class ScalarDS extends Dataset {
     }
 
     /**
+     * Constructs an instance of a ScalarDS with specific name, path and id. An HDF data object must have a
+     * name. The path is the group path starting from the root.
+     *
+     * @param theFile the file that contains the data object.
+     * @param theName the name of the data object, e.g. "dset".
+     * @param thePath the full path of the data object, e.g. "/arrays/".
+     * @param oid     the object id of the data object.
+     *
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #ScalarDS(FileFormat, String, String)}
-     *
-     * @param theFile
-     *            the file that contains the data object.
-     * @param theName
-     *            the name of the data object, e.g. "dset".
-     * @param thePath
-     *            the full path of the data object, e.g. "/arrays/".
-     * @param oid
-     *            the object id of the data object.
      */
     @Deprecated
     public ScalarDS(FileFormat theFile, String theName, String thePath, long[] oid)
@@ -308,8 +301,7 @@ public abstract class ScalarDS extends Dataset {
      * Returns true if this dataset is an image.
      *
      * For all Images, they must have an attribute called "CLASS". The value of this attribute is "IMAGE". For
-     * more details, read <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_i_m_g.html"> HDF5
+     * more details, read <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_i_m_g.html"> HDF5
      * Image and Palette Specification</a>
      *
      * @return true if the dataset is an image; otherwise, returns false.

@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Vector;
 
-import hdf.object.Attribute;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -60,7 +59,7 @@ public class NC2File extends FileFormat {
     @SuppressWarnings("rawtypes")
     private List objList;
 
-    /** the netcdf file */
+    /** the netcdf file. */
     private NetcdfFile ncFile;
 
     private static boolean isFileOpen;
@@ -333,12 +332,10 @@ public class NC2File extends FileFormat {
     }
 
     /**
-     * converts a ucar.nc2.Attribute into an hdf.object.nc2.NC2Attribute
+     * converts a ucar.nc2.Attribute into an hdf.object.nc2.NC2Attribute.
      *
-     * @param parent
-     *            the parent object.
-     * @param netcdfAttr
-     *            the ucar.nc2.Attribute object.
+     * @param parent     the parent object.
+     * @param netcdfAttr the ucar.nc2.Attribute object.
      *
      * @return the hdf.object.nc2.NC2Attribute if successful
      */
@@ -384,11 +381,10 @@ public class NC2File extends FileFormat {
     }
 
     /**
-     * Retrieves the tree structure of the file by depth-first order. The
-     * current implementation only retrieves groups and datasets.
+     * Retrieves the tree structure of the file by depth-first order. The current implementation only
+     * retrieves groups and datasets.
      *
-     * @param parentObject
-     *            the parent object.
+     * @param parentObj the parent object.
      */
     private void depth_first(HObject parentObj)
     {
@@ -401,9 +397,12 @@ public class NC2File extends FileFormat {
     } // private depth_first()
 
     /**
-     * Returns a list of all the members of this NetCDF3 in a
-     * breadth-first ordering that are rooted at the specified
-     * object.
+     * Returns a list of all the members of this NetCDF3 in a breadth-first ordering that are rooted at the
+     * specified object.
+     *
+     * @param obj - the start object
+     *
+     * @return a list of all the members
      */
     private static List<HObject> getMembersBreadthFirst(HObject obj)
     {

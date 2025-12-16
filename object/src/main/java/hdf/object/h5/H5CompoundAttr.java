@@ -16,8 +16,6 @@ package hdf.object.h5;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,22 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import hdf.object.Attribute;
 import hdf.object.CompoundDS;
-import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
-import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
-import hdf.object.Utils;
-import hdf.object.h5.H5Datatype;
-import hdf.object.h5.H5ReferenceType;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.HDFNativeData;
-import hdf.hdf5lib.exceptions.HDF5DataFiltersException;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 
 import org.slf4j.Logger;
@@ -61,8 +52,8 @@ import org.slf4j.LoggerFactory;
  * unique within that type, and a byte offset that determines the first byte (smallest byte address) of that
  * member in a compound datum.
  *
- * For more information on HDF5 attributes and datatypes, read the <a href=
- * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
+ * For more information on HDF5 attributes and datatypes, read the
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5
  * Attributes in HDF5 User Guide</a>
  *
  * There are two basic types of compound attributes: simple compound data and nested compound data. Members of
@@ -97,10 +88,10 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
     private static final Logger log = LoggerFactory.getLogger(H5CompoundAttr.class);
 
-    /** The HObject to which this NC2Attribute is attached, Attribute interface */
+    /** The HObject to which this NC2Attribute is attached, Attribute interface. */
     protected HObject parentObject;
 
-    /** additional information and properties for the attribute, Attribute interface */
+    /** additional information and properties for the attribute, Attribute interface. */
     private transient Map<String, Object> properties;
 
     /**
@@ -310,16 +301,16 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         aid = open();
         if (aid >= 0) {
             try {
-                sid        = H5.H5Aget_space(aid);
-                rank       = H5.H5Sget_simple_extent_ndims(sid);
-                space_type = H5.H5Sget_simple_extent_type(sid);
-                if (space_type == HDF5Constants.H5S_NULL)
+                sid       = H5.H5Aget_space(aid);
+                rank      = H5.H5Sget_simple_extent_ndims(sid);
+                spaceType = H5.H5Sget_simple_extent_type(sid);
+                if (spaceType == HDF5Constants.H5S_NULL)
                     isNULL = true;
                 else
                     isNULL = false;
                 tid    = H5.H5Aget_type(aid);
                 tclass = H5.H5Tget_class(tid);
-                log.trace("init(): tid={} sid={} rank={} space_type={}", tid, sid, rank, space_type);
+                log.trace("init(): tid={} sid={} rank={} spaceType={}", tid, sid, rank, spaceType);
 
                 long tmptid = 0;
 
@@ -384,9 +375,9 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
                         if (tclass == HDF5Constants.H5T_ARRAY) {
                             int n       = H5.H5Tget_array_ndims(memberTIDs[i]);
-                            long mdim[] = new long[n];
+                            long[] mdim = new long[n];
                             H5.H5Tget_array_dims(memberTIDs[i], mdim);
-                            int idim[] = new int[n];
+                            int[] idim = new int[n];
                             for (int j = 0; j < n; j++)
                                 idim[j] = (int)mdim[j];
                             memberDims[i]   = idim;
@@ -490,7 +481,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
                         long sid   = H5.H5Aget_space(aid);
                         int rank   = H5.H5Sget_simple_extent_ndims(sid);
                         if (rank > 0) {
-                            long dims[] = new long[rank];
+                            long[] dims = new long[rank];
                             H5.H5Sget_simple_extent_dims(sid, dims, null);
                             log.trace("getDatatype(): rank={}, dims={}", rank, dims);
                             for (int j = 0; j < dims.length; j++) {
@@ -619,11 +610,11 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
         nPoints = 1;
         log.trace("getData(): selectedDims length={}", selectedDims.length);
-        int point_len = selectedDims.length;
+        int pointLen = selectedDims.length;
         // Partial data for 3 or more dimensions
         if (rank > 2)
-            point_len = 3;
-        for (int j = 0; j < point_len; j++) {
+            pointLen = 3;
+        for (int j = 0; j < pointLen; j++) {
             log.trace("getData(): selectedDims[{}]={}", j, selectedDims[j]);
             nPoints *= selectedDims[j];
         }
@@ -635,7 +626,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         //     where selectedIndex[1] is the col dimension
         //     where selectedIndex[2] is the frame dimension
         if (rank > 2)
-            data = AttributeSelection();
+            data = attributeSelection();
 
         return data;
     }
@@ -840,7 +831,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         if (aid >= 0) {
             log.trace("compoundAttributeCommonIO(): isDataLoaded={}", isDataLoaded);
             try {
-                theData = AttributeCommonIO(aid, ioType, writeBuf);
+                theData = attributeCommonIO(aid, ioType, writeBuf);
             }
             finally {
                 close(aid);
@@ -879,7 +870,10 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         }
         else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
             /*
-             * TODO: true variable-length support.
+             * TODO(HDFView) [2025-12]: Implement true variable-length type support for compound attributes.
+             * Currently returns "*UNSUPPORTED*" placeholder for non-string variable-length fields.
+             * Requires integration with HDF5 H5Tvlen_* APIs for proper memory management.
+             * Related: Variable-length support needed across H5CompoundAttr, H5CompoundDS, H5Datatype.
              */
             String[] errVal = new String[nSelPoints];
             String errStr   = "*UNSUPPORTED*";
@@ -957,13 +951,13 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
                               memberType.getDescription(), memberOffset);
 
                     try {
-                        int mt_typesize = (int)memberType.getDatatypeSize();
-                        log.trace("compoundTypeIO(): member[{}] mt_typesize={}", i, mt_typesize);
-                        byte[] memberbuf = new byte[nSelPoints * mt_typesize];
+                        int mtTypesize = (int)memberType.getDatatypeSize();
+                        log.trace("compoundTypeIO(): member[{}] mt_typesize={}", i, mtTypesize);
+                        byte[] memberbuf = new byte[nSelPoints * mtTypesize];
                         for (int dimindx = 0; dimindx < nSelPoints; dimindx++)
                             try {
                                 System.arraycopy(dataBuf, (int)memberOffset + dimindx * (int)parentLength,
-                                                 memberbuf, dimindx * mt_typesize, mt_typesize);
+                                                 memberbuf, dimindx * mtTypesize, mtTypesize);
                             }
                             catch (Exception err) {
                                 log.trace("compoundTypeIO(): arraycopy failure: ", err);
@@ -1050,7 +1044,9 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         }
         else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
             /*
-             * TODO: true variable-length support.
+             * TODO(HDFView) [2025-12]: Implement true variable-length type support for compound attribute
+             * writes. Currently uses placeholder data for non-string variable-length fields. Related: See
+             * read path (line 873) and H5Datatype.java for coordinated fix.
              */
             String errVal = new String("*UNSUPPORTED*");
 
@@ -1123,7 +1119,10 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
                     try {
                         /*
-                         * TODO: currently doesn't correctly handle non-selected compound members.
+                         * TODO(HDFView) [2025-12]: Fix compound attribute write when subset of members
+                         * selected. Current member indexing doesn't account for unselected members, causing
+                         * misalignment. Need to map selected member index to actual position in compound type
+                         * structure. Related: Similar issue in H5CompoundDS.java line 1116.
                          */
                         memberData = ((List<?>)dataBuf).get(i);
                     }
@@ -1295,7 +1294,11 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         }
         else if (dtype.isCompound()) {
             /*
-             * TODO: still valid after reading change?
+             * TODO(HDFView) [2025-12]: Verify compound member byte conversion logic after read path
+             * refactoring. This code may need validation to ensure it still correctly handles compound member
+             * conversion. Check that nested compounds, variable-length members, and array members convert
+             * properly. Related: CompoundDS.java:615 has similar validation concern for compound byte
+             * conversion.
              */
             byteData = convertCompoundMemberBytes(dtype, (List<Object>)theObj);
         }
@@ -1581,6 +1584,8 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
     }
 
     /**
+     * Check if attribute's dataspace is a NULL.
+     *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     @Override
@@ -1590,6 +1595,8 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
     }
 
     /**
+     * Check if attribute is a single scalar point.
+     *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
     @Override
@@ -1759,11 +1766,11 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
                     strValue = "null";
                 else {
                     if (dtype.getDatatypeBase().isRef()) {
-                        ArrayList<byte[]> ref_value = (ArrayList<byte[]>)value;
-                        log.trace("toString: vlen value={}", ref_value);
+                        ArrayList<byte[]> refValue = (ArrayList<byte[]>)value;
+                        log.trace("toString: vlen value={}", refValue);
                         strValue = "{";
-                        for (int m = 0; m < ref_value.size(); m++) {
-                            byte[] curBytes = ref_value.get(m);
+                        for (int m = 0; m < refValue.size(); m++) {
+                            byte[] curBytes = refValue.get(m);
                             if (m > 0)
                                 strValue += ", ";
                             if (H5ReferenceType.zeroArrayCheck(curBytes))
@@ -1859,51 +1866,47 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
     /**
      * The general read and write attribute operations for hdf5 object data.
      *
-     * @param attr_id
-     *        the attribute to access
-     * @param ioType
-     *        the type of IO operation
-     * @param objBuf
-     *        the data buffer to use for write operation
+     * @param attrId the attribute to access
+     * @param ioType the type of IO operation
+     * @param objBuf the data buffer to use for write operation
      *
      * @return the attribute data
      *
-     * @throws Exception
-     *             if the data can not be retrieved
+     * @throws Exception if the data can not be retrieved
      */
     @Override
-    public Object AttributeCommonIO(long attr_id, H5File.IO_TYPE ioType, Object objBuf) throws Exception
+    public Object attributeCommonIO(long attrId, H5File.IO_TYPE ioType, Object objBuf) throws Exception
     {
         H5Datatype dsDatatype = (H5Datatype)getDatatype();
         Object theData        = null;
 
-        long dt_size = dsDatatype.getDatatypeSize();
-        log.trace("AttributeCommonIO(): create native");
+        long dtSize = dsDatatype.getDatatypeSize();
+        log.trace("attributeCommonIO(): create native");
         long tid = dsDatatype.createNative();
 
         if (ioType == H5File.IO_TYPE.READ) {
-            log.trace("AttributeCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}",
+            log.trace("attributeCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}",
                       dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(), dsDatatype.isRefObj());
 
             long lsize = 1;
             for (int j = 0; j < dims.length; j++)
                 lsize *= dims[j];
-            log.trace("AttributeCommonIO():read ioType dt_size={} lsize={}", dt_size, lsize);
+            log.trace("attributeCommonIO():read ioType dtSize={} lsize={}", dtSize, lsize);
 
             try {
                 // Read data.
-                Object attr_data = new byte[(int)(dt_size * lsize)];
+                Object attrData = new byte[(int)(dtSize * lsize)];
 
                 try {
-                    H5.H5Aread(attr_id, tid, attr_data);
+                    H5.H5Aread(attrId, tid, attrData);
                 }
                 catch (Exception ex) {
-                    log.debug("AttributeCommonIO(): H5Aread failure: ", ex);
+                    log.debug("attributeCommonIO(): H5Aread failure: ", ex);
                 }
-                theData = compoundTypeIO(dsDatatype, (int)lsize, dsDatatype, attr_data, new int[] {0});
+                theData = compoundTypeIO(dsDatatype, (int)lsize, dsDatatype, attrData, new int[] {0});
             }
             catch (Exception ex) {
-                log.debug("AttributeCommonIO():read ioType read failure: ", ex);
+                log.debug("attributeCommonIO():read ioType read failure: ", ex);
                 throw new Exception(ex.getMessage(), ex);
             }
             finally {
@@ -1911,7 +1914,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
             }
             for (int i = 0; i < ((ArrayList<Object[]>)theData).size(); i++) {
                 Object theobj = ((ArrayList<Object[]>)theData).get(i);
-                log.trace("AttributeCommonIO():read ioType data: {}", theobj);
+                log.trace("attributeCommonIO():read ioType data: {}", theobj);
             }
             originalBuf  = theData;
             isDataLoaded = true;
@@ -1919,10 +1922,10 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         else {
             theData = compoundTypeWriteIO(dsDatatype, dsDatatype, objBuf, new int[] {0});
             try {
-                H5.H5Awrite(attr_id, tid, theData);
+                H5.H5Awrite(attrId, tid, theData);
             }
             catch (Exception ex) {
-                log.debug("AttributeCommonIO(): H5Awrite failure: ", ex);
+                log.debug("attributeCommonIO(): H5Awrite failure: ", ex);
             }
             finally {
                 dsDatatype.close(tid);
@@ -1941,22 +1944,22 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
      *             if the data can not be retrieved
      */
     @Override
-    public Object AttributeSelection() throws Exception
+    public Object attributeSelection() throws Exception
     {
         return originalBuf;
         //        H5Datatype dsDatatype = (H5Datatype) getDatatype();
         //        Object theData = H5Datatype.allocateArray(dsDatatype, (int)nPoints);
         //        if (dsDatatype.isText() && convertByteToString && (theData instanceof byte[])) {
-        //        log.trace("AttributeSelection(): isText: converting byte array to string array");
+        //        log.trace("attributeSelection(): isText: converting byte array to string array");
         //        theData = byteToString((byte[]) theData, (int) dsDatatype.getDatatypeSize());
         //    }
         //    else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
-        //        log.trace("AttributeSelection(): isFloat: converting byte array to BigDecimal array");
+        //        log.trace("attributeSelection(): isFloat: converting byte array to BigDecimal array");
         //        theData = dsDatatype.byteToBigDecimal(0, (int)nPoints, (byte[]) theData);
         //    }
         //    else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() &&
         //    dsDatatype.getDatatypeBase().getDatatypeSize() == 16) {
-        //        log.trace("AttributeSelection(): isArray and isFloat: converting byte array to BigDecimal
+        //        log.trace("attributeSelection(): isArray and isFloat: converting byte array to BigDecimal
         //        array"); long[] arrayDims = dsDatatype.getArrayDims(); int asize = (int)nPoints; for (int j
         //        = 0; j < arrayDims.length; j++) {
         //            asize *= arrayDims[j];
@@ -1978,7 +1981,7 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
 
         //                int k = (int)startDims[selectedIndex[2]] * (int)getDepth();
         //                int index = row * (int)getWidth() + col;
-        //                log.trace("compoundAttributeSelection(): point{} row:col:k={}:{}:{}", curFrame, row,
+        // log.trace("compound attributeSelection(): point{} row:col:k={}:{}:{}", curFrame, row,
         //                col, k); int fromIndex = ((int)curFrame * (int)getWidth() * (int)getHeight() +
         //                                        col * (int)getHeight() +
         //                                        row);// * (int) dsDatatype.getDatatypeSize();
@@ -1992,13 +1995,13 @@ public class H5CompoundAttr extends CompoundDS implements H5Attribute {
         //                for (int i = 0; i < ((ArrayList<Object[]>)theOrig).size(); i++) {
         //                    Object theOrigobj = ((ArrayList<Object[]>)theOrig).get(i);
         //                    Object theDataobj = ((ArrayList<Object[]>)theData).get(i);
-        //                    log.trace("compoundAttributeSelection(): theOrig={} theData={}", theOrigobj,
+        // log.trace("compound attributeSelection(): theOrig={} theData={}", theOrigobj,
         //                    theDataobj); System.arraycopy(theOrig, fromIndex, theData, toIndex, objSize);
         //                }
         //            }
         //        }
 
-        //        log.trace("compoundAttributeSelection(): theData={}", theData);
+        // log.trace("compound attributeSelection(): theData={}", theData);
         //        return theData;
     }
 }

@@ -14,9 +14,6 @@
 
 package hdf.view.dialog;
 
-import java.awt.GraphicsEnvironment;
-import java.io.File;
-
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
@@ -37,7 +34,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -50,34 +46,51 @@ public class UserOptionsHDFPage extends UserOptionsDefaultPage {
 
     private Text fileExtField;
     private Combo pluginCombo;
-    private Button clearTextButton, deleteTextButton, insertTextButton;
-    private Button checkConvertEnum, checkShowRegRefValues, helpButton;
-    private Button checkNativeOrder, checkDecOrder, checkIncOrder;
-    private Button checkIndexName, checkIndexCreateOrder;
-    private Button earlyLibVersion, early18LibVersion, early110LibVersion, early112LibVersion,
-        early114LibVersion, early200LibVersion, earlyLateLibVersion;
-    private Button lateLibVersion, late18LibVersion, late110LibVersion, late112LibVersion, late114LibVersion,
-        late200LibVersion, lateLateLibVersion;
+    private Button clearTextButton;
+    private Button deleteTextButton;
+    private Button insertTextButton;
+    private Button checkConvertEnum;
+    private Button checkShowRegRefValues;
+    private Button helpButton;
+    private Button checkNativeOrder;
+    private Button checkDecOrder;
+    private Button checkIncOrder;
+    private Button checkIndexName;
+    private Button checkIndexCreateOrder;
+    private Button earlyLibVersion;
+    private Button early18LibVersion;
+    private Button early110LibVersion;
+    private Button early112LibVersion;
+    private Button early114LibVersion;
+    private Button early200LibVersion;
+    private Button earlyLateLibVersion;
+    private Button lateLibVersion;
+    private Button late18LibVersion;
+    private Button late110LibVersion;
+    private Button late112LibVersion;
+    private Button late114LibVersion;
+    private Button late200LibVersion;
+    private Button lateLateLibVersion;
     private Button pluginDirButton;
 
-    /** Default early libversion for files */
+    /** Default early libversion for files. */
     private static String earlyLibVers;
 
-    /** Default late libversion for files */
+    /** Default late libversion for files. */
     private static String lateLibVers;
 
-    /** Default index type for files */
+    /** Default index type for files. */
     private static String indexType;
 
-    /** Default index ordering for files */
+    /** Default index ordering for files. */
     private static String indexOrder;
 
-    /** Path to plugins */
+    /** Path to plugins. */
     private String pluginDir            = null;
     private int pluginDirIndex          = -1;
     private boolean isPluginListChanged = false;
 
-    /** a list of plugin paths */
+    /** a list of plugin paths. */
     private static String[] pluginPathList;
 
     /**

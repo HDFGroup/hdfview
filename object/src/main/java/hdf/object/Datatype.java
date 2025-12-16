@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
  *
  * A datatype has four basic characteristics: class, size, byte order and sign. These characteristics are
  * defined in the See <a
- * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
- * Datatypes in HDF5 User Guide</a>
+ * href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t__u_g.html#sec_datatype">HDF5 Datatypes
+ * in HDF5 User Guide</a>
  *
  * These characteristics apply to all the sub-classes. The sub-classes may have different ways to describe a
  * datatype. We here define the <strong> native datatype</strong> to the datatype used by the sub-class. For
@@ -56,149 +56,112 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     public static final int NATIVE = -1;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The error class of HDFView Datatype.
      */
     public static final int CLASS_NO_CLASS = -1;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The integer types class of HDFView Datatype.
      */
     public static final int CLASS_INTEGER = 0;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The floating-point types class of HDFView Datatype.
      */
     public static final int CLASS_FLOAT = 1;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The character types class of HDFView Datatype.
      */
     public static final int CLASS_CHAR = 2;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The character string types class of HDFView Datatype.
      */
     public static final int CLASS_STRING = 3;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The bit field types class of HDFView Datatype.
      */
     public static final int CLASS_BITFIELD = 4;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The opaque types class of HDFView Datatype.
      */
     public static final int CLASS_OPAQUE = 5;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The compound types class of HDFView Datatype.
      */
     public static final int CLASS_COMPOUND = 6;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The reference types class of HDFView Datatype.
      */
     public static final int CLASS_REFERENCE = 7;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The enumeration types class of HDFView Datatype.
      */
     public static final int CLASS_ENUM = 8;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The variable-Length types class of HDFView Datatype.
      */
     public static final int CLASS_VLEN = 9;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The array types class of HDFView Datatype.
      */
     public static final int CLASS_ARRAY = 10;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The date and time types class of HDFView Datatype.
      */
     public static final int CLASS_TIME = 11;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The complex number types class of HDFView Datatype.
      */
     public static final int CLASS_COMPLEX = 12;
 
     /**
-     * See <a href=
-     * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The little endian HDFView Datatype Byte order.
      */
     public static final int ORDER_LE = 0;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The big endian HDFView Datatype Byte order.
      */
     public static final int ORDER_BE = 1;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The VAX mixed endian HDFView Datatype Byte order.
      */
     public static final int ORDER_VAX = 2;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The no particular order (strings, bits,..) HDFView Datatype Byte order.
      */
     public static final int ORDER_NONE = 3;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The Compound type with mixed member orders HDFView Datatype Byte order.
+     */
+    public static final int ORDER_MIXED = 4;
+
+    /**
+     * The unsigned type HDFView Datatype integer sign scheme.
      */
     public static final int SIGN_NONE = 0;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The two's complement HDFView Datatype integer sign scheme.
      */
     public static final int SIGN_2 = 1;
 
     /**
-     * See <a
-     * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_t__u_g.html#sec_datatype">HDF5
-     * Datatypes in HDF5 User Guide</a>
+     * The sentinel (not used) HDFView Datatype integer sign scheme.
      */
     public static final int NSGN = 2;
 
@@ -239,7 +202,7 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     protected Datatype baseType;
 
     /**
-     * Determines whether this datatype is a named datatype
+     * Determines whether this datatype is a named datatype.
      */
     protected boolean isNamed = false;
 
@@ -299,17 +262,15 @@ public abstract class Datatype extends HObject implements MetaDataContainer {
     }
 
     /**
+     * Constructs a named datatype with a given file, name, path and id.
+     *
+     * @param theFile  the HDF file.
+     * @param typeName the name of the datatype, e.g "12-bit Integer".
+     * @param typePath the full group path of the datatype, e.g. "/datatypes/".
+     * @param oid      the oidof the datatype.
+     *
      * @deprecated Not for public use in the future.<br>
      *             Using {@link #Datatype(FileFormat, String, String)}
-     *
-     * @param theFile
-     *            the HDF file.
-     * @param typeName
-     *            the name of the datatype, e.g "12-bit Integer".
-     * @param typePath
-     *            the full group path of the datatype, e.g. "/datatypes/".
-     * @param oid
-     *            the oidof the datatype.
      */
     @Deprecated
     public Datatype(FileFormat theFile, String typeName, String typePath, long[] oid)

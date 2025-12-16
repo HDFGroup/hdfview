@@ -37,10 +37,10 @@ public class UserOptionsDialog extends PreferenceDialog {
 
     private Font curFont;
 
-    /** The setting of the root directory */
+    /** The setting of the root directory. */
     protected String rootDir = null;
 
-    /** The setting of the working directory */
+    /** The setting of the working directory. */
     protected String workDir = null;
 
     /**

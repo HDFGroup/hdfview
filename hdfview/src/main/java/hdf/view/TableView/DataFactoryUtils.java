@@ -37,14 +37,14 @@ import org.slf4j.LoggerFactory;
 public class DataFactoryUtils {
     private static final Logger log = LoggerFactory.getLogger(DataFactoryUtils.class);
 
-    /** the error string value */
+    /** the error string value. */
     public static final String errStr = "*ERROR*";
-    /** the null sting value */
+    /** the null sting value. */
     public static final String nullStr = "Null";
 
-    /** the COL_TO_BASE_CLASS_MAP_INDEX value */
+    /** the COL_TO_BASE_CLASS_MAP_INDEX value. */
     public static final int COL_TO_BASE_CLASS_MAP_INDEX = 0;
-    /** the CMPD_START_IDX_MAP_INDEX value */
+    /** the CMPD_START_IDX_MAP_INDEX value. */
     public static final int CMPD_START_IDX_MAP_INDEX = 1;
 
     /**

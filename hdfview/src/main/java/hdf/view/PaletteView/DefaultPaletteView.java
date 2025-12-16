@@ -19,7 +19,6 @@ import java.awt.Toolkit;
 import java.awt.image.IndexColorModel;
 import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import hdf.object.FileFormat;
 import hdf.object.HObject;
@@ -165,7 +164,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         createUI();
     }
 
-    /** Create the visual components */
+    /** Create the visual components. */
     public void createUI()
     {
         Shell parent = getParent();
@@ -382,7 +381,11 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         shell.open();
     }
 
-    /** @return the data object displayed in this data viewer */
+    /**
+     * get the data object displayed.
+     *
+     * @return the data object displayed in this data viewer
+     */
     @Override
     public HObject getDataObject()
     {
@@ -447,9 +450,11 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
 
         private final int PALETTE_MAX = 255;
 
-        private int dragX0, dragY0; // starting point of mouse drag
+        // starting point of mouse drag
+        private int dragX0;
+        private int dragY0;
 
-        public ChartCanvas(Composite parent, int style)
+        ChartCanvas(Composite parent, int style)
         {
             super(parent, style);
 
@@ -559,7 +564,10 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
                 }
             });
 
-            // TODO: editing behavior not quite correct yet
+            // TODO(HDFView) [2025-12]: Fix palette editing mouse interaction behavior.
+            // Current mouse move handling doesn't correctly track palette entry selection or editing state.
+            // Need to verify: cursor feedback, selection highlighting, and edit mode transitions.
+            // Low priority - basic palette editing works but UX could be improved.
             this.addMouseMoveListener(new MouseMoveListener() {
                 @Override
                 public void mouseMove(MouseEvent e)
@@ -641,7 +649,7 @@ public class DefaultPaletteView extends Dialog implements PaletteView {
         private static final String RGBNAME = "Color";
         private static final String IDXNAME = "Index";
 
-        public PaletteValueTable(Shell parent, int style) { super(parent, style); }
+        PaletteValueTable(Shell parent, int style) { super(parent, style); }
 
         public void open()
         {

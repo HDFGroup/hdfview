@@ -57,6 +57,7 @@ jobs:
       run: |
         cat > build.properties << EOF
         hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+        hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/hdf5/plugins
         hdf.lib.dir=/usr/lib/x86_64-linux-gnu
         platform.hdf.lib=/usr/lib/x86_64-linux-gnu
         ci.build=true
@@ -155,18 +156,164 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
+    - name: Cache HDF Libraries
+      id: cache-hdf
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/hdf4
+          ${{ github.workspace }}/hdf5
+        key: ${{ runner.os }}-hdf-github-${{ github.run_id }}
+        restore-keys: |
+          ${{ runner.os }}-hdf-github-
+
+    - name: Download and Install HDF4 from GitHub
+      if: steps.cache-hdf.outputs.cache-hit != 'true'
+      run: |
+        echo "Downloading HDF4 from GitHub releases..."
+        gh release download snapshot \
+          --repo HDFGroup/hdf4 \
+          --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz"
+
+        echo "Extracting HDF4..."
+        tar -zxf hdf4-master-*-ubuntu-2404_gcc.tar.gz
+        cd hdf4
+        tar -zxf HDF-*-Linux.tar.gz --strip-components 1
+
+        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        FILE_NAME_HDF=$(ls $HDF4DIR)
+        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Download and Install HDF5 from GitHub
+      if: steps.cache-hdf.outputs.cache-hit != 'true'
+      run: |
+        echo "Downloading HDF5 from GitHub releases..."
+        for i in 1 2 3; do
+          echo "Download attempt $i of 3..."
+          if gh release download snapshot \
+            --repo HDFGroup/hdf5 \
+            --pattern "hdf5-develop-*-ubuntu-2404_gcc.tar.gz"; then
+            break
+          fi
+          if [ $i -lt 3 ]; then
+            echo "Download failed, retrying in 5 seconds..."
+            sleep 5
+          else
+            echo "All download attempts failed"
+            exit 1
+          fi
+        done
+
+        echo "Extracting HDF5..."
+        tar -zxf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
+        cd hdf5
+
+        HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
+        echo "Extracting $HDF5_TARBALL..."
+        tar -zxf "$HDF5_TARBALL" --strip-components 1
+
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
+        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Set Environment Variables from Cache
+      if: steps.cache-hdf.outputs.cache-hit == 'true'
+      run: |
+        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
+        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
+        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+
+        echo "Using cached HDF libraries:"
+        echo "HDF4: $HDF4DIR$FILE_NAME_HDF"
+        echo "HDF5: $HDF5DIR$FILE_NAME_HDF5"
+
+    - name: Install HDF JARs to Local Maven Repository
+      run: |
+        echo "Installing HDF JARs to local Maven repository..."
+
+        # Copy JARs to repository directory
+        mkdir -p repository/lib
+        cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs found"
+        cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs found"
+
+        # List available JARs
+        echo "JARs in repository/lib:"
+        ls -la repository/lib/*.jar 2>/dev/null || echo "No JARs found"
+
+        # Install jarhdf5
+        if [ -f repository/lib/jarhdf5-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          mvn install:install-file -Dfile="$JAR_FILE" \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE"
+        fi
+
+        # Install jarhdf
+        if [ -f repository/lib/jarhdf-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          mvn install:install-file -Dfile="$JAR_FILE" \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE"
+        fi
+
+        # Install fits
+        if [ -f repository/lib/fits.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: fits.jar"
+        fi
+
+        # Install netcdf
+        if [ -f repository/lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: netcdf.jar"
+        fi
+
     - name: Set up build.properties
       run: |
         cat > build.properties << EOF
-        hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
-        hdf.lib.dir=/usr/lib/x86_64-linux-gnu
-        platform.hdf.lib=/usr/lib/x86_64-linux-gnu
+        # HDF5 Configuration
+        hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
+        hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
+
+        # HDF4 Configuration
+        hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
+
+        # Platform Configuration
+        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
+
+        # CI-specific settings
         ci.build=true
         EOF
 
+        echo "Generated build.properties:"
+        cat build.properties
+
     - name: Build for CodeQL Analysis
       run: |
+        echo "::group::Building repository module"
+        # Build repository module (needed for dependencies) but don't install it
+        mvn compile -pl repository -B -Ddependency-check.skip=true
+        echo "::endgroup::"
+
+        echo "::group::Building for CodeQL analysis"
         mvn clean compile -B -DskipTests
+        echo "::endgroup::"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
@@ -198,6 +345,7 @@ jobs:
       run: |
         cat > build.properties << EOF
         hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+        hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/hdf5/plugins
         hdf.lib.dir=/usr/lib/x86_64-linux-gnu
         platform.hdf.lib=/usr/lib/x86_64-linux-gnu
         ci.build=true

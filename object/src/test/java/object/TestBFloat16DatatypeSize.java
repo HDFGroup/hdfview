@@ -19,7 +19,6 @@ import hdf.hdf5lib.HDF5Constants;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.Test;
  */
 @Tag("unit")
 @DisplayName("BFLOAT16 Datatype Size Consistency Test")
-@Disabled("Temporarily disabled - requires BFLOAT16 support from fix-float8-float16-bfloat16-support branch")
 public class TestBFloat16DatatypeSize {
 
     private static final String TEST_FILE      = "../hdfview/src/test/resources/uitest/tbfloat16.h5";

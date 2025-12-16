@@ -77,7 +77,7 @@ public class NC2Group extends Group {
      */
     private List netcdfAttributeList;
 
-    /** The default object ID for NC2 objects */
+    /** The default object ID for NC2 objects. */
     private static final long[] DEFAULT_OID = {0};
 
     /**

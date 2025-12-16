@@ -54,10 +54,10 @@ public class NewDatatypeDialog extends NewDataObjectDialog {
 
     private Combo parentChoice;
 
-    /** TextField for entering the name of the object */
+    /** TextField for entering the name of the object. */
     protected Text nameField;
 
-    /** a list of current groups */
+    /** a list of current groups. */
     private List<Group> groupList;
 
     /**

@@ -112,7 +112,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get the file extensions associated with this DefaultFileFilter
+     * Get the file extensions associated with this DefaultFileFilter.
      *
      * @return the file extensions associated with this DefaultFileFilter
      */
@@ -163,7 +163,7 @@ public class DefaultFileFilter {
 
     /**
      * Get the human readable description of this filter. For example: "JPEG and GIF Image Files (*.jpg,
-     * *.gif)"
+     * *.gif)".
      *
      * @return the human readable description of this filter.
      */
@@ -233,7 +233,7 @@ public class DefaultFileFilter {
     public boolean isExtensionListInDescription() { return useExtensionsInDescription; }
 
     /**
-     * Get the file filter for HDF4/5 file
+     * Get the file filter for HDF4/5 file.
      *
      * @return a file filter for HDF4/5 file.
      */
@@ -251,7 +251,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for NetCDF3 file
+     * Get a file filter for NetCDF3 file.
      *
      * @return a file filter for NetCDF3 file.
      */
@@ -265,7 +265,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for HDF4 file
+     * Get a file filter for HDF4 file.
      *
      * @return a file filter for HDF4 file.
      */
@@ -281,7 +281,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for HDF5 file
+     * Get a file filter for HDF5 file.
      *
      * @return a file filter for HDF5 file.
      */
@@ -296,7 +296,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for JPEG image files
+     * Get a file filter for JPEG image files.
      *
      * @return a file filter for JPEG image files.
      */
@@ -315,7 +315,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for TIFF image files
+     * Get a file filter for TIFF image files.
      *
      * @return a file filter for TIFF image files.
      */
@@ -330,7 +330,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for PNG image files
+     * Get a file filter for PNG image files.
      *
      * @return a file filter for PNG image files.
      */
@@ -344,7 +344,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for BMP image files
+     * Get a file filter for BMP image files.
      *
      * @return a file filter for BMP image files.
      */
@@ -359,7 +359,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for GIF image files
+     * Get a file filter for GIF image files.
      *
      * @return a file filter for GIF image files.
      */
@@ -373,7 +373,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for GIF, JPEG, BMP, or PNG image files
+     * Get a file filter for GIF, JPEG, BMP, or PNG image files.
      *
      * @return a file filter for GIF, JPEG, BMP, or PNG image files.
      */
@@ -396,7 +396,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for text file
+     * Get a file filter for text file.
      *
      * @return a file filter for text file.
      */
@@ -411,7 +411,7 @@ public class DefaultFileFilter {
     }
 
     /**
-     * Get a file filter for binary file
+     * Get a file filter for binary file.
      *
      * @return a file filter for binary file.
      */

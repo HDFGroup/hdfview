@@ -15,17 +15,9 @@
 package hdf.object;
 
 import java.lang.reflect.Array;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +30,11 @@ import org.slf4j.LoggerFactory;
  * data may take many library calls if we use the library APIs directly. The read() and write functions hide
  * all the details of these calls from users.
  *
- * For more details on dataset and attributes, See <a href=
- * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_d__u_g.html#sec_dataset">HDF5
- * Datasets in HDF5 User Guide</a> <a href=
- * "https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
- * Attributes in HDF5 User Guide</a>
+ * For more details on dataset and attributes, See
+ * <a href= "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_d__u_g.html#sec_dataset">HDF5 Datasets
+ * in HDF5 User Guide</a> <a href=
+ * "https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5 Attributes in
+ * HDF5 User Guide</a>
  *
  * @see hdf.object.ScalarDS
  * @see hdf.object.CompoundDS
@@ -63,7 +55,7 @@ public abstract class Dataset extends HObject implements DataFormat {
     /**
      * The type of space for the dataset.
      */
-    protected int space_type;
+    protected int spaceType;
 
     /**
      * The number of dimensions of the dataset.
@@ -71,12 +63,12 @@ public abstract class Dataset extends HObject implements DataFormat {
     protected int rank;
 
     /**
-     * The current dimension sizes of the dataset
+     * The current dimension sizes of the dataset.
      */
     protected long[] dims;
 
     /**
-     * The max dimension sizes of the dataset
+     * The max dimension sizes of the dataset.
      */
     protected long[] maxDims;
 
@@ -173,22 +165,22 @@ public abstract class Dataset extends HObject implements DataFormat {
      */
     protected String[] dimNames;
 
-    /** Flag to indicate if the byte[] array is converted to strings */
+    /** Flag to indicate if the byte[] array is converted to strings. */
     protected boolean convertByteToString = true;
 
     /** Flag to indicate if data values are loaded into memory. */
     protected boolean isDataLoaded = false;
 
-    /** Flag to indicate if this dataset has been initialized */
+    /** Flag to indicate if this dataset has been initialized. */
     protected boolean inited = false;
 
     /** The number of data points in the memory buffer. */
     protected long nPoints = 1;
 
-    /** Flag to indicate if the dataspace is NULL */
+    /** Flag to indicate if the dataspace is NULL. */
     protected boolean isNULL = false;
 
-    /** Flag to indicate if the data is a single scalar point */
+    /** Flag to indicate if the data is a single scalar point. */
     protected boolean isScalar = false;
 
     /** True if this dataset is an image. */
@@ -226,17 +218,15 @@ public abstract class Dataset extends HObject implements DataFormat {
     public Dataset(FileFormat theFile, String dsName, String dsPath) { this(theFile, dsName, dsPath, null); }
 
     /**
+     * Constructs a Dataset object with a given file, name and path.
+     *
+     * @param theFile the file that contains the dataset.
+     * @param dsName  the name of the Dataset, e.g. "dset1".
+     * @param dsPath  the full group path of this Dataset, e.g. "/arrays/".
+     * @param oid     the oid of this Dataset.
+     *
      * @deprecated Not for public use in the future. <br>
      *             Using {@link #Dataset(FileFormat, String, String)}
-     *
-     * @param theFile
-     *            the file that contains the dataset.
-     * @param dsName
-     *            the name of the Dataset, e.g. "dset1".
-     * @param dsPath
-     *            the full group path of this Dataset, e.g. "/arrays/".
-     * @param oid
-     *            the oid of this Dataset.
      */
     @Deprecated
     public Dataset(FileFormat theFile, String dsName, String dsPath, long[] oid)
@@ -246,7 +236,7 @@ public abstract class Dataset extends HObject implements DataFormat {
 
         datatype       = null;
         rank           = -1;
-        space_type     = -1;
+        spaceType      = -1;
         data           = null;
         dims           = null;
         maxDims        = null;
@@ -290,7 +280,7 @@ public abstract class Dataset extends HObject implements DataFormat {
     @Override
     public final int getSpaceType()
     {
-        return space_type;
+        return spaceType;
     }
 
     /**
@@ -505,30 +495,25 @@ public abstract class Dataset extends HObject implements DataFormat {
     /**
      * Creates a new dataset and writes the data buffer to the new dataset.
      *
-     * This function allows applications to create a new dataset for a given
-     * data buffer. For example, users can select a specific interesting part
-     * from a large image and create a new image with the selection.
+     * This function allows applications to create a new dataset for a given data buffer. For example, users
+     * can select a specific interesting part from a large image and create a new image with the selection.
      *
-     * The new dataset retains the datatype and dataset creation properties of
-     * this dataset.
+     * The new dataset retains the datatype and dataset creation properties of this dataset.
      *
-     * @param pgroup
-     *            the group which the dataset is copied to.
-     * @param name
-     *            the name of the new dataset.
-     * @param dims
-     *            the dimension sizes of the the new dataset.
-     * @param data
-     *            the data values of the subset to be copied.
+     * @param pgroup   the group which the dataset is copied to.
+     * @param name     the name of the new dataset.
+     * @param copydims the dimension sizes of the the new dataset.
+     * @param copydata the data values of the subset to be copied.
      *
      * @return the new dataset.
      *
      * @throws Exception if dataset can not be copied
      */
-    public abstract Dataset copy(Group pgroup, String name, long[] dims, Object data) throws Exception;
+    public abstract Dataset copy(Group pgroup, String name, long[] copydims, Object copydata)
+        throws Exception;
 
     /**
-     * The status of initialization for this object
+     * The status of initialization for this object.
      *
      * @return true if the data has been initialized
      */
@@ -539,7 +524,7 @@ public abstract class Dataset extends HObject implements DataFormat {
     }
 
     /**
-     * Resets selection of dataspace
+     * Resets selection of dataspace.
      */
     protected void resetSelection()
     {
@@ -750,8 +735,15 @@ public abstract class Dataset extends HObject implements DataFormat {
             dataValue = getData();
 
             /*
-             * TODO: Converting data from unsigned C integers to Java integers
-             *       is currently unsupported for Compound Datasets.
+             * TODO(HDFView) [2025-12]: Implement unsigned-to-signed conversion for CompoundDS members.
+             * Currently unsigned C integer conversion is skipped for compound datasets.
+             * Java lacks native unsigned types, so conversion must use wider types or special handling:
+             * - unsigned byte  -> short
+             * - unsigned short -> int
+             * - unsigned int   -> long
+             * - unsigned long  -> BigInteger or special bit handling
+             * Impact: Compound datasets with unsigned members display incorrect values (appear negative).
+             * Related: DefaultBaseTableView.java line 1428 handles display-side conversion.
              */
             if (!(this instanceof CompoundDS))
                 convertFromUnsignedC();
@@ -982,12 +974,15 @@ public abstract class Dataset extends HObject implements DataFormat {
     }
 
     /**
-     * @deprecated Not for public use in the future. <br>
-     *             Using {@link #convertFromUnsignedC(Object, Object)}
+     * Converts one-dimension array of unsigned C-type integers to a new array of appropriate Java integer in
+     * memory.
      *
-     * @param dataIN  the object data
+     * @param dataIN the object data
      *
      * @return the converted object
+     *
+     * @deprecated Not for public use in the future. <br>
+     *             Using {@link #convertFromUnsignedC(Object, Object)}
      */
     @Deprecated
     public static Object convertFromUnsignedC(Object dataIN)
@@ -1125,13 +1120,14 @@ public abstract class Dataset extends HObject implements DataFormat {
     }
 
     /**
-     * @deprecated Not for public use in the future. <br>
-     *             Using {@link #convertToUnsignedC(Object, Object)}
+     * Converts the array of converted unsigned integers back to unsigned C-type integer data in memory.
      *
-     * @param dataIN
-     *            the input 1D array of the unsigned C-type integers.
+     * @param dataIN the input 1D array of the unsigned C-type integers.
      *
      * @return the upgraded 1D array of Java integers.
+     *
+     * @deprecated Not for public use in the future. <br>
+     *             Using {@link #convertToUnsignedC(Object, Object)}
      */
     @Deprecated
     public static Object convertToUnsignedC(Object dataIN)
@@ -1376,14 +1372,14 @@ public abstract class Dataset extends HObject implements DataFormat {
     }
 
     /**
-     * Check if dataset's dataspace is a NULL
+     * Check if dataset's dataspace is a NULL.
      *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     public boolean isNULL() { return isNULL; }
 
     /**
-     * Check if dataset is a single scalar point
+     * Check if dataset is a single scalar point.
      *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
@@ -1598,8 +1594,16 @@ public abstract class Dataset extends HObject implements DataFormat {
 
             if (value == null)
                 strValue = "null";
-            else
-                strValue = Float.toString(Float.float16ToFloat((short)value));
+            else {
+                // NOTE: For Float16/BFLOAT16, data may already be in Float format if native
+                // representation required it. Only convert if still in Short format.
+                if (value instanceof Short)
+                    strValue = Float.toString(Float.float16ToFloat((short)value));
+                else if (value instanceof Float)
+                    strValue = Float.toString((float)value);
+                else
+                    strValue = value.toString();
+            }
 
             // if (count > 0 && strValue.length() > count)
             // truncate the extra characters
@@ -1612,8 +1616,16 @@ public abstract class Dataset extends HObject implements DataFormat {
 
                 if (value == null)
                     strValue = "null";
-                else
-                    strValue = Float.toString(Float.float16ToFloat((short)value));
+                else {
+                    // NOTE: For Float16/BFLOAT16, data may already be in Float format if native
+                    // representation required it. Only convert if still in Short format.
+                    if (value instanceof Short)
+                        strValue = Float.toString(Float.float16ToFloat((short)value));
+                    else if (value instanceof Float)
+                        strValue = Float.toString((float)value);
+                    else
+                        strValue = value.toString();
+                }
 
                 if (count > 0 && strValue.length() > count)
                     // truncate the extra characters

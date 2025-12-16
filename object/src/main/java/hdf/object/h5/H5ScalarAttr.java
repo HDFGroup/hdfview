@@ -15,22 +15,11 @@
 package hdf.object.h5;
 
 import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
-import hdf.object.Attribute;
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -38,16 +27,11 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
-import hdf.object.h5.H5Attribute;
-import hdf.object.h5.H5Datatype;
-import hdf.object.h5.H5ReferenceType;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.HDFNativeData;
 import hdf.hdf5lib.exceptions.HDF5DataFiltersException;
 import hdf.hdf5lib.exceptions.HDF5Exception;
-import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +42,8 @@ import org.slf4j.LoggerFactory;
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * For more details on attributes, <a
- * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
+ * For more details on attributes,
+ * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5
  * Attributes in HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
@@ -98,14 +82,14 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
 
     private static final Logger log = LoggerFactory.getLogger(H5ScalarAttr.class);
 
-    /** The HObject to which this NC2Attribute is attached, Attribute interface */
+    /** The HObject to which this NC2Attribute is attached, Attribute interface. */
     protected HObject parentObject;
 
-    /** additional information and properties for the attribute, Attribute interface */
+    /** additional information and properties for the attribute, Attribute interface. */
     private transient Map<String, Object> properties;
 
     /**
-     * flag to indicate if the datatype in file is the same as dataype in memory
+     * flag to indicate if the datatype in file is the same as dataype in memory.
      */
     protected boolean isNativeDatatype = false;
 
@@ -315,15 +299,15 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         aid = open();
         if (aid >= 0) {
             try {
-                sid        = H5.H5Aget_space(aid);
-                rank       = H5.H5Sget_simple_extent_ndims(sid);
-                space_type = H5.H5Sget_simple_extent_type(sid);
-                if (space_type == HDF5Constants.H5S_NULL)
+                sid       = H5.H5Aget_space(aid);
+                rank      = H5.H5Sget_simple_extent_ndims(sid);
+                spaceType = H5.H5Sget_simple_extent_type(sid);
+                if (spaceType == HDF5Constants.H5S_NULL)
                     isNULL = true;
                 else
                     isNULL = false;
                 tid = H5.H5Aget_type(aid);
-                log.trace("init(): tid={} sid={} rank={} space_type={}", tid, sid, rank, space_type);
+                log.trace("init(): tid={} sid={} rank={} spaceType={}", tid, sid, rank, spaceType);
 
                 if (rank == 0) {
                     // a scalar data point
@@ -357,7 +341,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                             datatype = new H5Datatype(getFileFormat(), tid);
 
                         log.trace(
-                            "init(): tid={} is tclass={} has isText={} : isNamed={} :  isVLEN={} : isEnum={} : isUnsigned={} : isRegRef={}",
+                            "init(): tid={} is tclass={} has isText={}: isNamed={}:  isVLEN={}: isEnum={}: isUnsigned={}: isRegRef={}",
                             tid, datatype.getDatatypeClass(), ((H5Datatype)datatype).isText(),
                             datatype.isNamed(), datatype.isVLEN(), datatype.isEnum(), datatype.isUnsigned(),
                             ((H5Datatype)datatype).isRegRef());
@@ -436,31 +420,17 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                 try {
                     tid = H5.H5Aget_type(aid);
                     log.trace("getDatatype(): isNativeDatatype={}", isNativeDatatype);
-                    if (!isNativeDatatype) {
-                        long tmptid = -1;
-                        try {
-                            tmptid = H5Datatype.toNative(tid);
-                            if (tmptid >= 0) {
-                                try {
-                                    H5.H5Tclose(tid);
-                                }
-                                catch (Exception ex2) {
-                                    log.debug("getDatatype(): H5Tclose(tid {}) failure: ", tid, ex2);
-                                }
-                                tid = tmptid;
-                            }
-                        }
-                        catch (Exception ex) {
-                            log.debug("getDatatype(): toNative: ", ex);
-                        }
-                    }
-                    int nativeClass = H5.H5Tget_class(tid);
-                    if (nativeClass == HDF5Constants.H5T_REFERENCE) {
+
+                    // For display purposes, create H5Datatype from the FILE type, not NATIVE type.
+                    // This preserves the correct bit width (e.g., "16-bit" for Float16/BFLOAT16).
+                    // The toNative conversion happens later during data reading in createNative().
+                    int fileTypeClass = H5.H5Tget_class(tid);
+                    if (fileTypeClass == HDF5Constants.H5T_REFERENCE) {
                         long lsize = 1;
                         long sid   = H5.H5Aget_space(aid);
                         int rank   = H5.H5Sget_simple_extent_ndims(sid);
                         if (rank > 0) {
-                            long dims[] = new long[rank];
+                            long[] dims = new long[rank];
                             H5.H5Sget_simple_extent_dims(sid, dims, null);
                             log.trace("getDatatype(): rank={}, dims={}", rank, dims);
                             for (int j = 0; j < dims.length; j++) {
@@ -575,11 +545,11 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
 
         nPoints = 1;
         log.trace("getData(): selectedDims length={}", selectedDims.length);
-        int point_len = selectedDims.length;
+        int pointLen = selectedDims.length;
         // Partial data for 3 or more dimensions
         if (rank > 2)
-            point_len = 3;
-        for (int j = 0; j < point_len; j++) {
+            pointLen = 3;
+        for (int j = 0; j < pointLen; j++) {
             log.trace("getData(): selectedDims[{}]={}", j, selectedDims[j]);
             nPoints *= selectedDims[j];
         }
@@ -591,7 +561,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         //     where selectedIndex[1] is the col dimension
         //     where selectedIndex[2] is the frame dimension
         if (rank > 2)
-            data = AttributeSelection();
+            data = attributeSelection();
 
         return data;
     }
@@ -688,7 +658,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
             init();
 
         try {
-            readData = scalarAttributeCommonIO(H5File.IO_TYPE.READ, null);
+            readData = scalarattributeCommonIO(H5File.IO_TYPE.READ, null);
         }
         catch (Exception ex) {
             log.debug("read(): failed to read scalar attribute: ", ex);
@@ -724,7 +694,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         ((MetaDataContainer)getParentObject()).writeMetadata(this);
 
         try {
-            scalarAttributeCommonIO(H5File.IO_TYPE.WRITE, buf);
+            scalarattributeCommonIO(H5File.IO_TYPE.WRITE, buf);
         }
         catch (Exception ex) {
             log.debug("write(Object): failed to write to scalar attribute: ", ex);
@@ -733,7 +703,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         resetSelection();
     }
 
-    private Object scalarAttributeCommonIO(H5File.IO_TYPE ioType, Object writeBuf) throws Exception
+    private Object scalarattributeCommonIO(H5File.IO_TYPE ioType, Object writeBuf) throws Exception
     {
         H5Datatype dsDatatype = (H5Datatype)getDatatype();
         Object theData        = null;
@@ -743,23 +713,23 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
          */
         if (ioType == H5File.IO_TYPE.WRITE) {
             if (writeBuf == null) {
-                log.debug("scalarAttributeCommonIO(): writeBuf is null");
+                log.debug("scalarattributeCommonIO(): writeBuf is null");
                 throw new Exception("write buffer is null");
             }
         }
 
         long aid = open();
         if (aid >= 0) {
-            log.trace("scalarAttributeCommonIO(): isDataLoaded={}", isDataLoaded);
+            log.trace("scalarattributeCommonIO(): isDataLoaded={}", isDataLoaded);
             try {
-                theData = AttributeCommonIO(aid, ioType, writeBuf);
+                theData = attributeCommonIO(aid, ioType, writeBuf);
             }
             finally {
                 close(aid);
             }
         }
         else
-            log.debug("scalarAttributeCommonIO(): failed to open attribute");
+            log.debug("scalarattributeCommonIO(): failed to open attribute");
 
         return theData;
     }
@@ -914,6 +884,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
     }
 
     /**
+     * Check if the dataspace is a NULL.
+     *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     @Override
@@ -923,6 +895,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
     }
 
     /**
+     * Check if the data is a single scalar point.
+     *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
     @Override
@@ -1074,11 +1048,11 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                     strValue = "null";
                 else {
                     if (dtype.getDatatypeBase().isRef()) {
-                        ArrayList<byte[]> ref_value = (ArrayList<byte[]>)value;
-                        log.trace("toString: vlen value={}", ref_value);
+                        ArrayList<byte[]> refValue = (ArrayList<byte[]>)value;
+                        log.trace("toString: vlen value={}", refValue);
                         strValue = "{";
-                        for (int m = 0; m < ref_value.size(); m++) {
-                            byte[] curBytes = ref_value.get(m);
+                        for (int m = 0; m < refValue.size(); m++) {
+                            byte[] curBytes = refValue.get(m);
                             if (m > 0)
                                 strValue += ", ";
                             if (H5ReferenceType.zeroArrayCheck(curBytes))
@@ -1173,7 +1147,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
     /**
      * The general read and write attribute operations for hdf5 object data.
      *
-     * @param attr_id
+     * @param attrID
      *        the attribute to access
      * @param ioType
      *        the type of IO operation
@@ -1186,24 +1160,24 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      *             if the data can not be retrieved
      */
     @Override
-    public Object AttributeCommonIO(long attr_id, H5File.IO_TYPE ioType, Object objBuf) throws Exception
+    public Object attributeCommonIO(long attrID, H5File.IO_TYPE ioType, Object objBuf) throws Exception
     {
         H5Datatype dsDatatype = (H5Datatype)getDatatype();
         Object theData        = null;
 
-        long dt_size = dsDatatype.getDatatypeSize();
-        log.trace("AttributeCommonIO(): create native");
+        long dtSize = dsDatatype.getDatatypeSize();
+        log.trace("attributeCommonIO(): create native");
         long tid = dsDatatype.createNative();
 
         if (ioType == H5File.IO_TYPE.READ) {
-            log.trace("AttributeCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}",
+            log.trace("attributeCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}",
                       dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(), dsDatatype.isRefObj());
-            log.trace("AttributeCommonIO():read ioType isVLEN={}", dsDatatype.isVLEN());
+            log.trace("attributeCommonIO():read ioType isVLEN={}", dsDatatype.isVLEN());
 
             long lsize = 1;
             for (int j = 0; j < dims.length; j++)
                 lsize *= dims[j];
-            log.trace("AttributeCommonIO():read ioType dt_size={} lsize={}", dt_size, lsize);
+            log.trace("attributeCommonIO():read ioType dtSize={} lsize={}", dtSize, lsize);
 
             try {
                 if (dsDatatype.isVarStr()) {
@@ -1211,11 +1185,11 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                     for (int j = 0; j < lsize; j++)
                         strs[j] = "";
                     try {
-                        log.trace("AttributeCommonIO():read ioType H5Aread_VLStrings");
-                        H5.H5Aread_VLStrings(attr_id, tid, strs);
+                        log.trace("attributeCommonIO():read ioType H5Aread_VLStrings");
+                        H5.H5Aread_VLStrings(attrID, tid, strs);
                     }
                     catch (Exception ex) {
-                        log.debug("AttributeCommonIO():read ioType H5Aread_VLStrings failure: ", ex);
+                        log.debug("attributeCommonIO():read ioType H5Aread_VLStrings failure: ", ex);
                         ex.printStackTrace();
                     }
                     theData = strs;
@@ -1225,8 +1199,8 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                     for (int j = 0; j < lsize; j++)
                         strs[j] = "";
                     try {
-                        log.trace("AttributeCommonIO():read ioType H5AreadComposite");
-                        H5.H5AreadComplex(attr_id, tid, strs);
+                        log.trace("attributeCommonIO():read ioType H5AreadComposite");
+                        H5.H5AreadComplex(attrID, tid, strs);
                     }
                     catch (Exception ex) {
                         ex.printStackTrace();
@@ -1234,98 +1208,98 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                     theData = strs;
                 }
                 else if (dsDatatype.isVLEN()) {
-                    log.trace("AttributeCommonIO():read ioType:VLEN-REF H5Aread isArray()={}",
+                    log.trace("attributeCommonIO():read ioType:VLEN-REF H5Aread isArray()={}",
                               dsDatatype.isArray());
                     theData = new ArrayList[(int)lsize];
                     for (int j = 0; j < lsize; j++)
                         ((ArrayList[])theData)[j] = new ArrayList<byte[]>();
 
                     try {
-                        H5.H5AreadVL(attr_id, tid, (Object[])theData);
+                        H5.H5AreadVL(attrID, tid, (Object[])theData);
                     }
                     catch (Exception ex) {
-                        log.debug("AttributeCommonIO():read ioType:VLEN-REF H5Aread failure: ", ex);
+                        log.debug("attributeCommonIO():read ioType:VLEN-REF H5Aread failure: ", ex);
                         ex.printStackTrace();
                     }
                 }
                 else {
-                    Object attr_data = null;
+                    Object attrData = null;
                     try {
-                        attr_data = H5Datatype.allocateArray(dsDatatype, (int)lsize);
+                        attrData = H5Datatype.allocateArray(dsDatatype, (int)lsize);
                     }
                     catch (OutOfMemoryError e) {
-                        log.debug("AttributeCommonIO():read ioType out of memory", e);
+                        log.debug("attributeCommonIO():read ioType out of memory", e);
                         theData = null;
                     }
-                    if (attr_data == null)
-                        log.debug("AttributeCommonIO():read ioType allocateArray returned null");
+                    if (attrData == null)
+                        log.debug("attributeCommonIO():read ioType allocateArray returned null");
 
-                    log.trace("AttributeCommonIO():read ioType H5Aread isArray()={}", dsDatatype.isArray());
+                    log.trace("attributeCommonIO():read ioType H5Aread isArray()={}", dsDatatype.isArray());
                     try {
-                        H5.H5Aread(attr_id, tid, attr_data);
+                        H5.H5Aread(attrID, tid, attrData);
                     }
                     catch (Exception ex) {
-                        log.debug("AttributeCommonIO():read ioType H5Aread failure: ", ex);
+                        log.debug("attributeCommonIO():read ioType H5Aread failure: ", ex);
                         ex.printStackTrace();
                     }
 
                     /*
                      * Perform any necessary data conversions.
                      */
-                    if (dsDatatype.isText() && convertByteToString && (attr_data instanceof byte[])) {
+                    if (dsDatatype.isText() && convertByteToString && (attrData instanceof byte[])) {
                         log.trace(
-                            "AttributeCommonIO():read ioType isText: converting byte array to string array");
-                        theData = byteToString((byte[])attr_data, (int)dsDatatype.getDatatypeSize());
+                            "attributeCommonIO():read ioType isText: converting byte array to string array");
+                        theData = byteToString((byte[])attrData, (int)dsDatatype.getDatatypeSize());
                     }
-                    else if (dsDatatype.isFloat() && dt_size == 16) {
+                    else if (dsDatatype.isFloat() && dtSize == 16) {
                         log.trace(
-                            "AttributeCommonIO():read ioType isFloat: converting byte array to BigDecimal array");
-                        theData = dsDatatype.byteToBigDecimal(0, (int)nPoints, (byte[])attr_data);
+                            "attributeCommonIO():read ioType isFloat: converting byte array to BigDecimal array");
+                        theData = dsDatatype.byteToBigDecimal(0, (int)nPoints, (byte[])attrData);
                     }
                     else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() &&
                              dsDatatype.getDatatypeBase().getDatatypeSize() == 16) {
                         log.trace(
-                            "AttributeCommonIO():read ioType isArray and isFloat: converting byte array to BigDecimal array");
+                            "attributeCommonIO():read ioType isArray and isFloat: byte array to BigDecimal array");
                         long[] arrayDims = dsDatatype.getArrayDims();
                         int asize        = (int)nPoints;
                         for (int j = 0; j < arrayDims.length; j++) {
                             asize *= arrayDims[j];
                         }
                         theData = ((H5Datatype)dsDatatype.getDatatypeBase())
-                                      .byteToBigDecimal(0, asize, (byte[])attr_data);
+                                      .byteToBigDecimal(0, asize, (byte[])attrData);
                     }
-                    else if (dsDatatype.isRef() && (attr_data instanceof byte[])) {
+                    else if (dsDatatype.isRef() && (attrData instanceof byte[])) {
                         log.trace(
-                            "AttributeCommonIO():read ioType isRef: converting byte array to List of bytes");
+                            "attributeCommonIO():read ioType isRef: converting byte array to List of bytes");
                         theData = new ArrayList<byte[]>((int)lsize);
                         for (int m = 0; m < (int)lsize; m++) {
                             byte[] curBytes = new byte[(int)dsDatatype.getDatatypeSize()];
                             try {
-                                System.arraycopy(attr_data, m * (int)dt_size, curBytes, 0,
+                                System.arraycopy(attrData, m * (int)dtSize, curBytes, 0,
                                                  (int)dsDatatype.getDatatypeSize());
                                 ((ArrayList<byte[]>)theData).add(curBytes);
                             }
                             catch (Exception err) {
-                                log.trace("AttributeCommonIO(): arraycopy failure: ", err);
+                                log.trace("attributeCommonIO(): arraycopy failure: ", err);
                             }
                         }
                     }
                     else
-                        theData = attr_data;
+                        theData = attrData;
                 }
             }
             catch (HDF5DataFiltersException exfltr) {
-                log.debug("AttributeCommonIO():read ioType read failure: ", exfltr);
+                log.debug("attributeCommonIO():read ioType read failure: ", exfltr);
                 throw new Exception("Filter not available exception: " + exfltr.getMessage(), exfltr);
             }
             catch (Exception ex) {
-                log.debug("AttributeCommonIO():read ioType read failure: ", ex);
+                log.debug("attributeCommonIO():read ioType read failure: ", ex);
                 throw new Exception(ex.getMessage(), ex);
             }
             finally {
                 dsDatatype.close(tid);
             }
-            log.trace("AttributeCommonIO():read ioType data: {}", theData);
+            log.trace("attributeCommonIO():read ioType data: {}", theData);
             originalBuf  = theData;
             isDataLoaded = true;
         } // H5File.IO_TYPE.READ
@@ -1342,30 +1316,30 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                 String cname = objBuf.getClass().getName();
                 char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
                 boolean doIntConversion =
-                    (((dt_size == 1) && (dname == 'S')) || ((dt_size == 2) && (dname == 'I')) ||
-                     ((dt_size == 4) && (dname == 'J')) || (dsDatatype.isUnsigned() && unsignedConverted));
+                    (((dtSize == 1) && (dname == 'S')) || ((dtSize == 2) && (dname == 'I')) ||
+                     ((dtSize == 4) && (dname == 'J')) || (dsDatatype.isUnsigned() && unsignedConverted));
 
                 if (doIntConversion) {
-                    log.trace("AttributeCommonIO(): converting integer data to unsigned C-type integers");
+                    log.trace("attributeCommonIO(): converting integer data to unsigned C-type integers");
                     tmpData = convertToUnsignedC(objBuf, null);
                 }
                 else if (dsDatatype.isText() && !dsDatatype.isVarStr() && convertByteToString &&
                          !(objBuf instanceof byte[])) {
-                    log.trace("AttributeCommonIO(): converting string array to byte array");
-                    tmpData = stringToByte((String[])objBuf, (int)dt_size);
+                    log.trace("attributeCommonIO(): converting string array to byte array");
+                    tmpData = stringToByte((String[])objBuf, (int)dtSize);
                 }
                 else if (dsDatatype.isEnum() && (Array.get(objBuf, 0) instanceof String)) {
-                    log.trace("AttributeCommonIO(): converting enum names to values");
+                    log.trace("attributeCommonIO(): converting enum names to values");
                     tmpData = dsDatatype.convertEnumNameToValue((String[])objBuf);
                 }
                 else if (dsDatatype.isFloat() && dsDatatype.getDatatypeSize() == 16) {
-                    log.trace("AttributeCommonIO(): isFloat: converting BigDecimal array to byte array");
+                    log.trace("attributeCommonIO(): isFloat: converting BigDecimal array to byte array");
                     throw new Exception("data conversion failure: cannot write BigDecimal values");
                     // tmpData = dsDatatype.bigDecimalToByte(0, (int)nPoints, (BigDecimal[]) objBuf);
                 }
             }
             catch (Exception ex) {
-                log.debug("AttributeCommonIO(): data conversion failure: ", ex);
+                log.debug("attributeCommonIO(): data conversion failure: ", ex);
                 throw new Exception("data conversion failure: " + ex.getMessage());
             }
 
@@ -1374,49 +1348,49 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
              */
             try {
                 if (dsDatatype.isVarStr()) {
-                    log.trace("AttributeCommonIO(): H5Awrite_VLStrings aid={} tid={}", attr_id, tid);
+                    log.trace("attributeCommonIO(): H5Awrite_VLStrings aid={} tid={}", attrID, tid);
 
-                    H5.H5Awrite_VLStrings(attr_id, tid, (Object[])tmpData);
+                    H5.H5Awrite_VLStrings(attrID, tid, (Object[])tmpData);
                 }
                 else if (dsDatatype.isVLEN() ||
                          (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isVLEN())) {
-                    log.trace("AttributeCommonIO(): H5AwriteVL aid={} tid={}", attr_id, tid);
+                    log.trace("attributeCommonIO(): H5AwriteVL aid={} tid={}", attrID, tid);
 
-                    H5.H5AwriteVL(attr_id, tid, (Object[])tmpData);
+                    H5.H5AwriteVL(attrID, tid, (Object[])tmpData);
                 }
                 else {
-                    log.trace("AttributeCommonIO(): dsDatatype.isRef()={} data is String={}",
+                    log.trace("attributeCommonIO(): dsDatatype.isRef()={} data is String={}",
                               dsDatatype.isRef(), tmpData instanceof String);
                     if (dsDatatype.isRef() && tmpData instanceof String) {
                         // reference is a path+name to the object
-                        log.trace("AttributeCommonIO(): Attribute class is CLASS_REFERENCE");
-                        log.trace("AttributeCommonIO(): H5Awrite aid={} tid={}", attr_id, tid);
+                        log.trace("attributeCommonIO(): Attribute class is CLASS_REFERENCE");
+                        log.trace("attributeCommonIO(): H5Awrite aid={} tid={}", attrID, tid);
                         byte[] refBuf =
                             H5.H5Rcreate_object(getFID(), (String)tmpData, HDF5Constants.H5P_DEFAULT);
                         if (refBuf != null) {
-                            H5.H5Awrite(attr_id, tid, refBuf);
+                            H5.H5Awrite(attrID, tid, refBuf);
                             H5.H5Rdestroy(refBuf);
                         }
                     }
                     else if (Array.get(tmpData, 0) instanceof String) {
                         int len     = ((String[])tmpData).length;
-                        byte[] bval = Dataset.stringToByte((String[])tmpData, (int)dt_size);
-                        if (bval != null && bval.length == dt_size * len) {
+                        byte[] bval = Dataset.stringToByte((String[])tmpData, (int)dtSize);
+                        if (bval != null && bval.length == dtSize * len) {
                             bval[bval.length - 1] = 0;
                             tmpData               = bval;
                         }
-                        log.trace("AttributeCommonIO(): String={}: {}", tmpData);
-                        log.trace("AttributeCommonIO(): H5Awrite aid={} tid={}", attr_id, tid);
-                        H5.H5Awrite(attr_id, tid, tmpData);
+                        log.trace("attributeCommonIO(): String={}: {}", tmpData);
+                        log.trace("attributeCommonIO(): H5Awrite aid={} tid={}", attrID, tid);
+                        H5.H5Awrite(attrID, tid, tmpData);
                     }
                     else {
-                        log.trace("AttributeCommonIO(): H5Awrite aid={} tid={}", attr_id, tid);
-                        H5.H5Awrite(attr_id, tid, tmpData);
+                        log.trace("attributeCommonIO(): H5Awrite aid={} tid={}", attrID, tid);
+                        H5.H5Awrite(attrID, tid, tmpData);
                     }
                 }
             }
             catch (Exception ex) {
-                log.debug("AttributeCommonIO(): write failure: ", ex);
+                log.debug("attributeCommonIO(): write failure: ", ex);
                 throw new Exception(ex.getMessage());
             }
             finally {
@@ -1436,7 +1410,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
      *             if the data can not be retrieved
      */
     @Override
-    public Object AttributeSelection() throws Exception
+    public Object attributeSelection() throws Exception
     {
         H5Datatype dsDatatype = (H5Datatype)getDatatype();
         int dsSize            = (int)dsDatatype.getDatatypeSize();
@@ -1444,16 +1418,16 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
             dsSize = (int)dsDatatype.getDatatypeBase().getDatatypeSize();
         Object theData = H5Datatype.allocateArray(dsDatatype, (int)nPoints);
         if (dsDatatype.isText() && convertByteToString && (theData instanceof byte[])) {
-            log.trace("scalarAttributeSelection(): isText: converting byte array to string array");
+            log.trace("scalar attributeSelection(): isText: converting byte array to string array");
             theData = byteToString((byte[])theData, dsSize);
         }
         else if (dsDatatype.isFloat() && dsSize == 16) {
-            log.trace("scalarAttributeSelection(): isFloat: converting byte array to BigDecimal array");
+            log.trace("scalar attributeSelection(): isFloat: converting byte array to BigDecimal array");
             theData = dsDatatype.byteToBigDecimal(0, (int)nPoints, (byte[])theData);
         }
         else if (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isFloat() && dsSize == 16) {
             log.trace(
-                "scalarAttributeSelection(): isArray and isFloat: converting byte array to BigDecimal array");
+                "scalar attributeSelection(): isArray and isFloat: converting byte array to BigDecimal array");
             long[] arrayDims = dsDatatype.getArrayDims();
             int asize        = (int)nPoints;
             for (int j = 0; j < arrayDims.length; j++) {
@@ -1462,7 +1436,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
             theData = ((H5Datatype)dsDatatype.getDatatypeBase()).byteToBigDecimal(0, asize, (byte[])theData);
         }
         Object theOrig = originalBuf;
-        log.trace("scalarAttributeSelection(): originalBuf={} with datatype size={}", originalBuf, dsSize);
+        log.trace("scalar attributeSelection(): originalBuf={} with datatype size={}", originalBuf, dsSize);
 
         // Copy the selection from originalBuf to theData
         // Only three dims are involved and selected data is 2 dimensions
@@ -1475,7 +1449,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
         for (int col = 0; col < (int)getWidth(); col++) {
             for (int row = 0; row < (int)getHeight(); row++) {
                 int index = row * (int)getWidth() + col;
-                log.trace("scalarAttributeSelection(): point[{}] row:col:k={}:{}:{}", curFrame, row, col, k);
+                log.trace("scalar attributeSelection(): point[{}] row:col:k={}:{}:{}", curFrame, row, col, k);
                 int fromIndex =
                     ((int)curFrame * (int)getWidth() * (int)getHeight() + col * (int)getHeight() + row);
                 int toIndex = (col * (int)getHeight() + row);
@@ -1487,7 +1461,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                         System.arraycopy(theOrig, fromIndex, theData, toIndex, objSize);
                     }
                     catch (Exception err) {
-                        log.debug("scalarAttributeSelection(): arraycopy failure: ", err);
+                        log.debug("scalar attributeSelection(): arraycopy failure: ", err);
                     }
                 }
                 else if (dsDatatype.isStdRef()) {
@@ -1498,7 +1472,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                         System.arraycopy(theOrig, fromIndex, theData, toIndex, objSize);
                     }
                     catch (Exception err) {
-                        log.debug("scalarAttributeSelection(): arraycopy failure: ", err);
+                        log.debug("scalar attributeSelection(): arraycopy failure: ", err);
                     }
                 }
                 else {
@@ -1509,12 +1483,12 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                                 System.arraycopy(rElements, 0, theData, toIndex * dsSize, dsSize);
                             }
                             catch (Exception err) {
-                                log.trace("scalarAttributeSelection(): refarraycopy failure: ", err);
+                                log.trace("scalar attributeSelection(): refarraycopy failure: ", err);
                             }
                         }
                         else {
                             Object value = Array.get(theOrig, fromIndex);
-                            log.trace("scalarAttributeSelection(): value={}", value);
+                            log.trace("scalar attributeSelection(): value={}", value);
                             ((ArrayList<Object>)theData).add(toIndex, value);
                         }
                     }
@@ -1524,7 +1498,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
             }
         }
 
-        log.trace("scalarAttributeSelection(): theData={}", theData);
+        log.trace("scalar attributeSelection(): theData={}", theData);
         return theData;
     }
 }

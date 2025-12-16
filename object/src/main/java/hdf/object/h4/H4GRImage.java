@@ -31,7 +31,6 @@ import hdf.object.Group;
 import hdf.object.HObject;
 import hdf.object.MetaDataContainer;
 import hdf.object.ScalarDS;
-import hdf.object.h4.H4ScalarAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,19 +115,19 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
     private List attributeList;
 
     /**
-     * The GR interface identifier obtained from GRstart(fid)
+     * The GR interface identifier obtained from GRstart(fid).
      */
     private long grid;
 
     /**
-     * The number of components in the raster image
+     * The number of components in the raster image.
      */
     private int ncomp;
 
-    /** the datatype identifier */
+    /** the datatype identifier. */
     private long datatypeID = -1;
 
-    /** the number of attributes */
+    /** the number of attributes. */
     private int nAttributes = -1;
 
     /**
@@ -152,10 +151,12 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
     public H4GRImage(FileFormat theFile, String name, String path, long[] oid)
     {
         super(theFile, name, path, oid);
-        palette = null;
-        isImage = isImageDisplay = true;
-        unsignedConverted        = false;
-        grid                     = ((H4File)getFileFormat()).getGRAccessID();
+        palette           = null;
+        isImage           = true;
+        isImageDisplay    = true;
+        unsignedConverted = false;
+
+        grid = ((H4File)getFileFormat()).getGRAccessID();
     }
 
     /*
@@ -684,10 +685,10 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
 
     // Implementing HObject.
     @Override
-    public void close(long grid)
+    public void close(long theGrid)
     {
         try {
-            HDFLibrary.GRendaccess(grid);
+            HDFLibrary.GRendaccess(theGrid);
         }
         catch (HDFException ex) {
             log.debug("close(): failure: ", ex);
@@ -838,7 +839,9 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
         int[] lutInfo = new int[4]; // ncomp, datatype, interlace, num_entries
         try {
             // find the first palette.
-            // Todo: get all the palettes
+            // TODO(HDFView) [2025-12]: Extend palette loading to retrieve all palettes, not just first.
+            // Currently only loads palette at index 0. Need to loop through all available palettes.
+            // Enhancement for users with multi-palette images. Low priority.
             lutid = HDFLibrary.GRgetlutid(id, 0);
             HDFLibrary.GRgetlutinfo(lutid, lutInfo);
         }
@@ -1041,7 +1044,11 @@ public class H4GRImage extends ScalarDS implements MetaDataContainer {
     }
 
     /**
-     * copy attributes from one GR image to another GR image
+     * copy attributes from one GR image to another GR image.
+     *
+     * @param srcdid             - the source object id
+     * @param dstdid             - the destination object id
+     * @param numberOfAttributes - the number of attributes to copy
      */
     private void copyAttribute(long srcdid, long dstdid, int numberOfAttributes)
     {

@@ -14,16 +14,11 @@
 
 package hdf.object.nc2;
 
-import java.lang.reflect.Array;
-import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import hdf.object.Attribute;
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -40,8 +35,8 @@ import org.slf4j.LoggerFactory;
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * For more details on attributes, <a
- * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
+ * For more details on attributes,
+ * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5
  * Attributes in HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
@@ -82,10 +77,10 @@ public class NC2Attribute extends ScalarDS implements Attribute {
 
     private static final Logger log = LoggerFactory.getLogger(NC2Attribute.class);
 
-    /** The HObject to which this NC2Attribute is attached, Attribute interface */
+    /** The HObject to which this NC2Attribute is attached, Attribute interface. */
     protected HObject parentObject;
 
-    /** additional information and properties for the attribute, Attribute interface */
+    /** additional information and properties for the attribute, Attribute interface. */
     private transient Map<String, Object> properties;
 
     /**
@@ -228,7 +223,11 @@ public class NC2Attribute extends ScalarDS implements Attribute {
                 if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
                     log.trace("open(): FILE_TYPE_NC3");
                     /*
-                     * TODO: Get type of netcdf3 object this is attached to and retrieve attribute info.
+                     * TODO(HDFView) [2025-12]: Implement NetCDF3-specific attribute retrieval.
+                     * Need to determine parent object type (variable, dimension, global) and use appropriate
+                     * NetCDF library calls. May be limited by NetCDF3 library capabilities - investigate if
+                     * full implementation possible. Related: Similar pattern to H4ScalarAttribute.java line
+                     * 224, H4CompoundAttribute.java line 228.
                      */
                 }
             }
@@ -258,7 +257,10 @@ public class NC2Attribute extends ScalarDS implements Attribute {
             if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
                 log.trace("close(): FILE_TYPE_NC3");
                 /*
-                 * TODO: Get type of netcdf3 object this is attached to and close attribute.
+                 * TODO(HDFView) [2025-12]: Implement NetCDF3-specific attribute cleanup.
+                 * Need to properly close attribute handle based on parent object type.
+                 * Coordinate with open() implementation once parent object type detection is added.
+                 * Related: H4ScalarAttribute.java line 257, H4CompoundAttribute.java line 260.
                  */
             }
         }
@@ -276,7 +278,10 @@ public class NC2Attribute extends ScalarDS implements Attribute {
         if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_NC3))) {
             log.trace("init(): FILE_TYPE_NC3");
             /*
-             * TODO: If netcdf3 attribute object needs to init dependent objects.
+             * TODO(HDFView) [2025-12]: Determine if NetCDF3 attributes require dependency initialization.
+             * May need to initialize datatype or parent object references before first use.
+             * Currently assumes no initialization needed - verify with NetCDF3 spec.
+             * Related: H4ScalarAttribute.java line 278, H4CompoundAttribute.java line 282.
              */
             inited = true;
         }
@@ -462,11 +467,15 @@ public class NC2Attribute extends ScalarDS implements Attribute {
     public final long[] getAttributeDims() { return getDims(); }
 
     /**
+     * Check if the dataspace is a NULL.
+     *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     public boolean isAttributeNULL() { return isNULL(); }
 
     /**
+     * Check if the data is a single scalar point.
+     *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isAttributeScalar() { return isScalar(); }

@@ -14,8 +14,6 @@
 
 package hdf.object.h4;
 
-import java.lang.reflect.Array;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,8 +22,6 @@ import java.util.Map;
 
 import hdf.object.Attribute;
 import hdf.object.CompoundDS;
-import hdf.object.CompoundDataFormat;
-import hdf.object.DataFormat;
 import hdf.object.Dataset;
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
@@ -42,8 +38,8 @@ import org.slf4j.LoggerFactory;
  *
  * Like a dataset, an attribute has a name, datatype and dataspace.
  *
- * For more details on attributes, <a
- * href="https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/_h5_a__u_g.html#sec_attribute">HDF5
+ * For more details on attributes,
+ * <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_h5_a__u_g.html#sec_attribute">HDF5
  * Attributes in HDF5 User Guide</a>
  *
  * The following code is an example of an attribute with 1D integer array of two elements.
@@ -84,10 +80,10 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
 
     private static final Logger log = LoggerFactory.getLogger(H4CompoundAttribute.class);
 
-    /** The HObject to which this NC2Attribute is attached, Attribute interface */
+    /** The HObject to which this NC2Attribute is attached, Attribute interface. */
     protected HObject parentObject;
 
-    /** additional information and properties for the attribute, Attribute interface */
+    /** additional information and properties for the attribute, Attribute interface. */
     private transient Map<String, Object> properties;
 
     /**
@@ -229,7 +225,11 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
                 if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                     log.trace("open(): FILE_TYPE_HDF4");
                     /*
-                     * TODO: Get type of HDF4 object this is attached to and retrieve attribute info.
+                     * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute retrieval for compound
+                     * types. Need to determine parent object type (GR, SDS, Vdata) and use appropriate
+                     * HDFLibrary calls. May be limited by HDF4 library capabilities - investigate if full
+                     * implementation possible. Related: H4ScalarAttribute.java line 224 has same stub for
+                     * scalar attributes.
                      */
                 }
             }
@@ -259,7 +259,10 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
             if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
                 log.trace("close(): FILE_TYPE_HDF4");
                 /*
-                 * TODO: Get type of HDF4 object this is attached to and close attribute.
+                 * TODO(HDFView) [2025-12]: Implement HDF4-specific attribute cleanup for compound types.
+                 * Need to properly close attribute handle based on parent object type.
+                 * Coordinate with open() implementation once parent object type detection is added.
+                 * Related: H4ScalarAttribute.java line 254 for scalar attribute cleanup.
                  */
             }
         }
@@ -277,7 +280,10 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
         if (this.getFileFormat().isThisType(FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4))) {
             log.trace("init(): FILE_TYPE_HDF4");
             /*
-             * TODO: If HDF4 attribute object needs to init dependent objects.
+             * TODO(HDFView) [2025-12]: Determine if HDF4 compound attributes require dependency
+             * initialization. May need to initialize datatype or parent object references before first use.
+             * Currently assumes no initialization needed - verify with HDF4 spec.
+             * Related: H4ScalarAttribute.java line 272 for scalar attributes.
              */
             inited = true;
         }
@@ -311,8 +317,10 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
             init();
 
         /*
-         * TODO: For now, convert a compound Attribute's data (String[]) into a List for
-         * convenient processing
+         * TODO(HDFView) [2025-12]: Review whether String[] to List conversion is still necessary.
+         * This conversion was added for backward compatibility with existing HDFView code.
+         * Consider refactoring callers to accept List directly, then remove this conversion.
+         * Low priority - current approach works but adds unnecessary object creation.
          */
         if (getDatatype().isCompound() && !(data instanceof List)) {
             List<String> valueList = Arrays.asList((String[])data);
@@ -374,21 +382,16 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
     }
 
     /**
-     * Given an array of bytes representing a compound Datatype and a start index
-     * and length, converts len number of bytes into the correct Object type and
-     * returns it.
+     * Given an array of bytes representing a compound Datatype and a start index and length, converts len
+     * number of bytes into the correct Object type and returns it.
      *
-     * @param data
-     *            The byte array representing the data of the compound Datatype
-     * @param data_type
-     *            The type of data to convert the bytes to
-     * @param start
-     *            The start index of the bytes to get
-     * @param len
-     *            The number of bytes to convert
+     * @param data     The byte array representing the data of the compound Datatype
+     * @param dataType The type of data to convert the bytes to
+     * @param start    The start index of the bytes to get
+     * @param len      The number of bytes to convert
      * @return The converted type of the bytes
      */
-    protected Object convertCompoundByteMember(byte[] data, long data_type, long start, long len)
+    protected Object convertCompoundByteMember(byte[] data, long dataType, long start, long len)
     {
         return null;
     }
@@ -525,6 +528,8 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
     public final long[] getAttributeDims() { return getDims(); }
 
     /**
+     * Check if Attribute is null.
+     *
      * @return true if the dataspace is a NULL; otherwise, returns false.
      */
     @Override
@@ -534,6 +539,8 @@ public class H4CompoundAttribute extends CompoundDS implements Attribute {
     }
 
     /**
+     * Check if Attribute is a single scalar point.
+     *
      * @return true if the data is a single scalar point; otherwise, returns false.
      */
     public boolean isAttributeScalar() { return isScalar(); }
