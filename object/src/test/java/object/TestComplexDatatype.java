@@ -273,7 +273,7 @@ public class TestComplexDatatype {
         System.out.println("Dataset type: " + obj.getClass().getSimpleName());
 
         if (obj instanceof H5ScalarDS) {
-            H5ScalarDS dataset = (H5ScalarDS)obj;
+            H5ScalarDS dataset             = (H5ScalarDS)obj;
             hdf.object.h5.H5Datatype dtype = (hdf.object.h5.H5Datatype)dataset.getDatatype();
 
             System.out.println("Datatype: " + dtype.getDescription());
@@ -300,12 +300,13 @@ public class TestComplexDatatype {
                         if (length > 0) {
                             Object firstElement = java.lang.reflect.Array.get(data, 0);
                             if (firstElement != null) {
-                                System.out.println("First element type: " + firstElement.getClass().getName());
+                                System.out.println("First element type: " +
+                                                   firstElement.getClass().getName());
 
                                 if (firstElement instanceof java.util.ArrayList) {
                                     java.util.ArrayList<?> list = (java.util.ArrayList<?>)firstElement;
-                                    System.out.println("First element is ArrayList with size: " + list.size() +
-                                                       " (should be 10)");
+                                    System.out.println("First element is ArrayList with size: " +
+                                                       list.size() + " (should be 10)");
                                     if (list.size() > 0) {
                                         System.out.println("✓ ArrayList has data!");
                                         Object firstValue = list.get(0);
