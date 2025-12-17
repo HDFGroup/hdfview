@@ -81,7 +81,7 @@ jobs:
         echo "Downloading HDF4: ${{ inputs.use_hdf }}"
 
         # Download HDF4 binary from HDF Group GitHub releases
-        gh release download ${{ inputs.use_hdf }}" \
+        gh release download "${{ inputs.use_hdf }}" \
           --repo HDFGroup/hdf4 \
           --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
@@ -107,7 +107,7 @@ jobs:
         echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
 
         # Download HDF5 binary from HDF Group GitHub releases
-        gh release download ${{ inputs.use_hdf5 }}" \
+        gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
           --pattern "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
@@ -277,7 +277,7 @@ jobs:
         echo "Downloading HDF4: ${{ inputs.use_hdf }}"
 
         # Download HDF4 binary from HDF Group GitHub releases
-        gh release download ${{ inputs.use_hdf }}" \
+        gh release download "${{ inputs.use_hdf }}" \
           --repo HDFGroup/hdf4 \
           --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
@@ -303,7 +303,7 @@ jobs:
         echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
 
         # Download HDF5 binary from HDF Group GitHub releases
-        gh release download ${{ inputs.use_hdf5 }}" \
+        gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
           --pattern "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
@@ -467,7 +467,7 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Downloading HDF4: ${{ inputs.use_hdf }}"
-        gh release download ${{ inputs.use_hdf }}" `
+        gh release download "${{ inputs.use_hdf }}" `
           --repo HDFGroup/hdf4 `
           --pattern "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
 
@@ -494,7 +494,7 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Downloading HDF5: ${{ inputs.use_hdf5 }}"
-        gh release download ${{ inputs.use_hdf5 }}" `
+        gh release download "${{ inputs.use_hdf5 }}" `
           --repo HDFGroup/hdf5 `
           --pattern "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
 
@@ -662,7 +662,7 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       shell: pwsh
       run: |
-        gh release download ${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
+        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
         7z x "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
         Set-Location hdf4
         7z x HDF-*-win64.zip
@@ -679,7 +679,7 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       shell: pwsh
       run: |
-        gh release download ${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
+        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
         7z x "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
         Set-Location hdf5
         7z x HDF5-*-win64.zip
@@ -822,7 +822,7 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       run: |
         echo "Downloading HDF4: ${{ inputs.use_hdf }}"
-        gh release download ${{ inputs.use_hdf }}" \
+        gh release download "${{ inputs.use_hdf }}" \
           --repo HDFGroup/hdf4 \
           --pattern "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
 
@@ -841,7 +841,7 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       run: |
         echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
-        gh release download ${{ inputs.use_hdf5 }}" \
+        gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
           --pattern "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
 
@@ -994,7 +994,7 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        gh release download ${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
+        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
         tar -zxvf "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
         cd hdf4
         tar -zxvf HDF-*-Darwin.tar.gz --strip-components 1
@@ -1006,7 +1006,7 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        gh release download ${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
+        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
         tar -zxvf "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
         cd hdf5
         tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
@@ -1103,8 +1103,8 @@ jobs:
         echo "## Maven Build Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### HDF Libraries Used" >> $GITHUB_STEP_SUMMARY
-        echo "- **HDF4**: ${{ inputs.use_hdf }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **HDF5**: ${{ inputs.use_hdf5 }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **HDF4**: "${{ inputs.use_hdf }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **HDF5**: "${{ inputs.use_hdf5 }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Artifacts Created" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ Linux x86_64 binary archive (with HDF libraries from GitHub)" >> $GITHUB_STEP_SUMMARY
