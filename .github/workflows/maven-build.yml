@@ -494,7 +494,7 @@ jobs:
           --pattern "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
 
         Write-Host "Extracting HDF5..."
-        7z x "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
+        7z x "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
         Set-Location hdf5
         7z x HDF5-*-win64.zip
 
@@ -675,7 +675,7 @@ jobs:
       shell: pwsh
       run: |
         gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
-        7z x "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
+        7z x "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
         Set-Location hdf5
         7z x HDF5-*-win64.zip
         # Windows structure: hdf5/HDF5-x.y.z-win64/lib, hdf5/HDF5-x.y.z-win64/bin
