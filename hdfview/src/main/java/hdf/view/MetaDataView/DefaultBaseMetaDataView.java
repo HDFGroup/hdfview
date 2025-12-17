@@ -473,7 +473,7 @@ public abstract class DefaultBaseMetaDataView implements MetaDataView {
         Text text;
 
         /* Add an SWT Group to encompass all of the GUI components */
-        org.eclipse.swt.widgets.Group generalInfoGroup = new org.eclipse.swt.widgets.Group(parent, SWT.NONE);
+        org.eclipse.swt.widgets.Group generalInfoGroup = new org.eclipse.swt.widgets.Group(goparent, SWT.NONE);
         generalInfoGroup.setFont(curFont);
         generalInfoGroup.setLayout(new GridLayout(2, false));
         generalInfoGroup.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
