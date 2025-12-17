@@ -1500,8 +1500,10 @@ public class H5Datatype extends Datatype {
 
                 if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
                     // Always log bit field values for debugging
-                    log.debug("createNative(): FLOAT typeSize={} bytes ({}bits), bit fields: spos={}, epos={}, esize={}, mpos={}, msize={}",
-                              datatypeSize, datatypeSize * 8, nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+                    log.debug(
+                        "createNative(): FLOAT typeSize={} bytes ({}bits), bit fields: spos={}, epos={}, esize={}, mpos={}, msize={}",
+                        datatypeSize, datatypeSize * 8, nativeFPspos, nativeFPepos, nativeFPesize,
+                        nativeFPmpos, nativeFPmsize);
 
                     // Validate bit field values before calling H5Tset_fields
                     long totalBits = datatypeSize * 8;
@@ -1520,8 +1522,9 @@ public class H5Datatype extends Datatype {
                         // Only skip for standard IEEE 754 sizes (4=float, 8=double)
                         // Long double (16 bytes) is platform-specific and may need special handling
                         if (datatypeSize == 8 || datatypeSize == 4) {
-                            log.debug("createNative(): Skipping H5Tset_fields for standard {}-byte float - using native type defaults",
-                                      datatypeSize);
+                            log.debug(
+                                "createNative(): Skipping H5Tset_fields for standard {}-byte float - using native type defaults",
+                                datatypeSize);
                             fieldsValid = false; // Skip the H5Tset_fields call
                         }
                     }
