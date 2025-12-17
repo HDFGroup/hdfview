@@ -17,14 +17,14 @@ Major Enhancements
 ==============================================================================
     * Build system converted to Maven
     * GH #117 Add User Option for editing the plugin path and include plugins.
-    * GH #138 Add Support for operating with float16 datatypes.
+    * GH #138 Add Support for operating with float16 and complex datatypes.
 
     ***** Previous fixes *****
     * GH #121 Updated all icons with transparency.
 
 Major Bug Fixes
 ==============================================================================
-    *
+    * 
 
     ***** Previous fixes *****
     * GH #119 (crashes opening HDF4 file) has been fixed. The problem was
@@ -51,6 +51,8 @@ Major Bug Fixes
 
 Minor Bug Fixes
 ==============================================================================
+    * GH #387 (checkHDF5Filters shows 'NONE') Replace corrupted tfilters.h5 test data file with correct version.
+    * GH #352 (isn't displaying attribute values correctly) Incorrectly using the array value as a character limit.
     * GH #159 (Help menu dialogs have gigantic images) Implemented by changing the size from 1024 to 256.
     * GH #171 (HDFView fails to find input files on command line when using relative paths)
 
