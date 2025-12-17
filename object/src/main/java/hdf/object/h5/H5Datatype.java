@@ -1499,7 +1499,7 @@ public class H5Datatype extends Datatype {
                 }
 
                 if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
-                    H5.H5Tset_fields(tid, nativeFPspos, nativeFPmpos, nativeFPesize, nativeFPmpos,
+                    H5.H5Tset_fields(tid, nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos,
                                      nativeFPmsize);
                 }
             }
