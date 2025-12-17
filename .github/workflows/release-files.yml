@@ -166,7 +166,7 @@ jobs:
 
       - name: Create description file
         run: |
-          cat ${{ github.workspace }}/RELEASE.txt > description.txt
+          cat ${{ github.workspace }}/CHANGELOG.md > description.txt
 
       - name: PreRelease tag
         id: create_prerelease

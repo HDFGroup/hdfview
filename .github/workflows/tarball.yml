@@ -129,7 +129,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: NEWSLETTER
-              path: ./hdfsrc/docs/RELEASE.txt
+              path: ./hdfsrc/docs/CHANGELOG.md
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       # Save User Guide
