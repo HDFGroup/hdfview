@@ -27,11 +27,6 @@ jobs:
             fetch-depth: 0
             ref: '${{ github.head_ref || github.ref_name }}'
 
-        - name: List files for the space
-          run: |
-              ls -l ${{ github.workspace }}
-              ls ${{ github.workspace }}/HDFVIEW
-
         - name: Setup AWS CLI
           uses: aws-actions/configure-aws-credentials@v4
           with:

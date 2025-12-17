@@ -9,11 +9,6 @@ on:
         type: string
         required: false
         default: check
-      use_tag:
-        description: 'Release version tag'
-        type: string
-        required: false
-        default: snapshot
       use_environ:
         description: 'Environment to locate files'
         type: string
@@ -120,11 +115,6 @@ jobs:
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: List files in the repository
-        run: |
-              ls -l ${{ github.workspace }}
-              ls $GITHUB_WORKSPACE/hdfsrc
-
       - name: Save NEWSLETTER
         uses: actions/upload-artifact@v4
         with:
@@ -156,11 +146,6 @@ jobs:
               zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
               tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
         shell: bash
-
-      - name: List files in the repository
-        run: |
-              ls -l ${{ github.workspace }}
-              ls $GITHUB_WORKSPACE
 
       # Save files created by release script
       - name: Save tgz-tarball

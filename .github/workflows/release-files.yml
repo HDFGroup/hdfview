@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       use_tag:
-        description: 'Release version tag'
+        description: 'Git tag name to create'
         type: string
         required: false
         default: HDFView-99.99.99
@@ -136,11 +136,6 @@ jobs:
               tar -zcvf UsersGuide.tar.gz ./UsersGuide
         shell: bash
 
-      - name: List files for the space
-        run: |
-            ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}/hdfview
-
       - name: Create sha256 sums for files
         run: |
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
@@ -212,9 +207,3 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: List files for the space (Linux)
-        run: |
-              ls -l ${{ github.workspace }}
-              ls ${{ runner.workspace }}
-
