@@ -20,11 +20,6 @@ on:
         type: string
         required: false
         default: 'snapshot'
-      name_hdf5:
-        description: 'HDF5 base name (for compatibility)'
-        type: string
-        required: false
-        default: 'snapshot'
       use_environ:
         description: 'Environment (snapshots or release)'
         type: string
@@ -109,7 +104,7 @@ jobs:
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
-          --pattern "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+          --pattern "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract outer tar.gz (creates hdf5/ directory)
         tar -zxvf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
@@ -305,7 +300,7 @@ jobs:
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
-          --pattern "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+          --pattern "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract outer tar.gz (creates hdf5/ directory)
         tar -zxvf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
@@ -496,7 +491,7 @@ jobs:
         Write-Host "Downloading HDF5: ${{ inputs.use_hdf5 }}"
         gh release download "${{ inputs.use_hdf5 }}" `
           --repo HDFGroup/hdf5 `
-          --pattern "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
+          --pattern "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
 
         Write-Host "Extracting HDF5..."
         7z x "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
@@ -679,7 +674,7 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       shell: pwsh
       run: |
-        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
+        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
         7z x "${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
         Set-Location hdf5
         7z x HDF5-*-win64.zip
@@ -843,7 +838,7 @@ jobs:
         echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
         gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
-          --pattern "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
+          --pattern "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
 
         echo "Extracting HDF5..."
         tar -zxvf "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
@@ -1006,7 +1001,7 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
+        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
         tar -zxvf "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
         cd hdf5
         tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1

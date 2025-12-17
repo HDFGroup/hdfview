@@ -19,11 +19,6 @@ on:
         type: string
         required: false
         default: snapshot
-      name_tag5:
-        description: 'HDF5 Release version base name'
-        type: string
-        required: false
-        default: snapshot
 
 permissions:
   contents: read
