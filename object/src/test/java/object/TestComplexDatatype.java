@@ -49,15 +49,13 @@ public class TestComplexDatatype {
      * Test reading simple float complex datasets (F32 and F64).
      */
     @ParameterizedTest(name = "{0} - {1}")
-    @CsvSource({
-        "tcomplex.h5, /DatasetFloatComplex, float complex (F32)",
-        "tcomplex.h5, /DatasetDoubleComplex, double complex (F64)",
-        "tcomplex_be.h5, /DatasetFloatComplex, float complex BE (F32)",
-        "tcomplex_be.h5, /DatasetDoubleComplex, double complex BE (F64)"
-    })
+    @CsvSource({"tcomplex.h5, /DatasetFloatComplex, float complex (F32)",
+                "tcomplex.h5, /DatasetDoubleComplex, double complex (F64)",
+                "tcomplex_be.h5, /DatasetFloatComplex, float complex BE (F32)",
+                "tcomplex_be.h5, /DatasetDoubleComplex, double complex BE (F64)"})
     @DisplayName("Simple complex dataset read test")
-    public void testSimpleComplexDatasetRead(String filename, String datasetPath, String description)
-        throws Exception
+    public void
+    testSimpleComplexDatasetRead(String filename, String datasetPath, String description) throws Exception
     {
         System.out.println("\n=== Testing: " + description + " ===");
         System.out.println("File: " + filename);
@@ -109,7 +107,7 @@ public class TestComplexDatatype {
                     System.out.print("First values (real, imag): ");
                     for (int i = 0; i < printCount; i += 2) {
                         if (i + 1 < floatData.length) {
-                            System.out.print("(" + floatData[i] + "," + floatData[i+1] + ") ");
+                            System.out.print("(" + floatData[i] + "," + floatData[i + 1] + ") ");
                         }
                     }
                     System.out.println();
@@ -124,7 +122,7 @@ public class TestComplexDatatype {
                     System.out.print("First values (real, imag): ");
                     for (int i = 0; i < printCount; i += 2) {
                         if (i + 1 < doubleData.length) {
-                            System.out.print("(" + doubleData[i] + "," + doubleData[i+1] + ") ");
+                            System.out.print("(" + doubleData[i] + "," + doubleData[i + 1] + ") ");
                         }
                     }
                     System.out.println();
@@ -169,12 +167,11 @@ public class TestComplexDatatype {
      * Test compound datasets containing complex members.
      */
     @ParameterizedTest(name = "{0}")
-    @CsvSource({
-        "tcompound_complex.h5, /CompoundDatasetFloatComplex",
-        "tcompound_complex2.h5, /VariableLengthDatasetFloatComplex"
-    })
+    @CsvSource({"tcompound_complex.h5, /CompoundDatasetFloatComplex",
+                "tcompound_complex2.h5, /VariableLengthDatasetFloatComplex"})
     @DisplayName("Compound with complex members")
-    public void testCompoundWithComplexMembers(String filename, String datasetPath) throws Exception
+    public void
+    testCompoundWithComplexMembers(String filename, String datasetPath) throws Exception
     {
         System.out.println("\n=== Testing: Compound dataset with complex members ===");
         System.out.println("File: " + filename);
