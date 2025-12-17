@@ -1499,8 +1499,25 @@ public class H5Datatype extends Datatype {
                 }
 
                 if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
-                    H5.H5Tset_fields(tid, nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos,
-                                     nativeFPmsize);
+                    log.trace("createNative(): attempting H5Tset_fields with spos={}, epos={}, esize={}, mpos={}, msize={}",
+                              nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+
+                    // Validate bit field values before calling H5Tset_fields
+                    long totalBits = datatypeSize * 8;
+                    boolean fieldsValid = (nativeFPspos >= 0) && (nativeFPepos >= 0) && (nativeFPmpos >= 0) &&
+                                          (nativeFPesize > 0) && (nativeFPmsize > 0) &&
+                                          (nativeFPspos < totalBits) &&
+                                          (nativeFPepos + nativeFPesize <= totalBits) &&
+                                          (nativeFPmpos + nativeFPmsize <= totalBits);
+
+                    if (fieldsValid) {
+                        H5.H5Tset_fields(tid, nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos,
+                                         nativeFPmsize);
+                    }
+                    else {
+                        log.debug("createNative(): skipping H5Tset_fields - invalid bit field configuration for {}-byte float (spos={}, epos={}, esize={}, mpos={}, msize={})",
+                                  datatypeSize, nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+                    }
                 }
             }
             catch (Exception ex) {
