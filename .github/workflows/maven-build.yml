@@ -107,7 +107,7 @@ jobs:
           --pattern "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
@@ -303,7 +303,7 @@ jobs:
           --pattern "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf "${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
@@ -841,7 +841,7 @@ jobs:
           --pattern "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
 
         echo "Extracting HDF5..."
-        tar -zxvf "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
+        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
         cd hdf5
         tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
 
@@ -1002,7 +1002,7 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       run: |
         gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
-        tar -zxvf "${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
+        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
         cd hdf5
         tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
