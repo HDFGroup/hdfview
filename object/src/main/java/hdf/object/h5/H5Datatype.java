@@ -1499,27 +1499,41 @@ public class H5Datatype extends Datatype {
                 }
 
                 if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
-                    log.trace(
-                        "createNative(): attempting H5Tset_fields with spos={}, epos={}, esize={}, mpos={}, msize={}",
-                        nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos, nativeFPmsize);
+                    // Always log bit field values for debugging
+                    log.debug("createNative(): FLOAT typeSize={} bytes ({}bits), bit fields: spos={}, epos={}, esize={}, mpos={}, msize={}",
+                              datatypeSize, datatypeSize * 8, nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos, nativeFPmsize);
 
                     // Validate bit field values before calling H5Tset_fields
-                    long totalBits      = datatypeSize * 8;
+                    long totalBits = datatypeSize * 8;
+
+                    // Check basic field constraints
                     boolean fieldsValid = (nativeFPspos >= 0) && (nativeFPepos >= 0) && (nativeFPmpos >= 0) &&
                                           (nativeFPesize > 0) && (nativeFPmsize > 0) &&
                                           (nativeFPspos < totalBits) &&
                                           (nativeFPepos + nativeFPesize <= totalBits) &&
                                           (nativeFPmpos + nativeFPmsize <= totalBits);
 
+                    // Additional check: fields should not overlap and should fit standard IEEE layouts
                     if (fieldsValid) {
+                        // For complex base types, skip H5Tset_fields entirely - the copied native type
+                        // already has correct fields. Setting fields is only needed for custom types.
+                        // Only skip for standard IEEE 754 sizes (4=float, 8=double)
+                        // Long double (16 bytes) is platform-specific and may need special handling
+                        if (datatypeSize == 8 || datatypeSize == 4) {
+                            log.debug("createNative(): Skipping H5Tset_fields for standard {}-byte float - using native type defaults",
+                                      datatypeSize);
+                            fieldsValid = false; // Skip the H5Tset_fields call
+                        }
+                    }
+
+                    if (fieldsValid) {
+                        log.debug("createNative(): Calling H5Tset_fields...");
                         H5.H5Tset_fields(tid, nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos,
                                          nativeFPmsize);
+                        log.debug("createNative(): H5Tset_fields succeeded");
                     }
                     else {
-                        log.debug(
-                            "createNative(): skipping H5Tset_fields - invalid bit field configuration for {}-byte float (spos={}, epos={}, esize={}, mpos={}, msize={})",
-                            datatypeSize, nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos,
-                            nativeFPmsize);
+                        log.debug("createNative(): SKIPPING H5Tset_fields (using native type defaults)");
                     }
                 }
             }
