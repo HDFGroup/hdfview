@@ -56,7 +56,6 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
       use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
-      name_hdf5: ${{ inputs.name_tag5 }}
       snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
 
