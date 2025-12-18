@@ -262,15 +262,11 @@ The project uses automated GitHub Actions workflows for continuous integration a
   - GitHub CodeQL security analysis
   - License compliance checking (prohibits GPL/AGPL)
 
-- **`maven-build.yml`**: Cross-platform binary builds
+- **`maven-build.yml`**: Cross-platform binary builds and Maven package publishing
   - 6 build jobs (Linux, Windows, macOS binaries and app packages)
   - Downloads HDF4/HDF5 from GitHub releases
-  - Daily scheduled builds
-
-- **`maven-release.yml`**: Automated releases
-  - Version management from Git tags
-  - GitHub Packages publication
-  - Release notes generation
+  - Optional GitHub Packages publication (Maven registry)
+  - Called by release.yml for comprehensive releases
 
 ### Quality Tools and Standards
 
