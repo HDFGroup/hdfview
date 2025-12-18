@@ -1,4 +1,4 @@
-HDFView version 4.3.0
+HDFView version 3.4.0
 
 # 🔺 HDFView Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous HDFView release, platforms tested, and known problems in this release.
@@ -15,7 +15,7 @@ All notable changes to this project will be documented in this file. This docume
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
 * [Known Problems](#-known-problems)
 
-# 🔆 Executive Summary: HDFView Version 4.3.0
+# 🔆 Executive Summary: HDFView Version 3.4.0
 
 ## Enhanced Features:
 
