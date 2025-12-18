@@ -1098,7 +1098,7 @@ jobs:
         echo "## Maven Build Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### HDF Libraries Used" >> $GITHUB_STEP_SUMMARY
-        echo "- **HDF4**: "${{ inputs.use_hdf }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **HDF4**: ${{ inputs.use_hdf }}" >> $GITHUB_STEP_SUMMARY
         echo "- **HDF5**: "${{ inputs.use_hdf5 }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Artifacts Created" >> $GITHUB_STEP_SUMMARY
