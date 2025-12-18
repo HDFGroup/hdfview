@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file. This docume
 
 > [!IMPORTANT]
 >
-> - Built and tested with **HDF 4.3.1** and **HDF5 2.0.0**
+> - Built and tested with **HDF 4.3.X** and **HDF5 X.Y.Z**
 > - Built and tested with **OpenJDK 21**
 > - Uses Java modules for improved modularity
 > - Utilizes newest `jpackage` for distribution
