@@ -1213,6 +1213,7 @@ jobs:
       run: |
         cat > build.properties << EOF
         hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+        hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/lib/plugin
         hdf.lib.dir=/usr/lib/x86_64-linux-gnu
         platform.hdf.lib=/usr/lib/x86_64-linux-gnu
         ci.build=true
