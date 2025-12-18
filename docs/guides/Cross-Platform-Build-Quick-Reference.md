@@ -45,7 +45,7 @@ mvn install:install-file -Dfile=repository/lib/swt.jar \
   -DgroupId=org.eclipse.platform \
   -DartifactId=org.eclipse.swt.gtk.linux.x86_64 \
   -Dversion=3.126.0 -Dpackaging=jar -DgeneratePom=true
-mvn package -pl object,hdfview -Dmaven.test.skip=true
+mvn package -pl object,hdfview
 
 # Run HDFView
 ./run-hdfview.sh

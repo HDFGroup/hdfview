@@ -351,7 +351,7 @@ Comprehensive project documentation is maintained in multiple locations:
 ### User Documentation (`docs/`)
 - **Contributing Guide**: `CONTRIBUTING.md` - How to contribute to the project
 - **Testing Guide**: `docs/Testing-Guide.md` - Complete guide for running tests locally and in CI
-- **Build Instructions**: `docs/Build_HDFView.txt` - How to build the project
+- **Build Instructions**: `docs/guides/Cross-Platform-Build-Quick-Reference.md` - How to build the project
 - **Build Properties**: `docs/build.properties.example` - Configuration template
 - **Users Guide**: `docs/UsersGuide/` - End-user documentation
 
@@ -378,4 +378,4 @@ When working with this codebase:
 - **Contributing Guide**: See `CONTRIBUTING.md` for comprehensive developer documentation
 - **GitHub Issues**: Search existing issues for known problems and solutions
 - **CI/CD Guides**: See `docs/guides/` for detailed workflow documentation
-- **Build Issues**: Check `docs/Build_HDFView.txt` and platform-specific troubleshooting guides
+- **Build Issues**: Check `docs/guides/Cross-Platform-Build-Quick-Reference.md` and platform-specific troubleshooting guides
