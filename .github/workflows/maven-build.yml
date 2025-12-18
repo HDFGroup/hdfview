@@ -1238,6 +1238,7 @@ jobs:
     - name: Publish to GitHub Packages
       run: |
         mvn deploy -B \
+          -pl object,hdfview \
           -DskipTests \
           -Ddependency-check.skip=true \
           -Dmaven.javadoc.skip=false \
