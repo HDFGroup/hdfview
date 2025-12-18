@@ -1239,6 +1239,7 @@ jobs:
       run: |
         mvn deploy -B \
           -DskipTests \
+          -Ddependency-check.skip=true \
           -Dmaven.javadoc.skip=false \
           -Dmaven.source.skip=false
       env:
