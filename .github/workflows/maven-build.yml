@@ -1241,7 +1241,8 @@ jobs:
           -DskipTests \
           -Ddependency-check.skip=true \
           -Dmaven.javadoc.skip=false \
-          -Dmaven.source.skip=false
+          -Dmaven.source.skip=false \
+          -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
