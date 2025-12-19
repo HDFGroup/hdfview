@@ -748,11 +748,12 @@ public class DataDisplayConverterFactory {
              */
             if (value instanceof byte[] && typeSize >= 16 && this.dtype instanceof hdf.object.h5.H5Datatype) {
                 try {
+                    byte[] byteValue                 = (byte[])value;
                     hdf.object.h5.H5Datatype h5dtype = (hdf.object.h5.H5Datatype)this.dtype;
-                    double converted                 = h5dtype.convertBytesToDouble((byte[])value);
+                    double converted                 = h5dtype.convertBytesToDouble(byteValue);
                     value                            = converted;
                     log.trace("canonicalToDisplayValue(): converted byte[{}] to double using datatype metadata: {}",
-                              ((byte[])value).length, converted);
+                              byteValue.length, converted);
                 }
                 catch (Exception ex) {
                     log.debug("canonicalToDisplayValue(): byte array conversion failed: ", ex);
