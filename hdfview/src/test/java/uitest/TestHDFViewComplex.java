@@ -44,13 +44,13 @@ public class TestHDFViewComplex extends AbstractWindowTest {
 
         SWTBotShell tableShell   = null;
         final String filename    = "tcomplex.h5";
-        final String datasetName = "/DatasetFloat32Complex";
+        final String datasetName = "/DatasetFloatComplex";
         File hdf_file            = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
 
-            checkFileTree(filetree, "checkHDF5Float32Complex()", 2, filename);
+            checkFileTree(filetree, "checkHDF5Float32Complex()", 7, filename);
 
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
@@ -101,13 +101,13 @@ public class TestHDFViewComplex extends AbstractWindowTest {
 
         SWTBotShell tableShell   = null;
         final String filename    = "tcomplex.h5";
-        final String datasetName = "/DatasetFloat64Complex";
+        final String datasetName = "/DatasetDoubleComplex";
         File hdf_file            = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
 
-            checkFileTree(filetree, "checkHDF5Float64Complex()", 2, filename);
+            checkFileTree(filetree, "checkHDF5Float64Complex()", 7, filename);
 
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
@@ -164,7 +164,7 @@ public class TestHDFViewComplex extends AbstractWindowTest {
         try {
             SWTBotTree filetree = bot.tree();
 
-            checkFileTree(filetree, "checkHDF5LongDoubleComplex()", 2, filename);
+            checkFileTree(filetree, "checkHDF5LongDoubleComplex()", 7, filename);
 
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
@@ -212,14 +212,14 @@ public class TestHDFViewComplex extends AbstractWindowTest {
              "8.2+8.2i", "9.2+9.2i"}};
 
         SWTBotShell tableShell   = null;
-        final String filename    = "tcomplex.h5";
-        final String datasetName = "/DatasetLongDoubleComplexBE";
+        final String filename    = "tcomplex_be.h5";
+        final String datasetName = "/DatasetLongDoubleComplex";
         File hdf_file            = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
 
-            checkFileTree(filetree, "checkHDF5LongDoubleComplexBE()", 2, filename);
+            checkFileTree(filetree, "checkHDF5LongDoubleComplexBE()", 7, filename);
 
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
@@ -263,13 +263,13 @@ public class TestHDFViewComplex extends AbstractWindowTest {
         SWTBotShell tableShell   = null;
         SWTBotShell errorShell   = null;
         final String filename    = "tcomplex.h5";
-        final String datasetName = "/DatasetVLENComplex";
+        final String datasetName = "/VariableLengthDatasetFloatComplex";
         File hdf_file            = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
 
-            checkFileTree(filetree, "checkHDF5VLENComplexError()", 2, filename);
+            checkFileTree(filetree, "checkHDF5VLENComplexError()", 7, filename);
 
             // Try to open VLEN complex dataset - should trigger error dialog
             filetree.getTreeItem(filename).getNode(datasetName).doubleClick();
@@ -317,27 +317,24 @@ public class TestHDFViewComplex extends AbstractWindowTest {
     public void checkHDF5ComplexArray()
     {
         // Test first 3 rows of complex array dataset
-        // Each element is [real+imag_i, real+imag_i] (2-element array of complex)
+        // This is a 1x1 dataset containing a 10x10 array of complex values
         String[][] expectedData = {
-            {"[10.0+0.0i, 10.0+0.0i]", "[1.0+1.0i, 1.0+1.0i]", "[2.0+2.0i, 2.0+2.0i]", "[3.0+3.0i, 3.0+3.0i]",
-             "[4.0+4.0i, 4.0+4.0i]", "[5.0+5.0i, 5.0+5.0i]", "[6.0+6.0i, 6.0+6.0i]", "[7.0+7.0i, 7.0+7.0i]",
-             "[8.0+8.0i, 8.0+8.0i]", "[9.0+9.0i, 9.0+9.0i]"},
-            {"[9.0+0.0i, 9.0+0.0i]", "[1.1+1.1i, 1.1+1.1i]", "[2.1+2.1i, 2.1+2.1i]", "[3.1+3.1i, 3.1+3.1i]",
-             "[4.1+4.1i, 4.1+4.1i]", "[5.1+5.1i, 5.1+5.1i]", "[6.1+6.1i, 6.1+6.1i]", "[7.1+7.1i, 7.1+7.1i]",
-             "[8.1+8.1i, 8.1+8.1i]", "[9.1+9.1i, 9.1+9.1i]"},
-            {"[8.0+0.0i, 8.0+0.0i]", "[1.2+1.2i, 1.2+1.2i]", "[2.2+2.2i, 2.2+2.2i]", "[3.2+3.2i, 3.2+3.2i]",
-             "[4.2+4.2i, 4.2+4.2i]", "[5.2+5.2i, 5.2+5.2i]", "[6.2+6.2i, 6.2+6.2i]", "[7.2+7.2i, 7.2+7.2i]",
-             "[8.2+8.2i, 8.2+8.2i]", "[9.2+9.2i, 9.2+9.2i]"}};
+            {"10.0+0.0i", "1.0+1.0i", "2.0+2.0i", "3.0+3.0i", "4.0+4.0i", "5.0+5.0i", "6.0+6.0i", "7.0+7.0i",
+             "8.0+8.0i", "9.0+9.0i"},
+            {"9.0+0.0i", "1.1+1.1i", "2.1+2.1i", "3.1+3.1i", "4.1+4.1i", "5.1+5.1i", "6.1+6.1i", "7.1+7.1i",
+             "8.1+8.1i", "9.1+9.1i"},
+            {"8.0+0.0i", "1.2+1.2i", "2.2+2.2i", "3.2+3.2i", "4.2+4.2i", "5.2+5.2i", "6.2+6.2i", "7.2+7.2i",
+             "8.2+8.2i", "9.2+9.2i"}};
 
         SWTBotShell tableShell   = null;
         final String filename    = "tcomplex.h5";
-        final String datasetName = "/DatasetComplexArray";
+        final String datasetName = "/ArrayDatasetFloatComplex";
         File hdf_file            = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
 
-            checkFileTree(filetree, "checkHDF5ComplexArray()", 2, filename);
+            checkFileTree(filetree, "checkHDF5ComplexArray()", 7, filename);
 
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
@@ -378,24 +375,24 @@ public class TestHDFViewComplex extends AbstractWindowTest {
     public void checkHDF5ComplexCompound()
     {
         // Test first 3 rows of complex compound dataset
-        // Each element is {id: int, value: complex}
+        // Each element is a compound with one complex field
         String[][] expectedData = {
-            {"{1, 10.0+0.0i}", "{2, 1.0+1.0i}", "{3, 2.0+2.0i}", "{4, 3.0+3.0i}", "{5, 4.0+4.0i}",
-             "{6, 5.0+5.0i}", "{7, 6.0+6.0i}", "{8, 7.0+7.0i}", "{9, 8.0+8.0i}", "{10, 9.0+9.0i}"},
-            {"{11, 9.0+0.0i}", "{12, 1.1+1.1i}", "{13, 2.1+2.1i}", "{14, 3.1+3.1i}", "{15, 4.1+4.1i}",
-             "{16, 5.1+5.1i}", "{17, 6.1+6.1i}", "{18, 7.1+7.1i}", "{19, 8.1+8.1i}", "{20, 9.1+9.1i}"},
-            {"{21, 8.0+0.0i}", "{22, 1.2+1.2i}", "{23, 2.2+2.2i}", "{24, 3.2+3.2i}", "{25, 4.2+4.2i}",
-             "{26, 5.2+5.2i}", "{27, 6.2+6.2i}", "{28, 7.2+7.2i}", "{29, 8.2+8.2i}", "{30, 9.2+9.2i}"}};
+            {"{10.0+0.0i}", "{1.0+1.0i}", "{2.0+2.0i}", "{3.0+3.0i}", "{4.0+4.0i}", "{5.0+5.0i}", "{6.0+6.0i}",
+             "{7.0+7.0i}", "{8.0+8.0i}", "{9.0+9.0i}"},
+            {"{9.0+0.0i}", "{1.1+1.1i}", "{2.1+2.1i}", "{3.1+3.1i}", "{4.1+4.1i}", "{5.1+5.1i}", "{6.1+6.1i}",
+             "{7.1+7.1i}", "{8.1+8.1i}", "{9.1+9.1i}"},
+            {"{8.0+0.0i}", "{1.2+1.2i}", "{2.2+2.2i}", "{3.2+3.2i}", "{4.2+4.2i}", "{5.2+5.2i}", "{6.2+6.2i}",
+             "{7.2+7.2i}", "{8.2+8.2i}", "{9.2+9.2i}"}};
 
         SWTBotShell tableShell   = null;
         final String filename    = "tcomplex.h5";
-        final String datasetName = "/DatasetComplexCompound";
+        final String datasetName = "/CompoundDatasetFloatComplex";
         File hdf_file            = openFile(filename, FILE_MODE.READ_ONLY);
 
         try {
             SWTBotTree filetree = bot.tree();
 
-            checkFileTree(filetree, "checkHDF5ComplexCompound()", 2, filename);
+            checkFileTree(filetree, "checkHDF5ComplexCompound()", 7, filename);
 
             tableShell                     = openTreeviewObject(filetree, filename, datasetName);
             final SWTBotNatTable dataTable = getNatTable(tableShell);
