@@ -1519,9 +1519,10 @@ public class H5Datatype extends Datatype {
                     if (fieldsValid) {
                         // For complex base types, skip H5Tset_fields entirely - the copied native type
                         // already has correct fields. Setting fields is only needed for custom types.
-                        // Only skip for standard IEEE 754 sizes (4=float, 8=double)
-                        // Long double (16 bytes) is platform-specific and may need special handling
-                        if (datatypeSize == 8 || datatypeSize == 4) {
+                        // Skip for standard IEEE 754 sizes (4=float, 8=double)
+                        // Also skip for long double (16 bytes) which is platform-specific
+                        // (x86_64: 80-bit extended precision, some platforms: 128-bit quadruple precision)
+                        if (datatypeSize == 4 || datatypeSize == 8 || datatypeSize == 16) {
                             log.debug(
                                 "createNative(): Skipping H5Tset_fields for standard {}-byte float - using native type defaults",
                                 datatypeSize);
@@ -1967,7 +1968,13 @@ public class H5Datatype extends Datatype {
                 data = new double[numPoints];
                 break;
             case 16:
-                log.trace("allocateArray(): allocating byte array for 16-byte float");
+                // Long double (16-byte) is platform-specific:
+                // - x86_64 Linux: 80-bit extended precision (stored in 16 bytes with padding)
+                // - Some platforms: 128-bit quadruple precision
+                // Return as byte array since Java has no native long double type.
+                // UI layer or consumers can convert bytes to doubles with potential precision loss.
+                log.trace(
+                    "allocateArray(): allocating byte array for 16-byte float (long double - platform-specific format)");
                 data = new byte[numPoints * 16];
                 break;
             default:
