@@ -1246,4 +1246,3 @@ jobs:
           -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

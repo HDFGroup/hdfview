@@ -35,8 +35,10 @@ All notable changes to this project will be documented in this file. This docume
 
 ## Major Enhancements
 
+* Build system converted to Maven
+
 * **[GH #117](https://github.com/HDFGroup/hdfview/issues/117)** - Add User Option for editing the plugin path and include plugins
-* **[GH #138](https://github.com/HDFGroup/hdfview/issues/138)** - Add Support for operating with float16 datatypes
+* **[GH #138](https://github.com/HDFGroup/hdfview/issues/138)** - Add Support for operating with float16 and complex datatypes
 
 # 🪲 Bug Fixes
 
@@ -57,6 +59,10 @@ All notable changes to this project will be documented in this file. This docume
 ## Minor Bug Fixes
 
 * **[GH #171](https://github.com/HDFGroup/hdfview/issues/171)** - HDFView fails to find input files on command line when using relative paths
+
+* **[GH #387](https://github.com/HDFGroup/hdfview/issues/387)** (checkHDF5Filters shows 'NONE') Replace corrupted tfilters.h5 test data file with correct version.
+
+* **[GH #352](https://github.com/HDFGroup/hdfview/issues/352)** (isn't displaying attribute values correctly) Incorrectly using the array value as a character limit.
 
 # ☑️ Platforms Tested
 
