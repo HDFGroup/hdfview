@@ -807,6 +807,102 @@ public class H5Datatype extends Datatype {
         return sig.multiply(new BigDecimal(powscale, MathContext.DECIMAL128));
     }
 
+    /**
+     * Converts a byte array representing a floating-point value to a Java double,
+     * using this datatype's format metadata (sign position, exponent, mantissa, bias, etc.).
+     *
+     * <p>
+     * This method is platform-independent and works with any floating-point format
+     * by using the HDF5 datatype properties extracted when the type was read.
+     * It handles:
+     * <ul>
+     * <li>Variable sign, exponent, and mantissa positions and sizes</li>
+     * <li>Different byte orders (little-endian, big-endian)</li>
+     * <li>Different normalization methods (implied, explicit, none)</li>
+     * <li>Platform-specific formats (x86 extended precision, IEEE 754, etc.)</li>
+     * </ul>
+     *
+     * @param raw
+     *            The byte array to convert to a double (length must match datatype size)
+     * @return A double representing the floating-point value, or 0.0 on error
+     */
+    public double convertBytesToDouble(byte[] raw)
+    {
+        try {
+            // Use BitSet for bit-level extraction
+            BitSet rawset = BitSet.valueOf(raw);
+
+            // Extract sign bit
+            boolean sign = rawset.get(nativeOffset + (int)nativeFPspos);
+
+            // Extract mantissa bits
+            BitSet mantissaset = rawset.get(nativeOffset + (int)nativeFPmpos,
+                                            nativeOffset + (int)nativeFPmpos + (int)nativeFPmsize);
+
+            // Extract exponent bits
+            BitSet exponentset = rawset.get(nativeOffset + (int)nativeFPepos,
+                                            nativeOffset + (int)nativeFPepos + (int)nativeFPesize);
+
+            // Convert exponent to long, handling byte order
+            byte[] expraw = Arrays.copyOf(exponentset.toByteArray(), (int)(nativeFPesize + 7) / 8);
+            byte[] bexp   = new byte[expraw.length];
+
+            if (datatypeOrder == ORDER_LE) {
+                // BitSet is LE, convert to BE for BigInteger
+                int k = 0;
+                for (int j = expraw.length - 1; j >= 0; j--)
+                    bexp[k++] = expraw[j];
+            }
+            else {
+                System.arraycopy(expraw, 0, bexp, 0, expraw.length);
+            }
+
+            BigInteger bscale = new BigInteger(bexp);
+            long exponent     = bscale.longValue();
+
+            // Apply exponent bias
+            long unbiasedExp = exponent - nativeFPebias;
+
+            // Convert mantissa to double [0, 1)
+            byte[] manraw = Arrays.copyOf(mantissaset.toByteArray(), (int)(nativeFPmsize + 7) / 8);
+            byte[] bman   = new byte[manraw.length];
+
+            if (datatypeOrder == ORDER_BE) {
+                int k = 0;
+                for (int j = manraw.length - 1; j >= 0; j--)
+                    bman[k++] = manraw[j];
+            }
+            else {
+                System.arraycopy(manraw, 0, bman, 0, manraw.length);
+            }
+
+            BitSet manset = BitSet.valueOf(bman);
+
+            // Calculate mantissa value as fraction [0, 1)
+            double mantissa = 0.0;
+            for (int i = 0; i < (int)nativeFPmsize; i++) {
+                if (manset.get((int)nativeFPmsize - 1 - i))
+                    mantissa += Math.pow(2, -(i + 1)); // Note: -(i+1) for proper fraction
+            }
+
+            // Add implicit/explicit integer bit based on normalization
+            double significand = mantissa;
+            if (nativeFPnorm == HDF5Constants.H5T_NORM_IMPLIED ||
+                nativeFPnorm == HDF5Constants.H5T_NORM_MSBSET)
+                significand += 1.0;
+
+            // Apply exponent
+            double value = Math.scalb(significand, (int)unbiasedExp);
+
+            // Apply sign
+            return sign ? -value : value;
+        }
+        catch (Exception ex) {
+            log.debug("convertBytesToDouble(): conversion failed, returning 0.0: ", ex);
+            return 0.0;
+        }
+    }
+
     /*
      * (non-Javadoc)
      * @see hdf.object.Datatype#fromNative(int)

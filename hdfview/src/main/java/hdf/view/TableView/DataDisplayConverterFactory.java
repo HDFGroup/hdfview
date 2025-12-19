@@ -704,6 +704,7 @@ public class DataDisplayConverterFactory {
         private static final Logger log = LoggerFactory.getLogger(NumericalDataDisplayConverter.class);
 
         private final StringBuilder buffer;
+        private final Datatype dtype;
         private final long typeSize;
         private final boolean isUINT64;
         private final boolean isFLT16;
@@ -717,6 +718,8 @@ public class DataDisplayConverterFactory {
                 throw new Exception(
                     "NumericalDataDisplayConverter: datatype is not an integer or floating-point type");
             }
+
+            this.dtype = dtype; // Store for byte-to-double conversion
 
             buffer = new StringBuilder();
 
@@ -739,18 +742,20 @@ public class DataDisplayConverterFactory {
             }
 
             /*
-             * Handle byte[16] from long double (16-byte float).
-             * Convert platform-specific long double bytes to Java double for display.
-             * This enables decimal display of long double complex numbers.
+             * Handle byte arrays from platform-specific float types (e.g., 16-byte long double).
+             * Use the datatype's own metadata to convert bytes to double for display.
+             * This is platform-independent and works with any float format.
              */
-            if (value instanceof byte[] && ((byte[])value).length == 16) {
+            if (value instanceof byte[] && typeSize >= 16 && this.dtype instanceof hdf.object.h5.H5Datatype) {
                 try {
-                    double converted = bytesToLongDouble((byte[])value);
-                    value            = converted;
-                    log.trace("canonicalToDisplayValue(): converted byte[16] to double: {}", converted);
+                    hdf.object.h5.H5Datatype h5dtype = (hdf.object.h5.H5Datatype)this.dtype;
+                    double converted                 = h5dtype.convertBytesToDouble((byte[])value);
+                    value                            = converted;
+                    log.trace("canonicalToDisplayValue(): converted byte[{}] to double using datatype metadata: {}",
+                              ((byte[])value).length, converted);
                 }
                 catch (Exception ex) {
-                    log.debug("canonicalToDisplayValue(): byte[16] conversion failed: ", ex);
+                    log.debug("canonicalToDisplayValue(): byte array conversion failed: ", ex);
                     // Fall through to hex/binary display if conversion fails
                 }
             }
@@ -786,86 +791,6 @@ public class DataDisplayConverterFactory {
             return buffer;
         }
 
-        /**
-         * Converts a 16-byte array representing a platform-specific long double to a Java double.
-         *
-         * <p>
-         * Long double format varies by platform:
-         * <ul>
-         * <li>x86/x86_64: 80-bit extended precision (10 bytes + 6 bytes padding)</li>
-         * <li>ARM64, SPARC: 128-bit IEEE 754 quadruple precision</li>
-         * <li>PowerPC: 128-bit double-double format</li>
-         * </ul>
-         *
-         * <p>
-         * This implementation uses a simple heuristic approach:
-         * <ol>
-         * <li>Try x86_64 80-bit extended precision parsing (most common)</li>
-         * <li>If that seems invalid, fall back to treating as IEEE 754 double</li>
-         * </ol>
-         *
-         * <p>
-         * Note: Conversion to double may lose precision, but is acceptable for display purposes.
-         *
-         * @param bytes 16-byte array containing platform-specific long double
-         * @return converted double value
-         */
-        private double bytesToLongDouble(byte[] bytes)
-        {
-            /*
-             * x86_64 80-bit extended precision format:
-             * - Bytes 0-7: 64-bit mantissa with explicit integer bit in bit 63
-             * - Bytes 8-9: 15-bit exponent + 1-bit sign
-             * - Bytes 10-15: padding (usually zeros)
-             *
-             * The mantissa has an explicit integer bit (bit 63) which is 1 for
-             * normalized numbers. Bits 0-62 are the fractional part.
-             */
-            try {
-                // Read mantissa as little-endian (bits 0-63)
-                long mantissaBits = 0;
-                for (int i = 0; i < 8; i++) {
-                    mantissaBits |= ((long)(bytes[i] & 0xFF)) << (i * 8);
-                }
-
-                // Read exponent and sign (bits 64-79)
-                int expAndSign = ((bytes[9] & 0xFF) << 8) | (bytes[8] & 0xFF);
-                int exponent   = expAndSign & 0x7FFF; // 15-bit exponent
-                int sign       = (expAndSign >> 15) & 1;
-
-                // Special cases
-                if (exponent == 0 && mantissaBits == 0) {
-                    return sign == 1 ? -0.0 : 0.0;
-                }
-                if (exponent == 0x7FFF) {
-                    if (mantissaBits == 0)
-                        return sign == 1 ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
-                    else
-                        return Double.NaN;
-                }
-
-                /*
-                 * Extract significand from mantissa with explicit integer bit:
-                 * - Bit 63: explicit integer bit (1 for normalized numbers)
-                 * - Bits 0-62: fractional part
-                 * - Significand = 1.fraction (for normalized)
-                 */
-                long fractionBits = mantissaBits & 0x7FFFFFFFFFFFFFFFL; // Bits 0-62
-                double fraction   = (double)fractionBits / (1L << 63); // Convert to [0, 1)
-                double significand =
-                    1.0 + fraction; // Add explicit integer bit (assumes normalized number)
-
-                // Apply exponent (bias = 16383 for x86 extended precision)
-                int unbiasedExp = exponent - 16383;
-                double value    = Math.scalb(significand, unbiasedExp);
-
-                return sign == 1 ? -value : value;
-            }
-            catch (Exception ex) {
-                log.debug("bytesToLongDouble(): conversion failed, returning 0.0: ", ex);
-                return 0.0;
-            }
-        }
     }
 
     private static class EnumDataDisplayConverter extends HDFDisplayConverter {
