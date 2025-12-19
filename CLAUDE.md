@@ -262,15 +262,11 @@ The project uses automated GitHub Actions workflows for continuous integration a
   - GitHub CodeQL security analysis
   - License compliance checking (prohibits GPL/AGPL)
 
-- **`maven-build.yml`**: Cross-platform binary builds
+- **`maven-build.yml`**: Cross-platform binary builds and Maven package publishing
   - 6 build jobs (Linux, Windows, macOS binaries and app packages)
   - Downloads HDF4/HDF5 from GitHub releases
-  - Daily scheduled builds
-
-- **`maven-release.yml`**: Automated releases
-  - Version management from Git tags
-  - GitHub Packages publication
-  - Release notes generation
+  - Optional GitHub Packages publication (Maven registry)
+  - Called by release.yml for comprehensive releases
 
 ### Quality Tools and Standards
 
@@ -351,7 +347,7 @@ Comprehensive project documentation is maintained in multiple locations:
 ### User Documentation (`docs/`)
 - **Contributing Guide**: `CONTRIBUTING.md` - How to contribute to the project
 - **Testing Guide**: `docs/Testing-Guide.md` - Complete guide for running tests locally and in CI
-- **Build Instructions**: `docs/Build_HDFView.txt` - How to build the project
+- **Build Instructions**: `docs/guides/Cross-Platform-Build-Quick-Reference.md` - How to build the project
 - **Build Properties**: `docs/build.properties.example` - Configuration template
 - **Users Guide**: `docs/UsersGuide/` - End-user documentation
 
@@ -378,4 +374,4 @@ When working with this codebase:
 - **Contributing Guide**: See `CONTRIBUTING.md` for comprehensive developer documentation
 - **GitHub Issues**: Search existing issues for known problems and solutions
 - **CI/CD Guides**: See `docs/guides/` for detailed workflow documentation
-- **Build Issues**: Check `docs/Build_HDFView.txt` and platform-specific troubleshooting guides
+- **Build Issues**: Check `docs/guides/Cross-Platform-Build-Quick-Reference.md` and platform-specific troubleshooting guides

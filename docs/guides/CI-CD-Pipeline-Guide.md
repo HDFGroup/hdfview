@@ -17,7 +17,7 @@ The HDFView CI/CD pipeline consists of four main GitHub Actions workflows:
 1. **`maven-ci.yml`** - Core development workflow (build, test, artifacts)
 2. **`maven-quality.yml`** - Quality gates and analysis
 3. **`maven-security.yml`** - Security and dependency scanning
-4. **`maven-release.yml`** - Release and artifact management
+4. **`release.yml`** - Release orchestration (calls tarball.yml, maven-build.yml, release-files.yml)
 
 ### Trigger Strategy
 
@@ -131,42 +131,38 @@ Checkstyle Errors: 0 (blocking)
 - License compliance reports
 - GitHub Security alerts integration
 
-### 4. Release Management Pipeline (`maven-release.yml`)
+### 4. Release Management Pipeline (`release.yml`)
 
 **Purpose**: Automated release creation and artifact publishing
 
 **Triggers**:
-- Git tags matching `v*.*.*` or `release-*`
-- Manual workflow dispatch
+- Manual workflow dispatch with release/snapshot selection
 
 **Release Process**:
 
 1. **Version Determination**:
-   ```bash
-   # From tag: v1.2.3 → version 1.2.3
-   # From manual: current POM version (release mode)
-   ```
+   - Reads VERSION file from repository
+   - Constructs tag name (e.g., HDFView-3.3.4 for release, snapshot for dev)
 
-2. **Quality Validation**:
-   - Full test suite execution
-   - Coverage threshold enforcement (release builds)
-   - Build artifact verification
+2. **Source Tarball Creation** (via `tarball.yml`):
+   - Source code archives (tar.gz, zip)
+   - User Guide documentation
 
-3. **Artifact Creation**:
-   - Application JARs
-   - Source JARs
-   - JavaDoc JARs
-   - Distribution packages
+3. **Cross-Platform Build** (via `maven-build.yml`):
+   - 6 platform-specific builds (Linux, Windows, macOS binary + app packages)
+   - Downloads HDF4/HDF5 from GitHub releases
+   - **GitHub Packages publication** (Maven registry) when enabled
+   - Parallel build execution for efficiency
 
-4. **Release Publication**:
-   - GitHub Release creation
-   - Asset upload to GitHub Releases
-   - Maven packages to GitHub Packages
+4. **Release Publication** (via `release-files.yml`):
+   - GitHub Release creation (release or pre-release)
+   - Asset upload: source tarballs, platform binaries, documentation
+   - SHA256 checksums for all artifacts
+   - Release notes from CHANGELOG.md
 
-**Release Types**:
-- **Release**: Full production release
-- **Snapshot**: Development snapshot
-- **Hotfix**: Emergency fix release
+**Build Types**:
+- **Release**: Full production release with versioned tag
+- **Snapshot**: Development snapshot with timestamped tag
 
 ## Configuration Files
 
