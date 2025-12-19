@@ -370,48 +370,55 @@ public class TestComplexDatatype {
             System.out.println("✓ Data read without crash!");
             System.out.println("Data type: " + data.getClass().getName());
 
-            // Long double complex is returned as byte array since Java has no native long double type
-            // Format: 32 bytes per complex number (2 × 16-byte long doubles)
-            if (data instanceof byte[]) {
-                byte[] bytes = (byte[])data;
-                int expectedBytes = 10 * 10 * 32; // 10×10 dataset, 32 bytes per complex number
-                System.out.println("Data length: " + bytes.length + " bytes (expected: " + expectedBytes + ")");
-                assertEquals(expectedBytes, bytes.length, "Byte array should be correct size");
+            // Long double complex is returned as byte[][] since Java has no native long double type
+            // Format: byte[100][32] - 100 complex numbers, 32 bytes each (16 real + 16 imaginary)
+            if (data instanceof byte[][]) {
+                byte[][] complexData = (byte[][])data;
+                int expectedElements = 10 * 10; // 10×10 dataset
+                System.out.println("Data structure: byte[" + complexData.length + "][32]");
+                System.out.println("Expected: byte[" + expectedElements + "][32]");
+                assertEquals(expectedElements, complexData.length, "Should have 100 complex numbers");
+
+                // Verify each complex number is 32 bytes
+                for (int i = 0; i < Math.min(5, complexData.length); i++) {
+                    assertEquals(32, complexData[i].length,
+                                 "Complex number " + i + " should be 32 bytes");
+                }
 
                 // Verify data is not all zeros (which would indicate read failure)
-                int nonZeroCount = 0;
-                for (byte b : bytes) {
-                    if (b != 0)
-                        nonZeroCount++;
+                int nonZeroBytes = 0;
+                for (byte[] complexNum : complexData) {
+                    for (byte b : complexNum) {
+                        if (b != 0)
+                            nonZeroBytes++;
+                    }
                 }
-                System.out.println("Non-zero bytes: " + nonZeroCount + " out of " + bytes.length);
-                assertTrue(nonZeroCount > 0,
+                System.out.println("Non-zero bytes: " + nonZeroBytes + " out of " + (100 * 32));
+                assertTrue(nonZeroBytes > 0,
                            "Data should contain non-zero bytes (not all zeros means data was read)");
 
-                // Try to interpret the first complex number as a sanity check
-                // Note: This is platform-specific and may not work on all systems
+                // Display first complex number as sanity check
                 // On x86_64 Linux, long double is 80-bit extended precision in 16 bytes
-                // We'll just check that the first 16-byte chunk contains reasonable data
                 System.out.println("\nFirst complex number (raw bytes):");
-                System.out.print("  Real part (first 16 bytes): ");
-                for (int i = 0; i < 16 && i < bytes.length; i++) {
-                    System.out.printf("%02X ", bytes[i]);
+                System.out.print("  Real part (16 bytes): ");
+                for (int i = 0; i < 16; i++) {
+                    System.out.printf("%02X ", complexData[0][i]);
                 }
                 System.out.println();
-                System.out.print("  Imag part (next 16 bytes): ");
-                for (int i = 16; i < 32 && i < bytes.length; i++) {
-                    System.out.printf("%02X ", bytes[i]);
+                System.out.print("  Imag part (16 bytes): ");
+                for (int i = 16; i < 32; i++) {
+                    System.out.printf("%02X ", complexData[0][i]);
                 }
                 System.out.println();
 
-                System.out.println(
-                    "\n✓ Long double complex data read successfully as byte array (3200 bytes)");
+                System.out.println("\n✓ Long double complex data read successfully as byte[100][32]");
                 System.out.println(
                     "Note: Data is in platform-specific long double format (16 bytes per float).");
-                System.out.println("      UI layer can convert to displayable format with potential precision loss.");
+                System.out.println(
+                    "      Object layer preserves raw bytes. UI layer can convert to displayable format.");
             }
             else {
-                fail("Expected byte array for long double complex, got: " + data.getClass().getName());
+                fail("Expected byte[][] for long double complex, got: " + data.getClass().getName());
             }
         }
         catch (Exception e) {

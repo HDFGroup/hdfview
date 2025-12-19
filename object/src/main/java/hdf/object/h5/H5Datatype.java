@@ -1816,7 +1816,23 @@ public class H5Datatype extends Datatype {
 
     /**
      * Allocates a one-dimensional array of byte, short, int, long, float, double, or String to store data in
-     * memory. For example,
+     * memory.
+     *
+     * <p>
+     * <b>Design Principle: Conversion at Last Responsible Moment</b><br>
+     * This method preserves raw data in its native or closest Java representation, deferring type conversions
+     * until actually needed for display, export, or computation. This approach:
+     * <ul>
+     * <li>Maintains cross-platform compatibility (e.g., byte arrays for platform-specific types)</li>
+     * <li>Prevents premature precision loss</li>
+     * <li>Enables multiple display modes (hex, binary, decimal) from same data</li>
+     * <li>Supports lossless round-trip for edit operations</li>
+     * </ul>
+     * Conversion to display-friendly formats should occur in the UI layer (DataProvider/DisplayConverter),
+     * not in the object layer.
+     *
+     * <p>
+     * For example,
      *
      * <pre>
      * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT32);
@@ -2020,8 +2036,38 @@ public class H5Datatype extends Datatype {
         }
         else if (typeClass == CLASS_COMPLEX) {
             log.trace("allocateArray(): class CLASS_COMPLEX");
-            if (baseType != null)
+            if (baseType != null) {
                 data = H5Datatype.allocateArray(baseType, numPoints * 2);
+
+                /*
+                 * Reshape byte arrays from long double complex for proper UI structure.
+                 * For types where Java has no native representation (e.g., 16-byte long double),
+                 * the base type allocation returns a flat byte array. For complex numbers,
+                 * we need to structure this as byte[numComplex][bytesPerComplex] so the UI
+                 * can properly extract real and imaginary components.
+                 *
+                 * Example: 10x10 long double complex dataset:
+                 *   - Before: byte[3200] (flat, hard to parse)
+                 *   - After: byte[100][32] (100 complex numbers, 32 bytes each)
+                 *
+                 * This preserves raw bytes (no precision loss) while providing logical structure.
+                 */
+                long baseSize = baseType.getDatatypeSize();
+                if (data instanceof byte[] && baseSize == 16) {
+                    byte[] flatData        = (byte[])data;
+                    int bytesPerComplex    = (int)(baseSize * 2); // 32 bytes: 16 real + 16 imaginary
+                    byte[][] reshapedData  = new byte[numPoints][bytesPerComplex];
+
+                    for (int i = 0; i < numPoints; i++) {
+                        System.arraycopy(flatData, i * bytesPerComplex, reshapedData[i], 0,
+                                         bytesPerComplex);
+                    }
+                    data = reshapedData;
+                    log.trace(
+                        "allocateArray(): reshaped byte[{}] to byte[{}][{}] for 16-byte complex (long double)",
+                        flatData.length, numPoints, bytesPerComplex);
+                }
+            }
             else {
                 if (typeSize == NATIVE)
                     typeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);
