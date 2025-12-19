@@ -419,9 +419,15 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                                         isFillValueConverted = true;
                                     }
 
-                                    int n = Array.getLength(fillValue);
-                                    for (int i = 0; i < n; i++)
-                                        addFilteredImageValue((Number)Array.get(fillValue, i));
+                                    /*
+                                     * For byte[][] (e.g., long double complex), skip adding to filtered
+                                     * image values since elements are byte arrays, not Numbers.
+                                     */
+                                    if (!(fillValue instanceof byte[][])) {
+                                        int n = Array.getLength(fillValue);
+                                        for (int i = 0; i < n; i++)
+                                            addFilteredImageValue((Number)Array.get(fillValue, i));
+                                    }
                                 }
                             }
                             catch (Exception ex2) {

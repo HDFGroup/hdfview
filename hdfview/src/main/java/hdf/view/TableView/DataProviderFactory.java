@@ -2223,8 +2223,17 @@ public class DataProviderFactory {
 
             try {
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
-                theValue     = retrieveArrayOfAtomicElements(dataBuf, bufIndex * 2);
-                log.trace("getDataValue(bufIndex={}, dataBuf={})=({})", bufIndex, dataBuf, theValue);
+
+                /*
+                 * For flat arrays (float[], double[]), multiply by 2 to get pairs.
+                 * For structured arrays (byte[][]), use index directly - each element
+                 * is already a complete complex number.
+                 */
+                int dataIndex = (dataBuf instanceof byte[][]) ? bufIndex : bufIndex * 2;
+
+                theValue = retrieveArrayOfAtomicElements(dataBuf, dataIndex);
+                log.trace("getDataValue(bufIndex={}, dataIndex={}, dataBuf={})=({})", bufIndex, dataIndex,
+                          dataBuf, theValue);
             }
             catch (Exception ex) {
                 log.debug("getDataValue(rowIndex={}, columnIndex={}): failure: ", rowIndex, columnIndex, ex);
