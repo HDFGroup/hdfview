@@ -829,19 +829,45 @@ public class H5Datatype extends Datatype {
     public double convertBytesToDouble(byte[] raw)
     {
         try {
+            log.trace("convertBytesToDouble(): mpos={} msize={} epos={} esize={} bias={} norm={} order={}",
+                      nativeFPmpos, nativeFPmsize, nativeFPepos, nativeFPesize, nativeFPebias, nativeFPnorm,
+                      datatypeOrder);
+
             // Use BitSet for bit-level extraction
             BitSet rawset = BitSet.valueOf(raw);
 
-            // Extract sign bit
-            boolean sign = rawset.get(nativeOffset + (int)nativeFPspos);
+            /*
+             * Detect x86 extended precision format (80-bit in 16 bytes).
+             * HDF5 reports incorrect field positions (assumes padding at end).
+             * Actual x86 layout:
+             * - Bits 0-63: mantissa
+             * - Bits 64-78: exponent (15 bits)
+             * - Bit 79: sign
+             * - Bits 80-127: padding
+             */
+            boolean isX86Extended = (raw.length == 16 &&
+                                     nativeFPesize == 15 &&
+                                     nativeFPebias == 16383 &&
+                                     nativeFPmsize == 112);
 
-            // Extract mantissa bits
-            BitSet mantissaset = rawset.get(nativeOffset + (int)nativeFPmpos,
-                                            nativeOffset + (int)nativeFPmpos + (int)nativeFPmsize);
+            int exponentPos = isX86Extended ? 64 : (int)nativeFPepos;
+            int signPos = isX86Extended ? 79 : (int)nativeFPspos;
+
+            // Extract sign bit
+            boolean sign = rawset.get(nativeOffset + signPos);
+
+            /*
+             * Extract mantissa bits.
+             * Note: For extended precision formats (e.g., x86 80-bit in 16 bytes),
+             * HDF5 may report msize including padding. Limit to actual precision (64 bits).
+             */
+            long actualMantissaSize = Math.min(nativeFPmsize, 64);
+            BitSet mantissaset      = rawset.get(nativeOffset + (int)nativeFPmpos,
+                                             nativeOffset + (int)nativeFPmpos + (int)actualMantissaSize);
 
             // Extract exponent bits
-            BitSet exponentset = rawset.get(nativeOffset + (int)nativeFPepos,
-                                            nativeOffset + (int)nativeFPepos + (int)nativeFPesize);
+            BitSet exponentset = rawset.get(nativeOffset + exponentPos,
+                                            nativeOffset + exponentPos + (int)nativeFPesize);
 
             // Convert exponent to long, handling byte order
             byte[] expraw = Arrays.copyOf(exponentset.toByteArray(), (int)(nativeFPesize + 7) / 8);
@@ -864,7 +890,7 @@ public class H5Datatype extends Datatype {
             long unbiasedExp = exponent - nativeFPebias;
 
             // Convert mantissa to double [0, 1)
-            byte[] manraw = Arrays.copyOf(mantissaset.toByteArray(), (int)(nativeFPmsize + 7) / 8);
+            byte[] manraw = Arrays.copyOf(mantissaset.toByteArray(), (int)(actualMantissaSize + 7) / 8);
             byte[] bman   = new byte[manraw.length];
 
             if (datatypeOrder == ORDER_BE) {
@@ -878,18 +904,37 @@ public class H5Datatype extends Datatype {
 
             BitSet manset = BitSet.valueOf(bman);
 
-            // Calculate mantissa value as fraction [0, 1)
-            double mantissa = 0.0;
-            for (int i = 0; i < (int)nativeFPmsize; i++) {
-                if (manset.get((int)nativeFPmsize - 1 - i))
-                    mantissa += Math.pow(2, -(i + 1)); // Note: -(i+1) for proper fraction
+            // Calculate mantissa value
+            double mantissa;
+            if (nativeFPnorm == HDF5Constants.H5T_NORM_MSBSET || isX86Extended) {
+                // Explicit integer bit at MSB of mantissa
+                // Bit 63: integer bit (0 or 1)
+                // Bits 0-62: fractional part
+                mantissa = manset.get((int)actualMantissaSize - 1) ? 1.0 : 0.0;
+                for (int i = 0; i < (int)actualMantissaSize - 1; i++) {
+                    if (manset.get((int)actualMantissaSize - 2 - i))
+                        mantissa += Math.pow(2, -(i + 1));
+                }
+            }
+            else if (nativeFPnorm == HDF5Constants.H5T_NORM_IMPLIED) {
+                // Implicit integer bit (always 1, not stored)
+                // All bits are fractional part
+                mantissa = 1.0;
+                for (int i = 0; i < (int)actualMantissaSize; i++) {
+                    if (manset.get((int)actualMantissaSize - 1 - i))
+                        mantissa += Math.pow(2, -(i + 1));
+                }
+            }
+            else {
+                // H5T_NORM_NONE or unknown - treat as all fractional
+                mantissa = 0.0;
+                for (int i = 0; i < (int)actualMantissaSize; i++) {
+                    if (manset.get((int)actualMantissaSize - 1 - i))
+                        mantissa += Math.pow(2, -(i + 1));
+                }
             }
 
-            // Add implicit/explicit integer bit based on normalization
             double significand = mantissa;
-            if (nativeFPnorm == HDF5Constants.H5T_NORM_IMPLIED ||
-                nativeFPnorm == HDF5Constants.H5T_NORM_MSBSET)
-                significand += 1.0;
 
             // Apply exponent
             double value = Math.scalb(significand, (int)unbiasedExp);
