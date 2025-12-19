@@ -833,23 +833,51 @@ public class H5Datatype extends Datatype {
                       nativeFPmpos, nativeFPmsize, nativeFPepos, nativeFPesize, nativeFPebias, nativeFPnorm,
                       datatypeOrder);
 
-            // Use BitSet for bit-level extraction
-            BitSet rawset = BitSet.valueOf(raw);
-
             /*
-             * Detect x86 extended precision format (80-bit in 16 bytes).
-             * HDF5 reports incorrect field positions (assumes padding at end).
-             * Actual x86 layout:
-             * - Bits 0-63: mantissa
-             * - Bits 64-78: exponent (15 bits)
-             * - Bit 79: sign
-             * - Bits 80-127: padding
+             * Detect x86 extended precision format early for proper byte order handling.
              */
             boolean isX86Extended = (raw.length == 16 &&
                                      nativeFPesize == 15 &&
                                      nativeFPebias == 16383 &&
                                      nativeFPmsize == 112);
 
+            /*
+             * BitSet.valueOf() interprets bytes as little-endian.
+             * For big-endian data, reverse the byte array first.
+             *
+             * For x86 extended precision in BE:
+             * - Bytes 0-5: padding (00 00 00 00 00 00)
+             * - Bytes 6-7: sign + exponent (3F FF for 1.0)
+             * - Bytes 8-15: mantissa (80 00 00 00 00 00 00 00 for 1.0)
+             *
+             * Need to convert to LE layout:
+             * - Bytes 0-7: mantissa
+             * - Bytes 8-9: sign + exponent
+             * - Bytes 10-15: padding
+             */
+            /*
+             * For x86 extended precision, HDF5 stores bytes in canonical LE format
+             * regardless of the dataset's byte order attribute, so no conversion needed.
+             * For other BE formats, reverse the entire byte array.
+             */
+            byte[] rawBytes = raw;
+            if (datatypeOrder == ORDER_BE && !isX86Extended) {
+                // Generic BE reversal for non-x86 formats
+                rawBytes = new byte[raw.length];
+                for (int i = 0; i < raw.length; i++)
+                    rawBytes[i] = raw[raw.length - 1 - i];
+            }
+
+            // Use BitSet for bit-level extraction
+            BitSet rawset = BitSet.valueOf(rawBytes);
+
+            /*
+             * For x86 extended precision (now converted to LE layout):
+             * - Bits 0-63: mantissa
+             * - Bits 64-78: exponent (15 bits)
+             * - Bit 79: sign
+             * - Bits 80-127: padding
+             */
             int exponentPos = isX86Extended ? 64 : (int)nativeFPepos;
             int signPos = isX86Extended ? 79 : (int)nativeFPspos;
 
@@ -873,15 +901,14 @@ public class H5Datatype extends Datatype {
             byte[] expraw = Arrays.copyOf(exponentset.toByteArray(), (int)(nativeFPesize + 7) / 8);
             byte[] bexp   = new byte[expraw.length];
 
-            if (datatypeOrder == ORDER_LE) {
-                // BitSet is LE, convert to BE for BigInteger
-                int k = 0;
-                for (int j = expraw.length - 1; j >= 0; j--)
-                    bexp[k++] = expraw[j];
-            }
-            else {
-                System.arraycopy(expraw, 0, bexp, 0, expraw.length);
-            }
+            /*
+             * BitSet.toByteArray() returns bytes in LE order.
+             * BigInteger expects bytes in BE order.
+             * After byte reversal for BE data, BitSet is in LE order, so always reverse.
+             */
+            int k = 0;
+            for (int j = expraw.length - 1; j >= 0; j--)
+                bexp[k++] = expraw[j];
 
             BigInteger bscale = new BigInteger(bexp);
             long exponent     = bscale.longValue();
@@ -891,18 +918,12 @@ public class H5Datatype extends Datatype {
 
             // Convert mantissa to double [0, 1)
             byte[] manraw = Arrays.copyOf(mantissaset.toByteArray(), (int)(actualMantissaSize + 7) / 8);
-            byte[] bman   = new byte[manraw.length];
 
-            if (datatypeOrder == ORDER_BE) {
-                int k = 0;
-                for (int j = manraw.length - 1; j >= 0; j--)
-                    bman[k++] = manraw[j];
-            }
-            else {
-                System.arraycopy(manraw, 0, bman, 0, manraw.length);
-            }
-
-            BitSet manset = BitSet.valueOf(bman);
+            /*
+             * After byte reversal for BE data, mantissa bits are already in correct order.
+             * No need for additional reversal - just convert to BitSet for bit extraction.
+             */
+            BitSet manset = BitSet.valueOf(manraw);
 
             // Calculate mantissa value
             double mantissa;
