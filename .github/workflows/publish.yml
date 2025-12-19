@@ -1,0 +1,133 @@
+name: hdfview publish to S3
+
+# Triggers the workflow on demand
+on:
+  workflow_dispatch:
+    inputs:
+      use_tag:
+        description: 'HDFView Release version tag (required for publishing release artifacts)'
+        type: string
+        required: false
+      target_dir:
+        description: 'HDFView target bucket directory'
+        type: string
+        required: true
+      local_dir:
+        description: 'Local directory in HDFVIEW/ to publish (for branch files)'
+        type: string
+        required: false
+      publish_source:
+        description: 'Publish source tarballs from release'
+        type: boolean
+        default: true
+      publish_binaries:
+        description: 'Publish binary packages from release'
+        type: boolean
+        default: true
+      publish_apps:
+        description: 'Publish app packages from release'
+        type: boolean
+        default: true
+      publish_docs:
+        description: 'Publish documentation from release'
+        type: boolean
+        default: true
+      publish_branch_files:
+        description: 'Publish files from branch HDFVIEW directory'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - name: Get Sources
+          uses: actions/checkout@9a9194f87191a7e9055e3e9b95b8cfb13023bb08 # v4.1.7
+          with:
+            fetch-depth: 0
+            ref: '${{ github.head_ref || github.ref_name }}'
+
+        # Fetch release artifacts conditionally based on file type
+        - name: Get source tarballs from release
+          if: ${{ inputs.use_tag != '' && inputs.publish_source }}
+          uses: dsaltares/fetch-gh-release-asset@master
+          with:
+            repo: 'HDFGroup/hdfview'
+            version: 'tags/${{ inputs.use_tag }}'
+            regex: true
+            target: 'HDFVIEW/'
+            file: '^HDFView-[0-9]+\.[0-9]+\.[0-9]+\.(tar\.gz|zip)$'
+
+        - name: Get checksums from release
+          if: ${{ inputs.use_tag != '' && (inputs.publish_source || inputs.publish_binaries || inputs.publish_apps) }}
+          uses: dsaltares/fetch-gh-release-asset@master
+          with:
+            repo: 'HDFGroup/hdfview'
+            version: 'tags/${{ inputs.use_tag }}'
+            regex: true
+            target: 'HDFVIEW/'
+            file: '\.sha256sums\.txt$'
+
+        - name: Get binary packages from release
+          if: ${{ inputs.use_tag != '' && inputs.publish_binaries }}
+          uses: dsaltares/fetch-gh-release-asset@master
+          with:
+            repo: 'HDFGroup/hdfview'
+            version: 'tags/${{ inputs.use_tag }}'
+            regex: true
+            target: 'HDFVIEW/'
+            file: '^HDFView-[0-9]+\.[0-9]+\.[0-9]+-(Linux-x86_64\.tar\.gz|win64\.zip|Darwin\.tar\.gz)$'
+
+        - name: Get app packages from release
+          if: ${{ inputs.use_tag != '' && inputs.publish_apps }}
+          uses: dsaltares/fetch-gh-release-asset@master
+          with:
+            repo: 'HDFGroup/hdfview'
+            version: 'tags/${{ inputs.use_tag }}'
+            regex: true
+            target: 'HDFVIEW/'
+            file: '^HDFView-[0-9]+\.[0-9]+\.[0-9]+App-(Linux-x86_64\.tar\.gz|win64\.zip|Darwin\.tar\.gz)$'
+
+        - name: Get UsersGuide from release
+          if: ${{ inputs.use_tag != '' && inputs.publish_docs }}
+          uses: dsaltares/fetch-gh-release-asset@master
+          with:
+            repo: 'HDFGroup/hdfview'
+            version: 'tags/${{ inputs.use_tag }}'
+            regex: true
+            target: 'HDFVIEW/'
+            file: '^UsersGuide\.(tar\.gz|zip)$'
+
+        - name: Setup AWS CLI
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                 aws-region: ${{ secrets.AWS_REGION }}
+
+        # Sync release artifacts to downloads directory
+        - name: Sync release files to S3 downloads
+          if: ${{ inputs.use_tag != '' && (inputs.publish_source || inputs.publish_binaries || inputs.publish_apps || inputs.publish_docs) }}
+          run: |
+                aws s3 sync ./HDFVIEW s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads --delete
+
+        # Extract and sync documentation
+        - name: Uncompress UsersGuide
+          if: ${{ inputs.use_tag != '' && inputs.publish_docs }}
+          run: tar -zxvf ${{ github.workspace }}/HDFVIEW/UsersGuide.tar.gz
+
+        - name: Sync UsersGuide to S3
+          if: ${{ inputs.use_tag != '' && inputs.publish_docs }}
+          run: |
+                aws s3 sync ./UsersGuide s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/UsersGuide --delete
+
+        # Sync branch files
+        - name: Sync branch files to S3
+          if: ${{ inputs.publish_branch_files && inputs.local_dir != '' }}
+          run: |
+                aws s3 sync ./HDFVIEW/${{ inputs.local_dir }} s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}
+
