@@ -5,10 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       use_tag:
-        description: 'HDFView Release version tag'
-        type: string
-        required: false
+        description: 'Build type: release or snapshot'
+        type: choice
+        required: true
         default: snapshot
+        options:
+          - release
+          - snapshot
       use_tag4:
         description: 'HDF Release version tag and base name'
         type: string
@@ -19,54 +22,76 @@ on:
         type: string
         required: false
         default: snapshot
-      name_tag5:
-        description: 'HDF5 Release version base name'
-        type: string
-        required: false
-        default: snapshot
 
 permissions:
   contents: read
 
 jobs:
-  log-the-inputs:
+  determine-version:
     runs-on: ubuntu-latest
     outputs:
-      rel_tag: ${{ steps.get-tag-name.outputs.RELEASE_TAG }}
-      rel4_tag: ${{ steps.get-tag-name.outputs.RELEASE4_TAG }}
-      rel5_tag: ${{ steps.get-tag-name.outputs.RELEASE5_TAG }}
+      version_tag: ${{ steps.construct-tag.outputs.VERSION_TAG }}
+      build_type: ${{ steps.validate-input.outputs.BUILD_TYPE }}
+      hdf4_tag: ${{ steps.validate-input.outputs.HDF4_TAG }}
+      hdf5_tag: ${{ steps.validate-input.outputs.HDF5_TAG }}
     steps:
-    - name: Get tag name
-      id: get-tag-name
+    - name: Validate input
+      id: validate-input
       env:
         TAG: ${{ inputs.use_tag }}
         TAG4: ${{ inputs.use_tag4 }}
         TAG5: ${{ inputs.use_tag5 }}
       run: |
-          echo "RELEASE_TAG=$TAG" >> $GITHUB_OUTPUT
-          echo "RELEASE4_TAG=$TAG4" >> $GITHUB_OUTPUT
-          echo "RELEASE5_TAG=$TAG5" >> $GITHUB_OUTPUT
+          if [[ "$TAG" != "release" && "$TAG" != "snapshot" ]]; then
+            echo "Error: use_tag must be either 'release' or 'snapshot', got: $TAG"
+            exit 1
+          fi
+          echo "BUILD_TYPE=$TAG" >> $GITHUB_OUTPUT
+          echo "HDF4_TAG=$TAG4" >> $GITHUB_OUTPUT
+          echo "HDF5_TAG=$TAG5" >> $GITHUB_OUTPUT
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Read VERSION file
+      id: read-version
+      run: echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+
+    - name: Extract version number
+      id: extract-version
+      run: |
+        VERSION_BASE=$(echo "${{ steps.read-version.outputs.version }}" | sed -r "s/.*-([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
+        echo "VERSION_NUMBER=$VERSION_BASE" >> $GITHUB_OUTPUT
+
+    - name: Construct tag name
+      id: construct-tag
+      run: |
+        if [[ "${{ steps.validate-input.outputs.BUILD_TYPE }}" == "release" ]]; then
+          TAG_NAME="HDFView-${{ steps.extract-version.outputs.VERSION_NUMBER }}"
+        else
+          TAG_NAME="snapshot"
+        fi
+        echo "VERSION_TAG=$TAG_NAME" >> $GITHUB_OUTPUT
+        echo "Constructed tag name: $TAG_NAME"
 
   call-workflow-tarball:
-    needs: log-the-inputs
+    needs: determine-version
     uses: ./.github/workflows/tarball.yml
     with:
-      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
       use_environ: release
 
   call-workflow-maven-build:
-    needs: [log-the-inputs, call-workflow-tarball]
+    needs: [determine-version, call-workflow-tarball]
     uses: ./.github/workflows/maven-build.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      use_hdf: ${{ needs.log-the-inputs.outputs.rel4_tag }}
-      use_hdf5: ${{ needs.log-the-inputs.outputs.rel5_tag }}
-      name_hdf5: ${{ inputs.name_tag5 }}
+      use_hdf: ${{ needs.determine-version.outputs.hdf4_tag }}
+      use_hdf5: ${{ needs.determine-version.outputs.hdf5_tag }}
       snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
 
   call-workflow-release:
-    needs: [log-the-inputs, call-workflow-tarball, call-workflow-maven-build]
+    needs: [determine-version, call-workflow-tarball, call-workflow-maven-build]
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
@@ -74,6 +99,6 @@ jobs:
       file_base: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
-      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_tag: ${{ needs.determine-version.outputs.version_tag }}
       use_environ: release
 
