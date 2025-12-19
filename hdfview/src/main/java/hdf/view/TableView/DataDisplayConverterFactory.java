@@ -814,35 +814,50 @@ public class DataDisplayConverterFactory {
         {
             /*
              * x86_64 80-bit extended precision format:
-             * - Bytes 0-7: 64-bit mantissa
+             * - Bytes 0-7: 64-bit mantissa with explicit integer bit in bit 63
              * - Bytes 8-9: 15-bit exponent + 1-bit sign
              * - Bytes 10-15: padding (usually zeros)
              *
-             * For simplicity, we'll extract the components and convert to double.
-             * This loses precision but is acceptable for display.
+             * The mantissa has an explicit integer bit (bit 63) which is 1 for
+             * normalized numbers. Bits 0-62 are the fractional part.
              */
             try {
-                // Read as little-endian
-                long mantissa = 0;
+                // Read mantissa as little-endian (bits 0-63)
+                long mantissaBits = 0;
                 for (int i = 0; i < 8; i++) {
-                    mantissa |= ((long)(bytes[i] & 0xFF)) << (i * 8);
+                    mantissaBits |= ((long)(bytes[i] & 0xFF)) << (i * 8);
                 }
 
+                // Read exponent and sign (bits 64-79)
                 int expAndSign = ((bytes[9] & 0xFF) << 8) | (bytes[8] & 0xFF);
                 int exponent   = expAndSign & 0x7FFF; // 15-bit exponent
                 int sign       = (expAndSign >> 15) & 1;
 
                 // Special cases
-                if (exponent == 0 && mantissa == 0) {
+                if (exponent == 0 && mantissaBits == 0) {
                     return sign == 1 ? -0.0 : 0.0;
                 }
                 if (exponent == 0x7FFF) {
-                    return sign == 1 ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+                    if (mantissaBits == 0)
+                        return sign == 1 ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+                    else
+                        return Double.NaN;
                 }
 
-                // Normalize: x86 extended uses bias of 16383
-                // Convert to double (bias 1023)
-                double value = Math.scalb((double)mantissa / (1L << 63), exponent - 16383 - 63);
+                /*
+                 * Extract significand from mantissa with explicit integer bit:
+                 * - Bit 63: explicit integer bit (1 for normalized numbers)
+                 * - Bits 0-62: fractional part
+                 * - Significand = 1.fraction (for normalized)
+                 */
+                long fractionBits = mantissaBits & 0x7FFFFFFFFFFFFFFFL; // Bits 0-62
+                double fraction   = (double)fractionBits / (1L << 63); // Convert to [0, 1)
+                double significand =
+                    1.0 + fraction; // Add explicit integer bit (assumes normalized number)
+
+                // Apply exponent (bias = 16383 for x86 extended precision)
+                int unbiasedExp = exponent - 16383;
+                double value    = Math.scalb(significand, unbiasedExp);
 
                 return sign == 1 ? -value : value;
             }
