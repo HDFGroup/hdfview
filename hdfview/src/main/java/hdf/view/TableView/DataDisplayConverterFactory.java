@@ -752,8 +752,9 @@ public class DataDisplayConverterFactory {
                     hdf.object.h5.H5Datatype h5dtype = (hdf.object.h5.H5Datatype)this.dtype;
                     double converted                 = h5dtype.convertBytesToDouble(byteValue);
                     value                            = converted;
-                    log.trace("canonicalToDisplayValue(): converted byte[{}] to double using datatype metadata: {}",
-                              byteValue.length, converted);
+                    log.trace(
+                        "canonicalToDisplayValue(): converted byte[{}] to double using datatype metadata: {}",
+                        byteValue.length, converted);
                 }
                 catch (Exception ex) {
                     log.debug("canonicalToDisplayValue(): byte array conversion failed: ", ex);
@@ -791,7 +792,6 @@ public class DataDisplayConverterFactory {
 
             return buffer;
         }
-
     }
 
     private static class EnumDataDisplayConverter extends HDFDisplayConverter {

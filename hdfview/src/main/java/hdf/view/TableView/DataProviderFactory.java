@@ -2289,9 +2289,9 @@ public class DataProviderFactory {
                           complexBytes.length);
 
                 // Split into real and imaginary parts (16 bytes each for long double)
-                int halfSize   = complexBytes.length / 2;
-                tempArray[0]   = Arrays.copyOfRange(complexBytes, 0, halfSize);
-                tempArray[1]   = Arrays.copyOfRange(complexBytes, halfSize, complexBytes.length);
+                int halfSize = complexBytes.length / 2;
+                tempArray[0] = Arrays.copyOfRange(complexBytes, 0, halfSize);
+                tempArray[1] = Arrays.copyOfRange(complexBytes, halfSize, complexBytes.length);
 
                 log.trace("retrieveArrayOfAtomicElements(): split byte[{}] into 2 x byte[{}]",
                           complexBytes.length, halfSize);

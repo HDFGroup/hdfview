@@ -381,8 +381,7 @@ public class TestComplexDatatype {
 
                 // Verify each complex number is 32 bytes
                 for (int i = 0; i < Math.min(5, complexData.length); i++) {
-                    assertEquals(32, complexData[i].length,
-                                 "Complex number " + i + " should be 32 bytes");
+                    assertEquals(32, complexData[i].length, "Complex number " + i + " should be 32 bytes");
                 }
 
                 // Verify data is not all zeros (which would indicate read failure)

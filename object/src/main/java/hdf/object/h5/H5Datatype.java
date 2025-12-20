@@ -836,10 +836,8 @@ public class H5Datatype extends Datatype {
             /*
              * Detect x86 extended precision format early for proper byte order handling.
              */
-            boolean isX86Extended = (raw.length == 16 &&
-                                     nativeFPesize == 15 &&
-                                     nativeFPebias == 16383 &&
-                                     nativeFPmsize == 112);
+            boolean isX86Extended =
+                (raw.length == 16 && nativeFPesize == 15 && nativeFPebias == 16383 && nativeFPmsize == 112);
 
             /*
              * BitSet.valueOf() interprets bytes as little-endian.
@@ -879,7 +877,7 @@ public class H5Datatype extends Datatype {
              * - Bits 80-127: padding
              */
             int exponentPos = isX86Extended ? 64 : (int)nativeFPepos;
-            int signPos = isX86Extended ? 79 : (int)nativeFPspos;
+            int signPos     = isX86Extended ? 79 : (int)nativeFPspos;
 
             // Extract sign bit
             boolean sign = rawset.get(nativeOffset + signPos);
@@ -891,11 +889,11 @@ public class H5Datatype extends Datatype {
              */
             long actualMantissaSize = Math.min(nativeFPmsize, 64);
             BitSet mantissaset      = rawset.get(nativeOffset + (int)nativeFPmpos,
-                                             nativeOffset + (int)nativeFPmpos + (int)actualMantissaSize);
+                                                 nativeOffset + (int)nativeFPmpos + (int)actualMantissaSize);
 
             // Extract exponent bits
-            BitSet exponentset = rawset.get(nativeOffset + exponentPos,
-                                            nativeOffset + exponentPos + (int)nativeFPesize);
+            BitSet exponentset =
+                rawset.get(nativeOffset + exponentPos, nativeOffset + exponentPos + (int)nativeFPesize);
 
             // Convert exponent to long, handling byte order
             byte[] expraw = Arrays.copyOf(exponentset.toByteArray(), (int)(nativeFPesize + 7) / 8);
@@ -2216,13 +2214,12 @@ public class H5Datatype extends Datatype {
                  */
                 long baseSize = baseType.getDatatypeSize();
                 if (data instanceof byte[] && baseSize == 16) {
-                    byte[] flatData        = (byte[])data;
-                    int bytesPerComplex    = (int)(baseSize * 2); // 32 bytes: 16 real + 16 imaginary
-                    byte[][] reshapedData  = new byte[numPoints][bytesPerComplex];
+                    byte[] flatData       = (byte[])data;
+                    int bytesPerComplex   = (int)(baseSize * 2); // 32 bytes: 16 real + 16 imaginary
+                    byte[][] reshapedData = new byte[numPoints][bytesPerComplex];
 
                     for (int i = 0; i < numPoints; i++) {
-                        System.arraycopy(flatData, i * bytesPerComplex, reshapedData[i], 0,
-                                         bytesPerComplex);
+                        System.arraycopy(flatData, i * bytesPerComplex, reshapedData[i], 0, bytesPerComplex);
                     }
                     data = reshapedData;
                     log.trace(
