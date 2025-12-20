@@ -78,7 +78,6 @@ jobs:
     uses: ./.github/workflows/tarball.yml
     with:
       use_ignore: ${{ needs.get-base-names.outputs.run-ignore }}
-      use_tag: snapshot
       use_environ: snapshots
 
   call-workflow-maven-build:

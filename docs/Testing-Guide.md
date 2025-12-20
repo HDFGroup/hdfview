@@ -23,6 +23,7 @@ This guide explains how to run tests for HDFView locally and in CI environments.
 2. **Maven 3.9+** - Build system
 3. **HDF5 Native Libraries** - Configured in `build.properties`
 4. **HDF4 Native Libraries** - Configured in `build.properties`
+5. HDFView must be built with testing enabled
 
 ### Optional (for UI tests)
 
@@ -52,12 +53,20 @@ See `docs/build.properties.example` for a complete template.
 
 ### Run All Tests
 
+This will attempt to run the UI tests, which open and close HDFView windows and interact with them during the testing process.
+
 ```bash
 # Run all tests (object module + UI tests)
 mvn test
 ```
 
-### Run Specific Module
+### Run Specific Tests
+
+#### By Module
+
+The object module tests HDF5 object model and file operations, and does not require a display.
+
+The UI module (hdfview) tests SWT widgets, menus, dialogs, etc. It requires a real display, NOT Xvfb - this is a SWT limitation. Due to the need to display windows, this module is disabled in CI and must be run locally. Currently, 5 tests are failing - see GitHub issues #383-386.
 
 ```bash
 # Object module only (no display needed)
@@ -67,22 +76,29 @@ mvn test -pl object
 mvn test -pl hdfview
 ```
 
-### Expected Results
+#### By Tag
 
-**Object Module:**
-- 149 tests across 15 test classes should run
-- Tests HDF5 object model and file operations
-- No display required
-- **Status**: ✅ All passing in CI (Linux, macOS, Windows)
+```bash
+# Unit tests only
+mvn test -Dgroups="unit"
 
-**UI Module:**
-- 16 test classes for GUI functionality
-- Requires display (real display, NOT Xvfb - SWT limitation)
-- Tests SWT widgets, menus, dialogs, etc.
-- **Status**: ⚠️ Run locally only (disabled in CI due to display requirements)
-- **Current Results**: ~78 tests passing, 5 tests failing (tracked in GitHub issues #383-386)
+# Combined tags (OR)
+mvn test -Dgroups="ui | integration"
+```
 
----
+#### By Test Class
+
+
+```bash
+# Run single test class
+mvn test -Dtest=TestHDFViewMenu
+
+# Run multiple test classes
+mvn test -Dtest=TestHDFViewMenu,TestTreeViewFiles
+
+# Run test method pattern
+mvn test -Dtest=TestHDFViewMenu#verifyOpenButtonEnabled
+```
 
 ## Test Organization
 
@@ -129,95 +145,7 @@ Tests run in multiple phases:
 
 ---
 
-## Running Tests Locally
-
-### Option 1: All Tests (Recommended)
-
-```bash
-# Run complete test suite
-mvn test
-
-# Show detailed output
-mvn test -B
-
-# Continue on failures to see all results
-mvn test -Dmaven.test.failure.ignore=true
-```
-
-### Option 2: By Module
-
-```bash
-# Object module (fast, no display)
-mvn test -pl object
-
-# UI module (requires display)
-mvn test -pl hdfview
-
-# Multiple modules
-mvn test -pl object,hdfview
-```
-
-### Option 3: By Test Tag
-
-```bash
-# Unit tests only
-mvn test -Dgroups="unit"
-
-# Integration tests only
-mvn test -Dgroups="integration"
-
-# UI tests only
-mvn test -Dgroups="ui"
-
-# Combined tags (AND)
-mvn test -Dgroups="ui & integration"
-
-# Combined tags (OR)
-mvn test -Dgroups="ui | integration"
-```
-
-### Option 4: Specific Test Class
-
-```bash
-# Run single test class
-mvn test -Dtest=TestHDFViewMenu
-
-# Run multiple test classes
-mvn test -Dtest=TestHDFViewMenu,TestTreeViewFiles
-
-# Run test method pattern
-mvn test -Dtest=TestHDFViewMenu#verifyOpenButtonEnabled
-```
-
-### Option 5: With Maven Phases
-
-```bash
-# Clean, compile, and test
-mvn clean test
-
-# Test with coverage report
-mvn test jacoco:report
-
-# Package without running tests
-mvn package -DskipTests
-```
-
----
-
 ## Test Execution Options
-
-### Verbose Output
-
-```bash
-# Show all test output
-mvn test -X
-
-# Show stack traces on failures
-mvn test -e
-
-# Quiet mode (minimal output)
-mvn test -q
-```
 
 ### Parallel Execution
 
@@ -424,13 +352,6 @@ mvn test -pl hdfview  # Local development only
 - macOS requires Display on main thread (threading conflicts)
 - UI tests are validated locally before merge
 
-### Viewing CI Test Results
-
-1. Go to [GitHub Actions](https://github.com/byrnHDF/hdfview/actions)
-2. Click on a workflow run
-3. View job logs for test output
-4. Download test report artifacts
-
 ### Local CI Simulation
 
 To exactly replicate CI environment:
@@ -447,28 +368,6 @@ xvfb-run -a -s "-screen 0 1024x768x24" mvn clean test -B \
 ---
 
 ## Best Practices
-
-### Development Workflow
-
-1. **Before committing:** Run tests locally
-   ```bash
-   mvn test
-   ```
-
-2. **Fix failures:** Don't commit broken tests
-   ```bash
-   mvn test -Dtest=FailingTest -X
-   ```
-
-3. **Check coverage:** Ensure adequate test coverage
-   ```bash
-   mvn test jacoco:report
-   # Open: target/site/jacoco/index.html
-   ```
-
-4. **Push and verify:** Check CI passes
-   - All platform builds succeed
-   - Tests pass on all platforms
 
 ### Writing New Tests
 
@@ -497,16 +396,6 @@ xvfb-run -a -s "-screen 0 1024x768x24" mvn clean test -B \
    ```bash
    mvn test -Dtest=YourNewTest
    ```
-
----
-
-## Additional Resources
-
-- **JUnit 5 Documentation:** https://junit.org/junit5/docs/current/user-guide/
-- **SWTBot Testing:** https://www.eclipse.org/swtbot/
-- **Maven Surefire Plugin:** https://maven.apache.org/surefire/maven-surefire-plugin/
-- **Project Overview:** See `CLAUDE.md` in project root
-- **Build Instructions:** See `docs/Build_HDFView.txt`
 
 ---
 
@@ -539,11 +428,3 @@ mvn clean test
 # 8. Continue on failures
 mvn test -Dmaven.test.failure.ignore=true
 ```
-
----
-
-**Last Updated:** November 23, 2025
-**HDFView Version:** 3.4-SNAPSHOT
-**Java Version:** 21
-**Maven Version:** 3.9+
-**Test Status:** Object: 149/149 passing | UI: ~78/83 passing (local only)
