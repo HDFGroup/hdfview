@@ -85,6 +85,63 @@ public class TestHDFViewComplex extends AbstractWindowTest {
         }
     }
 
+    @Test
+    public void checkHDF5Float32ComplexAttr()
+    {
+        // Test Float32 complex attribute
+        String attributeName = "AttributeFloatComplex";
+        String expectedValue = "-1.0+1.0i";
+
+        SWTBotShell tableShell = null;
+        String filename        = "tcomplex.h5";
+        String datasetName     = "/DatasetFloatComplex";
+        File hdf_file          = openFile(filename, FILE_MODE.READ_ONLY);
+
+        try {
+            SWTBotTree filetree = bot.tree();
+
+            checkFileTree(filetree, "checkHDF5Float32ComplexAttr()", 7, filename);
+
+            // Open dataset Attribute Table
+            SWTBotTable attrTable = openAttributeTable(filetree, filename, datasetName);
+
+            // Verify attribute is listed
+            String attrValue = attrTable.cell(0, 3); // Column 3 is value
+            assertTrue(attrValue.contains("-1"), "Attribute value should contain -1");
+
+            // Open attribute to view in detail
+            tableShell               = openAttributeObject(attrTable, attributeName, 0);
+            SWTBotNatTable dataTable = getNatTable(tableShell);
+
+            TableDataRetriever retriever =
+                DataRetrieverFactory.getTableDataRetriever(dataTable, "checkHDF5Float32ComplexAttr()", true);
+
+            // Test the single attribute value
+            retriever.testTableLocation(0, 0, expectedValue);
+
+            tableShell.bot().menu().menu("Table").menu("Close").click();
+            bot.waitUntil(Conditions.shellCloses(tableShell));
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+        catch (AssertionError ae) {
+            ae.printStackTrace();
+            fail(ae.getMessage());
+        }
+        finally {
+            closeShell(tableShell);
+
+            try {
+                closeFile(hdf_file, false);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
     // ==================== Float64 Complex Tests ====================
 
     @Test
