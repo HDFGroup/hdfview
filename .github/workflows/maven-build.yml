@@ -1186,6 +1186,116 @@ jobs:
         path: ${{ inputs.file_base }}App-Darwin.tar.gz
         retention-days: 30
 
+  build-linux-installers:
+    name: Build Linux Installers (DEB/RPM)
+    runs-on: ubuntu-latest
+    needs: build-linux-app
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Download Linux App Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: tgz-ubuntu-2404-app-binary
+
+    - name: Extract App Image
+      run: |
+        tar -xzf ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
+        ls -la HDFView/
+
+    - name: Create DEB Installer
+      run: |
+        echo "DEB installer creation - to be implemented"
+        echo "Requires jpackage-deb profile and package files"
+        # TODO: Implement DEB creation once jpackage profile is ready
+
+    - name: Create RPM Installer
+      run: |
+        echo "RPM installer creation - to be implemented"
+        echo "Requires jpackage-rpm profile and package files"
+        # TODO: Implement RPM creation once jpackage profile is ready
+
+  build-macos-installer:
+    name: Build macOS Installer (DMG)
+    runs-on: macos-latest
+    needs: build-macos-app
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Download macOS App Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: tgz-macos14_clang-app-binary
+
+    - name: Extract App Image
+      run: |
+        tar -xzf ${{ inputs.file_base }}App-Darwin.tar.gz
+        ls -la HDFView.app/
+
+    - name: Create DMG Installer
+      run: |
+        echo "DMG installer creation - to be implemented"
+        echo "Requires jpackage-installer-mac profile and code signing"
+        # TODO: Implement DMG creation once jpackage profile is ready
+
+  build-windows-installer:
+    name: Build Windows Installer (MSI)
+    runs-on: windows-latest
+    needs: build-windows-app
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Download Windows App Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: zip-win-vs2022-app-binary
+
+    - name: Extract App Image
+      shell: pwsh
+      run: |
+        Expand-Archive -Path "${{ inputs.file_base }}App-win64.zip" -DestinationPath .
+        Get-ChildItem -Path HDFView\
+
+    - name: Create MSI Installer
+      shell: pwsh
+      run: |
+        Write-Host "MSI installer creation - to be implemented"
+        Write-Host "Requires jpackage-installer-windows profile and code signing"
+        # TODO: Implement MSI creation once jpackage profile is ready
+
   publish-packages:
     name: Publish Maven Packages
     runs-on: ubuntu-latest
