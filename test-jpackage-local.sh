@@ -83,6 +83,7 @@ echo "Running: mvn verify -Pjpackage-app-image -pl object,hdfview"
 mvn verify -Pjpackage-app-image -pl object,hdfview \
   -Dmaven.test.skip=true \
   -Djacoco.skip=true \
+  -Dpmd.skip=true \
   -Ddependency-check.skip=true \
   -B
 echo
