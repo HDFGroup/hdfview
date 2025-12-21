@@ -266,9 +266,9 @@
                     <delete dir="${jpackage.input}"/>
                     <mkdir dir="${jpackage.input}"/>
 
-                    <!-- Copy main JAR -->
+                    <!-- Copy main JAR (built to ../libs by maven-jar-plugin) -->
                     <echo message="Copying main JAR: ${project.build.finalName}.jar"/>
-                    <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                    <copy file="${project.basedir}/../libs/${project.build.finalName}.jar"
                           todir="${jpackage.input}"
                           failonerror="false"/>
 
