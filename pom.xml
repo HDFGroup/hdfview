@@ -147,7 +147,7 @@
                 <executable>sh</executable>
                 <arguments>
                   <argument>-c</argument>
-                  <argument>if [ -f "${hdf.lib.dir}/libhdf4.settings" ]; then grep "HDF4 Version:" "${hdf.lib.dir}/libhdf4.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf4.version; else echo "unknown" > ${project.build.directory}/hdf4.version; fi</argument>
+                  <argument>mkdir -p ${project.build.directory} &amp;&amp; if [ -f "${hdf.lib.dir}/libhdf4.settings" ]; then grep "HDF4 Version:" "${hdf.lib.dir}/libhdf4.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf4.version; else echo "unknown" > ${project.build.directory}/hdf4.version; fi</argument>
                 </arguments>
                 <skip>${maven.exec.skip}</skip>
               </configuration>
@@ -161,7 +161,7 @@
                 <executable>sh</executable>
                 <arguments>
                   <argument>-c</argument>
-                  <argument>grep "HDF5 Version:" "${hdf5.lib.dir}/libhdf5.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf5.version</argument>
+                  <argument>mkdir -p ${project.build.directory} &amp;&amp; grep "HDF5 Version:" "${hdf5.lib.dir}/libhdf5.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf5.version</argument>
                 </arguments>
               </configuration>
             </execution>
@@ -174,7 +174,7 @@
                 <executable>sh</executable>
                 <arguments>
                   <argument>-c</argument>
-                  <argument>grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' VERSION | head -1 > ${project.build.directory}/app.version</argument>
+                  <argument>mkdir -p ${project.build.directory} &amp;&amp; grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' VERSION | head -1 > ${project.build.directory}/app.version</argument>
                 </arguments>
               </configuration>
             </execution>
