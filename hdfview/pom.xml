@@ -242,6 +242,8 @@
       <properties>
         <jpackage.type>app-image</jpackage.type>
         <jpackage.skip.signing>true</jpackage.skip.signing>
+        <!-- jpackage requires numeric version (no -SNAPSHOT suffix) -->
+        <jpackage.app.version>3.4.0</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -386,7 +388,7 @@
                     <argument>--type</argument>
                     <argument>${jpackage.type}</argument>
                     <argument>--app-version</argument>
-                    <argument>${project.version}</argument>
+                    <argument>${jpackage.app.version}</argument>
                     <argument>--copyright</argument>
                     <argument>Copyright 2006 by The HDF Group</argument>
                     <argument>--description</argument>
@@ -413,6 +415,7 @@
       <id>jpackage-deb</id>
       <properties>
         <jpackage.type>deb</jpackage.type>
+        <jpackage.app.version>3.4.0</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -473,6 +476,7 @@
       <id>jpackage-rpm</id>
       <properties>
         <jpackage.type>rpm</jpackage.type>
+        <jpackage.app.version>3.4.0</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -563,6 +567,9 @@
     <!-- Manual activation only - use with -Djpackage.type=dmg -->
     <profile>
       <id>jpackage-installer-mac</id>
+      <properties>
+        <jpackage.app.version>3.4.0</jpackage.app.version>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -600,6 +607,9 @@
     <!-- Manual activation only - use with -Djpackage.type=msi -->
     <profile>
       <id>jpackage-installer-windows</id>
+      <properties>
+        <jpackage.app.version>3.4.0</jpackage.app.version>
+      </properties>
       <build>
         <plugins>
           <plugin>
