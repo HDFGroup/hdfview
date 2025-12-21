@@ -329,7 +329,7 @@ jobs:
         echo "Creating distributable application package with jpackage..."
 
         # Create app-image (portable application directory)
-        mvn package -Pjpackage-app-image -pl hdfview -DskipTests -B
+        mvn verify -Pjpackage-app-image -DskipTests -B
 
         echo "Verifying jpackage output..."
         if [ -d hdfview/target/dist/HDFView ]; then

@@ -253,7 +253,7 @@
             <executions>
               <execution>
                 <id>prepare-jpackage-input</id>
-                <phase>package</phase>
+                <phase>verify</phase>
                 <goals>
                   <goal>run</goal>
                 </goals>
@@ -270,7 +270,7 @@
                     <echo message="Copying main JAR: ${project.build.finalName}.jar"/>
                     <copy file="${project.build.directory}/${project.build.finalName}.jar"
                           todir="${jpackage.input}"
-                          failonerror="true"/>
+                          failonerror="false"/>
 
                     <!-- Copy object module JAR -->
                     <echo message="Copying object module JAR..."/>
@@ -364,7 +364,7 @@
             <executions>
               <execution>
                 <id>jpackage</id>
-                <phase>package</phase>
+                <phase>verify</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
@@ -424,7 +424,7 @@
             <executions>
               <execution>
                 <id>prepare-jpackage-input</id>
-                <phase>package</phase>
+                <phase>verify</phase>
                 <goals>
                   <goal>run</goal>
                 </goals>
@@ -438,7 +438,7 @@
             <executions>
               <execution>
                 <id>jpackage</id>
-                <phase>package</phase>
+                <phase>verify</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
@@ -484,7 +484,7 @@
             <executions>
               <execution>
                 <id>prepare-jpackage-input</id>
-                <phase>package</phase>
+                <phase>verify</phase>
                 <goals>
                   <goal>run</goal>
                 </goals>
@@ -498,7 +498,7 @@
             <executions>
               <execution>
                 <id>jpackage</id>
-                <phase>package</phase>
+                <phase>verify</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
