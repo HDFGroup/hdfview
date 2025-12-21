@@ -289,19 +289,19 @@ jobs:
         echo "::group::Create jpackage App Image"
         echo "Creating distributable application package with jpackage..."
 
-        # Create app-image (macOS application bundle)
-        # Run from hdfview directory to build only that module
+        # Create app-image using existing build artifacts from Package Application step
+        # Run only the jpackage-related plugins without rebuilding
+        # -rf hdfview: Resume from hdfview module (skip repository and object - already built)
         # Skip dependency-check (already runs in maven-security.yml workflow)
-        cd hdfview
-        mvn verify -Pjpackage-app-image -DskipTests -Ddependency-check.skip=true -Duser.properties.file=../build.properties -B
+        mvn verify -Pjpackage-app-image -rf hdfview -Dmaven.main.skip=true -DskipTests -Ddependency-check.skip=true -B
 
         echo "Verifying jpackage output..."
-        if [ -d target/dist/HDFView.app ]; then
+        if [ -d hdfview/target/dist/HDFView.app ]; then
           echo "✓ jpackage app-image created successfully"
-          echo "Package size: $(du -sh target/dist/HDFView.app | cut -f1)"
-          echo "Native libraries: $(find target/dist/HDFView.app/Contents -name "*.dylib" | wc -l) .dylib files"
-          echo "JAR files: $(find target/dist/HDFView.app/Contents -name "*.jar" | wc -l) JARs"
-          echo "HDF5 plugins: $(ls -1 target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
+          echo "Package size: $(du -sh hdfview/target/dist/HDFView.app | cut -f1)"
+          echo "Native libraries: $(find hdfview/target/dist/HDFView.app/Contents -name "*.dylib" | wc -l) .dylib files"
+          echo "JAR files: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" | wc -l) JARs"
+          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
         else
           echo "✗ jpackage app-image creation failed"
           exit 1
