@@ -396,39 +396,55 @@ jobs:
           exit 1
         fi
 
-    - name: Build Application Package
+    - name: Build and Package Application
       run: |
-        echo "Building HDFView application package with Maven..."
-        # Now build with package (HDF JARs already installed manually above)
-        # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
-        # package phase stops before verify, avoiding PMD/Checkstyle execution
-        mvn clean package -Dmaven.test.skip=true -B
+        echo "Building HDFView with Maven..."
+        # Install parent POM first (required for child module resolution)
+        mvn install -B -N -Ddependency-check.skip=true
+
+        # Install object and hdfview modules (needed for jpackage)
+        mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
+
+        # Package application
+        mvn package -DskipTests -B
+
+    - name: Create jpackage App Image
+      run: |
+        echo "Creating distributable application package with jpackage..."
+
+        # Create app-image using jpackage profile
+        # -pl object,hdfview: Build object and hdfview modules (skip repository)
+        # -Dmaven.test.skip=true: Skip test compilation and execution
+        # -Djacoco.skip=true: Skip JaCoCo (not needed for release builds)
+        # -Dpmd.skip=true: Skip PMD (static analysis not needed for release)
+        # -Ddependency-check.skip=true: Skip OWASP (runs in separate security workflow)
+        mvn verify -Pjpackage-app-image -pl object,hdfview \
+          -Dmaven.test.skip=true \
+          -Djacoco.skip=true \
+          -Dpmd.skip=true \
+          -Ddependency-check.skip=true \
+          -B
+
+        echo "Verifying jpackage output..."
+        if [ -d hdfview/target/dist/HDFView ]; then
+          echo "✓ jpackage app-image created successfully"
+          echo "Package size: $(du -sh hdfview/target/dist/HDFView | cut -f1)"
+          echo "Native libraries: $(find hdfview/target/dist/HDFView/lib/app -name "*.so" 2>/dev/null | wc -l) .so files"
+          echo "JAR files: $(find hdfview/target/dist/HDFView/lib/app -name "*.jar" 2>/dev/null | wc -l) JARs"
+          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView/lib/app/plugin/*.so 2>/dev/null | wc -l) plugins"
+        else
+          echo "✗ jpackage app-image creation failed"
+          exit 1
+        fi
 
     - name: Create Linux Application Archive
       run: |
-        # Create application distribution directory
-        mkdir -p hdfview-app
-
-        # Copy application files
-        cp hdfview/target/*.jar hdfview-app/ 2>/dev/null || echo "No hdfview JARs found"
-        cp object/target/*.jar hdfview-app/ 2>/dev/null || echo "No object JARs found"
-        cp libs/*.jar hdfview-app/ 2>/dev/null || echo "No libs JARs found"
-
-        # Copy HDF native libraries
-        if [ -d "${{ env.HDF5LIB_PATH }}/lib" ]; then
-          mkdir -p hdfview-app/lib
-          cp -L ${{ env.HDF5LIB_PATH }}/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF5 .so files"
-        fi
-        if [ -d "${{ env.HDF4LIB_PATH }}/lib" ]; then
-          mkdir -p hdfview-app/lib
-          cp -L ${{ env.HDF4LIB_PATH }}/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF4 .so files"
-        fi
-
-        # Create archive with App suffix
-        tar -czf ${{ inputs.file_base }}App-Linux-x86_64.tar.gz hdfview-app/
+        # Package the jpackage app-image as a tar.gz for distribution
+        cd hdfview/target/dist
+        tar -czf ${{ github.workspace }}/${{ inputs.file_base }}App-Linux-x86_64.tar.gz HDFView/
 
         echo "Linux application archive created: ${{ inputs.file_base }}App-Linux-x86_64.tar.gz"
-        ls -lh ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
+        ls -lh ${{ github.workspace }}/${{ inputs.file_base }}App-Linux-x86_64.tar.gz
 
     - name: Upload Linux App Artifact
       uses: actions/upload-artifact@v4
@@ -771,20 +787,60 @@ jobs:
           exit 1
         }
 
-    - name: Build Application Package
+    - name: Build and Package Application
       shell: pwsh
       run: |
-        mvn package -pl object,hdfview "-Dmaven.test.skip=true" "-Dpmd.skip=true" "-Dcheckstyle.skip=true" -B
+        Write-Host "Building HDFView with Maven..."
+        # Install parent POM first (required for child module resolution)
+        mvn install -B -N "-Ddependency-check.skip=true"
+
+        # Install object and hdfview modules (needed for jpackage)
+        mvn install -B -pl object,hdfview -DskipTests "-Ddependency-check.skip=true"
+
+        # Package application
+        mvn package -DskipTests -B
+
+    - name: Create jpackage App Image
+      shell: pwsh
+      run: |
+        Write-Host "Creating distributable application package with jpackage..."
+
+        # Create app-image using jpackage profile
+        # -pl object,hdfview: Build object and hdfview modules (skip repository)
+        # -Dmaven.test.skip=true: Skip test compilation and execution
+        # -Djacoco.skip=true: Skip JaCoCo (not needed for release builds)
+        # -Dpmd.skip=true: Skip PMD (static analysis not needed for release)
+        # -Ddependency-check.skip=true: Skip OWASP (runs in separate security workflow)
+        mvn verify -Pjpackage-app-image -pl object,hdfview `
+          "-Dmaven.test.skip=true" `
+          "-Djacoco.skip=true" `
+          "-Dpmd.skip=true" `
+          "-Ddependency-check.skip=true" `
+          -B
+
+        Write-Host "Verifying jpackage output..."
+        if (Test-Path "hdfview\target\dist\HDFView") {
+          Write-Host "✓ jpackage app-image created successfully"
+          $size = (Get-ChildItem -Recurse "hdfview\target\dist\HDFView" | Measure-Object -Property Length -Sum).Sum / 1MB
+          Write-Host "Package size: $([math]::Round($size, 2)) MB"
+          $dlls = (Get-ChildItem -Recurse "hdfview\target\dist\HDFView\lib\app\*.dll" -ErrorAction SilentlyContinue).Count
+          Write-Host "Native libraries: $dlls .dll files"
+          $jars = (Get-ChildItem -Recurse "hdfview\target\dist\HDFView\lib\app\*.jar" -ErrorAction SilentlyContinue).Count
+          Write-Host "JAR files: $jars JARs"
+        } else {
+          Write-Error "✗ jpackage app-image creation failed"
+          exit 1
+        }
 
     - name: Create Windows Application Archive
       shell: pwsh
       run: |
-        New-Item -Path "hdfview-app" -ItemType Directory -Force
-        Copy-Item "libs\*.jar" -Destination "hdfview-app\"
-        New-Item -Path "hdfview-app\lib" -ItemType Directory -Force
-        Copy-Item "$env:HDF4LIB_PATH\bin\*.dll" -Destination "hdfview-app\lib\" -ErrorAction SilentlyContinue
-        Copy-Item "$env:HDF5LIB_PATH\bin\*.dll" -Destination "hdfview-app\lib\" -ErrorAction SilentlyContinue
-        Compress-Archive -Path "hdfview-app\*" -DestinationPath "${{ inputs.file_base }}App-win64.zip"
+        # Package the jpackage app-image as a ZIP for distribution
+        Set-Location "hdfview\target\dist"
+        Compress-Archive -Path "HDFView\*" -DestinationPath "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip"
+
+        Write-Host "Windows application archive created: ${{ inputs.file_base }}App-win64.zip"
+        Get-Item "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip" | Select-Object Name, Length
 
     - name: Upload Windows App Artifact
       uses: actions/upload-artifact@v4
@@ -1073,18 +1129,55 @@ jobs:
           exit 1
         fi
 
-    - name: Build Application Package
+    - name: Build and Package Application
       run: |
-        mvn package -pl object,hdfview -Dmaven.test.skip=true -Dpmd.skip=true -Dcheckstyle.skip=true -B
+        echo "Building HDFView with Maven..."
+        # Install parent POM first (required for child module resolution)
+        mvn install -B -N -Ddependency-check.skip=true
+
+        # Install object and hdfview modules (needed for jpackage)
+        mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
+
+        # Package application
+        mvn package -DskipTests -B
+
+    - name: Create jpackage App Image
+      run: |
+        echo "Creating distributable application package with jpackage..."
+
+        # Create app-image using jpackage profile
+        # -pl object,hdfview: Build object and hdfview modules (skip repository)
+        # -Dmaven.test.skip=true: Skip test compilation and execution
+        # -Djacoco.skip=true: Skip JaCoCo (not needed for release builds)
+        # -Dpmd.skip=true: Skip PMD (static analysis not needed for release)
+        # -Ddependency-check.skip=true: Skip OWASP (runs in separate security workflow)
+        mvn verify -Pjpackage-app-image -pl object,hdfview \
+          -Dmaven.test.skip=true \
+          -Djacoco.skip=true \
+          -Dpmd.skip=true \
+          -Ddependency-check.skip=true \
+          -B
+
+        echo "Verifying jpackage output..."
+        if [ -d hdfview/target/dist/HDFView.app ]; then
+          echo "✓ jpackage app-image created successfully"
+          echo "Package size: $(du -sh hdfview/target/dist/HDFView.app | cut -f1)"
+          echo "Native libraries: $(find hdfview/target/dist/HDFView.app/Contents -name "*.dylib" 2>/dev/null | wc -l) .dylib files"
+          echo "JAR files: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" 2>/dev/null | wc -l) JARs"
+          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
+        else
+          echo "✗ jpackage app-image creation failed"
+          exit 1
+        fi
 
     - name: Create macOS Application Archive
       run: |
-        mkdir -p hdfview-app
-        cp libs/*.jar hdfview-app/
-        mkdir -p hdfview-app/lib
-        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.dylib hdfview-app/lib/ 2>/dev/null || true
-        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.dylib hdfview-app/lib/ 2>/dev/null || true
-        tar -czf ${{ inputs.file_base }}App-Darwin.tar.gz -C hdfview-app .
+        # Package the jpackage app-image as a tar.gz for distribution
+        cd hdfview/target/dist
+        tar -czf ${{ github.workspace }}/${{ inputs.file_base }}App-Darwin.tar.gz HDFView.app/
+
+        echo "macOS application archive created: ${{ inputs.file_base }}App-Darwin.tar.gz"
+        ls -lh ${{ github.workspace }}/${{ inputs.file_base }}App-Darwin.tar.gz
 
     - name: Upload macOS App Artifact
       uses: actions/upload-artifact@v4
