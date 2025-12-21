@@ -333,10 +333,12 @@ jobs:
         Write-Host "Creating distributable application package with jpackage..."
 
         # Create app-image using existing build artifacts from Package Application step
-        # Run only the jpackage-related plugins without rebuilding
-        # -rf hdfview: Resume from hdfview module (skip repository and object - already built)
+        # Build only hdfview module, skip compilation (use existing JAR from Package step)
+        # -pl hdfview: Build only hdfview module (skip repository - causes install-file errors)
+        # -am: Also build dependencies (object module)
+        # -Dmaven.test.skip=true: Skip test compilation and execution
         # Skip dependency-check (already runs in maven-security.yml workflow)
-        mvn verify -Pjpackage-app-image -rf hdfview "-Dmaven.main.skip=true" "-DskipTests" "-Ddependency-check.skip=true" -B
+        mvn verify -Pjpackage-app-image -pl hdfview -am "-Dmaven.test.skip=true" "-Ddependency-check.skip=true" -B
 
         Write-Host "Verifying jpackage output..."
         if (Test-Path "hdfview\target\dist\HDFView") {
