@@ -294,8 +294,9 @@ jobs:
         # -pl hdfview: Build only hdfview module (skip repository - causes install-file errors)
         # -am: Also build dependencies (object module)
         # -Dmaven.test.skip=true: Skip test compilation and execution
+        # -Djacoco.skip=true: Skip JaCoCo (code coverage already done in test step)
         # Skip dependency-check (already runs in maven-security.yml workflow)
-        mvn verify -Pjpackage-app-image -pl hdfview -am -Dmaven.test.skip=true -Ddependency-check.skip=true -B
+        mvn verify -Pjpackage-app-image -pl hdfview -am -Dmaven.test.skip=true -Djacoco.skip=true -Ddependency-check.skip=true -B
 
         echo "Verifying jpackage output..."
         if [ -d hdfview/target/dist/HDFView.app ]; then
