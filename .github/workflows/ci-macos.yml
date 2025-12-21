@@ -290,7 +290,8 @@ jobs:
         echo "Creating distributable application package with jpackage..."
 
         # Create app-image (macOS application bundle)
-        mvn verify -Pjpackage-app-image -DskipTests -B
+        # Skip dependency-check (already runs in maven-security.yml workflow)
+        mvn verify -Pjpackage-app-image -DskipTests -Ddependency-check.skip=true -B
 
         echo "Verifying jpackage output..."
         if [ -d hdfview/target/dist/HDFView.app ]; then
