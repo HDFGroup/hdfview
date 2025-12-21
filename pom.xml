@@ -169,6 +169,7 @@
                   <argument>-c</argument>
                   <argument>mkdir -p ${project.build.directory} &amp;&amp; grep "HDF5 Version:" "${hdf5.lib.dir}/libhdf5.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf5.version</argument>
                 </arguments>
+                <skip>${maven.exec.skip}</skip>
               </configuration>
             </execution>
             <!-- Extract application version from VERSION file -->
@@ -182,6 +183,7 @@
                   <argument>-c</argument>
                   <argument>mkdir -p ${project.build.directory} &amp;&amp; grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' VERSION | head -1 > ${project.build.directory}/app.version</argument>
                 </arguments>
+                <skip>${maven.exec.skip}</skip>
               </configuration>
             </execution>
           </executions>
