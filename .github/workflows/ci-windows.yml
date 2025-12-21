@@ -333,20 +333,21 @@ jobs:
         Write-Host "Creating distributable application package with jpackage..."
 
         # Create app-image (portable application directory)
-        # Build only hdfview module (skip repository module - already installed in previous step)
+        # Run from hdfview directory to build only that module
         # Skip dependency-check (already runs in maven-security.yml workflow)
-        mvn verify -Pjpackage-app-image -pl hdfview "-DskipTests" "-Ddependency-check.skip=true" -B
+        Set-Location hdfview
+        mvn verify -Pjpackage-app-image "-DskipTests" "-Ddependency-check.skip=true" -B
 
         Write-Host "Verifying jpackage output..."
-        if (Test-Path "hdfview\target\dist\HDFView") {
+        if (Test-Path "target\dist\HDFView") {
           Write-Host "✓ jpackage app-image created successfully"
-          $dirSize = (Get-ChildItem -Path "hdfview\target\dist\HDFView" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+          $dirSize = (Get-ChildItem -Path "target\dist\HDFView" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
           Write-Host "Package size: $([math]::Round($dirSize, 2)) MB"
-          $dllCount = (Get-ChildItem -Path "hdfview\target\dist\HDFView\app" -Recurse -Filter "*.dll" -ErrorAction SilentlyContinue).Count
+          $dllCount = (Get-ChildItem -Path "target\dist\HDFView\app" -Recurse -Filter "*.dll" -ErrorAction SilentlyContinue).Count
           Write-Host "Native libraries: $dllCount .dll files"
-          $jarCount = (Get-ChildItem -Path "hdfview\target\dist\HDFView\app" -Recurse -Filter "*.jar" -ErrorAction SilentlyContinue).Count
+          $jarCount = (Get-ChildItem -Path "target\dist\HDFView\app" -Recurse -Filter "*.jar" -ErrorAction SilentlyContinue).Count
           Write-Host "JAR files: $jarCount JARs"
-          $pluginCount = (Get-ChildItem -Path "hdfview\target\dist\HDFView\app\plugin" -Filter "*.dll" -ErrorAction SilentlyContinue).Count
+          $pluginCount = (Get-ChildItem -Path "target\dist\HDFView\app\plugin" -Filter "*.dll" -ErrorAction SilentlyContinue).Count
           Write-Host "HDF5 plugins: $pluginCount plugins"
         } else {
           Write-Host "✗ jpackage app-image creation failed"
