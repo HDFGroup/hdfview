@@ -284,6 +284,35 @@ jobs:
         echo "Target artifacts:"
         find target -name "*.jar" -type f 2>/dev/null | head -5 || echo "No target JARs found"
 
+    - name: Create jpackage App Image
+      run: |
+        echo "::group::Create jpackage App Image"
+        echo "Creating distributable application package with jpackage..."
+
+        # Create app-image (macOS application bundle)
+        mvn verify -Pjpackage-app-image -DskipTests -B
+
+        echo "Verifying jpackage output..."
+        if [ -d hdfview/target/dist/HDFView.app ]; then
+          echo "✓ jpackage app-image created successfully"
+          echo "Package size: $(du -sh hdfview/target/dist/HDFView.app | cut -f1)"
+          echo "Native libraries: $(find hdfview/target/dist/HDFView.app/Contents -name "*.dylib" | wc -l) .dylib files"
+          echo "JAR files: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" | wc -l) JARs"
+          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
+        else
+          echo "✗ jpackage app-image creation failed"
+          exit 1
+        fi
+        echo "::endgroup::"
+
+    - name: Upload jpackage App Image
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: hdfview-app-image-macos-${{ github.run_number }}
+        path: hdfview/target/dist/HDFView.app/
+        retention-days: 7
+
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: success() || failure()
@@ -336,3 +365,13 @@ jobs:
         find . -name "*.jar" -newer build.properties 2>/dev/null | \
           head -5 | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY || \
           echo "- No JAR artifacts found" >> $GITHUB_STEP_SUMMARY
+
+        # Add jpackage summary
+        if [ -d hdfview/target/dist/HDFView.app ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### jpackage App Image" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: $(du -sh hdfview/target/dist/HDFView.app 2>/dev/null | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Native Libraries**: $(find hdfview/target/dist/HDFView.app/Contents -name "*.dylib" 2>/dev/null | wc -l) .dylib files" >> $GITHUB_STEP_SUMMARY
+          echo "- **JAR Files**: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" 2>/dev/null | wc -l) JARs" >> $GITHUB_STEP_SUMMARY
+          echo "- **HDF5 Plugins**: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) compression plugins" >> $GITHUB_STEP_SUMMARY
+        fi

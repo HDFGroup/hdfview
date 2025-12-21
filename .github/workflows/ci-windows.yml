@@ -326,6 +326,40 @@ jobs:
         Write-Host "Target artifacts:"
         Get-ChildItem -Recurse -Path "target" -Filter "*.jar" -ErrorAction SilentlyContinue | Select-Object -First 5 | Format-Table FullName
 
+    - name: Create jpackage App Image
+      shell: pwsh
+      run: |
+        Write-Host "::group::Create jpackage App Image"
+        Write-Host "Creating distributable application package with jpackage..."
+
+        # Create app-image (portable application directory)
+        mvn verify -Pjpackage-app-image "-DskipTests" -B
+
+        Write-Host "Verifying jpackage output..."
+        if (Test-Path "hdfview\target\dist\HDFView") {
+          Write-Host "✓ jpackage app-image created successfully"
+          $dirSize = (Get-ChildItem -Path "hdfview\target\dist\HDFView" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+          Write-Host "Package size: $([math]::Round($dirSize, 2)) MB"
+          $dllCount = (Get-ChildItem -Path "hdfview\target\dist\HDFView\app" -Recurse -Filter "*.dll" -ErrorAction SilentlyContinue).Count
+          Write-Host "Native libraries: $dllCount .dll files"
+          $jarCount = (Get-ChildItem -Path "hdfview\target\dist\HDFView\app" -Recurse -Filter "*.jar" -ErrorAction SilentlyContinue).Count
+          Write-Host "JAR files: $jarCount JARs"
+          $pluginCount = (Get-ChildItem -Path "hdfview\target\dist\HDFView\app\plugin" -Filter "*.dll" -ErrorAction SilentlyContinue).Count
+          Write-Host "HDF5 plugins: $pluginCount plugins"
+        } else {
+          Write-Host "✗ jpackage app-image creation failed"
+          exit 1
+        }
+        Write-Host "::endgroup::"
+
+    - name: Upload jpackage App Image
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: hdfview-app-image-windows-${{ github.run_number }}
+        path: hdfview/target/dist/HDFView/
+        retention-days: 7
+
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: success() || failure()
@@ -387,4 +421,17 @@ jobs:
           }
         } else {
           "- No JAR artifacts found" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+        }
+
+        # Add jpackage summary
+        if (Test-Path "hdfview\target\dist\HDFView") {
+          "`n### jpackage App Image" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          $dirSize = (Get-ChildItem -Path "hdfview\target\dist\HDFView" -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum / 1MB
+          "- **Size**: $([math]::Round($dirSize, 2)) MB" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          $dllCount = (Get-ChildItem -Path "hdfview\target\dist\HDFView\app" -Recurse -Filter "*.dll" -ErrorAction SilentlyContinue).Count
+          "- **Native Libraries**: $dllCount .dll files" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          $jarCount = (Get-ChildItem -Path "hdfview\target\dist\HDFView\app" -Recurse -Filter "*.jar" -ErrorAction SilentlyContinue).Count
+          "- **JAR Files**: $jarCount JARs" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          $pluginCount = (Get-ChildItem -Path "hdfview\target\dist\HDFView\app\plugin" -Filter "*.dll" -ErrorAction SilentlyContinue).Count
+          "- **HDF5 Plugins**: $pluginCount compression plugins" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
         }
