@@ -89,15 +89,25 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        echo "Downloading HDF4: ${{ inputs.use_hdf }}"
+        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf_name }}" ]; then
+          PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+        else
+          PATTERN="*-ubuntu-2404_gcc.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
 
         # Download HDF4 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf }}" \
           --repo HDFGroup/hdf4 \
-          --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+          --pattern "$PATTERN" \
+          --clobber
 
         # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+        tar -zxvf *-ubuntu-2404_gcc.tar.gz
+        [ -d hdf4 ] || mv hdf4-* hdf4
 
         # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
