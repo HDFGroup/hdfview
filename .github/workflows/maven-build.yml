@@ -67,7 +67,7 @@ env:
   # TODO: This is a hack to deal with the fact that HDF5 provides this part itself for snapshots,
   # but releases are just the version number.
   # HDF4 provides the prefix for snapshots and releases, so HDF4 does not need a corresponding variable.
-  HDF5_PREFIX: ${{ inputs.build_type == 'snapshot' && '' || 'hdf5-' }}
+  HDF5_PREFIX: ${{ (inputs.build_type == 'release' && 'hdf5-') || '' }}
 
 jobs:
   build-linux:
