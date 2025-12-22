@@ -1,5 +1,9 @@
 name: hdfview remove-files
 
+# This workflow removes old snapshot artifacts from GitHub releases to prevent accumulation.
+# It deletes the previous build's files (based on file_base) from the specified release tag.
+# This is typically called by daily-build.yml to clean up old snapshots before uploading new ones.
+
 # Triggers the workflow on a call from another workflow
 on:
   workflow_call:
