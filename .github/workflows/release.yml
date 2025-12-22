@@ -4,7 +4,7 @@ name: hdfview release build
 on:
   workflow_dispatch:
     inputs:
-      use_tag:
+      build_type:
         description: 'Build type: release or snapshot'
         type: choice
         required: true
@@ -39,12 +39,12 @@ jobs:
     - name: Validate input
       id: validate-input
       env:
-        TAG: ${{ inputs.use_tag }}
+        TAG: ${{ inputs.build_type }}
         TAG4: ${{ inputs.use_tag4 }}
         TAG5: ${{ inputs.use_tag5 }}
       run: |
           if [[ "$TAG" != "release" && "$TAG" != "snapshot" ]]; then
-            echo "Error: use_tag must be either 'release' or 'snapshot', got: $TAG"
+            echo "Error: build_type must be either 'release' or 'snapshot', got: $TAG"
             exit 1
           fi
           echo "BUILD_TYPE=$TAG" >> $GITHUB_OUTPUT
@@ -110,6 +110,7 @@ jobs:
     uses: ./.github/workflows/maven-build.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      build_type: ${{ needs.determine-version.outputs.build_type }}
       use_hdf: ${{ needs.determine-version.outputs.hdf4_tag }}
       use_hdf_name: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf4-name || needs.determine-version.outputs.hdf4_tag }}
       use_hdf5: ${{ needs.determine-version.outputs.hdf5_tag }}
