@@ -1,4 +1,4 @@
-HDFView version 99.99.99
+HDFView version 3.4.0
 
 # 🔺 HDFView Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous HDFView release, platforms tested, and known problems in this release.
@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file. This docume
 
 > [!IMPORTANT]
 >
-> - Built and tested with **HDF 4.3.X** and **HDF5 2.Y.Z**
+> - Built and tested with **HDF 4.3.0** and **HDF5 2.0.0**
 > - Built and tested with **OpenJDK 21**
 > - Uses Java modules for improved modularity
 > - Utilizes newest `jpackage` for distribution
