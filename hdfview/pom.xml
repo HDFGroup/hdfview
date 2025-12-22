@@ -235,6 +235,417 @@
         </dependency>
       </dependencies>
     </profile>
+
+    <!-- jpackage profile for creating application image (portable directory) -->
+    <profile>
+      <id>jpackage-app-image</id>
+      <properties>
+        <jpackage.type>app-image</jpackage.type>
+        <jpackage.skip.signing>true</jpackage.skip.signing>
+        <!-- jpackage requires numeric version (no -SNAPSHOT suffix) -->
+        <jpackage.app.version>3.4.0</jpackage.app.version>
+      </properties>
+      <build>
+        <plugins>
+          <!-- Prepare staging directory with all required files -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>prepare-jpackage-input</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <echo message="Preparing jpackage input directory..."/>
+
+                    <!-- Create staging directory -->
+                    <property name="jpackage.input" value="${project.build.directory}/jpackage-input"/>
+                    <delete dir="${jpackage.input}"/>
+                    <mkdir dir="${jpackage.input}"/>
+
+                    <!-- Copy main JAR (built to ../libs by maven-jar-plugin) -->
+                    <echo message="Copying main JAR: ${project.build.finalName}.jar"/>
+                    <copy file="${project.basedir}/../libs/${project.build.finalName}.jar"
+                          todir="${jpackage.input}"
+                          failonerror="false"/>
+
+                    <!-- Copy object module JAR -->
+                    <echo message="Copying object module JAR..."/>
+                    <copy file="${project.basedir}/../libs/object-${project.version}.jar"
+                          todir="${jpackage.input}"
+                          failonerror="false"/>
+
+                    <!-- Copy all dependencies from target/lib -->
+                    <echo message="Copying dependencies from target/lib..."/>
+                    <copy todir="${jpackage.input}" failonerror="false">
+                      <fileset dir="${project.build.directory}/lib">
+                        <include name="**/*.jar"/>
+                      </fileset>
+                      <flattenmapper/>
+                    </copy>
+
+                    <!-- Copy HDF native libraries if available -->
+                    <echo message="Copying HDF5 native libraries from ${hdf5.lib.dir}..."/>
+                    <copy todir="${jpackage.input}" failonerror="false" flatten="true">
+                      <fileset dir="${hdf5.lib.dir}" erroronmissingdir="false">
+                        <include name="*.so"/>
+                        <include name="*.so.*"/>
+                        <include name="*.dll"/>
+                        <include name="*.dylib"/>
+                        <include name="*.jar"/>
+                      </fileset>
+                    </copy>
+
+                    <echo message="Copying HDF4 native libraries from ${hdf.lib.dir}..."/>
+                    <copy todir="${jpackage.input}" failonerror="false" flatten="true">
+                      <fileset dir="${hdf.lib.dir}" erroronmissingdir="false">
+                        <include name="*.so"/>
+                        <include name="*.so.*"/>
+                        <include name="*.dll"/>
+                        <include name="*.dylib"/>
+                        <include name="*.jar"/>
+                      </fileset>
+                    </copy>
+
+                    <!-- Copy HDF5 plugins -->
+                    <echo message="Copying HDF5 plugins from ${hdf5.plugin.dir}..."/>
+                    <mkdir dir="${jpackage.input}/plugin"/>
+                    <copy todir="${jpackage.input}/plugin" failonerror="false">
+                      <fileset dir="${hdf5.plugin.dir}" erroronmissingdir="false">
+                        <include name="*.so"/>
+                        <include name="*.dll"/>
+                        <include name="*.dylib"/>
+                      </fileset>
+                    </copy>
+
+                    <!-- Copy sample files if they exist -->
+                    <echo message="Copying sample files..."/>
+                    <mkdir dir="${jpackage.input}/samples"/>
+                    <copy todir="${jpackage.input}/samples" failonerror="false">
+                      <fileset dir="${project.basedir}/samples" erroronmissingdir="false">
+                        <include name="**/*"/>
+                      </fileset>
+                    </copy>
+
+                    <!-- Copy documentation -->
+                    <echo message="Copying documentation..."/>
+                    <mkdir dir="${jpackage.input}/doc"/>
+                    <copy todir="${jpackage.input}/doc" failonerror="false">
+                      <fileset dir="${project.basedir}/../docs/UsersGuide" erroronmissingdir="false">
+                        <include name="**/*.md"/>
+                        <include name="**/*.txt"/>
+                      </fileset>
+                    </copy>
+
+                    <!-- List contents of staging directory -->
+                    <echo message="Staging directory contents:"/>
+                    <exec executable="ls">
+                      <arg value="-lh"/>
+                      <arg value="${jpackage.input}"/>
+                    </exec>
+
+                    <echo message="JAR files in staging:"/>
+                    <exec executable="ls">
+                      <arg value="-lh"/>
+                      <arg value="${jpackage.input}"/>
+                    </exec>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>jpackage</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${java.home}/bin/jpackage</executable>
+                  <workingDirectory>${project.basedir}</workingDirectory>
+                  <arguments>
+                    <argument>--verbose</argument>
+                    <argument>--name</argument>
+                    <argument>HDFView</argument>
+                    <argument>--input</argument>
+                    <argument>${project.build.directory}/jpackage-input</argument>
+                    <argument>--main-jar</argument>
+                    <argument>${project.build.finalName}.jar</argument>
+                    <argument>--main-class</argument>
+                    <argument>hdf.view.HDFView</argument>
+                    <argument>--dest</argument>
+                    <argument>${project.build.directory}/dist</argument>
+                    <argument>--type</argument>
+                    <argument>${jpackage.type}</argument>
+                    <argument>--app-version</argument>
+                    <argument>${jpackage.app.version}</argument>
+                    <argument>--copyright</argument>
+                    <argument>Copyright 2006 by The HDF Group</argument>
+                    <argument>--description</argument>
+                    <argument>A visual tool for browsing and editing HDF files</argument>
+                    <argument>--vendor</argument>
+                    <argument>The HDF Group</argument>
+                    <argument>--java-options</argument>
+                    <argument>-Xmx1024M</argument>
+                    <argument>--java-options</argument>
+                    <argument>-Djava.library.path=$APPDIR</argument>
+                    <argument>--arguments</argument>
+                    <argument>-Dhdfview.root=$APPDIR</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- jpackage profile for creating DEB installer -->
+    <profile>
+      <id>jpackage-deb</id>
+      <properties>
+        <jpackage.type>deb</jpackage.type>
+        <jpackage.app.version>3.4.0</jpackage.app.version>
+      </properties>
+      <build>
+        <plugins>
+          <!-- Inherit staging assembly from jpackage-app-image -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>prepare-jpackage-input</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>jpackage</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <arguments combine.children="append">
+                    <argument>--icon</argument>
+                    <argument>${project.basedir}/../package_files/hdfview.png</argument>
+                    <argument>--linux-menu-group</argument>
+                    <argument>Science</argument>
+                    <argument>--linux-shortcut</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewH4.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF4.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewH5.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF5.properties</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- jpackage profile for creating RPM installer -->
+    <profile>
+      <id>jpackage-rpm</id>
+      <properties>
+        <jpackage.type>rpm</jpackage.type>
+        <jpackage.app.version>3.4.0</jpackage.app.version>
+      </properties>
+      <build>
+        <plugins>
+          <!-- Inherit staging assembly from jpackage-app-image -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>prepare-jpackage-input</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>jpackage</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <arguments combine.children="append">
+                    <argument>--icon</argument>
+                    <argument>${project.basedir}/../package_files/hdfview.png</argument>
+                    <argument>--linux-menu-group</argument>
+                    <argument>Science</argument>
+                    <argument>--linux-shortcut</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewH4.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF4.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewH5.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF5.properties</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- jpackage profile for macOS app-image (always add macOS JVM options) -->
+    <profile>
+      <id>jpackage-mac-base</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>jpackage</id>
+                <configuration>
+                  <arguments combine.children="append">
+                    <argument>--icon</argument>
+                    <argument>${project.basedir}/../package_files/macosx/HDFView.icns</argument>
+                    <argument>--java-options</argument>
+                    <argument>-XstartOnFirstThread</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- jpackage profile for macOS installers (DMG) - adds file associations -->
+    <!-- Manual activation only - use with -Djpackage.type=dmg -->
+    <profile>
+      <id>jpackage-installer-mac</id>
+      <properties>
+        <jpackage.app.version>3.4.0</jpackage.app.version>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>jpackage</id>
+                <configuration>
+                  <arguments combine.children="append">
+                    <argument>--mac-package-identifier</argument>
+                    <argument>HDFView.hdfgroup.org</argument>
+                    <argument>--mac-package-name</argument>
+                    <argument>HDFView-${project.version}</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewH4.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF4.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewH5.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF5.properties</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- jpackage profile for Windows installers (MSI) -->
+    <!-- Manual activation only - use with -Djpackage.type=msi -->
+    <profile>
+      <id>jpackage-installer-windows</id>
+      <properties>
+        <jpackage.app.version>3.4.0</jpackage.app.version>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>jpackage</id>
+                <configuration>
+                  <arguments combine.children="append">
+                    <argument>--icon</argument>
+                    <argument>${project.basedir}/../package_files/hdfview.ico</argument>
+                    <argument>--win-console</argument>
+                    <argument>--win-dir-chooser</argument>
+                    <argument>--win-per-user-install</argument>
+                    <argument>--win-menu</argument>
+                    <argument>--win-menu-group</argument>
+                    <argument>The HDF Group</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewH4.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF4.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewH5.properties</argument>
+                    <argument>--file-associations</argument>
+                    <argument>${project.basedir}/../package_files/HDFViewHDF5.properties</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <build>
@@ -310,6 +721,26 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+
+      <!-- jpackage execution for creating application packages -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>jpackage</id>
+            <phase>none</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${java.home}/bin/jpackage</executable>
+              <workingDirectory>${project.build.directory}</workingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
 
     <!-- Explicit resources configuration to ensure proper copying -->

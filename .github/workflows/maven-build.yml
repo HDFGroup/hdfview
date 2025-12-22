@@ -11,15 +11,25 @@ on:
         type: string
         required: true
       use_hdf:
-        description: 'HDF4 version from GitHub releases (e.g., hdf4-master-50c8c59)'
+        description: 'HDF4 release tag (e.g., snapshot, hdf4-1.2.3)'
         type: string
         required: false
         default: 'snapshot'
+      use_hdf_name:
+        description: 'HDF4 base filename (optional, uses wildcard if empty)'
+        type: string
+        required: false
+        default: ''
       use_hdf5:
-        description: 'HDF5 version from GitHub releases (e.g., hdf5-develop-03b0b4f)'
+        description: 'HDF5 release tag (e.g., snapshot, hdf5-2.0.0)'
         type: string
         required: false
         default: 'snapshot'
+      use_hdf5_name:
+        description: 'HDF5 base filename (optional, uses wildcard if empty)'
+        type: string
+        required: false
+        default: ''
       use_environ:
         description: 'Environment (snapshots or release)'
         type: string
@@ -79,15 +89,25 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        echo "Downloading HDF4: ${{ inputs.use_hdf }}"
+        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf_name }}" ]; then
+          PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+        else
+          PATTERN="*-ubuntu-2404_gcc.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
 
         # Download HDF4 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf }}" \
           --repo HDFGroup/hdf4 \
-          --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+          --pattern "$PATTERN" \
+          --clobber
 
         # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+        tar -zxvf *-ubuntu-2404_gcc.tar.gz
+        [ -d hdf4 ] || mv hdf4-* hdf4
 
         # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
@@ -105,15 +125,25 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
+        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
+          PATTERN="${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
+        else
+          PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
 
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
-          --pattern "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+          --pattern "$PATTERN" \
+          --clobber
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+        tar -zxvf hdf5-*-ubuntu-2404_gcc.tar.gz
+        [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
@@ -275,15 +305,25 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        echo "Downloading HDF4: ${{ inputs.use_hdf }}"
+        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf_name }}" ]; then
+          PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+        else
+          PATTERN="*-ubuntu-2404_gcc.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
 
         # Download HDF4 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf }}" \
           --repo HDFGroup/hdf4 \
-          --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+          --pattern "$PATTERN" \
+          --clobber
 
         # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
+        tar -zxvf *-ubuntu-2404_gcc.tar.gz
+        [ -d hdf4 ] || mv hdf4-* hdf4
 
         # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
@@ -301,15 +341,25 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
+        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
+          PATTERN="${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
+        else
+          PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
 
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
-          --pattern "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+          --pattern "$PATTERN" \
+          --clobber
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
+        tar -zxvf hdf5-*-ubuntu-2404_gcc.tar.gz
+        [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
@@ -396,39 +446,55 @@ jobs:
           exit 1
         fi
 
-    - name: Build Application Package
+    - name: Build and Package Application
       run: |
-        echo "Building HDFView application package with Maven..."
-        # Now build with package (HDF JARs already installed manually above)
-        # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
-        # package phase stops before verify, avoiding PMD/Checkstyle execution
-        mvn clean package -Dmaven.test.skip=true -B
+        echo "Building HDFView with Maven..."
+        # Install parent POM first (required for child module resolution)
+        mvn install -B -N -Ddependency-check.skip=true
+
+        # Install object and hdfview modules (needed for jpackage)
+        mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
+
+        # Package application
+        mvn package -DskipTests -B
+
+    - name: Create jpackage App Image
+      run: |
+        echo "Creating distributable application package with jpackage..."
+
+        # Create app-image using jpackage profile
+        # -pl object,hdfview: Build object and hdfview modules (skip repository)
+        # -Dmaven.test.skip=true: Skip test compilation and execution
+        # -Djacoco.skip=true: Skip JaCoCo (not needed for release builds)
+        # -Dpmd.skip=true: Skip PMD (static analysis not needed for release)
+        # -Ddependency-check.skip=true: Skip OWASP (runs in separate security workflow)
+        mvn verify -Pjpackage-app-image -pl object,hdfview \
+          -Dmaven.test.skip=true \
+          -Djacoco.skip=true \
+          -Dpmd.skip=true \
+          -Ddependency-check.skip=true \
+          -B
+
+        echo "Verifying jpackage output..."
+        if [ -d hdfview/target/dist/HDFView ]; then
+          echo "✓ jpackage app-image created successfully"
+          echo "Package size: $(du -sh hdfview/target/dist/HDFView | cut -f1)"
+          echo "Native libraries: $(find hdfview/target/dist/HDFView/lib/app -name "*.so" 2>/dev/null | wc -l) .so files"
+          echo "JAR files: $(find hdfview/target/dist/HDFView/lib/app -name "*.jar" 2>/dev/null | wc -l) JARs"
+          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView/lib/app/plugin/*.so 2>/dev/null | wc -l) plugins"
+        else
+          echo "✗ jpackage app-image creation failed"
+          exit 1
+        fi
 
     - name: Create Linux Application Archive
       run: |
-        # Create application distribution directory
-        mkdir -p hdfview-app
-
-        # Copy application files
-        cp hdfview/target/*.jar hdfview-app/ 2>/dev/null || echo "No hdfview JARs found"
-        cp object/target/*.jar hdfview-app/ 2>/dev/null || echo "No object JARs found"
-        cp libs/*.jar hdfview-app/ 2>/dev/null || echo "No libs JARs found"
-
-        # Copy HDF native libraries
-        if [ -d "${{ env.HDF5LIB_PATH }}/lib" ]; then
-          mkdir -p hdfview-app/lib
-          cp -L ${{ env.HDF5LIB_PATH }}/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF5 .so files"
-        fi
-        if [ -d "${{ env.HDF4LIB_PATH }}/lib" ]; then
-          mkdir -p hdfview-app/lib
-          cp -L ${{ env.HDF4LIB_PATH }}/lib/*.so* hdfview-app/lib/ 2>/dev/null || echo "No HDF4 .so files"
-        fi
-
-        # Create archive with App suffix
-        tar -czf ${{ inputs.file_base }}App-Linux-x86_64.tar.gz hdfview-app/
+        # Package the jpackage app-image as a tar.gz for distribution
+        cd hdfview/target/dist
+        tar -czf ${{ github.workspace }}/${{ inputs.file_base }}App-Linux-x86_64.tar.gz HDFView/
 
         echo "Linux application archive created: ${{ inputs.file_base }}App-Linux-x86_64.tar.gz"
-        ls -lh ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
+        ls -lh ${{ github.workspace }}/${{ inputs.file_base }}App-Linux-x86_64.tar.gz
 
     - name: Upload Linux App Artifact
       uses: actions/upload-artifact@v4
@@ -467,13 +533,28 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF4: ${{ inputs.use_hdf }}"
+        Write-Host "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+
+        # Determine file pattern based on whether base name is provided
+        if ("${{ inputs.use_hdf_name }}") {
+          $PATTERN = "${{ inputs.use_hdf_name }}-win-vs2022_cl.zip"
+        } else {
+          $PATTERN = "*-win-vs2022_cl.zip"
+        }
+        Write-Host "Using pattern: $PATTERN"
+
         gh release download "${{ inputs.use_hdf }}" `
           --repo HDFGroup/hdf4 `
-          --pattern "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
+          --pattern $PATTERN `
+          --clobber
 
         Write-Host "Extracting HDF4..."
-        7z x "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
+        7z x *-win-vs2022_cl.zip
+        # Rename hdf4-* directory to hdf4 if needed
+        $hdf4Dir = Get-ChildItem -Directory -Filter "hdf4*" | Select-Object -First 1
+        if ($hdf4Dir.Name -ne "hdf4") {
+          Rename-Item $hdf4Dir.FullName "hdf4"
+        }
         Set-Location hdf4
         7z x HDF-*-win64.zip
 
@@ -494,13 +575,28 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF5: ${{ inputs.use_hdf5 }}"
+        Write-Host "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+
+        # Determine file pattern based on whether base name is provided
+        if ("${{ inputs.use_hdf5_name }}") {
+          $PATTERN = "${{ inputs.use_hdf5_name }}-win-vs2022_cl.zip"
+        } else {
+          $PATTERN = "hdf5-*-win-vs2022_cl.zip"
+        }
+        Write-Host "Using pattern: $PATTERN"
+
         gh release download "${{ inputs.use_hdf5 }}" `
           --repo HDFGroup/hdf5 `
-          --pattern "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
+          --pattern $PATTERN `
+          --clobber
 
         Write-Host "Extracting HDF5..."
-        7z x "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
+        7z x hdf5-*-win-vs2022_cl.zip
+        # Rename hdf5-* directory to hdf5 if needed
+        $hdf5Dir = Get-ChildItem -Directory -Filter "hdf5*" | Select-Object -First 1
+        if ($hdf5Dir.Name -ne "hdf5") {
+          Rename-Item $hdf5Dir.FullName "hdf5"
+        }
         Set-Location hdf5
         7z x HDF5-*-win64.zip
 
@@ -663,8 +759,23 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       shell: pwsh
       run: |
-        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
-        7z x "${{ inputs.use_hdf }}-win-vs2022_cl.zip"
+        Write-Host "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+
+        # Determine file pattern based on whether base name is provided
+        if ("${{ inputs.use_hdf_name }}") {
+          $PATTERN = "${{ inputs.use_hdf_name }}-win-vs2022_cl.zip"
+        } else {
+          $PATTERN = "*-win-vs2022_cl.zip"
+        }
+        Write-Host "Using pattern: $PATTERN"
+
+        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern $PATTERN --clobber
+        7z x *-win-vs2022_cl.zip
+        # Rename hdf4-* directory to hdf4 if needed
+        $hdf4Dir = Get-ChildItem -Directory -Filter "hdf4*" | Select-Object -First 1
+        if ($hdf4Dir.Name -ne "hdf4") {
+          Rename-Item $hdf4Dir.FullName "hdf4"
+        }
         Set-Location hdf4
         7z x HDF-*-win64.zip
         # Windows structure: hdf4/HDF-4.3.1-win64/lib, hdf4/HDF-4.3.1-win64/bin
@@ -680,8 +791,23 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       shell: pwsh
       run: |
-        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
-        7z x "hdf5-${{ inputs.use_hdf5 }}-win-vs2022_cl.zip"
+        Write-Host "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+
+        # Determine file pattern based on whether base name is provided
+        if ("${{ inputs.use_hdf5_name }}") {
+          $PATTERN = "${{ inputs.use_hdf5_name }}-win-vs2022_cl.zip"
+        } else {
+          $PATTERN = "hdf5-*-win-vs2022_cl.zip"
+        }
+        Write-Host "Using pattern: $PATTERN"
+
+        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern $PATTERN --clobber
+        7z x hdf5-*-win-vs2022_cl.zip
+        # Rename hdf5-* directory to hdf5 if needed
+        $hdf5Dir = Get-ChildItem -Directory -Filter "hdf5*" | Select-Object -First 1
+        if ($hdf5Dir.Name -ne "hdf5") {
+          Rename-Item $hdf5Dir.FullName "hdf5"
+        }
         Set-Location hdf5
         7z x HDF5-*-win64.zip
         # Windows structure: hdf5/HDF5-x.y.z-win64/lib, hdf5/HDF5-x.y.z-win64/bin
@@ -771,20 +897,60 @@ jobs:
           exit 1
         }
 
-    - name: Build Application Package
+    - name: Build and Package Application
       shell: pwsh
       run: |
-        mvn package -pl object,hdfview "-Dmaven.test.skip=true" "-Dpmd.skip=true" "-Dcheckstyle.skip=true" -B
+        Write-Host "Building HDFView with Maven..."
+        # Install parent POM first (required for child module resolution)
+        mvn install -B -N "-Ddependency-check.skip=true"
+
+        # Install object and hdfview modules (needed for jpackage)
+        mvn install -B -pl object,hdfview -DskipTests "-Ddependency-check.skip=true"
+
+        # Package application
+        mvn package -DskipTests -B
+
+    - name: Create jpackage App Image
+      shell: pwsh
+      run: |
+        Write-Host "Creating distributable application package with jpackage..."
+
+        # Create app-image using jpackage profile
+        # -pl object,hdfview: Build object and hdfview modules (skip repository)
+        # -Dmaven.test.skip=true: Skip test compilation and execution
+        # -Djacoco.skip=true: Skip JaCoCo (not needed for release builds)
+        # -Dpmd.skip=true: Skip PMD (static analysis not needed for release)
+        # -Ddependency-check.skip=true: Skip OWASP (runs in separate security workflow)
+        mvn verify -Pjpackage-app-image -pl object,hdfview `
+          "-Dmaven.test.skip=true" `
+          "-Djacoco.skip=true" `
+          "-Dpmd.skip=true" `
+          "-Ddependency-check.skip=true" `
+          -B
+
+        Write-Host "Verifying jpackage output..."
+        if (Test-Path "hdfview\target\dist\HDFView") {
+          Write-Host "✓ jpackage app-image created successfully"
+          $size = (Get-ChildItem -Recurse "hdfview\target\dist\HDFView" | Measure-Object -Property Length -Sum).Sum / 1MB
+          Write-Host "Package size: $([math]::Round($size, 2)) MB"
+          $dlls = (Get-ChildItem -Recurse "hdfview\target\dist\HDFView\lib\app\*.dll" -ErrorAction SilentlyContinue).Count
+          Write-Host "Native libraries: $dlls .dll files"
+          $jars = (Get-ChildItem -Recurse "hdfview\target\dist\HDFView\lib\app\*.jar" -ErrorAction SilentlyContinue).Count
+          Write-Host "JAR files: $jars JARs"
+        } else {
+          Write-Error "✗ jpackage app-image creation failed"
+          exit 1
+        }
 
     - name: Create Windows Application Archive
       shell: pwsh
       run: |
-        New-Item -Path "hdfview-app" -ItemType Directory -Force
-        Copy-Item "libs\*.jar" -Destination "hdfview-app\"
-        New-Item -Path "hdfview-app\lib" -ItemType Directory -Force
-        Copy-Item "$env:HDF4LIB_PATH\bin\*.dll" -Destination "hdfview-app\lib\" -ErrorAction SilentlyContinue
-        Copy-Item "$env:HDF5LIB_PATH\bin\*.dll" -Destination "hdfview-app\lib\" -ErrorAction SilentlyContinue
-        Compress-Archive -Path "hdfview-app\*" -DestinationPath "${{ inputs.file_base }}App-win64.zip"
+        # Package the jpackage app-image as a ZIP for distribution
+        Set-Location "hdfview\target\dist"
+        Compress-Archive -Path "HDFView\*" -DestinationPath "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip"
+
+        Write-Host "Windows application archive created: ${{ inputs.file_base }}App-win64.zip"
+        Get-Item "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip" | Select-Object Name, Length
 
     - name: Upload Windows App Artifact
       uses: actions/upload-artifact@v4
@@ -822,13 +988,24 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        echo "Downloading HDF4: ${{ inputs.use_hdf }}"
+        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf_name }}" ]; then
+          PATTERN="${{ inputs.use_hdf_name }}-macos14_clang.tar.gz"
+        else
+          PATTERN="*-macos14_clang.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
+
         gh release download "${{ inputs.use_hdf }}" \
           --repo HDFGroup/hdf4 \
-          --pattern "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
+          --pattern "$PATTERN" \
+          --clobber
 
         echo "Extracting HDF4..."
-        tar -zxvf "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
+        tar -zxvf *-macos14_clang.tar.gz
+        [ -d hdf4 ] || mv hdf4-* hdf4
         cd hdf4
         tar -zxvf HDF-*-Darwin.tar.gz --strip-components 1
 
@@ -841,13 +1018,24 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
+        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
+          PATTERN="${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
+        else
+          PATTERN="hdf5-*-macos14_clang.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
+
         gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
-          --pattern "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
+          --pattern "$PATTERN" \
+          --clobber
 
         echo "Extracting HDF5..."
-        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
+        tar -zxvf hdf5-*-macos14_clang.tar.gz
+        [ -d hdf5 ] || mv hdf5-* hdf5
         cd hdf5
         tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
 
@@ -995,8 +1183,20 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
-        tar -zxvf "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
+        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf_name }}" ]; then
+          PATTERN="${{ inputs.use_hdf_name }}-macos14_clang.tar.gz"
+        else
+          PATTERN="*-macos14_clang.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
+
+        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "$PATTERN" \
+          --clobber
+        tar -zxvf *-macos14_clang.tar.gz
+        [ -d hdf4 ] || mv hdf4-* hdf4
         cd hdf4
         tar -zxvf HDF-*-Darwin.tar.gz --strip-components 1
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
@@ -1007,8 +1207,20 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
-        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
+        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
+          PATTERN="${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
+        else
+          PATTERN="hdf5-*-macos14_clang.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
+
+        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "$PATTERN" \
+          --clobber
+        tar -zxvf hdf5-*-macos14_clang.tar.gz
+        [ -d hdf5 ] || mv hdf5-* hdf5
         cd hdf5
         tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
@@ -1073,18 +1285,55 @@ jobs:
           exit 1
         fi
 
-    - name: Build Application Package
+    - name: Build and Package Application
       run: |
-        mvn package -pl object,hdfview -Dmaven.test.skip=true -Dpmd.skip=true -Dcheckstyle.skip=true -B
+        echo "Building HDFView with Maven..."
+        # Install parent POM first (required for child module resolution)
+        mvn install -B -N -Ddependency-check.skip=true
+
+        # Install object and hdfview modules (needed for jpackage)
+        mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
+
+        # Package application
+        mvn package -DskipTests -B
+
+    - name: Create jpackage App Image
+      run: |
+        echo "Creating distributable application package with jpackage..."
+
+        # Create app-image using jpackage profile
+        # -pl object,hdfview: Build object and hdfview modules (skip repository)
+        # -Dmaven.test.skip=true: Skip test compilation and execution
+        # -Djacoco.skip=true: Skip JaCoCo (not needed for release builds)
+        # -Dpmd.skip=true: Skip PMD (static analysis not needed for release)
+        # -Ddependency-check.skip=true: Skip OWASP (runs in separate security workflow)
+        mvn verify -Pjpackage-app-image -pl object,hdfview \
+          -Dmaven.test.skip=true \
+          -Djacoco.skip=true \
+          -Dpmd.skip=true \
+          -Ddependency-check.skip=true \
+          -B
+
+        echo "Verifying jpackage output..."
+        if [ -d hdfview/target/dist/HDFView.app ]; then
+          echo "✓ jpackage app-image created successfully"
+          echo "Package size: $(du -sh hdfview/target/dist/HDFView.app | cut -f1)"
+          echo "Native libraries: $(find hdfview/target/dist/HDFView.app/Contents -name "*.dylib" 2>/dev/null | wc -l) .dylib files"
+          echo "JAR files: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" 2>/dev/null | wc -l) JARs"
+          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
+        else
+          echo "✗ jpackage app-image creation failed"
+          exit 1
+        fi
 
     - name: Create macOS Application Archive
       run: |
-        mkdir -p hdfview-app
-        cp libs/*.jar hdfview-app/
-        mkdir -p hdfview-app/lib
-        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.dylib hdfview-app/lib/ 2>/dev/null || true
-        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.dylib hdfview-app/lib/ 2>/dev/null || true
-        tar -czf ${{ inputs.file_base }}App-Darwin.tar.gz -C hdfview-app .
+        # Package the jpackage app-image as a tar.gz for distribution
+        cd hdfview/target/dist
+        tar -czf ${{ github.workspace }}/${{ inputs.file_base }}App-Darwin.tar.gz HDFView.app/
+
+        echo "macOS application archive created: ${{ inputs.file_base }}App-Darwin.tar.gz"
+        ls -lh ${{ github.workspace }}/${{ inputs.file_base }}App-Darwin.tar.gz
 
     - name: Upload macOS App Artifact
       uses: actions/upload-artifact@v4
@@ -1092,6 +1341,116 @@ jobs:
         name: tgz-macos14_clang-app-binary
         path: ${{ inputs.file_base }}App-Darwin.tar.gz
         retention-days: 30
+
+  build-linux-installers:
+    name: Build Linux Installers (DEB/RPM)
+    runs-on: ubuntu-latest
+    needs: build-linux-app
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Download Linux App Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: tgz-ubuntu-2404-app-binary
+
+    - name: Extract App Image
+      run: |
+        tar -xzf ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
+        ls -la HDFView/
+
+    - name: Create DEB Installer
+      run: |
+        echo "DEB installer creation - to be implemented"
+        echo "Requires jpackage-deb profile and package files"
+        # TODO: Implement DEB creation once jpackage profile is ready
+
+    - name: Create RPM Installer
+      run: |
+        echo "RPM installer creation - to be implemented"
+        echo "Requires jpackage-rpm profile and package files"
+        # TODO: Implement RPM creation once jpackage profile is ready
+
+  build-macos-installer:
+    name: Build macOS Installer (DMG)
+    runs-on: macos-latest
+    needs: build-macos-app
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Download macOS App Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: tgz-macos14_clang-app-binary
+
+    - name: Extract App Image
+      run: |
+        tar -xzf ${{ inputs.file_base }}App-Darwin.tar.gz
+        ls -la HDFView.app/
+
+    - name: Create DMG Installer
+      run: |
+        echo "DMG installer creation - to be implemented"
+        echo "Requires jpackage-installer-mac profile and code signing"
+        # TODO: Implement DMG creation once jpackage profile is ready
+
+  build-windows-installer:
+    name: Build Windows Installer (MSI)
+    runs-on: windows-latest
+    needs: build-windows-app
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Download Windows App Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: zip-win-vs2022-app-binary
+
+    - name: Extract App Image
+      shell: pwsh
+      run: |
+        Expand-Archive -Path "${{ inputs.file_base }}App-win64.zip" -DestinationPath .
+        Get-ChildItem -Path HDFView\
+
+    - name: Create MSI Installer
+      shell: pwsh
+      run: |
+        Write-Host "MSI installer creation - to be implemented"
+        Write-Host "Requires jpackage-installer-windows profile and code signing"
+        # TODO: Implement MSI creation once jpackage profile is ready
 
   publish-packages:
     name: Publish Maven Packages

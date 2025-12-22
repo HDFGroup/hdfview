@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   get-base-names:
@@ -85,9 +86,10 @@ jobs:
     uses: ./.github/workflows/maven-build.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      use_hdf: ${{ needs.get-base-names.outputs.hdf4-name }}
-      use_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
-      name_hdf5: ${{ needs.get-base-names.outputs.hdf5-name }}
+      use_hdf: snapshot
+      use_hdf_name: ${{ needs.get-base-names.outputs.hdf4-name }}
+      use_hdf5: snapshot
+      use_hdf5_name: ${{ needs.get-base-names.outputs.hdf5-name }}
       use_environ: snapshots
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
