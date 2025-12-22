@@ -936,6 +936,35 @@ jobs:
           exit 1
         }
 
+    - name: Install SWTBot JARs to Local Maven Repository
+      shell: pwsh
+      run: |
+        Write-Host "Installing SWTBot JARs to local Maven repository..."
+
+        if (Test-Path "repository\lib\org.eclipse.swtbot.swt.finder.jar") {
+          mvn install:install-file "-Dfile=repository\lib\org.eclipse.swtbot.swt.finder.jar" `
+            "-DgroupId=org.eclipse.local" `
+            "-DartifactId=org.eclipse.swtbot.swt.finder" `
+            "-Dversion=4.2.1" `
+            "-Dpackaging=jar" `
+            "-DgeneratePom=true"
+          Write-Host "SWTBot SWT finder JAR installed"
+        } else {
+          Write-Host "WARNING: org.eclipse.swtbot.swt.finder.jar not found"
+        }
+
+        if (Test-Path "repository\lib\org.eclipse.swtbot.nebula.nattable.finder.jar") {
+          mvn install:install-file "-Dfile=repository\lib\org.eclipse.swtbot.nebula.nattable.finder.jar" `
+            "-DgroupId=org.eclipse.local" `
+            "-DartifactId=org.eclipse.swtbot.nebula.nattable.finder" `
+            "-Dversion=4.2.1" `
+            "-Dpackaging=jar" `
+            "-DgeneratePom=true"
+          Write-Host "SWTBot Nebula NatTable finder JAR installed"
+        } else {
+          Write-Host "WARNING: org.eclipse.swtbot.nebula.nattable.finder.jar not found"
+        }
+
     - name: Build and Package Application
       shell: pwsh
       run: |
@@ -1163,6 +1192,34 @@ jobs:
           exit 1
         fi
 
+    - name: Install SWTBot JARs to Local Maven Repository
+      run: |
+        echo "Installing SWTBot JARs to local Maven repository..."
+
+        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local \
+            -DartifactId=org.eclipse.swtbot.swt.finder \
+            -Dversion=4.2.1 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "SWTBot SWT finder JAR installed"
+        else
+          echo "WARNING: org.eclipse.swtbot.swt.finder.jar not found"
+        fi
+
+        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local \
+            -DartifactId=org.eclipse.swtbot.nebula.nattable.finder \
+            -Dversion=4.2.1 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "SWTBot Nebula NatTable finder JAR installed"
+        else
+          echo "WARNING: org.eclipse.swtbot.nebula.nattable.finder.jar not found"
+        fi
+
     - name: Build with Maven
       run: |
         echo "Building HDFView with Maven..."
@@ -1322,6 +1379,34 @@ jobs:
         else
           echo "ERROR: swt.jar not found in repository/lib/"
           exit 1
+        fi
+
+    - name: Install SWTBot JARs to Local Maven Repository
+      run: |
+        echo "Installing SWTBot JARs to local Maven repository..."
+
+        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local \
+            -DartifactId=org.eclipse.swtbot.swt.finder \
+            -Dversion=4.2.1 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "SWTBot SWT finder JAR installed"
+        else
+          echo "WARNING: org.eclipse.swtbot.swt.finder.jar not found"
+        fi
+
+        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local \
+            -DartifactId=org.eclipse.swtbot.nebula.nattable.finder \
+            -Dversion=4.2.1 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "SWTBot Nebula NatTable finder JAR installed"
+        else
+          echo "WARNING: org.eclipse.swtbot.nebula.nattable.finder.jar not found"
         fi
 
     - name: Build and Package Application
