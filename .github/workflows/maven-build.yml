@@ -1014,8 +1014,9 @@ jobs:
       shell: pwsh
       run: |
         # Package the jpackage app-image as a ZIP for distribution
+        # Note: Must preserve HDFView directory structure for jpackage --app-image to work
         Set-Location "hdfview\target\dist"
-        Compress-Archive -Path "HDFView\*" -DestinationPath "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip"
+        Compress-Archive -Path "HDFView" -DestinationPath "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip"
 
         Write-Host "Windows application archive created: ${{ inputs.file_base }}App-win64.zip"
         Get-Item "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip" | Select-Object Name, Length
@@ -1532,13 +1533,162 @@ jobs:
     - name: Extract App Image
       run: |
         tar -xzf ${{ inputs.file_base }}App-Darwin.tar.gz
-        ls -la HDFView.app/
+        ls -la
+
+    - name: Setup Keychain and Certificate
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
+      env:
+        MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+        MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+      run: |
+        echo "Setting up temporary keychain for code signing..."
+
+        # Create temporary keychain
+        security create-keychain -p "$MACOS_KEYCHAIN_PASSWORD" build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "$MACOS_KEYCHAIN_PASSWORD" build.keychain
+        security set-keychain-settings build.keychain
+
+        # Decode and import certificate
+        echo "$MACOS_CERTIFICATE" | base64 --decode > certificate.p12
+        security import certificate.p12 \
+          -k build.keychain \
+          -P "$MACOS_CERT_PASSWORD" \
+          -T /usr/bin/codesign \
+          -T /usr/bin/productsign
+
+        # Allow codesign to access keychain
+        security set-key-partition-list -S apple-tool:,apple: \
+          -k "$MACOS_KEYCHAIN_PASSWORD" \
+          build.keychain
+
+        # Clean up certificate file
+        rm certificate.p12
+
+        echo "Keychain setup complete"
+
+    - name: Sign App Bundle
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
+      env:
+        MACOS_DEVELOPER_ID: ${{ secrets.MACOS_DEVELOPER_ID }}
+      run: |
+        echo "Code signing app bundle..."
+
+        # Sign the app bundle
+        codesign --force --timestamp --options runtime \
+          --entitlements lib/macosx/distribution.entitlements \
+          --verbose=4 --strict \
+          --sign "$MACOS_DEVELOPER_ID" \
+          --deep \
+          HDFView.app
+
+        # Verify signature
+        codesign -dvv HDFView.app
+        codesign -vvvv --strict HDFView.app
+
+        echo "App bundle signed successfully"
 
     - name: Create DMG Installer
       run: |
-        echo "DMG installer creation - to be implemented"
-        echo "Requires jpackage-installer-mac profile and code signing"
-        # TODO: Implement DMG creation once jpackage profile is ready
+        echo "Creating DMG installer from app-image..."
+
+        # Use jpackage to create DMG from app-image
+        jpackage \
+          --type dmg \
+          --app-image HDFView.app \
+          --name HDFView \
+          --app-version 3.4.0 \
+          --mac-package-identifier HDFView.hdfgroup.org \
+          --mac-package-name HDFView-3.4.0 \
+          --file-associations package_files/HDFViewHDF.properties \
+          --file-associations package_files/HDFViewH4.properties \
+          --file-associations package_files/HDFViewHDF4.properties \
+          --file-associations package_files/HDFViewH5.properties \
+          --file-associations package_files/HDFViewHDF5.properties \
+          --dest .
+
+        echo "DMG installer created successfully"
+        ls -lh *.dmg
+
+    - name: Sign DMG Installer
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
+      env:
+        MACOS_DEVELOPER_ID: ${{ secrets.MACOS_DEVELOPER_ID }}
+      run: |
+        echo "Code signing DMG installer..."
+
+        # Sign the DMG
+        codesign --force --timestamp --options runtime \
+          --entitlements lib/macosx/distribution.entitlements \
+          --verbose=4 --strict \
+          --sign "$MACOS_DEVELOPER_ID" \
+          --deep \
+          HDFView-3.4.0.dmg
+
+        # Verify signature
+        codesign -dvv HDFView-3.4.0.dmg
+
+        # Verify DMG integrity
+        hdiutil verify HDFView-3.4.0.dmg
+
+        echo "DMG installer signed successfully"
+
+    - name: Notarize DMG
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      run: |
+        echo "Submitting DMG for notarization..."
+
+        # Submit for notarization and wait for completion
+        xcrun notarytool submit \
+          --wait \
+          --output-format json \
+          --apple-id "$APPLE_ID" \
+          --password "$APPLE_ID_PASSWORD" \
+          --team-id "$APPLE_TEAM_ID" \
+          HDFView-3.4.0.dmg > notarization-output.json
+
+        # Check if notarization succeeded
+        STATUS=$(jq -r '.status' notarization-output.json)
+        if [ "$STATUS" != "Accepted" ]; then
+          echo "Notarization failed with status: $STATUS"
+          jq '.' notarization-output.json
+          exit 1
+        fi
+
+        echo "Notarization completed successfully"
+
+    - name: Staple Notarization Ticket
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
+      run: |
+        echo "Stapling notarization ticket to DMG..."
+
+        # Staple the notarization ticket
+        xcrun stapler staple HDFView-3.4.0.dmg
+
+        # Validate stapling
+        xcrun stapler validate -v HDFView-3.4.0.dmg
+
+        # Verify with spctl
+        spctl -vvvv --assess --type install HDFView-3.4.0.dmg || true
+
+        echo "Notarization ticket stapled successfully"
+
+    - name: Cleanup Keychain
+      if: always() && github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
+      run: |
+        security delete-keychain build.keychain || true
+
+    - name: Upload macOS DMG Installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: HDFView-3.4.0-macOS-dmg
+        path: HDFView-3.4.0.dmg
+        retention-days: 5
 
   build-windows-installer:
     name: Build Windows Installer (MSI)
@@ -1567,14 +1717,90 @@ jobs:
       shell: pwsh
       run: |
         Expand-Archive -Path "${{ inputs.file_base }}App-win64.zip" -DestinationPath .
-        Get-ChildItem -Path HDFView\
+        Get-ChildItem -Recurse
 
     - name: Create MSI Installer
       shell: pwsh
       run: |
-        Write-Host "MSI installer creation - to be implemented"
-        Write-Host "Requires jpackage-installer-windows profile and code signing"
-        # TODO: Implement MSI creation once jpackage profile is ready
+        Write-Host "Creating MSI installer from app-image..."
+
+        # Use jpackage to create MSI from app-image
+        jpackage `
+          --type msi `
+          --app-image HDFView `
+          --name HDFView `
+          --app-version 3.4.0 `
+          --icon package_files\hdfview.ico `
+          --win-dir-chooser `
+          --win-per-user-install `
+          --win-menu `
+          --win-menu-group "The HDF Group" `
+          --file-associations package_files\HDFViewHDF.properties `
+          --file-associations package_files\HDFViewH4.properties `
+          --file-associations package_files\HDFViewHDF4.properties `
+          --file-associations package_files\HDFViewH5.properties `
+          --file-associations package_files\HDFViewHDF5.properties `
+          --dest .
+
+        Write-Host "MSI installer created successfully"
+        Get-ChildItem *.msi
+
+    - name: Sign MSI Installer
+      if: github.repository == 'HDFGroup/hdfview' && env.WINDOWS_CERTIFICATE != ''
+      shell: pwsh
+      env:
+        WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+        WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+      run: |
+        Write-Host "Signing MSI installer..."
+
+        # Decode certificate from base64
+        $certBytes = [System.Convert]::FromBase64String($env:WINDOWS_CERTIFICATE)
+        $certPath = Join-Path $env:TEMP "cert.pfx"
+        [System.IO.File]::WriteAllBytes($certPath, $certBytes)
+
+        # Find signtool.exe
+        $signtool = Get-ChildItem -Path "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter "signtool.exe" |
+          Where-Object { $_.FullName -match "x64" } |
+          Select-Object -First 1
+
+        if (-not $signtool) {
+          Write-Error "signtool.exe not found"
+          exit 1
+        }
+
+        Write-Host "Using signtool: $($signtool.FullName)"
+
+        # Sign the MSI
+        & $signtool.FullName sign `
+          /v `
+          /debug `
+          /fd SHA256 `
+          /d "HDFView 3.4.0 Installer" `
+          /f $certPath `
+          /p $env:WINDOWS_CERT_PASSWORD `
+          /t http://timestamp.digicert.com `
+          HDFView-3.4.0.msi
+
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Signing failed with exit code $LASTEXITCODE"
+          exit $LASTEXITCODE
+        }
+
+        # Verify signature
+        & $signtool.FullName verify /pa /v HDFView-3.4.0.msi
+
+        # Clean up certificate
+        Remove-Item $certPath
+
+        Write-Host "MSI installer signed successfully"
+
+    - name: Upload Windows MSI Installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: HDFView-3.4.0-win64-msi
+        path: HDFView-3.4.0.msi
+        retention-days: 5
 
   publish-packages:
     name: Publish Maven Packages

@@ -145,7 +145,7 @@ mvn test -pl hdfview -Dtest=TestClassName
 - **Properties Plugin**: External property file loading (`build.properties`)
 - **Resources Plugin**: Copies resources from both `src/main/resources` and `src/main/java` (icons, images)
 - **Dependency Plugin**: Copies runtime dependencies to `hdfview/target/lib/` during package phase
-- **Exec Plugin**: Native library version extraction and application execution
+- **Exec Plugin**: Native library version extraction, application execution, and jpackage installer creation
 - **JaCoCo Plugin**: Code coverage analysis and reporting (60% line, 50% branch coverage targets)
 - **JavaDoc Plugin**: API documentation generation with multi-module aggregation
 - **Surefire Plugin**: JUnit 5 test execution with parallel test support
@@ -153,6 +153,47 @@ mvn test -pl hdfview -Dtest=TestClassName
 - **Checkstyle Plugin**: Code style enforcement (v10.12+, Java 21 compatible)
 - **OWASP Dependency Check**: Security vulnerability scanning
 - **License Plugin**: License compliance checking
+
+### Distribution and Installers
+
+HDFView uses Java 21's native jpackage tool to create platform-specific installers:
+
+**Supported Formats:**
+- **Windows**: MSI installer with Authenticode signing
+- **macOS**: DMG disk image with code signing and notarization
+- **Linux**: DEB and RPM packages
+
+**jpackage Profiles:**
+- `jpackage-app-image` - Creates application bundle (default for CI)
+- `jpackage-installer-deb` - Creates DEB package
+- `jpackage-installer-rpm` - Creates RPM package
+- `jpackage-installer-mac` - Adds macOS-specific options for DMG
+- `jpackage-installer-windows` - Adds Windows-specific options for MSI
+
+**Creating Installers Locally:**
+```bash
+# Create app-image (platform application bundle)
+mvn verify -Pjpackage-app-image -pl object,hdfview -DskipTests
+
+# Create platform installer (requires app-image first)
+# Linux: DEB
+mvn package -Pjpackage-installer-deb -Djpackage.type=deb -pl hdfview
+
+# Linux: RPM
+mvn package -Pjpackage-installer-rpm -Djpackage.type=rpm -pl hdfview
+
+# macOS: DMG (unsigned)
+mvn package -Pjpackage-installer-mac -Djpackage.type=dmg -pl hdfview
+
+# Windows: MSI (unsigned)
+mvn package -Pjpackage-installer-windows -Djpackage.type=msi -pl hdfview
+```
+
+**Code Signing:**
+- Signing only occurs in GitHub Actions on canonical repository
+- Requires secrets configured (see `docs/Installer-Signing-Guide.md`)
+- Forks can build unsigned installers for testing
+- macOS requires Developer ID certificate and notarization with Apple
 
 ## Architecture
 
@@ -325,6 +366,15 @@ Located in `scripts/`:
 - Detailed research plan available for JavaFX evaluation
 - Focus on large dataset performance
 - Deferred to prioritize other modernization efforts
+
+### ✅ Phase 2E: jpackage Integration & Installer Signing (COMPLETE)
+- Migrated from Ant-based installer creation to Java 21's native jpackage
+- Native installers for all platforms: MSI (Windows), DMG (macOS), DEB/RPM (Linux)
+- Code signing implemented for Windows (Authenticode) and macOS (Developer ID + Notarization)
+- Split workflow: app-image creation → installer creation → signing
+- Conditional signing (only on canonical repository with secrets)
+- Comprehensive documentation for signing process and secret configuration
+- See: `docs/Installer-Signing-Guide.md` and `.claude/dev-docs/jpackage-integration.md`
 
 ## Known Issues
 
