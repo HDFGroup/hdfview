@@ -136,7 +136,7 @@ jobs:
         if [ -n "${{ inputs.use_hdf5_name }}" ]; then
           PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
         else
-          PATTERN="${{ env.HDF5_PREFIX }}hdf5-*-ubuntu-2404_gcc.tar.gz"
+          PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -352,7 +352,7 @@ jobs:
         if [ -n "${{ inputs.use_hdf5_name }}" ]; then
           PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
         else
-          PATTERN="${{ env.HDF5_PREFIX }}hdf5-*-ubuntu-2404_gcc.tar.gz"
+          PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -584,7 +584,7 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if ("${{ inputs.use_hdf5_name }}") {
-          $PATTERN = "${{ inputs.use_hdf5_name }}-win-vs2022_cl.zip"
+          $PATTERN = "${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-win-vs2022_cl.zip"
         } else {
           $PATTERN = "hdf5-*-win-vs2022_cl.zip"
         }
@@ -829,7 +829,7 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if ("${{ inputs.use_hdf5_name }}") {
-          $PATTERN = "${{ inputs.use_hdf5_name }}-win-vs2022_cl.zip"
+          $PATTERN = "${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-win-vs2022_cl.zip"
         } else {
           $PATTERN = "hdf5-*-win-vs2022_cl.zip"
         }
@@ -1058,7 +1058,7 @@ jobs:
         if [ -n "${{ inputs.use_hdf5_name }}" ]; then
           PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
         else
-          PATTERN="${{ env.HDF5_PREFIX }}hdf5-*-macos14_clang.tar.gz"
+          PATTERN="hdf5-*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -1247,7 +1247,7 @@ jobs:
         if [ -n "${{ inputs.use_hdf5_name }}" ]; then
           PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
         else
-          PATTERN="${{ env.HDF5_PREFIX }}hdf5-*-macos14_clang.tar.gz"
+          PATTERN="hdf5-*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
