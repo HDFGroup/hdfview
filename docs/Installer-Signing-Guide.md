@@ -124,7 +124,7 @@ The following GitHub secrets must be configured:
      --output-format json \
      --apple-id "${APPLE_ID}" \
      --password "${APPLE_ID_PASSWORD}" \
-     --team-id "${TEAM_ID}" \
+     --team-id "${APPLE_TEAM_ID}" \
      HDFView-${VERSION}.dmg
    ```
 

@@ -96,7 +96,7 @@ The installer jobs (`build-linux-installers`, `build-macos-installer`, `build-wi
   env:
     APPLE_ID: ${{ secrets.APPLE_ID }}
     APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-    TEAM_ID: ${{ secrets.TEAM_ID }}
+    APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
   run: |
     # Submit DMG to Apple notarization service
     # Wait for notarization to complete
@@ -137,7 +137,7 @@ For the canonical `HDFGroup/hdfview` repository:
 - `MACOS_CERTIFICATE_PWD` - Certificate password
 - `APPLE_ID` - Apple Developer account email
 - `APPLE_PASSWORD` - App-specific password for notarization
-- `TEAM_ID` - Apple Developer Team ID
+- `APPLE_TEAM_ID` - Apple Developer Team ID
 
 **Windows:**
 - `WINDOWS_CERTIFICATE` - Authenticode certificate (base64 encoded or PFX)
