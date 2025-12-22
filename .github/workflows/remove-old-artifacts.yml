@@ -1,4 +1,4 @@
-name: hdfview remove-files
+name: hdfview remove old artifacts
 
 # This workflow removes old snapshot artifacts from GitHub releases to prevent accumulation.
 # It deletes the previous build's files (based on file_base) from the specified release tag.

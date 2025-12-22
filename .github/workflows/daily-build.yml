@@ -129,7 +129,7 @@ jobs:
     needs: [get-base-names, call-workflow-tarball, call-workflow-maven-build, call-workflow-release]
     permissions:
       contents: write # In order to allow file deletion
-    uses: ./.github/workflows/remove-files.yml
+    uses: ./.github/workflows/remove-old-artifacts.yml
     with:
       file_base: ${{ needs.get-base-names.outputs.hdfview-name }}
       use_tag: HDFView-99.99.99
