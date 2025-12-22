@@ -200,13 +200,14 @@ jobs:
         # Manually install each JAR to local Maven repository
         # This bypasses the repository module's POM and avoids PMD issues
 
-        # Install jarhdf5 (find any version)
+        # Install jarhdf5 (extract version from filename)
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
         fi
 
         # Install jarhdf (find any version)
@@ -416,13 +417,14 @@ jobs:
         # Manually install each JAR to local Maven repository
         # This bypasses the repository module's POM and avoids PMD issues
 
-        # Install jarhdf5 (find any version)
+        # Install jarhdf5 (extract version from filename)
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
         fi
 
         # Install jarhdf (find any version)
@@ -662,8 +664,10 @@ jobs:
 
         $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf5) {
+          $HDF5_VERSION = $jarhdf5.Name -replace 'jarhdf5-([0-9.]+)\.jar', '$1'
           mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
-            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=2.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
+            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=$HDF5_VERSION" "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($jarhdf5.Name) as version $HDF5_VERSION"
         }
 
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -894,8 +898,10 @@ jobs:
         }
         $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf5) {
+          $HDF5_VERSION = $jarhdf5.Name -replace 'jarhdf5-([0-9.]+)\.jar', '$1'
           mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
-            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=2.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
+            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=$HDF5_VERSION" "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($jarhdf5.Name) as version $HDF5_VERSION"
         }
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
@@ -1138,8 +1144,10 @@ jobs:
 
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
         fi
 
         if [ -f repository/lib/jarhdf-*.jar ]; then
@@ -1344,7 +1352,9 @@ jobs:
         cp lib/netcdf.jar repository/lib/ 2>/dev/null || echo "netcdf.jar not found"
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
-          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
+          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
         fi
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
@@ -1866,10 +1876,11 @@ jobs:
             VERSION_DIR=$(ls HDF_Group/HDF5 | head -1)
             JAR_FILE=$(ls HDF_Group/HDF5/$VERSION_DIR/lib/jarhdf5*.jar 2>/dev/null | head -1)
             if [ -f "$JAR_FILE" ]; then
+              HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
               mvn install:install-file -Dfile="$JAR_FILE" \
-                -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+                -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
                 -Dpackaging=jar -DgeneratePom=true
-              echo "Installed jarhdf5.jar from GitHub: $JAR_FILE"
+              echo "Installed jarhdf5.jar from GitHub: $JAR_FILE as version $HDF5_VERSION"
             fi
           fi
           cd ${{ github.workspace }}
