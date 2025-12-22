@@ -1014,8 +1014,9 @@ jobs:
       shell: pwsh
       run: |
         # Package the jpackage app-image as a ZIP for distribution
+        # Note: Must preserve HDFView directory structure for jpackage --app-image to work
         Set-Location "hdfview\target\dist"
-        Compress-Archive -Path "HDFView\*" -DestinationPath "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip"
+        Compress-Archive -Path "HDFView" -DestinationPath "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip"
 
         Write-Host "Windows application archive created: ${{ inputs.file_base }}App-win64.zip"
         Get-Item "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip" | Select-Object Name, Length
