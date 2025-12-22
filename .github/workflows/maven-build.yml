@@ -58,6 +58,11 @@ env:
     -XX:+TieredCompilation
     -XX:TieredStopAtLevel=1
     -Djava.awt.headless=true
+  # Prefix for HDF5 release file patterns: "" for snapshot, "hdf5-" for tagged releases
+  # TODO: This is a hack to deal with the fact that HDF5 provides this part itself for snapshots,
+  # but releases are just the version number.
+  # HDF4 provides the prefix for snapshots and releases, so HDF4 does not need a corresponding variable.
+  HDF5_PREFIX: ${{ inputs.use_hdf5 == 'snapshot' && '' || 'hdf5-' }}
 
 jobs:
   build-linux:
@@ -93,9 +98,9 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if [ -n "${{ inputs.use_hdf_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
         else
-          PATTERN="*-ubuntu-2404_gcc.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -129,9 +134,9 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
         else
-          PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}hdf5-*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -309,9 +314,9 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if [ -n "${{ inputs.use_hdf_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
         else
-          PATTERN="*-ubuntu-2404_gcc.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -345,9 +350,9 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
         else
-          PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}hdf5-*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -1021,9 +1026,9 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if [ -n "${{ inputs.use_hdf_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf_name }}-macos14_clang.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf_name }}-macos14_clang.tar.gz"
         else
-          PATTERN="*-macos14_clang.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -1051,9 +1056,9 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
         else
-          PATTERN="hdf5-*-macos14_clang.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}hdf5-*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -1216,9 +1221,9 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if [ -n "${{ inputs.use_hdf_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf_name }}-macos14_clang.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf_name }}-macos14_clang.tar.gz"
         else
-          PATTERN="*-macos14_clang.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
@@ -1240,9 +1245,9 @@ jobs:
 
         # Determine file pattern based on whether base name is provided
         if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
         else
-          PATTERN="hdf5-*-macos14_clang.tar.gz"
+          PATTERN="${{ env.HDF5_PREFIX }}hdf5-*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
