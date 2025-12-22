@@ -247,7 +247,7 @@ jobs:
         # Now build with package (HDF JARs already installed manually above)
         # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
         # package phase stops before verify, avoiding PMD/Checkstyle execution
-        mvn clean package -Dmaven.test.skip=true -B
+        mvn clean package -Dmaven.test.skip=true -Dhdf5.version="$HDF5_VERSION" -B
 
     - name: Create Linux Binary Archive
       run: |
@@ -745,7 +745,7 @@ jobs:
       run: |
         Write-Host "Building HDFView with Maven..."
         # Build object and hdfview modules, stop at package phase to avoid verify/PMD
-        mvn package -pl object,hdfview "-Dmaven.test.skip=true" -B
+        mvn package -pl object,hdfview "-Dmaven.test.skip=true" -Dhdf5.version="$HDF5_VERSION" -B
 
     - name: Create Windows Binary Archive
       shell: pwsh
@@ -1233,7 +1233,7 @@ jobs:
       run: |
         echo "Building HDFView with Maven..."
         # Build object and hdfview modules, stop at package phase to avoid verify/PMD
-        mvn package -pl object,hdfview -Dmaven.test.skip=true -B
+        mvn package -pl object,hdfview -Dmaven.test.skip=true -Dhdf5.version="$HDF5_VERSION" -B
 
     - name: Create macOS Binary Archive
       run: |
