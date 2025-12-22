@@ -697,6 +697,35 @@ jobs:
           exit 1
         }
 
+    - name: Install SWTBot JARs to Local Maven Repository
+      shell: pwsh
+      run: |
+        Write-Host "Installing SWTBot JARs to local Maven repository..."
+
+        if (Test-Path "repository\lib\org.eclipse.swtbot.swt.finder.jar") {
+          mvn install:install-file "-Dfile=repository\lib\org.eclipse.swtbot.swt.finder.jar" `
+            "-DgroupId=org.eclipse.local" `
+            "-DartifactId=org.eclipse.swtbot.swt.finder" `
+            "-Dversion=4.2.1" `
+            "-Dpackaging=jar" `
+            "-DgeneratePom=true"
+          Write-Host "SWTBot SWT finder JAR installed"
+        } else {
+          Write-Host "WARNING: org.eclipse.swtbot.swt.finder.jar not found"
+        }
+
+        if (Test-Path "repository\lib\org.eclipse.swtbot.nebula.nattable.finder.jar") {
+          mvn install:install-file "-Dfile=repository\lib\org.eclipse.swtbot.nebula.nattable.finder.jar" `
+            "-DgroupId=org.eclipse.local" `
+            "-DartifactId=org.eclipse.swtbot.nebula.nattable.finder" `
+            "-Dversion=4.2.1" `
+            "-Dpackaging=jar" `
+            "-DgeneratePom=true"
+          Write-Host "SWTBot Nebula NatTable finder JAR installed"
+        } else {
+          Write-Host "WARNING: org.eclipse.swtbot.nebula.nattable.finder.jar not found"
+        }
+
     - name: Build with Maven
       shell: pwsh
       run: |
