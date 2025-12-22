@@ -108,7 +108,9 @@ jobs:
         run: |
           if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
           then
-            FILE_NAME_BASE=$(echo "hdfview-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
+            # Replace / with - in branch name to create valid filename
+            BRANCH_NAME=$(echo "${{ needs.check_commits.outputs.branch_ref }}" | sed 's/\//-/g')
+            FILE_NAME_BASE=$(echo "hdfview-${BRANCH_NAME}-${{ needs.check_commits.outputs.branch_sha }}")
           else
             FILE_NAME_BASE=$(echo "HDFView-${{ steps.version.outputs.TAG_VERSION }}")
           fi

@@ -704,6 +704,7 @@ public class DataDisplayConverterFactory {
         private static final Logger log = LoggerFactory.getLogger(NumericalDataDisplayConverter.class);
 
         private final StringBuilder buffer;
+        private final Datatype dtype;
         private final long typeSize;
         private final boolean isUINT64;
         private final boolean isFLT16;
@@ -717,6 +718,8 @@ public class DataDisplayConverterFactory {
                 throw new Exception(
                     "NumericalDataDisplayConverter: datatype is not an integer or floating-point type");
             }
+
+            this.dtype = dtype; // Store for byte-to-double conversion
 
             buffer = new StringBuilder();
 
@@ -736,6 +739,27 @@ public class DataDisplayConverterFactory {
             if (value == null) {
                 log.debug("canonicalToDisplayValue({}): value is null", value);
                 return DataFactoryUtils.nullStr;
+            }
+
+            /*
+             * Handle byte arrays from platform-specific float types (e.g., 16-byte long double).
+             * Use the datatype's own metadata to convert bytes to double for display.
+             * This is platform-independent and works with any float format.
+             */
+            if (value instanceof byte[] && typeSize >= 16 && this.dtype instanceof hdf.object.h5.H5Datatype) {
+                try {
+                    byte[] byteValue                 = (byte[])value;
+                    hdf.object.h5.H5Datatype h5dtype = (hdf.object.h5.H5Datatype)this.dtype;
+                    double converted                 = h5dtype.convertBytesToDouble(byteValue);
+                    value                            = converted;
+                    log.trace(
+                        "canonicalToDisplayValue(): converted byte[{}] to double using datatype metadata: {}",
+                        byteValue.length, converted);
+                }
+                catch (Exception ex) {
+                    log.debug("canonicalToDisplayValue(): byte array conversion failed: ", ex);
+                    // Fall through to hex/binary display if conversion fails
+                }
             }
 
             buffer.setLength(0); // clear the old string

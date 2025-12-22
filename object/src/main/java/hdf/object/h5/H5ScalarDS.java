@@ -419,9 +419,15 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                                         isFillValueConverted = true;
                                     }
 
-                                    int n = Array.getLength(fillValue);
-                                    for (int i = 0; i < n; i++)
-                                        addFilteredImageValue((Number)Array.get(fillValue, i));
+                                    /*
+                                     * For byte[][] (e.g., long double complex), skip adding to filtered
+                                     * image values since elements are byte arrays, not Numbers.
+                                     */
+                                    if (!(fillValue instanceof byte[][])) {
+                                        int n = Array.getLength(fillValue);
+                                        for (int i = 0; i < n; i++)
+                                            addFilteredImageValue((Number)Array.get(fillValue, i));
+                                    }
                                 }
                             }
                             catch (Exception ex2) {
@@ -980,6 +986,17 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                             }
                             else if (dsDatatype.isVLEN() ||
                                      (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isVLEN())) {
+                                // Check for unsupported VLEN complex combination
+                                H5Datatype baseType = (H5Datatype)dsDatatype.getDatatypeBase();
+                                if (baseType != null && baseType.isComplex()) {
+                                    log.debug(
+                                        "scalarDatasetCommonIO(): VLEN complex dataset detected - unsupported by jarhdf5 2.0.0");
+                                    throw new HDF5Exception(
+                                        "Variable-length complex datasets are not currently supported by the HDF5 library. "
+                                        + "The data exists in the file but cannot be read or displayed. "
+                                        + "This is a known limitation of the jarhdf5 2.0.0 library.");
+                                }
+
                                 log.trace(
                                     "scalarDatasetCommonIO(): H5DreadVL did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
                                     did, tid,

@@ -108,6 +108,17 @@ Available configs:
 
 To add new configs, save to `.claude/debug-configs/simplelogger-<name>.properties`
 
+## Quality Analysis Scripts
+
+For code quality, static analysis, and security scanning:
+- `validate-quality.sh` - Quick quality validation for pre-commit
+- `check-quality.sh` - Comprehensive quality analysis
+- `analyze-coverage.sh` - Coverage analysis with threshold checking
+- `security-analysis.sh` - Security and license compliance scanning
+- `collect-metrics.sh` - Unified quality metrics collection
+
+See **CLAUDE.md** → "CI/CD and Quality Assurance" section for detailed usage.
+
 ## See Also
 
 - **CLAUDE.md**: Full project documentation

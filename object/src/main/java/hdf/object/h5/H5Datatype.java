@@ -807,6 +807,166 @@ public class H5Datatype extends Datatype {
         return sig.multiply(new BigDecimal(powscale, MathContext.DECIMAL128));
     }
 
+    /**
+     * Converts a byte array representing a floating-point value to a Java double,
+     * using this datatype's format metadata (sign position, exponent, mantissa, bias, etc.).
+     *
+     * <p>
+     * This method is platform-independent and works with any floating-point format
+     * by using the HDF5 datatype properties extracted when the type was read.
+     * It handles:
+     * <ul>
+     * <li>Variable sign, exponent, and mantissa positions and sizes</li>
+     * <li>Different byte orders (little-endian, big-endian)</li>
+     * <li>Different normalization methods (implied, explicit, none)</li>
+     * <li>Platform-specific formats (x86 extended precision, IEEE 754, etc.)</li>
+     * </ul>
+     *
+     * @param raw
+     *            The byte array to convert to a double (length must match datatype size)
+     * @return A double representing the floating-point value, or 0.0 on error
+     */
+    public double convertBytesToDouble(byte[] raw)
+    {
+        try {
+            log.trace("convertBytesToDouble(): mpos={} msize={} epos={} esize={} bias={} norm={} order={}",
+                      nativeFPmpos, nativeFPmsize, nativeFPepos, nativeFPesize, nativeFPebias, nativeFPnorm,
+                      datatypeOrder);
+
+            /*
+             * Detect x86 extended precision format early for proper byte order handling.
+             */
+            boolean isX86Extended =
+                (raw.length == 16 && nativeFPesize == 15 && nativeFPebias == 16383 && nativeFPmsize == 112);
+
+            /*
+             * BitSet.valueOf() interprets bytes as little-endian.
+             * For big-endian data, reverse the byte array first.
+             *
+             * For x86 extended precision in BE:
+             * - Bytes 0-5: padding (00 00 00 00 00 00)
+             * - Bytes 6-7: sign + exponent (3F FF for 1.0)
+             * - Bytes 8-15: mantissa (80 00 00 00 00 00 00 00 for 1.0)
+             *
+             * Need to convert to LE layout:
+             * - Bytes 0-7: mantissa
+             * - Bytes 8-9: sign + exponent
+             * - Bytes 10-15: padding
+             */
+            /*
+             * For x86 extended precision, HDF5 stores bytes in canonical LE format
+             * regardless of the dataset's byte order attribute, so no conversion needed.
+             * For other BE formats, reverse the entire byte array.
+             */
+            byte[] rawBytes = raw;
+            if (datatypeOrder == ORDER_BE && !isX86Extended) {
+                // Generic BE reversal for non-x86 formats
+                rawBytes = new byte[raw.length];
+                for (int i = 0; i < raw.length; i++)
+                    rawBytes[i] = raw[raw.length - 1 - i];
+            }
+
+            // Use BitSet for bit-level extraction
+            BitSet rawset = BitSet.valueOf(rawBytes);
+
+            /*
+             * For x86 extended precision (now converted to LE layout):
+             * - Bits 0-63: mantissa
+             * - Bits 64-78: exponent (15 bits)
+             * - Bit 79: sign
+             * - Bits 80-127: padding
+             */
+            int exponentPos = isX86Extended ? 64 : (int)nativeFPepos;
+            int signPos     = isX86Extended ? 79 : (int)nativeFPspos;
+
+            // Extract sign bit
+            boolean sign = rawset.get(nativeOffset + signPos);
+
+            /*
+             * Extract mantissa bits.
+             * Note: For extended precision formats (e.g., x86 80-bit in 16 bytes),
+             * HDF5 may report msize including padding. Limit to actual precision (64 bits).
+             */
+            long actualMantissaSize = Math.min(nativeFPmsize, 64);
+            BitSet mantissaset      = rawset.get(nativeOffset + (int)nativeFPmpos,
+                                                 nativeOffset + (int)nativeFPmpos + (int)actualMantissaSize);
+
+            // Extract exponent bits
+            BitSet exponentset =
+                rawset.get(nativeOffset + exponentPos, nativeOffset + exponentPos + (int)nativeFPesize);
+
+            // Convert exponent to long, handling byte order
+            byte[] expraw = Arrays.copyOf(exponentset.toByteArray(), (int)(nativeFPesize + 7) / 8);
+            byte[] bexp   = new byte[expraw.length];
+
+            /*
+             * BitSet.toByteArray() returns bytes in LE order.
+             * BigInteger expects bytes in BE order.
+             * After byte reversal for BE data, BitSet is in LE order, so always reverse.
+             */
+            int k = 0;
+            for (int j = expraw.length - 1; j >= 0; j--)
+                bexp[k++] = expraw[j];
+
+            BigInteger bscale = new BigInteger(bexp);
+            long exponent     = bscale.longValue();
+
+            // Apply exponent bias
+            long unbiasedExp = exponent - nativeFPebias;
+
+            // Convert mantissa to double [0, 1)
+            byte[] manraw = Arrays.copyOf(mantissaset.toByteArray(), (int)(actualMantissaSize + 7) / 8);
+
+            /*
+             * After byte reversal for BE data, mantissa bits are already in correct order.
+             * No need for additional reversal - just convert to BitSet for bit extraction.
+             */
+            BitSet manset = BitSet.valueOf(manraw);
+
+            // Calculate mantissa value
+            double mantissa;
+            if (nativeFPnorm == HDF5Constants.H5T_NORM_MSBSET || isX86Extended) {
+                // Explicit integer bit at MSB of mantissa
+                // Bit 63: integer bit (0 or 1)
+                // Bits 0-62: fractional part
+                mantissa = manset.get((int)actualMantissaSize - 1) ? 1.0 : 0.0;
+                for (int i = 0; i < (int)actualMantissaSize - 1; i++) {
+                    if (manset.get((int)actualMantissaSize - 2 - i))
+                        mantissa += Math.pow(2, -(i + 1));
+                }
+            }
+            else if (nativeFPnorm == HDF5Constants.H5T_NORM_IMPLIED) {
+                // Implicit integer bit (always 1, not stored)
+                // All bits are fractional part
+                mantissa = 1.0;
+                for (int i = 0; i < (int)actualMantissaSize; i++) {
+                    if (manset.get((int)actualMantissaSize - 1 - i))
+                        mantissa += Math.pow(2, -(i + 1));
+                }
+            }
+            else {
+                // H5T_NORM_NONE or unknown - treat as all fractional
+                mantissa = 0.0;
+                for (int i = 0; i < (int)actualMantissaSize; i++) {
+                    if (manset.get((int)actualMantissaSize - 1 - i))
+                        mantissa += Math.pow(2, -(i + 1));
+                }
+            }
+
+            double significand = mantissa;
+
+            // Apply exponent
+            double value = Math.scalb(significand, (int)unbiasedExp);
+
+            // Apply sign
+            return sign ? -value : value;
+        }
+        catch (Exception ex) {
+            log.debug("convertBytesToDouble(): conversion failed, returning 0.0: ", ex);
+            return 0.0;
+        }
+    }
+
     /*
      * (non-Javadoc)
      * @see hdf.object.Datatype#fromNative(int)
@@ -1499,8 +1659,46 @@ public class H5Datatype extends Datatype {
                 }
 
                 if ((nativeFPesize >= 0) && (nativeFPmsize >= 0)) {
-                    H5.H5Tset_fields(tid, nativeFPspos, nativeFPmpos, nativeFPesize, nativeFPmpos,
-                                     nativeFPmsize);
+                    // Always log bit field values for debugging
+                    log.debug(
+                        "createNative(): FLOAT typeSize={} bytes ({}bits), bit fields: spos={}, epos={}, esize={}, mpos={}, msize={}",
+                        datatypeSize, datatypeSize * 8, nativeFPspos, nativeFPepos, nativeFPesize,
+                        nativeFPmpos, nativeFPmsize);
+
+                    // Validate bit field values before calling H5Tset_fields
+                    long totalBits = datatypeSize * 8;
+
+                    // Check basic field constraints
+                    boolean fieldsValid = (nativeFPspos >= 0) && (nativeFPepos >= 0) && (nativeFPmpos >= 0) &&
+                                          (nativeFPesize > 0) && (nativeFPmsize > 0) &&
+                                          (nativeFPspos < totalBits) &&
+                                          (nativeFPepos + nativeFPesize <= totalBits) &&
+                                          (nativeFPmpos + nativeFPmsize <= totalBits);
+
+                    // Additional check: fields should not overlap and should fit standard IEEE layouts
+                    if (fieldsValid) {
+                        // For complex base types, skip H5Tset_fields entirely - the copied native type
+                        // already has correct fields. Setting fields is only needed for custom types.
+                        // Skip for standard IEEE 754 sizes (4=float, 8=double)
+                        // Also skip for long double (16 bytes) which is platform-specific
+                        // (x86_64: 80-bit extended precision, some platforms: 128-bit quadruple precision)
+                        if (datatypeSize == 4 || datatypeSize == 8 || datatypeSize == 16) {
+                            log.debug(
+                                "createNative(): Skipping H5Tset_fields for standard {}-byte float - using native type defaults",
+                                datatypeSize);
+                            fieldsValid = false; // Skip the H5Tset_fields call
+                        }
+                    }
+
+                    if (fieldsValid) {
+                        log.debug("createNative(): Calling H5Tset_fields...");
+                        H5.H5Tset_fields(tid, nativeFPspos, nativeFPepos, nativeFPesize, nativeFPmpos,
+                                         nativeFPmsize);
+                        log.debug("createNative(): H5Tset_fields succeeded");
+                    }
+                    else {
+                        log.debug("createNative(): SKIPPING H5Tset_fields (using native type defaults)");
+                    }
                 }
             }
             catch (Exception ex) {
@@ -1778,7 +1976,23 @@ public class H5Datatype extends Datatype {
 
     /**
      * Allocates a one-dimensional array of byte, short, int, long, float, double, or String to store data in
-     * memory. For example,
+     * memory.
+     *
+     * <p>
+     * <b>Design Principle: Conversion at Last Responsible Moment</b><br>
+     * This method preserves raw data in its native or closest Java representation, deferring type conversions
+     * until actually needed for display, export, or computation. This approach:
+     * <ul>
+     * <li>Maintains cross-platform compatibility (e.g., byte arrays for platform-specific types)</li>
+     * <li>Prevents premature precision loss</li>
+     * <li>Enables multiple display modes (hex, binary, decimal) from same data</li>
+     * <li>Supports lossless round-trip for edit operations</li>
+     * </ul>
+     * Conversion to display-friendly formats should occur in the UI layer (DataProvider/DisplayConverter),
+     * not in the object layer.
+     *
+     * <p>
+     * For example,
      *
      * <pre>
      * long tid = H5.H5Tcopy(HDF5Constants.H5T_NATIVE_INT32);
@@ -1930,7 +2144,13 @@ public class H5Datatype extends Datatype {
                 data = new double[numPoints];
                 break;
             case 16:
-                log.trace("allocateArray(): allocating byte array for 16-byte float");
+                // Long double (16-byte) is platform-specific:
+                // - x86_64 Linux: 80-bit extended precision (stored in 16 bytes with padding)
+                // - Some platforms: 128-bit quadruple precision
+                // Return as byte array since Java has no native long double type.
+                // UI layer or consumers can convert bytes to doubles with potential precision loss.
+                log.trace(
+                    "allocateArray(): allocating byte array for 16-byte float (long double - platform-specific format)");
                 data = new byte[numPoints * 16];
                 break;
             default:
@@ -1976,8 +2196,37 @@ public class H5Datatype extends Datatype {
         }
         else if (typeClass == CLASS_COMPLEX) {
             log.trace("allocateArray(): class CLASS_COMPLEX");
-            if (baseType != null)
+            if (baseType != null) {
                 data = H5Datatype.allocateArray(baseType, numPoints * 2);
+
+                /*
+                 * Reshape byte arrays from long double complex for proper UI structure.
+                 * For types where Java has no native representation (e.g., 16-byte long double),
+                 * the base type allocation returns a flat byte array. For complex numbers,
+                 * we need to structure this as byte[numComplex][bytesPerComplex] so the UI
+                 * can properly extract real and imaginary components.
+                 *
+                 * Example: 10x10 long double complex dataset:
+                 *   - Before: byte[3200] (flat, hard to parse)
+                 *   - After: byte[100][32] (100 complex numbers, 32 bytes each)
+                 *
+                 * This preserves raw bytes (no precision loss) while providing logical structure.
+                 */
+                long baseSize = baseType.getDatatypeSize();
+                if (data instanceof byte[] && baseSize == 16) {
+                    byte[] flatData       = (byte[])data;
+                    int bytesPerComplex   = (int)(baseSize * 2); // 32 bytes: 16 real + 16 imaginary
+                    byte[][] reshapedData = new byte[numPoints][bytesPerComplex];
+
+                    for (int i = 0; i < numPoints; i++) {
+                        System.arraycopy(flatData, i * bytesPerComplex, reshapedData[i], 0, bytesPerComplex);
+                    }
+                    data = reshapedData;
+                    log.trace(
+                        "allocateArray(): reshaped byte[{}] to byte[{}][{}] for 16-byte complex (long double)",
+                        flatData.length, numPoints, bytesPerComplex);
+                }
+            }
             else {
                 if (typeSize == NATIVE)
                     typeSize = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_FLOAT);

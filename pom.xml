@@ -28,6 +28,8 @@
     <properties.plugin.version>1.2.1</properties.plugin.version>
     <swt.version>3.126.0</swt.version>
     <osgi.platform>gtk.linux.x86_64</osgi.platform>
+    <!-- Skip shell-based exec plugins on Windows (no sh available) -->
+    <maven.exec.skip>false</maven.exec.skip>
   </properties>
 
   <dependencyManagement>
@@ -139,6 +141,7 @@
           <version>3.1.1</version>
           <executions>
             <!-- Extract HDF4 version from libhdf4.settings -->
+            <!-- Skip on Windows as shell commands are not compatible -->
             <execution>
               <id>extract-hdf4-version</id>
               <phase>initialize</phase>
@@ -147,9 +150,12 @@
                 <executable>sh</executable>
                 <arguments>
                   <argument>-c</argument>
-                  <argument>if [ -f "${hdf.lib.dir}/libhdf4.settings" ]; then grep "HDF4 Version:" "${hdf.lib.dir}/libhdf4.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf4.version; else echo "unknown" > ${project.build.directory}/hdf4.version; fi</argument>
+                  <argument>mkdir -p ${project.build.directory} &amp;&amp; if [ -f "${hdf.lib.dir}/libhdf4.settings" ]; then grep "HDF4 Version:" "${hdf.lib.dir}/libhdf4.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf4.version; else echo "unknown" > ${project.build.directory}/hdf4.version; fi</argument>
                 </arguments>
                 <skip>${maven.exec.skip}</skip>
+                <environmentVariables>
+                  <SKIP_ON_WINDOWS>true</SKIP_ON_WINDOWS>
+                </environmentVariables>
               </configuration>
             </execution>
             <!-- Extract HDF5 version from libhdf5.settings -->
@@ -161,8 +167,9 @@
                 <executable>sh</executable>
                 <arguments>
                   <argument>-c</argument>
-                  <argument>grep "HDF5 Version:" "${hdf5.lib.dir}/libhdf5.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf5.version</argument>
+                  <argument>mkdir -p ${project.build.directory} &amp;&amp; grep "HDF5 Version:" "${hdf5.lib.dir}/libhdf5.settings" | sed 's/.*: *\([0-9.]*\).*/\1/' > ${project.build.directory}/hdf5.version</argument>
                 </arguments>
+                <skip>${maven.exec.skip}</skip>
               </configuration>
             </execution>
             <!-- Extract application version from VERSION file -->
@@ -174,8 +181,9 @@
                 <executable>sh</executable>
                 <arguments>
                   <argument>-c</argument>
-                  <argument>grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' VERSION | head -1 > ${project.build.directory}/app.version</argument>
+                  <argument>mkdir -p ${project.build.directory} &amp;&amp; grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' VERSION | head -1 > ${project.build.directory}/app.version</argument>
                 </arguments>
+                <skip>${maven.exec.skip}</skip>
               </configuration>
             </execution>
           </executions>
@@ -913,6 +921,19 @@ Otherwise, ensure HDF4 libraries are installed or set HDF4_HOME environment vari
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <!-- Skip shell-based exec plugins on Windows (no sh command available) -->
+    <profile>
+      <id>windows-skip-shell</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <properties>
+        <maven.exec.skip>true</maven.exec.skip>
+      </properties>
     </profile>
   </profiles>
 

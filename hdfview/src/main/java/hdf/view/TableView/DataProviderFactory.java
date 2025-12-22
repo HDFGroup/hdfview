@@ -2223,8 +2223,17 @@ public class DataProviderFactory {
 
             try {
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
-                theValue     = retrieveArrayOfAtomicElements(dataBuf, bufIndex * 2);
-                log.trace("getDataValue(bufIndex={}, dataBuf={})=({})", bufIndex, dataBuf, theValue);
+
+                /*
+                 * For flat arrays (float[], double[]), multiply by 2 to get pairs.
+                 * For structured arrays (byte[][]), use index directly - each element
+                 * is already a complete complex number.
+                 */
+                int dataIndex = (dataBuf instanceof byte[][]) ? bufIndex : bufIndex * 2;
+
+                theValue = retrieveArrayOfAtomicElements(dataBuf, dataIndex);
+                log.trace("getDataValue(bufIndex={}, dataIndex={}, dataBuf={})=({})", bufIndex, dataIndex,
+                          dataBuf, theValue);
             }
             catch (Exception ex) {
                 log.debug("getDataValue(rowIndex={}, columnIndex={}): failure: ", rowIndex, columnIndex, ex);
@@ -2263,15 +2272,40 @@ public class DataProviderFactory {
 
         private Object[] retrieveArrayOfAtomicElements(Object objBuf, int rowStartIdx)
         {
-            log.trace("retrieveArrayOfAtomicElements(): objBuf={}", objBuf);
-            Object[] tempArray = new Object[(int)2];
-            Object realElement = Array.get(objBuf, rowStartIdx);
-            Object imgElement  = Array.get(objBuf, rowStartIdx + 1);
-            log.trace("retrieveArrayOfAtomicElements(): realElement={} imgElement={}", realElement,
-                      imgElement);
+            log.trace("retrieveArrayOfAtomicElements(): objBuf={} rowStartIdx={}", objBuf, rowStartIdx);
+            Object[] tempArray = new Object[2];
 
-            tempArray[0] = baseTypeDataProvider.getDataValue(objBuf, rowStartIdx);
-            tempArray[1] = baseTypeDataProvider.getDataValue(objBuf, rowStartIdx + 1);
+            /*
+             * Handle 2D byte array from long double complex.
+             * For types without native Java representation (e.g., 16-byte long double),
+             * object layer returns byte[numComplex][bytesPerComplex] structure.
+             * Split the 32-byte chunk into real (first 16 bytes) and imaginary (last 16 bytes).
+             */
+            if (objBuf instanceof byte[][]) {
+                byte[][] complexData = (byte[][])objBuf;
+                byte[] complexBytes  = complexData[rowStartIdx];
+
+                log.trace("retrieveArrayOfAtomicElements(): handling byte[][] - complexBytes.length={}",
+                          complexBytes.length);
+
+                // Split into real and imaginary parts (16 bytes each for long double)
+                int halfSize = complexBytes.length / 2;
+                tempArray[0] = Arrays.copyOfRange(complexBytes, 0, halfSize);
+                tempArray[1] = Arrays.copyOfRange(complexBytes, halfSize, complexBytes.length);
+
+                log.trace("retrieveArrayOfAtomicElements(): split byte[{}] into 2 x byte[{}]",
+                          complexBytes.length, halfSize);
+            }
+            else {
+                // Standard path for float[], double[], etc.
+                Object realElement = Array.get(objBuf, rowStartIdx);
+                Object imgElement  = Array.get(objBuf, rowStartIdx + 1);
+                log.trace("retrieveArrayOfAtomicElements(): realElement={} imgElement={}", realElement,
+                          imgElement);
+
+                tempArray[0] = baseTypeDataProvider.getDataValue(objBuf, rowStartIdx);
+                tempArray[1] = baseTypeDataProvider.getDataValue(objBuf, rowStartIdx + 1);
+            }
 
             log.trace("retrieveArrayOfAtomicElements(): tempArray[0]={} tempArray[1]={}", tempArray[0],
                       tempArray[1]);

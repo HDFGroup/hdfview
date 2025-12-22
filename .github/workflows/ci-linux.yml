@@ -323,6 +323,40 @@ jobs:
           object/target/*.jar
         retention-days: 7
 
+    - name: Create jpackage App Image
+      run: |
+        echo "::group::Create jpackage App Image"
+        echo "Creating distributable application package with jpackage..."
+
+        # Create app-image
+        # -pl object,hdfview: Build object and hdfview modules (skip repository - causes install-file errors)
+        # -Dmaven.test.skip=true: Skip test compilation and execution
+        # -Djacoco.skip=true: Skip JaCoCo (code coverage already done in test step)
+        # -Dpmd.skip=true: Skip PMD (static analysis already done in maven-quality.yml workflow)
+        # Skip dependency-check (already runs in maven-security.yml workflow)
+        mvn verify -Pjpackage-app-image -pl object,hdfview -Dmaven.test.skip=true -Djacoco.skip=true -Dpmd.skip=true -Ddependency-check.skip=true -B
+
+        echo "Verifying jpackage output..."
+        if [ -d hdfview/target/dist/HDFView ]; then
+          echo "✓ jpackage app-image created successfully"
+          echo "Package size: $(du -sh hdfview/target/dist/HDFView | cut -f1)"
+          echo "Native libraries: $(find hdfview/target/dist/HDFView/lib/app -name "*.so" | wc -l) .so files"
+          echo "JAR files: $(find hdfview/target/dist/HDFView/lib/app -name "*.jar" | wc -l) JARs"
+          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView/lib/app/plugin/*.so 2>/dev/null | wc -l) plugins"
+        else
+          echo "✗ jpackage app-image creation failed"
+          exit 1
+        fi
+        echo "::endgroup::"
+
+    - name: Upload jpackage App Image
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: hdfview-app-image-linux-${{ github.run_number }}
+        path: hdfview/target/dist/HDFView/
+        retention-days: 7
+
     - name: Build Summary
       if: always()
       run: |
@@ -341,3 +375,13 @@ jobs:
         find . -name "*.jar" -newer build.properties 2>/dev/null | \
           head -5 | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY || \
           echo "- No JAR artifacts found" >> $GITHUB_STEP_SUMMARY
+
+        # Add jpackage summary
+        if [ -d hdfview/target/dist/HDFView ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### jpackage App Image" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: $(du -sh hdfview/target/dist/HDFView 2>/dev/null | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Native Libraries**: $(find hdfview/target/dist/HDFView/lib/app -name "*.so" 2>/dev/null | wc -l) .so files" >> $GITHUB_STEP_SUMMARY
+          echo "- **JAR Files**: $(find hdfview/target/dist/HDFView/lib/app -name "*.jar" 2>/dev/null | wc -l) JARs" >> $GITHUB_STEP_SUMMARY
+          echo "- **HDF5 Plugins**: $(ls -1 hdfview/target/dist/HDFView/lib/app/plugin/*.so 2>/dev/null | wc -l) compression plugins" >> $GITHUB_STEP_SUMMARY
+        fi
