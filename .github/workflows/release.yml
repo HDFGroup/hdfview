@@ -75,6 +75,30 @@ jobs:
         echo "VERSION_TAG=$TAG_NAME" >> $GITHUB_OUTPUT
         echo "Constructed tag name: $TAG_NAME"
 
+  get-base-names:
+    runs-on: ubuntu-latest
+    outputs:
+      hdf4-name: ${{ steps.get-hdf4-base.outputs.base-name }}
+      hdf5-name: ${{ steps.get-hdf5-base.outputs.base-name }}
+    steps:
+      - name: Get HDF4 base name
+        id: get-hdf4-base
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BASE_NAME=$(gh release view snapshot --repo HDFGroup/hdf4 --json assets --jq '.assets[] | select(.name == "last-file.txt") | .url' | xargs curl -sL)
+          echo "base-name=$BASE_NAME" >> $GITHUB_OUTPUT
+          echo "HDF4 base name: $BASE_NAME"
+
+      - name: Get HDF5 base name
+        id: get-hdf5-base
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BASE_NAME=$(gh release view snapshot --repo HDFGroup/hdf5 --json assets --jq '.assets[] | select(.name == "last-file.txt") | .url' | xargs curl -sL)
+          echo "base-name=$BASE_NAME" >> $GITHUB_OUTPUT
+          echo "HDF5 base name: $BASE_NAME"
+
   call-workflow-tarball:
     needs: determine-version
     uses: ./.github/workflows/tarball.yml
@@ -82,12 +106,14 @@ jobs:
       use_environ: release
 
   call-workflow-maven-build:
-    needs: [determine-version, call-workflow-tarball]
+    needs: [determine-version, get-base-names, call-workflow-tarball]
     uses: ./.github/workflows/maven-build.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_hdf: ${{ needs.determine-version.outputs.hdf4_tag }}
+      use_hdf_name: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf4-name || needs.determine-version.outputs.hdf4_tag }}
       use_hdf5: ${{ needs.determine-version.outputs.hdf5_tag }}
+      use_hdf5_name: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf5-name || needs.determine-version.outputs.hdf5_tag }}
       snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
       publish_to_maven_registry: true
