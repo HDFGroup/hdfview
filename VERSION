@@ -1,1 +1,22 @@
+# HDFView Version Configuration
+# This is the single source of truth for HDFView version information
+#
+# Version scheme:
+#   - master branch:    99.99.99
+#   - release branch:   MAJOR.MINOR.99
+#   - release:          MAJOR.MINOR.RELEASE
+#
+# Usage:
+#   - Maven build system reads this file to set project.version
+#   - GitHub workflows read this file to construct release tags
+#   - Runtime version display loads from filtered versions.properties
+
+# HDFView version number (MAJOR.MINOR.RELEASE format)
+HDFVIEW_VERSION=99.99.99
+
+# Tag prefix for GitHub releases (do not change)
+HDFVIEW_TAG_PREFIX=HDFView
+
+# Full version tag (constructed as: ${HDFVIEW_TAG_PREFIX}-${HDFVIEW_VERSION})
+# This line is auto-generated for backwards compatibility
 VERSION=HDFView-99.99.99

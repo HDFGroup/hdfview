@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.hdfgroup.hdfview</groupId>
     <artifactId>hdfview-bom</artifactId>
-    <version>3.4-SNAPSHOT</version>
+    <version>99.99.99-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>org.hdfgroup.hdfview</groupId>
       <artifactId>object</artifactId>
-      <version>3.4-SNAPSHOT</version>
+      <version>99.99.99-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -243,7 +243,8 @@
         <jpackage.type>app-image</jpackage.type>
         <jpackage.skip.signing>true</jpackage.skip.signing>
         <!-- jpackage requires numeric version (no -SNAPSHOT suffix) -->
-        <jpackage.app.version>3.4.0</jpackage.app.version>
+        <!-- Version loaded from VERSION file via properties-maven-plugin -->
+        <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -415,7 +416,8 @@
       <id>jpackage-deb</id>
       <properties>
         <jpackage.type>deb</jpackage.type>
-        <jpackage.app.version>3.4.0</jpackage.app.version>
+        <!-- Version loaded from VERSION file via properties-maven-plugin -->
+        <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -476,7 +478,8 @@
       <id>jpackage-rpm</id>
       <properties>
         <jpackage.type>rpm</jpackage.type>
-        <jpackage.app.version>3.4.0</jpackage.app.version>
+        <!-- Version loaded from VERSION file via properties-maven-plugin -->
+        <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -568,7 +571,8 @@
     <profile>
       <id>jpackage-installer-mac</id>
       <properties>
-        <jpackage.app.version>3.4.0</jpackage.app.version>
+        <!-- Version loaded from VERSION file via properties-maven-plugin -->
+        <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -608,7 +612,8 @@
     <profile>
       <id>jpackage-installer-windows</id>
       <properties>
-        <jpackage.app.version>3.4.0</jpackage.app.version>
+        <!-- Version loaded from VERSION file via properties-maven-plugin -->
+        <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -747,11 +752,14 @@
     <resources>
       <resource>
         <directory>src/main/resources</directory>
-        <filtering>false</filtering>
+        <!-- Enable filtering to substitute Maven properties in versions.properties -->
+        <filtering>true</filtering>
       </resource>
       <!-- Include non-Java files from src/main/java (icons, properties, etc.) -->
+      <!-- No filtering for these resources to avoid breaking binary files -->
       <resource>
         <directory>src/main/java</directory>
+        <filtering>false</filtering>
         <includes>
           <include>**/*.gif</include>
           <include>**/*.png</include>
