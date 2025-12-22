@@ -125,25 +125,15 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
-
-        # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
-        else
-          PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
-        fi
-        echo "Using pattern: $PATTERN"
+        echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
 
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
-          --pattern "$PATTERN" \
-          --clobber
+          --pattern "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf hdf5-*-ubuntu-2404_gcc.tar.gz
-        [ -d hdf5 ] || mv hdf5-* hdf5
+        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
@@ -305,25 +295,15 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
-
-        # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
-        else
-          PATTERN="*-ubuntu-2404_gcc.tar.gz"
-        fi
-        echo "Using pattern: $PATTERN"
+        echo "Downloading HDF4: ${{ inputs.use_hdf }}"
 
         # Download HDF4 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf }}" \
           --repo HDFGroup/hdf4 \
-          --pattern "$PATTERN" \
-          --clobber
+          --pattern "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf *-ubuntu-2404_gcc.tar.gz
-        [ -d hdf4 ] || mv hdf4-* hdf4
+        tar -zxvf "${{ inputs.use_hdf }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
@@ -341,25 +321,15 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
-
-        # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
-        else
-          PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
-        fi
-        echo "Using pattern: $PATTERN"
+        echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
 
         # Download HDF5 binary from HDF Group GitHub releases
         gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
-          --pattern "$PATTERN" \
-          --clobber
+          --pattern "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf hdf5-*-ubuntu-2404_gcc.tar.gz
-        [ -d hdf5 ] || mv hdf5-* hdf5
+        tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-ubuntu-2404_gcc.tar.gz"
 
         # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
@@ -931,8 +901,7 @@ jobs:
         echo "Downloading HDF4: ${{ inputs.use_hdf }}"
         gh release download "${{ inputs.use_hdf }}" \
           --repo HDFGroup/hdf4 \
-          --pattern "$PATTERN" \
-          --clobber
+          --pattern "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
 
         echo "Extracting HDF4..."
         tar -zxvf "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
@@ -951,8 +920,7 @@ jobs:
         echo "Downloading HDF5: ${{ inputs.use_hdf5 }}"
         gh release download "${{ inputs.use_hdf5 }}" \
           --repo HDFGroup/hdf5 \
-          --pattern "$PATTERN" \
-          --clobber
+          --pattern "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
 
         echo "Extracting HDF5..."
         tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
@@ -1103,8 +1071,7 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "$PATTERN" \
-          --clobber
+        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
         tar -zxvf "${{ inputs.use_hdf }}-macos14_clang.tar.gz"
         cd hdf4
         tar -zxvf HDF-*-Darwin.tar.gz --strip-components 1
@@ -1116,8 +1083,7 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "$PATTERN" \
-          --clobber
+        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
         tar -zxvf "hdf5-${{ inputs.use_hdf5 }}-macos14_clang.tar.gz"
         cd hdf5
         tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
