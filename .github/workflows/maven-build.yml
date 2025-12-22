@@ -11,15 +11,25 @@ on:
         type: string
         required: true
       use_hdf:
-        description: 'HDF4 version from GitHub releases (e.g., hdf4-master-50c8c59)'
+        description: 'HDF4 release tag (e.g., snapshot, hdf4-1.2.3)'
         type: string
         required: false
         default: 'snapshot'
+      use_hdf_name:
+        description: 'HDF4 base filename (optional, uses wildcard if empty)'
+        type: string
+        required: false
+        default: ''
       use_hdf5:
-        description: 'HDF5 version from GitHub releases (e.g., hdf5-develop-03b0b4f)'
+        description: 'HDF5 release tag (e.g., snapshot, hdf5-2.0.0)'
         type: string
         required: false
         default: 'snapshot'
+      use_hdf5_name:
+        description: 'HDF5 base filename (optional, uses wildcard if empty)'
+        type: string
+        required: false
+        default: ''
       use_environ:
         description: 'Environment (snapshots or release)'
         type: string
