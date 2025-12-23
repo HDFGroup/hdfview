@@ -31,4 +31,7 @@ jobs:
 
       - name: View top-level index source
         run: |
-          cat releases/hdfview/index.html
+          echo "### Top-Level Index File Content" >> $GITHUB_STEP_SUMMARY
+          echo '```html' >> $GITHUB_STEP_SUMMARY
+          aws s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/index.html - >> $GITHUB_STEP_SUMMARY 2>&1 || echo "[index.html not found in bucket]" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
