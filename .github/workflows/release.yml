@@ -122,6 +122,7 @@ jobs:
       snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
       publish_to_maven_registry: true
+    secrets: inherit
 
   call-workflow-release:
     needs: [determine-version, call-workflow-tarball, call-workflow-maven-build]

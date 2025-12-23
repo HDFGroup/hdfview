@@ -1622,6 +1622,16 @@ jobs:
         echo "DMG installer created successfully"
         ls -lh *.dmg
 
+    - name: Rename DMG for snapshots
+      if: inputs.use_environ == 'snapshots'
+      run: |
+        # For snapshots, rename DMG to include commit SHA (file_base)
+        OLD_NAME="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+        NEW_NAME="${{ inputs.file_base }}.dmg"
+        echo "Renaming $OLD_NAME to $NEW_NAME"
+        mv "$OLD_NAME" "$NEW_NAME"
+        ls -lh *.dmg
+
     - name: Sign DMG Installer
       if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
       env:
@@ -1629,9 +1639,14 @@ jobs:
       run: |
         echo "Code signing DMG installer..."
 
-        # Sign the DMG
-        HDFVIEW_VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-        DMG_FILE="HDFView-${HDFVIEW_VERSION}.dmg"
+        # Determine DMG filename (snapshot includes commit SHA, release uses version only)
+        if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
+          DMG_FILE="${{ inputs.file_base }}.dmg"
+        else
+          DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+        fi
+
+        echo "Signing DMG: $DMG_FILE"
 
         codesign --force --timestamp --options runtime \
           --entitlements lib/macosx/distribution.entitlements \
@@ -1657,9 +1672,14 @@ jobs:
       run: |
         echo "Submitting DMG for notarization..."
 
-        # Submit for notarization and wait for completion
-        HDFVIEW_VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-        DMG_FILE="HDFView-${HDFVIEW_VERSION}.dmg"
+        # Determine DMG filename (snapshot includes commit SHA, release uses version only)
+        if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
+          DMG_FILE="${{ inputs.file_base }}.dmg"
+        else
+          DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+        fi
+
+        echo "Notarizing DMG: $DMG_FILE"
 
         xcrun notarytool submit \
           --wait \
@@ -1684,8 +1704,14 @@ jobs:
       run: |
         echo "Stapling notarization ticket to DMG..."
 
-        HDFVIEW_VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-        DMG_FILE="HDFView-${HDFVIEW_VERSION}.dmg"
+        # Determine DMG filename (snapshot includes commit SHA, release uses version only)
+        if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
+          DMG_FILE="${{ inputs.file_base }}.dmg"
+        else
+          DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+        fi
+
+        echo "Stapling ticket to DMG: $DMG_FILE"
 
         # Staple the notarization ticket
         xcrun stapler staple "$DMG_FILE"
@@ -1706,8 +1732,8 @@ jobs:
     - name: Upload macOS DMG Installer
       uses: actions/upload-artifact@v4
       with:
-        name: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-macOS-dmg
-        path: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg
+        name: ${{ inputs.use_environ == 'snapshots' && format('{0}-macOS-dmg', inputs.file_base) || format('HDFView-{0}-macOS-dmg', steps.get-version.outputs.HDFVIEW_VERSION) }}
+        path: ${{ inputs.use_environ == 'snapshots' && format('{0}.dmg', inputs.file_base) || format('HDFView-{0}.dmg', steps.get-version.outputs.HDFVIEW_VERSION) }}
         retention-days: 5
 
   build-windows-installer:
@@ -1777,6 +1803,17 @@ jobs:
         Write-Host "MSI installer created successfully"
         Get-ChildItem *.msi
 
+    - name: Rename MSI for snapshots
+      if: inputs.use_environ == 'snapshots'
+      shell: pwsh
+      run: |
+        # For snapshots, rename MSI to include commit SHA (file_base)
+        $oldName = "HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.msi"
+        $newName = "${{ inputs.file_base }}.msi"
+        Write-Host "Renaming $oldName to $newName"
+        Move-Item -Path $oldName -Destination $newName
+        Get-ChildItem *.msi
+
     - name: Sign MSI Installer
       if: github.repository == 'HDFGroup/hdfview' && env.WINDOWS_CERTIFICATE != ''
       shell: pwsh
@@ -1803,9 +1840,15 @@ jobs:
 
         Write-Host "Using signtool: $($signtool.FullName)"
 
-        # Sign the MSI
+        # Determine MSI filename (snapshot includes commit SHA, release uses version only)
         $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-        $msiFile = "HDFView-${version}.msi"
+        if ("${{ inputs.use_environ }}" -eq "snapshots") {
+          $msiFile = "${{ inputs.file_base }}.msi"
+        } else {
+          $msiFile = "HDFView-${version}.msi"
+        }
+
+        Write-Host "Signing MSI: $msiFile"
 
         & $signtool.FullName sign `
           /v `
@@ -1833,8 +1876,8 @@ jobs:
     - name: Upload Windows MSI Installer
       uses: actions/upload-artifact@v4
       with:
-        name: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-win64-msi
-        path: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.msi
+        name: ${{ inputs.use_environ == 'snapshots' && format('{0}-win64-msi', inputs.file_base) || format('HDFView-{0}-win64-msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
+        path: ${{ inputs.use_environ == 'snapshots' && format('{0}.msi', inputs.file_base) || format('HDFView-{0}.msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
         retention-days: 5
 
   publish-packages:
