@@ -1915,7 +1915,7 @@ jobs:
 
           mkdir -p /tmp/hdf4-download && cd /tmp/hdf4-download
           gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "$PATTERN"
-          tar -zxf hdf4-*-ubuntu-2404_gcc.tar.gz
+          tar -zxf hdf4*-ubuntu-2404_gcc.tar.gz
           cd hdf4
 
           # Extract inner tar.gz
