@@ -189,6 +189,7 @@ jobs:
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
+          make_latest: false
           body_path: description.txt
           files: |
               last-file.txt
@@ -212,6 +213,7 @@ jobs:
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: false
+          make_latest: true
           body_path: description.txt
           files: |
               UsersGuide.tar.gz
