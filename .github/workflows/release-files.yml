@@ -148,6 +148,15 @@ jobs:
               tar -zcvf UsersGuide.tar.gz ./UsersGuide
         shell: bash
 
+      - name: List downloaded files (debug)
+        run: |
+          echo "=== Files in workspace ==="
+          ls -lh
+          echo ""
+          echo "=== Checking for installer files ==="
+          ls -lh HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi || echo "MSI not found!"
+          ls -lh HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg || echo "DMG not found!"
+
       - name: Create sha256 sums for files
         run: |
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
