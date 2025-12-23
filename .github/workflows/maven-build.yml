@@ -1624,7 +1624,7 @@ jobs:
 
         # Allow codesign to access keychain
         security set-key-partition-list -S apple-tool:,apple: \
-          -k "$MACOS_KEYCHAIN_PASSWORD" \
+          -k "$KEYCHAIN_PASSWD" \
           build.keychain
 
         # Clean up certificate file
@@ -1901,16 +1901,15 @@ jobs:
         # Install Azure Code Signing tools
         dotnet tool install --global AzureSignTool --version 5.0.0
 
-        # Sign using Azure Code Signing
+        # Sign using Azure Key Vault
         AzureSignTool sign `
-          -du "${{ env.AZURE_ENDPOINT }}" `
-          -kvu "${{ env.AZURE_ENDPOINT }}" `
-          -kvt "${{ env.AZURE_TENANT_ID }}" `
-          -kvi "${{ env.AZURE_CLIENT_ID }}" `
-          -kvs "${{ env.AZURE_CLIENT_SECRET }}" `
-          -kvc "${{ env.AZURE_CERT_PROFILE_NAME }}" `
-          -tr "http://timestamp.digicert.com" `
-          -v `
+          --azure-key-vault-url "${{ env.AZURE_ENDPOINT }}" `
+          --azure-key-vault-tenant-id "${{ env.AZURE_TENANT_ID }}" `
+          --azure-key-vault-client-id "${{ env.AZURE_CLIENT_ID }}" `
+          --azure-key-vault-client-secret "${{ env.AZURE_CLIENT_SECRET }}" `
+          --azure-key-vault-certificate "${{ env.AZURE_CERT_PROFILE_NAME }}" `
+          --timestamp-rfc3161 "http://timestamp.digicert.com" `
+          --verbose `
           $msiFile
 
         if ($LASTEXITCODE -ne 0) {
