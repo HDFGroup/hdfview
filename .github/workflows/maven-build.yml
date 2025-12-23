@@ -1519,6 +1519,14 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Extract version from VERSION file
+      id: get-version
+      run: |
+        # Read HDFVIEW_VERSION from VERSION file
+        HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
+        echo "HDFVIEW_VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
+        echo "HDFView version: $HDFVIEW_VERSION"
+
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -1594,13 +1602,16 @@ jobs:
         echo "Creating DMG installer from app-image..."
 
         # Use jpackage to create DMG from app-image
+        # Version loaded from VERSION file
+        HDFVIEW_VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+
         jpackage \
           --type dmg \
           --app-image HDFView.app \
           --name HDFView \
-          --app-version 3.4.0 \
+          --app-version "$HDFVIEW_VERSION" \
           --mac-package-identifier HDFView.hdfgroup.org \
-          --mac-package-name HDFView-3.4.0 \
+          --mac-package-name "HDFView-$HDFVIEW_VERSION" \
           --file-associations package_files/HDFViewHDF.properties \
           --file-associations package_files/HDFViewH4.properties \
           --file-associations package_files/HDFViewHDF4.properties \
@@ -1619,18 +1630,21 @@ jobs:
         echo "Code signing DMG installer..."
 
         # Sign the DMG
+        HDFVIEW_VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+        DMG_FILE="HDFView-${HDFVIEW_VERSION}.dmg"
+
         codesign --force --timestamp --options runtime \
           --entitlements lib/macosx/distribution.entitlements \
           --verbose=4 --strict \
           --sign "$MACOS_DEVELOPER_ID" \
           --deep \
-          HDFView-3.4.0.dmg
+          "$DMG_FILE"
 
         # Verify signature
-        codesign -dvv HDFView-3.4.0.dmg
+        codesign -dvv "$DMG_FILE"
 
         # Verify DMG integrity
-        hdiutil verify HDFView-3.4.0.dmg
+        hdiutil verify "$DMG_FILE"
 
         echo "DMG installer signed successfully"
 
@@ -1644,13 +1658,16 @@ jobs:
         echo "Submitting DMG for notarization..."
 
         # Submit for notarization and wait for completion
+        HDFVIEW_VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+        DMG_FILE="HDFView-${HDFVIEW_VERSION}.dmg"
+
         xcrun notarytool submit \
           --wait \
           --output-format json \
           --apple-id "$APPLE_ID" \
           --password "$APPLE_ID_PASSWORD" \
           --team-id "$APPLE_TEAM_ID" \
-          HDFView-3.4.0.dmg > notarization-output.json
+          "$DMG_FILE" > notarization-output.json
 
         # Check if notarization succeeded
         STATUS=$(jq -r '.status' notarization-output.json)
@@ -1667,14 +1684,17 @@ jobs:
       run: |
         echo "Stapling notarization ticket to DMG..."
 
+        HDFVIEW_VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+        DMG_FILE="HDFView-${HDFVIEW_VERSION}.dmg"
+
         # Staple the notarization ticket
-        xcrun stapler staple HDFView-3.4.0.dmg
+        xcrun stapler staple "$DMG_FILE"
 
         # Validate stapling
-        xcrun stapler validate -v HDFView-3.4.0.dmg
+        xcrun stapler validate -v "$DMG_FILE"
 
         # Verify with spctl
-        spctl -vvvv --assess --type install HDFView-3.4.0.dmg || true
+        spctl -vvvv --assess --type install "$DMG_FILE" || true
 
         echo "Notarization ticket stapled successfully"
 
@@ -1686,8 +1706,8 @@ jobs:
     - name: Upload macOS DMG Installer
       uses: actions/upload-artifact@v4
       with:
-        name: HDFView-3.4.0-macOS-dmg
-        path: HDFView-3.4.0.dmg
+        name: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-macOS-dmg
+        path: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg
         retention-days: 5
 
   build-windows-installer:
@@ -1701,6 +1721,15 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
+    - name: Extract version from VERSION file
+      id: get-version
+      shell: pwsh
+      run: |
+        # Read HDFVIEW_VERSION from VERSION file
+        $version = (Get-Content VERSION | Select-String "^HDFVIEW_VERSION=").ToString().Split('=')[1]
+        echo "HDFVIEW_VERSION=$version" >> $env:GITHUB_OUTPUT
+        Write-Host "HDFView version: $version"
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
@@ -1724,12 +1753,15 @@ jobs:
       run: |
         Write-Host "Creating MSI installer from app-image..."
 
+        # Version loaded from VERSION file
+        $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+
         # Use jpackage to create MSI from app-image
         jpackage `
           --type msi `
           --app-image HDFView `
           --name HDFView `
-          --app-version 3.4.0 `
+          --app-version $version `
           --icon package_files\hdfview.ico `
           --win-dir-chooser `
           --win-per-user-install `
@@ -1772,15 +1804,18 @@ jobs:
         Write-Host "Using signtool: $($signtool.FullName)"
 
         # Sign the MSI
+        $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+        $msiFile = "HDFView-${version}.msi"
+
         & $signtool.FullName sign `
           /v `
           /debug `
           /fd SHA256 `
-          /d "HDFView 3.4.0 Installer" `
+          /d "HDFView $version Installer" `
           /f $certPath `
           /p $env:WINDOWS_CERT_PASSWORD `
           /t http://timestamp.digicert.com `
-          HDFView-3.4.0.msi
+          $msiFile
 
         if ($LASTEXITCODE -ne 0) {
           Write-Error "Signing failed with exit code $LASTEXITCODE"
@@ -1788,7 +1823,7 @@ jobs:
         }
 
         # Verify signature
-        & $signtool.FullName verify /pa /v HDFView-3.4.0.msi
+        & $signtool.FullName verify /pa /v $msiFile
 
         # Clean up certificate
         Remove-Item $certPath
@@ -1798,8 +1833,8 @@ jobs:
     - name: Upload Windows MSI Installer
       uses: actions/upload-artifact@v4
       with:
-        name: HDFView-3.4.0-win64-msi
-        path: HDFView-3.4.0.msi
+        name: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-win64-msi
+        path: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.msi
         retention-days: 5
 
   publish-packages:

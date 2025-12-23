@@ -94,13 +94,16 @@ jobs:
 
       - name: Read VERSION file
         id: getversion
-        run: echo "version=$(cat hdfsrc/VERSION)" >> $GITHUB_OUTPUT
+        run: |
+          # Extract HDFVIEW_VERSION from VERSION file (ignoring comments)
+          HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" hdfsrc/VERSION | cut -d'=' -f2)
+          echo "version=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Retrieve version
         id: version
         run: |
-          cd "$GITHUB_WORKSPACE/hdfsrc"
-          VERSION_BASE=$(echo "${{ steps.getversion.outputs.version }}" | sed -r "s/.*-([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
+          # Version is already numeric from HDFVIEW_VERSION property
+          VERSION_BASE="${{ steps.getversion.outputs.version }}"
           echo "TAG_VERSION=$VERSION_BASE" >> $GITHUB_OUTPUT
 
       - name: Set file base name
