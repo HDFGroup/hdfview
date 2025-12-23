@@ -53,6 +53,25 @@ jobs:
           echo "File base: $FILE_NAME_BASE"
           echo "HDFView version: $HDFVIEW_VERSION"
 
+      - name: List files to delete (debug)
+        run: |
+          echo "=== Files to be deleted from release ==="
+          echo "Tag: ${{ inputs.use_tag }}"
+          echo "File base: ${{ steps.get-file-base.outputs.FILE_BASE }}"
+          echo ""
+          echo "Files that will be deleted:"
+          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt"
+          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz"
+          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}.zip"
+          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz"
+          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz"
+          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip"
+          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz"
+          echo ""
+          echo "Files that will NOT be deleted (auto-replace on upload):"
+          echo "  - HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi"
+          echo "  - HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg"
+
       - name: PreRelease delete from tag
         id: delete_prerelease
         if: ${{ (inputs.use_environ == 'snapshots') }}
