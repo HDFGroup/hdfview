@@ -670,6 +670,7 @@ jobs:
           mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
             "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=$HDF5_VERSION" "-Dpackaging=jar" "-DgeneratePom=true"
           Write-Host "Installed: $($jarhdf5.Name) as version $HDF5_VERSION"
+          "HDF5_VERSION=$HDF5_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         }
 
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -747,7 +748,7 @@ jobs:
       run: |
         Write-Host "Building HDFView with Maven..."
         # Build object and hdfview modules, stop at package phase to avoid verify/PMD
-        mvn package -pl object,hdfview "-Dmaven.test.skip=true" -Dhdf5.version="$HDF5_VERSION" -B
+        mvn package -pl object,hdfview "-Dmaven.test.skip=true" "-Dhdf5.version=$env:HDF5_VERSION" -B
 
     - name: Create Windows Binary Archive
       shell: pwsh
@@ -904,6 +905,7 @@ jobs:
           mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
             "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=$HDF5_VERSION" "-Dpackaging=jar" "-DgeneratePom=true"
           Write-Host "Installed: $($jarhdf5.Name) as version $HDF5_VERSION"
+          "HDF5_VERSION=$HDF5_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         }
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
@@ -1150,6 +1152,7 @@ jobs:
           mvn install:install-file -Dfile="$JAR_FILE" \
             -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
         fi
 
         if [ -f repository/lib/jarhdf-*.jar ]; then
@@ -1357,6 +1360,7 @@ jobs:
           HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
         fi
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
