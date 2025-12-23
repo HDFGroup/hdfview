@@ -105,7 +105,16 @@ jobs:
       use_hdf5: snapshot
       use_hdf5_name: ${{ needs.get-base-names.outputs.hdf5-name }}
       use_environ: snapshots
-    secrets: inherit
+    secrets:
+      MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+      MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+      MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+      MACOS_DEVELOPER_ID: ${{ secrets.MACOS_DEVELOPER_ID }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+      WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-release:
