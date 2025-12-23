@@ -40,11 +40,6 @@ on:
         type: string
         required: false
         default: 'snapshots'
-      snap_name:
-        description: 'Snapshot name (for compatibility)'
-        type: string
-        required: false
-        default: ''
       publish_to_maven_registry:
         description: 'Publish artifacts to GitHub Packages Maven registry'
         type: boolean
@@ -240,22 +235,26 @@ jobs:
         # Manually install each JAR to local Maven repository
         # This bypasses the repository module's POM and avoids PMD issues
 
-        # Install jarhdf5 (find any version)
+        # Install jarhdf5 (extract version from filename)
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
         fi
 
-        # Install jarhdf (find any version)
+        # Install jarhdf (extract version from filename)
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $HDF4_VERSION"
+          echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
         fi
 
         # Install fits
@@ -286,7 +285,7 @@ jobs:
         # Now build with package (HDF JARs already installed manually above)
         # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
         # package phase stops before verify, avoiding PMD/Checkstyle execution
-        mvn clean package -Dmaven.test.skip=true -B
+        mvn clean package -Dmaven.test.skip=true -Dhdf5.version="$HDF5_VERSION" -Dhdf.version="$HDF4_VERSION" -B
 
     - name: Create Linux Binary Archive
       run: |
@@ -456,22 +455,26 @@ jobs:
         # Manually install each JAR to local Maven repository
         # This bypasses the repository module's POM and avoids PMD issues
 
-        # Install jarhdf5 (find any version)
+        # Install jarhdf5 (extract version from filename)
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
         fi
 
-        # Install jarhdf (find any version)
+        # Install jarhdf (extract version from filename)
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $HDF4_VERSION"
+          echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
         fi
 
         # Install fits
@@ -702,14 +705,20 @@ jobs:
 
         $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf5) {
+          $HDF5_VERSION = $jarhdf5.Name -replace 'jarhdf5-([0-9.]+)\.jar', '$1'
           mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
-            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=2.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
+            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=$HDF5_VERSION" "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($jarhdf5.Name) as version $HDF5_VERSION"
+          "HDF5_VERSION=$HDF5_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         }
 
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
+          $HDF4_VERSION = $jarhdf.Name -replace 'jarhdf-([0-9.]+)\.jar', '$1'
           mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
-            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=4.3.1" "-Dpackaging=jar" "-DgeneratePom=true"
+            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=$HDF4_VERSION" "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($jarhdf.Name) as version $HDF4_VERSION"
+          "HDF4_VERSION=$HDF4_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         }
 
         if (Test-Path "repository\lib\fits.jar") {
@@ -781,7 +790,7 @@ jobs:
       run: |
         Write-Host "Building HDFView with Maven..."
         # Build object and hdfview modules, stop at package phase to avoid verify/PMD
-        mvn package -pl object,hdfview "-Dmaven.test.skip=true" -B
+        mvn package -pl object,hdfview "-Dmaven.test.skip=true" "-Dhdf5.version=$env:HDF5_VERSION" "-Dhdf.version=$env:HDF4_VERSION" -B
 
     - name: Create Windows Binary Archive
       shell: pwsh
@@ -934,13 +943,19 @@ jobs:
         }
         $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf5) {
+          $HDF5_VERSION = $jarhdf5.Name -replace 'jarhdf5-([0-9.]+)\.jar', '$1'
           mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
-            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=2.0.0" "-Dpackaging=jar" "-DgeneratePom=true"
+            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=$HDF5_VERSION" "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($jarhdf5.Name) as version $HDF5_VERSION"
+          "HDF5_VERSION=$HDF5_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         }
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
+          $HDF4_VERSION = $jarhdf.Name -replace 'jarhdf-([0-9.]+)\.jar', '$1'
           mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
-            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=4.3.1" "-Dpackaging=jar" "-DgeneratePom=true"
+            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=$HDF4_VERSION" "-Dpackaging=jar" "-DgeneratePom=true"
+          Write-Host "Installed: $($jarhdf.Name) as version $HDF4_VERSION"
+          "HDF4_VERSION=$HDF4_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         }
         if (Test-Path "repository\lib\fits.jar") {
           mvn install:install-file "-Dfile=repository\lib\fits.jar" `
@@ -1178,14 +1193,20 @@ jobs:
 
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
         fi
 
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 -Dpackaging=jar -DgeneratePom=true
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $HDF4_VERSION"
+          echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
         fi
 
         # Install fits
@@ -1265,7 +1286,7 @@ jobs:
       run: |
         echo "Building HDFView with Maven..."
         # Build object and hdfview modules, stop at package phase to avoid verify/PMD
-        mvn package -pl object,hdfview -Dmaven.test.skip=true -B
+        mvn package -pl object,hdfview -Dmaven.test.skip=true -Dhdf5.version="$HDF5_VERSION" -Dhdf.version="$HDF4_VERSION" -B
 
     - name: Create macOS Binary Archive
       run: |
@@ -1384,11 +1405,17 @@ jobs:
         cp lib/netcdf.jar repository/lib/ 2>/dev/null || echo "netcdf.jar not found"
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
-          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 -Dpackaging=jar -DgeneratePom=true
+          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
+          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
         fi
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
-          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 -Dpackaging=jar -DgeneratePom=true
+          HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
+          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $HDF4_VERSION"
+          echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
         fi
         if [ -f repository/lib/fits.jar ]; then
           mvn install:install-file -Dfile=repository/lib/fits.jar \
@@ -1975,9 +2002,18 @@ jobs:
         echo "Checking for HDF Java packages..."
 
         # Always download jarhdf5 from GitHub (system packages are outdated)
-        echo "Downloading jarhdf5.jar from GitHub..."
+        echo "Downloading jarhdf5.jar from GitHub release: ${{ inputs.use_hdf5 }}..."
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
+        else
+          PATTERN="*ubuntu-2404_gcc.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
+
         mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
-          gh release download snapshot --repo HDFGroup/hdf5 --pattern "*ubuntu-2404_gcc.tar.gz"
+          gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "$PATTERN"
           tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
           cd hdf5
 
@@ -1990,10 +2026,12 @@ jobs:
             VERSION_DIR=$(ls HDF_Group/HDF5 | head -1)
             JAR_FILE=$(ls HDF_Group/HDF5/$VERSION_DIR/lib/jarhdf5*.jar 2>/dev/null | head -1)
             if [ -f "$JAR_FILE" ]; then
+              HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
               mvn install:install-file -Dfile="$JAR_FILE" \
-                -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+                -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
                 -Dpackaging=jar -DgeneratePom=true
-              echo "Installed jarhdf5.jar from GitHub: $JAR_FILE"
+              echo "Installed jarhdf5.jar from GitHub: $JAR_FILE as version $HDF5_VERSION"
+              echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
             fi
           fi
           cd ${{ github.workspace }}
@@ -2001,14 +2039,33 @@ jobs:
         # Try jarhdf from system packages, fallback to GitHub download
         if [ -f /usr/share/java/jarhdf.jar ]; then
           echo "Installing jarhdf.jar from system packages"
-          mvn install:install-file -Dfile=/usr/share/java/jarhdf.jar \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+          # Extract version from jar if possible, otherwise use default
+          JAR_PATH="/usr/share/java/jarhdf.jar"
+          # System jarhdf.jar typically doesn't have version in filename, check actual file
+          if jar -tf "$JAR_PATH" | grep -q "MANIFEST.MF"; then
+            HDF4_VERSION=$(unzip -p "$JAR_PATH" META-INF/MANIFEST.MF | grep "Implementation-Version" | cut -d' ' -f2 | tr -d '\r' || echo "4.3.1")
+          else
+            HDF4_VERSION="4.3.1"
+          fi
+          mvn install:install-file -Dfile="$JAR_PATH" \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
+          echo "Installed jarhdf.jar from system packages as version $HDF4_VERSION"
+          echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
         else
-          echo "System packages don't provide jarhdf.jar, downloading from GitHub..."
+          echo "System packages don't provide jarhdf.jar, downloading from GitHub release: ${{ inputs.use_hdf }}..."
+
+          # Determine file pattern based on whether base name is provided
+          if [ -n "${{ inputs.use_hdf_name }}" ]; then
+            PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+          else
+            PATTERN="*ubuntu-2404_gcc.tar.gz"
+          fi
+          echo "Using pattern: $PATTERN"
+
           mkdir -p /tmp/hdf4-download && cd /tmp/hdf4-download
-          gh release download snapshot --repo HDFGroup/hdf4 --pattern "*ubuntu-2404_gcc.tar.gz"
-          tar -zxf hdf4-*-ubuntu-2404_gcc.tar.gz
+          gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "$PATTERN"
+          tar -zxf hdf4*-ubuntu-2404_gcc.tar.gz
           cd hdf4
 
           # Extract inner tar.gz
@@ -2020,10 +2077,12 @@ jobs:
             VERSION_DIR=$(ls HDF_Group/HDF | head -1)
             JAR_FILE=$(ls HDF_Group/HDF/$VERSION_DIR/lib/jarhdf-*.jar 2>/dev/null | head -1)
             if [ -f "$JAR_FILE" ]; then
+              HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
               mvn install:install-file -Dfile="$JAR_FILE" \
-                -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+                -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" \
                 -Dpackaging=jar -DgeneratePom=true
-              echo "Installed jarhdf.jar from GitHub: $JAR_FILE"
+              echo "Installed jarhdf.jar from GitHub: $JAR_FILE as version $HDF4_VERSION"
+              echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
             fi
           fi
           cd ${{ github.workspace }}
@@ -2076,6 +2135,8 @@ jobs:
           -Ddependency-check.skip=true \
           -Dmaven.javadoc.skip=false \
           -Dmaven.source.skip=false \
+          -Dhdf5.version="$HDF5_VERSION" \
+          -Dhdf.version="$HDF4_VERSION" \
           -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
