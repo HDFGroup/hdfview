@@ -105,6 +105,7 @@ jobs:
       use_hdf5: snapshot
       use_hdf5_name: ${{ needs.get-base-names.outputs.hdf5-name }}
       use_environ: snapshots
+    secrets: inherit
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-release:
