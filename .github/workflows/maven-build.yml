@@ -40,11 +40,6 @@ on:
         type: string
         required: false
         default: 'snapshots'
-      snap_name:
-        description: 'Snapshot name (for compatibility)'
-        type: string
-        required: false
-        default: ''
       publish_to_maven_registry:
         description: 'Publish artifacts to GitHub Packages Maven registry'
         type: boolean
@@ -1867,9 +1862,18 @@ jobs:
         echo "Checking for HDF Java packages..."
 
         # Always download jarhdf5 from GitHub (system packages are outdated)
-        echo "Downloading jarhdf5.jar from GitHub..."
+        echo "Downloading jarhdf5.jar from GitHub release: ${{ inputs.use_hdf5 }}..."
+
+        # Determine file pattern based on whether base name is provided
+        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
+        else
+          PATTERN="*ubuntu-2404_gcc.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
+
         mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
-          gh release download snapshot --repo HDFGroup/hdf5 --pattern "*ubuntu-2404_gcc.tar.gz"
+          gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "$PATTERN"
           tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
           cd hdf5
 
@@ -1887,6 +1891,7 @@ jobs:
                 -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
                 -Dpackaging=jar -DgeneratePom=true
               echo "Installed jarhdf5.jar from GitHub: $JAR_FILE as version $HDF5_VERSION"
+              echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
             fi
           fi
           cd ${{ github.workspace }}
@@ -1898,9 +1903,18 @@ jobs:
             -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
             -Dpackaging=jar -DgeneratePom=true
         else
-          echo "System packages don't provide jarhdf.jar, downloading from GitHub..."
+          echo "System packages don't provide jarhdf.jar, downloading from GitHub release: ${{ inputs.use_hdf }}..."
+
+          # Determine file pattern based on whether base name is provided
+          if [ -n "${{ inputs.use_hdf_name }}" ]; then
+            PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+          else
+            PATTERN="*ubuntu-2404_gcc.tar.gz"
+          fi
+          echo "Using pattern: $PATTERN"
+
           mkdir -p /tmp/hdf4-download && cd /tmp/hdf4-download
-          gh release download snapshot --repo HDFGroup/hdf4 --pattern "*ubuntu-2404_gcc.tar.gz"
+          gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "$PATTERN"
           tar -zxf hdf4-*-ubuntu-2404_gcc.tar.gz
           cd hdf4
 
@@ -1969,6 +1983,7 @@ jobs:
           -Ddependency-check.skip=true \
           -Dmaven.javadoc.skip=false \
           -Dmaven.source.skip=false \
+          -Dhdf5.version="$HDF5_VERSION" \
           -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

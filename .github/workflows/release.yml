@@ -115,7 +115,6 @@ jobs:
       use_hdf_name: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf4-name || needs.determine-version.outputs.hdf4_tag }}
       use_hdf5: ${{ needs.determine-version.outputs.hdf5_tag }}
       use_hdf5_name: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf5-name || needs.determine-version.outputs.hdf5_tag }}
-      snap_name: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       use_environ: release
       publish_to_maven_registry: true
 
