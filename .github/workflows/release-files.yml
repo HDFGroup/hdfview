@@ -97,16 +97,18 @@ jobs:
               path: ${{ github.workspace }}
 
       # Get platform installers created by jpackage (REQUIRED)
+      # Snapshots: {file_base}-win64-msi (includes commit SHA)
+      # Releases: HDFView-{VERSION}-win64-msi (version only)
       - name: Get Windows MSI installer
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: HDFView-${{ steps.get-file-base.outputs.VERSION }}-win64-msi
+              name: ${{ inputs.use_environ == 'snapshots' && format('{0}-win64-msi', steps.get-file-base.outputs.FILE_BASE) || format('HDFView-{0}-win64-msi', steps.get-file-base.outputs.VERSION) }}
               path: ${{ github.workspace }}
 
       - name: Get macOS DMG installer
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: HDFView-${{ steps.get-file-base.outputs.VERSION }}-macOS-dmg
+              name: ${{ inputs.use_environ == 'snapshots' && format('{0}-macOS-dmg', steps.get-file-base.outputs.FILE_BASE) || format('HDFView-{0}-macOS-dmg', steps.get-file-base.outputs.VERSION) }}
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux)
@@ -154,16 +156,28 @@ jobs:
           ls -lh
           echo ""
           echo "=== Checking for installer files ==="
-          ls -lh HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi || echo "MSI not found!"
-          ls -lh HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg || echo "DMG not found!"
+          # Snapshots: {file_base}.msi, Releases: HDFView-{VERSION}.msi
+          if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
+            ls -lh ${{ steps.get-file-base.outputs.FILE_BASE }}.msi || echo "MSI not found!"
+            ls -lh ${{ steps.get-file-base.outputs.FILE_BASE }}.dmg || echo "DMG not found!"
+          else
+            ls -lh HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi || echo "MSI not found!"
+            ls -lh HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg || echo "DMG not found!"
+          fi
 
       - name: Create sha256 sums for files
         run: |
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          # Snapshots: {file_base}.msi/dmg, Releases: HDFView-{VERSION}.msi/dmg
+          if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
+            sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.msi >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+            sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.dmg >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          else
+            sha256sum HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+            sha256sum HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          fi
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
@@ -200,8 +214,8 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
-              HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi
-              HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.msi
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.dmg
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
