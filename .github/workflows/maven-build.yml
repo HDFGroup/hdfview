@@ -1543,6 +1543,15 @@ jobs:
     runs-on: macos-latest
     needs: build-macos-app
     timeout-minutes: 20
+    env:
+      # Set secrets as env vars at job level so they can be checked in step conditions
+      MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+      MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+      MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+      MACOS_DEVELOPER_ID: ${{ secrets.MACOS_DEVELOPER_ID }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
     steps:
     - name: Checkout Code
@@ -1575,11 +1584,7 @@ jobs:
         ls -la
 
     - name: Setup Keychain and Certificate
-      if: github.repository == 'HDFGroup/hdfview' && secrets.MACOS_CERTIFICATE != ''
-      env:
-        MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-        MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
-        MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
       run: |
         echo "Setting up temporary keychain for code signing..."
 
@@ -1608,9 +1613,7 @@ jobs:
         echo "Keychain setup complete"
 
     - name: Sign App Bundle
-      if: github.repository == 'HDFGroup/hdfview' && secrets.MACOS_CERTIFICATE != ''
-      env:
-        MACOS_DEVELOPER_ID: ${{ secrets.MACOS_DEVELOPER_ID }}
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
       run: |
         echo "Code signing app bundle..."
 
@@ -1664,9 +1667,7 @@ jobs:
         ls -lh *.dmg
 
     - name: Sign DMG Installer
-      if: github.repository == 'HDFGroup/hdfview' && secrets.MACOS_CERTIFICATE != ''
-      env:
-        MACOS_DEVELOPER_ID: ${{ secrets.MACOS_DEVELOPER_ID }}
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
       run: |
         echo "Code signing DMG installer..."
 
@@ -1695,11 +1696,7 @@ jobs:
         echo "DMG installer signed successfully"
 
     - name: Notarize DMG
-      if: github.repository == 'HDFGroup/hdfview' && secrets.MACOS_CERTIFICATE != ''
-      env:
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
       run: |
         echo "Submitting DMG for notarization..."
 
@@ -1731,7 +1728,7 @@ jobs:
         echo "Notarization completed successfully"
 
     - name: Staple Notarization Ticket
-      if: github.repository == 'HDFGroup/hdfview' && secrets.MACOS_CERTIFICATE != ''
+      if: github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
       run: |
         echo "Stapling notarization ticket to DMG..."
 
@@ -1756,7 +1753,7 @@ jobs:
         echo "Notarization ticket stapled successfully"
 
     - name: Cleanup Keychain
-      if: always() && github.repository == 'HDFGroup/hdfview' && secrets.MACOS_CERTIFICATE != ''
+      if: always() && github.repository == 'HDFGroup/hdfview' && env.MACOS_CERTIFICATE != ''
       run: |
         security delete-keychain build.keychain || true
 
@@ -1772,6 +1769,10 @@ jobs:
     runs-on: windows-latest
     needs: build-windows-app
     timeout-minutes: 20
+    env:
+      # Set secrets as env vars at job level so they can be checked in step conditions
+      WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+      WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
 
     steps:
     - name: Checkout Code
@@ -1846,11 +1847,8 @@ jobs:
         Get-ChildItem *.msi
 
     - name: Sign MSI Installer
-      if: github.repository == 'HDFGroup/hdfview' && secrets.WINDOWS_CERTIFICATE != ''
+      if: github.repository == 'HDFGroup/hdfview' && env.WINDOWS_CERTIFICATE != ''
       shell: pwsh
-      env:
-        WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
-        WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
       run: |
         Write-Host "Signing MSI installer..."
 
