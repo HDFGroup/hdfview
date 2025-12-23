@@ -50,6 +50,37 @@ on:
         type: boolean
         required: false
         default: false
+    secrets:
+      # macOS Code Signing
+      MACOS_CERTIFICATE:
+        description: 'macOS Developer ID certificate (base64 encoded)'
+        required: false
+      MACOS_CERT_PASSWORD:
+        description: 'Password for macOS certificate'
+        required: false
+      MACOS_KEYCHAIN_PASSWORD:
+        description: 'Password for temporary keychain'
+        required: false
+      MACOS_DEVELOPER_ID:
+        description: 'macOS Developer ID identity name'
+        required: false
+      # macOS Notarization
+      APPLE_ID:
+        description: 'Apple ID for notarization'
+        required: false
+      APPLE_ID_PASSWORD:
+        description: 'App-specific password for Apple ID'
+        required: false
+      APPLE_TEAM_ID:
+        description: 'Apple Developer Team ID'
+        required: false
+      # Windows Code Signing
+      WINDOWS_CERTIFICATE:
+        description: 'Windows code signing certificate (base64 encoded PFX)'
+        required: false
+      WINDOWS_CERT_PASSWORD:
+        description: 'Password for Windows certificate'
+        required: false
 
 permissions:
   contents: read
