@@ -1,0 +1,30 @@
+name: Peek S3 Bucket Contents
+
+# Manual trigger to inspect S3 bucket contents
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  peek-bucket:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: List Files in S3
+        run: |
+          echo "### S3 File Listing for \`${{ secrets.AWS_S3_BUCKET }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Target Directory: \`${{ vars.TARGET_PATH }}\`" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          # Run the command and append results to the summary
+          aws s3 ls s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }} --recursive >> $GITHUB_STEP_SUMMARY
+
+          echo '```' >> $GITHUB_STEP_SUMMARY
