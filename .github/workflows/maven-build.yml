@@ -208,6 +208,7 @@ jobs:
             -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
         fi
 
         # Install jarhdf (find any version)
@@ -425,6 +426,7 @@ jobs:
             -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
         fi
 
         # Install jarhdf (find any version)
