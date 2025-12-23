@@ -70,6 +70,10 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          # Extract version from file_base (e.g., "HDFView-3.4.0" -> "3.4.0")
+          VERSION=$(echo "$FILE_NAME_BASE" | sed 's/^HDFView-//')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted VERSION: $VERSION"
 
       # Get files created by tarball script
       - name: Get tgz-tarball (Linux)
@@ -84,18 +88,20 @@ jobs:
               name: zip-tarball
               path: ${{ github.workspace }}
 
-      # Get files created by ant script
-      - name: Get published binary (Windows)
+      # Get platform installers created by jpackage
+      - name: Get Windows MSI installer
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: zip-win-vs2022-binary
+              name: HDFView-${{ steps.get-file-base.outputs.VERSION }}-win64-msi
               path: ${{ github.workspace }}
+        continue-on-error: true # Allow workflow to continue if artifact not found
 
-      - name: Get published binary (MacOS)
+      - name: Get macOS DMG installer
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: tgz-macos14_clang-binary
+              name: HDFView-${{ steps.get-file-base.outputs.VERSION }}-macOS-dmg
               path: ${{ github.workspace }}
+        continue-on-error: true # Allow workflow to continue if artifact not found
 
       - name: Get published binary (Linux)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -141,8 +147,13 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Darwin.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          # Add platform installers (MSI for Windows, DMG for macOS) if they exist
+          if [ -f "HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi" ]; then
+            sha256sum HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          fi
+          if [ -f "HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg" ]; then
+            sha256sum HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          fi
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
@@ -178,8 +189,8 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+              HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi
+              HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
@@ -200,8 +211,8 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win64.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-Darwin.tar.gz
+              HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi
+              HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
