@@ -28,3 +28,7 @@ jobs:
           aws s3 ls s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }} --recursive >> $GITHUB_STEP_SUMMARY
 
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: View top-level index source
+        run: |
+          cat releases/hdfview/index.html
