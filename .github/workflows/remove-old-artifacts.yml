@@ -35,15 +35,23 @@ jobs:
     permissions:
         contents: write
     steps:
-      - name: Get file base name
+      # Checkout repository to read VERSION file
+      - name: Get Sources
+        uses: actions/checkout@9a9194f87191a7e9055e3e9b95b8cfb13023bb08 # v4.1.7
+        with:
+          fetch-depth: 0
+          ref: '${{ github.head_ref || github.ref_name }}'
+
+      - name: Get file base name and version
         id: get-file-base
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-          # Extract version from file_base (e.g., "HDFView-3.4.0" -> "3.4.0")
-          VERSION=$(echo "$FILE_NAME_BASE" | sed 's/^HDFView-//')
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "Extracted VERSION: $VERSION"
+          # Read HDFVIEW_VERSION from VERSION file (same as maven-build.yml)
+          HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
+          echo "VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
+          echo "File base: $FILE_NAME_BASE"
+          echo "HDFView version: $HDFVIEW_VERSION"
 
       - name: PreRelease delete from tag
         id: delete_prerelease
