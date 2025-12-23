@@ -65,8 +65,6 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
-              HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi
-              HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
