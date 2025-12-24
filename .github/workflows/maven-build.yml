@@ -279,6 +279,34 @@ jobs:
           exit 1
         fi
 
+    - name: Install SWTBot JARs to Local Maven Repository
+      run: |
+        echo "Installing SWTBot JARs to local Maven repository..."
+
+        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local \
+            -DartifactId=org.eclipse.swtbot.swt.finder \
+            -Dversion=4.2.1 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "SWTBot SWT finder JAR installed"
+        else
+          echo "WARNING: org.eclipse.swtbot.swt.finder.jar not found"
+        fi
+
+        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local \
+            -DartifactId=org.eclipse.swtbot.nebula.nattable.finder \
+            -Dversion=4.2.1 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "SWTBot Nebula NatTable finder JAR installed"
+        else
+          echo "WARNING: org.eclipse.swtbot.nebula.nattable.finder.jar not found"
+        fi
+
     - name: Build with Maven
       run: |
         echo "Building HDFView with Maven..."
