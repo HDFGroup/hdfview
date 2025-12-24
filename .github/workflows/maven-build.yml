@@ -6,8 +6,8 @@ name: Maven Build for Release
 on:
   workflow_call:
     inputs:
-      file_base:
-        description: 'Base name for artifacts'
+      artifact_basename:
+        description: 'Base name for all build artifacts (e.g., hdfview-master-abc1234 or HDFView-3.4.0)'
         type: string
         required: true
       build_type:
@@ -341,16 +341,16 @@ jobs:
         fi
 
         # Create archive with the expected naming convention
-        tar -czf ${{ inputs.file_base }}-Linux-x86_64.tar.gz hdfview-dist/
+        tar -czf ${{ inputs.artifact_basename }}-Linux-x86_64.tar.gz hdfview-dist/
 
-        echo "Linux binary archive created: ${{ inputs.file_base }}-Linux-x86_64.tar.gz"
-        ls -lh ${{ inputs.file_base }}-Linux-x86_64.tar.gz
+        echo "Linux binary archive created: ${{ inputs.artifact_basename }}-Linux-x86_64.tar.gz"
+        ls -lh ${{ inputs.artifact_basename }}-Linux-x86_64.tar.gz
 
     - name: Upload Linux Binary Artifact
       uses: actions/upload-artifact@v4
       with:
         name: tgz-ubuntu-2404-binary
-        path: ${{ inputs.file_base }}-Linux-x86_64.tar.gz
+        path: ${{ inputs.artifact_basename }}-Linux-x86_64.tar.gz
         retention-days: 30
 
   build-linux-app:
@@ -572,16 +572,16 @@ jobs:
       run: |
         # Package the jpackage app-image as a tar.gz for distribution
         cd hdfview/target/dist
-        tar -czf ${{ github.workspace }}/${{ inputs.file_base }}App-Linux-x86_64.tar.gz HDFView/
+        tar -czf ${{ github.workspace }}/${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz HDFView/
 
-        echo "Linux application archive created: ${{ inputs.file_base }}App-Linux-x86_64.tar.gz"
-        ls -lh ${{ github.workspace }}/${{ inputs.file_base }}App-Linux-x86_64.tar.gz
+        echo "Linux application archive created: ${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz"
+        ls -lh ${{ github.workspace }}/${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz
 
     - name: Upload Linux App Artifact
       uses: actions/upload-artifact@v4
       with:
         name: tgz-ubuntu-2404-app-binary
-        path: ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
+        path: ${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz
         retention-days: 30
 
   build-windows:
@@ -836,13 +836,13 @@ jobs:
         Copy-Item "$env:HDF5LIB_PATH\bin\*.dll" -Destination "hdfview-dist\lib\" -ErrorAction SilentlyContinue
 
         # Create ZIP archive
-        Compress-Archive -Path "hdfview-dist\*" -DestinationPath "${{ inputs.file_base }}-win64.zip"
+        Compress-Archive -Path "hdfview-dist\*" -DestinationPath "${{ inputs.artifact_basename }}-win64.zip"
 
     - name: Upload Windows Binary Artifact
       uses: actions/upload-artifact@v4
       with:
         name: zip-win-vs2022-binary
-        path: ${{ inputs.file_base }}-win64.zip
+        path: ${{ inputs.artifact_basename }}-win64.zip
         retention-days: 30
 
   build-windows-app:
@@ -1206,16 +1206,16 @@ jobs:
         # Package the jpackage app-image as a ZIP for distribution
         # Note: Must preserve HDFView directory structure for jpackage --app-image to work
         Set-Location "hdfview\target\dist"
-        Compress-Archive -Path "HDFView" -DestinationPath "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip"
+        Compress-Archive -Path "HDFView" -DestinationPath "${{ github.workspace }}\${{ inputs.artifact_basename }}App-win64.zip"
 
-        Write-Host "Windows application archive created: ${{ inputs.file_base }}App-win64.zip"
-        Get-Item "${{ github.workspace }}\${{ inputs.file_base }}App-win64.zip" | Select-Object Name, Length
+        Write-Host "Windows application archive created: ${{ inputs.artifact_basename }}App-win64.zip"
+        Get-Item "${{ github.workspace }}\${{ inputs.artifact_basename }}App-win64.zip" | Select-Object Name, Length
 
     - name: Upload Windows App Artifact
       uses: actions/upload-artifact@v4
       with:
         name: zip-win-vs2022-app-binary
-        path: ${{ inputs.file_base }}App-win64.zip
+        path: ${{ inputs.artifact_basename }}App-win64.zip
         retention-days: 30
 
   build-macos:
@@ -1446,13 +1446,13 @@ jobs:
         cp -L ${{ env.HDF5LIB_PATH }}/lib/*.dylib hdfview-dist/lib/ 2>/dev/null || true
 
         # Create tar.gz archive
-        tar -czf ${{ inputs.file_base }}-Darwin.tar.gz -C hdfview-dist .
+        tar -czf ${{ inputs.artifact_basename }}-Darwin.tar.gz -C hdfview-dist .
 
     - name: Upload macOS Binary Artifact
       uses: actions/upload-artifact@v4
       with:
         name: tgz-macos14_clang-binary
-        path: ${{ inputs.file_base }}-Darwin.tar.gz
+        path: ${{ inputs.artifact_basename }}-Darwin.tar.gz
         retention-days: 30
 
   build-macos-app:
@@ -1822,10 +1822,10 @@ jobs:
       run: |
         # Package the jpackage app-image as a tar.gz for distribution
         cd hdfview/target/dist
-        tar -czf ${{ github.workspace }}/${{ inputs.file_base }}App-Darwin.tar.gz HDFView.app/
+        tar -czf ${{ github.workspace }}/${{ inputs.artifact_basename }}App-Darwin.tar.gz HDFView.app/
 
-        echo "macOS application archive created: ${{ inputs.file_base }}App-Darwin.tar.gz"
-        ls -lh ${{ github.workspace }}/${{ inputs.file_base }}App-Darwin.tar.gz
+        echo "macOS application archive created: ${{ inputs.artifact_basename }}App-Darwin.tar.gz"
+        ls -lh ${{ github.workspace }}/${{ inputs.artifact_basename }}App-Darwin.tar.gz
 
     - name: Create DMG Installer
       run: |
@@ -1937,7 +1937,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tgz-macos14_clang-app-binary
-        path: ${{ inputs.file_base }}App-Darwin.tar.gz
+        path: ${{ inputs.artifact_basename }}App-Darwin.tar.gz
         retention-days: 30
 
     - name: Upload macOS DMG Installer Artifact
@@ -1973,7 +1973,7 @@ jobs:
 
     - name: Extract App Image
       run: |
-        tar -xzf ${{ inputs.file_base }}App-Linux-x86_64.tar.gz
+        tar -xzf ${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz
         ls -la HDFView/
 
     - name: Create DEB Installer
@@ -2031,7 +2031,7 @@ jobs:
     - name: Extract App Image
       shell: pwsh
       run: |
-        Expand-Archive -Path "${{ inputs.file_base }}App-win64.zip" -DestinationPath .
+        Expand-Archive -Path "${{ inputs.artifact_basename }}App-win64.zip" -DestinationPath .
         Get-ChildItem -Recurse
 
     - name: Create MSI Installer
@@ -2079,9 +2079,9 @@ jobs:
       if: inputs.build_environment == 'snapshots'
       shell: pwsh
       run: |
-        # For snapshots, rename MSI to include commit SHA (file_base)
+        # For snapshots, rename MSI to include commit SHA (artifact_basename)
         $oldName = "HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.msi"
-        $newName = "${{ inputs.file_base }}.msi"
+        $newName = "${{ inputs.artifact_basename }}.msi"
         Write-Host "Renaming $oldName to $newName"
         Move-Item -Path $oldName -Destination $newName
         Get-ChildItem *.msi
@@ -2111,7 +2111,7 @@ jobs:
         # Determine MSI filename (snapshot includes commit SHA, release uses version only)
         $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
         if ("${{ inputs.build_environment }}" -eq "snapshots") {
-          $msiFile = "${{ inputs.file_base }}.msi"
+          $msiFile = "${{ inputs.artifact_basename }}.msi"
         } else {
           $msiFile = "HDFView-${version}.msi"
         }
@@ -2144,8 +2144,8 @@ jobs:
     - name: Upload Windows MSI Installer
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.build_environment == 'snapshots' && format('{0}-win64-msi', inputs.file_base) || format('HDFView-{0}-win64-msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
-        path: ${{ inputs.build_environment == 'snapshots' && format('{0}.msi', inputs.file_base) || format('HDFView-{0}.msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
+        name: ${{ inputs.build_environment == 'snapshots' && format('{0}-win64-msi', inputs.artifact_basename) || format('HDFView-{0}-win64-msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
+        path: ${{ inputs.build_environment == 'snapshots' && format('{0}.msi', inputs.artifact_basename) || format('HDFView-{0}.msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
         retention-days: 5
 
   publish-packages:

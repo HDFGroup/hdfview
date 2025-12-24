@@ -14,8 +14,8 @@ on:
         type: string
         required: true
         default: snapshots
-      file_base:
-        description: "The common base name of the source tarballs"
+      artifact_basename:
+        description: "Base name for all build artifacts (e.g., hdfview-master-abc1234 or HDFView-3.4.0)"
         required: true
         type: string
       file_branch:
@@ -72,15 +72,15 @@ jobs:
           fetch-depth: 0
           ref: '${{ github.head_ref || github.ref_name }}'
 
-      - name: Get file base name and version
-        id: get-file-base
+      - name: Get artifact basename and version
+        id: get-artifact-info
         run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          ARTIFACT_NAME=$(echo "${{ inputs.artifact_basename }}")
+          echo "ARTIFACT_BASENAME=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
           # Read HDFVIEW_VERSION from VERSION file (same as maven-build.yml)
           HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
           echo "VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
-          echo "File base: $FILE_NAME_BASE"
+          echo "Artifact basename: $ARTIFACT_NAME"
           echo "HDFView version: $HDFVIEW_VERSION"
 
       # Get files created by tarball script
@@ -97,18 +97,18 @@ jobs:
               path: ${{ github.workspace }}
 
       # Get platform installers created by jpackage (REQUIRED)
-      # Snapshots: {file_base}-win64-msi (includes commit SHA)
+      # Snapshots: {artifact_basename}-win64-msi (includes commit SHA)
       # Releases: HDFView-{VERSION}-win64-msi (version only)
       - name: Get Windows MSI installer
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: ${{ inputs.build_environment == 'snapshots' && format('{0}-win64-msi', steps.get-file-base.outputs.FILE_BASE) || format('HDFView-{0}-win64-msi', steps.get-file-base.outputs.VERSION) }}
+              name: ${{ inputs.build_environment == 'snapshots' && format('{0}-win64-msi', steps.get-artifact-info.outputs.ARTIFACT_BASENAME) || format('HDFView-{0}-win64-msi', steps.get-artifact-info.outputs.VERSION) }}
               path: ${{ github.workspace }}
 
       - name: Get macOS DMG installer
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: ${{ inputs.build_environment == 'snapshots' && format('{0}-macOS-dmg', steps.get-file-base.outputs.FILE_BASE) || format('HDFView-{0}-macOS-dmg', steps.get-file-base.outputs.VERSION) }}
+              name: ${{ inputs.build_environment == 'snapshots' && format('{0}-macOS-dmg', steps.get-artifact-info.outputs.ARTIFACT_BASENAME) || format('HDFView-{0}-macOS-dmg', steps.get-artifact-info.outputs.VERSION) }}
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux)
@@ -156,37 +156,37 @@ jobs:
           ls -lh
           echo ""
           echo "=== Checking for installer files ==="
-          # Snapshots: {file_base}.msi, Releases: HDFView-{VERSION}.msi
+          # Snapshots: {artifact_basename}.msi, Releases: HDFView-{VERSION}.msi
           if [ "${{ inputs.build_environment }}" = "snapshots" ]; then
-            ls -lh ${{ steps.get-file-base.outputs.FILE_BASE }}.msi || echo "MSI not found!"
-            ls -lh ${{ steps.get-file-base.outputs.FILE_BASE }}.dmg || echo "DMG not found!"
+            ls -lh ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi || echo "MSI not found!"
+            ls -lh ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.dmg || echo "DMG not found!"
           else
-            ls -lh HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi || echo "MSI not found!"
-            ls -lh HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg || echo "DMG not found!"
+            ls -lh HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi || echo "MSI not found!"
+            ls -lh HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "DMG not found!"
           fi
 
       - name: Create sha256 sums for files
         run: |
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          # Snapshots: {file_base}.msi/dmg, Releases: HDFView-{VERSION}.msi/dmg
+          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.tar.gz >${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.zip >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}-Linux-x86_64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          # Snapshots: {artifact_basename}.msi/dmg, Releases: HDFView-{VERSION}.msi/dmg
           if [ "${{ inputs.build_environment }}" = "snapshots" ]; then
-            sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.msi >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-            sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.dmg >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+            sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+            sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           else
-            sha256sum HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-            sha256sum HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+            sha256sum HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+            sha256sum HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           fi
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz >>${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum UsersGuide.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum UsersGuide.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Darwin.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum UsersGuide.tar.gz >> ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum UsersGuide.zip >> ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
 
       - name: Store snapshot name
         run: |
-          echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
+          echo "${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}" > ./last-file.txt
 
       - name: Get NEWSLETTER
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -211,15 +211,15 @@ jobs:
               last-file.txt
               UsersGuide.tar.gz
               UsersGuide.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.msi
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.dmg
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.zip
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}-Linux-x86_64.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.dmg
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Darwin.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Release tag
@@ -234,13 +234,13 @@ jobs:
           files: |
               UsersGuide.tar.gz
               UsersGuide.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
-              HDFView-${{ steps.get-file-base.outputs.VERSION }}.msi
-              HDFView-${{ steps.get-file-base.outputs.VERSION }}.dmg
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.zip
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}-Linux-x86_64.tar.gz
+              HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi
+              HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Darwin.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

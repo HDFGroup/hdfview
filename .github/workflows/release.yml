@@ -113,7 +113,7 @@ jobs:
     needs: [determine-version, get-base-names, call-workflow-tarball]
     uses: ./.github/workflows/maven-build.yml
     with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
       build_type: ${{ needs.determine-version.outputs.build_type }}
       hdf4_version_tag: ${{ needs.determine-version.outputs.hdf4_version_tag }}
       hdf4_artifact_basename: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf4_artifact_basename || needs.determine-version.outputs.hdf4_version_tag }}
@@ -141,7 +141,7 @@ jobs:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
     with:
-      file_base: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
+      artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       release_version_tag: ${{ needs.determine-version.outputs.version_tag }}
