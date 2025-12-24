@@ -2,14 +2,18 @@
 REM =============================================================================
 REM HDFView Launcher Script for Windows
 REM
-REM This script validates the environment and launches HDFView using either:
+REM This script validates the environment and launches an already-built HDFView.
+REM Build the project first using: mvn clean package -DskipTests
+REM
+REM Launch options:
 REM   1. Maven exec:java (for development)
 REM   2. Direct JAR execution (recommended)
 REM
 REM Requirements:
 REM   - Java 21+
-REM   - Maven 3.6+
+REM   - Maven 3.6+ (only for option 1)
 REM   - HDF5 and HDF4 native libraries (configured in build.properties)
+REM   - HDFView must be built before running this script
 REM =============================================================================
 
 setlocal enabledelayedexpansion
@@ -141,13 +145,12 @@ echo.
 
 REM Check build status
 echo [INFO] Checking build status...
-set BUILD_NEEDED=0
 if not exist "libs\hdfview-3.4-SNAPSHOT.jar" (
-    echo [WARN] HDFView JAR not found - build needed
-    set BUILD_NEEDED=1
-) else (
-    echo [OK] Project appears to be built
+    echo [ERROR] HDFView JAR not found: libs\hdfview-3.4-SNAPSHOT.jar
+    echo [ERROR] Build the project first: mvn clean package -DskipTests
+    exit /b 1
 )
+echo [OK] HDFView JAR found
 echo.
 
 REM Check platform
@@ -157,18 +160,6 @@ echo.
 
 echo [INFO] Environment validation complete!
 echo.
-
-REM Build if needed
-if !BUILD_NEEDED! == 1 (
-    echo [INFO] Building project (this may take a few minutes^)...
-    call mvn clean package -DskipTests -q
-    if errorlevel 1 (
-        echo [ERROR] Build failed
-        exit /b 1
-    )
-    echo [OK] Build completed
-    echo.
-)
 
 REM Set up runtime environment
 set "PATH=!hdf5_lib_dir!;!hdf_lib_dir!;!PATH!"
@@ -225,13 +216,9 @@ if not exist "libs\hdfview-3.4-SNAPSHOT.jar" (
 )
 
 if not exist "hdfview\target\lib" (
-    echo [ERROR] Dependencies not found. Building project...
-    call mvn package -DskipTests -q
-    if errorlevel 1 (
-        echo [ERROR] Build failed
-        exit /b 1
-    )
-    echo [OK] Build completed
+    echo [ERROR] Dependencies not found: hdfview\target\lib
+    echo [ERROR] Build the project first: mvn clean package -DskipTests
+    exit /b 1
 )
 
 REM Build classpath, excluding slf4j-nop or slf4j-simple based on debug mode

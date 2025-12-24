@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # HDFView Launcher Script
-# Validates environment and launches HDFView application
+# Validates environment and launches an already-built HDFView application
+#
+# Build the project first using: mvn clean package -DskipTests
 #
 # Usage:
 #   ./run-hdfview.sh              # Launch with direct JAR (default)
@@ -9,6 +11,12 @@
 #   ./run-hdfview.sh --choose     # Interactive mode to choose launch method
 #   ./run-hdfview.sh --maven      # Launch with Maven exec:java
 #   ./run-hdfview.sh --validate   # Just validate environment
+#
+# Requirements:
+#   - Java 21+
+#   - Maven 3.6+ (only for --maven mode)
+#   - HDF5 and HDF4 native libraries (configured in build.properties)
+#   - HDFView must be built before running this script
 #
 # Environment variables:
 #   HDFVIEW_DEBUG=1               # Enable debug logging
@@ -149,15 +157,9 @@ fi
 # Check if repository dependencies are installed
 print_status "Checking Maven repository dependencies..."
 if [[ ! -d "$HOME/.m2/repository/jarhdf/jarhdf" ]]; then
-    print_warning "HDF dependencies not found in Maven repository"
-    print_status "Installing repository dependencies..."
-    mvn clean install -pl repository -Ddependency-check.skip=true -q
-    if [[ $? -eq 0 ]]; then
-        print_success "Repository dependencies installed"
-    else
-        print_error "Failed to install repository dependencies"
-        exit 1
-    fi
+    print_error "HDF dependencies not found in Maven repository"
+    print_error "Build the project first: mvn clean package -DskipTests"
+    exit 1
 else
     print_success "Maven repository dependencies found"
 fi
@@ -165,11 +167,11 @@ fi
 # Check if project needs building
 print_status "Checking build status..."
 if [[ ! -d "hdfview/target" ]] || [[ ! -f "libs/hdfview-99.99.99-SNAPSHOT.jar" ]]; then
-    print_warning "Project not built or outdated build detected"
-    BUILD_NEEDED=1
+    print_error "HDFView not built - missing hdfview/target or libs/hdfview-99.99.99-SNAPSHOT.jar"
+    print_error "Build the project first: mvn clean package -DskipTests"
+    exit 1
 else
-    print_success "Project appears to be built"
-    BUILD_NEEDED=0
+    print_success "HDFView JAR found"
 fi
 
 # Check SWT dependencies
@@ -193,14 +195,6 @@ esac
 echo
 print_status "Environment validation complete!"
 echo
-
-# Build if needed
-if [[ $BUILD_NEEDED -eq 1 ]]; then
-    print_status "Building project (this may take a few minutes)..."
-    mvn clean package -DskipTests -q
-    print_success "Build completed"
-    echo
-fi
 
 # Set up runtime environment
 export LD_LIBRARY_PATH="$hdf5_lib_dir:$hdf_lib_dir:$LD_LIBRARY_PATH"
@@ -289,9 +283,9 @@ case $CHOICE in
         fi
 
         if [[ ! -d "hdfview/target/lib" ]]; then
-            print_error "Dependencies not found. Building project..."
-            mvn package -DskipTests -q
-            print_success "Build completed"
+            print_error "Dependencies not found: hdfview/target/lib"
+            print_error "Build the project first: mvn clean package -DskipTests"
+            exit 1
         fi
 
         # Build classpath, excluding slf4j-nop or slf4j-simple based on debug mode
