@@ -100,9 +100,9 @@ jobs:
     uses: ./.github/workflows/maven-build.yml
     with:
       artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
-      hdf4_version_tag: snapshot
+      hdf4_release_tag: snapshot
       hdf4_artifact_basename: ${{ needs.get-base-names.outputs.hdf4-name }}
-      hdf5_version_tag: snapshot
+      hdf5_release_tag: snapshot
       hdf5_artifact_basename: ${{ needs.get-base-names.outputs.hdf5-name }}
       build_environment: snapshots
     secrets:
