@@ -8,12 +8,12 @@ name: hdfview remove old artifacts
 on:
   workflow_call:
     inputs:
-      use_tag:
+      release_version_tag:
         description: 'Release version tag'
         type: string
         required: false
         default: HDFView-99.99.99
-      use_environ:
+      build_environment:
         description: 'Environment to locate files'
         type: string
         required: true
@@ -31,7 +31,7 @@ permissions:
 jobs:
   PreRelease-delfiles:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.use_environ }}
+    environment: ${{ inputs.build_environment }}
     permissions:
         contents: write
     steps:
@@ -56,7 +56,7 @@ jobs:
       - name: List files to delete (debug)
         run: |
           echo "=== Files to be deleted from release ==="
-          echo "Tag: ${{ inputs.use_tag }}"
+          echo "Tag: ${{ inputs.release_version_tag }}"
           echo "File base: ${{ steps.get-file-base.outputs.FILE_BASE }}"
           echo ""
           echo "Files that will be deleted:"
@@ -72,11 +72,11 @@ jobs:
 
       - name: PreRelease delete from tag
         id: delete_prerelease
-        if: ${{ (inputs.use_environ == 'snapshots') }}
+        if: ${{ (inputs.build_environment == 'snapshots') }}
         uses: mknejp/delete-release-assets@v1
         with:
           token: ${{ github.token }}
-          tag: "${{ inputs.use_tag }}"
+          tag: "${{ inputs.release_version_tag }}"
           assets: |
               ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz

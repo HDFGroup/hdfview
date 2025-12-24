@@ -15,27 +15,27 @@ on:
         type: string
         required: false
         default: 'snapshot'
-      use_hdf:
+      hdf4_version_tag:
         description: 'HDF4 release tag (e.g., snapshot, hdf4-1.2.3)'
         type: string
         required: false
         default: 'snapshot'
-      use_hdf_name:
+      hdf4_artifact_basename:
         description: 'HDF4 base filename (optional, uses wildcard if empty)'
         type: string
         required: false
         default: ''
-      use_hdf5:
+      hdf5_version_tag:
         description: 'HDF5 release tag (e.g., snapshot, hdf5-2.0.0)'
         type: string
         required: false
         default: 'snapshot'
-      use_hdf5_name:
+      hdf5_artifact_basename:
         description: 'HDF5 base filename (optional, uses wildcard if empty)'
         type: string
         required: false
         default: ''
-      use_environ:
+      build_environment:
         description: 'Environment (snapshots or release)'
         type: string
         required: false
@@ -134,18 +134,18 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+        echo "Downloading HDF4 from release tag: ${{ inputs.hdf4_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+        if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
+          PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
         else
           PATTERN="*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
         # Download HDF4 binary from HDF Group GitHub releases
-        gh release download "${{ inputs.use_hdf }}" \
+        gh release download "${{ inputs.hdf4_version_tag }}" \
           --repo HDFGroup/hdf4 \
           --pattern "$PATTERN" \
           --clobber
@@ -170,18 +170,18 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+        echo "Downloading HDF5 from release tag: ${{ inputs.hdf5_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
+        if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.hdf5_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
         else
           PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
         # Download HDF5 binary from HDF Group GitHub releases
-        gh release download "${{ inputs.use_hdf5 }}" \
+        gh release download "${{ inputs.hdf5_version_tag }}" \
           --repo HDFGroup/hdf5 \
           --pattern "$PATTERN" \
           --clobber
@@ -208,8 +208,8 @@ jobs:
       run: |
         cat > build.properties << EOF
         # Build Properties using HDF libraries from GitHub releases
-        # HDF4: ${{ inputs.use_hdf }}
-        # HDF5: ${{ inputs.use_hdf5 }}
+        # HDF4: ${{ inputs.hdf4_version_tag }}
+        # HDF5: ${{ inputs.hdf5_version_tag }}
         hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
         hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
         hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
@@ -382,18 +382,18 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+        echo "Downloading HDF4 from release tag: ${{ inputs.hdf4_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+        if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
+          PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
         else
           PATTERN="*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
         # Download HDF4 binary from HDF Group GitHub releases
-        gh release download "${{ inputs.use_hdf }}" \
+        gh release download "${{ inputs.hdf4_version_tag }}" \
           --repo HDFGroup/hdf4 \
           --pattern "$PATTERN" \
           --clobber
@@ -418,18 +418,18 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+        echo "Downloading HDF5 from release tag: ${{ inputs.hdf5_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
+        if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.hdf5_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
         else
           PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
         # Download HDF5 binary from HDF Group GitHub releases
-        gh release download "${{ inputs.use_hdf5 }}" \
+        gh release download "${{ inputs.hdf5_version_tag }}" \
           --repo HDFGroup/hdf5 \
           --pattern "$PATTERN" \
           --clobber
@@ -456,8 +456,8 @@ jobs:
       run: |
         cat > build.properties << EOF
         # Build Properties using HDF libraries from GitHub releases
-        # HDF4: ${{ inputs.use_hdf }}
-        # HDF5: ${{ inputs.use_hdf5 }}
+        # HDF4: ${{ inputs.hdf4_version_tag }}
+        # HDF5: ${{ inputs.hdf5_version_tag }}
         hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
         hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
         hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
@@ -614,17 +614,17 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+        Write-Host "Downloading HDF4 from release tag: ${{ inputs.hdf4_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if ("${{ inputs.use_hdf_name }}") {
-          $PATTERN = "${{ inputs.use_hdf_name }}-win-vs2022_cl.zip"
+        if ("${{ inputs.hdf4_artifact_basename }}") {
+          $PATTERN = "${{ inputs.hdf4_artifact_basename }}-win-vs2022_cl.zip"
         } else {
           $PATTERN = "*-win-vs2022_cl.zip"
         }
         Write-Host "Using pattern: $PATTERN"
 
-        gh release download "${{ inputs.use_hdf }}" `
+        gh release download "${{ inputs.hdf4_version_tag }}" `
           --repo HDFGroup/hdf4 `
           --pattern $PATTERN `
           --clobber
@@ -656,17 +656,17 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+        Write-Host "Downloading HDF5 from release tag: ${{ inputs.hdf5_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if ("${{ inputs.use_hdf5_name }}") {
-          $PATTERN = "${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-win-vs2022_cl.zip"
+        if ("${{ inputs.hdf5_artifact_basename }}") {
+          $PATTERN = "${{ env.HDF5_PREFIX }}${{ inputs.hdf5_artifact_basename }}-win-vs2022_cl.zip"
         } else {
           $PATTERN = "hdf5-*-win-vs2022_cl.zip"
         }
         Write-Host "Using pattern: $PATTERN"
 
-        gh release download "${{ inputs.use_hdf5 }}" `
+        gh release download "${{ inputs.hdf5_version_tag }}" `
           --repo HDFGroup/hdf5 `
           --pattern $PATTERN `
           --clobber
@@ -875,17 +875,17 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+        Write-Host "Downloading HDF4 from release tag: ${{ inputs.hdf4_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if ("${{ inputs.use_hdf_name }}") {
-          $PATTERN = "${{ inputs.use_hdf_name }}-win-vs2022_cl.zip"
+        if ("${{ inputs.hdf4_artifact_basename }}") {
+          $PATTERN = "${{ inputs.hdf4_artifact_basename }}-win-vs2022_cl.zip"
         } else {
           $PATTERN = "*-win-vs2022_cl.zip"
         }
         Write-Host "Using pattern: $PATTERN"
 
-        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern $PATTERN --clobber
+        gh release download "${{ inputs.hdf4_version_tag }}" --repo HDFGroup/hdf4 --pattern $PATTERN --clobber
         7z x *-win-vs2022_cl.zip
         # Rename hdf4-* directory to hdf4 if needed
         $hdf4Dir = Get-ChildItem -Directory -Filter "hdf4*" | Select-Object -First 1
@@ -907,17 +907,17 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+        Write-Host "Downloading HDF5 from release tag: ${{ inputs.hdf5_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if ("${{ inputs.use_hdf5_name }}") {
-          $PATTERN = "${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-win-vs2022_cl.zip"
+        if ("${{ inputs.hdf5_artifact_basename }}") {
+          $PATTERN = "${{ env.HDF5_PREFIX }}${{ inputs.hdf5_artifact_basename }}-win-vs2022_cl.zip"
         } else {
           $PATTERN = "hdf5-*-win-vs2022_cl.zip"
         }
         Write-Host "Using pattern: $PATTERN"
 
-        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern $PATTERN --clobber
+        gh release download "${{ inputs.hdf5_version_tag }}" --repo HDFGroup/hdf5 --pattern $PATTERN --clobber
         7z x hdf5-*-win-vs2022_cl.zip
         # Rename hdf5-* directory to hdf5 if needed
         $hdf5Dir = Get-ChildItem -Directory -Filter "hdf5*" | Select-Object -First 1
@@ -1255,17 +1255,17 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+        echo "Downloading HDF4 from release tag: ${{ inputs.hdf4_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf_name }}-macos14_clang.tar.gz"
+        if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
+          PATTERN="${{ inputs.hdf4_artifact_basename }}-macos14_clang.tar.gz"
         else
           PATTERN="*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
-        gh release download "${{ inputs.use_hdf }}" \
+        gh release download "${{ inputs.hdf4_version_tag }}" \
           --repo HDFGroup/hdf4 \
           --pattern "$PATTERN" \
           --clobber
@@ -1285,17 +1285,17 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+        echo "Downloading HDF5 from release tag: ${{ inputs.hdf5_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
+        if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.hdf5_artifact_basename }}-macos14_clang.tar.gz"
         else
           PATTERN="hdf5-*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
-        gh release download "${{ inputs.use_hdf5 }}" \
+        gh release download "${{ inputs.hdf5_version_tag }}" \
           --repo HDFGroup/hdf5 \
           --pattern "$PATTERN" \
           --clobber
@@ -1501,17 +1501,17 @@ jobs:
 
     - name: Download and Install HDF4 from GitHub
       run: |
-        echo "Downloading HDF4 from release tag: ${{ inputs.use_hdf }}"
+        echo "Downloading HDF4 from release tag: ${{ inputs.hdf4_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf_name }}" ]; then
-          PATTERN="${{ inputs.use_hdf_name }}-macos14_clang.tar.gz"
+        if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
+          PATTERN="${{ inputs.hdf4_artifact_basename }}-macos14_clang.tar.gz"
         else
           PATTERN="*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
-        gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "$PATTERN" \
+        gh release download "${{ inputs.hdf4_version_tag }}" --repo HDFGroup/hdf4 --pattern "$PATTERN" \
           --clobber
         tar -zxvf *-macos14_clang.tar.gz
         [ -d hdf4 ] || mv hdf4-* hdf4
@@ -1525,17 +1525,17 @@ jobs:
 
     - name: Download and Install HDF5 from GitHub
       run: |
-        echo "Downloading HDF5 from release tag: ${{ inputs.use_hdf5 }}"
+        echo "Downloading HDF5 from release tag: ${{ inputs.hdf5_version_tag }}"
 
         # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-macos14_clang.tar.gz"
+        if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.hdf5_artifact_basename }}-macos14_clang.tar.gz"
         else
           PATTERN="hdf5-*-macos14_clang.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
-        gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "$PATTERN" \
+        gh release download "${{ inputs.hdf5_version_tag }}" --repo HDFGroup/hdf5 --pattern "$PATTERN" \
           --clobber
         tar -zxvf hdf5-*-macos14_clang.tar.gz
         [ -d hdf5 ] || mv hdf5-* hdf5
@@ -2076,7 +2076,7 @@ jobs:
         }
 
     - name: Rename MSI for snapshots
-      if: inputs.use_environ == 'snapshots'
+      if: inputs.build_environment == 'snapshots'
       shell: pwsh
       run: |
         # For snapshots, rename MSI to include commit SHA (file_base)
@@ -2110,7 +2110,7 @@ jobs:
 
         # Determine MSI filename (snapshot includes commit SHA, release uses version only)
         $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-        if ("${{ inputs.use_environ }}" -eq "snapshots") {
+        if ("${{ inputs.build_environment }}" -eq "snapshots") {
           $msiFile = "${{ inputs.file_base }}.msi"
         } else {
           $msiFile = "HDFView-${version}.msi"
@@ -2144,8 +2144,8 @@ jobs:
     - name: Upload Windows MSI Installer
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.use_environ == 'snapshots' && format('{0}-win64-msi', inputs.file_base) || format('HDFView-{0}-win64-msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
-        path: ${{ inputs.use_environ == 'snapshots' && format('{0}.msi', inputs.file_base) || format('HDFView-{0}.msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
+        name: ${{ inputs.build_environment == 'snapshots' && format('{0}-win64-msi', inputs.file_base) || format('HDFView-{0}-win64-msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
+        path: ${{ inputs.build_environment == 'snapshots' && format('{0}.msi', inputs.file_base) || format('HDFView-{0}.msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
         retention-days: 5
 
   publish-packages:
@@ -2197,18 +2197,18 @@ jobs:
         echo "Checking for HDF Java packages..."
 
         # Always download jarhdf5 from GitHub (system packages are outdated)
-        echo "Downloading jarhdf5.jar from GitHub release: ${{ inputs.use_hdf5 }}..."
+        echo "Downloading jarhdf5.jar from GitHub release: ${{ inputs.hdf5_version_tag }}..."
 
         # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.use_hdf5_name }}" ]; then
-          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.use_hdf5_name }}-ubuntu-2404_gcc.tar.gz"
+        if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.hdf5_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
         else
           PATTERN="*ubuntu-2404_gcc.tar.gz"
         fi
         echo "Using pattern: $PATTERN"
 
         mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
-          gh release download "${{ inputs.use_hdf5 }}" --repo HDFGroup/hdf5 --pattern "$PATTERN"
+          gh release download "${{ inputs.hdf5_version_tag }}" --repo HDFGroup/hdf5 --pattern "$PATTERN"
           tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
           cd hdf5
 
@@ -2248,18 +2248,18 @@ jobs:
           echo "Installed jarhdf.jar from system packages as version $HDF4_VERSION"
           echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
         else
-          echo "System packages don't provide jarhdf.jar, downloading from GitHub release: ${{ inputs.use_hdf }}..."
+          echo "System packages don't provide jarhdf.jar, downloading from GitHub release: ${{ inputs.hdf4_version_tag }}..."
 
           # Determine file pattern based on whether base name is provided
-          if [ -n "${{ inputs.use_hdf_name }}" ]; then
-            PATTERN="${{ inputs.use_hdf_name }}-ubuntu-2404_gcc.tar.gz"
+          if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
+            PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
           else
             PATTERN="*ubuntu-2404_gcc.tar.gz"
           fi
           echo "Using pattern: $PATTERN"
 
           mkdir -p /tmp/hdf4-download && cd /tmp/hdf4-download
-          gh release download "${{ inputs.use_hdf }}" --repo HDFGroup/hdf4 --pattern "$PATTERN"
+          gh release download "${{ inputs.hdf4_version_tag }}" --repo HDFGroup/hdf4 --pattern "$PATTERN"
           tar -zxf hdf4*-ubuntu-2404_gcc.tar.gz
           cd hdf4
 

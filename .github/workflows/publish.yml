@@ -4,7 +4,7 @@ name: hdfview publish to S3
 on:
   workflow_dispatch:
     inputs:
-      use_tag:
+      release_version_tag:
         description: 'HDFView Release version tag (required for publishing release artifacts)'
         type: string
         required: false
@@ -53,51 +53,51 @@ jobs:
 
         # Fetch release artifacts conditionally based on file type
         - name: Get source tarballs from release
-          if: ${{ inputs.use_tag != '' && inputs.publish_source }}
+          if: ${{ inputs.release_version_tag != '' && inputs.publish_source }}
           uses: dsaltares/fetch-gh-release-asset@master
           with:
             repo: 'HDFGroup/hdfview'
-            version: 'tags/${{ inputs.use_tag }}'
+            version: 'tags/${{ inputs.release_version_tag }}'
             regex: true
             target: 'HDFVIEW/'
             file: '^HDFView-[0-9]+\.[0-9]+\.[0-9]+\.(tar\.gz|zip)$'
 
         - name: Get checksums from release
-          if: ${{ inputs.use_tag != '' && (inputs.publish_source || inputs.publish_binaries || inputs.publish_apps) }}
+          if: ${{ inputs.release_version_tag != '' && (inputs.publish_source || inputs.publish_binaries || inputs.publish_apps) }}
           uses: dsaltares/fetch-gh-release-asset@master
           with:
             repo: 'HDFGroup/hdfview'
-            version: 'tags/${{ inputs.use_tag }}'
+            version: 'tags/${{ inputs.release_version_tag }}'
             regex: true
             target: 'HDFVIEW/'
             file: '\.sha256sums\.txt$'
 
         - name: Get binary packages from release
-          if: ${{ inputs.use_tag != '' && inputs.publish_binaries }}
+          if: ${{ inputs.release_version_tag != '' && inputs.publish_binaries }}
           uses: dsaltares/fetch-gh-release-asset@master
           with:
             repo: 'HDFGroup/hdfview'
-            version: 'tags/${{ inputs.use_tag }}'
+            version: 'tags/${{ inputs.release_version_tag }}'
             regex: true
             target: 'HDFVIEW/'
             file: '^HDFView-[0-9]+\.[0-9]+\.[0-9]+-(Linux-x86_64\.tar\.gz|win64\.zip|Darwin\.tar\.gz)$'
 
         - name: Get app packages from release
-          if: ${{ inputs.use_tag != '' && inputs.publish_apps }}
+          if: ${{ inputs.release_version_tag != '' && inputs.publish_apps }}
           uses: dsaltares/fetch-gh-release-asset@master
           with:
             repo: 'HDFGroup/hdfview'
-            version: 'tags/${{ inputs.use_tag }}'
+            version: 'tags/${{ inputs.release_version_tag }}'
             regex: true
             target: 'HDFVIEW/'
             file: '^HDFView-[0-9]+\.[0-9]+\.[0-9]+App-(Linux-x86_64\.tar\.gz|win64\.zip|Darwin\.tar\.gz)$'
 
         - name: Get UsersGuide from release
-          if: ${{ inputs.use_tag != '' && inputs.publish_docs }}
+          if: ${{ inputs.release_version_tag != '' && inputs.publish_docs }}
           uses: dsaltares/fetch-gh-release-asset@master
           with:
             repo: 'HDFGroup/hdfview'
-            version: 'tags/${{ inputs.use_tag }}'
+            version: 'tags/${{ inputs.release_version_tag }}'
             regex: true
             target: 'HDFVIEW/'
             file: '^UsersGuide\.(tar\.gz|zip)$'
@@ -111,17 +111,17 @@ jobs:
 
         # Sync release artifacts to downloads directory
         - name: Sync release files to S3 downloads
-          if: ${{ inputs.use_tag != '' && (inputs.publish_source || inputs.publish_binaries || inputs.publish_apps || inputs.publish_docs) }}
+          if: ${{ inputs.release_version_tag != '' && (inputs.publish_source || inputs.publish_binaries || inputs.publish_apps || inputs.publish_docs) }}
           run: |
                 aws s3 sync ./HDFVIEW s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/downloads --delete
 
         # Extract and sync documentation
         - name: Uncompress UsersGuide
-          if: ${{ inputs.use_tag != '' && inputs.publish_docs }}
+          if: ${{ inputs.release_version_tag != '' && inputs.publish_docs }}
           run: tar -zxvf ${{ github.workspace }}/HDFVIEW/UsersGuide.tar.gz
 
         - name: Sync UsersGuide to S3
-          if: ${{ inputs.use_tag != '' && inputs.publish_docs }}
+          if: ${{ inputs.release_version_tag != '' && inputs.publish_docs }}
           run: |
                 aws s3 sync ./UsersGuide s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.TARGET_PATH }}/${{ inputs.target_dir }}/documentation/UsersGuide --delete
 

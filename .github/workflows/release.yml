@@ -12,13 +12,13 @@ on:
         options:
           - release
           - snapshot
-      use_tag4:
-        description: 'HDF Release version tag and base name'
+      hdf4_version_tag:
+        description: 'HDF4 version tag and base name (e.g. hdf4.3.1)'
         type: string
         required: false
         default: snapshot
-      use_tag5:
-        description: 'HDF5 Release version tag'
+      hdf5_version_tag:
+        description: 'HDF5 version tag (e.g. 2.0.0)'
         type: string
         required: false
         default: snapshot
@@ -33,23 +33,23 @@ jobs:
     outputs:
       version_tag: ${{ steps.construct-tag.outputs.VERSION_TAG }}
       build_type: ${{ steps.validate-input.outputs.BUILD_TYPE }}
-      hdf4_tag: ${{ steps.validate-input.outputs.HDF4_TAG }}
-      hdf5_tag: ${{ steps.validate-input.outputs.HDF5_TAG }}
+      hdf4_version_tag: ${{ steps.validate-input.outputs.HDF4_VERSION_TAG }}
+      hdf5_version_tag: ${{ steps.validate-input.outputs.HDF5_VERSION_TAG }}
     steps:
     - name: Validate input
       id: validate-input
       env:
         TAG: ${{ inputs.build_type }}
-        TAG4: ${{ inputs.use_tag4 }}
-        TAG5: ${{ inputs.use_tag5 }}
+        HDF4_TAG: ${{ inputs.hdf4_version_tag }}
+        HDF5_TAG: ${{ inputs.hdf5_version_tag }}
       run: |
           if [[ "$TAG" != "release" && "$TAG" != "snapshot" ]]; then
             echo "Error: build_type must be either 'release' or 'snapshot', got: $TAG"
             exit 1
           fi
           echo "BUILD_TYPE=$TAG" >> $GITHUB_OUTPUT
-          echo "HDF4_TAG=$TAG4" >> $GITHUB_OUTPUT
-          echo "HDF5_TAG=$TAG5" >> $GITHUB_OUTPUT
+          echo "HDF4_VERSION_TAG=$HDF4_TAG" >> $GITHUB_OUTPUT
+          echo "HDF5_VERSION_TAG=$HDF5_TAG" >> $GITHUB_OUTPUT
 
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -82,8 +82,8 @@ jobs:
   get-base-names:
     runs-on: ubuntu-latest
     outputs:
-      hdf4-name: ${{ steps.get-hdf4-base.outputs.base-name }}
-      hdf5-name: ${{ steps.get-hdf5-base.outputs.base-name }}
+      hdf4_artifact_basename: ${{ steps.get-hdf4-base.outputs.base-name }}
+      hdf5_artifact_basename: ${{ steps.get-hdf5-base.outputs.base-name }}
     steps:
       - name: Get HDF4 base name
         id: get-hdf4-base
@@ -107,7 +107,7 @@ jobs:
     needs: determine-version
     uses: ./.github/workflows/tarball.yml
     with:
-      use_environ: release
+      build_environment: release
 
   call-workflow-maven-build:
     needs: [determine-version, get-base-names, call-workflow-tarball]
@@ -115,11 +115,11 @@ jobs:
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       build_type: ${{ needs.determine-version.outputs.build_type }}
-      use_hdf: ${{ needs.determine-version.outputs.hdf4_tag }}
-      use_hdf_name: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf4-name || needs.determine-version.outputs.hdf4_tag }}
-      use_hdf5: ${{ needs.determine-version.outputs.hdf5_tag }}
-      use_hdf5_name: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf5-name || needs.determine-version.outputs.hdf5_tag }}
-      use_environ: release
+      hdf4_version_tag: ${{ needs.determine-version.outputs.hdf4_version_tag }}
+      hdf4_artifact_basename: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf4_artifact_basename || needs.determine-version.outputs.hdf4_version_tag }}
+      hdf5_version_tag: ${{ needs.determine-version.outputs.hdf5_version_tag }}
+      hdf5_artifact_basename: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf5_artifact_basename || needs.determine-version.outputs.hdf5_version_tag }}
+      build_environment: release
       publish_to_maven_registry: true
     secrets:
       APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
@@ -144,6 +144,6 @@ jobs:
       file_base: HDFView-${{ needs.call-workflow-tarball.outputs.source_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
-      use_tag: ${{ needs.determine-version.outputs.version_tag }}
-      use_environ: release
+      release_version_tag: ${{ needs.determine-version.outputs.version_tag }}
+      build_environment: release
 
