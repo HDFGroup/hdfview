@@ -12,11 +12,10 @@
 #   - Runtime version display loads from filtered versions.properties
 
 # HDFView version number (MAJOR.MINOR.RELEASE format)
-HDFVIEW_VERSION=99.99.99
-
+HDFVIEW_VERSION=3.4.0
 # Tag prefix for GitHub releases (do not change)
 HDFVIEW_TAG_PREFIX=HDFView
 
 # Full version tag (constructed as: ${HDFVIEW_TAG_PREFIX}-${HDFVIEW_VERSION})
 # This line is auto-generated for backwards compatibility
-VERSION=HDFView-99.99.99
+VERSION=HDFView-3.4.0

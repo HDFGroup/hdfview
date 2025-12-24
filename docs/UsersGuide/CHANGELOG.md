@@ -1,4 +1,4 @@
-HDFView version 99.99.99
+HDFView version 3.4.0
 
 # 🔺 HDFView Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous HDFView release, platforms tested, and known problems in this release.
