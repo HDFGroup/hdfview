@@ -81,7 +81,6 @@ if [[ -f "build.properties" ]]; then
     print_success "build.properties loaded"
 else
     print_error "build.properties file not found!"
-    print_error "Copy build.properties.template to build.properties and configure it"
     exit 1
 fi
 
@@ -165,7 +164,7 @@ fi
 
 # Check if project needs building
 print_status "Checking build status..."
-if [[ ! -d "hdfview/target" ]] || [[ ! -f "libs/hdfview-3.4-SNAPSHOT.jar" ]]; then
+if [[ ! -d "hdfview/target" ]] || [[ ! -f "libs/hdfview-99.99.99-SNAPSHOT.jar" ]]; then
     print_warning "Project not built or outdated build detected"
     BUILD_NEEDED=1
 else
@@ -284,7 +283,7 @@ case $CHOICE in
         ;;
     2)
         print_status "Launching HDFView via direct JAR execution..."
-        if [[ ! -f "libs/hdfview-3.4-SNAPSHOT.jar" ]]; then
+        if [[ ! -f "libs/hdfview-99.99.99-SNAPSHOT.jar" ]]; then
             print_error "JAR file not found. Build the project first."
             exit 1
         fi
@@ -296,7 +295,7 @@ case $CHOICE in
         fi
 
         # Build classpath, excluding slf4j-nop or slf4j-simple based on debug mode
-        CLASSPATH="libs/hdfview-3.4-SNAPSHOT.jar"
+        CLASSPATH="libs/hdfview-99.99.99-SNAPSHOT.jar"
         for jar in hdfview/target/lib/*.jar; do
             jarname=$(basename "$jar")
             if [[ "$SLF4J_IMPL" == "simple" ]]; then
@@ -318,7 +317,7 @@ case $CHOICE in
         echo
         echo "To launch manually:"
         echo "Option 1 (Maven): mvn exec:java -Dexec.mainClass=\"hdf.view.HDFView\" -pl hdfview"
-        echo "Option 2 (JAR): java ${JVM_ARGS[*]} -cp \"libs/hdfview-3.4-SNAPSHOT.jar:hdfview/target/lib/*\" hdf.view.HDFView"
+        echo "Option 2 (JAR): java ${JVM_ARGS[*]} -cp \"libs/hdfview-99.99.99-SNAPSHOT.jar:hdfview/target/lib/*\" hdf.view.HDFView"
         ;;
     *)
         print_error "Invalid choice. Exiting."

@@ -475,8 +475,7 @@
                   <!-- Hard validation: HDF5 library directory must exist -->
                   <requireProperty>
                     <property>hdf5.lib.dir</property>
-                    <message>ERROR: hdf5.lib.dir property is required. Please set it in build.properties.
-See build.properties.template for examples or docs/build.properties.example for guidance.</message>
+                    <message>ERROR: hdf5.lib.dir property is required. Please set it in build.properties.</message>
                   </requireProperty>
                   <requireFilesExist>
                     <files>

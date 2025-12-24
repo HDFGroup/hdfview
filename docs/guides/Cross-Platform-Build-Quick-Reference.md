@@ -34,8 +34,6 @@ gh release download snapshot --repo HDFGroup/hdf5 --pattern "hdf5-develop-*-ubun
 tar -zxvf hdf4-master-*-ubuntu-2404_gcc.tar.gz
 cd hdf4 && tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
 
-# Create a build.properties file from template
-cp build.properties.template build.properties
 # Modify build.properties to populate hdf5.lib.dir, hdf5.plugin.dir,
 # hdf.lib.dir, and platform.hdf.lib with paths to your local installations
 
@@ -45,7 +43,7 @@ mvn install:install-file -Dfile=repository/lib/swt.jar \
   -DgroupId=org.eclipse.platform \
   -DartifactId=org.eclipse.swt.gtk.linux.x86_64 \
   -Dversion=3.126.0 -Dpackaging=jar -DgeneratePom=true
-mvn package -pl object,hdfview
+mvn package -DskipTests=true -pl object,hdfview
 
 # Run HDFView
 ./run-hdfview.sh
@@ -62,8 +60,6 @@ gh release download snapshot --repo HDFGroup/hdf5 --pattern "hdf5-develop-*-win-
 Set-Location hdf4
 7z x HDF-*-win64.zip
 
-# Create a build.properties file from template
-cp build.properties.template build.properties
 # Modify build.properties to populate hdf5.lib.dir, hdf5.plugin.dir,
 # hdf.lib.dir, and platform.hdf.lib with paths to your local installations
 
@@ -73,7 +69,7 @@ mvn install:install-file "-Dfile=repository\lib\swt.jar" `
   "-DgroupId=org.eclipse.platform" `
   "-DartifactId=org.eclipse.swt.win32.win32.amd64" `
   "-Dversion=3.126.0" "-Dpackaging=jar" "-DgeneratePom=true"
-mvn package -pl object,hdfview "-Dmaven.test.skip=true" -B
+mvn package -DskipTests=true  -pl object,hdfview -B
 ```
 
 ### macOS (Bash)
@@ -86,8 +82,6 @@ gh release download snapshot --repo HDFGroup/hdf5 --pattern "hdf5-develop-*-maco
 tar -zxvf hdf4-master-*-macos14_clang.tar.gz
 cd hdf4 && tar -zxvf HDF-*-Darwin.tar.gz --strip-components 1
 
-# Create a build.properties file from template
-cp build.properties.template build.properties
 # Modify build.properties to populate hdf5.lib.dir, hdf5.plugin.dir,
 # hdf.lib.dir, and platform.hdf.lib with paths to your local installations
 
@@ -97,7 +91,7 @@ mvn install:install-file -Dfile=repository/lib/swt.jar \
   -DgroupId=org.eclipse.platform \
   -DartifactId=org.eclipse.swt.cocoa.macosx.amd64 \
   -Dversion=3.126.0 -Dpackaging=jar -DgeneratePom=true
-mvn package -pl object,hdfview -Dmaven.test.skip=true -B
+mvn package -pl object,hdfview -DskipTests=true  -B
 ```
 
 ---
@@ -188,24 +182,4 @@ otool -L lib/*.dylib
 
 # Test native libraries (Windows PowerShell)
 dumpbin /dependents lib\*.dll
-```
-
----
-
-## Environment Setup
-
-All platforms use `build.properties` for HDF library configuration:
-
-```bash
-# 1. Copy the template
-cp build.properties.template build.properties
-
-# 2. Edit build.properties to set:
-#    - hdf5.lib.dir = /path/to/hdf5
-#    - hdf5.plugin.dir = /path/to/hdf5/plugins
-#    - hdf.lib.dir = /path/to/hdf4
-#    - platform.hdf.lib = /path/to/hdf5/lib:/path/to/hdf4/lib
-
-# Windows users: Use forward slashes in paths
-#    hdf5.lib.dir = C:/path/to/hdf5
 ```

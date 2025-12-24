@@ -408,7 +408,6 @@ Comprehensive project documentation is maintained in multiple locations:
 - **Contributing Guide**: `CONTRIBUTING.md` - How to contribute to the project
 - **Testing Guide**: `docs/Testing-Guide.md` - Complete guide for running tests locally and in CI
 - **Build Instructions**: `docs/guides/Cross-Platform-Build-Quick-Reference.md` - How to build the project
-- **Build Properties**: `docs/build.properties.example` - Configuration template
 - **Users Guide**: `docs/UsersGuide/` - End-user documentation
 
 ### Developer Guides (`docs/guides/`)

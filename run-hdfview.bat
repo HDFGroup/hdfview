@@ -28,7 +28,6 @@ REM ============================================================================
 set "PROPS_FILE=build.properties"
 if not exist "%PROPS_FILE%" (
     echo [ERROR] build.properties file not found!
-    echo [ERROR] Copy build.properties.template to build.properties and configure it
     exit /b 1
 )
 

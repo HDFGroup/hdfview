@@ -45,8 +45,6 @@ hdf.lib.dir=/path/to/hdf4/lib
 platform.hdf.lib=/path/to/hdf5/lib
 ```
 
-See `docs/build.properties.example` for a complete template.
-
 ---
 
 ## Quick Start
