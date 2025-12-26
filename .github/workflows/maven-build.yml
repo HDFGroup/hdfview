@@ -1908,11 +1908,27 @@ jobs:
         Move-Item -Path $oldName -Destination $newName
         Get-ChildItem *.msi
 
-    - name: Sign MSI Installer with Azure Code Signing
+    - name: Install Microsoft Trusted Signing
       if: github.repository == 'HDFGroup/hdfview' && env.AZURE_TENANT_ID != ''
       shell: pwsh
       run: |
-        Write-Host "Signing MSI installer with Azure Code Signing..."
+        Write-Host "Installing Microsoft Trusted Signing tools..."
+        Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
+        .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
+        .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.53 -x
+
+    - name: Create Trusted Signing credentials file
+      if: github.repository == 'HDFGroup/hdfview' && env.AZURE_TENANT_ID != ''
+      uses: jsdaniell/create-json@v1.2.3
+      with:
+        name: "credentials.json"
+        json: '{"Endpoint": "${{ env.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ env.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ env.AZURE_CERT_PROFILE_NAME }}"}'
+
+    - name: Sign MSI Installer with Microsoft Trusted Signing
+      if: github.repository == 'HDFGroup/hdfview' && env.AZURE_TENANT_ID != ''
+      shell: pwsh
+      run: |
+        Write-Host "Signing MSI installer with Microsoft Trusted Signing..."
 
         # Determine MSI filename (snapshot includes commit SHA, release uses version only)
         $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
@@ -1923,28 +1939,29 @@ jobs:
         }
 
         Write-Host "Signing MSI: $msiFile"
-        Write-Host "Using Azure Code Signing service"
 
-        # Install Azure Code Signing tools
-        dotnet tool install --global AzureSignTool --version 5.0.0
+        # Set paths
+        $signtoolPath = "${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64/signtool.exe"
+        $dllPath = "${{ github.workspace }}/Microsoft.Trusted.Signing.Client/bin/x64/Azure.CodeSigning.Dlib.dll"
+        $metadataPath = "${{ github.workspace }}/credentials.json"
 
-        # Sign using Azure Key Vault
-        AzureSignTool sign `
-          --azure-key-vault-url "${{ env.AZURE_ENDPOINT }}" `
-          --azure-key-vault-tenant-id "${{ env.AZURE_TENANT_ID }}" `
-          --azure-key-vault-client-id "${{ env.AZURE_CLIENT_ID }}" `
-          --azure-key-vault-client-secret "${{ env.AZURE_CLIENT_SECRET }}" `
-          --azure-key-vault-certificate "${{ env.AZURE_CERT_PROFILE_NAME }}" `
-          --timestamp-rfc3161 "http://timestamp.digicert.com" `
-          --verbose `
+        # Sign using Microsoft Trusted Signing
+        & $signtoolPath sign `
+          /v `
+          /debug `
+          /fd SHA256 `
+          /tr "http://timestamp.acs.microsoft.com" `
+          /td SHA256 `
+          /dlib $dllPath `
+          /dmdf $metadataPath `
           $msiFile
 
         if ($LASTEXITCODE -ne 0) {
-          Write-Error "Azure Code Signing failed with exit code $LASTEXITCODE"
+          Write-Error "Signing failed with exit code $LASTEXITCODE"
           exit $LASTEXITCODE
         }
 
-        Write-Host "MSI installer signed successfully with Azure Code Signing"
+        Write-Host "MSI installer signed successfully"
 
     - name: Upload Windows MSI Installer
       uses: actions/upload-artifact@v4
