@@ -1747,9 +1747,11 @@ jobs:
         echo "DMG installer signed successfully"
 
     - name: Notarize DMG
-      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
+      if: github.repository == 'HDFGroup/hdfview' && env.NOTARY_USER != ''
       run: |
         echo "Submitting DMG for notarization..."
+        echo "Using Apple ID: $NOTARY_USER"
+        echo "Using Team ID: $SIGNER"
 
         # Determine DMG filename (snapshot includes commit SHA, release uses version only)
         if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
@@ -1760,12 +1762,14 @@ jobs:
 
         echo "Notarizing DMG: $DMG_FILE"
 
+        # Matching build.xml notarization (lines 1963-1968)
+        # Uses NOTARY_USER, NOTARY_KEY, and SIGNER (Team ID)
         xcrun notarytool submit \
           --wait \
           --output-format json \
-          --apple-id "$APPLE_ID" \
-          --password "$APPLE_ID_PASSWORD" \
-          --team-id "$APPLE_TEAM_ID" \
+          --apple-id "$NOTARY_USER" \
+          --password "$NOTARY_KEY" \
+          --team-id "$SIGNER" \
           "$DMG_FILE" > notarization-output.json
 
         # Check if notarization succeeded
@@ -1779,7 +1783,7 @@ jobs:
         echo "Notarization completed successfully"
 
     - name: Staple Notarization Ticket
-      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
+      if: github.repository == 'HDFGroup/hdfview' && env.NOTARY_USER != ''
       run: |
         echo "Stapling notarization ticket to DMG..."
 
