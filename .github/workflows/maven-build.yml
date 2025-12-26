@@ -1321,15 +1321,32 @@ jobs:
         retention-days: 30
 
   build-macos-app:
-    name: Build macOS Application Package
+    name: Build macOS DMG Installer
     runs-on: macos-latest
     timeout-minutes: 30
+    env:
+      # Repository variables (matching ant.yml and build.xml)
+      KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+      SIGNER: ${{ vars.SIGNER }}
+      NOTARY_USER: ${{ vars.NOTARY_USER }}
+      NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+      # Secrets for signing
+      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+      APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
+    - name: Extract version from VERSION file
+      id: get-version
+      run: |
+        HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
+        echo "HDFVIEW_VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
+        echo "HDFView version: $HDFVIEW_VERSION"
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
@@ -1509,7 +1526,7 @@ jobs:
         # Import certificate from secrets
         echo $APPLE_CERTS_BASE64 | base64 --decode > $CERTIFICATE_PATH
 
-        # Create and configure keychain
+        # Create and configure keychain (matching ant.yml)
         security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
         security -v list-keychain -d user -s $KEYCHAIN_FILE
         security -v list-keychains
@@ -1520,56 +1537,75 @@ jobs:
         security -v import $CERTIFICATE_PATH -P $APPLE_CERTS_BASE64_PASSWD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
         security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
 
+        # Clean up certificate file
+        rm $CERTIFICATE_PATH
+
         echo "✓ Keychain setup complete"
         echo "✓ Code signing identity: $SIGNER"
 
     - name: Prepare jpackage Input Directory
       run: |
-        echo "Preparing jpackage input directory..."
-        # Use Maven antrun to prepare staging directory (no jpackage execution yet)
-        # This creates target/jpackage-input with all required files
-        mvn process-resources antrun:run@prepare-jpackage-input -Pjpackage-app-image -pl hdfview -B
+        echo "Preparing jpackage input directory using Maven antrun..."
 
-    - name: Create Signed jpackage App Image
+        # Use Maven antrun plugin to prepare the staging directory
+        # This runs the prepare-jpackage-input execution from pom.xml
+        mvn antrun:run@prepare-jpackage-input -Pjpackage-app-image -pl hdfview \
+          -Dmaven.test.skip=true \
+          -Djacoco.skip=true \
+          -Dpmd.skip=true \
+          -Ddependency-check.skip=true \
+          -B
+
+        echo "Verifying jpackage input directory..."
+        ls -lh hdfview/target/jpackage-input/
+        echo "JAR count: $(find hdfview/target/jpackage-input -name "*.jar" | wc -l)"
+        echo "Dylib count: $(find hdfview/target/jpackage-input -name "*.dylib" | wc -l)"
+
+    - name: Create Signed App Image with jpackage
+      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
       run: |
-        echo "Creating distributable application package with jpackage..."
-        echo "Signing enabled: $([ -n \"$SIGNER\" ] && echo \"YES\" || echo \"NO\")"
+        echo "Creating SIGNED app-image with jpackage (matching build.xml approach)..."
 
-        # Read version from VERSION file
-        HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
-        echo "HDFView version: $HDFVIEW_VERSION"
+        # Unlock keychain (matching build.xml line 2099-2105)
+        security unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_NAME.keychain
 
-        # Build jpackage command
-        JPACKAGE_CMD="$JAVA_HOME/bin/jpackage --verbose \
+        # Create dist directory
+        mkdir -p hdfview/target/dist
+
+        # Call jpackage directly with --mac-sign (matching build.xml lines 2270-2343)
+        $JAVA_HOME/bin/jpackage \
+          --verbose \
           --name HDFView \
           --input hdfview/target/jpackage-input \
-          --main-jar hdfview-${HDFVIEW_VERSION}.jar \
+          --main-jar hdfview-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.jar \
           --main-class hdf.view.HDFView \
           --dest hdfview/target/dist \
           --type app-image \
-          --app-version $HDFVIEW_VERSION \
-          --copyright 'Copyright 2006 by The HDF Group' \
-          --description 'A visual tool for browsing and editing HDF files' \
-          --vendor 'The HDF Group' \
-          --java-options -Xmx1024M \
-          --java-options -Djava.library.path=\$APPDIR \
-          --java-options -XstartOnFirstThread \
-          --arguments -Dhdfview.root=\$APPDIR"
+          --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
+          --mac-sign \
+          --mac-package-identifier HDFView.hdfgroup.org \
+          --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
+          --mac-package-signing-prefix org.hdfgroup.HDFView \
+          --mac-signing-key-user-name "The HDF Group ($SIGNER)"
 
-        # Add macOS signing arguments if signing is enabled (matching build.xml lines 2333-2341)
-        if [ -n "$SIGNER" ] && [ "$GITHUB_REPOSITORY" = "HDFGroup/hdfview" ]; then
-          echo "Adding macOS code signing arguments..."
-          JPACKAGE_CMD="$JPACKAGE_CMD \
-            --mac-sign \
-            --mac-package-identifier HDFView.hdfgroup.org \
-            --mac-package-signing-prefix org.hdfgroup.HDFView \
-            --mac-signing-key-user-name 'The HDF Group ($SIGNER)'"
-          echo "✓ Will sign all binaries with: The HDF Group ($SIGNER)"
-        fi
+        echo "✓ Signed app-image created successfully"
 
-        # Execute jpackage
-        eval $JPACKAGE_CMD
+    - name: Create Unsigned App Image with Maven
+      if: github.repository != 'HDFGroup/hdfview' || env.APPLE_CERTS_BASE64 == ''
+      run: |
+        echo "Creating UNSIGNED app-image using Maven profile (fork or no secrets)..."
 
+        mvn verify -Pjpackage-app-image -pl object,hdfview \
+          -Dmaven.test.skip=true \
+          -Djacoco.skip=true \
+          -Dpmd.skip=true \
+          -Ddependency-check.skip=true \
+          -B
+
+        echo "✓ Unsigned app-image created"
+
+    - name: Verify App Image Creation
+      run: |
         echo "Verifying jpackage output..."
         if [ -d hdfview/target/dist/HDFView.app ]; then
           echo "✓ jpackage app-image created successfully"
@@ -1578,11 +1614,11 @@ jobs:
           echo "JAR files: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" 2>/dev/null | wc -l) JARs"
           echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
 
-          # Verify code signatures if signing was enabled
-          if [ -n "$SIGNER" ] && [ "$GITHUB_REPOSITORY" = "HDFGroup/hdfview" ]; then
+          # Verify code signature if signed
+          if [ "${{ github.repository }}" = "HDFGroup/hdfview" ] && [ -n "$APPLE_CERTS_BASE64" ]; then
             echo ""
             echo "=== Verifying Code Signatures ==="
-            codesign -vvv --deep --strict HDFView.app 2>&1 | head -20
+            codesign -vvv --deep --strict hdfview/target/dist/HDFView.app 2>&1 | head -20
           fi
         else
           echo "✗ jpackage app-image creation failed"
@@ -1598,11 +1634,125 @@ jobs:
         echo "macOS application archive created: ${{ inputs.file_base }}App-Darwin.tar.gz"
         ls -lh ${{ github.workspace }}/${{ inputs.file_base }}App-Darwin.tar.gz
 
+    - name: Create DMG Installer
+      run: |
+        echo "Creating DMG installer from app-image..."
+
+        cd hdfview/target/dist
+
+        # Use jpackage to create DMG from existing app-image
+        $JAVA_HOME/bin/jpackage \
+          --type dmg \
+          --app-image HDFView.app \
+          --name HDFView \
+          --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
+          --mac-package-identifier HDFView.hdfgroup.org \
+          --mac-package-name "HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}" \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewH4.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF4.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewH5.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF5.properties \
+          --dest .
+
+        echo "DMG installer created successfully"
+        ls -lh *.dmg
+
+    - name: Rename DMG for Snapshots
+      if: inputs.use_environ == 'snapshots'
+      run: |
+        cd hdfview/target/dist
+        # For snapshots, rename DMG to include commit SHA (file_base)
+        OLD_NAME="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+        NEW_NAME="${{ inputs.file_base }}.dmg"
+        echo "Renaming $OLD_NAME to $NEW_NAME"
+        mv "$OLD_NAME" "$NEW_NAME"
+        ls -lh *.dmg
+
+    - name: Notarize DMG Installer
+      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
+      run: |
+        echo "Submitting DMG for notarization..."
+
+        cd hdfview/target/dist
+
+        # Determine DMG filename (snapshot includes commit SHA, release uses version only)
+        if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
+          DMG_FILE="${{ inputs.file_base }}.dmg"
+        else
+          DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+        fi
+
+        echo "DMG file: $DMG_FILE"
+
+        # Submit for notarization using xcrun notarytool (matching build.xml)
+        xcrun notarytool submit "$DMG_FILE" \
+          --apple-id "$NOTARY_USER" \
+          --password "$NOTARY_KEY" \
+          --team-id "$SIGNER" \
+          --wait \
+          --timeout 30m \
+          --output-format json > notarization-response.json
+
+        cat notarization-response.json
+
+        # Check notarization status
+        STATUS=$(cat notarization-response.json | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+        SUBMISSION_ID=$(cat notarization-response.json | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+        echo "Notarization status: $STATUS"
+        echo "Submission ID: $SUBMISSION_ID"
+
+        if [ "$STATUS" = "Accepted" ]; then
+          echo "✓ Notarization successful"
+        else
+          echo "✗ Notarization failed with status: $STATUS"
+          echo ""
+          echo "=== Fetching Detailed Notarization Log ==="
+          if [ -n "$SUBMISSION_ID" ]; then
+            xcrun notarytool log "$SUBMISSION_ID" \
+              --apple-id "$NOTARY_USER" \
+              --password "$NOTARY_KEY" \
+              --team-id "$SIGNER" || echo "Failed to fetch log"
+          fi
+          exit 1
+        fi
+
+    - name: Staple Notarization to DMG
+      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
+      run: |
+        echo "Stapling notarization ticket to DMG..."
+
+        cd hdfview/target/dist
+
+        # Determine DMG filename
+        if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
+          DMG_FILE="${{ inputs.file_base }}.dmg"
+        else
+          DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+        fi
+
+        # Staple the notarization ticket
+        xcrun stapler staple "$DMG_FILE"
+
+        # Verify stapling
+        xcrun stapler validate "$DMG_FILE"
+
+        echo "✓ Notarization ticket stapled successfully"
+
     - name: Upload macOS App Artifact
       uses: actions/upload-artifact@v4
       with:
         name: tgz-macos14_clang-app-binary
         path: ${{ inputs.file_base }}App-Darwin.tar.gz
+        retention-days: 30
+
+    - name: Upload macOS DMG Installer Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        # Artifact name matches what release-files.yml expects
+        name: ${{ inputs.use_environ == 'snapshots' && format('{0}-macOS-dmg', inputs.file_base) || format('HDFView-{0}-macOS-dmg', steps.get-version.outputs.HDFVIEW_VERSION) }}
+        path: hdfview/target/dist/*.dmg
         retention-days: 30
 
   build-linux-installers:
@@ -1644,261 +1794,6 @@ jobs:
         echo "RPM installer creation - to be implemented"
         echo "Requires jpackage-rpm profile and package files"
         # TODO: Implement RPM creation once jpackage profile is ready
-
-  build-macos-installer:
-    name: Build macOS Installer (DMG)
-    runs-on: macos-latest
-    needs: build-macos-app
-    timeout-minutes: 20
-    env:
-      # Set secrets as env vars at job level so they can be checked in step conditions
-      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
-      APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
-      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-      APPLE_ID: ${{ secrets.APPLE_ID }}
-      APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      # Repository variables for signing (matching ant.yml)
-      KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-      SIGNER: ${{ vars.SIGNER }}
-      NOTARY_USER: ${{ vars.NOTARY_USER }}
-      NOTARY_KEY: ${{ vars.NOTARY_KEY }}
-
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Extract version from VERSION file
-      id: get-version
-      run: |
-        # Read HDFVIEW_VERSION from VERSION file
-        HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
-        echo "HDFVIEW_VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
-        echo "HDFView version: $HDFVIEW_VERSION"
-
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-
-    - name: Download macOS App Artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: tgz-macos14_clang-app-binary
-
-    - name: Extract App Image
-      run: |
-        tar -xzf ${{ inputs.file_base }}App-Darwin.tar.gz
-        ls -la
-
-    - name: Debug - Check Signing Secrets
-      run: |
-        echo "Repository: ${{ github.repository }}"
-        echo "APPLE_CERTS_BASE64 is set: ${{ env.APPLE_CERTS_BASE64 != '' }}"
-        echo "KEYCHAIN_PASSWD is set: ${{ env.KEYCHAIN_PASSWD != '' }}"
-        echo "APPLE_ID is set: ${{ env.APPLE_ID != '' }}"
-        if [ -n "$APPLE_CERTS_BASE64" ]; then
-          echo "✓ APPLE_CERTS_BASE64 has value (length: ${#APPLE_CERTS_BASE64})"
-        else
-          echo "✗ APPLE_CERTS_BASE64 is empty or not set"
-        fi
-
-    - name: Setup Keychain and Certificate
-      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
-      shell: bash
-      run: |
-        echo "Setting up temporary keychain for code signing..."
-
-        # Create variables (matching ant.yml exactly)
-        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-        KEYCHAIN_FILE=$KEYCHAIN_NAME.keychain
-
-        # Import certificate from secrets
-        echo $APPLE_CERTS_BASE64 | base64 --decode > $CERTIFICATE_PATH
-
-        # Create keychain
-        security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
-        security -v list-keychain -d user -s $KEYCHAIN_FILE
-        security -v list-keychains
-        security -v set-keychain-settings -lut 21600 $KEYCHAIN_FILE
-        security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
-
-        # Import certificate to keychain
-        security -v import $CERTIFICATE_PATH -P $APPLE_CERTS_BASE64_PASSWD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
-        security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
-
-        echo "Keychain setup complete"
-
-    - name: Verify App Bundle Signatures
-      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
-      run: |
-        echo "Verifying app bundle signatures (signed during jpackage creation)..."
-        echo "Using identity: $SIGNER"
-
-        # Verify signature (app bundle already signed by jpackage)
-        codesign -dvv HDFView.app
-        codesign -vvvv --deep --strict HDFView.app
-
-        echo "✓ App bundle signatures verified successfully"
-
-    - name: Create DMG Installer
-      run: |
-        echo "Creating DMG installer from app-image..."
-
-        # Use jpackage to create DMG from app-image
-        # Version loaded from VERSION file
-        HDFVIEW_VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-
-        jpackage \
-          --type dmg \
-          --app-image HDFView.app \
-          --name HDFView \
-          --app-version "$HDFVIEW_VERSION" \
-          --mac-package-identifier HDFView.hdfgroup.org \
-          --mac-package-name "HDFView-$HDFVIEW_VERSION" \
-          --file-associations package_files/HDFViewHDF.properties \
-          --file-associations package_files/HDFViewH4.properties \
-          --file-associations package_files/HDFViewHDF4.properties \
-          --file-associations package_files/HDFViewH5.properties \
-          --file-associations package_files/HDFViewHDF5.properties \
-          --dest .
-
-        echo "DMG installer created successfully"
-        ls -lh *.dmg
-
-    - name: Rename DMG for snapshots
-      if: inputs.use_environ == 'snapshots'
-      run: |
-        # For snapshots, rename DMG to include commit SHA (file_base)
-        OLD_NAME="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
-        NEW_NAME="${{ inputs.file_base }}.dmg"
-        echo "Renaming $OLD_NAME to $NEW_NAME"
-        mv "$OLD_NAME" "$NEW_NAME"
-        ls -lh *.dmg
-
-    - name: Sign DMG Installer
-      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
-      run: |
-        echo "Code signing DMG installer..."
-        echo "Using identity: $SIGNER"
-
-        # Determine DMG filename (snapshot includes commit SHA, release uses version only)
-        if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
-          DMG_FILE="${{ inputs.file_base }}.dmg"
-        else
-          DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
-        fi
-
-        echo "Signing DMG: $DMG_FILE"
-
-        codesign --force --timestamp --options runtime \
-          --entitlements lib/macosx/distribution.entitlements \
-          --verbose=4 --strict \
-          --sign "$SIGNER" \
-          --deep \
-          "$DMG_FILE"
-
-        # Verify signature
-        codesign -dvv "$DMG_FILE"
-
-        # Verify DMG integrity
-        hdiutil verify "$DMG_FILE"
-
-        echo "DMG installer signed successfully"
-
-    - name: Notarize DMG
-      if: github.repository == 'HDFGroup/hdfview' && env.NOTARY_USER != ''
-      run: |
-        echo "Submitting DMG for notarization..."
-        echo "Using Apple ID: $NOTARY_USER"
-        echo "Using Team ID: $SIGNER"
-
-        # Determine DMG filename (snapshot includes commit SHA, release uses version only)
-        if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
-          DMG_FILE="${{ inputs.file_base }}.dmg"
-        else
-          DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
-        fi
-
-        echo "Notarizing DMG: $DMG_FILE"
-
-        # Matching build.xml notarization (lines 1963-1968)
-        # Uses NOTARY_USER, NOTARY_KEY, and SIGNER (Team ID)
-        xcrun notarytool submit \
-          --wait \
-          --output-format json \
-          --apple-id "$NOTARY_USER" \
-          --password "$NOTARY_KEY" \
-          --team-id "$SIGNER" \
-          "$DMG_FILE" > notarization-output.json
-
-        # Check if notarization succeeded
-        STATUS=$(jq -r '.status' notarization-output.json)
-        SUBMISSION_ID=$(jq -r '.id' notarization-output.json)
-
-        if [ "$STATUS" != "Accepted" ]; then
-          echo "❌ Notarization failed with status: $STATUS"
-          echo "Submission ID: $SUBMISSION_ID"
-          echo ""
-          echo "=== Notarization Response ==="
-          jq '.' notarization-output.json
-          echo ""
-          echo "=== Fetching Detailed Logs from Apple ==="
-
-          # Get detailed logs from Apple (matching build.xml lines 1986-1996)
-          xcrun notarytool log \
-            --apple-id "$NOTARY_USER" \
-            --password "$NOTARY_KEY" \
-            --team-id "$SIGNER" \
-            "$SUBMISSION_ID" notarization-log.json
-
-          echo "=== Apple Notarization Logs ==="
-          cat notarization-log.json | jq '.'
-
-          exit 1
-        fi
-
-        echo "✅ Notarization completed successfully"
-
-    - name: Staple Notarization Ticket
-      if: github.repository == 'HDFGroup/hdfview' && env.NOTARY_USER != ''
-      run: |
-        echo "Stapling notarization ticket to DMG..."
-
-        # Determine DMG filename (snapshot includes commit SHA, release uses version only)
-        if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
-          DMG_FILE="${{ inputs.file_base }}.dmg"
-        else
-          DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
-        fi
-
-        echo "Stapling ticket to DMG: $DMG_FILE"
-
-        # Staple the notarization ticket
-        xcrun stapler staple "$DMG_FILE"
-
-        # Validate stapling
-        xcrun stapler validate -v "$DMG_FILE"
-
-        # Verify with spctl
-        spctl -vvvv --assess --type install "$DMG_FILE" || true
-
-        echo "Notarization ticket stapled successfully"
-
-    - name: Cleanup Keychain
-      if: always() && github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
-      run: |
-        security delete-keychain build.keychain || true
-
-    - name: Upload macOS DMG Installer
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ inputs.use_environ == 'snapshots' && format('{0}-macOS-dmg', inputs.file_base) || format('HDFView-{0}-macOS-dmg', steps.get-version.outputs.HDFVIEW_VERSION) }}
-        path: ${{ inputs.use_environ == 'snapshots' && format('{0}.dmg', inputs.file_base) || format('HDFView-{0}.dmg', steps.get-version.outputs.HDFVIEW_VERSION) }}
-        retention-days: 5
 
   build-windows-installer:
     name: Build Windows Installer (MSI)
