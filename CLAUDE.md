@@ -304,8 +304,12 @@ The project uses automated GitHub Actions workflows for continuous integration a
   - License compliance checking (prohibits GPL/AGPL)
 
 - **`maven-build.yml`**: Cross-platform binary builds and Maven package publishing
-  - 6 build jobs (Linux, Windows, macOS binaries and app packages)
+  - 7 build jobs across 3 platforms:
+    - **Linux**: binary tar.gz, app-image, installers (DEB/RPM - planned)
+    - **Windows**: binary zip, app-image, MSI installer (signed)
+    - **macOS**: binary tar.gz, app-image + DMG installer (consolidated, signed)
   - Downloads HDF4/HDF5 from GitHub releases
+  - Code signing for Windows (Microsoft Trusted Signing) and macOS (Developer ID + Notarization)
   - Optional GitHub Packages publication (Maven registry)
   - Called by release.yml for comprehensive releases
 
@@ -371,7 +375,13 @@ Located in `scripts/`:
 - Migrated from Ant-based installer creation to Java 21's native jpackage
 - Native installers for all platforms: MSI (Windows), DMG (macOS), DEB/RPM (Linux)
 - Code signing implemented for Windows (Authenticode) and macOS (Developer ID + Notarization)
-- Split workflow: app-image creation → installer creation → signing
+- **macOS**: Single consolidated job - signs during app-image creation using `jpackage --mac-sign`
+  - Keychain setup matching ant.yml implementation
+  - Signs all binaries (dylibs, frameworks, executables) during jpackage execution
+  - Uses repository variables: SIGNER, KEYCHAIN_NAME, NOTARY_USER, NOTARY_KEY
+  - Manual jpackage input directory preparation for reliability
+  - Full notarization workflow: submit → wait → log errors → staple
+- **Windows**: Microsoft Trusted Signing with Azure Code Signing
 - Conditional signing (only on canonical repository with secrets)
 - Comprehensive documentation for signing process and secret configuration
 - See: `docs/Installer-Signing-Guide.md` and `.claude/dev-docs/jpackage-integration.md`
