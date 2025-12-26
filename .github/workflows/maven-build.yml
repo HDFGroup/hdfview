@@ -1632,30 +1632,27 @@ jobs:
 
     - name: Setup Keychain and Certificate
       if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
+      shell: bash
       run: |
         echo "Setting up temporary keychain for code signing..."
 
-        # Create temporary keychain
-        security create-keychain -p "$KEYCHAIN_PASSWD" build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p "$KEYCHAIN_PASSWD" build.keychain
-        security set-keychain-settings build.keychain
+        # Create variables (matching ant.yml)
+        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+        KEYCHAIN_FILE=build.keychain
 
-        # Decode and import certificate
-        echo "$APPLE_CERTS_BASE64" | base64 --decode > certificate.p12
-        security import certificate.p12 \
-          -k build.keychain \
-          -P "$APPLE_CERTS_BASE64_PASSWD" \
-          -T /usr/bin/codesign \
-          -T /usr/bin/productsign
+        # Import certificate from secrets
+        echo $APPLE_CERTS_BASE64 | base64 --decode > $CERTIFICATE_PATH
 
-        # Allow codesign to access keychain
-        security set-key-partition-list -S apple-tool:,apple: \
-          -k "$KEYCHAIN_PASSWD" \
-          build.keychain
+        # Create keychain
+        security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+        security -v list-keychain -d user -s $KEYCHAIN_FILE
+        security -v list-keychains
+        security -v set-keychain-settings -lut 21600 $KEYCHAIN_FILE
+        security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
 
-        # Clean up certificate file
-        rm certificate.p12
+        # Import certificate to keychain
+        security -v import $CERTIFICATE_PATH -P $APPLE_CERTS_BASE64_PASSWD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
+        security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
 
         echo "Keychain setup complete"
 
