@@ -1621,13 +1621,13 @@ jobs:
     - name: Debug - Check Signing Secrets
       run: |
         echo "Repository: ${{ github.repository }}"
-        echo "MACOS_CERTIFICATE is set: ${{ env.APPLE_CERTS_BASE64 != '' }}"
-        echo "MACOS_DEVELOPER_ID is set: ${{ env.MACOS_DEVELOPER_ID != '' }}"
+        echo "APPLE_CERTS_BASE64 is set: ${{ env.APPLE_CERTS_BASE64 != '' }}"
+        echo "KEYCHAIN_PASSWD is set: ${{ env.KEYCHAIN_PASSWD != '' }}"
         echo "APPLE_ID is set: ${{ env.APPLE_ID != '' }}"
-        if [ -n "$MACOS_CERTIFICATE" ]; then
-          echo "✓ MACOS_CERTIFICATE has value (length: ${#MACOS_CERTIFICATE})"
+        if [ -n "$APPLE_CERTS_BASE64" ]; then
+          echo "✓ APPLE_CERTS_BASE64 has value (length: ${#APPLE_CERTS_BASE64})"
         else
-          echo "✗ MACOS_CERTIFICATE is empty or not set"
+          echo "✗ APPLE_CERTS_BASE64 is empty or not set"
         fi
 
     - name: Setup Keychain and Certificate
@@ -1887,11 +1887,12 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Repository: ${{ github.repository }}"
-        Write-Host "WINDOWS_CERTIFICATE is set: ${{ env.WINDOWS_CERTIFICATE != '' }}"
-        if ($env:WINDOWS_CERTIFICATE) {
-          Write-Host "✓ WINDOWS_CERTIFICATE has value (length: $($env:WINDOWS_CERTIFICATE.Length))"
+        Write-Host "AZURE_TENANT_ID is set: ${{ env.AZURE_TENANT_ID != '' }}"
+        Write-Host "AZURE_ENDPOINT is set: ${{ env.AZURE_ENDPOINT != '' }}"
+        if ($env:AZURE_TENANT_ID) {
+          Write-Host "✓ AZURE_TENANT_ID has value (length: $($env:AZURE_TENANT_ID.Length))"
         } else {
-          Write-Host "✗ WINDOWS_CERTIFICATE is empty or not set"
+          Write-Host "✗ AZURE_TENANT_ID is empty or not set"
         }
 
     - name: Rename MSI for snapshots
