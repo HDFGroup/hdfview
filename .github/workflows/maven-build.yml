@@ -1547,19 +1547,44 @@ jobs:
       run: |
         echo "Preparing jpackage input directory manually..."
 
+        # Debug: Show what's available
+        echo "=== Available JAR files ==="
+        echo "In libs/:"
+        ls -lh libs/*.jar 2>/dev/null || echo "  No libs/ directory or no JARs"
+        echo "In hdfview/target/:"
+        ls -lh hdfview/target/*.jar 2>/dev/null || echo "  No JARs in hdfview/target/"
+        echo ""
+
         # Create staging directory
         JPACKAGE_INPUT=hdfview/target/jpackage-input
         rm -rf $JPACKAGE_INPUT
         mkdir -p $JPACKAGE_INPUT
 
-        # Copy main JAR (built to libs/ by maven-jar-plugin)
+        # Copy main JAR - try both locations
         echo "Copying main JAR..."
-        cp libs/hdfview-*.jar $JPACKAGE_INPUT/
-        ls -lh $JPACKAGE_INPUT/*.jar
+        if ls libs/hdfview-*.jar 1> /dev/null 2>&1; then
+          cp libs/hdfview-*.jar $JPACKAGE_INPUT/
+          echo "  Copied from libs/"
+        elif ls hdfview/target/hdfview-*.jar 1> /dev/null 2>&1; then
+          cp hdfview/target/hdfview-*.jar $JPACKAGE_INPUT/
+          echo "  Copied from hdfview/target/"
+        else
+          echo "  ERROR: hdfview JAR not found!"
+          exit 1
+        fi
 
         # Copy object module JAR
         echo "Copying object module JAR..."
-        cp libs/object-*.jar $JPACKAGE_INPUT/
+        if ls libs/object-*.jar 1> /dev/null 2>&1; then
+          cp libs/object-*.jar $JPACKAGE_INPUT/
+          echo "  Copied from libs/"
+        elif ls object/target/object-*.jar 1> /dev/null 2>&1; then
+          cp object/target/object-*.jar $JPACKAGE_INPUT/
+          echo "  Copied from object/target/"
+        else
+          echo "  ERROR: object JAR not found!"
+          exit 1
+        fi
 
         # Copy all dependencies from target/lib
         echo "Copying dependencies from target/lib..."
