@@ -1087,6 +1087,14 @@ jobs:
     name: Build macOS Binary
     runs-on: macos-latest
     timeout-minutes: 30
+    env:
+      # Repository variables for signing (matching ant.yml)
+      KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+      SIGNER: ${{ vars.SIGNER }}
+      # Secrets for keychain setup
+      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+      APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
 
     steps:
     - name: Checkout Code
@@ -1489,22 +1497,78 @@ jobs:
         # Package application
         mvn package -DskipTests -B
 
-    - name: Create jpackage App Image
+    - name: Setup Keychain for Code Signing
+      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
+      run: |
+        echo "Setting up temporary keychain for code signing..."
+
+        # Create variables (matching ant.yml and build.xml)
+        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+        KEYCHAIN_FILE=$KEYCHAIN_NAME.keychain
+
+        # Import certificate from secrets
+        echo $APPLE_CERTS_BASE64 | base64 --decode > $CERTIFICATE_PATH
+
+        # Create and configure keychain
+        security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+        security -v list-keychain -d user -s $KEYCHAIN_FILE
+        security -v list-keychains
+        security -v set-keychain-settings -lut 21600 $KEYCHAIN_FILE
+        security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+
+        # Import certificate to keychain
+        security -v import $CERTIFICATE_PATH -P $APPLE_CERTS_BASE64_PASSWD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
+        security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+
+        echo "✓ Keychain setup complete"
+        echo "✓ Code signing identity: $SIGNER"
+
+    - name: Prepare jpackage Input Directory
+      run: |
+        echo "Preparing jpackage input directory..."
+        # Use Maven antrun to prepare staging directory (no jpackage execution yet)
+        # This creates target/jpackage-input with all required files
+        mvn process-resources antrun:run@prepare-jpackage-input -Pjpackage-app-image -pl hdfview -B
+
+    - name: Create Signed jpackage App Image
       run: |
         echo "Creating distributable application package with jpackage..."
+        echo "Signing enabled: $([ -n \"$SIGNER\" ] && echo \"YES\" || echo \"NO\")"
 
-        # Create app-image using jpackage profile
-        # -pl object,hdfview: Build object and hdfview modules (skip repository)
-        # -Dmaven.test.skip=true: Skip test compilation and execution
-        # -Djacoco.skip=true: Skip JaCoCo (not needed for release builds)
-        # -Dpmd.skip=true: Skip PMD (static analysis not needed for release)
-        # -Ddependency-check.skip=true: Skip OWASP (runs in separate security workflow)
-        mvn verify -Pjpackage-app-image -pl object,hdfview \
-          -Dmaven.test.skip=true \
-          -Djacoco.skip=true \
-          -Dpmd.skip=true \
-          -Ddependency-check.skip=true \
-          -B
+        # Read version from VERSION file
+        HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
+        echo "HDFView version: $HDFVIEW_VERSION"
+
+        # Build jpackage command
+        JPACKAGE_CMD="$JAVA_HOME/bin/jpackage --verbose \
+          --name HDFView \
+          --input hdfview/target/jpackage-input \
+          --main-jar hdfview-${HDFVIEW_VERSION}.jar \
+          --main-class hdf.view.HDFView \
+          --dest hdfview/target/dist \
+          --type app-image \
+          --app-version $HDFVIEW_VERSION \
+          --copyright 'Copyright 2006 by The HDF Group' \
+          --description 'A visual tool for browsing and editing HDF files' \
+          --vendor 'The HDF Group' \
+          --java-options -Xmx1024M \
+          --java-options -Djava.library.path=\$APPDIR \
+          --java-options -XstartOnFirstThread \
+          --arguments -Dhdfview.root=\$APPDIR"
+
+        # Add macOS signing arguments if signing is enabled (matching build.xml lines 2333-2341)
+        if [ -n "$SIGNER" ] && [ "$GITHUB_REPOSITORY" = "HDFGroup/hdfview" ]; then
+          echo "Adding macOS code signing arguments..."
+          JPACKAGE_CMD="$JPACKAGE_CMD \
+            --mac-sign \
+            --mac-package-identifier HDFView.hdfgroup.org \
+            --mac-package-signing-prefix org.hdfgroup.HDFView \
+            --mac-signing-key-user-name 'The HDF Group ($SIGNER)'"
+          echo "✓ Will sign all binaries with: The HDF Group ($SIGNER)"
+        fi
+
+        # Execute jpackage
+        eval $JPACKAGE_CMD
 
         echo "Verifying jpackage output..."
         if [ -d hdfview/target/dist/HDFView.app ]; then
@@ -1513,6 +1577,13 @@ jobs:
           echo "Native libraries: $(find hdfview/target/dist/HDFView.app/Contents -name "*.dylib" 2>/dev/null | wc -l) .dylib files"
           echo "JAR files: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" 2>/dev/null | wc -l) JARs"
           echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
+
+          # Verify code signatures if signing was enabled
+          if [ -n "$SIGNER" ] && [ "$GITHUB_REPOSITORY" = "HDFGroup/hdfview" ]; then
+            echo ""
+            echo "=== Verifying Code Signatures ==="
+            codesign -vvv --deep --strict HDFView.app 2>&1 | head -20
+          fi
         else
           echo "✗ jpackage app-image creation failed"
           exit 1
@@ -1661,25 +1732,17 @@ jobs:
 
         echo "Keychain setup complete"
 
-    - name: Sign App Bundle
+    - name: Verify App Bundle Signatures
       if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
       run: |
-        echo "Code signing app bundle..."
+        echo "Verifying app bundle signatures (signed during jpackage creation)..."
         echo "Using identity: $SIGNER"
 
-        # Sign the app bundle
-        codesign --force --timestamp --options runtime \
-          --entitlements lib/macosx/distribution.entitlements \
-          --verbose=4 --strict \
-          --sign "$SIGNER" \
-          --deep \
-          HDFView.app
-
-        # Verify signature
+        # Verify signature (app bundle already signed by jpackage)
         codesign -dvv HDFView.app
-        codesign -vvvv --strict HDFView.app
+        codesign -vvvv --deep --strict HDFView.app
 
-        echo "App bundle signed successfully"
+        echo "✓ App bundle signatures verified successfully"
 
     - name: Create DMG Installer
       run: |
