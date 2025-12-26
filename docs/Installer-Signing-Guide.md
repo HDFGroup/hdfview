@@ -21,15 +21,18 @@ The following GitHub secrets must be configured in the canonical repository:
 
 ### macOS Signing and Notarization
 
-The following GitHub secrets must be configured:
+The following GitHub secrets and repository variables must be configured:
 
-- `MACOS_CERTIFICATE`: Base64-encoded Apple Developer ID Application certificate (.p12)
-- `MACOS_CERT_PASSWORD`: Password for the certificate
-- `MACOS_KEYCHAIN_PASSWORD`: Temporary keychain password (can be any secure value)
-- `MACOS_DEVELOPER_ID`: Developer ID/Team ID (format: "Developer ID Application: YourName (TEAMID)")
-- `APPLE_ID`: Apple ID email for notarization
-- `APPLE_ID_PASSWORD`: App-specific password for notarization (generate at appleid.apple.com)
-- `APPLE_TEAM_ID`: 10-character Team ID
+**Secrets (encrypted):**
+- `APPLE_CERTS_BASE64`: Base64-encoded Apple Developer ID Application certificate (.p12)
+- `APPLE_CERTS_BASE64_PASSWD`: Password for the certificate
+- `KEYCHAIN_PASSWD`: Temporary keychain password (can be any secure value)
+
+**Repository Variables (plain text):**
+- `KEYCHAIN_NAME`: Name for the temporary keychain (e.g., "build")
+- `SIGNER`: 10-character Team ID (e.g., "465P44SP96")
+- `NOTARY_USER`: Apple ID email for notarization
+- `NOTARY_KEY`: App-specific password for notarization (generate at appleid.apple.com)
 
 ## Windows Signing Process
 
@@ -60,91 +63,131 @@ The following GitHub secrets must be configured:
 
 ## macOS Signing Process
 
-### For .app Bundles
+### Overview
+
+macOS signing uses jpackage's built-in `--mac-sign` option to sign all binaries (dylibs, frameworks, executables) during app-image creation. This ensures proper code signing with timestamps and hardened runtime.
+
+### Steps
 
 1. **Create temporary keychain**:
    ```bash
-   security create-keychain -p ${KEYCHAIN_PASSWORD} build.keychain
-   security unlock-keychain -p ${KEYCHAIN_PASSWORD} build.keychain
-   security set-keychain-settings build.keychain
+   security -v create-keychain -p ${KEYCHAIN_PASSWD} ${KEYCHAIN_NAME}.keychain
+   security -v list-keychain -d user -s ${KEYCHAIN_NAME}.keychain
+   security -v unlock-keychain -p ${KEYCHAIN_PASSWD} ${KEYCHAIN_NAME}.keychain
+   security -v set-keychain-settings -lut 21600 ${KEYCHAIN_NAME}.keychain
    ```
 
 2. **Import certificate**:
    ```bash
-   security import certificate.p12 -k build.keychain \
-     -P ${CERT_PASSWORD} -T /usr/bin/codesign
+   echo $APPLE_CERTS_BASE64 | base64 --decode > certificate.p12
+   security -v import certificate.p12 -P ${APPLE_CERTS_BASE64_PASSWD} \
+     -A -t cert -f pkcs12 -k ${KEYCHAIN_NAME}.keychain
+   security -v set-key-partition-list -S apple-tool:,codesign:,apple: \
+     -k ${KEYCHAIN_PASSWD} ${KEYCHAIN_NAME}.keychain
    ```
 
-3. **Set partition list** (allow codesign to access):
+3. **Prepare jpackage input directory** (manually copy JARs and dylibs):
    ```bash
-   security set-key-partition-list -S apple-tool:,apple: \
-     -k ${KEYCHAIN_PASSWORD} build.keychain
+   mkdir -p hdfview/target/jpackage-input
+   cp libs/hdfview-*.jar hdfview/target/jpackage-input/
+   cp libs/object-*.jar hdfview/target/jpackage-input/
+   cp hdfview/target/lib/*.jar hdfview/target/jpackage-input/
+   cp ${HDF5LIB_PATH}/lib/*.dylib hdfview/target/jpackage-input/
+   # ... copy other dependencies
    ```
 
-4. **Code sign the app**:
+4. **Create signed app-image with jpackage**:
    ```bash
-   codesign --force --timestamp --options runtime \
-     --entitlements lib/macosx/distribution.entitlements \
-     --verbose=4 --strict \
-     --sign "${DEVELOPER_ID}" \
-     --deep \
-     HDFView.app
+   security unlock-keychain -p ${KEYCHAIN_PASSWD} ${KEYCHAIN_NAME}.keychain
+
+   jpackage \
+     --verbose \
+     --name HDFView \
+     --input hdfview/target/jpackage-input \
+     --main-jar hdfview-99.99.99.jar \
+     --main-class hdf.view.HDFView \
+     --dest hdfview/target/dist \
+     --type app-image \
+     --app-version 99.99.99 \
+     --mac-sign \
+     --mac-package-identifier HDFView.hdfgroup.org \
+     --mac-package-name HDFView-99.99.99 \
+     --mac-package-signing-prefix org.hdfgroup.HDFView \
+     --mac-signing-key-user-name "The HDF Group (${SIGNER})"
    ```
 
 5. **Verify signature**:
    ```bash
-   codesign -dvv HDFView.app
-   codesign -vvvv --strict HDFView.app
+   codesign -vvv --deep --strict hdfview/target/dist/HDFView.app
    ```
 
-### For .dmg or .pkg Installers
+### Creating and Notarizing DMG Installer
 
-1. **Create DMG/PKG** (already done by jpackage)
-
-2. **Code sign the installer**:
+1. **Create DMG from signed app-image**:
    ```bash
-   codesign --force --timestamp --options runtime \
-     --entitlements lib/macosx/distribution.entitlements \
-     --verbose=4 --strict \
-     --sign "${DEVELOPER_ID}" \
-     --deep \
-     HDFView-${VERSION}.dmg
+   jpackage \
+     --type dmg \
+     --app-image HDFView.app \
+     --name HDFView \
+     --app-version 99.99.99 \
+     --mac-package-identifier HDFView.hdfgroup.org \
+     --mac-package-name "HDFView-99.99.99" \
+     --file-associations package_files/HDFViewHDF.properties \
+     --file-associations package_files/HDFViewH4.properties \
+     --file-associations package_files/HDFViewHDF4.properties \
+     --file-associations package_files/HDFViewH5.properties \
+     --file-associations package_files/HDFViewHDF5.properties \
+     --dest .
    ```
 
-3. **Verify DMG**:
-   ```bash
-   codesign -dvv HDFView-${VERSION}.dmg
-   hdiutil verify HDFView-${VERSION}.dmg
-   ```
+   Note: The DMG inherits signatures from the signed app-image.
 
-4. **Submit for notarization**:
+2. **Submit for notarization**:
    ```bash
-   xcrun notarytool submit \
+   xcrun notarytool submit "HDFView-99.99.99.dmg" \
+     --apple-id "${NOTARY_USER}" \
+     --password "${NOTARY_KEY}" \
+     --team-id "${SIGNER}" \
      --wait \
-     --output-format json \
-     --apple-id "${APPLE_ID}" \
-     --password "${APPLE_ID_PASSWORD}" \
-     --team-id "${APPLE_TEAM_ID}" \
-     HDFView-${VERSION}.dmg
+     --timeout 30m \
+     --output-format json > notarization-response.json
    ```
 
-5. **Staple notarization ticket**:
+3. **Check notarization status and fetch logs on failure**:
    ```bash
-   xcrun stapler staple HDFView-${VERSION}.dmg
-   xcrun stapler validate -v HDFView-${VERSION}.dmg
+   STATUS=$(cat notarization-response.json | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+   SUBMISSION_ID=$(cat notarization-response.json | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+   if [ "$STATUS" != "Accepted" ]; then
+     echo "Notarization failed with status: $STATUS"
+     xcrun notarytool log "$SUBMISSION_ID" \
+       --apple-id "${NOTARY_USER}" \
+       --password "${NOTARY_KEY}" \
+       --team-id "${SIGNER}"
+     exit 1
+   fi
    ```
 
-6. **Verify Gatekeeper**:
+4. **Staple notarization ticket**:
    ```bash
-   spctl -vvvv --assess --type install HDFView-${VERSION}.dmg
+   xcrun stapler staple "HDFView-99.99.99.dmg"
+   xcrun stapler validate "HDFView-99.99.99.dmg"
+   ```
+
+5. **Verify Gatekeeper acceptance** (optional):
+   ```bash
+   spctl -vvvv --assess --type install "HDFView-99.99.99.dmg"
    ```
 
 ### Notes
 
-- Entitlements file required: `lib/macosx/distribution.entitlements`
-- Hardened runtime required for notarization
-- Notarization can take several minutes (--wait flag waits for completion)
+- **Critical**: All binaries must be signed DURING jpackage app-image creation using `--mac-sign`
+  - Manual signing with `codesign --deep` after creation does NOT work reliably
+  - jpackage ensures proper signing of all nested binaries (dylibs, frameworks, executables)
+- Hardened runtime and timestamps are automatically applied by jpackage
+- Notarization can take 5-30 minutes (`--wait` flag blocks until complete)
 - Stapling embeds the notarization ticket in the DMG for offline verification
+- Repository variables (SIGNER, NOTARY_USER, etc.) are used instead of old APPLE_ID variables
 - Only runs on macOS runners
 - Only runs when secrets are available (canonical repository)
 
