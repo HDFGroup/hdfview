@@ -328,7 +328,7 @@
                     <echo message="Copying sample files..."/>
                     <mkdir dir="${jpackage.input}/samples"/>
                     <copy todir="${jpackage.input}/samples" failonerror="false">
-                      <fileset dir="${project.basedir}/samples" erroronmissingdir="false">
+                      <fileset dir="${project.basedir}/../samples" erroronmissingdir="false">
                         <include name="**/*"/>
                       </fileset>
                     </copy>
@@ -340,6 +340,10 @@
                       <fileset dir="${project.basedir}/../docs/UsersGuide" erroronmissingdir="false">
                         <include name="**/*.md"/>
                         <include name="**/*.txt"/>
+                        <include name="**/*.html"/>
+                        <include name="**/*.png"/>
+                        <include name="**/*.jpg"/>
+                        <include name="**/*.gif"/>
                       </fileset>
                     </copy>
 
@@ -702,6 +706,8 @@
               </goals>
               <configuration>
                 <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                <!-- Include only runtime dependencies (excludes test and provided scopes) -->
+                <includeScope>runtime</includeScope>
               </configuration>
             </execution>
           </executions>
