@@ -1033,6 +1033,111 @@ jobs:
         # Package application
         mvn package -DskipTests -B
 
+    - name: Prepare jpackage Input Directory
+      shell: pwsh
+      run: |
+        Write-Host "Preparing jpackage input directory manually (Windows-specific fix)..."
+        Write-Host "This step manually prepares the staging directory to ensure native libraries are included."
+        Write-Host ""
+
+        # Create staging directory
+        $JPACKAGE_INPUT = "hdfview\target\jpackage-input"
+        Write-Host "Creating staging directory: $JPACKAGE_INPUT"
+        if (Test-Path $JPACKAGE_INPUT) {
+          Remove-Item -Recurse -Force $JPACKAGE_INPUT
+        }
+        New-Item -ItemType Directory -Path $JPACKAGE_INPUT | Out-Null
+
+        # Copy main JARs from libs/
+        Write-Host "Copying main JARs from libs/..."
+        Copy-Item "libs\hdfview-*.jar" $JPACKAGE_INPUT\ -ErrorAction Stop
+        Copy-Item "libs\object-*.jar" $JPACKAGE_INPUT\ -ErrorAction Stop
+        Write-Host "  ✓ Main JARs copied"
+
+        # Copy all runtime dependencies from hdfview/target/lib
+        Write-Host "Copying runtime dependencies from hdfview\target\lib..."
+        $jarCount = (Get-ChildItem "hdfview\target\lib\*.jar").Count
+        Copy-Item "hdfview\target\lib\*.jar" $JPACKAGE_INPUT\ -ErrorAction Stop
+        Write-Host "  ✓ Copied $jarCount dependency JARs"
+
+        # Copy HDF5 native libraries
+        Write-Host "Copying HDF5 native libraries from $env:HDF5LIB_PATH..."
+        if (Test-Path "$env:HDF5LIB_PATH\bin") {
+          $hdf5Dlls = Get-ChildItem "$env:HDF5LIB_PATH\bin\*.dll" -ErrorAction SilentlyContinue
+          if ($hdf5Dlls) {
+            Copy-Item "$env:HDF5LIB_PATH\bin\*.dll" $JPACKAGE_INPUT\ -ErrorAction Stop
+            Write-Host "  ✓ Copied $($hdf5Dlls.Count) HDF5 DLLs"
+          } else {
+            Write-Warning "  ⚠ No HDF5 DLLs found in $env:HDF5LIB_PATH\bin"
+          }
+        } else {
+          Write-Error "  ✗ HDF5 bin directory not found: $env:HDF5LIB_PATH\bin"
+          exit 1
+        }
+
+        # Copy HDF4 native libraries
+        Write-Host "Copying HDF4 native libraries from $env:HDF4LIB_PATH..."
+        if (Test-Path "$env:HDF4LIB_PATH\bin") {
+          $hdf4Dlls = Get-ChildItem "$env:HDF4LIB_PATH\bin\*.dll" -ErrorAction SilentlyContinue
+          if ($hdf4Dlls) {
+            Copy-Item "$env:HDF4LIB_PATH\bin\*.dll" $JPACKAGE_INPUT\ -ErrorAction Stop
+            Write-Host "  ✓ Copied $($hdf4Dlls.Count) HDF4 DLLs"
+          } else {
+            Write-Warning "  ⚠ No HDF4 DLLs found in $env:HDF4LIB_PATH\bin"
+          }
+        } else {
+          Write-Error "  ✗ HDF4 bin directory not found: $env:HDF4LIB_PATH\bin"
+          exit 1
+        }
+
+        # Copy HDF5 plugins
+        Write-Host "Copying HDF5 plugins..."
+        $pluginDir = "$JPACKAGE_INPUT\plugin"
+        New-Item -ItemType Directory -Path $pluginDir -Force | Out-Null
+        if (Test-Path "$env:HDF5_PLUGIN_PATH") {
+          $plugins = Get-ChildItem "$env:HDF5_PLUGIN_PATH\*.dll" -ErrorAction SilentlyContinue
+          if ($plugins) {
+            Copy-Item "$env:HDF5_PLUGIN_PATH\*.dll" $pluginDir\ -ErrorAction Stop
+            Write-Host "  ✓ Copied $($plugins.Count) plugin DLLs"
+          } else {
+            Write-Host "  ⓘ No plugins found"
+          }
+        } else {
+          Write-Host "  ⓘ HDF5_PLUGIN_PATH not set, skipping plugins"
+        }
+
+        # Copy samples
+        Write-Host "Copying sample files..."
+        $samplesDir = "$JPACKAGE_INPUT\samples"
+        New-Item -ItemType Directory -Path $samplesDir -Force | Out-Null
+        if (Test-Path "samples") {
+          Copy-Item "samples\*" $samplesDir\ -Recurse -ErrorAction Stop
+          $sampleCount = (Get-ChildItem $samplesDir -File).Count
+          Write-Host "  ✓ Copied $sampleCount sample files"
+        } else {
+          Write-Warning "  ⚠ samples directory not found"
+        }
+
+        # Copy documentation
+        Write-Host "Copying documentation..."
+        $docDir = "$JPACKAGE_INPUT\doc"
+        New-Item -ItemType Directory -Path $docDir -Force | Out-Null
+        if (Test-Path "docs\UsersGuide") {
+          Copy-Item "docs\UsersGuide\*" $docDir\ -Recurse -Include "*.md","*.txt","*.html","*.png","*.jpg","*.gif" -ErrorAction Stop
+          $docCount = (Get-ChildItem $docDir -Recurse -File).Count
+          Write-Host "  ✓ Copied $docCount documentation files"
+        } else {
+          Write-Warning "  ⚠ docs\UsersGuide directory not found"
+        }
+
+        Write-Host ""
+        Write-Host "=== Staging directory prepared ==="
+        Write-Host "Total files: $((Get-ChildItem $JPACKAGE_INPUT -Recurse -File).Count)"
+        Write-Host "Total size: $([math]::Round((Get-ChildItem $JPACKAGE_INPUT -Recurse -File | Measure-Object -Property Length -Sum).Sum / 1MB, 2)) MB"
+        Write-Host "JAR files: $((Get-ChildItem $JPACKAGE_INPUT -Filter *.jar).Count)"
+        Write-Host "DLL files: $((Get-ChildItem $JPACKAGE_INPUT -Recurse -Filter *.dll).Count)"
+        Write-Host ""
+
     - name: Create jpackage App Image
       shell: pwsh
       run: |
@@ -1044,11 +1149,13 @@ jobs:
         # -Djacoco.skip=true: Skip JaCoCo (not needed for release builds)
         # -Dpmd.skip=true: Skip PMD (static analysis not needed for release)
         # -Ddependency-check.skip=true: Skip OWASP (runs in separate security workflow)
+        # -Dmaven.antrun.skip=true: Skip Ant plugin (we manually prepared the input directory)
         mvn verify -Pjpackage-app-image -pl object,hdfview `
           "-Dmaven.test.skip=true" `
           "-Djacoco.skip=true" `
           "-Dpmd.skip=true" `
           "-Ddependency-check.skip=true" `
+          "-Dmaven.antrun.skip=true" `
           -B
 
         Write-Host "Verifying jpackage output..."
