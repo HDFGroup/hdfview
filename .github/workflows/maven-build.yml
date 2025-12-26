@@ -1545,21 +1545,75 @@ jobs:
 
     - name: Prepare jpackage Input Directory
       run: |
-        echo "Preparing jpackage input directory using Maven antrun..."
+        echo "Preparing jpackage input directory manually..."
 
-        # Use Maven antrun plugin to prepare the staging directory
-        # This runs the prepare-jpackage-input execution from pom.xml
-        mvn antrun:run@prepare-jpackage-input -Pjpackage-app-image -pl hdfview \
-          -Dmaven.test.skip=true \
-          -Djacoco.skip=true \
-          -Dpmd.skip=true \
-          -Ddependency-check.skip=true \
-          -B
+        # Debug: Show what's available
+        echo "=== Available JAR files ==="
+        echo "In libs/:"
+        ls -lh libs/*.jar 2>/dev/null || echo "  No libs/ directory or no JARs"
+        echo "In hdfview/target/:"
+        ls -lh hdfview/target/*.jar 2>/dev/null || echo "  No JARs in hdfview/target/"
+        echo ""
 
-        echo "Verifying jpackage input directory..."
-        ls -lh hdfview/target/jpackage-input/
-        echo "JAR count: $(find hdfview/target/jpackage-input -name "*.jar" | wc -l)"
-        echo "Dylib count: $(find hdfview/target/jpackage-input -name "*.dylib" | wc -l)"
+        # Create staging directory
+        JPACKAGE_INPUT=hdfview/target/jpackage-input
+        rm -rf $JPACKAGE_INPUT
+        mkdir -p $JPACKAGE_INPUT
+
+        # Copy main JAR - try both locations
+        echo "Copying main JAR..."
+        if ls libs/hdfview-*.jar 1> /dev/null 2>&1; then
+          cp libs/hdfview-*.jar $JPACKAGE_INPUT/
+          echo "  Copied from libs/"
+        elif ls hdfview/target/hdfview-*.jar 1> /dev/null 2>&1; then
+          cp hdfview/target/hdfview-*.jar $JPACKAGE_INPUT/
+          echo "  Copied from hdfview/target/"
+        else
+          echo "  ERROR: hdfview JAR not found!"
+          exit 1
+        fi
+
+        # Copy object module JAR
+        echo "Copying object module JAR..."
+        if ls libs/object-*.jar 1> /dev/null 2>&1; then
+          cp libs/object-*.jar $JPACKAGE_INPUT/
+          echo "  Copied from libs/"
+        elif ls object/target/object-*.jar 1> /dev/null 2>&1; then
+          cp object/target/object-*.jar $JPACKAGE_INPUT/
+          echo "  Copied from object/target/"
+        else
+          echo "  ERROR: object JAR not found!"
+          exit 1
+        fi
+
+        # Copy all dependencies from target/lib
+        echo "Copying dependencies from target/lib..."
+        if [ -d hdfview/target/lib ]; then
+          cp hdfview/target/lib/*.jar $JPACKAGE_INPUT/ || echo "No dependency JARs found"
+        fi
+
+        # Copy HDF5 native libraries
+        echo "Copying HDF5 native libraries from ${{ env.HDF5LIB_PATH }}/lib..."
+        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || echo "No HDF5 dylibs"
+        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || echo "No HDF5 JARs"
+
+        # Copy HDF4 native libraries
+        echo "Copying HDF4 native libraries from ${{ env.HDF4LIB_PATH }}/lib..."
+        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || echo "No HDF4 dylibs"
+        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || echo "No HDF4 JARs"
+
+        # Copy HDF5 plugins
+        echo "Copying HDF5 plugins..."
+        mkdir -p $JPACKAGE_INPUT/plugin
+        cp -L ${{ env.HDF5LIB_PATH }}/lib/plugin/*.dylib $JPACKAGE_INPUT/plugin/ 2>/dev/null || echo "No HDF5 plugins"
+
+        echo ""
+        echo "=== jpackage input directory prepared ==="
+        ls -lh $JPACKAGE_INPUT/
+        echo ""
+        echo "JAR count: $(find $JPACKAGE_INPUT -name "*.jar" | wc -l)"
+        echo "Dylib count: $(find $JPACKAGE_INPUT -name "*.dylib" | wc -l)"
+        echo "Plugin count: $(ls -1 $JPACKAGE_INPUT/plugin/*.dylib 2>/dev/null | wc -l)"
 
     - name: Create Signed App Image with jpackage
       if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
@@ -1572,12 +1626,16 @@ jobs:
         # Create dist directory
         mkdir -p hdfview/target/dist
 
+        # Determine the actual main JAR filename from what was copied
+        MAIN_JAR=$(basename hdfview/target/jpackage-input/hdfview-*.jar)
+        echo "Main JAR: $MAIN_JAR"
+
         # Call jpackage directly with --mac-sign (matching build.xml lines 2270-2343)
         $JAVA_HOME/bin/jpackage \
           --verbose \
           --name HDFView \
           --input hdfview/target/jpackage-input \
-          --main-jar hdfview-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.jar \
+          --main-jar "$MAIN_JAR" \
           --main-class hdf.view.HDFView \
           --dest hdfview/target/dist \
           --type app-image \
