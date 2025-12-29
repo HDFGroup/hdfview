@@ -2179,6 +2179,19 @@ jobs:
 
         Write-Host "MSI installer signed successfully"
 
+        # Verify signature
+        Write-Host ""
+        Write-Host "=== Verifying MSI Signature ==="
+        $sig = Get-AuthenticodeSignature -FilePath $msiFile
+        $sig | Format-List
+
+        if ($sig.Status -ne 'Valid') {
+          Write-Error "Signature verification failed: $($sig.Status)"
+          exit 1
+        }
+
+        Write-Host "✓ MSI signature verified successfully"
+
     - name: Upload Windows MSI Installer
       uses: actions/upload-artifact@v4
       with:
