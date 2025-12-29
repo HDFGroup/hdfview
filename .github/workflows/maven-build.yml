@@ -1493,20 +1493,10 @@ jobs:
         path: ${{ inputs.artifact_basename }}-Darwin.tar.gz
         retention-days: 30
 
-  build-macos-app:
-    name: Build macOS DMG Installer
-    runs-on: macos-latest
+  build-macos-app-x86_64:
+    name: Build macOS App Image (x86_64)
+    runs-on: macos-13
     timeout-minutes: 30
-    env:
-      # Repository variables (matching ant.yml and build.xml)
-      KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-      SIGNER: ${{ vars.SIGNER }}
-      NOTARY_USER: ${{ vars.NOTARY_USER }}
-      NOTARY_KEY: ${{ vars.NOTARY_KEY }}
-      # Secrets for signing
-      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
-      APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
-      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
 
     steps:
     - name: Checkout Code
@@ -1627,21 +1617,19 @@ jobs:
     - name: Build repository module (copies platform SWT JAR)
       run: |
         echo "Building repository module to copy SWT JAR..."
-        # Only run generate-sources phase to trigger antrun plugin (copies SWT JAR)
-        # This avoids the verify phase which would trigger PMD
         mvn generate-sources -pl repository -B
 
-    - name: Install SWT JAR to Local Maven Repository
+    - name: Install SWT JAR to Local Maven Repository (x86_64)
       run: |
-        echo "Installing macOS SWT JAR to local Maven repository..."
+        echo "Installing macOS x86_64 SWT JAR to local Maven repository..."
         if [ -f repository/lib/swt.jar ]; then
           mvn install:install-file -Dfile=repository/lib/swt.jar \
             -DgroupId=org.eclipse.platform \
-            -DartifactId=org.eclipse.swt.cocoa.macosx.amd64 \
+            -DartifactId=org.eclipse.swt.cocoa.macosx.x86_64 \
             -Dversion=3.126.0 \
             -Dpackaging=jar \
             -DgeneratePom=true
-          echo "macOS SWT JAR installed"
+          echo "macOS x86_64 SWT JAR installed"
         else
           echo "ERROR: swt.jar not found in repository/lib/"
           exit 1
@@ -1678,132 +1666,54 @@ jobs:
     - name: Build and Package Application
       run: |
         echo "Building HDFView with Maven..."
-        # Install parent POM first (required for child module resolution)
         mvn install -B -N -Ddependency-check.skip=true
-
-        # Install object and hdfview modules (needed for jpackage)
         mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
-
-        # Package application
         mvn package -DskipTests -B
-
-    - name: Setup Keychain for Code Signing
-      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
-      run: |
-        echo "Setting up temporary keychain for code signing..."
-
-        # Create variables (matching ant.yml and build.xml)
-        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-        KEYCHAIN_FILE=$KEYCHAIN_NAME.keychain
-
-        # Import certificate from secrets
-        echo $APPLE_CERTS_BASE64 | base64 --decode > $CERTIFICATE_PATH
-
-        # Create and configure keychain (matching ant.yml)
-        security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
-        security -v list-keychain -d user -s $KEYCHAIN_FILE
-        security -v list-keychains
-        security -v set-keychain-settings -lut 21600 $KEYCHAIN_FILE
-        security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
-
-        # Import certificate to keychain
-        security -v import $CERTIFICATE_PATH -P $APPLE_CERTS_BASE64_PASSWD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
-        security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
-
-        # Clean up certificate file
-        rm $CERTIFICATE_PATH
-
-        echo "✓ Keychain setup complete"
-        echo "✓ Code signing identity: $SIGNER"
 
     - name: Prepare jpackage Input Directory
       run: |
-        echo "Preparing jpackage input directory manually..."
-
-        # Debug: Show what's available
-        echo "=== Available JAR files ==="
-        echo "In libs/:"
-        ls -lh libs/*.jar 2>/dev/null || echo "  No libs/ directory or no JARs"
-        echo "In hdfview/target/:"
-        ls -lh hdfview/target/*.jar 2>/dev/null || echo "  No JARs in hdfview/target/"
-        echo ""
-
-        # Create staging directory
+        echo "Preparing jpackage input directory..."
         JPACKAGE_INPUT=hdfview/target/jpackage-input
         rm -rf $JPACKAGE_INPUT
         mkdir -p $JPACKAGE_INPUT
 
-        # Copy main JAR - try both locations
-        echo "Copying main JAR..."
+        # Copy JARs
         if ls libs/hdfview-*.jar 1> /dev/null 2>&1; then
           cp libs/hdfview-*.jar $JPACKAGE_INPUT/
-          echo "  Copied from libs/"
         elif ls hdfview/target/hdfview-*.jar 1> /dev/null 2>&1; then
           cp hdfview/target/hdfview-*.jar $JPACKAGE_INPUT/
-          echo "  Copied from hdfview/target/"
         else
-          echo "  ERROR: hdfview JAR not found!"
+          echo "ERROR: hdfview JAR not found!"
           exit 1
         fi
 
-        # Copy object module JAR
-        echo "Copying object module JAR..."
         if ls libs/object-*.jar 1> /dev/null 2>&1; then
           cp libs/object-*.jar $JPACKAGE_INPUT/
-          echo "  Copied from libs/"
         elif ls object/target/object-*.jar 1> /dev/null 2>&1; then
           cp object/target/object-*.jar $JPACKAGE_INPUT/
-          echo "  Copied from object/target/"
         else
-          echo "  ERROR: object JAR not found!"
+          echo "ERROR: object JAR not found!"
           exit 1
         fi
 
-        # Copy all dependencies from target/lib
-        echo "Copying dependencies from target/lib..."
-        if [ -d hdfview/target/lib ]; then
-          cp hdfview/target/lib/*.jar $JPACKAGE_INPUT/ || echo "No dependency JARs found"
-        fi
+        [ -d hdfview/target/lib ] && cp hdfview/target/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || true
+        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || true
+        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || true
+        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || true
+        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || true
 
-        # Copy HDF5 native libraries
-        echo "Copying HDF5 native libraries from ${{ env.HDF5LIB_PATH }}/lib..."
-        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || echo "No HDF5 dylibs"
-        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || echo "No HDF5 JARs"
-
-        # Copy HDF4 native libraries
-        echo "Copying HDF4 native libraries from ${{ env.HDF4LIB_PATH }}/lib..."
-        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || echo "No HDF4 dylibs"
-        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || echo "No HDF4 JARs"
-
-        # Copy HDF5 plugins
-        echo "Copying HDF5 plugins..."
         mkdir -p $JPACKAGE_INPUT/plugin
-        cp -L ${{ env.HDF5LIB_PATH }}/lib/plugin/*.dylib $JPACKAGE_INPUT/plugin/ 2>/dev/null || echo "No HDF5 plugins"
+        cp -L ${{ env.HDF5LIB_PATH }}/lib/plugin/*.dylib $JPACKAGE_INPUT/plugin/ 2>/dev/null || true
 
-        echo ""
-        echo "=== jpackage input directory prepared ==="
-        ls -lh $JPACKAGE_INPUT/
-        echo ""
-        echo "JAR count: $(find $JPACKAGE_INPUT -name "*.jar" | wc -l)"
-        echo "Dylib count: $(find $JPACKAGE_INPUT -name "*.dylib" | wc -l)"
-        echo "Plugin count: $(ls -1 $JPACKAGE_INPUT/plugin/*.dylib 2>/dev/null | wc -l)"
+        echo "JAR count: $(find $JPACKAGE_INPUT -name '*.jar' | wc -l)"
+        echo "Dylib count: $(find $JPACKAGE_INPUT -name '*.dylib' | wc -l)"
 
-    - name: Create Signed App Image with jpackage
-      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
+    - name: Create Unsigned App Image (x86_64)
       run: |
-        echo "Creating SIGNED app-image with jpackage (matching build.xml approach)..."
-
-        # Unlock keychain (matching build.xml line 2099-2105)
-        security unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_NAME.keychain
-
-        # Create dist directory
+        echo "Creating unsigned x86_64 app-image..."
         mkdir -p hdfview/target/dist
-
-        # Determine the actual main JAR filename from what was copied
         MAIN_JAR=$(basename hdfview/target/jpackage-input/hdfview-*.jar)
-        echo "Main JAR: $MAIN_JAR"
 
-        # Call jpackage directly with --mac-sign (matching build.xml lines 2270-2343)
         $JAVA_HOME/bin/jpackage \
           --verbose \
           --name HDFView \
@@ -1813,65 +1723,437 @@ jobs:
           --dest hdfview/target/dist \
           --type app-image \
           --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
-          --mac-sign \
           --mac-package-identifier HDFView.hdfgroup.org \
-          --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
-          --mac-package-signing-prefix org.hdfgroup.HDFView \
-          --mac-signing-key-user-name "The HDF Group ($SIGNER)"
+          --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}
 
-        echo "✓ Signed app-image created successfully"
+        echo "✓ x86_64 app-image created"
 
-    - name: Create Unsigned App Image with Maven
-      if: github.repository != 'HDFGroup/hdfview' || env.APPLE_CERTS_BASE64 == ''
+    - name: Create x86_64 Application Archive
       run: |
-        echo "Creating UNSIGNED app-image using Maven profile (fork or no secrets)..."
+        cd hdfview/target/dist
+        tar -czf ${{ github.workspace }}/HDFView-x86_64.app.tar.gz HDFView.app/
+        echo "Created x86_64 archive"
 
-        mvn verify -Pjpackage-app-image -pl object,hdfview \
-          -Dmaven.test.skip=true \
-          -Djacoco.skip=true \
-          -Dpmd.skip=true \
-          -Ddependency-check.skip=true \
-          -B
+    - name: Upload x86_64 App Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-app-x86_64
+        path: HDFView-x86_64.app.tar.gz
+        retention-days: 30
 
-        echo "✓ Unsigned app-image created"
+  build-macos-app-arm64:
+    name: Build macOS App Image (ARM64)
+    runs-on: macos-latest
+    timeout-minutes: 30
 
-    - name: Verify App Image Creation
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Extract version from VERSION file
+      id: get-version
       run: |
-        echo "Verifying jpackage output..."
-        if [ -d hdfview/target/dist/HDFView.app ]; then
-          echo "✓ jpackage app-image created successfully"
-          echo "Package size: $(du -sh hdfview/target/dist/HDFView.app | cut -f1)"
-          echo "Native libraries: $(find hdfview/target/dist/HDFView.app/Contents -name "*.dylib" 2>/dev/null | wc -l) .dylib files"
-          echo "JAR files: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" 2>/dev/null | wc -l) JARs"
-          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
+        HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
+        echo "HDFVIEW_VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
+        echo "HDFView version: $HDFVIEW_VERSION"
 
-          # Verify code signature if signed
-          if [ "${{ github.repository }}" = "HDFGroup/hdfview" ] && [ -n "$APPLE_CERTS_BASE64" ]; then
-            echo ""
-            echo "=== Verifying Code Signatures ==="
-            codesign -vvv --deep --strict hdfview/target/dist/HDFView.app 2>&1 | head -20
-          fi
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.m2/repository
+          !~/.m2/repository/org/hdfgroup
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Download and Install HDF4 from GitHub
+      run: |
+        echo "Downloading HDF4 from release tag: ${{ inputs.hdf4_release_tag }}"
+
+        if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
+          PATTERN="${{ inputs.hdf4_artifact_basename }}-macos14_clang.tar.gz"
         else
-          echo "✗ jpackage app-image creation failed"
+          PATTERN="*-macos14_clang.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
+
+        gh release download "${{ inputs.hdf4_release_tag }}" --repo HDFGroup/hdf4 --pattern "$PATTERN" \
+          --clobber
+        tar -zxvf *-macos14_clang.tar.gz
+        [ -d hdf4 ] || mv hdf4-* hdf4
+        cd hdf4
+        tar -zxvf HDF-*-Darwin.tar.gz --strip-components 1
+        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        FILE_NAME=$(ls $HDF4DIR)
+        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME" >> $GITHUB_ENV
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Download and Install HDF5 from GitHub
+      run: |
+        echo "Downloading HDF5 from release tag: ${{ inputs.hdf5_release_tag }}"
+
+        if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
+          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.hdf5_artifact_basename }}-macos14_clang.tar.gz"
+        else
+          PATTERN="hdf5-*-macos14_clang.tar.gz"
+        fi
+        echo "Using pattern: $PATTERN"
+
+        gh release download "${{ inputs.hdf5_release_tag }}" --repo HDFGroup/hdf5 --pattern "$PATTERN" \
+          --clobber
+        tar -zxvf hdf5-*-macos14_clang.tar.gz
+        [ -d hdf5 ] || mv hdf5-* hdf5
+        cd hdf5
+        tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        FILE_NAME=$(ls $HDF5DIR)
+        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME" >> $GITHUB_ENV
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Set up build.properties
+      run: |
+        cat > build.properties <<EOF
+        hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
+        hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
+        hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
+        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
+        EOF
+
+    - name: Install HDF JARs to Local Maven Repository
+      run: |
+        mkdir -p repository/lib
+        cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs"
+        cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs"
+        cp lib/fits.jar repository/lib/ 2>/dev/null || echo "fits.jar not found"
+        cp lib/netcdf.jar repository/lib/ 2>/dev/null || echo "netcdf.jar not found"
+        if [ -f repository/lib/jarhdf5-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
+          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
+        fi
+        if [ -f repository/lib/jarhdf-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
+          mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $HDF4_VERSION"
+          echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
+        fi
+        if [ -f repository/lib/fits.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+        fi
+        if [ -f repository/lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+        fi
+
+    - name: Build repository module (copies platform SWT JAR)
+      run: |
+        echo "Building repository module to copy SWT JAR..."
+        mvn generate-sources -pl repository -B
+
+    - name: Install SWT JAR to Local Maven Repository (aarch64)
+      run: |
+        echo "Installing macOS aarch64 SWT JAR to local Maven repository..."
+        if [ -f repository/lib/swt.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/swt.jar \
+            -DgroupId=org.eclipse.platform \
+            -DartifactId=org.eclipse.swt.cocoa.macosx.aarch64 \
+            -Dversion=3.126.0 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "macOS aarch64 SWT JAR installed"
+        else
+          echo "ERROR: swt.jar not found in repository/lib/"
           exit 1
         fi
 
-    - name: Create macOS Application Archive
+    - name: Install SWTBot JARs to Local Maven Repository
       run: |
-        # Package the jpackage app-image as a tar.gz for distribution
-        cd hdfview/target/dist
-        tar -czf ${{ github.workspace }}/${{ inputs.artifact_basename }}App-Darwin.tar.gz HDFView.app/
+        echo "Installing SWTBot JARs to local Maven repository..."
 
-        echo "macOS application archive created: ${{ inputs.artifact_basename }}App-Darwin.tar.gz"
-        ls -lh ${{ github.workspace }}/${{ inputs.artifact_basename }}App-Darwin.tar.gz
+        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local \
+            -DartifactId=org.eclipse.swtbot.swt.finder \
+            -Dversion=4.2.1 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "SWTBot SWT finder JAR installed"
+        else
+          echo "WARNING: org.eclipse.swtbot.swt.finder.jar not found"
+        fi
+
+        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local \
+            -DartifactId=org.eclipse.swtbot.nebula.nattable.finder \
+            -Dversion=4.2.1 \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+          echo "SWTBot Nebula NatTable finder JAR installed"
+        else
+          echo "WARNING: org.eclipse.swtbot.nebula.nattable.finder.jar not found"
+        fi
+
+    - name: Build and Package Application
+      run: |
+        echo "Building HDFView with Maven..."
+        mvn install -B -N -Ddependency-check.skip=true
+        mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
+        mvn package -DskipTests -B
+
+    - name: Prepare jpackage Input Directory
+      run: |
+        echo "Preparing jpackage input directory..."
+        JPACKAGE_INPUT=hdfview/target/jpackage-input
+        rm -rf $JPACKAGE_INPUT
+        mkdir -p $JPACKAGE_INPUT
+
+        # Copy JARs
+        if ls libs/hdfview-*.jar 1> /dev/null 2>&1; then
+          cp libs/hdfview-*.jar $JPACKAGE_INPUT/
+        elif ls hdfview/target/hdfview-*.jar 1> /dev/null 2>&1; then
+          cp hdfview/target/hdfview-*.jar $JPACKAGE_INPUT/
+        else
+          echo "ERROR: hdfview JAR not found!"
+          exit 1
+        fi
+
+        if ls libs/object-*.jar 1> /dev/null 2>&1; then
+          cp libs/object-*.jar $JPACKAGE_INPUT/
+        elif ls object/target/object-*.jar 1> /dev/null 2>&1; then
+          cp object/target/object-*.jar $JPACKAGE_INPUT/
+        else
+          echo "ERROR: object JAR not found!"
+          exit 1
+        fi
+
+        [ -d hdfview/target/lib ] && cp hdfview/target/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || true
+        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || true
+        cp -L ${{ env.HDF5LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || true
+        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || true
+        cp -L ${{ env.HDF4LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || true
+
+        mkdir -p $JPACKAGE_INPUT/plugin
+        cp -L ${{ env.HDF5LIB_PATH }}/lib/plugin/*.dylib $JPACKAGE_INPUT/plugin/ 2>/dev/null || true
+
+        echo "JAR count: $(find $JPACKAGE_INPUT -name '*.jar' | wc -l)"
+        echo "Dylib count: $(find $JPACKAGE_INPUT -name '*.dylib' | wc -l)"
+
+    - name: Create Unsigned App Image (ARM64)
+      run: |
+        echo "Creating unsigned ARM64 app-image..."
+        mkdir -p hdfview/target/dist
+        MAIN_JAR=$(basename hdfview/target/jpackage-input/hdfview-*.jar)
+
+        $JAVA_HOME/bin/jpackage \
+          --verbose \
+          --name HDFView \
+          --input hdfview/target/jpackage-input \
+          --main-jar "$MAIN_JAR" \
+          --main-class hdf.view.HDFView \
+          --dest hdfview/target/dist \
+          --type app-image \
+          --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
+          --mac-package-identifier HDFView.hdfgroup.org \
+          --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}
+
+        echo "✓ ARM64 app-image created"
+
+    - name: Create ARM64 Application Archive
+      run: |
+        cd hdfview/target/dist
+        tar -czf ${{ github.workspace }}/HDFView-arm64.app.tar.gz HDFView.app/
+        echo "Created ARM64 archive"
+
+    - name: Upload ARM64 App Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-app-arm64
+        path: HDFView-arm64.app.tar.gz
+        retention-days: 30
+
+  build-macos-universal:
+    name: Build Universal macOS DMG
+    runs-on: macos-latest
+    needs: [build-macos-app-x86_64, build-macos-app-arm64]
+    timeout-minutes: 45
+    env:
+      KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+      SIGNER: ${{ vars.SIGNER }}
+      NOTARY_USER: ${{ vars.NOTARY_USER }}
+      NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
+      APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Extract version from VERSION file
+      id: get-version
+      run: |
+        HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
+        echo "HDFVIEW_VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
+        echo "HDFView version: $HDFVIEW_VERSION"
+
+    - name: Download x86_64 App Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: macos-app-x86_64
+        path: ./artifacts/x86_64
+
+    - name: Download ARM64 App Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: macos-app-arm64
+        path: ./artifacts/arm64
+
+    - name: Extract App Images
+      run: |
+        echo "Extracting app images..."
+        cd artifacts/x86_64
+        tar -xzf HDFView-x86_64.app.tar.gz
+        cd ../arm64
+        tar -xzf HDFView-arm64.app.tar.gz
+        cd ../..
+
+        echo "Extracted applications:"
+        ls -la artifacts/x86_64/
+        ls -la artifacts/arm64/
+
+    - name: Merge Binaries with lipo to Create Universal App
+      run: |
+        echo "Creating universal binary by merging x86_64 and ARM64..."
+
+        # Create universal app directory
+        mkdir -p universal
+
+        # Copy ARM64 app as base (we'll replace arch-specific binaries)
+        cp -R artifacts/arm64/HDFView.app universal/HDFView.app
+
+        echo "Merging architecture-specific binaries with lipo..."
+
+        # Find all binaries in the runtime (JRE) that need merging
+        # These include dylibs and the main executable
+
+        # Merge main launcher
+        if [ -f artifacts/x86_64/HDFView.app/Contents/MacOS/HDFView ]; then
+          echo "Merging main launcher..."
+          lipo -create \
+            artifacts/x86_64/HDFView.app/Contents/MacOS/HDFView \
+            artifacts/arm64/HDFView.app/Contents/MacOS/HDFView \
+            -output universal/HDFView.app/Contents/MacOS/HDFView
+        fi
+
+        # Merge all JRE dylibs
+        echo "Merging JRE libraries..."
+        find artifacts/x86_64/HDFView.app/Contents/runtime -name "*.dylib" | while read x86_lib; do
+          # Get relative path from app root
+          rel_path="${x86_lib#artifacts/x86_64/HDFView.app/}"
+          arm64_lib="artifacts/arm64/HDFView.app/$rel_path"
+          universal_lib="universal/HDFView.app/$rel_path"
+
+          if [ -f "$arm64_lib" ]; then
+            echo "  Merging: $rel_path"
+            lipo -create "$x86_lib" "$arm64_lib" -output "$universal_lib"
+          fi
+        done
+
+        # Merge libjli
+        if [ -f artifacts/x86_64/HDFView.app/Contents/runtime/Contents/MacOS/libjli.dylib ]; then
+          echo "Merging libjli.dylib..."
+          lipo -create \
+            artifacts/x86_64/HDFView.app/Contents/runtime/Contents/MacOS/libjli.dylib \
+            artifacts/arm64/HDFView.app/Contents/runtime/Contents/MacOS/libjli.dylib \
+            -output universal/HDFView.app/Contents/runtime/Contents/MacOS/libjli.dylib
+        fi
+
+        echo "✓ Universal binary merge complete"
+
+        # Verify some merged binaries
+        echo ""
+        echo "Verifying merged binaries:"
+        file universal/HDFView.app/Contents/MacOS/HDFView
+        file universal/HDFView.app/Contents/runtime/Contents/Home/lib/server/libjvm.dylib || true
+
+    - name: Setup Keychain for Code Signing
+      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
+      run: |
+        echo "Setting up temporary keychain for code signing..."
+        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+        KEYCHAIN_FILE=$KEYCHAIN_NAME.keychain
+
+        echo $APPLE_CERTS_BASE64 | base64 --decode > $CERTIFICATE_PATH
+
+        security -v create-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+        security -v list-keychain -d user -s $KEYCHAIN_FILE
+        security -v list-keychains
+        security -v set-keychain-settings -lut 21600 $KEYCHAIN_FILE
+        security -v unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+
+        security -v import $CERTIFICATE_PATH -P $APPLE_CERTS_BASE64_PASSWD -A -t cert -f pkcs12 -k $KEYCHAIN_FILE
+        security -v set-key-partition-list -S apple-tool:,codesign:,apple: -k $KEYCHAIN_PASSWD $KEYCHAIN_FILE
+
+        rm $CERTIFICATE_PATH
+
+        echo "✓ Keychain setup complete"
+        echo "✓ Code signing identity: $SIGNER"
+
+    - name: Code Sign Universal App
+      if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
+      run: |
+        echo "Code signing universal app..."
+
+        security unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_NAME.keychain
+
+        # Sign with force to overwrite any existing signatures
+        codesign --force --deep --sign "The HDF Group ($SIGNER)" \
+          --options runtime \
+          --timestamp \
+          universal/HDFView.app
+
+        echo "✓ Universal app signed"
+
+        # Verify signature
+        codesign -vvv --deep --strict universal/HDFView.app
+
+    - name: Create Universal App Archive
+      run: |
+        cd universal
+        tar -czf ${{ github.workspace }}/${{ inputs.artifact_basename }}App-Darwin.tar.gz HDFView.app/
+        echo "Universal app archive created"
+
+    - name: Upload Universal App Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: tgz-macos14_clang-app-binary
+        path: ${{ inputs.artifact_basename }}App-Darwin.tar.gz
+        retention-days: 30
 
     - name: Create DMG Installer
       run: |
-        echo "Creating DMG installer from app-image..."
+        echo "Creating DMG installer from universal app-image..."
 
-        cd hdfview/target/dist
+        cd universal
 
-        # Use jpackage to create DMG from existing app-image
         $JAVA_HOME/bin/jpackage \
           --type dmg \
           --app-image HDFView.app \
@@ -1886,14 +2168,13 @@ jobs:
           --file-associations ${{ github.workspace }}/package_files/HDFViewHDF5.properties \
           --dest .
 
-        echo "DMG installer created successfully"
+        echo "DMG installer created"
         ls -lh *.dmg
 
     - name: Rename DMG for Snapshots
       if: inputs.use_environ == 'snapshots'
       run: |
-        cd hdfview/target/dist
-        # For snapshots, rename DMG to include commit SHA (file_base)
+        cd universal
         OLD_NAME="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
         NEW_NAME="${{ inputs.file_base }}.dmg"
         echo "Renaming $OLD_NAME to $NEW_NAME"
@@ -1905,9 +2186,8 @@ jobs:
       run: |
         echo "Submitting DMG for notarization..."
 
-        cd hdfview/target/dist
+        cd universal
 
-        # Determine DMG filename (snapshot includes commit SHA, release uses version only)
         if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
           DMG_FILE="${{ inputs.file_base }}.dmg"
         else
@@ -1916,7 +2196,6 @@ jobs:
 
         echo "DMG file: $DMG_FILE"
 
-        # Submit for notarization using xcrun notarytool (matching build.xml)
         xcrun notarytool submit "$DMG_FILE" \
           --apple-id "$NOTARY_USER" \
           --password "$NOTARY_KEY" \
@@ -1927,7 +2206,6 @@ jobs:
 
         cat notarization-response.json
 
-        # Check notarization status
         STATUS=$(cat notarization-response.json | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
         SUBMISSION_ID=$(cat notarization-response.json | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
 
@@ -1938,8 +2216,6 @@ jobs:
           echo "✓ Notarization successful"
         else
           echo "✗ Notarization failed with status: $STATUS"
-          echo ""
-          echo "=== Fetching Detailed Notarization Log ==="
           if [ -n "$SUBMISSION_ID" ]; then
             xcrun notarytool log "$SUBMISSION_ID" \
               --apple-id "$NOTARY_USER" \
@@ -1954,36 +2230,24 @@ jobs:
       run: |
         echo "Stapling notarization ticket to DMG..."
 
-        cd hdfview/target/dist
+        cd universal
 
-        # Determine DMG filename
         if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
           DMG_FILE="${{ inputs.file_base }}.dmg"
         else
           DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
         fi
 
-        # Staple the notarization ticket
         xcrun stapler staple "$DMG_FILE"
-
-        # Verify stapling
         xcrun stapler validate "$DMG_FILE"
 
         echo "✓ Notarization ticket stapled successfully"
 
-    - name: Upload macOS App Artifact
+    - name: Upload DMG Installer Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: tgz-macos14_clang-app-binary
-        path: ${{ inputs.artifact_basename }}App-Darwin.tar.gz
-        retention-days: 30
-
-    - name: Upload macOS DMG Installer Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        # Artifact name matches what release-files.yml expects
         name: ${{ inputs.use_environ == 'snapshots' && format('{0}-macOS-dmg', inputs.file_base) || format('HDFView-{0}-macOS-dmg', steps.get-version.outputs.HDFVIEW_VERSION) }}
-        path: hdfview/target/dist/*.dmg
+        path: universal/*.dmg
         retention-days: 30
 
   build-linux-installers:
