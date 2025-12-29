@@ -115,254 +115,6 @@ env:
   HDF5_PREFIX: ${{ (inputs.build_type == 'release' && 'hdf5-') || '' }}
 
 jobs:
-  build-linux:
-    name: Build Linux Binary
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-
-    - name: Cache Maven Dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.m2/repository
-          !~/.m2/repository/org/hdfgroup
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-
-    - name: Download and Install HDF4 from GitHub
-      run: |
-        echo "Downloading HDF4 from release tag: ${{ inputs.hdf4_release_tag }}"
-
-        # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
-          PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
-        else
-          PATTERN="*-ubuntu-2404_gcc.tar.gz"
-        fi
-        echo "Using pattern: $PATTERN"
-
-        # Download HDF4 binary from HDF Group GitHub releases
-        gh release download "${{ inputs.hdf4_release_tag }}" \
-          --repo HDFGroup/hdf4 \
-          --pattern "$PATTERN" \
-          --clobber
-
-        # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf *-ubuntu-2404_gcc.tar.gz
-        [ -d hdf4 ] || mv hdf4-* hdf4
-
-        # Extract inner tar.gz into hdf4/ directory
-        cd "${{ github.workspace }}/hdf4"
-        tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
-
-        # Set HDF4 library path
-        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
-
-        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
-        ls -la "$HDF4DIR$FILE_NAME_HDF"
-      env:
-        GH_TOKEN: ${{ github.token }}
-
-    - name: Download and Install HDF5 from GitHub
-      run: |
-        echo "Downloading HDF5 from release tag: ${{ inputs.hdf5_release_tag }}"
-
-        # Determine file pattern based on whether base name is provided
-        if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
-          PATTERN="${{ env.HDF5_PREFIX }}${{ inputs.hdf5_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
-        else
-          PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
-        fi
-        echo "Using pattern: $PATTERN"
-
-        # Download HDF5 binary from HDF Group GitHub releases
-        gh release download "${{ inputs.hdf5_release_tag }}" \
-          --repo HDFGroup/hdf5 \
-          --pattern "$PATTERN" \
-          --clobber
-
-        # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf hdf5-*-ubuntu-2404_gcc.tar.gz
-        [ -d hdf5 ] || mv hdf5-* hdf5
-
-        # Extract inner tar.gz into hdf5/ directory
-        cd "${{ github.workspace }}/hdf5"
-        tar -zxvf HDF5-*-Linux.tar.gz --strip-components 1
-
-        # Set HDF5 library path
-        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
-
-        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
-        ls -la "$HDF5DIR$FILE_NAME_HDF5"
-      env:
-        GH_TOKEN: ${{ github.token }}
-
-    - name: Set up build.properties
-      run: |
-        cat > build.properties << EOF
-        # Build Properties using HDF libraries from GitHub releases
-        # HDF4: ${{ inputs.hdf4_release_tag }}
-        # HDF5: ${{ inputs.hdf5_release_tag }}
-        hdf5.lib.dir=${{ env.HDF5LIB_PATH }}/lib
-        hdf5.plugin.dir=${{ env.HDF5LIB_PATH }}/lib/plugin
-        hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
-        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
-        EOF
-
-        echo "Generated build.properties:"
-        cat build.properties
-
-    - name: Install HDF JARs to Local Maven Repository
-      run: |
-        echo "Manually installing HDF JARs to avoid PMD issues..."
-
-        # Copy HDF JARs from downloaded distributions to repository/lib
-        mkdir -p repository/lib
-        cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs found"
-        cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs found"
-
-        # List what we have
-        echo "JARs in repository/lib:"
-        ls -la repository/lib/*.jar
-
-        # Manually install each JAR to local Maven repository
-        # This bypasses the repository module's POM and avoids PMD issues
-
-        # Install jarhdf5 (extract version from filename)
-        if [ -f repository/lib/jarhdf5-*.jar ]; then
-          JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
-          HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
-          mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE as version $HDF5_VERSION"
-          echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
-        fi
-
-        # Install jarhdf (extract version from filename)
-        if [ -f repository/lib/jarhdf-*.jar ]; then
-          JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
-          HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
-          mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE as version $HDF4_VERSION"
-          echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
-        fi
-
-        # Install fits
-        if [ -f repository/lib/fits.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/fits.jar \
-            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: fits.jar"
-        else
-          echo "ERROR: fits.jar not found in repository/lib/"
-          exit 1
-        fi
-
-        # Install netcdf
-        if [ -f repository/lib/netcdf.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
-            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: netcdf.jar"
-        else
-          echo "ERROR: netcdf.jar not found in repository/lib/"
-          exit 1
-        fi
-
-    - name: Install SWTBot JARs to Local Maven Repository
-      run: |
-        echo "Installing SWTBot JARs to local Maven repository..."
-
-        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
-            -DgroupId=org.eclipse.local \
-            -DartifactId=org.eclipse.swtbot.swt.finder \
-            -Dversion=4.2.1 \
-            -Dpackaging=jar \
-            -DgeneratePom=true
-          echo "SWTBot SWT finder JAR installed"
-        else
-          echo "WARNING: org.eclipse.swtbot.swt.finder.jar not found"
-        fi
-
-        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
-            -DgroupId=org.eclipse.local \
-            -DartifactId=org.eclipse.swtbot.nebula.nattable.finder \
-            -Dversion=4.2.1 \
-            -Dpackaging=jar \
-            -DgeneratePom=true
-          echo "SWTBot Nebula NatTable finder JAR installed"
-        else
-          echo "WARNING: org.eclipse.swtbot.nebula.nattable.finder.jar not found"
-        fi
-
-    - name: Build with Maven
-      run: |
-        echo "Building HDFView with Maven..."
-        # Now build with package (HDF JARs already installed manually above)
-        # Use -Dmaven.test.skip=true to skip test compilation entirely (module-info conflicts)
-        # package phase stops before verify, avoiding PMD/Checkstyle execution
-        mvn clean package -Dmaven.test.skip=true -Dhdf5.version="$HDF5_VERSION" -Dhdf.version="$HDF4_VERSION" -B
-
-    - name: Create Linux Binary Archive
-      run: |
-        # Create a distribution directory
-        mkdir -p hdfview-dist
-
-        # Copy JAR files
-        cp hdfview/target/*.jar hdfview-dist/ 2>/dev/null || echo "No hdfview JARs found"
-        cp object/target/*.jar hdfview-dist/ 2>/dev/null || echo "No object JARs found"
-        cp libs/*.jar hdfview-dist/ 2>/dev/null || echo "No libs JARs found"
-
-        # Copy dependencies
-        if [ -d "target/lib" ]; then
-          cp -r target/lib hdfview-dist/
-        fi
-
-        # Copy HDF native libraries
-        if [ -d "${{ env.HDF5LIB_PATH }}/lib" ]; then
-          mkdir -p hdfview-dist/lib
-          cp -L ${{ env.HDF5LIB_PATH }}/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF5 .so files"
-        fi
-        if [ -d "${{ env.HDF4LIB_PATH }}/lib" ]; then
-          mkdir -p hdfview-dist/lib
-          cp -L ${{ env.HDF4LIB_PATH }}/lib/*.so* hdfview-dist/lib/ 2>/dev/null || echo "No HDF4 .so files"
-        fi
-
-        # Create archive with the expected naming convention
-        tar -czf ${{ inputs.artifact_basename }}-Linux-x86_64.tar.gz hdfview-dist/
-
-        echo "Linux binary archive created: ${{ inputs.artifact_basename }}-Linux-x86_64.tar.gz"
-        ls -lh ${{ inputs.artifact_basename }}-Linux-x86_64.tar.gz
-
-    - name: Upload Linux Binary Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: tgz-ubuntu-2404-binary
-        path: ${{ inputs.artifact_basename }}-Linux-x86_64.tar.gz
-        retention-days: 30
-
   build-linux-app:
     name: Build Linux Application Package
     runs-on: ubuntu-latest
@@ -2278,17 +2030,83 @@ jobs:
         tar -xzf ${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz
         ls -la HDFView/
 
+    - name: Get Version from VERSION file
+      id: get-version
+      run: |
+        if [ -f VERSION ]; then
+          VERSION=$(cat VERSION | tr -d '\r\n')
+          echo "HDFVIEW_VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "HDFView version: $VERSION"
+        else
+          echo "ERROR: VERSION file not found"
+          exit 1
+        fi
+
     - name: Create DEB Installer
       run: |
-        echo "DEB installer creation - to be implemented"
-        echo "Requires jpackage-deb profile and package files"
-        # TODO: Implement DEB creation once jpackage profile is ready
+        echo "Creating DEB installer from app-image..."
+
+        # Version loaded from VERSION file
+        VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+
+        # Use jpackage to create DEB from app-image
+        jpackage \
+          --type deb \
+          --app-image HDFView \
+          --name HDFView \
+          --app-version "$VERSION" \
+          --icon package_files/hdfview.png \
+          --linux-menu-group "Science" \
+          --linux-shortcut \
+          --file-associations package_files/HDFViewHDF.properties \
+          --file-associations package_files/HDFViewH4.properties \
+          --file-associations package_files/HDFViewHDF4.properties \
+          --file-associations package_files/HDFViewH5.properties \
+          --file-associations package_files/HDFViewHDF5.properties \
+          --dest .
+
+        echo "DEB installer created successfully"
+        ls -lh *.deb
 
     - name: Create RPM Installer
       run: |
-        echo "RPM installer creation - to be implemented"
-        echo "Requires jpackage-rpm profile and package files"
-        # TODO: Implement RPM creation once jpackage profile is ready
+        echo "Creating RPM installer from app-image..."
+
+        # Version loaded from VERSION file
+        VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+
+        # Use jpackage to create RPM from app-image
+        jpackage \
+          --type rpm \
+          --app-image HDFView \
+          --name HDFView \
+          --app-version "$VERSION" \
+          --icon package_files/hdfview.png \
+          --linux-menu-group "Science" \
+          --linux-shortcut \
+          --file-associations package_files/HDFViewHDF.properties \
+          --file-associations package_files/HDFViewH4.properties \
+          --file-associations package_files/HDFViewHDF4.properties \
+          --file-associations package_files/HDFViewH5.properties \
+          --file-associations package_files/HDFViewHDF5.properties \
+          --dest .
+
+        echo "RPM installer created successfully"
+        ls -lh *.rpm
+
+    - name: Upload DEB Installer Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: deb-ubuntu-2404-installer
+        path: "*.deb"
+        retention-days: 30
+
+    - name: Upload RPM Installer Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: rpm-ubuntu-2404-installer
+        path: "*.rpm"
+        retention-days: 30
 
   build-windows-installer:
     name: Build Windows Installer (MSI)
