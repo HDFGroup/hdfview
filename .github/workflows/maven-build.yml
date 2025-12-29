@@ -2030,17 +2030,12 @@ jobs:
         tar -xzf ${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz
         ls -la HDFView/
 
-    - name: Get Version from VERSION file
+    - name: Extract version from VERSION file
       id: get-version
       run: |
-        if [ -f VERSION ]; then
-          VERSION=$(cat VERSION | tr -d '\r\n')
-          echo "HDFVIEW_VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "HDFView version: $VERSION"
-        else
-          echo "ERROR: VERSION file not found"
-          exit 1
-        fi
+        HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
+        echo "HDFVIEW_VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
+        echo "HDFView version: $HDFVIEW_VERSION"
 
     - name: Create DEB Installer
       run: |
