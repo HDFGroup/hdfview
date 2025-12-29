@@ -114,7 +114,6 @@ jobs:
 
   get-base-names:
     needs: determine-version
-    if: ${{ needs.determine-version.outputs.build_type == 'snapshot' }}
     runs-on: ubuntu-latest
     outputs:
       hdf4_artifact_basename: ${{ steps.get-hdf4-base.outputs.base-name }}
@@ -125,18 +124,32 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          BASE_NAME=$(gh release view snapshot --repo HDFGroup/hdf4 --json assets --jq '.assets[] | select(.name == "last-file.txt") | .url' | xargs curl -sL)
-          echo "base-name=$BASE_NAME" >> $GITHUB_OUTPUT
-          echo "HDF4 base name: $BASE_NAME"
+          if [[ "${{ needs.determine-version.outputs.build_type }}" == "snapshot" ]]; then
+            # For snapshots, fetch the artifact basename from the snapshot release
+            BASE_NAME=$(gh release view snapshot --repo HDFGroup/hdf4 --json assets --jq '.assets[] | select(.name == "last-file.txt") | .url' | xargs curl -sL)
+            echo "base-name=$BASE_NAME" >> $GITHUB_OUTPUT
+            echo "HDF4 base name (snapshot): $BASE_NAME"
+          else
+            # For releases, output empty string (will use determine-version outputs)
+            echo "base-name=" >> $GITHUB_OUTPUT
+            echo "HDF4 base name: (not needed for release)"
+          fi
 
       - name: Get HDF5 base name
         id: get-hdf5-base
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          BASE_NAME=$(gh release view snapshot --repo HDFGroup/hdf5 --json assets --jq '.assets[] | select(.name == "last-file.txt") | .url' | xargs curl -sL)
-          echo "base-name=$BASE_NAME" >> $GITHUB_OUTPUT
-          echo "HDF5 base name: $BASE_NAME"
+          if [[ "${{ needs.determine-version.outputs.build_type }}" == "snapshot" ]]; then
+            # For snapshots, fetch the artifact basename from the snapshot release
+            BASE_NAME=$(gh release view snapshot --repo HDFGroup/hdf5 --json assets --jq '.assets[] | select(.name == "last-file.txt") | .url' | xargs curl -sL)
+            echo "base-name=$BASE_NAME" >> $GITHUB_OUTPUT
+            echo "HDF5 base name (snapshot): $BASE_NAME"
+          else
+            # For releases, output empty string (will use determine-version outputs)
+            echo "base-name=" >> $GITHUB_OUTPUT
+            echo "HDF5 base name: (not needed for release)"
+          fi
 
   call-workflow-tarball:
     needs: determine-version
@@ -146,7 +159,6 @@ jobs:
 
   call-workflow-maven-build:
     needs: [determine-version, get-base-names, call-workflow-tarball]
-    if: always() && !cancelled() && !contains(needs.*.result, 'failure')
     uses: ./.github/workflows/maven-build.yml
     with:
       artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
