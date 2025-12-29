@@ -1495,7 +1495,7 @@ jobs:
 
   build-macos-app-x86_64:
     name: Build macOS App Image (x86_64)
-    runs-on: macos-13
+    runs-on: macos-15-intel
     timeout-minutes: 30
 
     steps:
@@ -1743,7 +1743,7 @@ jobs:
 
   build-macos-app-arm64:
     name: Build macOS App Image (ARM64)
-    runs-on: macos-latest
+    runs-on: macos-15
     timeout-minutes: 30
 
     steps:
@@ -1989,7 +1989,7 @@ jobs:
 
   build-macos-universal:
     name: Build Universal macOS DMG
-    runs-on: macos-latest
+    runs-on: macos-15
     needs: [build-macos-app-x86_64, build-macos-app-arm64]
     timeout-minutes: 45
     env:
