@@ -13,7 +13,6 @@
 
 # HDFView version number (MAJOR.MINOR.RELEASE format)
 HDFVIEW_VERSION=99.99.99
-
 # Tag prefix for GitHub releases (do not change)
 HDFVIEW_TAG_PREFIX=HDFView
 

@@ -9,7 +9,7 @@ on:
         type: string
         required: false
         default: check
-      use_environ:
+      build_environment:
         description: 'Environment to locate files'
         type: string
         required: true
@@ -21,9 +21,9 @@ on:
       source_base:
         description: "The common version name of the binaries"
         value: ${{ jobs.create_tarball.outputs.source_base }}
-      file_base:
-        description: "The common base name of the source tarballs"
-        value: ${{ jobs.create_tarball.outputs.file_base }}
+      artifact_basename:
+        description: "Base name for all build artifacts (e.g., hdfview-master-abc1234 or HDFView-3.4.0)"
+        value: ${{ jobs.create_tarball.outputs.artifact_basename }}
       file_branch:
         description: "The branch used for the source tarballs"
         value: ${{ jobs.check_commits.outputs.branch_ref }}
@@ -69,7 +69,7 @@ jobs:
       with:
         seconds: 86400 # One day in seconds
         branch: '${{ steps.get-branch-name.outputs.branch_ref }}'
-      if: ${{ (inputs.use_environ == 'snapshots' && inputs.use_ignore == 'check') }}
+      if: ${{ (inputs.build_environment == 'snapshots' && inputs.use_ignore == 'check') }}
 
     - run: echo "You have ${{ steps.check-new-commits.outputs.new-commits-number }} new commit(s) in ${{ steps.get-branch-name.outputs.BRANCH_REF }} ✅!"
       if: ${{ steps.check-new-commits.outputs.has-new-commits == 'true' }}
@@ -80,9 +80,9 @@ jobs:
     name: Create a source tarball
     runs-on: ubuntu-latest
     needs: check_commits
-    if: ${{ ((inputs.use_environ == 'snapshots') && ((needs.check_commits.outputs.has_changes == 'true') || (inputs.use_ignore == 'ignore'))) || (inputs.use_environ  == 'release') }}
+    if: ${{ ((inputs.build_environment == 'snapshots') && ((needs.check_commits.outputs.has_changes == 'true') || (inputs.use_ignore == 'ignore'))) || (inputs.build_environment  == 'release') }}
     outputs:
-      file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
+      artifact_basename: ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}
       source_base: ${{ steps.version.outputs.TAG_VERSION }}
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -106,18 +106,18 @@ jobs:
           VERSION_BASE="${{ steps.getversion.outputs.version }}"
           echo "TAG_VERSION=$VERSION_BASE" >> $GITHUB_OUTPUT
 
-      - name: Set file base name
-        id: set-file-base
+      - name: Set artifact base name
+        id: set-artifact-basename
         run: |
-          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          if [[ '${{ inputs.build_environment }}' == 'snapshots' ]]
           then
             # Replace / with - in branch name to create valid filename
             BRANCH_NAME=$(echo "${{ needs.check_commits.outputs.branch_ref }}" | sed 's/\//-/g')
-            FILE_NAME_BASE=$(echo "hdfview-${BRANCH_NAME}-${{ needs.check_commits.outputs.branch_sha }}")
+            ARTIFACT_NAME=$(echo "hdfview-${BRANCH_NAME}-${{ needs.check_commits.outputs.branch_sha }}")
           else
-            FILE_NAME_BASE=$(echo "HDFView-${{ steps.version.outputs.TAG_VERSION }}")
+            ARTIFACT_NAME=$(echo "HDFView-${{ steps.version.outputs.TAG_VERSION }}")
           fi
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          echo "ARTIFACT_BASENAME=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Save NEWSLETTER
@@ -137,19 +137,19 @@ jobs:
 
       - name: Create release source file (tgz and zip)
         id: create-snapshot-files
-        if: ${{ (inputs.use_environ == 'release') }}
+        if: ${{ (inputs.build_environment == 'release') }}
         run: |
-              mv hdfsrc ${{ steps.set-file-base.outputs.FILE_BASE }}
-              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./${{ steps.set-file-base.outputs.FILE_BASE }}
-              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./${{ steps.set-file-base.outputs.FILE_BASE }}
+              mv hdfsrc ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}
+              zip -r ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.zip ./${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}
+              tar -zcvf ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.tar.gz ./${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}
         shell: bash
 
       - name: Create snapshot source file (tgz and zip)
         id: create-release-files
-        if: ${{ (inputs.use_environ == 'snapshots') }}
+        if: ${{ (inputs.build_environment == 'snapshots') }}
         run: |
-              zip -r ${{ steps.set-file-base.outputs.FILE_BASE }}.zip ./hdfsrc
-              tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz ./hdfsrc
+              zip -r ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.zip ./hdfsrc
+              tar -zcvf ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.tar.gz ./hdfsrc
         shell: bash
 
       # Save files created by release script
@@ -157,12 +157,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: tgz-tarball
-              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+              path: ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Save zip-tarball
         uses: actions/upload-artifact@v4
         with:
               name: zip-tarball
-              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+              path: ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

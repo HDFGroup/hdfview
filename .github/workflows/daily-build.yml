@@ -93,18 +93,18 @@ jobs:
     uses: ./.github/workflows/tarball.yml
     with:
       use_ignore: ${{ needs.get-base-names.outputs.run-ignore }}
-      use_environ: snapshots
+      build_environment: snapshots
 
   call-workflow-maven-build:
     needs: [get-base-names, call-workflow-tarball]
     uses: ./.github/workflows/maven-build.yml
     with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      use_hdf: snapshot
-      use_hdf_name: ${{ needs.get-base-names.outputs.hdf4-name }}
-      use_hdf5: snapshot
-      use_hdf5_name: ${{ needs.get-base-names.outputs.hdf5-name }}
-      use_environ: snapshots
+      artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
+      hdf4_release_tag: snapshot
+      hdf4_artifact_basename: ${{ needs.get-base-names.outputs.hdf4-name }}
+      hdf5_release_tag: snapshot
+      hdf5_artifact_basename: ${{ needs.get-base-names.outputs.hdf5-name }}
+      build_environment: snapshots
     secrets:
       APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
       APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
@@ -126,11 +126,11 @@ jobs:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
     with:
-      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
-      use_tag: HDFView-99.99.99
-      use_environ: snapshots
+      release_version_tag: HDFView-99.99.99
+      build_environment: snapshots
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
   # Remove old snapshot artifacts from the GitHub release to prevent accumulation
@@ -144,8 +144,8 @@ jobs:
       contents: write # In order to allow file deletion
     uses: ./.github/workflows/remove-old-artifacts.yml
     with:
-      file_base: ${{ needs.get-base-names.outputs.hdfview-name }}
-      use_tag: HDFView-99.99.99
-      use_environ: snapshots
-    if: ${{ needs.get-base-names.outputs.has-previous-build == 'true' && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) && (needs.get-base-names.outputs.hdfview-name != needs.call-workflow-tarball.outputs.file_base) }}
+      artifact_basename: ${{ needs.get-base-names.outputs.hdfview-name }}
+      release_version_tag: HDFView-99.99.99
+      build_environment: snapshots
+    if: ${{ needs.get-base-names.outputs.has-previous-build == 'true' && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) && (needs.get-base-names.outputs.hdfview-name != needs.call-workflow-tarball.outputs.artifact_basename) }}
 

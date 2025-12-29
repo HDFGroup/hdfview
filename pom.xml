@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.hdfgroup.hdfview</groupId>
   <artifactId>hdfview-bom</artifactId>
-  <version>99.99.99-SNAPSHOT</version>
+  <version>99.99.99</version>
   <packaging>pom</packaging>
   <modules>
 <!-- The repository module must be first in order to ensure
@@ -30,6 +30,9 @@
     <osgi.platform>gtk.linux.x86_64</osgi.platform>
     <!-- Skip shell-based exec plugins on Windows (no sh available) -->
     <maven.exec.skip>false</maven.exec.skip>
+    <!-- OWASP dependency check disabled by default (requires NVD API key) -->
+    <!-- Enable with: -Dsecurity.scan.skip=false -->
+    <security.scan.skip>true</security.scan.skip>
 
     <!-- HDFView version properties - loaded from VERSION file by properties-maven-plugin -->
     <!-- HDFVIEW_VERSION and HDFVIEW_TAG_PREFIX are read from VERSION file -->
@@ -475,24 +478,8 @@
                   <!-- Hard validation: HDF5 library directory must exist -->
                   <requireProperty>
                     <property>hdf5.lib.dir</property>
-                    <message>ERROR: hdf5.lib.dir property is required. Please set it in build.properties.
-See build.properties.template for examples or docs/build.properties.example for guidance.</message>
+                    <message>ERROR: hdf5.lib.dir property is required. Please set it in build.properties.</message>
                   </requireProperty>
-                  <requireFilesExist>
-                    <files>
-                      <file>${hdf5.lib.dir}</file>
-                    </files>
-                    <message>ERROR: HDF5 library directory does not exist: ${hdf5.lib.dir}
-
-Please ensure HDF5 libraries are installed and hdf5.lib.dir points to the correct location.
-
-Common locations:
-- Linux: /usr/local/lib, /usr/lib/x86_64-linux-gnu
-- macOS: /opt/homebrew/lib, /usr/local/lib
-- Windows: C:/Program Files/HDF_Group/HDF5/*/lib
-
-You can also set HDF5_HOME environment variable and use: hdf5.lib.dir=${env.HDF5_HOME}/lib</message>
-                  </requireFilesExist>
                   <!-- Soft validation: HDF5 plugin directory (can be skipped in CI with -Denforcer.skip=true) -->
                   <requireProperty>
                     <property>hdf5.plugin.dir</property>
@@ -614,11 +601,14 @@ Otherwise, ensure HDF4 libraries are installed or set HDF4_HOME environment vari
         </plugin>
 
         <!-- OWASP Dependency Vulnerability Scanning -->
+        <!-- Disabled by default - requires NVD API key (https://nvd.nist.gov/developers/request-an-api-key) -->
+        <!-- Enable with: mvn verify -Dsecurity.scan=true -->
         <plugin>
           <groupId>org.owasp</groupId>
           <artifactId>dependency-check-maven</artifactId>
           <version>9.0.7</version>
           <configuration>
+            <skip>${security.scan.skip}</skip>
             <failBuildOnCVSS>8.0</failBuildOnCVSS>
             <skipTestScope>true</skipTestScope>
             <skipProvidedScope>true</skipProvidedScope>

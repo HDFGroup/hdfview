@@ -1,25 +1,25 @@
 name: hdfview remove old artifacts
 
 # This workflow removes old snapshot artifacts from GitHub releases to prevent accumulation.
-# It deletes the previous build's files (based on file_base) from the specified release tag.
+# It deletes the previous build's files (based on artifact_basename) from the specified release tag.
 # This is typically called by daily-build.yml to clean up old snapshots before uploading new ones.
 
 # Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
-      use_tag:
+      release_version_tag:
         description: 'Release version tag'
         type: string
         required: false
         default: HDFView-99.99.99
-      use_environ:
+      build_environment:
         description: 'Environment to locate files'
         type: string
         required: true
         default: snapshots
-      file_base:
-        description: "The common base name of the source tarballs"
+      artifact_basename:
+        description: "Base name for all build artifacts (e.g., hdfview-master-abc1234 or HDFView-3.4.0)"
         required: true
         type: string
 
@@ -31,7 +31,7 @@ permissions:
 jobs:
   PreRelease-delfiles:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.use_environ }}
+    environment: ${{ inputs.build_environment }}
     permissions:
         contents: write
     steps:
@@ -42,48 +42,48 @@ jobs:
           fetch-depth: 0
           ref: '${{ github.head_ref || github.ref_name }}'
 
-      - name: Get file base name and version
-        id: get-file-base
+      - name: Get artifact basename and version
+        id: get-artifact-info
         run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          ARTIFACT_NAME=$(echo "${{ inputs.artifact_basename }}")
+          echo "ARTIFACT_BASENAME=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
           # Read HDFVIEW_VERSION from VERSION file (same as maven-build.yml)
           HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
           echo "VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
-          echo "File base: $FILE_NAME_BASE"
+          echo "Artifact basename: $ARTIFACT_NAME"
           echo "HDFView version: $HDFVIEW_VERSION"
 
       - name: List files to delete (debug)
         run: |
           echo "=== Files to be deleted from release ==="
-          echo "Tag: ${{ inputs.use_tag }}"
-          echo "File base: ${{ steps.get-file-base.outputs.FILE_BASE }}"
+          echo "Tag: ${{ inputs.release_version_tag }}"
+          echo "File base: ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}"
           echo ""
           echo "Files that will be deleted:"
-          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt"
-          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz"
-          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}.zip"
-          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz"
-          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}.msi (NEW!)"
-          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}.dmg (NEW!)"
-          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz"
-          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip"
-          echo "  - ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz"
+          echo "  - ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt"
+          echo "  - ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.tar.gz"
+          echo "  - ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.zip"
+          echo "  - ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}-Linux-x86_64.tar.gz"
+          echo "  - ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi (NEW!)"
+          echo "  - ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.dmg (NEW!)"
+          echo "  - ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz"
+          echo "  - ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip"
+          echo "  - ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Darwin.tar.gz"
 
       - name: PreRelease delete from tag
         id: delete_prerelease
-        if: ${{ (inputs.use_environ == 'snapshots') }}
+        if: ${{ (inputs.build_environment == 'snapshots') }}
         uses: mknejp/delete-release-assets@v1
         with:
           token: ${{ github.token }}
-          tag: "${{ inputs.use_tag }}"
+          tag: "${{ inputs.release_version_tag }}"
           assets: |
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-Linux-x86_64.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.msi
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.dmg
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Linux-x86_64.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-win64.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}App-Darwin.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.zip
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}-Linux-x86_64.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.dmg
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip
+              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Darwin.tar.gz

@@ -34,8 +34,6 @@ HDFView is a Java-based GUI application for viewing and editing HDF files. The p
 
 2. **Configure native libraries**
    ```bash
-   # Copy the example configuration
-   cp docs/build.properties.example build.properties
 
    # Edit build.properties to point to your HDF4/HDF5 installations
    vi build.properties
@@ -59,7 +57,7 @@ HDFView is a Java-based GUI application for viewing and editing HDF files. The p
 
 ### Required Configuration
 
-Create a `build.properties` file in the project root (use `docs/build.properties.example` as template):
+Modify the `build.properties` file in the project root:
 
 ```properties
 # HDF4 library path

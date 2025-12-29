@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.hdfgroup.hdfview</groupId>
     <artifactId>hdfview-bom</artifactId>
-    <version>99.99.99-SNAPSHOT</version>
+    <version>99.99.99</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>org.hdfgroup.hdfview</groupId>
       <artifactId>object</artifactId>
-      <version>99.99.99-SNAPSHOT</version>
+      <version>99.99.99</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
