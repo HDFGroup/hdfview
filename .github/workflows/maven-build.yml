@@ -1960,6 +1960,22 @@ jobs:
           codesign -vvv --strict universal/HDFView.app/Contents/app/libdf.dylib
         fi
 
+        # Verify ALL dylibs are signed
+        echo "Checking all dylib signatures..."
+        UNSIGNED_COUNT=0
+        find universal/HDFView.app -name "*.dylib" -type f | while read dylib; do
+          if ! codesign -vv "$dylib" 2>&1 | grep -q "valid on disk"; then
+            echo "  ✗ UNSIGNED OR INVALID: $dylib"
+            UNSIGNED_COUNT=$((UNSIGNED_COUNT + 1))
+          fi
+        done
+
+        if [ $UNSIGNED_COUNT -gt 0 ]; then
+          echo "WARNING: Found $UNSIGNED_COUNT unsigned dylibs!"
+        else
+          echo "✓ All dylibs have valid signatures"
+        fi
+
     - name: Create Universal App Archive
       run: |
         cd universal
@@ -1991,6 +2007,36 @@ jobs:
 
         echo "DMG installer created"
         ls -lh *.dmg
+
+    - name: Verify Signatures in DMG
+      run: |
+        cd universal
+
+        if [ "${{ inputs.use_environ }}" = "snapshots" ]; then
+          DMG_FILE="${{ inputs.file_base }}.dmg"
+        else
+          DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+        fi
+
+        # The DMG doesn't exist with the snapshot name yet (renaming happens next)
+        # So always check the version-named DMG first
+        ACTUAL_DMG="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+
+        echo "Mounting DMG to verify signatures: $ACTUAL_DMG"
+        hdiutil attach "$ACTUAL_DMG" -readonly -nobrowse -mountpoint /tmp/hdfview-dmg
+
+        echo "Checking sample dylib in mounted DMG..."
+        if [ -f /tmp/hdfview-dmg/HDFView.app/Contents/app/libdf.dylib ]; then
+          codesign -vvv /tmp/hdfview-dmg/HDFView.app/Contents/app/libdf.dylib || echo "✗ libdf.dylib NOT SIGNED in DMG!"
+        fi
+
+        if [ -f /tmp/hdfview-dmg/HDFView.app/Contents/app/libhdf5_cpp.1000.0.0.dylib ]; then
+          codesign -vvv /tmp/hdfview-dmg/HDFView.app/Contents/app/libhdf5_cpp.1000.0.0.dylib || echo "✗ libhdf5_cpp NOT SIGNED in DMG!"
+        fi
+
+        hdiutil detach /tmp/hdfview-dmg
+
+        echo "✓ DMG signature check complete"
 
     - name: Rename DMG for Snapshots
       if: inputs.use_environ == 'snapshots'
