@@ -165,6 +165,7 @@ jobs:
   call-workflow-maven-build:
     needs: [determine-version, get-base-names, call-workflow-tarball]
     uses: ./.github/workflows/maven-build.yml
+    secrets: inherit
     with:
       artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
       build_type: ${{ needs.determine-version.outputs.build_type }}
