@@ -1476,9 +1476,14 @@ jobs:
           --type app-image \
           --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
           --mac-package-identifier HDFView.hdfgroup.org \
-          --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}
+          --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewH4.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF4.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewH5.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF5.properties
 
-        echo "✓ x86_64 app-image created"
+        echo "✓ x86_64 app-image created with file associations"
 
     - name: Create x86_64 Application Archive
       run: |
@@ -1722,9 +1727,14 @@ jobs:
           --type app-image \
           --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
           --mac-package-identifier HDFView.hdfgroup.org \
-          --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}
+          --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewH4.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF4.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewH5.properties \
+          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF5.properties
 
-        echo "✓ ARM64 app-image created"
+        echo "✓ ARM64 app-image created with file associations"
 
     - name: Create ARM64 Application Archive
       run: |
@@ -1953,10 +1963,11 @@ jobs:
 
     - name: Create DMG Installer
       run: |
-        echo "Creating DMG installer from universal app-image..."
+        echo "Creating DMG installer from signed universal app-image..."
 
         cd universal
 
+        # Note: File associations already included in app-image (added before lipo merge)
         $JAVA_HOME/bin/jpackage \
           --type dmg \
           --app-image HDFView.app \
@@ -1964,11 +1975,6 @@ jobs:
           --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
           --mac-package-identifier HDFView.hdfgroup.org \
           --mac-package-name "HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}" \
-          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF.properties \
-          --file-associations ${{ github.workspace }}/package_files/HDFViewH4.properties \
-          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF4.properties \
-          --file-associations ${{ github.workspace }}/package_files/HDFViewH5.properties \
-          --file-associations ${{ github.workspace }}/package_files/HDFViewHDF5.properties \
           --dest .
 
         echo "DMG installer created"
