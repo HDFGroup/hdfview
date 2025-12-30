@@ -111,10 +111,16 @@ jobs:
               name: ${{ inputs.build_environment == 'snapshots' && format('{0}-macOS-dmg', steps.get-artifact-info.outputs.ARTIFACT_BASENAME) || format('HDFView-{0}-macOS-dmg', steps.get-artifact-info.outputs.VERSION) }}
               path: ${{ github.workspace }}
 
-      - name: Get published binary (Linux)
+      - name: Get DEB installer (Linux)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: tgz-ubuntu-2404-binary
+              name: deb-ubuntu-2404-installer
+              path: ${{ github.workspace }}
+
+      - name: Get RPM installer (Linux)
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+              name: rpm-ubuntu-2404-installer
               path: ${{ github.workspace }}
 
       # Get files created by ant-app script
@@ -169,7 +175,9 @@ jobs:
         run: |
           sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.tar.gz >${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.zip >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}-Linux-x86_64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          # DEB and RPM packages for Linux
+          sha256sum *.deb >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum *.rpm >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           # Snapshots: {artifact_basename}.msi/dmg, Releases: HDFView-{VERSION}.msi/dmg
           if [ "${{ inputs.build_environment }}" = "snapshots" ]; then
             sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
@@ -213,7 +221,8 @@ jobs:
               UsersGuide.zip
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.tar.gz
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.zip
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}-Linux-x86_64.tar.gz
+              *.deb
+              *.rpm
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.dmg
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz
@@ -236,7 +245,8 @@ jobs:
               UsersGuide.zip
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.tar.gz
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.zip
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}-Linux-x86_64.tar.gz
+              *.deb
+              *.rpm
               HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi
               HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz
