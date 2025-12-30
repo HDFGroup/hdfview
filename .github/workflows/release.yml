@@ -170,7 +170,7 @@ jobs:
       hdf5_artifact_basename: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf5_artifact_basename || needs.determine-version.outputs.hdf5_artifact_basename }}
       hdf5_version: ${{ needs.determine-version.outputs.hdf5_version }}
       build_environment: release
-      publish_to_maven_registry: true
+      publish_to_maven_registry: ${{ needs.determine-version.outputs.build_type == 'snapshot' }}
     secrets:
       APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
       APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
