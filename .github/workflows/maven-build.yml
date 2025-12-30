@@ -1801,6 +1801,18 @@ jobs:
         ls -la artifacts/x86_64/
         ls -la artifacts/arm64/
 
+    - name: Strip Ad-Hoc Signatures Before Merge
+      run: |
+        echo "Removing ad-hoc signatures from architecture-specific apps..."
+        echo "This is required because jpackage auto-signs with pseudo-identity '-'"
+        echo "and lipo invalidates those signatures when merging."
+
+        # Remove _CodeSignature directories from both apps
+        find artifacts/x86_64/HDFView.app -name "_CodeSignature" -type d -exec rm -rf {} + 2>/dev/null || true
+        find artifacts/arm64/HDFView.app -name "_CodeSignature" -type d -exec rm -rf {} + 2>/dev/null || true
+
+        echo "✓ Ad-hoc signatures stripped from both architecture builds"
+
     - name: Merge Binaries with lipo to Create Universal App
       run: |
         echo "Creating universal binary by merging x86_64 and ARM64..."
@@ -2108,6 +2120,7 @@ jobs:
           --name HDFView \
           --app-version "$VERSION" \
           --icon package_files/hdfview.png \
+          --linux-package-name hdfview \
           --linux-menu-group "Science" \
           --linux-shortcut \
           --file-associations package_files/HDFViewHDF.properties \
@@ -2134,6 +2147,7 @@ jobs:
           --name HDFView \
           --app-version "$VERSION" \
           --icon package_files/hdfview.png \
+          --linux-package-name hdfview \
           --linux-menu-group "Science" \
           --linux-shortcut \
           --file-associations package_files/HDFViewHDF.properties \
