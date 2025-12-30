@@ -1,0 +1,242 @@
+name: Publish Maven Packages to Github
+
+on:
+    workflow_call:
+        inputs:
+            artifact_basename:
+              description: 'Base name for all build artifacts (e.g., hdfview-master-abc1234 or HDFView-3.4.0)'
+              type: string
+              required: true
+            build_type:
+              description: 'Build type: release or snapshot'
+              type: string
+              required: false
+              default: 'snapshot'
+            hdf4_release_tag:
+              description: 'HDF4 GitHub release tag to download from (e.g., snapshot, hdf4.3.1)'
+              type: string
+              required: false
+              default: 'snapshot'
+            hdf4_artifact_basename:
+              description: 'HDF4 artifact base filename pattern (e.g., hdf4.3.1, hdf-master-abc1234)'
+              type: string
+              required: false
+              default: 'snapshot'
+            hdf5_release_tag:
+              description: 'HDF5 GitHub release tag to download from (e.g., snapshot, 2.0.0)'
+              type: string
+              required: false
+              default: 'snapshot'
+            hdf5_artifact_basename:
+              description: 'HDF5 artifact base filename pattern (e.g., 2.0.0, hdf5-develop-xyz7890)'
+              type: string
+              required: false
+              default: 'snapshot'
+            hdf4_version:
+              description: 'HDF4 version number (e.g., 4.3.1) - if provided, skips parsing from JAR filename'
+              type: string
+              required: false
+              default: ''
+            hdf5_version:
+              description: 'HDF5 version number (e.g., 2.0.0) - if provided, skips parsing from JAR filename'
+              type: string
+              required: false
+              default: ''
+            hdf5_prefix:
+              description: 'Prefix for HDF5 release file patterns: "" for snapshot, "hdf5-" for tagged releases'
+              type: string
+              required: false
+              default: ''
+  
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+    publish-maven-packages:
+      name: Publish Maven Packages
+      runs-on: ubuntu-latest
+    
+      timeout-minutes: 30
+
+      steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-publish-${{ hashFiles('**/pom.xml') }}
+
+      - name: Install HDF Libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhdf5-dev libhdf4-dev
+
+          # Try to install Java packages if available (may not exist in all Ubuntu versions)
+          sudo apt-get install -y libhdf5-java || echo "libhdf5-java not available, will use GitHub releases"
+          sudo apt-get install -y libhdf4-java || echo "libhdf4-java not available, will use GitHub releases"
+
+      - name: Install Java Dependencies to Maven Local Repository
+        run: |
+          echo "Installing Java dependencies..."
+
+          # Install fits.jar and netcdf.jar from repository
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+
+          # Install HDF JARs - try system packages first, fallback to downloading
+          # Note: libhdf4-java and libhdf5-java may not be available in all Ubuntu versions
+          echo "Checking for HDF Java packages..."
+
+          # Always download jarhdf5 from GitHub (system packages are outdated)
+          echo "Downloading jarhdf5.jar from GitHub release: ${{ inputs.hdf5_release_tag }}..."
+
+          # Determine file pattern based on whether base name is provided
+          if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
+            PATTERN="${{ inputs.hdf5_prefix }}${{ inputs.hdf5_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
+          else
+            PATTERN="*ubuntu-2404_gcc.tar.gz"
+          fi
+          echo "Using pattern: $PATTERN"
+
+          mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
+            gh release download "${{ inputs.hdf5_release_tag }}" --repo HDFGroup/hdf5 --pattern "$PATTERN"
+            tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
+            cd hdf5
+
+            # Extract inner tar.gz
+            HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
+            tar -zxf "$HDF5_TARBALL" --strip-components 1
+
+            # Find JAR in HDF_Group/HDF5/version/lib structure
+            if [ -d HDF_Group/HDF5 ]; then
+              VERSION_DIR=$(ls HDF_Group/HDF5 | head -1)
+              JAR_FILE=$(ls HDF_Group/HDF5/$VERSION_DIR/lib/jarhdf5*.jar 2>/dev/null | head -1)
+              if [ -f "$JAR_FILE" ]; then
+                HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
+                mvn install:install-file -Dfile="$JAR_FILE" \
+                  -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" \
+                  -Dpackaging=jar -DgeneratePom=true
+                echo "Installed jarhdf5.jar from GitHub: $JAR_FILE as version $HDF5_VERSION"
+                echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
+              fi
+            fi
+            cd ${{ github.workspace }}
+
+          # Try jarhdf from system packages, fallback to GitHub download
+          if [ -f /usr/share/java/jarhdf.jar ]; then
+            echo "Installing jarhdf.jar from system packages"
+            # Extract version from jar if possible, otherwise use default
+            JAR_PATH="/usr/share/java/jarhdf.jar"
+            # System jarhdf.jar typically doesn't have version in filename, check actual file
+            if jar -tf "$JAR_PATH" | grep -q "MANIFEST.MF"; then
+              HDF4_VERSION=$(unzip -p "$JAR_PATH" META-INF/MANIFEST.MF | grep "Implementation-Version" | cut -d' ' -f2 | tr -d '\r' || echo "4.3.1")
+            else
+              HDF4_VERSION="4.3.1"
+            fi
+            mvn install:install-file -Dfile="$JAR_PATH" \
+              -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" \
+              -Dpackaging=jar -DgeneratePom=true
+            echo "Installed jarhdf.jar from system packages as version $HDF4_VERSION"
+            echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
+          else
+            echo "System packages don't provide jarhdf.jar, downloading from GitHub release: ${{ inputs.hdf4_release_tag }}..."
+
+            # Determine file pattern based on whether base name is provided
+            if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
+              PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
+            else
+              PATTERN="*ubuntu-2404_gcc.tar.gz"
+            fi
+            echo "Using pattern: $PATTERN"
+
+            mkdir -p /tmp/hdf4-download && cd /tmp/hdf4-download
+            gh release download "${{ inputs.hdf4_release_tag }}" --repo HDFGroup/hdf4 --pattern "$PATTERN"
+            tar -zxf hdf4*-ubuntu-2404_gcc.tar.gz
+            cd hdf4
+
+            # Extract inner tar.gz
+            HDF4_TARBALL=$(ls HDF-*-Linux.tar.gz | head -1)
+            tar -zxf "$HDF4_TARBALL" --strip-components 1
+
+            # Find JAR in HDF_Group/HDF/version/lib structure
+            if [ -d HDF_Group/HDF ]; then
+              VERSION_DIR=$(ls HDF_Group/HDF | head -1)
+              JAR_FILE=$(ls HDF_Group/HDF/$VERSION_DIR/lib/jarhdf-*.jar 2>/dev/null | head -1)
+              if [ -f "$JAR_FILE" ]; then
+                HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
+                mvn install:install-file -Dfile="$JAR_FILE" \
+                  -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" \
+                  -Dpackaging=jar -DgeneratePom=true
+                echo "Installed jarhdf.jar from GitHub: $JAR_FILE as version $HDF4_VERSION"
+                echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
+              fi
+            fi
+            cd ${{ github.workspace }}
+          fi
+
+          # Install SWTBot JARs for UI testing
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.nebula.nattable.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+
+          echo "All Java dependencies installed successfully"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Set up build.properties
+        run: |
+          cat > build.properties << EOF
+          hdf5.lib.dir=/usr/lib/x86_64-linux-gnu
+          hdf5.plugin.dir=/usr/lib/x86_64-linux-gnu/lib/plugin
+          hdf.lib.dir=/usr/lib/x86_64-linux-gnu
+          platform.hdf.lib=/usr/lib/x86_64-linux-gnu
+          ci.build=true
+          release.build=true
+          EOF
+
+      - name: Configure Maven Settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << EOF
+          <settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>\${env.GITHUB_ACTOR}</username>
+                <password>\${env.GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Publish to GitHub Packages
+        run: |
+          mvn deploy -B \
+            -pl object,hdfview \
+            -DskipTests \
+            -Ddependency-check.skip=true \
+            -Dmaven.javadoc.skip=false \
+            -Dmaven.source.skip=false \
+            -Dhdf5.version="$HDF5_VERSION" \
+            -Dhdf.version="$HDF4_VERSION" \
+            -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
