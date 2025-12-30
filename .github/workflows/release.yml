@@ -39,6 +39,7 @@ jobs:
       hdf5_artifact_basename: ${{ steps.construct-hdf-tags.outputs.HDF5_ARTIFACT_BASENAME }}
       hdf4_version: ${{ steps.construct-hdf-tags.outputs.HDF4_VERSION }}
       hdf5_version: ${{ steps.construct-hdf-tags.outputs.HDF5_VERSION }}
+      hdf5_prefix: ${{ steps.construct-hdf-tags.outputs.HDF5_PREFIX }}
     steps:
     - name: Validate input
       id: validate-input
@@ -90,6 +91,7 @@ jobs:
           HDF5_TAG="$HDF5_VER"
           HDF4_BASENAME="$HDF4_TAG"
           HDF5_BASENAME="$HDF5_TAG"
+          HDF5_PREFIX="hdf5-"
         else
           # For snapshot builds, use "snapshot" placeholders (versions will be parsed from downloaded artifacts)
           HDF4_VER=""
@@ -98,6 +100,7 @@ jobs:
           HDF5_TAG="snapshot"
           HDF4_BASENAME="snapshot"
           HDF5_BASENAME="snapshot"
+          HDF5_PREFIX=""
         fi
         echo "HDF4_RELEASE_TAG=$HDF4_TAG" >> $GITHUB_OUTPUT
         echo "HDF5_RELEASE_TAG=$HDF5_TAG" >> $GITHUB_OUTPUT
@@ -105,12 +108,14 @@ jobs:
         echo "HDF5_ARTIFACT_BASENAME=$HDF5_BASENAME" >> $GITHUB_OUTPUT
         echo "HDF4_VERSION=$HDF4_VER" >> $GITHUB_OUTPUT
         echo "HDF5_VERSION=$HDF5_VER" >> $GITHUB_OUTPUT
+        echo "HDF5_PREFIX=$HDF5_PREFIX" >> $GITHUB_OUTPUT
         echo "HDF4 release tag: $HDF4_TAG"
         echo "HDF5 release tag: $HDF5_TAG"
         echo "HDF4 artifact basename: $HDF4_BASENAME"
         echo "HDF5 artifact basename: $HDF5_BASENAME"
         echo "HDF4 version: $HDF4_VER"
         echo "HDF5 version: $HDF5_VER"
+        echo "HDF5 prefix: $HDF5_PREFIX"
 
   get-base-names:
     needs: determine-version
@@ -169,21 +174,9 @@ jobs:
       hdf5_release_tag: ${{ needs.determine-version.outputs.hdf5_release_tag }}
       hdf5_artifact_basename: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf5_artifact_basename || needs.determine-version.outputs.hdf5_artifact_basename }}
       hdf5_version: ${{ needs.determine-version.outputs.hdf5_version }}
+      hdf5_prefix: ${{ needs.determine-version.outputs.hdf5_prefix }}
       build_environment: release
       publish_to_maven_registry: ${{ needs.determine-version.outputs.build_type != 'snapshot' }}
-    secrets:
-      APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
-      APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
-      KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
-      APPLE_ID: ${{ secrets.APPLE_ID }}
-      APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-      AZURE_CODE_SIGNING_NAME: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-      AZURE_CERT_PROFILE_NAME: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
 
   call-workflow-release:
     needs: [determine-version, call-workflow-tarball, call-workflow-maven-build]
