@@ -1876,16 +1876,67 @@ jobs:
 
         security unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_NAME.keychain
 
-        # Sign with force to overwrite any existing signatures
-        codesign --force --deep --sign "The HDF Group ($SIGNER)" \
+        # Bottom-up signing approach (required for notarization)
+        # Sign all dylibs first (including HDF4/HDF5 libraries)
+        echo "Signing all dylib files..."
+        find universal/HDFView.app -name "*.dylib" -type f | while read dylib; do
+          echo "  Signing: $dylib"
+          codesign --force --sign "The HDF Group ($SIGNER)" \
+            --options runtime \
+            --timestamp \
+            "$dylib" || echo "  Warning: Failed to sign $dylib"
+        done
+
+        # Sign all framework bundles
+        echo "Signing frameworks..."
+        find universal/HDFView.app/Contents/runtime -name "*.framework" -type d | while read framework; do
+          echo "  Signing: $framework"
+          codesign --force --sign "The HDF Group ($SIGNER)" \
+            --options runtime \
+            --timestamp \
+            "$framework" || echo "  Warning: Failed to sign $framework"
+        done
+
+        # Sign executables in MacOS directory
+        echo "Signing executables..."
+        find universal/HDFView.app/Contents/MacOS -type f -perm +111 | while read exe; do
+          echo "  Signing: $exe"
+          codesign --force --sign "The HDF Group ($SIGNER)" \
+            --options runtime \
+            --timestamp \
+            "$exe" || echo "  Warning: Failed to sign $exe"
+        done
+
+        # Sign Java runtime executables
+        if [ -d universal/HDFView.app/Contents/runtime/Contents/Home/bin ]; then
+          echo "Signing JRE binaries..."
+          find universal/HDFView.app/Contents/runtime/Contents/Home/bin -type f -perm +111 | while read exe; do
+            echo "  Signing: $exe"
+            codesign --force --sign "The HDF Group ($SIGNER)" \
+              --options runtime \
+              --timestamp \
+              "$exe" || echo "  Warning: Failed to sign $exe"
+          done
+        fi
+
+        # Finally, sign the app bundle itself (WITHOUT --deep)
+        echo "Signing main app bundle..."
+        codesign --force --sign "The HDF Group ($SIGNER)" \
           --options runtime \
           --timestamp \
           universal/HDFView.app
 
-        echo "✓ Universal app signed"
+        echo "✓ Universal app signed with bottom-up approach"
 
-        # Verify signature
-        codesign -vvv --deep --strict universal/HDFView.app
+        # Verify signature (without --deep)
+        echo "Verifying app signature..."
+        codesign -vvv --strict universal/HDFView.app
+
+        # Verify a sample dylib signature
+        if [ -f universal/HDFView.app/Contents/app/libdf.dylib ]; then
+          echo "Verifying sample dylib signature..."
+          codesign -vvv --strict universal/HDFView.app/Contents/app/libdf.dylib
+        fi
 
     - name: Create Universal App Archive
       run: |
