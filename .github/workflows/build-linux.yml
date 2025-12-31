@@ -348,55 +348,43 @@ jobs:
     
         - name: Create DEB Installer
           run: |
-            echo "Creating DEB installer from app-image..."
+            echo "Creating DEB installer using Maven profile..."
 
-            # Version loaded from VERSION file
-            VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+            # Use Maven jpackage-installer-deb profile
+            # Requires app-image to be in hdfview/target/dist/HDFView
+            mvn package -Pjpackage-installer-deb -pl hdfview -B
 
-            # Use jpackage to create DEB from app-image
-            jpackage \
-                --type deb \
-                --app-image HDFView \
-                --name HDFView \
-                --app-version "$VERSION" \
-                --icon package_files/hdfview.png \
-                --linux-menu-group "Science" \
-                --linux-shortcut \
-                --file-associations package_files/HDFViewHDF.properties \
-                --file-associations package_files/HDFViewH4.properties \
-                --file-associations package_files/HDFViewHDF4.properties \
-                --file-associations package_files/HDFViewH5.properties \
-                --file-associations package_files/HDFViewHDF5.properties \
-                --dest .
+            if ls hdfview/target/dist/*.deb 1> /dev/null 2>&1; then
+              echo "✓ DEB installer created successfully"
 
-            echo "DEB installer created successfully"
-            ls -lh *.deb
+              # Copy DEB to workspace root for uploading
+              cp hdfview/target/dist/*.deb .
+              echo "Copied DEB to workspace root"
+              ls -lh *.deb
+            else
+              echo "✗ DEB creation failed"
+              exit 1
+            fi
     
         - name: Create RPM Installer
           run: |
-            echo "Creating RPM installer from app-image..."
+            echo "Creating RPM installer using Maven profile..."
 
-            # Version loaded from VERSION file
-            VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+            # Use Maven jpackage-installer-rpm profile
+            # Requires app-image to be in hdfview/target/dist/HDFView
+            mvn package -Pjpackage-installer-rpm -pl hdfview -B
 
-            # Use jpackage to create RPM from app-image
-            jpackage \
-                --type rpm \
-                --app-image HDFView \
-                --name HDFView \
-                --app-version "$VERSION" \
-                --icon package_files/hdfview.png \
-                --linux-menu-group "Science" \
-                --linux-shortcut \
-                --file-associations package_files/HDFViewHDF.properties \
-                --file-associations package_files/HDFViewH4.properties \
-                --file-associations package_files/HDFViewHDF4.properties \
-                --file-associations package_files/HDFViewH5.properties \
-                --file-associations package_files/HDFViewHDF5.properties \
-                --dest .
+            if ls hdfview/target/dist/*.rpm 1> /dev/null 2>&1; then
+              echo "✓ RPM installer created successfully"
 
-            echo "RPM installer created successfully"
-            ls -lh *.rpm
+              # Copy RPM to workspace root for uploading
+              cp hdfview/target/dist/*.rpm .
+              echo "Copied RPM to workspace root"
+              ls -lh *.rpm
+            else
+              echo "✗ RPM creation failed"
+              exit 1
+            fi
     
         - name: Upload DEB Installer Artifact
           uses: actions/upload-artifact@v4

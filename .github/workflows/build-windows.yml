@@ -736,31 +736,24 @@ jobs:
         - name: Create MSI Installer
           shell: pwsh
           run: |
-            Write-Host "Creating MSI installer from app-image..."
-    
-            # Version loaded from VERSION file
-            $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-    
-            # Use jpackage to create MSI from app-image
-            jpackage `
-              --type msi `
-              --app-image HDFView `
-              --name HDFView `
-              --app-version $version `
-              --icon package_files\hdfview.ico `
-              --win-dir-chooser `
-              --win-per-user-install `
-              --win-menu `
-              --win-menu-group "The HDF Group" `
-              --file-associations package_files\HDFViewHDF.properties `
-              --file-associations package_files\HDFViewH4.properties `
-              --file-associations package_files\HDFViewHDF4.properties `
-              --file-associations package_files\HDFViewH5.properties `
-              --file-associations package_files\HDFViewHDF5.properties `
-              --dest .
-    
-            Write-Host "MSI installer created successfully"
-            Get-ChildItem *.msi
+            Write-Host "Creating MSI installer using Maven profile..."
+
+            # Use Maven jpackage-installer-windows profile
+            # Requires app-image to be in hdfview/target/dist/HDFView
+            mvn package -Pjpackage-installer-windows -pl hdfview -B
+
+            if (Test-Path "hdfview\target\dist\*.msi") {
+              Write-Host "✓ MSI installer created successfully"
+
+              # Copy MSI to workspace root for signing/uploading steps
+              $msiFile = Get-ChildItem "hdfview\target\dist\*.msi" | Select-Object -First 1
+              Copy-Item $msiFile.FullName -Destination .
+              Write-Host "Copied MSI to workspace root: $($msiFile.Name)"
+              Get-ChildItem *.msi
+            } else {
+              Write-Error "✗ MSI creation failed"
+              exit 1
+            }
     
         - name: Debug - Check Signing Secrets
           shell: pwsh

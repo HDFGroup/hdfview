@@ -171,7 +171,6 @@
           <groupId>org.eclipse.platform</groupId>
           <artifactId>${swt.artifactId}</artifactId>
           <version>${swt.version}</version>
-          <optional>true</optional>
           <exclusions>
             <exclusion>
               <groupId>org.eclipse.platform</groupId>
@@ -198,7 +197,6 @@
           <groupId>org.eclipse.platform</groupId>
           <artifactId>${swt.artifactId}</artifactId>
           <version>${swt.version}</version>
-          <optional>true</optional>
           <exclusions>
             <exclusion>
               <groupId>org.eclipse.platform</groupId>
@@ -225,7 +223,6 @@
           <groupId>org.eclipse.platform</groupId>
           <artifactId>${swt.artifactId}</artifactId>
           <version>${swt.version}</version>
-          <optional>true</optional>
           <exclusions>
             <exclusion>
               <groupId>org.eclipse.platform</groupId>
@@ -416,8 +413,10 @@
     </profile>
 
     <!-- jpackage profile for creating DEB installer -->
+    <!-- Use with: mvn package -Pjpackage-installer-deb -pl hdfview -->
+    <!-- Requires pre-built app-image in hdfview/target/dist/HDFView -->
     <profile>
-      <id>jpackage-deb</id>
+      <id>jpackage-installer-deb</id>
       <properties>
         <jpackage.type>deb</jpackage.type>
         <!-- Version loaded from VERSION file via properties-maven-plugin -->
@@ -425,34 +424,28 @@
       </properties>
       <build>
         <plugins>
-          <!-- Inherit staging assembly from jpackage-app-image -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>3.1.0</version>
-            <executions>
-              <execution>
-                <id>prepare-jpackage-input</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
             <executions>
               <execution>
                 <id>jpackage</id>
-                <phase>verify</phase>
+                <phase>package</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <arguments combine.children="append">
+                  <executable>${java.home}/bin/jpackage</executable>
+                  <workingDirectory>${project.build.directory}/dist</workingDirectory>
+                  <arguments>
+                    <argument>--type</argument>
+                    <argument>${jpackage.type}</argument>
+                    <argument>--app-image</argument>
+                    <argument>HDFView</argument>
+                    <argument>--name</argument>
+                    <argument>HDFView</argument>
+                    <argument>--app-version</argument>
+                    <argument>${jpackage.app.version}</argument>
                     <argument>--icon</argument>
                     <argument>${project.basedir}/../package_files/hdfview.png</argument>
                     <argument>--linux-menu-group</argument>
@@ -468,6 +461,8 @@
                     <argument>${project.basedir}/../package_files/HDFViewH5.properties</argument>
                     <argument>--file-associations</argument>
                     <argument>${project.basedir}/../package_files/HDFViewHDF5.properties</argument>
+                    <argument>--dest</argument>
+                    <argument>.</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -478,8 +473,10 @@
     </profile>
 
     <!-- jpackage profile for creating RPM installer -->
+    <!-- Use with: mvn package -Pjpackage-installer-rpm -pl hdfview -->
+    <!-- Requires pre-built app-image in hdfview/target/dist/HDFView -->
     <profile>
-      <id>jpackage-rpm</id>
+      <id>jpackage-installer-rpm</id>
       <properties>
         <jpackage.type>rpm</jpackage.type>
         <!-- Version loaded from VERSION file via properties-maven-plugin -->
@@ -487,34 +484,28 @@
       </properties>
       <build>
         <plugins>
-          <!-- Inherit staging assembly from jpackage-app-image -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>3.1.0</version>
-            <executions>
-              <execution>
-                <id>prepare-jpackage-input</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
             <executions>
               <execution>
                 <id>jpackage</id>
-                <phase>verify</phase>
+                <phase>package</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <arguments combine.children="append">
+                  <executable>${java.home}/bin/jpackage</executable>
+                  <workingDirectory>${project.build.directory}/dist</workingDirectory>
+                  <arguments>
+                    <argument>--type</argument>
+                    <argument>${jpackage.type}</argument>
+                    <argument>--app-image</argument>
+                    <argument>HDFView</argument>
+                    <argument>--name</argument>
+                    <argument>HDFView</argument>
+                    <argument>--app-version</argument>
+                    <argument>${jpackage.app.version}</argument>
                     <argument>--icon</argument>
                     <argument>${project.basedir}/../package_files/hdfview.png</argument>
                     <argument>--linux-menu-group</argument>
@@ -530,6 +521,8 @@
                     <argument>${project.basedir}/../package_files/HDFViewH5.properties</argument>
                     <argument>--file-associations</argument>
                     <argument>${project.basedir}/../package_files/HDFViewHDF5.properties</argument>
+                    <argument>--dest</argument>
+                    <argument>.</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -559,6 +552,8 @@
                   <arguments combine.children="append">
                     <argument>--icon</argument>
                     <argument>${project.basedir}/../package_files/macosx/HDFView.icns</argument>
+                    <argument>--mac-entitlements</argument>
+                    <argument>${project.basedir}/../lib/macosx/distribution.entitlements</argument>
                     <argument>--java-options</argument>
                     <argument>-XstartOnFirstThread</argument>
                   </arguments>
@@ -571,12 +566,16 @@
     </profile>
 
     <!-- jpackage profile for macOS installers (DMG) - adds file associations -->
-    <!-- Manual activation only - use with -Djpackage.type=dmg -->
+    <!-- Use with: mvn package -Pjpackage-installer-mac -Djpackage.type=dmg -pl hdfview -->
+    <!-- Requires pre-built app-image in hdfview/target/dist/HDFView.app -->
     <profile>
       <id>jpackage-installer-mac</id>
       <properties>
+        <jpackage.type>dmg</jpackage.type>
         <!-- Version loaded from VERSION file via properties-maven-plugin -->
         <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
+        <!-- Package name - can be overridden for architecture-specific builds -->
+        <jpackage.mac.package.name>HDFView-${project.version}</jpackage.mac.package.name>
       </properties>
       <build>
         <plugins>
@@ -586,12 +585,26 @@
             <executions>
               <execution>
                 <id>jpackage</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
                 <configuration>
-                  <arguments combine.children="append">
+                  <executable>${java.home}/bin/jpackage</executable>
+                  <workingDirectory>${project.build.directory}/dist</workingDirectory>
+                  <arguments>
+                    <argument>--type</argument>
+                    <argument>${jpackage.type}</argument>
+                    <argument>--app-image</argument>
+                    <argument>HDFView.app</argument>
+                    <argument>--name</argument>
+                    <argument>HDFView</argument>
+                    <argument>--app-version</argument>
+                    <argument>${jpackage.app.version}</argument>
                     <argument>--mac-package-identifier</argument>
                     <argument>HDFView.hdfgroup.org</argument>
                     <argument>--mac-package-name</argument>
-                    <argument>HDFView-${project.version}</argument>
+                    <argument>${jpackage.mac.package.name}</argument>
                     <argument>--file-associations</argument>
                     <argument>${project.basedir}/../package_files/HDFViewHDF.properties</argument>
                     <argument>--file-associations</argument>
@@ -602,6 +615,8 @@
                     <argument>${project.basedir}/../package_files/HDFViewH5.properties</argument>
                     <argument>--file-associations</argument>
                     <argument>${project.basedir}/../package_files/HDFViewHDF5.properties</argument>
+                    <argument>--dest</argument>
+                    <argument>.</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -612,10 +627,12 @@
     </profile>
 
     <!-- jpackage profile for Windows installers (MSI) -->
-    <!-- Manual activation only - use with -Djpackage.type=msi -->
+    <!-- Use with: mvn package -Pjpackage-installer-windows -pl hdfview -->
+    <!-- Requires pre-built app-image in hdfview/target/dist/HDFView -->
     <profile>
       <id>jpackage-installer-windows</id>
       <properties>
+        <jpackage.type>msi</jpackage.type>
         <!-- Version loaded from VERSION file via properties-maven-plugin -->
         <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
       </properties>
@@ -627,11 +644,24 @@
             <executions>
               <execution>
                 <id>jpackage</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
                 <configuration>
-                  <arguments combine.children="append">
+                  <executable>${java.home}/bin/jpackage</executable>
+                  <workingDirectory>${project.build.directory}/dist</workingDirectory>
+                  <arguments>
+                    <argument>--type</argument>
+                    <argument>${jpackage.type}</argument>
+                    <argument>--app-image</argument>
+                    <argument>HDFView</argument>
+                    <argument>--name</argument>
+                    <argument>HDFView</argument>
+                    <argument>--app-version</argument>
+                    <argument>${jpackage.app.version}</argument>
                     <argument>--icon</argument>
                     <argument>${project.basedir}/../package_files/hdfview.ico</argument>
-                    <argument>--win-console</argument>
                     <argument>--win-dir-chooser</argument>
                     <argument>--win-per-user-install</argument>
                     <argument>--win-menu</argument>
@@ -647,6 +677,8 @@
                     <argument>${project.basedir}/../package_files/HDFViewH5.properties</argument>
                     <argument>--file-associations</argument>
                     <argument>${project.basedir}/../package_files/HDFViewHDF5.properties</argument>
+                    <argument>--dest</argument>
+                    <argument>.</argument>
                   </arguments>
                 </configuration>
               </execution>
