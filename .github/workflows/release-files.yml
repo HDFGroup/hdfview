@@ -168,21 +168,25 @@ jobs:
 
       - name: Create sha256 sums for files
         run: |
-          # Use glob patterns to hash all artifacts following standard naming: HDFView-{VERSION}[-OS][-arch].ext
-          # Installers: HDFView-{VERSION}-{OS}.{ext} (except DMG which has arch)
-          sha256sum HDFView-*-Linux.deb >${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-*-Linux.rpm >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-*-Windows.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-*-Darwin-x86_64.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-*-Darwin-arm64.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          # App binaries: HDFView-{VERSION}App-{OS}[-arch].{ext} (only Darwin has arch)
-          sha256sum HDFView-*App-Linux.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-*App-Windows.zip >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-*App-Darwin-x86_64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-*App-Darwin-arm64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          # Use version to construct exact filenames (avoids glob expansion issues)
+          VERSION="${{ steps.get-artifact-info.outputs.VERSION }}"
+
+          # Installers
+          sha256sum HDFView-${VERSION}-Linux.deb >${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-${VERSION}-Linux.rpm >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-${VERSION}-Windows.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-${VERSION}-Darwin-x86_64.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-${VERSION}-Darwin-arm64.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+
+          # App binaries
+          sha256sum HDFView-${VERSION}App-Linux.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-${VERSION}App-Windows.zip >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-${VERSION}App-Darwin-x86_64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-${VERSION}App-Darwin-arm64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+
           # Documentation
-          sha256sum UsersGuide.tar.gz >> ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum UsersGuide.zip >> ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum UsersGuide.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum UsersGuide.zip >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
 
       - name: Store snapshot name
         run: |
