@@ -177,10 +177,12 @@ jobs:
           # Snapshots: {artifact_basename}.msi, Releases: HDFView-{VERSION}.msi
           if [ "${{ inputs.build_environment }}" = "snapshots" ]; then
             ls -lh ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi || echo "MSI not found!"
-            ls -lh ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.dmg || echo "DMG not found!"
+            ls -lh HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "x86_64 DMG not found!"
+            ls -lh HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "arm64 DMG not found!"
           else
             ls -lh HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi || echo "MSI not found!"
-            ls -lh HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "DMG not found!"
+            ls -lh HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "x86_64 DMG not found!"
+            ls -lh HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "arm64 DMG not found!"
           fi
 
       - name: Create sha256 sums for files
@@ -193,14 +195,17 @@ jobs:
           # Snapshots: {artifact_basename}.msi/dmg, Releases: HDFView-{VERSION}.msi/dmg
           if [ "${{ inputs.build_environment }}" = "snapshots" ]; then
             sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-            sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+            sha256sum HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+            sha256sum HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           else
             sha256sum HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-            sha256sum HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+            sha256sum HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+            sha256sum HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           fi
           sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Darwin.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-x86_64.app.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-arm64.app.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           sha256sum UsersGuide.tar.gz >> ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           sha256sum UsersGuide.zip >> ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
 
@@ -236,10 +241,12 @@ jobs:
               *.deb
               *.rpm
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.dmg
+              HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
+              HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Darwin.tar.gz
+              HDFView-x86_64.app.tar.gz
+              HDFView-arm64.app.tar.gz
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
@@ -260,9 +267,11 @@ jobs:
               *.deb
               *.rpm
               HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi
-              HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
+              HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
+              HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Darwin.tar.gz
+              HDFView-x86_64.app.tar.gz
+              HDFView-arm64.app.tar.gz
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
