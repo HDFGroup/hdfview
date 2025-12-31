@@ -404,7 +404,7 @@
                     <argument>-Xmx1024M</argument>
                     <argument>--java-options</argument>
                     <argument>-Djava.library.path=$APPDIR</argument>
-                    <argument>--arguments</argument>
+                    <argument>--java-options</argument>
                     <argument>-Dhdfview.root=$APPDIR</argument>
                   </arguments>
                 </configuration>
