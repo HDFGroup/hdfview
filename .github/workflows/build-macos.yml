@@ -376,21 +376,16 @@ jobs:
           run: |
             echo "Creating DMG installer for ${{ matrix.arch }}..."
 
-            # Use Maven jpackage-installer-mac profile
-            # Set package name to: HDFView-{VERSION}-Darwin-{arch}
-            # jpackage creates DMG as: {package-name}.dmg
-            mvn package -Pjpackage-installer-mac -pl hdfview \
-              -Djpackage.mac.package.name="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}" \
-              -DskipTests \
-              -B
+            # Use Maven jpackage-installer-mac profile (creates HDFView-{VERSION}.dmg)
+            mvn package -Pjpackage-installer-mac -pl hdfview -DskipTests -B
 
-            if ls hdfview/target/dist/*.dmg 1> /dev/null 2>&1; then
-              echo "✓ DMG installer created"
-              ls -lh hdfview/target/dist/*.dmg
-            else
-              echo "✗ DMG creation failed"
-              exit 1
-            fi
+            # Rename to standard format: HDFView-{VERSION}-Darwin-{arch}.dmg
+            cd hdfview/target/dist
+            DMG_FILE=$(ls *.dmg)
+            STANDARD_NAME="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg"
+            mv "$DMG_FILE" "$STANDARD_NAME"
+            echo "✓ DMG renamed to: $STANDARD_NAME"
+            ls -lh *.dmg
 
         - name: Notarize DMG Installer
           if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
