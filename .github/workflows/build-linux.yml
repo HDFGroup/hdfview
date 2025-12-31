@@ -360,7 +360,6 @@ jobs:
                 --name HDFView \
                 --app-version "$VERSION" \
                 --icon package_files/hdfview.png \
-                --linux-package-name HDFView \
                 --linux-menu-group "Science" \
                 --linux-shortcut \
                 --file-associations package_files/HDFViewHDF.properties \
@@ -387,7 +386,6 @@ jobs:
                 --name HDFView \
                 --app-version "$VERSION" \
                 --icon package_files/hdfview.png \
-                --linux-package-name HDFView \
                 --linux-menu-group "Science" \
                 --linux-shortcut \
                 --file-associations package_files/HDFViewHDF.properties \
