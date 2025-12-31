@@ -226,6 +226,22 @@ jobs:
             exit 1
             fi
 
+        - name: Install SWT JAR to Local Maven Repository
+          run: |
+            echo "Installing Linux SWT JAR to local Maven repository..."
+            if [ -f repository/lib/swt.jar ]; then
+              mvn install:install-file -Dfile=repository/lib/swt.jar \
+                -DgroupId=org.eclipse.platform \
+                -DartifactId=org.eclipse.swt.gtk.linux.x86_64 \
+                -Dversion=3.126.0 \
+                -Dpackaging=jar \
+                -DgeneratePom=true
+              echo "Linux SWT JAR installed"
+            else
+              echo "ERROR: swt.jar not found in repository/lib/"
+              exit 1
+            fi
+
         - name: Install SWTBot JARs to Local Maven Repository
           run: |
             echo "Installing SWTBot JARs to local Maven repository..."
@@ -338,21 +354,87 @@ jobs:
           run: |
             tar -xzf ${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz
             ls -la HDFView/
-    
+
         - name: Extract version from VERSION file
           id: get-version
           run: |
             HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
             echo "HDFVIEW_VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
             echo "HDFView version: $HDFVIEW_VERSION"
-    
+
+        - name: Build repository module (copies platform SWT JAR)
+          run: |
+            echo "Building repository module to copy SWT JAR..."
+            mvn generate-sources -pl repository -B
+
+        - name: Install object module to Local Maven Repository
+          run: |
+            echo "Installing object module to local Maven repository..."
+            if [ -f libs/object-*.jar ]; then
+              OBJECT_JAR=$(ls libs/object-*.jar | head -1)
+              mvn install:install-file -Dfile="$OBJECT_JAR" \
+                -DgroupId=org.hdfgroup.hdfview \
+                -DartifactId=object \
+                -Dversion=${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
+                -Dpackaging=jar \
+                -DgeneratePom=true
+              echo "object module installed"
+            else
+              echo "ERROR: object JAR not found in libs/"
+              exit 1
+            fi
+
+        - name: Install SWT JAR to Local Maven Repository
+          run: |
+            echo "Installing Linux SWT JAR to local Maven repository..."
+            if [ -f repository/lib/swt.jar ]; then
+              mvn install:install-file -Dfile=repository/lib/swt.jar \
+                -DgroupId=org.eclipse.platform \
+                -DartifactId=org.eclipse.swt.gtk.linux.x86_64 \
+                -Dversion=3.126.0 \
+                -Dpackaging=jar \
+                -DgeneratePom=true
+              echo "Linux SWT JAR installed"
+            else
+              echo "ERROR: swt.jar not found in repository/lib/"
+              exit 1
+            fi
+
+        - name: Install SWTBot JARs to Local Maven Repository
+          run: |
+            echo "Installing SWTBot JARs to local Maven repository..."
+
+            if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+              mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+                -DgroupId=org.eclipse.local \
+                -DartifactId=org.eclipse.swtbot.swt.finder \
+                -Dversion=4.2.1 \
+                -Dpackaging=jar \
+                -DgeneratePom=true
+              echo "SWTBot SWT finder JAR installed"
+            else
+              echo "WARNING: org.eclipse.swtbot.swt.finder.jar not found"
+            fi
+
+            if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+              mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+                -DgroupId=org.eclipse.local \
+                -DartifactId=org.eclipse.swtbot.nebula.nattable.finder \
+                -Dversion=4.2.1 \
+                -Dpackaging=jar \
+                -DgeneratePom=true
+              echo "SWTBot Nebula NatTable finder JAR installed"
+            else
+              echo "WARNING: org.eclipse.swtbot.nebula.nattable.finder.jar not found"
+            fi
+
         - name: Create DEB Installer
           run: |
             echo "Creating DEB installer using Maven profile..."
 
             # Use Maven jpackage-installer-deb profile
             # Requires app-image to be in hdfview/target/dist/HDFView
-            mvn package -Pjpackage-installer-deb -pl hdfview -B
+            mvn package -Pjpackage-installer-deb -pl hdfview -DskipTests -B
 
             if ls hdfview/target/dist/*.deb 1> /dev/null 2>&1; then
               echo "✓ DEB installer created successfully"
@@ -372,7 +454,7 @@ jobs:
 
             # Use Maven jpackage-installer-rpm profile
             # Requires app-image to be in hdfview/target/dist/HDFView
-            mvn package -Pjpackage-installer-rpm -pl hdfview -B
+            mvn package -Pjpackage-installer-rpm -pl hdfview -DskipTests -B
 
             if ls hdfview/target/dist/*.rpm 1> /dev/null 2>&1; then
               echo "✓ RPM installer created successfully"

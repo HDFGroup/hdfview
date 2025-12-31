@@ -381,6 +381,7 @@ jobs:
             # Note: We override mac-package-name to include architecture
             mvn package -Pjpackage-installer-mac -pl hdfview \
               -Djpackage.mac.package.name="${{ inputs.artifact_basename }}-${{ matrix.arch }}" \
+              -DskipTests \
               -B
 
             if ls hdfview/target/dist/*.dmg 1> /dev/null 2>&1; then
