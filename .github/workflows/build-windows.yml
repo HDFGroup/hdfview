@@ -704,50 +704,30 @@ jobs:
             path: ${{ inputs.artifact_basename }}App-win64.zip
             retention-days: 30
 
-        - name: Create MSI Installer
+        - name: Create and Prepare MSI Installer
           shell: pwsh
           run: |
-            Write-Host "Creating MSI installer using Maven profile..."
+            Write-Host "Creating MSI installer..."
+            mvn exec:exec@jpackage -pl hdfview -Pjpackage-installer-windows -B
 
-            # Use Maven jpackage-installer-windows profile
-            # App-image is already in hdfview/target/dist/HDFView from the same Maven session
-            mvn package -Pjpackage-installer-windows -pl hdfview -DskipTests -B
+            # Find the MSI that jpackage created
+            $msiFile = Get-ChildItem "hdfview\target\dist\*.msi" | Select-Object -First 1
 
-            if (Test-Path "hdfview\target\dist\*.msi") {
-              Write-Host "✓ MSI installer created successfully"
-
-              # Copy MSI to workspace root for signing/uploading steps
-              $msiFile = Get-ChildItem "hdfview\target\dist\*.msi" | Select-Object -First 1
-              Copy-Item $msiFile.FullName -Destination .
-              Write-Host "Copied MSI to workspace root: $($msiFile.Name)"
-              Get-ChildItem *.msi
-            } else {
-              Write-Error "✗ MSI creation failed"
+            if (-not $msiFile) {
+              Write-Error "No MSI found in hdfview\target\dist\"
               exit 1
             }
 
-        - name: Debug - Check Signing Secrets
-          shell: pwsh
-          run: |
-            Write-Host "Repository: ${{ github.repository }}"
-            Write-Host "AZURE_TENANT_ID is set: ${{ env.AZURE_TENANT_ID != '' }}"
-            Write-Host "AZURE_ENDPOINT is set: ${{ env.AZURE_ENDPOINT != '' }}"
-            if ($env:AZURE_TENANT_ID) {
-              Write-Host "✓ AZURE_TENANT_ID has value (length: $($env:AZURE_TENANT_ID.Length))"
+            # Determine final name and copy to workspace root
+            $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
+            if ("${{ inputs.build_type }}" -eq "snapshot") {
+              $finalMsi = "${{ inputs.artifact_basename }}.msi"
             } else {
-              Write-Host "✗ AZURE_TENANT_ID is empty or not set"
+              $finalMsi = "HDFView-${version}.msi"
             }
 
-        - name: Rename MSI for snapshots
-          if: inputs.build_type == 'snapshot'
-          shell: pwsh
-          run: |
-            # For snapshots, rename MSI to include commit SHA (artifact_basename)
-            $oldName = "HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.msi"
-            $newName = "${{ inputs.artifact_basename }}.msi"
-            Write-Host "Renaming $oldName to $newName"
-            Move-Item -Path $oldName -Destination $newName
-            Get-ChildItem *.msi
+            Copy-Item $msiFile.FullName -Destination $finalMsi
+            Write-Host "✓ MSI prepared: $finalMsi"
 
         - name: Install Microsoft Trusted Signing
           if: github.repository == 'HDFGroup/hdfview' && env.AZURE_TENANT_ID != ''
@@ -769,9 +749,7 @@ jobs:
           if: github.repository == 'HDFGroup/hdfview' && env.AZURE_TENANT_ID != ''
           shell: pwsh
           run: |
-            Write-Host "Signing MSI installer with Microsoft Trusted Signing..."
-
-            # Determine MSI filename (snapshot includes commit SHA, release uses version only)
+            # Determine MSI filename (same logic as prepare step)
             $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
             if ("${{ inputs.build_type }}" -eq "snapshot") {
               $msiFile = "${{ inputs.artifact_basename }}.msi"
@@ -781,41 +759,25 @@ jobs:
 
             Write-Host "Signing MSI: $msiFile"
 
-            # Set paths
             $signtoolPath = "${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64/signtool.exe"
             $dllPath = "${{ github.workspace }}/Microsoft.Trusted.Signing.Client/bin/x64/Azure.CodeSigning.Dlib.dll"
             $metadataPath = "${{ github.workspace }}/credentials.json"
 
-            # Sign using Microsoft Trusted Signing
-            & $signtoolPath sign `
-              /v `
-              /debug `
-              /fd SHA256 `
-              /tr "http://timestamp.acs.microsoft.com" `
-              /td SHA256 `
-              /dlib $dllPath `
-              /dmdf $metadataPath `
-              $msiFile
+            & $signtoolPath sign /v /debug /fd SHA256 /tr "http://timestamp.acs.microsoft.com" /td SHA256 /dlib $dllPath /dmdf $metadataPath $msiFile
 
             if ($LASTEXITCODE -ne 0) {
               Write-Error "Signing failed with exit code $LASTEXITCODE"
               exit $LASTEXITCODE
             }
 
-            Write-Host "MSI installer signed successfully"
-
             # Verify signature
-            Write-Host ""
-            Write-Host "=== Verifying MSI Signature ==="
             $sig = Get-AuthenticodeSignature -FilePath $msiFile
-            $sig | Format-List
-
             if ($sig.Status -ne 'Valid') {
               Write-Error "Signature verification failed: $($sig.Status)"
               exit 1
             }
 
-            Write-Host "✓ MSI signature verified successfully"
+            Write-Host "✓ MSI signed and verified"
 
         - name: Upload Windows MSI Installer
           uses: actions/upload-artifact@v4

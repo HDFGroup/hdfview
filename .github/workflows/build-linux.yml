@@ -54,6 +54,7 @@ permissions:
 
 jobs:
     build-linux-app:
+        name: Build Linux Binaries and Installers
         runs-on: ubuntu-latest
         timeout-minutes: 20
 
@@ -329,43 +330,19 @@ jobs:
 
         - name: Create DEB Installer
           run: |
-            echo "Creating DEB installer using Maven profile..."
+            echo "Creating DEB installer..."
+            mvn exec:exec@jpackage -pl hdfview -Pjpackage-installer-deb -B
 
-            # Use Maven jpackage-installer-deb profile
-            # App-image is already in hdfview/target/dist/HDFView from the same Maven session
-            mvn package -Pjpackage-installer-deb -pl hdfview -DskipTests -B
-
-            if ls hdfview/target/dist/*.deb 1> /dev/null 2>&1; then
-              echo "✓ DEB installer created successfully"
-
-              # Copy DEB to workspace root for uploading
-              cp hdfview/target/dist/*.deb .
-              echo "Copied DEB to workspace root"
-              ls -lh *.deb
-            else
-              echo "✗ DEB creation failed"
-              exit 1
-            fi
+            cp hdfview/target/dist/*.deb .
+            ls -lh *.deb
 
         - name: Create RPM Installer
           run: |
-            echo "Creating RPM installer using Maven profile..."
+            echo "Creating RPM installer..."
+            mvn exec:exec@jpackage -pl hdfview -Pjpackage-installer-rpm -B
 
-            # Use Maven jpackage-installer-rpm profile
-            # App-image is already in hdfview/target/dist/HDFView from the same Maven session
-            mvn package -Pjpackage-installer-rpm -pl hdfview -DskipTests -B
-
-            if ls hdfview/target/dist/*.rpm 1> /dev/null 2>&1; then
-              echo "✓ RPM installer created successfully"
-
-              # Copy RPM to workspace root for uploading
-              cp hdfview/target/dist/*.rpm .
-              echo "Copied RPM to workspace root"
-              ls -lh *.rpm
-            else
-              echo "✗ RPM creation failed"
-              exit 1
-            fi
+            cp hdfview/target/dist/*.rpm .
+            ls -lh *.rpm
 
         - name: Upload DEB Installer Artifact
           uses: actions/upload-artifact@v4
