@@ -312,20 +312,27 @@ jobs:
             exit 1
             fi
 
+        - name: Extract version from VERSION file
+          id: get-version
+          run: |
+            HDFVIEW_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
+            echo "HDFVIEW_VERSION=$HDFVIEW_VERSION" >> $GITHUB_OUTPUT
+            echo "HDFView version: $HDFVIEW_VERSION"
+
         - name: Create Linux Application Archive
           run: |
             # Package the jpackage app-image as a tar.gz for distribution
             cd hdfview/target/dist
-            tar -czf ${{ github.workspace }}/${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz HDFView/
+            tar -czf ${{ github.workspace }}/HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Linux.tar.gz HDFView/
 
-            echo "Linux application archive created: ${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz"
-            ls -lh ${{ github.workspace }}/${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz
+            echo "Linux application archive created: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Linux.tar.gz"
+            ls -lh ${{ github.workspace }}/HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Linux.tar.gz
 
         - name: Upload Linux App Artifact
           uses: actions/upload-artifact@v4
           with:
             name: tgz-ubuntu-2404-app-binary
-            path: ${{ inputs.artifact_basename }}App-Linux-x86_64.tar.gz
+            path: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Linux.tar.gz
             retention-days: 30
 
         - name: Create DEB Installer
@@ -333,27 +340,31 @@ jobs:
             echo "Creating DEB installer..."
             mvn exec:exec@jpackage -pl hdfview -Pjpackage-installer-deb -B
 
-            cp hdfview/target/dist/*.deb .
-            ls -lh *.deb
+            # Rename to standard format: HDFView-{VERSION}-Linux.deb
+            DEB_FILE=$(ls hdfview/target/dist/*.deb)
+            mv "$DEB_FILE" "HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Linux.deb"
+            ls -lh HDFView-*.deb
 
         - name: Create RPM Installer
           run: |
             echo "Creating RPM installer..."
             mvn exec:exec@jpackage -pl hdfview -Pjpackage-installer-rpm -B
 
-            cp hdfview/target/dist/*.rpm .
-            ls -lh *.rpm
+            # Rename to standard format: HDFView-{VERSION}-Linux.rpm
+            RPM_FILE=$(ls hdfview/target/dist/*.rpm)
+            mv "$RPM_FILE" "HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Linux.rpm"
+            ls -lh HDFView-*.rpm
 
         - name: Upload DEB Installer Artifact
           uses: actions/upload-artifact@v4
           with:
             name: deb-ubuntu-2404-installer
-            path: "*.deb"
+            path: "HDFView-*.deb"
             retention-days: 30
 
         - name: Upload RPM Installer Artifact
           uses: actions/upload-artifact@v4
           with:
             name: rpm-ubuntu-2404-installer
-            path: "*.rpm"
+            path: "HDFView-*.rpm"
             retention-days: 30

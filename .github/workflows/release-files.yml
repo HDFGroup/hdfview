@@ -160,37 +160,28 @@ jobs:
           echo "=== Files in workspace ==="
           ls -lh
           echo ""
-          echo "=== Checking for installer files ==="
-          # Snapshots: {artifact_basename}.msi, Releases: HDFView-{VERSION}.msi
-          if [ "${{ inputs.build_environment }}" = "snapshots" ]; then
-            ls -lh ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi || echo "MSI not found!"
-            ls -lh HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "x86_64 DMG not found!"
-            ls -lh HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "arm64 DMG not found!"
-          else
-            ls -lh HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi || echo "MSI not found!"
-            ls -lh HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "x86_64 DMG not found!"
-            ls -lh HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg || echo "arm64 DMG not found!"
-          fi
+          echo "=== Checking for installer files (standard naming) ==="
+          ls -lh HDFView-*-Windows.msi || echo "Windows MSI not found!"
+          ls -lh HDFView-*-Darwin-x86_64.dmg || echo "x86_64 DMG not found!"
+          ls -lh HDFView-*-Darwin-arm64.dmg || echo "arm64 DMG not found!"
+          ls -lh HDFView-*-Linux.deb || echo "Linux DEB not found!"
+          ls -lh HDFView-*-Linux.rpm || echo "Linux RPM not found!"
 
       - name: Create sha256 sums for files
         run: |
-          # DEB and RPM packages for Linux
-          sha256sum *.deb >${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum *.rpm >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          # Snapshots: {artifact_basename}.msi/dmg, Releases: HDFView-{VERSION}.msi/dmg
-          if [ "${{ inputs.build_environment }}" = "snapshots" ]; then
-            sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-            sha256sum HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-            sha256sum HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          else
-            sha256sum HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-            sha256sum HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-            sha256sum HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          fi
-          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-x86_64.app.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-arm64.app.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          # Use glob patterns to hash all artifacts following standard naming: HDFView-{VERSION}[-OS][-arch].ext
+          # Installers: HDFView-{VERSION}-{OS}.{ext} (except DMG which has arch)
+          sha256sum HDFView-*-Linux.deb >${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-*-Linux.rpm >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-*-Windows.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-*-Darwin-x86_64.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-*-Darwin-arm64.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          # App binaries: HDFView-{VERSION}App-{OS}[-arch].{ext} (only Darwin has arch)
+          sha256sum HDFView-*App-Linux.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-*App-Windows.zip >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-*App-Darwin-x86_64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-*App-Darwin-arm64.tar.gz >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          # Documentation
           sha256sum UsersGuide.tar.gz >> ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           sha256sum UsersGuide.zip >> ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
 
@@ -221,15 +212,13 @@ jobs:
               last-file.txt
               UsersGuide.tar.gz
               UsersGuide.zip
-              *.deb
-              *.rpm
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.msi
-              HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
-              HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip
-              HDFView-x86_64.app.tar.gz
-              HDFView-arm64.app.tar.gz
+              HDFView-*-Linux.deb
+              HDFView-*-Linux.rpm
+              HDFView-*-Windows.msi
+              HDFView-*-Darwin-*.dmg
+              HDFView-*App-Linux.tar.gz
+              HDFView-*App-Windows.zip
+              HDFView-*App-Darwin-*.tar.gz
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
@@ -245,14 +234,12 @@ jobs:
           files: |
               UsersGuide.tar.gz
               UsersGuide.zip
-              *.deb
-              *.rpm
-              HDFView-${{ steps.get-artifact-info.outputs.VERSION }}.msi
-              HDFView-x86_64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
-              HDFView-arm64-${{ steps.get-artifact-info.outputs.VERSION }}.dmg
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-Linux-x86_64.tar.gz
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}App-win64.zip
-              HDFView-x86_64.app.tar.gz
-              HDFView-arm64.app.tar.gz
+              HDFView-*-Linux.deb
+              HDFView-*-Linux.rpm
+              HDFView-*-Windows.msi
+              HDFView-*-Darwin-*.dmg
+              HDFView-*App-Linux.tar.gz
+              HDFView-*App-Windows.zip
+              HDFView-*App-Darwin-*.tar.gz
               ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

@@ -289,6 +289,14 @@ jobs:
           # Build object and hdfview modules, stop at package phase to avoid verify/PMD
           mvn package -pl object,hdfview "-Dmaven.test.skip=true" "-Dhdf5.version=$env:HDF5_VERSION" "-Dhdf.version=$env:HDF4_VERSION" -B
 
+      - name: Extract version from VERSION file
+        id: get-version-binary
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION | Select-String "^HDFVIEW_VERSION=").ToString().Split('=')[1]
+          echo "HDFVIEW_VERSION=$version" >> $env:GITHUB_OUTPUT
+          Write-Host "HDFView version: $version"
+
       - name: Create Windows Binary Archive
         shell: pwsh
         run: |
@@ -304,14 +312,14 @@ jobs:
           Copy-Item "$env:HDF4LIB_PATH\bin\*.dll" -Destination "hdfview-dist\lib\" -ErrorAction SilentlyContinue
           Copy-Item "$env:HDF5LIB_PATH\bin\*.dll" -Destination "hdfview-dist\lib\" -ErrorAction SilentlyContinue
 
-          # Create ZIP archive
-          Compress-Archive -Path "hdfview-dist\*" -DestinationPath "${{ inputs.artifact_basename }}-win64.zip"
+          # Create ZIP archive with standard name: HDFView-{VERSION}App-Windows.zip
+          Compress-Archive -Path "hdfview-dist\*" -DestinationPath "HDFView-${{ steps.get-version-binary.outputs.HDFVIEW_VERSION }}App-Windows.zip"
 
       - name: Upload Windows Binary Artifact
         uses: actions/upload-artifact@v4
         with:
           name: zip-win-vs2022-binary
-          path: ${{ inputs.artifact_basename }}-win64.zip
+          path: HDFView-*App-Windows.zip
           retention-days: 30
 
     build-windows-app:
@@ -690,18 +698,18 @@ jobs:
           shell: pwsh
           run: |
             # Package the jpackage app-image as a ZIP for distribution
-            # Note: Must preserve HDFView directory structure for jpackage --app-image to work
+            # Standard name: HDFView-{VERSION}App-Windows.zip
             Set-Location "hdfview\target\dist"
-            Compress-Archive -Path "HDFView" -DestinationPath "${{ github.workspace }}\${{ inputs.artifact_basename }}App-win64.zip"
-  
-            Write-Host "Windows application archive created: ${{ inputs.artifact_basename }}App-win64.zip"
-            Get-Item "${{ github.workspace }}\${{ inputs.artifact_basename }}App-win64.zip" | Select-Object Name, Length
-  
+            Compress-Archive -Path "HDFView" -DestinationPath "${{ github.workspace }}\HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Windows.zip"
+
+            Write-Host "Windows application archive created: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Windows.zip"
+            Get-Item "${{ github.workspace }}\HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Windows.zip" | Select-Object Name, Length
+
         - name: Upload Windows App Artifact
           uses: actions/upload-artifact@v4
           with:
             name: zip-win-vs2022-app-binary
-            path: ${{ inputs.artifact_basename }}App-win64.zip
+            path: HDFView-*App-Windows.zip
             retention-days: 30
 
         - name: Create and Prepare MSI Installer
@@ -718,13 +726,9 @@ jobs:
               exit 1
             }
 
-            # Determine final name and copy to workspace root
+            # Rename to standard format: HDFView-{VERSION}-Windows.msi
             $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-            if ("${{ inputs.build_type }}" -eq "snapshot") {
-              $finalMsi = "${{ inputs.artifact_basename }}.msi"
-            } else {
-              $finalMsi = "HDFView-${version}.msi"
-            }
+            $finalMsi = "HDFView-${version}-Windows.msi"
 
             Copy-Item $msiFile.FullName -Destination $finalMsi
             Write-Host "✓ MSI prepared: $finalMsi"
@@ -749,13 +753,9 @@ jobs:
           if: github.repository == 'HDFGroup/hdfview' && env.AZURE_TENANT_ID != ''
           shell: pwsh
           run: |
-            # Determine MSI filename (same logic as prepare step)
+            # Standard MSI name: HDFView-{VERSION}-Windows.msi
             $version = "${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-            if ("${{ inputs.build_type }}" -eq "snapshot") {
-              $msiFile = "${{ inputs.artifact_basename }}.msi"
-            } else {
-              $msiFile = "HDFView-${version}.msi"
-            }
+            $msiFile = "HDFView-${version}-Windows.msi"
 
             Write-Host "Signing MSI: $msiFile"
 
@@ -782,6 +782,6 @@ jobs:
         - name: Upload Windows MSI Installer
           uses: actions/upload-artifact@v4
           with:
-            name: ${{ inputs.build_type == 'snapshot' && format('{0}-win64-msi', inputs.artifact_basename) || format('HDFView-{0}-win64-msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
-            path: ${{ inputs.build_type == 'snapshot' && format('{0}.msi', inputs.artifact_basename) || format('HDFView-{0}.msi', steps.get-version.outputs.HDFVIEW_VERSION) }}
+            name: msi-win-vs2022-installer
+            path: HDFView-*-Windows.msi
             retention-days: 5

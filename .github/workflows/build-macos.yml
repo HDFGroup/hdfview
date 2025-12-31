@@ -362,25 +362,25 @@ jobs:
         - name: Create Application Archive
           run: |
             cd hdfview/target/dist
-            tar -czf ${{ github.workspace }}/HDFView-${{ matrix.arch }}.app.tar.gz HDFView.app/
-            echo "Created ${{ matrix.arch }} archive"
+            tar -czf ${{ github.workspace }}/HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Darwin-${{ matrix.arch }}.tar.gz HDFView.app/
+            echo "Created ${{ matrix.arch }} archive: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Darwin-${{ matrix.arch }}.tar.gz"
 
         - name: Upload App Artifact
           uses: actions/upload-artifact@v4
           with:
             name: macos-app-${{ matrix.arch }}
-            path: HDFView-${{ matrix.arch }}.app.tar.gz
+            path: HDFView-*App-Darwin-${{ matrix.arch }}.tar.gz
             retention-days: 30
 
         - name: Create DMG Installer
           run: |
-            echo "Creating DMG installer for ${{ matrix.arch }} using Maven profile..."
+            echo "Creating DMG installer for ${{ matrix.arch }}..."
 
             # Use Maven jpackage-installer-mac profile
-            # This includes file associations and macOS-specific packaging options
-            # Note: We override mac-package-name to include architecture
+            # Set package name to: HDFView-{VERSION}-Darwin-{arch}
+            # jpackage creates DMG as: {package-name}.dmg
             mvn package -Pjpackage-installer-mac -pl hdfview \
-              -Djpackage.mac.package.name="${{ inputs.artifact_basename }}-${{ matrix.arch }}" \
+              -Djpackage.mac.package.name="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}" \
               -DskipTests \
               -B
 
@@ -398,7 +398,8 @@ jobs:
             echo "Submitting DMG for notarization..."
             cd hdfview/target/dist
 
-            DMG_FILE="HDFView-${{ matrix.arch }}-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+            # Standard DMG name: HDFView-{VERSION}-Darwin-{arch}.dmg
+            DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg"
             echo "DMG file: $DMG_FILE"
 
             xcrun notarytool submit "$DMG_FILE" \
@@ -436,7 +437,8 @@ jobs:
             echo "Stapling notarization ticket to DMG..."
             cd hdfview/target/dist
 
-            DMG_FILE="HDFView-${{ matrix.arch }}-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+            # Standard DMG name: HDFView-{VERSION}-Darwin-{arch}.dmg
+            DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg"
 
             xcrun stapler staple "$DMG_FILE"
             xcrun stapler validate "$DMG_FILE"
@@ -446,7 +448,7 @@ jobs:
         - name: Upload DMG Installer Artifact
           uses: actions/upload-artifact@v4
           with:
-            name: ${{ inputs.artifact_basename }}-macOS-${{ matrix.arch }}-dmg
+            name: dmg-macos-${{ matrix.arch }}-installer
             path: hdfview/target/dist/*.dmg
             retention-days: 30
     
