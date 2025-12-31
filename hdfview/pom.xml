@@ -532,14 +532,11 @@
       </build>
     </profile>
 
-    <!-- jpackage profile for macOS app-image (always add macOS JVM options) -->
+    <!-- jpackage profile for macOS app-image (adds macOS-specific JVM options) -->
+    <!-- Must be explicitly activated: mvn verify -Pjpackage-app-image,jpackage-mac-base -->
+    <!-- Only use when creating app-image, NOT when creating installers from app-image -->
     <profile>
       <id>jpackage-mac-base</id>
-      <activation>
-        <os>
-          <family>mac</family>
-        </os>
-      </activation>
       <build>
         <plugins>
           <plugin>

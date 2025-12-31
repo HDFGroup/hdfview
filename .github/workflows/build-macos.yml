@@ -274,16 +274,16 @@ jobs:
           run: |
             echo "Creating ${{ matrix.arch }} app-image using Maven jpackage profile..."
 
-            # Use Maven jpackage-app-image profile
-            # This includes all necessary --java-options:
+            # Use Maven jpackage-app-image profile + jpackage-mac-base for macOS-specific options
+            # jpackage-app-image includes --java-options:
             #   -Xmx1024M
             #   -Djava.library.path=$APPDIR
             #   -Dhdfview.root=$APPDIR
-            #   -XstartOnFirstThread (macOS)
-            # And macOS-specific options:
+            # jpackage-mac-base adds macOS-specific:
+            #   --java-options -XstartOnFirstThread (required for SWT on macOS)
             #   --mac-entitlements
             #   --icon
-            mvn verify -Pjpackage-app-image -pl object,hdfview \
+            mvn verify -Pjpackage-app-image,jpackage-mac-base -pl object,hdfview \
               -Dmaven.test.skip=true \
               -Djacoco.skip=true \
               -Dpmd.skip=true \
