@@ -135,34 +135,3 @@ jobs:
               path: ./hdfsrc/docs/UsersGuide
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      - name: Create release source file (tgz and zip)
-        id: create-snapshot-files
-        if: ${{ (inputs.build_environment == 'release') }}
-        run: |
-              mv hdfsrc ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}
-              zip -r ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.zip ./${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}
-              tar -zcvf ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.tar.gz ./${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}
-        shell: bash
-
-      - name: Create snapshot source file (tgz and zip)
-        id: create-release-files
-        if: ${{ (inputs.build_environment == 'snapshots') }}
-        run: |
-              zip -r ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.zip ./hdfsrc
-              tar -zcvf ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.tar.gz ./hdfsrc
-        shell: bash
-
-      # Save files created by release script
-      - name: Save tgz-tarball
-        uses: actions/upload-artifact@v4
-        with:
-              name: tgz-tarball
-              path: ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.tar.gz
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: Save zip-tarball
-        uses: actions/upload-artifact@v4
-        with:
-              name: zip-tarball
-              path: ${{ steps.set-artifact-basename.outputs.ARTIFACT_BASENAME }}.zip
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
