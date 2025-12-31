@@ -325,6 +325,7 @@ jobs:
               --type app-image \
               --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
               --mac-package-identifier HDFView.hdfgroup.org \
+              --mac-entitlements lib/macosx/distribution.entitlements \
               --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
               --file-associations ${{ github.workspace }}/package_files/HDFViewHDF.properties \
               --file-associations ${{ github.workspace }}/package_files/HDFViewH4.properties \

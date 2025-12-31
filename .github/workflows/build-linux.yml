@@ -349,10 +349,10 @@ jobs:
         - name: Create DEB Installer
           run: |
             echo "Creating DEB installer from app-image..."
-    
+
             # Version loaded from VERSION file
             VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-    
+
             # Use jpackage to create DEB from app-image
             jpackage \
                 --type deb \
@@ -360,7 +360,7 @@ jobs:
                 --name HDFView \
                 --app-version "$VERSION" \
                 --icon package_files/hdfview.png \
-                --linux-package-name hdfview \
+                --linux-package-name HDFView \
                 --linux-menu-group "Science" \
                 --linux-shortcut \
                 --file-associations package_files/HDFViewHDF.properties \
@@ -369,17 +369,17 @@ jobs:
                 --file-associations package_files/HDFViewH5.properties \
                 --file-associations package_files/HDFViewHDF5.properties \
                 --dest .
-    
+
             echo "DEB installer created successfully"
             ls -lh *.deb
     
         - name: Create RPM Installer
           run: |
             echo "Creating RPM installer from app-image..."
-    
+
             # Version loaded from VERSION file
             VERSION="${{ steps.get-version.outputs.HDFVIEW_VERSION }}"
-    
+
             # Use jpackage to create RPM from app-image
             jpackage \
                 --type rpm \
@@ -387,7 +387,7 @@ jobs:
                 --name HDFView \
                 --app-version "$VERSION" \
                 --icon package_files/hdfview.png \
-                --linux-package-name hdfview \
+                --linux-package-name HDFView \
                 --linux-menu-group "Science" \
                 --linux-shortcut \
                 --file-associations package_files/HDFViewHDF.properties \
@@ -396,7 +396,7 @@ jobs:
                 --file-associations package_files/HDFViewH5.properties \
                 --file-associations package_files/HDFViewHDF5.properties \
                 --dest .
-    
+
             echo "RPM installer created successfully"
             ls -lh *.rpm
     
