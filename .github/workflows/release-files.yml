@@ -105,10 +105,16 @@ jobs:
               name: ${{ inputs.build_environment == 'snapshots' && format('{0}-win64-msi', steps.get-artifact-info.outputs.ARTIFACT_BASENAME) || format('HDFView-{0}-win64-msi', steps.get-artifact-info.outputs.VERSION) }}
               path: ${{ github.workspace }}
 
-      - name: Get macOS DMG installer
+      - name: Get macOS DMG installer (x86_64)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: ${{ inputs.build_environment == 'snapshots' && format('{0}-macOS-dmg', steps.get-artifact-info.outputs.ARTIFACT_BASENAME) || format('HDFView-{0}-macOS-dmg', steps.get-artifact-info.outputs.VERSION) }}
+              name: ${{ inputs.build_environment == 'snapshots' && format('{0}-macOS-x86_64-dmg', steps.get-artifact-info.outputs.ARTIFACT_BASENAME) || format('HDFView-{0}-macOS-x86_64-dmg', steps.get-artifact-info.outputs.VERSION) }}
+              path: ${{ github.workspace }}
+
+      - name: Get macOS DMG installer (arm64)
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+              name: ${{ inputs.build_environment == 'snapshots' && format('{0}-macOS-arm64-dmg', steps.get-artifact-info.outputs.ARTIFACT_BASENAME) || format('HDFView-{0}-macOS-arm64-dmg', steps.get-artifact-info.outputs.VERSION) }}
               path: ${{ github.workspace }}
 
       - name: Get DEB installer (Linux)
@@ -130,10 +136,16 @@ jobs:
               name: zip-win-vs2022-app-binary
               path: ${{ github.workspace }}
       
-      - name: Get published app binary (MacOS)
+      - name: Get published app binary (MacOS x86_64)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: tgz-macos14_clang-app-binary
+              name: macos-app-x86_64
+              path: ${{ github.workspace }}
+
+      - name: Get published app binary (MacOS arm64)
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+              name: macos-app-arm64
               path: ${{ github.workspace }}
       
       - name: Get published app binary (Linux)
