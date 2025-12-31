@@ -247,44 +247,6 @@ jobs:
             mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
             mvn package -DskipTests -B
 
-        - name: Prepare jpackage Input Directory
-          run: |
-            echo "Preparing jpackage input directory..."
-            JPACKAGE_INPUT=hdfview/target/jpackage-input
-            rm -rf $JPACKAGE_INPUT
-            mkdir -p $JPACKAGE_INPUT
-
-            # Copy JARs
-            if ls libs/hdfview-*.jar 1> /dev/null 2>&1; then
-              cp libs/hdfview-*.jar $JPACKAGE_INPUT/
-            elif ls hdfview/target/hdfview-*.jar 1> /dev/null 2>&1; then
-              cp hdfview/target/hdfview-*.jar $JPACKAGE_INPUT/
-            else
-              echo "ERROR: hdfview JAR not found!"
-              exit 1
-            fi
-
-            if ls libs/object-*.jar 1> /dev/null 2>&1; then
-              cp libs/object-*.jar $JPACKAGE_INPUT/
-            elif ls object/target/object-*.jar 1> /dev/null 2>&1; then
-              cp object/target/object-*.jar $JPACKAGE_INPUT/
-            else
-              echo "ERROR: object JAR not found!"
-              exit 1
-            fi
-
-            [ -d hdfview/target/lib ] && cp hdfview/target/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || true
-            cp -L ${{ env.HDF5LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || true
-            cp -L ${{ env.HDF5LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || true
-            cp -L ${{ env.HDF4LIB_PATH }}/lib/*.dylib $JPACKAGE_INPUT/ 2>/dev/null || true
-            cp -L ${{ env.HDF4LIB_PATH }}/lib/*.jar $JPACKAGE_INPUT/ 2>/dev/null || true
-
-            mkdir -p $JPACKAGE_INPUT/plugin
-            cp -L ${{ env.HDF5LIB_PATH }}/lib/plugin/*.dylib $JPACKAGE_INPUT/plugin/ 2>/dev/null || true
-
-            echo "JAR count: $(find $JPACKAGE_INPUT -name '*.jar' | wc -l)"
-            echo "Dylib count: $(find $JPACKAGE_INPUT -name '*.dylib' | wc -l)"
-
         - name: Setup Keychain for Code Signing
           if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
           run: |
@@ -308,44 +270,33 @@ jobs:
             echo "✓ Keychain setup complete"
             echo "✓ Code signing identity: $SIGNER"
 
-        - name: Create App Image with Code Signing
+        - name: Create App Image with Maven Profile
           run: |
-            echo "Creating ${{ matrix.arch }} app-image..."
-            mkdir -p hdfview/target/dist
-            MAIN_JAR=$(basename hdfview/target/jpackage-input/hdfview-*.jar)
+            echo "Creating ${{ matrix.arch }} app-image using Maven jpackage profile..."
 
-            # Build jpackage command with conditional signing
-            JPACKAGE_CMD="$JAVA_HOME/bin/jpackage \
-              --verbose \
-              --name HDFView \
-              --input hdfview/target/jpackage-input \
-              --main-jar \"$MAIN_JAR\" \
-              --main-class hdf.view.HDFView \
-              --dest hdfview/target/dist \
-              --type app-image \
-              --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
-              --mac-package-identifier HDFView.hdfgroup.org \
-              --mac-entitlements lib/macosx/distribution.entitlements \
-              --mac-package-name HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
-              --file-associations ${{ github.workspace }}/package_files/HDFViewHDF.properties \
-              --file-associations ${{ github.workspace }}/package_files/HDFViewH4.properties \
-              --file-associations ${{ github.workspace }}/package_files/HDFViewHDF4.properties \
-              --file-associations ${{ github.workspace }}/package_files/HDFViewH5.properties \
-              --file-associations ${{ github.workspace }}/package_files/HDFViewHDF5.properties"
+            # Use Maven jpackage-app-image profile + jpackage-mac-base for macOS-specific options
+            # jpackage-app-image includes --java-options:
+            #   -Xmx1024M
+            #   -Djava.library.path=$APPDIR
+            #   -Dhdfview.root=$APPDIR
+            # jpackage-mac-base adds macOS-specific:
+            #   --java-options -XstartOnFirstThread (required for SWT on macOS)
+            #   --mac-entitlements
+            #   --icon
+            mvn verify -Pjpackage-app-image,jpackage-mac-base -pl object,hdfview \
+              -Dmaven.test.skip=true \
+              -Djacoco.skip=true \
+              -Dpmd.skip=true \
+              -Ddependency-check.skip=true \
+              -B
 
-            # Add signing options if on canonical repo with secrets
-            if [ "${{ github.repository }}" = "HDFGroup/hdfview" ] && [ -n "$APPLE_CERTS_BASE64" ]; then
-              echo "Adding code signing to jpackage..."
-              JPACKAGE_CMD="$JPACKAGE_CMD \
-                --mac-sign \
-                --mac-signing-key-user-name \"The HDF Group ($SIGNER)\""
+            if [ -d hdfview/target/dist/HDFView.app ]; then
+              echo "✓ ${{ matrix.arch }} app-image created successfully"
+              echo "App size: $(du -sh hdfview/target/dist/HDFView.app | cut -f1)"
             else
-              echo "Skipping code signing (fork or missing secrets)"
+              echo "✗ app-image creation failed"
+              exit 1
             fi
-
-            eval $JPACKAGE_CMD
-
-            echo "✓ ${{ matrix.arch }} app-image created"
 
         - name: Additional Code Signing (dylibs and frameworks)
           if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
@@ -411,31 +362,29 @@ jobs:
         - name: Create Application Archive
           run: |
             cd hdfview/target/dist
-            tar -czf ${{ github.workspace }}/HDFView-${{ matrix.arch }}.app.tar.gz HDFView.app/
-            echo "Created ${{ matrix.arch }} archive"
+            tar -czf ${{ github.workspace }}/HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Darwin-${{ matrix.arch }}.tar.gz HDFView.app/
+            echo "Created ${{ matrix.arch }} archive: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Darwin-${{ matrix.arch }}.tar.gz"
 
         - name: Upload App Artifact
           uses: actions/upload-artifact@v4
           with:
             name: macos-app-${{ matrix.arch }}
-            path: HDFView-${{ matrix.arch }}.app.tar.gz
+            path: HDFView-*App-Darwin-${{ matrix.arch }}.tar.gz
             retention-days: 30
 
         - name: Create DMG Installer
           run: |
             echo "Creating DMG installer for ${{ matrix.arch }}..."
+
+            # Use Maven jpackage-installer-mac profile (creates HDFView-{VERSION}.dmg)
+            mvn package -Pjpackage-installer-mac -pl hdfview -DskipTests -B
+
+            # Rename to standard format: HDFView-{VERSION}-Darwin-{arch}.dmg
             cd hdfview/target/dist
-
-            $JAVA_HOME/bin/jpackage \
-              --type dmg \
-              --app-image HDFView.app \
-              --name HDFView-${{ matrix.arch }} \
-              --app-version ${{ steps.get-version.outputs.HDFVIEW_VERSION }} \
-              --mac-package-identifier HDFView.hdfgroup.org \
-              --mac-package-name "${{ inputs.artifact_basename }}-${{ matrix.arch }}" \
-              --dest .
-
-            echo "✓ DMG installer created"
+            DMG_FILE=$(ls *.dmg)
+            STANDARD_NAME="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg"
+            mv "$DMG_FILE" "$STANDARD_NAME"
+            echo "✓ DMG renamed to: $STANDARD_NAME"
             ls -lh *.dmg
 
         - name: Notarize DMG Installer
@@ -444,7 +393,8 @@ jobs:
             echo "Submitting DMG for notarization..."
             cd hdfview/target/dist
 
-            DMG_FILE="HDFView-${{ matrix.arch }}-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+            # Standard DMG name: HDFView-{VERSION}-Darwin-{arch}.dmg
+            DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg"
             echo "DMG file: $DMG_FILE"
 
             xcrun notarytool submit "$DMG_FILE" \
@@ -482,7 +432,8 @@ jobs:
             echo "Stapling notarization ticket to DMG..."
             cd hdfview/target/dist
 
-            DMG_FILE="HDFView-${{ matrix.arch }}-${{ steps.get-version.outputs.HDFVIEW_VERSION }}.dmg"
+            # Standard DMG name: HDFView-{VERSION}-Darwin-{arch}.dmg
+            DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg"
 
             xcrun stapler staple "$DMG_FILE"
             xcrun stapler validate "$DMG_FILE"
@@ -492,7 +443,7 @@ jobs:
         - name: Upload DMG Installer Artifact
           uses: actions/upload-artifact@v4
           with:
-            name: ${{ inputs.artifact_basename }}-macOS-${{ matrix.arch }}-dmg
+            name: dmg-macos-${{ matrix.arch }}-installer
             path: hdfview/target/dist/*.dmg
             retention-days: 30
     
