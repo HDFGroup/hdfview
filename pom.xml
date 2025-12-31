@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.hdfgroup.hdfview</groupId>
   <artifactId>hdfview-bom</artifactId>
-  <version>3.4.0</version>
+  <version>99.99.99</version>
   <packaging>pom</packaging>
   <modules>
 <!-- The repository module must be first in order to ensure
