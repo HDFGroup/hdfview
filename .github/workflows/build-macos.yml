@@ -214,8 +214,8 @@ jobs:
             # TODO - hardcoded dependency files in repository/lib will likely break over time
             cd repository/lib
 
-            if [ ! -f org.eclipse.swtbot.swt.jar ]; then
-              echo "Error: org.eclipse.swtbot.swt.jar file not found in repository/lib/"
+            if [ ! -f org.eclipse.swtbot.jar ]; then
+              echo "Error: org.eclipse.swtbot.jar file not found in repository/lib/"
               exit 1
             fi
 
