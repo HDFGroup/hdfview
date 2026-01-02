@@ -321,7 +321,7 @@ jobs:
             # Produced installer must be signed separately from the app-image
             codesign --force --sign "The HDF Group ($SIGNER)" \
               --options runtime \
-              -- timestamp \
+              --timestamp \
               "$STANDARD_DMG_NAME"
 
         - name: Notarize DMG Installer
