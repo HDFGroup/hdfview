@@ -106,7 +106,11 @@ jobs:
 
         - name: Download and Install HDF4 from GitHub
           run: |
-            PATTERN="*-macos14_clang.tar.gz"
+            if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
+              PATTERN="${{ inputs.hdf4_artifact_basename }}-macos14_clang.tar.gz"
+            else
+              PATTERN="*-macos14_clang.tar.gz"
+            fi
             echo "Using pattern: $PATTERN"
 
             gh release download "${{ inputs.hdf4_release_tag }}" --repo HDFGroup/hdf4 --pattern "$PATTERN" \
@@ -123,7 +127,11 @@ jobs:
 
         - name: Download and Install HDF5 from GitHub
           run: |
-            PATTERN="hdf5-*-macos14_clang.tar.gz"
+            if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
+              PATTERN="${{ inputs.hdf5_prefix }}${{ inputs.hdf5_artifact_basename }}-macos14_clang.tar.gz"
+            else
+              PATTERN="hdf5-*-macos14_clang.tar.gz"
+            fi
             echo "Using pattern: $PATTERN"
 
             gh release download "${{ inputs.hdf5_release_tag }}" --repo HDFGroup/hdf5 --pattern "$PATTERN" \
