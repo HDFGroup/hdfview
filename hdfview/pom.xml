@@ -238,7 +238,6 @@
       <id>jpackage-app-image</id>
       <properties>
         <jpackage.type>app-image</jpackage.type>
-        <jpackage.skip.signing>true</jpackage.skip.signing>
         <!-- jpackage requires numeric version (no -SNAPSHOT suffix) -->
         <!-- Version loaded from VERSION file via properties-maven-plugin -->
         <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
@@ -315,7 +314,7 @@
                     <mkdir dir="${jpackage.input}/plugin"/>
                     <copy todir="${jpackage.input}/plugin" failonerror="false">
                       <fileset dir="${hdf5.plugin.dir}" erroronmissingdir="false">
-                        <include name="*.so"/>
+                        <!-- <include name="*.so"/> -->
                         <include name="*.dll"/>
                         <include name="*.dylib"/>
                       </fileset>
@@ -539,6 +538,32 @@
       <id>jpackage-mac-base</id>
       <build>
         <plugins>
+          <!-- Clean up non-macOS plugin files before jpackage -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>remove-non-macos-plugins</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <echo message="Removing .so files from plugin directory (macOS uses .dylib and cannot sign these libraries)..."/>
+                    <delete failonerror="false">
+                      <fileset dir="${project.build.directory}/jpackage-input/plugin" erroronmissingdir="false">
+                        <include name="*.so"/>
+                      </fileset>
+                    </delete>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
