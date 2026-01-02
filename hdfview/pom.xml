@@ -562,7 +562,6 @@
                     <argument>--mac-sign</argument>
                     <argument>--mac-signing-key-user-name</argument>
                     <argument>The HDF Group (${env.SIGNER})</argument>
-                    <argument>--force</argument> <!-- Overwrite existing files, if any -->
                     <argument>--timestamp</argument> <!-- Include timestamp for notarization -->
                   </arguments>
                 </configuration>
