@@ -260,6 +260,9 @@ jobs:
             echo "Creating ${{ matrix.arch }} app-image using Maven jpackage profile..."
 
             # use base app-image profile + mac specific options
+            # TODO - May only need to use mvn verify here.
+            # The install step populates ~/.m2/repository, which probably is not need for app-image
+            # and may not be needed for the DMG creation
             mvn install -Pjpackage-app-image,jpackage-mac-base -pl object,hdfview \
               -Dmaven.test.skip=true \
               -Djacoco.skip=true \
@@ -275,81 +278,20 @@ jobs:
               exit 1
             fi
 
-        - name: Additional Code Signing (dylibs and frameworks)
-          if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
-          run: |
-            echo "Performing bottom-up code signing of all binaries..."
-            security unlock-keychain -p $KEYCHAIN_PASSWD $KEYCHAIN_NAME.keychain
-
-            # Sign all dylib files
-            echo "Signing all dylib files..."
-            find hdfview/target/dist/HDFView.app -name "*.dylib" -type f | while read dylib; do
-              echo "  Signing: $dylib"
-              codesign --force --sign "The HDF Group ($SIGNER)" \
-                --options runtime \
-                --timestamp \
-                "$dylib" || echo "  Warning: Failed to sign $dylib"
-            done
-
-            # Sign all framework bundles
-            echo "Signing frameworks..."
-            find hdfview/target/dist/HDFView.app/Contents/runtime -name "*.framework" -type d | while read framework; do
-              echo "  Signing: $framework"
-              codesign --force --sign "The HDF Group ($SIGNER)" \
-                --options runtime \
-                --timestamp \
-                "$framework" || echo "  Warning: Failed to sign $framework"
-            done
-
-            # Sign executables in MacOS directory
-            echo "Signing executables..."
-            find hdfview/target/dist/HDFView.app/Contents/MacOS -type f -perm +111 | while read exe; do
-              echo "  Signing: $exe"
-              codesign --force --sign "The HDF Group ($SIGNER)" \
-                --options runtime \
-                --timestamp \
-                "$exe" || echo "  Warning: Failed to sign $exe"
-            done
-
-            # Sign Java runtime executables
-            if [ -d hdfview/target/dist/HDFView.app/Contents/runtime/Contents/Home/bin ]; then
-              echo "Signing JRE binaries..."
-              find hdfview/target/dist/HDFView.app/Contents/runtime/Contents/Home/bin -type f -perm +111 | while read exe; do
-                echo "  Signing: $exe"
-                codesign --force --sign "The HDF Group ($SIGNER)" \
-                  --options runtime \
-                  --timestamp \
-                  "$exe" || echo "  Warning: Failed to sign $exe"
-              done
-            fi
-
-            # Finally, sign the app bundle itself
-            echo "Signing main app bundle..."
-            codesign --force --sign "The HDF Group ($SIGNER)" \
-              --options runtime \
-              --timestamp \
-              hdfview/target/dist/HDFView.app
-
-            echo "✓ Bottom-up code signing complete"
-
-            # Verify signature
-            echo "Verifying app signature..."
-            codesign -vvv --strict hdfview/target/dist/HDFView.app
-
         - name: Create Application Archive
           run: |
             cd hdfview/target/dist
             tar -czf ${{ github.workspace }}/HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Darwin-${{ matrix.arch }}.tar.gz HDFView.app/
             echo "Created ${{ matrix.arch }} archive: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Darwin-${{ matrix.arch }}.tar.gz"
 
-        - name: Upload App Artifact
+        - name: Upload Application Archive as Artifact
           uses: actions/upload-artifact@v4
           with:
             name: macos-app-${{ matrix.arch }}
             path: HDFView-*App-Darwin-${{ matrix.arch }}.tar.gz
             retention-days: 30
 
-        - name: Create DMG Installer
+        - name: Create and Sign DMG Installer
           run: |
             echo "Creating DMG installer for ${{ matrix.arch }}..."
 
@@ -359,10 +301,16 @@ jobs:
             # Rename to standard format: HDFView-{VERSION}-Darwin-{arch}.dmg
             cd hdfview/target/dist
             DMG_FILE=$(ls *.dmg)
-            STANDARD_NAME="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg"
-            mv "$DMG_FILE" "$STANDARD_NAME"
-            echo "✓ DMG renamed to: $STANDARD_NAME"
+            echo "STANDARD_DMG_NAME=HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg" >> $GITHUB_ENV
+            mv "$DMG_FILE" "$STANDARD_DMG_NAME"
+            echo "✓ DMG renamed to: $STANDARD_DMG_NAME"
             ls -lh *.dmg
+
+            # Produced installer must be signed separately from the app-image
+            codesign --force --sign "The HDF Group ($SIGNER)" \
+              --options runtime \
+              -- timestamp \
+              "$STANDARD_DMG_NAME"
 
         - name: Notarize DMG Installer
           if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
@@ -370,11 +318,9 @@ jobs:
             echo "Submitting DMG for notarization..."
             cd hdfview/target/dist
 
-            # Standard DMG name: HDFView-{VERSION}-Darwin-{arch}.dmg
-            DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg"
-            echo "DMG file: $DMG_FILE"
+            echo "DMG file: $STANDARD_DMG_NAME"
 
-            xcrun notarytool submit "$DMG_FILE" \
+            xcrun notarytool submit "$STANDARD_DMG_NAME" \
               --apple-id "$NOTARY_USER" \
               --password "$NOTARY_KEY" \
               --team-id "$SIGNER" \
@@ -409,11 +355,8 @@ jobs:
             echo "Stapling notarization ticket to DMG..."
             cd hdfview/target/dist
 
-            # Standard DMG name: HDFView-{VERSION}-Darwin-{arch}.dmg
-            DMG_FILE="HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg"
-
-            xcrun stapler staple "$DMG_FILE"
-            xcrun stapler validate "$DMG_FILE"
+            xcrun stapler staple "$STANDARD_DMG_NAME"
+            xcrun stapler validate "$STANDARD_DMG_NAME"
 
             echo "✓ Notarization ticket stapled successfully"
 
