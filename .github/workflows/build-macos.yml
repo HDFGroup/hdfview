@@ -299,6 +299,10 @@ jobs:
             path: HDFView-*App-Darwin-${{ matrix.arch }}.tar.gz
             retention-days: 30
 
+        - name: Set target DMG name
+          run: |
+            echo "STANDARD_DMG_NAME=HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg" >> $GITHUB_ENV
+
         - name: Create and Sign DMG Installer
           run: |
             echo "Creating DMG installer for ${{ matrix.arch }}..."
@@ -306,10 +310,10 @@ jobs:
             # Use Maven jpackage-installer-mac profile (creates HDFView-{VERSION}.dmg)
             mvn package -Pjpackage-installer-mac -pl hdfview -DskipTests -B
 
-            # Rename to standard format: HDFView-{VERSION}-Darwin-{arch}.dmg
+            # Rename to standard format
             cd hdfview/target/dist
             DMG_FILE=$(ls *.dmg)
-            echo "STANDARD_DMG_NAME=HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Darwin-${{ matrix.arch }}.dmg" >> $GITHUB_ENV
+
             mv "$DMG_FILE" "$STANDARD_DMG_NAME"
             echo "✓ DMG renamed to: $STANDARD_DMG_NAME"
             ls -lh *.dmg
