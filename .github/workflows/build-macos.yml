@@ -147,82 +147,90 @@ jobs:
             platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
             EOF
 
-        - name: Install HDF JARs to Local Maven Repository
+        - name: Install HDF5 JAR to Local Maven Repository
           run: |
             mkdir -p repository/lib
-            cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs"
             cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs"
+            cd repository/lib
 
-            if [ -f repository/lib/jarhdf5-*.jar ]; then
-              JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
-              HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
-              mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" -Dpackaging=jar -DgeneratePom=true
-              echo "Installed: $JAR_FILE as version $HDF5_VERSION"
-              echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
-            fi
-            if [ -f repository/lib/jarhdf-*.jar ]; then
-              JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
-              HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
-              mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" -Dpackaging=jar -DgeneratePom=true
-              echo "Installed: $JAR_FILE as version $HDF4_VERSION"
-              echo "HDF4_VERSION=$HDF4_VERSION" >> $GITHUB_ENV
+            if [ ! -f jarhdf5-*.jar ]; then
+              echo "Error: jarhdf5 JAR file not found!"
+              exit 1
             fi
 
-        - name: Build repository module (copies platform SWT JAR)
+            JAR_FILE=$(ls jarhdf5-*.jar | head -1)
+            HDF5_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf5-\([0-9.]*\)\.jar/\1/p')
+            mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$HDF5_VERSION" -Dpackaging=jar -DgeneratePom=true
+            echo "Installed: $JAR_FILE as version $HDF5_VERSION"
+
+        - name: Install HDF4 JAR to Local Maven Repository
           run: |
-            echo "Building repository module to copy SWT JAR..."
-            mvn generate-sources -pl repository -B
+            cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs"
+            cd repository/lib
+
+            if [ ! -f jarhdf-*.jar ]; then
+              echo "Error: jarhdf (hdf4) JAR file not found!"
+              exit 1
+            fi
+
+            JAR_FILE=$(ls jarhdf-*.jar | head -1)
+            HDF4_VERSION=$(echo "$JAR_FILE" | sed -n 's/.*jarhdf-\([0-9.]*\)\.jar/\1/p')
+            mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" -Dpackaging=jar -DgeneratePom=true
+            echo "Installed: $JAR_FILE as version $HDF4_VERSION"
 
         - name: Install SWT JAR to Local Maven Repository
           run: |
             echo "Installing macOS ${{ matrix.arch }} SWT JAR to local Maven repository..."
-            if [ -f repository/lib/swt.jar ]; then
-              mvn install:install-file -Dfile=repository/lib/swt.jar \
-                -DgroupId=org.eclipse.platform \
-                -DartifactId=${{ matrix.swt_artifact_id }} \
-                -Dversion=3.126.0 \
-                -Dpackaging=jar \
-                -DgeneratePom=true
-              echo "macOS ${{ matrix.arch }} SWT JAR installed"
-            else
-              echo "ERROR: swt.jar not found in repository/lib/"
+
+            # TODO - hardcoded dependency files in repository/lib will likely break over time
+            cd repository/lib
+
+            if [ ! -f swt.jar]; then
+              echo "Error: swt.jar file not found in repository/lib/"
               exit 1
             fi
+
+            mvn install:install-file -Dfile=swt.jar \
+              -DgroupId=org.eclipse.platform \
+              -DartifactId=${{ matrix.swt_artifact_id }} \
+              -Dversion=3.126.0 \
+              -Dpackaging=jar \
+              -DgeneratePom=true
+
+            echo "macOS ${{ matrix.arch }} SWT JAR installed"
 
         - name: Install SWTBot JARs to Local Maven Repository
           run: |
             echo "Installing SWTBot JARs to local Maven repository..."
 
-            if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
-              mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
-                -DgroupId=org.eclipse.local \
-                -DartifactId=org.eclipse.swtbot.swt.finder \
-                -Dversion=4.2.1 \
-                -Dpackaging=jar \
-                -DgeneratePom=true
-              echo "SWTBot SWT finder JAR installed"
-            else
-              echo "WARNING: org.eclipse.swtbot.swt.finder.jar not found"
+            # TODO - hardcoded dependency files in repository/lib will likely break over time
+            cd repository/lib
+
+            if [ ! -f org.eclipse.swtbot.swt.jar ]; then
+              echo "Error: org.eclipse.swtbot.swt.jar file not found in repository/lib/"
+              exit 1
             fi
 
-            if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
-              mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
-                -DgroupId=org.eclipse.local \
-                -DartifactId=org.eclipse.swtbot.nebula.nattable.finder \
-                -Dversion=4.2.1 \
-                -Dpackaging=jar \
-                -DgeneratePom=true
-              echo "SWTBot Nebula NatTable finder JAR installed"
-            else
-              echo "WARNING: org.eclipse.swtbot.nebula.nattable.finder.jar not found"
-            fi
+            mvn install:install-file -Dfile=org.eclipse.swtbot.swt.finder.jar \
+              -DgroupId=org.eclipse.local \
+              -DartifactId=org.eclipse.swtbot.swt.finder \
+              -Dversion=4.2.1 \
+              -Dpackaging=jar \
+              -DgeneratePom=true
+            echo "SWTBot SWT finder JAR installed"
 
-        - name: Build and Package Application
-          run: |
-            echo "Building HDFView with Maven..."
-            mvn install -B -N -Ddependency-check.skip=true
-            mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
-            mvn package -DskipTests -B
+            if [ ! -f org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+              echo "Error: org.eclipse.swtbot.nebula.nattable.finder.jar file not found in repository/lib/" 
+              exit 1
+            fi
+            
+            mvn install:install-file -Dfile=org.eclipse.swtbot.nebula.nattable.finder.jar \
+              -DgroupId=org.eclipse.local \
+              -DartifactId=org.eclipse.swtbot.nebula.nattable.finder \
+              -Dversion=4.2.1 \
+              -Dpackaging=jar \
+              -DgeneratePom=true
+            echo "SWTBot Nebula NatTable finder JAR installed"
 
         - name: Setup Keychain for Code Signing
           if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
@@ -247,20 +255,12 @@ jobs:
             echo "✓ Keychain setup complete"
             echo "✓ Code signing identity: $SIGNER"
 
-        - name: Create App Image with Maven Profile
+        - name: Create App Image + Install with Maven Profile
           run: |
             echo "Creating ${{ matrix.arch }} app-image using Maven jpackage profile..."
 
-            # Use Maven jpackage-app-image profile + jpackage-mac-base for macOS-specific options
-            # jpackage-app-image includes --java-options:
-            #   -Xmx1024M
-            #   -Djava.library.path=$APPDIR
-            #   -Dhdfview.root=$APPDIR
-            # jpackage-mac-base adds macOS-specific:
-            #   --java-options -XstartOnFirstThread (required for SWT on macOS)
-            #   --mac-entitlements
-            #   --icon
-            mvn verify -Pjpackage-app-image,jpackage-mac-base -pl object,hdfview \
+            # use base app-image profile + mac specific options
+            mvn install -Pjpackage-app-image,jpackage-mac-base -pl object,hdfview \
               -Dmaven.test.skip=true \
               -Djacoco.skip=true \
               -Dpmd.skip=true \

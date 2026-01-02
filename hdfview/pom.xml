@@ -290,6 +290,7 @@
                     <echo message="Copying HDF5 native libraries from ${hdf5.lib.dir}..."/>
                     <copy todir="${jpackage.input}" failonerror="false" flatten="true">
                       <fileset dir="${hdf5.lib.dir}" erroronmissingdir="false">
+                        <!-- TODO: Extensions should be set only in OS-specific profile extensions -->
                         <include name="*.so"/>
                         <include name="*.so.*"/>
                         <include name="*.dll"/>
@@ -310,11 +311,12 @@
                     </copy>
 
                     <!-- Copy HDF5 plugins -->
+                    <!-- TODO: Extensions should be set only in OS-specific profile extensions -->
                     <echo message="Copying HDF5 plugins from ${hdf5.plugin.dir}..."/>
                     <mkdir dir="${jpackage.input}/plugin"/>
                     <copy todir="${jpackage.input}/plugin" failonerror="false">
                       <fileset dir="${hdf5.plugin.dir}" erroronmissingdir="false">
-                        <!-- <include name="*.so"/> -->
+                        <include name="*.so"/>
                         <include name="*.dll"/>
                         <include name="*.dylib"/>
                       </fileset>
