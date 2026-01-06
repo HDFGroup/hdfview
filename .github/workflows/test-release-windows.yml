@@ -65,13 +65,22 @@ jobs:
           Write-Host "Downloading HDF4 libraries..."
           gh release download snapshot --repo HDFGroup/hdf4 `
             --pattern "*-win-vs2022_intel.zip" 2>$null
+          if (-not $?) {
+            Write-Host "HDF4 download had errors (non-critical)"
+          }
 
           Write-Host "Downloading HDF5 libraries..."
           gh release download snapshot --repo HDFGroup/hdf5 `
             --pattern "*-win-vs2022_intel.zip" 2>$null
+          if (-not $?) {
+            Write-Host "HDF5 download had errors (non-critical)"
+          }
 
           Write-Host "Downloaded library files:"
           Get-ChildItem -Filter "*.zip" -ErrorAction SilentlyContinue
+
+          # Reset exit code to success since downloads are non-critical
+          $LASTEXITCODE = 0
 
       - name: Setup test environment
         shell: pwsh
@@ -212,31 +221,36 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Searching for installed HDFView..."
+          Write-Host "Note: MSI uses --win-per-user-install, so it installs to LocalAppData"
 
-          # Common installation paths
+          # Per-user installation paths (default for --win-per-user-install)
+          # Installation path is: %LOCALAPPDATA%\HDFView\<version>\
+          $localAppData = $env:LOCALAPPDATA
           $possiblePaths = @(
+            "$localAppData\HDFView",
             "C:\Program Files\HDFView",
-            "C:\Program Files (x86)\HDFView",
-            "$env:ProgramFiles\HDFView",
-            "${env:ProgramFiles(x86)}\HDFView"
+            "C:\Program Files (x86)\HDFView"
           )
 
           $installPath = $null
           foreach ($path in $possiblePaths) {
+            Write-Host "Checking: $path"
             if (Test-Path $path) {
-              $installPath = $path
-              break
+              # For per-user install, the actual app is in a version subdirectory
+              # Try to find HDFView.exe recursively
+              $exePath = Get-ChildItem -Path $path -Filter "HDFView.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+              if ($exePath) {
+                $installPath = $exePath.DirectoryName
+                Write-Host "✓ Found at: $installPath"
+                break
+              }
             }
           }
 
           if (-not $installPath) {
-            Write-Host "✗ Installation not found in standard locations"
-            Write-Host "Searching entire Program Files..."
-            $installPath = Get-ChildItem -Path "C:\Program Files*" -Filter "HDFView.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 | Split-Path -Parent
-          }
-
-          if (-not $installPath) {
-            Write-Host "✗ HDFView installation not found"
+            Write-Host "✗ HDFView installation not found in expected locations"
+            Write-Host "Searching LocalAppData recursively..."
+            Get-ChildItem -Path $localAppData -Filter "HDFView.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
             exit 1
           }
 

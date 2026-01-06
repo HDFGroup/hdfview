@@ -77,6 +77,11 @@ jobs:
           echo "Downloaded library files:"
           ls -lh *.tar.gz 2>/dev/null || echo "No additional libraries downloaded"
 
+      - name: Download HDFView dependencies
+        run: |
+          apt update
+          apt install -y libx11-6 libxext6 libxrender1 libxtst6 libgtk-3-0
+
       - name: Setup test environment
         run: |
           # Create build.properties for tests
@@ -182,6 +187,9 @@ jobs:
 
       - name: Install DEB package
         run: |
+          echo "Creating directory for xdg-desktop-menu"
+          mkdir /usr/share/desktop-directories
+
           echo "Installing DEB package..."
           sudo dpkg -i HDFView-*-Linux.deb || sudo apt-get install -f -y
 
