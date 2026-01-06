@@ -1,0 +1,283 @@
+name: Test HDFView Release - Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'HDFView release tag (e.g., HDFView-3.4.0, snapshot)'
+        type: string
+        required: true
+        default: 'snapshot'
+  workflow_call:
+    inputs:
+      release_tag:
+        description: 'HDFView release tag (e.g., HDFView-3.4.0, snapshot)'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  test-app-binary:
+    name: Test App Binary (zip)
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository for test source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Download app binary from release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          Write-Host "Downloading HDFView app binary from release: ${{ inputs.release_tag }}"
+          gh release download ${{ inputs.release_tag }} `
+            --repo HDFGroup/hdfview `
+            --pattern "HDFView-*App-Windows.zip"
+
+          Write-Host "Downloaded files:"
+          Get-ChildItem -Filter "HDFView-*.zip"
+
+      - name: Extract app binary
+        shell: pwsh
+        run: |
+          Write-Host "Extracting app binary..."
+          $zipFile = Get-ChildItem -Filter "HDFView-*App-Windows.zip" | Select-Object -First 1
+          Expand-Archive -Path $zipFile.FullName -DestinationPath . -Force
+
+          Write-Host "App structure:"
+          Get-ChildItem -Recurse HDFView | Select-Object FullName
+
+      - name: Download test dependencies (HDF libraries)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          Write-Host "Downloading HDF4 libraries..."
+          gh release download snapshot --repo HDFGroup/hdf4 `
+            --pattern "*-win-vs2022_intel.zip" 2>$null
+
+          Write-Host "Downloading HDF5 libraries..."
+          gh release download snapshot --repo HDFGroup/hdf5 `
+            --pattern "*-win-vs2022_intel.zip" 2>$null
+
+          Write-Host "Downloaded library files:"
+          Get-ChildItem -Filter "*.zip" -ErrorAction SilentlyContinue
+
+      - name: Setup test environment
+        shell: pwsh
+        run: |
+          # Create build.properties for tests
+          $buildProps = @"
+          hdf5.lib.dir=$PWD\HDFView\app
+          hdf.lib.dir=$PWD\HDFView\app
+          platform.hdf.lib=$PWD\HDFView\app
+          hdfview.workdir=$PWD\HDFView\app\samples
+          "@
+          Set-Content -Path "build.properties" -Value $buildProps
+
+          Write-Host "Generated build.properties:"
+          Get-Content build.properties
+
+          # Add library path to PATH
+          $appPath = "$PWD\HDFView\app"
+          echo "PATH=$appPath;$env:PATH" >> $env:GITHUB_ENV
+
+      - name: Compile test classes
+        shell: pwsh
+        run: |
+          Write-Host "Compiling test classes..."
+
+          # Create classpath from app-image JARs
+          $jars = Get-ChildItem -Path "HDFView\app" -Filter "*.jar" -Recurse
+          $classpath = ($jars.FullName -join ";")
+
+          # Compile the single test we need
+          New-Item -ItemType Directory -Force -Path "test-classes" | Out-Null
+
+          javac -cp "$classpath" `
+            -d test-classes `
+            hdfview\src\test\java\uitest\AbstractWindowTest.java `
+            hdfview\src\test\java\uitest\TestHDFViewMenu.java
+
+          Write-Host "Test classes compiled successfully"
+
+      - name: Run smoke test (native Windows display)
+        shell: pwsh
+        run: |
+          Write-Host "Running smoke test: TestHDFViewMenu#verifyOpenButtonEnabled"
+          Write-Host "Windows runners have native GUI display support"
+
+          # Build classpath
+          $jars = Get-ChildItem -Path "HDFView\app" -Filter "*.jar" -Recurse
+          $classpath = ($jars.FullName -join ";")
+          $classpath = "test-classes;$classpath"
+
+          $appPath = "$PWD\HDFView\app"
+
+          # Run single smoke test with timeout
+          $testProcess = Start-Process -FilePath "java" `
+            -ArgumentList @(
+              "-cp", "$classpath",
+              "-Djava.library.path=$appPath",
+              "-Dhdfview.workdir=$appPath\samples",
+              "-Dhdfview.root=$appPath",
+              "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+              "--add-opens", "java.base/java.time=ALL-UNNAMED",
+              "org.junit.platform.console.ConsoleLauncher",
+              "--select-method", "uitest.TestHDFViewMenu#verifyOpenButtonEnabled",
+              "--details=verbose"
+            ) `
+            -NoNewWindow `
+            -PassThru `
+            -Wait
+
+          $exitCode = $testProcess.ExitCode
+
+          if ($exitCode -eq 0) {
+            Write-Host "✓ Smoke test PASSED"
+          } else {
+            Write-Host "✗ Smoke test FAILED with exit code $exitCode"
+            exit $exitCode
+          }
+
+      - name: Test Summary
+        if: always()
+        shell: pwsh
+        run: |
+          @"
+          ## App Binary Test Summary
+          - **Release Tag**: ${{ inputs.release_tag }}
+          - **Test**: TestHDFViewMenu#verifyOpenButtonEnabled
+          - **Display**: Native Windows GUI display
+          "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+
+  test-msi-installer:
+    name: Test MSI Installer
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download MSI installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          Write-Host "Downloading MSI installer from release: ${{ inputs.release_tag }}"
+          gh release download ${{ inputs.release_tag }} `
+            --repo HDFGroup/hdfview `
+            --pattern "HDFView-*-Windows.msi"
+
+          Write-Host "Downloaded installer:"
+          Get-ChildItem -Filter "HDFView-*.msi"
+
+      - name: Install MSI package
+        shell: pwsh
+        run: |
+          Write-Host "Installing MSI package..."
+          $msiFile = Get-ChildItem -Filter "HDFView-*.msi" | Select-Object -First 1
+
+          $arguments = @(
+            "/i",
+            $msiFile.FullName,
+            "/qn",
+            "/norestart",
+            "/L*V",
+            "install.log"
+          )
+
+          $process = Start-Process -FilePath "msiexec.exe" -ArgumentList $arguments -Wait -PassThru
+
+          if ($process.ExitCode -ne 0) {
+            Write-Host "Installation failed with exit code: $($process.ExitCode)"
+            if (Test-Path "install.log") {
+              Write-Host "Installation log:"
+              Get-Content "install.log" | Select-Object -Last 50
+            }
+            exit $process.ExitCode
+          }
+
+          Write-Host "Installation completed successfully"
+
+      - name: Verify installation and launch test
+        shell: pwsh
+        run: |
+          Write-Host "Searching for installed HDFView..."
+
+          # Common installation paths
+          $possiblePaths = @(
+            "C:\Program Files\HDFView",
+            "C:\Program Files (x86)\HDFView",
+            "$env:ProgramFiles\HDFView",
+            "${env:ProgramFiles(x86)}\HDFView"
+          )
+
+          $installPath = $null
+          foreach ($path in $possiblePaths) {
+            if (Test-Path $path) {
+              $installPath = $path
+              break
+            }
+          }
+
+          if (-not $installPath) {
+            Write-Host "✗ Installation not found in standard locations"
+            Write-Host "Searching entire Program Files..."
+            $installPath = Get-ChildItem -Path "C:\Program Files*" -Filter "HDFView.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 | Split-Path -Parent
+          }
+
+          if (-not $installPath) {
+            Write-Host "✗ HDFView installation not found"
+            exit 1
+          }
+
+          Write-Host "✓ Installation found at: $installPath"
+
+          # Find the launcher
+          $launcher = Get-ChildItem -Path $installPath -Filter "HDFView.exe" -Recurse | Select-Object -First 1
+
+          if (-not $launcher) {
+            Write-Host "✗ HDFView.exe not found in installation directory"
+            exit 1
+          }
+
+          Write-Host "Found launcher at: $($launcher.FullName)"
+
+          # Try to launch the application briefly
+          Write-Host "Launching HDFView for stability check..."
+          $app = Start-Process -FilePath $launcher.FullName -PassThru
+
+          # Wait 5 seconds to see if it crashes
+          Start-Sleep -Seconds 5
+
+          # Check if process is still running
+          $stillRunning = Get-Process -Id $app.Id -ErrorAction SilentlyContinue
+
+          if ($stillRunning) {
+            Write-Host "✓ HDFView launched successfully and is running"
+            Stop-Process -Id $app.Id -Force
+            Write-Host "✓ MSI installer smoke test PASSED"
+          } else {
+            Write-Host "✗ HDFView crashed or exited immediately"
+            exit 1
+          }
+
+      - name: Test Summary
+        if: always()
+        shell: pwsh
+        run: |
+          @"
+          ## MSI Installer Test Summary
+          - **Release Tag**: ${{ inputs.release_tag }}
+          - **Test**: Launch verification (5 second stability check)
+          - **Display**: Native Windows GUI display
+          "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append

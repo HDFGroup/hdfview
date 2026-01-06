@@ -1,0 +1,249 @@
+name: Test HDFView Release - macOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'HDFView release tag (e.g., HDFView-3.4.0, snapshot)'
+        type: string
+        required: true
+        default: 'snapshot'
+      architecture:
+        description: 'Architecture (x86_64 or arm64)'
+        type: choice
+        options:
+          - x86_64
+          - arm64
+        default: 'arm64'
+  workflow_call:
+    inputs:
+      release_tag:
+        description: 'HDFView release tag (e.g., HDFView-3.4.0, snapshot)'
+        type: string
+        required: true
+      architecture:
+        description: 'Architecture (x86_64 or arm64)'
+        type: string
+        required: false
+        default: 'arm64'
+
+permissions:
+  contents: read
+
+jobs:
+  test-app-binary:
+    name: Test App Binary (tar.gz)
+    runs-on: macos-latest  # Has built-in VMware display emulation
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository for test source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Download app binary from release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Downloading HDFView app binary from release: ${{ inputs.release_tag }}"
+          gh release download ${{ inputs.release_tag }} \
+            --repo HDFGroup/hdfview \
+            --pattern "HDFView-*App-Darwin-${{ inputs.architecture }}.tar.gz"
+
+          echo "Downloaded files:"
+          ls -lh HDFView-*.tar.gz
+
+      - name: Extract app binary
+        run: |
+          echo "Extracting app binary..."
+          tar -xzf HDFView-*App-Darwin-*.tar.gz
+
+          echo "App structure:"
+          ls -lR HDFView.app/
+
+      - name: Download test dependencies (HDF libraries)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Downloading HDF4 libraries..."
+          gh release download snapshot --repo HDFGroup/hdf4 \
+            --pattern "hdf4-master-*-osx.tar.gz" 2>/dev/null || echo "HDF4 download failed (non-critical)"
+
+          echo "Downloading HDF5 libraries..."
+          gh release download snapshot --repo HDFGroup/hdf5 \
+            --pattern "hdf5-*-osx.tar.gz" 2>/dev/null || echo "HDF5 download failed (non-critical)"
+
+          echo "Downloaded library files:"
+          ls -lh *.tar.gz 2>/dev/null || echo "No additional libraries downloaded"
+
+      - name: Setup test environment
+        run: |
+          # Create build.properties for tests
+          cat > build.properties << EOF
+          hdf5.lib.dir=$PWD/HDFView.app/Contents/app
+          hdf.lib.dir=$PWD/HDFView.app/Contents/app
+          platform.hdf.lib=$PWD/HDFView.app/Contents/app
+          hdfview.workdir=$PWD/HDFView.app/Contents/app/samples
+          EOF
+
+          echo "Generated build.properties:"
+          cat build.properties
+
+          # Set library path (macOS uses DYLD_LIBRARY_PATH)
+          echo "DYLD_LIBRARY_PATH=$PWD/HDFView.app/Contents/app:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+
+      - name: Compile test classes
+        run: |
+          echo "Compiling test classes..."
+
+          # Create classpath from app-image JARs
+          CLASSPATH=$(find HDFView.app/Contents/app -name "*.jar" -type f | tr '\n' ':')
+
+          # Compile the single test we need
+          mkdir -p test-classes
+          javac -cp "$CLASSPATH" \
+            -d test-classes \
+            hdfview/src/test/java/uitest/AbstractWindowTest.java \
+            hdfview/src/test/java/uitest/TestHDFViewMenu.java
+
+          echo "Test classes compiled successfully"
+
+      - name: Run smoke test (native macOS display emulation)
+        run: |
+          echo "Running smoke test: TestHDFViewMenu#verifyOpenButtonEnabled"
+          echo "macOS GitHub runners have VMware display emulation built-in"
+
+          # Build classpath
+          CLASSPATH=$(find HDFView.app/Contents/app -name "*.jar" -type f | tr '\n' ':')
+          CLASSPATH="test-classes:$CLASSPATH"
+
+          APP_DIR="$PWD/HDFView.app/Contents/app"
+
+          # Run single smoke test with timeout
+          # NOTE: -XstartOnFirstThread is REQUIRED for SWT on macOS
+          timeout 120s java -XstartOnFirstThread \
+            -cp "$CLASSPATH" \
+            -Djava.library.path="$APP_DIR" \
+            -Dhdfview.workdir="$APP_DIR/samples" \
+            -Dhdfview.root="$APP_DIR" \
+            --add-opens java.base/java.lang=ALL-UNNAMED \
+            --add-opens java.base/java.time=ALL-UNNAMED \
+            org.junit.platform.console.ConsoleLauncher \
+            --select-method uitest.TestHDFViewMenu#verifyOpenButtonEnabled \
+            --details=verbose || TEST_RESULT=$?
+
+          if [ ${TEST_RESULT:-0} -eq 0 ]; then
+            echo "✓ Smoke test PASSED"
+            exit 0
+          else
+            echo "✗ Smoke test FAILED with exit code $TEST_RESULT"
+            exit $TEST_RESULT
+          fi
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## App Binary Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Architecture**: ${{ inputs.architecture }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test**: TestHDFViewMenu#verifyOpenButtonEnabled" >> $GITHUB_STEP_SUMMARY
+          echo "- **Display**: VMware display emulation (built-in)" >> $GITHUB_STEP_SUMMARY
+
+  test-dmg-installer:
+    name: Test DMG Installer
+    runs-on: macos-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download DMG installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Downloading DMG installer from release: ${{ inputs.release_tag }}"
+          gh release download ${{ inputs.release_tag }} \
+            --repo HDFGroup/hdfview \
+            --pattern "HDFView-*-Darwin-${{ inputs.architecture }}.dmg"
+
+          echo "Downloaded installer:"
+          ls -lh HDFView-*.dmg
+
+      - name: Mount and install DMG
+        run: |
+          echo "Mounting DMG..."
+          dmgFile=$(ls HDFView-*.dmg | head -1)
+
+          # Mount the DMG
+          hdiutil attach "$dmgFile" -mountpoint /Volumes/HDFView
+
+          echo "DMG mounted successfully"
+          ls -la /Volumes/HDFView/
+
+          # Copy app to Applications (simulating user installation)
+          echo "Installing HDFView.app to /Applications..."
+          cp -R /Volumes/HDFView/HDFView.app /Applications/
+
+          # Unmount
+          echo "Unmounting DMG..."
+          hdiutil detach /Volumes/HDFView
+
+          echo "Installation complete"
+
+      - name: Verify installation and launch test
+        run: |
+          echo "Verifying installation..."
+
+          if [ ! -d "/Applications/HDFView.app" ]; then
+            echo "✗ Installation not found at /Applications/HDFView.app"
+            exit 1
+          fi
+
+          echo "✓ Installation found at /Applications/HDFView.app"
+
+          # Check for quarantine attribute (macOS security)
+          echo "Checking quarantine attribute..."
+          xattr /Applications/HDFView.app || echo "No extended attributes"
+
+          # Remove quarantine attribute if present (needed for unsigned apps in testing)
+          echo "Removing quarantine attribute for testing..."
+          xattr -dr com.apple.quarantine /Applications/HDFView.app 2>/dev/null || echo "No quarantine to remove"
+
+          # Try to launch the application briefly
+          echo "Launching HDFView for stability check..."
+          open /Applications/HDFView.app &
+          APP_PID=$!
+
+          # Wait 5 seconds to see if it crashes
+          sleep 5
+
+          # Check if the app is still running
+          # Look for the actual process (not the 'open' command)
+          if pgrep -f "HDFView.app" > /dev/null; then
+            echo "✓ HDFView launched successfully and is running"
+
+            # Kill the app
+            pkill -f "HDFView.app" || killall HDFView 2>/dev/null || true
+
+            echo "✓ DMG installer smoke test PASSED"
+          else
+            echo "✗ HDFView crashed or exited immediately"
+
+            # Check system logs for crash info
+            echo "Checking for crash logs..."
+            ls -la ~/Library/Logs/DiagnosticReports/HDFView* 2>/dev/null || echo "No crash logs found"
+
+            exit 1
+          fi
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## DMG Installer Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Architecture**: ${{ inputs.architecture }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test**: Launch verification (5 second stability check)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Display**: VMware display emulation (built-in)" >> $GITHUB_STEP_SUMMARY

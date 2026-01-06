@@ -1,0 +1,251 @@
+name: Test HDFView Release - Linux
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'HDFView release tag (e.g., HDFView-3.4.0, snapshot)'
+        type: string
+        required: true
+        default: 'snapshot'
+  workflow_call:
+    inputs:
+      release_tag:
+        description: 'HDFView release tag (e.g., HDFView-3.4.0, snapshot)'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  test-app-binary:
+    name: Test App Binary (tar.gz)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository for test source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Download app binary from release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Downloading HDFView app binary from release: ${{ inputs.release_tag }}"
+          gh release download ${{ inputs.release_tag }} \
+            --repo HDFGroup/hdfview \
+            --pattern "HDFView-*App-Linux.tar.gz"
+
+          echo "Downloaded files:"
+          ls -lh HDFView-*.tar.gz
+
+      - name: Extract app binary
+        run: |
+          echo "Extracting app binary..."
+          tar -xzf HDFView-*App-Linux.tar.gz
+
+          echo "App structure:"
+          ls -lR HDFView/
+
+      - name: Setup Xvfb and window manager
+        run: |
+          echo "Installing Xvfb, GTK, and metacity window manager..."
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgtk-3-0 libgtk-3-dev metacity x11-xserver-utils
+
+          echo "Xvfb and dependencies installed successfully"
+
+      - name: Download test dependencies (HDF libraries)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Downloading HDF4 libraries..."
+          gh release download snapshot --repo HDFGroup/hdf4 \
+            --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz" || echo "HDF4 download failed (non-critical)"
+
+          echo "Downloading HDF5 libraries..."
+          gh release download snapshot --repo HDFGroup/hdf5 \
+            --pattern "hdf5-*-ubuntu-2404_gcc.tar.gz" || echo "HDF5 download failed (non-critical)"
+
+          echo "Downloaded library files:"
+          ls -lh *.tar.gz 2>/dev/null || echo "No additional libraries downloaded"
+
+      - name: Setup test environment
+        run: |
+          # Create build.properties for tests
+          cat > build.properties << EOF
+          hdf5.lib.dir=$PWD/HDFView/lib/app
+          hdf.lib.dir=$PWD/HDFView/lib/app
+          platform.hdf.lib=$PWD/HDFView/lib/app
+          hdfview.workdir=$PWD/HDFView/lib/app/samples
+          EOF
+
+          echo "Generated build.properties:"
+          cat build.properties
+
+          # Set library path
+          echo "LD_LIBRARY_PATH=$PWD/HDFView/lib/app:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+      - name: Compile test classes
+        run: |
+          echo "Compiling test classes..."
+
+          # Create classpath from app-image JARs
+          CLASSPATH=$(find HDFView/lib/app -name "*.jar" -type f | tr '\n' ':')
+
+          # Compile the single test we need
+          mkdir -p test-classes
+          javac -cp "$CLASSPATH" \
+            -d test-classes \
+            hdfview/src/test/java/uitest/AbstractWindowTest.java \
+            hdfview/src/test/java/uitest/TestHDFViewMenu.java
+
+          echo "Test classes compiled successfully"
+
+      - name: Run smoke test with Xvfb
+        run: |
+          echo "Starting Xvfb and window manager..."
+          Xvfb :99 -screen 0 1024x768x24 &
+          XVFB_PID=$!
+          export DISPLAY=:99
+
+          # Wait for Xvfb to start
+          sleep 2
+
+          # Start window manager (SWTBot needs this)
+          metacity &
+          METACITY_PID=$!
+          sleep 2
+
+          echo "Running smoke test: TestHDFViewMenu#verifyOpenButtonEnabled"
+
+          # Build classpath
+          CLASSPATH=$(find HDFView/lib/app -name "*.jar" -type f | tr '\n' ':')
+          CLASSPATH="test-classes:$CLASSPATH"
+
+          # Run single smoke test with timeout
+          timeout 120s java \
+            -cp "$CLASSPATH" \
+            -Djava.library.path=$PWD/HDFView/lib/app \
+            -Dhdfview.workdir=$PWD/HDFView/lib/app/samples \
+            -Dhdfview.root=$PWD/HDFView/lib/app \
+            --add-opens java.base/java.lang=ALL-UNNAMED \
+            --add-opens java.base/java.time=ALL-UNNAMED \
+            org.junit.platform.console.ConsoleLauncher \
+            --select-method uitest.TestHDFViewMenu#verifyOpenButtonEnabled \
+            --details=verbose || TEST_RESULT=$?
+
+          # Cleanup
+          kill $METACITY_PID 2>/dev/null || true
+          kill $XVFB_PID 2>/dev/null || true
+
+          if [ ${TEST_RESULT:-0} -eq 0 ]; then
+            echo "✓ Smoke test PASSED"
+            exit 0
+          else
+            echo "✗ Smoke test FAILED with exit code $TEST_RESULT"
+            exit $TEST_RESULT
+          fi
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## App Binary Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test**: TestHDFViewMenu#verifyOpenButtonEnabled" >> $GITHUB_STEP_SUMMARY
+          echo "- **Display**: Xvfb :99 with metacity window manager" >> $GITHUB_STEP_SUMMARY
+
+  test-deb-installer:
+    name: Test DEB Installer
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download DEB installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Downloading DEB installer from release: ${{ inputs.release_tag }}"
+          gh release download ${{ inputs.release_tag }} \
+            --repo HDFGroup/hdfview \
+            --pattern "HDFView-*-Linux.deb"
+
+          echo "Downloaded installer:"
+          ls -lh HDFView-*.deb
+
+      - name: Install DEB package
+        run: |
+          echo "Installing DEB package..."
+          sudo dpkg -i HDFView-*-Linux.deb || sudo apt-get install -f -y
+
+          echo "Verifying installation..."
+          dpkg -l | grep -i hdfview || echo "Package listing check"
+
+      - name: Setup Xvfb
+        run: |
+          echo "Installing Xvfb and GTK for headless testing..."
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgtk-3-0
+
+      - name: Verify installed application launches
+        run: |
+          echo "Starting Xvfb..."
+          Xvfb :99 -screen 0 1024x768x24 &
+          XVFB_PID=$!
+          export DISPLAY=:99
+          sleep 2
+
+          echo "Attempting to launch installed HDFView..."
+
+          # Try to find the installed launcher
+          if [ -f "/opt/HDFView/bin/HDFView" ]; then
+            LAUNCHER="/opt/HDFView/bin/HDFView"
+          elif [ -f "/usr/bin/HDFView" ]; then
+            LAUNCHER="/usr/bin/HDFView"
+          else
+            echo "Finding HDFView launcher..."
+            LAUNCHER=$(find /opt /usr -name "HDFView" -type f 2>/dev/null | grep -i hdfview | head -1)
+          fi
+
+          if [ -z "$LAUNCHER" ]; then
+            echo "✗ HDFView launcher not found after installation"
+            kill $XVFB_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          echo "Found launcher at: $LAUNCHER"
+
+          # Launch HDFView and let it run for 5 seconds, then kill it
+          # If it crashes immediately, this will fail
+          timeout 10s $LAUNCHER &
+          APP_PID=$!
+          sleep 5
+
+          # Check if process is still running
+          if ps -p $APP_PID > /dev/null 2>&1; then
+            echo "✓ HDFView launched successfully and is running"
+            kill $APP_PID 2>/dev/null || true
+          else
+            echo "✗ HDFView crashed or exited immediately"
+            kill $XVFB_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          # Cleanup
+          kill $XVFB_PID 2>/dev/null || true
+          echo "✓ DEB installer smoke test PASSED"
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## DEB Installer Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test**: Launch verification (5 second stability check)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Display**: Xvfb :99" >> $GITHUB_STEP_SUMMARY

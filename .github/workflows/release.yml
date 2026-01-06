@@ -191,3 +191,30 @@ jobs:
       release_version_tag: ${{ needs.determine-version.outputs.version_tag }}
       build_environment: release
 
+  # Test the released artifacts on all platforms
+  test-release-linux:
+    needs: [determine-version, call-workflow-release]
+    uses: ./.github/workflows/test-release-linux.yml
+    with:
+      release_tag: ${{ needs.determine-version.outputs.version_tag }}
+
+  test-release-windows:
+    needs: [determine-version, call-workflow-release]
+    uses: ./.github/workflows/test-release-windows.yml
+    with:
+      release_tag: ${{ needs.determine-version.outputs.version_tag }}
+
+  test-release-macos-arm64:
+    needs: [determine-version, call-workflow-release]
+    uses: ./.github/workflows/test-release-macos.yml
+    with:
+      release_tag: ${{ needs.determine-version.outputs.version_tag }}
+      architecture: arm64
+
+  test-release-macos-x86_64:
+    needs: [determine-version, call-workflow-release]
+    uses: ./.github/workflows/test-release-macos.yml
+    with:
+      release_tag: ${{ needs.determine-version.outputs.version_tag }}
+      architecture: x86_64
+
