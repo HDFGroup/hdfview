@@ -230,18 +230,38 @@ jobs:
         - name: Install SWT JAR to Local Maven Repository
           run: |
             echo "Installing Linux SWT JAR to local Maven repository..."
-            if [ -f repository/lib/swt.jar ]; then
-              mvn install:install-file -Dfile=repository/lib/swt.jar \
-                -DgroupId=org.eclipse.platform \
-                -DartifactId=org.eclipse.swt.gtk.linux.x86_64 \
-                -Dversion=3.126.0 \
-                -Dpackaging=jar \
-                -DgeneratePom=true
-              echo "Linux SWT JAR installed"
-            else
-              echo "ERROR: swt.jar not found in repository/lib/"
+
+            # Download platform-specific SWT JAR from Maven Central
+            SWT_VERSION=3.126.0
+            SWT_ARTIFACT_ID=org.eclipse.swt.gtk.linux.x86_64
+            MAVEN_CENTRAL_URL="https://repo1.maven.org/maven2/org/eclipse/platform/${SWT_ARTIFACT_ID}/${SWT_VERSION}/${SWT_ARTIFACT_ID}-${SWT_VERSION}.jar"
+
+            echo "Downloading ${SWT_ARTIFACT_ID} from Maven Central..."
+            curl -L -o /tmp/swt-linux.jar "$MAVEN_CENTRAL_URL"
+
+            if [ ! -f /tmp/swt-linux.jar ]; then
+              echo "Error: Failed to download SWT JAR from Maven Central"
               exit 1
             fi
+
+            # Verify it's the correct platform (should contain .so for Linux)
+            if jar tf /tmp/swt-linux.jar | grep -q "\.so$"; then
+              echo "✓ Verified Linux native libraries in SWT JAR"
+            else
+              echo "✗ Error: Downloaded JAR does not contain Linux native libraries (.so)"
+              jar tf /tmp/swt-linux.jar | grep -E "\.(jnilib|dylib|so)$" || true
+              exit 1
+            fi
+
+            # Install to local Maven repository
+            mvn install:install-file -Dfile=/tmp/swt-linux.jar \
+              -DgroupId=org.eclipse.platform \
+              -DartifactId=${SWT_ARTIFACT_ID} \
+              -Dversion=${SWT_VERSION} \
+              -Dpackaging=jar \
+              -DgeneratePom=true
+
+            echo "✓ Linux SWT JAR installed successfully"
 
         - name: Install SWTBot JARs to Local Maven Repository
           run: |

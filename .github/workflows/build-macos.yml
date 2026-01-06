@@ -190,22 +190,37 @@ jobs:
           run: |
             echo "Installing macOS ${{ matrix.arch }} SWT JAR to local Maven repository..."
 
-            # TODO - hardcoded dependency files in repository/lib will likely break over time
-            cd repository/lib
+            # Download platform-specific SWT JAR from Maven Central
+            SWT_VERSION=3.126.0
+            SWT_ARTIFACT_ID=${{ matrix.swt_artifact_id }}
+            MAVEN_CENTRAL_URL="https://repo1.maven.org/maven2/org/eclipse/platform/${SWT_ARTIFACT_ID}/${SWT_VERSION}/${SWT_ARTIFACT_ID}-${SWT_VERSION}.jar"
 
-            if [ ! -f swt.jar]; then
-              echo "Error: swt.jar file not found in repository/lib/"
+            echo "Downloading ${SWT_ARTIFACT_ID} from Maven Central..."
+            curl -L -o /tmp/swt-${{ matrix.arch }}.jar "$MAVEN_CENTRAL_URL"
+
+            if [ ! -f /tmp/swt-${{ matrix.arch }}.jar ]; then
+              echo "Error: Failed to download SWT JAR from Maven Central"
               exit 1
             fi
 
-            mvn install:install-file -Dfile=swt.jar \
+            # Verify it's the correct platform (should contain .jnilib for macOS)
+            if jar tf /tmp/swt-${{ matrix.arch }}.jar | grep -q "\.jnilib$"; then
+              echo "✓ Verified macOS native libraries in SWT JAR"
+            else
+              echo "✗ Error: Downloaded JAR does not contain macOS native libraries (.jnilib)"
+              jar tf /tmp/swt-${{ matrix.arch }}.jar | grep -E "\.(jnilib|dylib|so)$" || true
+              exit 1
+            fi
+
+            # Install to local Maven repository
+            mvn install:install-file -Dfile=/tmp/swt-${{ matrix.arch }}.jar \
               -DgroupId=org.eclipse.platform \
-              -DartifactId=${{ matrix.swt_artifact_id }} \
-              -Dversion=3.126.0 \
+              -DartifactId=${SWT_ARTIFACT_ID} \
+              -Dversion=${SWT_VERSION} \
               -Dpackaging=jar \
               -DgeneratePom=true
 
-            echo "macOS ${{ matrix.arch }} SWT JAR installed"
+            echo "✓ macOS ${{ matrix.arch }} SWT JAR installed successfully"
 
         - name: Install SWTBot JARs to Local Maven Repository
           run: |
