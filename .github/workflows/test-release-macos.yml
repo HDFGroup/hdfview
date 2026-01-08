@@ -97,94 +97,49 @@ jobs:
           # Set library path (macOS uses DYLD_LIBRARY_PATH)
           echo "DYLD_LIBRARY_PATH=$PWD/HDFView.app/Contents/app:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
-      - name: Install GNU coreutils for timeout command
+      # NOTE: The way that JUnit UI tests use threads is currently incompatible with macOS.
+      # Pending a major refactor to the test setup, just run the app directly.
+      # See: AbstractWindowTest creates Display in a separate thread, violating macOS Cocoa
+      # requirement that Display must be created on the main thread (-XstartOnFirstThread).
+
+      - name: Run smoke test (launch app verification)
         run: |
-          echo "Installing GNU coreutils (provides gtimeout)..."
-          brew install coreutils
-          echo "✓ GNU coreutils installed"
-
-      - name: Download test dependencies
-        run: |
-          echo "Downloading test framework dependencies..."
-          mkdir -p test-libs
-
-          # Download JUnit Platform Console Standalone (includes all JUnit 5 runtime)
-          echo "Downloading JUnit Platform Console Standalone 1.10.0..."
-          curl -f -L -o test-libs/junit-platform-console-standalone-1.10.0.jar \
-            "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar"
-
-          # Download Hamcrest (required by SWTBot)
-          echo "Downloading Hamcrest 2.2..."
-          curl -f -L -o test-libs/hamcrest-2.2.jar \
-            "https://repo1.maven.org/maven2/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar"
-
-          # Copy SWTBot JARs from repository (already checked out)
-          echo "Copying SWTBot JARs from repository..."
-          cp repository/lib/org.eclipse.swtbot.swt.finder.jar test-libs/
-          cp repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar test-libs/
-
-          echo "Test dependencies ready:"
-          ls -lh test-libs/
-
-          # Verify JARs are valid ZIP files
-          echo "Verifying downloaded JARs..."
-          unzip -t test-libs/junit-platform-console-standalone-1.10.0.jar > /dev/null
-          unzip -t test-libs/hamcrest-2.2.jar > /dev/null
-          echo "✓ All JARs verified successfully"
-
-      - name: Compile test classes
-        run: |
-          echo "Compiling test classes..."
-
-          # Create classpath from app-image JARs and test libs
-          APP_JARS=$(find HDFView.app/Contents/app -name "*.jar" -type f | tr '\n' ':' | sed 's/:$//')
-          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':' | sed 's/:$//')
-          CLASSPATH="${APP_JARS}:${TEST_JARS}"
-
-          # Compile the single test we need
-          mkdir -p test-classes
-          javac -cp "$CLASSPATH" \
-            -d test-classes \
-            hdfview/src/test/java/uitest/AbstractWindowTest.java \
-            hdfview/src/test/java/uitest/TestHDFViewMenu.java
-
-          echo "Test classes compiled successfully"
-
-      - name: Run smoke test (native macOS display emulation)
-        run: |
-          echo "Running smoke test: TestHDFViewMenu#verifyOpenButtonEnabled"
+          echo "Running smoke test: Launch HDFView and verify stability"
           echo "macOS GitHub runners have VMware display emulation built-in"
 
-          # Build classpath: test-classes + app JARs + test libs
-          APP_JARS=$(find HDFView.app/Contents/app -name "*.jar" -type f | tr '\n' ':' | sed 's/:$//')
-          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':' | sed 's/:$//')
-          CLASSPATH="test-classes:${APP_JARS}:${TEST_JARS}"
+          # Check for quarantine attribute (macOS security)
+          echo "Checking quarantine attribute..."
+          xattr HDFView.app || echo "No extended attributes"
 
-          APP_DIR="$PWD/HDFView.app/Contents/app"
+          # Remove quarantine attribute if present (needed for testing)
+          echo "Removing quarantine attribute for testing..."
+          xattr -dr com.apple.quarantine HDFView.app 2>/dev/null || echo "No quarantine to remove"
 
-          # Run single smoke test with timeout
-          # NOTE: -XstartOnFirstThread is REQUIRED for SWT on macOS
-          # Use gtimeout from GNU coreutils (macOS doesn't have timeout by default)
-          # JUnit config: disable parallel execution to respect SWT threading requirements
-          gtimeout 120s java -XstartOnFirstThread \
-            -cp "$CLASSPATH" \
-            -Djava.library.path="$APP_DIR" \
-            -Dhdfview.workdir="$APP_DIR/samples" \
-            -Dhdfview.root="$APP_DIR" \
-            -Djunit.jupiter.execution.parallel.enabled=false \
-            -Djunit.jupiter.testinstance.lifecycle.default=per_class \
-            --add-opens java.base/java.lang=ALL-UNNAMED \
-            --add-opens java.base/java.time=ALL-UNNAMED \
-            org.junit.platform.console.ConsoleLauncher \
-            --select-method uitest.TestHDFViewMenu#verifyOpenButtonEnabled \
-            --details=verbose || TEST_RESULT=$?
+          # Try to launch the application briefly
+          echo "Launching HDFView for stability check..."
+          open HDFView.app &
+          APP_PID=$!
 
-          if [ ${TEST_RESULT:-0} -eq 0 ]; then
-            echo "✓ Smoke test PASSED"
-            exit 0
+          # Wait 5 seconds to see if it crashes
+          sleep 5
+
+          # Check if the app is still running
+          # Look for the actual process (not the 'open' command)
+          if pgrep -f "HDFView.app" > /dev/null; then
+            echo "✓ HDFView launched successfully and is running"
+
+            # Kill the app
+            pkill -f "HDFView.app" || killall HDFView 2>/dev/null || true
+
+            echo "✓ App binary smoke test PASSED"
           else
-            echo "✗ Smoke test FAILED with exit code $TEST_RESULT"
-            exit $TEST_RESULT
+            echo "✗ HDFView crashed or exited immediately"
+
+            # Check system logs for crash info
+            echo "Checking for crash logs..."
+            ls -la ~/Library/Logs/DiagnosticReports/HDFView* 2>/dev/null || echo "No crash logs found"
+
+            exit 1
           fi
 
       - name: Test Summary
@@ -193,8 +148,10 @@ jobs:
           echo "## App Binary Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Architecture**: ${{ inputs.architecture }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Test**: TestHDFViewMenu#verifyOpenButtonEnabled" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test**: Launch verification (5 second stability check)" >> $GITHUB_STEP_SUMMARY
           echo "- **Display**: VMware display emulation (built-in)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Note: JUnit UI tests are currently incompatible with macOS threading model_" >> $GITHUB_STEP_SUMMARY
 
   test-dmg-installer:
     name: Test DMG Installer
