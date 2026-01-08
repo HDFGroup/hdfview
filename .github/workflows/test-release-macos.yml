@@ -33,7 +33,7 @@ permissions:
 jobs:
   test-app-binary:
     name: Test App Binary (tar.gz)
-    runs-on: macos-latest  # Has built-in VMware display emulation
+    runs-on: ${{ inputs.architecture == 'x86_64' ? 'macos-13' : 'macos-latest' }}  # macos-13=x86_64, macos-latest=arm64
     timeout-minutes: 15
 
     steps:
@@ -198,7 +198,7 @@ jobs:
 
   test-dmg-installer:
     name: Test DMG Installer
-    runs-on: macos-latest
+    runs-on: ${{ inputs.architecture == 'x86_64' ? 'macos-13' : 'macos-latest' }}  # macos-13=x86_64, macos-latest=arm64
     timeout-minutes: 10
 
     steps:
