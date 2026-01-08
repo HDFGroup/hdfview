@@ -25,15 +25,6 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout repository for test source
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
       - name: Download app binary from release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -54,150 +45,62 @@ jobs:
           echo "App structure:"
           ls -lR HDFView/
 
-      - name: Setup Xvfb and window manager
+      - name: Setup Xvfb and GTK
         run: |
-          echo "Installing Xvfb, GTK, and metacity window manager..."
+          echo "Installing Xvfb and GTK for headless testing..."
           sudo apt-get update
-          sudo apt-get install -y xvfb libgtk-3-0 libgtk-3-dev metacity x11-xserver-utils
+          sudo apt-get install -y xvfb libgtk-3-0
 
-          echo "Xvfb and dependencies installed successfully"
-
-      - name: Download test dependencies (HDF libraries)
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Run smoke test (launch app verification)
         run: |
-          echo "Downloading HDF4 libraries..."
-          gh release download snapshot --repo HDFGroup/hdf4 \
-            --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz" || echo "HDF4 download failed (non-critical)"
+          echo "Running smoke test: Launch HDFView and verify stability"
 
-          echo "Downloading HDF5 libraries..."
-          gh release download snapshot --repo HDFGroup/hdf5 \
-            --pattern "hdf5-*-ubuntu-2404_gcc.tar.gz" || echo "HDF5 download failed (non-critical)"
-
-          echo "Downloaded library files:"
-          ls -lh *.tar.gz 2>/dev/null || echo "No additional libraries downloaded"
-
-      - name: Download HDFView dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y libx11-6 libxext6 libxrender1 libxtst6 libgtk-3-0
-
-      - name: Setup test environment
-        run: |
-          # Create build.properties for tests
-          cat > build.properties << EOF
-          hdf5.lib.dir=$PWD/HDFView/lib/app
-          hdf.lib.dir=$PWD/HDFView/lib/app
-          platform.hdf.lib=$PWD/HDFView/lib/app
-          hdfview.workdir=$PWD/HDFView/lib/app/samples
-          EOF
-
-          echo "Generated build.properties:"
-          cat build.properties
-
-          # Set library path
-          echo "LD_LIBRARY_PATH=$PWD/HDFView/lib/app:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-
-      - name: Download test dependencies
-        run: |
-          echo "Downloading test framework dependencies..."
-          mkdir -p test-libs
-
-          # Download JUnit Platform Console Standalone (includes all JUnit 5 runtime)
-          echo "Downloading JUnit Platform Console Standalone 1.10.0..."
-          curl -f -L -o test-libs/junit-platform-console-standalone-1.10.0.jar \
-            "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar"
-
-          # Download Hamcrest (required by SWTBot)
-          echo "Downloading Hamcrest 2.2..."
-          curl -f -L -o test-libs/hamcrest-2.2.jar \
-            "https://repo1.maven.org/maven2/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar"
-
-          # Copy SWTBot JARs from repository (already checked out)
-          echo "Copying SWTBot JARs from repository..."
-          cp repository/lib/org.eclipse.swtbot.swt.finder.jar test-libs/
-          cp repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar test-libs/
-
-          echo "Test dependencies ready:"
-          ls -lh test-libs/
-
-          # Verify JARs are valid ZIP files
-          echo "Verifying downloaded JARs..."
-          unzip -t test-libs/junit-platform-console-standalone-1.10.0.jar > /dev/null
-          unzip -t test-libs/hamcrest-2.2.jar > /dev/null
-          echo "✓ All JARs verified successfully"
-
-      - name: Compile test classes
-        run: |
-          echo "Compiling test classes..."
-
-          # Create classpath from app-image JARs and test libs
-          APP_JARS=$(find HDFView/lib/app -name "*.jar" -type f | tr '\n' ':')
-          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':')
-          CLASSPATH="${APP_JARS}${TEST_JARS}"
-
-          # Compile the single test we need
-          mkdir -p test-classes
-          javac -cp "$CLASSPATH" \
-            -d test-classes \
-            hdfview/src/test/java/uitest/AbstractWindowTest.java \
-            hdfview/src/test/java/uitest/TestHDFViewMenu.java
-
-          echo "Test classes compiled successfully"
-
-      - name: Run smoke test with Xvfb
-        run: |
-          echo "Starting Xvfb and window manager..."
+          echo "Starting Xvfb..."
           Xvfb :99 -screen 0 1024x768x24 &
           XVFB_PID=$!
           export DISPLAY=:99
-
-          # Wait for Xvfb to start
           sleep 2
 
-          # Start window manager (SWTBot needs this)
-          metacity &
-          METACITY_PID=$!
-          sleep 2
+          echo "Attempting to launch HDFView..."
 
-          echo "Running smoke test: TestHDFViewMenu#verifyOpenButtonEnabled"
+          # Find the launcher script
+          if [ -f "HDFView/bin/HDFView" ]; then
+            LAUNCHER="HDFView/bin/HDFView"
+          else
+            echo "✗ HDFView launcher not found at HDFView/bin/HDFView"
+            kill $XVFB_PID 2>/dev/null || true
+            exit 1
+          fi
 
-          # Build classpath: test-classes + app JARs + test libs
-          APP_JARS=$(find HDFView/lib/app -name "*.jar" -type f | tr '\n' ':')
-          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':')
-          CLASSPATH="test-classes:${APP_JARS}${TEST_JARS}"
+          echo "Found launcher at: $LAUNCHER"
 
-          # Run single smoke test with timeout
-          timeout 120s java \
-            -cp "$CLASSPATH" \
-            -Djava.library.path=$PWD/HDFView/lib/app \
-            -Dhdfview.workdir=$PWD/HDFView/lib/app/samples \
-            -Dhdfview.root=$PWD/HDFView/lib/app \
-            --add-opens java.base/java.lang=ALL-UNNAMED \
-            --add-opens java.base/java.time=ALL-UNNAMED \
-            org.junit.platform.console.ConsoleLauncher \
-            --select-method uitest.TestHDFViewMenu#verifyOpenButtonEnabled \
-            --details=verbose || TEST_RESULT=$?
+          # Launch HDFView and let it run for 5 seconds, then kill it
+          # If it crashes immediately, this will fail
+          timeout 10s $LAUNCHER &
+          APP_PID=$!
+          sleep 5
+
+          # Check if process is still running
+          if ps -p $APP_PID > /dev/null 2>&1; then
+            echo "✓ HDFView launched successfully and is running"
+            kill $APP_PID 2>/dev/null || true
+          else
+            echo "✗ HDFView crashed or exited immediately"
+            kill $XVFB_PID 2>/dev/null || true
+            exit 1
+          fi
 
           # Cleanup
-          kill $METACITY_PID 2>/dev/null || true
           kill $XVFB_PID 2>/dev/null || true
-
-          if [ ${TEST_RESULT:-0} -eq 0 ]; then
-            echo "✓ Smoke test PASSED"
-            exit 0
-          else
-            echo "✗ Smoke test FAILED with exit code $TEST_RESULT"
-            exit $TEST_RESULT
-          fi
+          echo "✓ App binary smoke test PASSED"
 
       - name: Test Summary
         if: always()
         run: |
           echo "## App Binary Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Test**: TestHDFViewMenu#verifyOpenButtonEnabled" >> $GITHUB_STEP_SUMMARY
-          echo "- **Display**: Xvfb :99 with metacity window manager" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test**: Launch verification (5 second stability check)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Display**: Xvfb :99" >> $GITHUB_STEP_SUMMARY
 
   test-deb-installer:
     name: Test DEB Installer

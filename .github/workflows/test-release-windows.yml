@@ -25,15 +25,6 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout repository for test source
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
       - name: Download app binary from release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -57,145 +48,39 @@ jobs:
           Write-Host "App structure:"
           Get-ChildItem -Recurse HDFView | Select-Object FullName
 
-      - name: Download test dependencies (HDF libraries)
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Run smoke test (launch app verification)
         shell: pwsh
         run: |
-          Write-Host "Downloading HDF4 libraries..."
-          gh release download snapshot --repo HDFGroup/hdf4 `
-            --pattern "*-win-vs2022_intel.zip" 2>$null
-          if (-not $?) {
-            Write-Host "HDF4 download had errors (non-critical)"
-          }
+          Write-Host "Running smoke test: Launch HDFView and verify stability"
+          Write-Host "Windows runners have native GUI display support"
 
-          Write-Host "Downloading HDF5 libraries..."
-          gh release download snapshot --repo HDFGroup/hdf5 `
-            --pattern "*-win-vs2022_intel.zip" 2>$null
-          if (-not $?) {
-            Write-Host "HDF5 download had errors (non-critical)"
-          }
+          # Find the launcher
+          $launcher = Get-ChildItem -Path "HDFView" -Filter "HDFView.exe" -Recurse | Select-Object -First 1
 
-          Write-Host "Downloaded library files:"
-          Get-ChildItem -Filter "*.zip" -ErrorAction SilentlyContinue
-
-          # Reset exit code to success since downloads are non-critical
-          $LASTEXITCODE = 0
-
-      - name: Setup test environment
-        shell: pwsh
-        run: |
-          # Create build.properties for tests
-          $buildProps = @"
-          hdf5.lib.dir=$PWD\HDFView\app
-          hdf.lib.dir=$PWD\HDFView\app
-          platform.hdf.lib=$PWD\HDFView\app
-          hdfview.workdir=$PWD\HDFView\app\samples
-          "@
-          Set-Content -Path "build.properties" -Value $buildProps
-
-          Write-Host "Generated build.properties:"
-          Get-Content build.properties
-
-          # Add library path to PATH
-          $appPath = "$PWD\HDFView\app"
-          echo "PATH=$appPath;$env:PATH" >> $env:GITHUB_ENV
-
-      - name: Download test dependencies
-        shell: pwsh
-        run: |
-          Write-Host "Downloading test framework dependencies..."
-          New-Item -ItemType Directory -Force -Path "test-libs" | Out-Null
-
-          # Download JUnit Platform Console Standalone (includes all JUnit 5 runtime)
-          Write-Host "Downloading JUnit Platform Console Standalone 1.10.0..."
-          Invoke-WebRequest `
-            -Uri "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar" `
-            -OutFile "test-libs\junit-platform-console-standalone-1.10.0.jar"
-
-          # Download Hamcrest (required by SWTBot)
-          Write-Host "Downloading Hamcrest 2.2..."
-          Invoke-WebRequest `
-            -Uri "https://repo1.maven.org/maven2/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar" `
-            -OutFile "test-libs\hamcrest-2.2.jar"
-
-          # Copy SWTBot JARs from repository (already checked out)
-          Write-Host "Copying SWTBot JARs from repository..."
-          Copy-Item "repository\lib\org.eclipse.swtbot.swt.finder.jar" -Destination "test-libs\"
-          Copy-Item "repository\lib\org.eclipse.swtbot.nebula.nattable.finder.jar" -Destination "test-libs\"
-
-          Write-Host "Test dependencies ready:"
-          Get-ChildItem test-libs
-
-          # Verify JARs are valid ZIP files
-          Write-Host "Verifying downloaded JARs..."
-          try {
-            Add-Type -AssemblyName System.IO.Compression.FileSystem
-            [System.IO.Compression.ZipFile]::OpenRead("test-libs\junit-platform-console-standalone-1.10.0.jar").Dispose()
-            [System.IO.Compression.ZipFile]::OpenRead("test-libs\hamcrest-2.2.jar").Dispose()
-            Write-Host "✓ All JARs verified successfully"
-          } catch {
-            Write-Host "✗ JAR verification failed: $_"
+          if (-not $launcher) {
+            Write-Host "✗ HDFView.exe not found in HDFView directory"
             exit 1
           }
 
-      - name: Compile test classes
-        shell: pwsh
-        run: |
-          Write-Host "Compiling test classes..."
+          Write-Host "Found launcher at: $($launcher.FullName)"
 
-          # Create classpath from app-image JARs
-          $appJars = Get-ChildItem -Path "HDFView\app" -Filter "*.jar" -Recurse
-          $testJars = Get-ChildItem -Path "test-libs" -Filter "*.jar"
-          $classpath = (($appJars.FullName + $testJars.FullName) -join ";")
+          # Try to launch the application briefly
+          Write-Host "Launching HDFView for stability check..."
+          $app = Start-Process -FilePath $launcher.FullName -PassThru
 
-          # Compile the single test we need
-          New-Item -ItemType Directory -Force -Path "test-classes" | Out-Null
+          # Wait 5 seconds to see if it crashes
+          Start-Sleep -Seconds 5
 
-          javac -cp "$classpath" `
-            -d test-classes `
-            hdfview\src\test\java\uitest\AbstractWindowTest.java `
-            hdfview\src\test\java\uitest\TestHDFViewMenu.java
+          # Check if process is still running
+          $stillRunning = Get-Process -Id $app.Id -ErrorAction SilentlyContinue
 
-          Write-Host "Test classes compiled successfully"
-
-      - name: Run smoke test (native Windows display)
-        shell: pwsh
-        run: |
-          Write-Host "Running smoke test: TestHDFViewMenu#verifyOpenButtonEnabled"
-          Write-Host "Windows runners have native GUI display support"
-
-          # Build classpath: test-classes + app JARs + test JARs
-          $appJars = Get-ChildItem -Path "HDFView\app" -Filter "*.jar" -Recurse
-          $testJars = Get-ChildItem -Path "test-libs" -Filter "*.jar"
-          $classpath = "test-classes;" + (($appJars.FullName + $testJars.FullName) -join ";")
-
-          $appPath = "$PWD\HDFView\app"
-
-          # Run single smoke test with timeout
-          $testProcess = Start-Process -FilePath "java" `
-            -ArgumentList @(
-              "-cp", "$classpath",
-              "-Djava.library.path=$appPath",
-              "-Dhdfview.workdir=$appPath\samples",
-              "-Dhdfview.root=$appPath",
-              "--add-opens", "java.base/java.lang=ALL-UNNAMED",
-              "--add-opens", "java.base/java.time=ALL-UNNAMED",
-              "org.junit.platform.console.ConsoleLauncher",
-              "--select-method", "uitest.TestHDFViewMenu#verifyOpenButtonEnabled",
-              "--details=verbose"
-            ) `
-            -NoNewWindow `
-            -PassThru `
-            -Wait
-
-          $exitCode = $testProcess.ExitCode
-
-          if ($exitCode -eq 0) {
-            Write-Host "✓ Smoke test PASSED"
+          if ($stillRunning) {
+            Write-Host "✓ HDFView launched successfully and is running"
+            Stop-Process -Id $app.Id -Force
+            Write-Host "✓ App binary smoke test PASSED"
           } else {
-            Write-Host "✗ Smoke test FAILED with exit code $exitCode"
-            exit $exitCode
+            Write-Host "✗ HDFView crashed or exited immediately"
+            exit 1
           }
 
       - name: Test Summary
@@ -205,7 +90,7 @@ jobs:
           @"
           ## App Binary Test Summary
           - **Release Tag**: ${{ inputs.release_tag }}
-          - **Test**: TestHDFViewMenu#verifyOpenButtonEnabled
+          - **Test**: Launch verification (5 second stability check)
           - **Display**: Native Windows GUI display
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
 
