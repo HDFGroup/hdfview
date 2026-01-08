@@ -165,11 +165,14 @@ jobs:
           # Run single smoke test with timeout
           # NOTE: -XstartOnFirstThread is REQUIRED for SWT on macOS
           # Use gtimeout from GNU coreutils (macOS doesn't have timeout by default)
+          # JUnit config: disable parallel execution to respect SWT threading requirements
           gtimeout 120s java -XstartOnFirstThread \
             -cp "$CLASSPATH" \
             -Djava.library.path="$APP_DIR" \
             -Dhdfview.workdir="$APP_DIR/samples" \
             -Dhdfview.root="$APP_DIR" \
+            -Djunit.jupiter.execution.parallel.enabled=false \
+            -Djunit.jupiter.testinstance.lifecycle.default=per_class \
             --add-opens java.base/java.lang=ALL-UNNAMED \
             --add-opens java.base/java.time=ALL-UNNAMED \
             org.junit.platform.console.ConsoleLauncher \
