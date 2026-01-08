@@ -70,17 +70,19 @@ jobs:
           --pattern "hdf4-master-*-macos14_clang.tar.gz" \
           --clobber
 
-        echo "Extracting HDF4 outer archive..."
-        tar -zxvf hdf4-master-*-macos14_clang.tar.gz
+        # Extract outer tar.gz (creates hdf4/ directory)
+        tar -zxvf *-macos14_clang.tar.gz
         [ -d hdf4 ] || mv hdf4-* hdf4
 
-        echo "Extracting HDF4 inner archive..."
+        # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
         tar -zxvf HDF-*-Darwin.tar.gz --strip-components 1
 
+        # Set HDF4 library path
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls "$HDF4DIR" | head -1)
+        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
         echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+
         echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
         ls -la "$HDF4DIR$FILE_NAME_HDF"
       env:
@@ -108,17 +110,19 @@ jobs:
           fi
         done
 
-        echo "Extracting HDF5 outer archive..."
-        tar -zxvf hdf5-develop-*-macos14_clang.tar.gz
+        # Extract outer tar.gz (creates hdf5/ directory)
+        tar -zxvf hdf5-*-macos14_clang.tar.gz
         [ -d hdf5 ] || mv hdf5-* hdf5
 
-        echo "Extracting HDF5 inner archive..."
+        # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
         tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
 
+        # Set HDF5 library path
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls "$HDF5DIR" | head -1)
+        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
         echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+
         echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
         ls -la "$HDF5DIR$FILE_NAME_HDF5"
       env:

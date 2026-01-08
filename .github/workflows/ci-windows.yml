@@ -65,15 +65,21 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF4 from GitHub releases..."
+        Write-Host "Downloading HDF4 from GitHub snapshot release..."
         gh release download snapshot `
           --repo HDFGroup/hdf4 `
-          --pattern "hdf4-master-*-win-vs2022_cl.zip"
+          --pattern "hdf4-master-*-win-vs2022_cl.zip" `
+          --clobber
 
         Write-Host "Extracting HDF4..."
-        7z x -y "hdf4-master-*-win-vs2022_cl.zip"
+        7z x *-win-vs2022_cl.zip
+        # Rename hdf4-* directory to hdf4 if needed
+        $hdf4Dir = Get-ChildItem -Directory -Filter "hdf4*" | Select-Object -First 1
+        if ($hdf4Dir.Name -ne "hdf4") {
+            Rename-Item $hdf4Dir.FullName "hdf4"
+        }
         Set-Location hdf4
-        7z x -y HDF-*-win64.zip
+        7z x HDF-*-win64.zip
 
         # Windows structure: hdf4/HDF-4.3.1-win64/lib, hdf4/HDF-4.3.1-win64/bin
         # Find the extracted HDF-*-win64 directory
@@ -93,15 +99,21 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF5 from GitHub releases..."
+        Write-Host "Downloading HDF5 from GitHub snapshot release..."
         gh release download snapshot `
           --repo HDFGroup/hdf5 `
-          --pattern "hdf5-develop-*-win-vs2022_cl.zip"
+          --pattern "hdf5-develop-*-win-vs2022_cl.zip" `
+          --clobber
 
         Write-Host "Extracting HDF5..."
-        7z x -y "hdf5-develop-*-win-vs2022_cl.zip"
+        7z x hdf5-*-win-vs2022_cl.zip
+        # Rename hdf5-* directory to hdf5 if needed
+        $hdf5Dir = Get-ChildItem -Directory -Filter "hdf5*" | Select-Object -First 1
+        if ($hdf5Dir.Name -ne "hdf5") {
+            Rename-Item $hdf5Dir.FullName "hdf5"
+        }
         Set-Location hdf5
-        7z x -y HDF5-*-win64.zip
+        7z x HDF5-*-win64.zip
 
         # Windows structure: hdf5/HDF5-x.y.z-win64/lib, hdf5/HDF5-x.y.z-win64/bin
         # Find the extracted HDF5-*-win64 directory
