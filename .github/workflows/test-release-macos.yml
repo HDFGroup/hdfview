@@ -33,7 +33,7 @@ permissions:
 jobs:
   test-app-binary:
     name: Test App Binary (tar.gz)
-    runs-on: ${{ inputs.architecture == 'x86_64' && 'macos-13' || 'macos-latest' }}  # macos-13=x86_64, macos-latest=arm64
+    runs-on: ${{ inputs.architecture == 'x86_64' && 'macos-15-intel' || 'macos-15' }}  # macos-15-intel=x86_64, macos-15=arm64
     timeout-minutes: 15
 
     steps:
@@ -198,7 +198,7 @@ jobs:
 
   test-dmg-installer:
     name: Test DMG Installer
-    runs-on: ${{ inputs.architecture == 'x86_64' && 'macos-13' || 'macos-latest' }}  # macos-13=x86_64, macos-latest=arm64
+    runs-on: ${{ inputs.architecture == 'x86_64' && 'macos-15-intel' || 'macos-15' }}  # macos-15-intel=x86_64, macos-15=arm64
     timeout-minutes: 10
 
     steps:
