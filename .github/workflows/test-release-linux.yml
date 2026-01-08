@@ -192,3 +192,100 @@ jobs:
           echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Test**: Launch verification (5 second stability check)" >> $GITHUB_STEP_SUMMARY
           echo "- **Display**: Xvfb :99" >> $GITHUB_STEP_SUMMARY
+
+  test-rpm-installer:
+    name: Test RPM Installer
+    runs-on: ubuntu-latest
+    # Use Fedora container since GitHub doesn't provide native RPM-based runners
+    container:
+      image: fedora:latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Install dependencies
+        run: |
+          echo "Installing required packages in Fedora container..."
+          dnf install -y wget xorg-x11-server-Xvfb gtk3 procps-ng findutils
+
+      - name: Download RPM installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Downloading RPM installer from release: ${{ inputs.release_tag }}"
+
+          # Install gh CLI in container
+          dnf install -y 'dnf-command(config-manager)'
+          dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+          dnf install -y gh
+
+          gh release download ${{ inputs.release_tag }} \
+            --repo HDFGroup/hdfview \
+            --pattern "HDFView-*-Linux.rpm"
+
+          echo "Downloaded installer:"
+          ls -lh HDFView-*.rpm
+
+      - name: Install RPM package
+        run: |
+          echo "Installing RPM package..."
+          dnf install -y HDFView-*-Linux.rpm
+
+          echo "Verifying installation..."
+          rpm -qa | grep -i hdfview || echo "Package listing check"
+
+      - name: Verify installed application launches
+        run: |
+          echo "Starting Xvfb..."
+          Xvfb :99 -screen 0 1024x768x24 &
+          XVFB_PID=$!
+          export DISPLAY=:99
+          sleep 2
+
+          echo "Attempting to launch installed HDFView..."
+
+          # Try to find the installed launcher
+          if [ -f "/opt/HDFView/bin/HDFView" ]; then
+            LAUNCHER="/opt/HDFView/bin/HDFView"
+          elif [ -f "/usr/bin/HDFView" ]; then
+            LAUNCHER="/usr/bin/HDFView"
+          else
+            echo "Finding HDFView launcher..."
+            LAUNCHER=$(find /opt /usr -name "HDFView" -type f 2>/dev/null | grep -i hdfview | head -1)
+          fi
+
+          if [ -z "$LAUNCHER" ]; then
+            echo "✗ HDFView launcher not found after installation"
+            kill $XVFB_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          echo "Found launcher at: $LAUNCHER"
+
+          # Launch HDFView and let it run for 5 seconds, then kill it
+          # If it crashes immediately, this will fail
+          timeout 10s $LAUNCHER &
+          APP_PID=$!
+          sleep 5
+
+          # Check if process is still running
+          if ps -p $APP_PID > /dev/null 2>&1; then
+            echo "✓ HDFView launched successfully and is running"
+            kill $APP_PID 2>/dev/null || true
+          else
+            echo "✗ HDFView crashed or exited immediately"
+            kill $XVFB_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          # Cleanup
+          kill $XVFB_PID 2>/dev/null || true
+          echo "✓ RPM installer smoke test PASSED"
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## RPM Installer Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test**: Launch verification (5 second stability check)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Display**: Xvfb :99 (in Fedora container)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Container**: fedora:latest" >> $GITHUB_STEP_SUMMARY
