@@ -64,33 +64,39 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        echo "Downloading HDF4 from GitHub releases..."
+        echo "Downloading HDF4 from GitHub snapshot release..."
         gh release download snapshot \
           --repo HDFGroup/hdf4 \
-          --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz"
+          --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz" \
+          --clobber
 
-        echo "Extracting HDF4..."
-        tar -zxf hdf4-master-*-ubuntu-2404_gcc.tar.gz
-        cd hdf4
-        tar -zxf HDF-*-Linux.tar.gz --strip-components 1
+        echo "Extracting HDF4 outer archive..."
+        tar -zxvf hdf4-master-*-ubuntu-2404_gcc.tar.gz
+        [ -d hdf4 ] || mv hdf4-* hdf4
+
+        echo "Extracting HDF4 inner archive..."
+        cd "${{ github.workspace }}/hdf4"
+        tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
 
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls $HDF4DIR)
+        FILE_NAME_HDF=$(ls "$HDF4DIR" | head -1)
         echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
         echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
+        ls -la "$HDF4DIR$FILE_NAME_HDF"
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Download and Install HDF5 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        echo "Downloading HDF5 from GitHub releases..."
+        echo "Downloading HDF5 from GitHub snapshot release..."
         # Retry logic for transient failures
         for i in 1 2 3; do
           echo "Download attempt $i of 3..."
           if gh release download snapshot \
             --repo HDFGroup/hdf5 \
-            --pattern "hdf5-develop-*-ubuntu-2404_gcc.tar.gz"; then
+            --pattern "hdf5-develop-*-ubuntu-2404_gcc.tar.gz" \
+            --clobber; then
             break
           fi
           if [ $i -lt 3 ]; then
@@ -102,19 +108,19 @@ jobs:
           fi
         done
 
-        echo "Extracting HDF5..."
-        tar -zxf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
-        cd hdf5
+        echo "Extracting HDF5 outer archive..."
+        tar -zxvf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
+        [ -d hdf5 ] || mv hdf5-* hdf5
 
-        # Extract inner tar.gz - use first match if multiple exist
-        HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
-        echo "Extracting $HDF5_TARBALL..."
-        tar -zxf "$HDF5_TARBALL" --strip-components 1
+        echo "Extracting HDF5 inner archive..."
+        cd "${{ github.workspace }}/hdf5"
+        tar -zxvf HDF5-*-Linux.tar.gz --strip-components 1
 
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
+        FILE_NAME_HDF5=$(ls "$HDF5DIR" | head -1)
         echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
         echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
+        ls -la "$HDF5DIR$FILE_NAME_HDF5"
       env:
         GH_TOKEN: ${{ github.token }}
 
