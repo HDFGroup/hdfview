@@ -71,12 +71,12 @@ jobs:
           --clobber
 
         # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf *-macos14_clang.tar.gz
+        tar -zxf *-macos14_clang.tar.gz
         [ -d hdf4 ] || mv hdf4-* hdf4
 
         # Extract inner tar.gz into hdf4/ directory
-        cd "${{ github.workspace }}/hdf4"
-        tar -zxvf HDF-*-Darwin.tar.gz --strip-components 1
+        cd hdf4
+        tar -zxf HDF-*-Darwin.tar.gz --strip-components 1
 
         # Set HDF4 library path
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
@@ -111,12 +111,12 @@ jobs:
         done
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf hdf5-*-macos14_clang.tar.gz
+        tar -zxf hdf5-*-macos14_clang.tar.gz
         [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
-        cd "${{ github.workspace }}/hdf5"
-        tar -zxvf HDF5-*-Darwin.tar.gz --strip-components 1
+        cd hdf5
+        tar -zxf HDF5-*-Darwin.tar.gz --strip-components 1
 
         # Set HDF5 library path
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
