@@ -101,14 +101,41 @@ jobs:
           $appPath = "$PWD\HDFView\app"
           echo "PATH=$appPath;$env:PATH" >> $env:GITHUB_ENV
 
+      - name: Download test dependencies
+        shell: pwsh
+        run: |
+          Write-Host "Downloading test framework dependencies..."
+          New-Item -ItemType Directory -Force -Path "test-libs" | Out-Null
+
+          # Download JUnit Platform Console Standalone (includes all JUnit 5 runtime)
+          Write-Host "Downloading JUnit Platform Console Standalone 5.10.0..."
+          Invoke-WebRequest `
+            -Uri "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/5.10.0/junit-platform-console-standalone-5.10.0.jar" `
+            -OutFile "test-libs\junit-platform-console-standalone-5.10.0.jar"
+
+          # Download Hamcrest (required by SWTBot)
+          Write-Host "Downloading Hamcrest 2.2..."
+          Invoke-WebRequest `
+            -Uri "https://repo1.maven.org/maven2/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar" `
+            -OutFile "test-libs\hamcrest-2.2.jar"
+
+          # Copy SWTBot JARs from repository (already checked out)
+          Write-Host "Copying SWTBot JARs from repository..."
+          Copy-Item "repository\lib\org.eclipse.swtbot.swt.finder.jar" -Destination "test-libs\"
+          Copy-Item "repository\lib\org.eclipse.swtbot.nebula.nattable.finder.jar" -Destination "test-libs\"
+
+          Write-Host "Test dependencies ready:"
+          Get-ChildItem test-libs
+
       - name: Compile test classes
         shell: pwsh
         run: |
           Write-Host "Compiling test classes..."
 
           # Create classpath from app-image JARs
-          $jars = Get-ChildItem -Path "HDFView\app" -Filter "*.jar" -Recurse
-          $classpath = ($jars.FullName -join ";")
+          $appJars = Get-ChildItem -Path "HDFView\app" -Filter "*.jar" -Recurse
+          $testJars = Get-ChildItem -Path "test-libs" -Filter "*.jar"
+          $classpath = (($appJars.FullName + $testJars.FullName) -join ";")
 
           # Compile the single test we need
           New-Item -ItemType Directory -Force -Path "test-classes" | Out-Null
@@ -126,10 +153,10 @@ jobs:
           Write-Host "Running smoke test: TestHDFViewMenu#verifyOpenButtonEnabled"
           Write-Host "Windows runners have native GUI display support"
 
-          # Build classpath
-          $jars = Get-ChildItem -Path "HDFView\app" -Filter "*.jar" -Recurse
-          $classpath = ($jars.FullName -join ";")
-          $classpath = "test-classes;$classpath"
+          # Build classpath: test-classes + app JARs + test JARs
+          $appJars = Get-ChildItem -Path "HDFView\app" -Filter "*.jar" -Recurse
+          $testJars = Get-ChildItem -Path "test-libs" -Filter "*.jar"
+          $classpath = "test-classes;" + (($appJars.FullName + $testJars.FullName) -join ";")
 
           $appPath = "$PWD\HDFView\app"
 
