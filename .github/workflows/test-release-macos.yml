@@ -97,6 +97,12 @@ jobs:
           # Set library path (macOS uses DYLD_LIBRARY_PATH)
           echo "DYLD_LIBRARY_PATH=$PWD/HDFView.app/Contents/app:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
+      - name: Install GNU coreutils for timeout command
+        run: |
+          echo "Installing GNU coreutils (provides gtimeout)..."
+          brew install coreutils
+          echo "✓ GNU coreutils installed"
+
       - name: Download test dependencies
         run: |
           echo "Downloading test framework dependencies..."
@@ -131,9 +137,9 @@ jobs:
           echo "Compiling test classes..."
 
           # Create classpath from app-image JARs and test libs
-          APP_JARS=$(find HDFView.app/Contents/app -name "*.jar" -type f | tr '\n' ':')
-          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':')
-          CLASSPATH="${APP_JARS}${TEST_JARS}"
+          APP_JARS=$(find HDFView.app/Contents/app -name "*.jar" -type f | tr '\n' ':' | sed 's/:$//')
+          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':' | sed 's/:$//')
+          CLASSPATH="${APP_JARS}:${TEST_JARS}"
 
           # Compile the single test we need
           mkdir -p test-classes
@@ -150,15 +156,16 @@ jobs:
           echo "macOS GitHub runners have VMware display emulation built-in"
 
           # Build classpath: test-classes + app JARs + test libs
-          APP_JARS=$(find HDFView.app/Contents/app -name "*.jar" -type f | tr '\n' ':')
-          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':')
-          CLASSPATH="test-classes:${APP_JARS}${TEST_JARS}"
+          APP_JARS=$(find HDFView.app/Contents/app -name "*.jar" -type f | tr '\n' ':' | sed 's/:$//')
+          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':' | sed 's/:$//')
+          CLASSPATH="test-classes:${APP_JARS}:${TEST_JARS}"
 
           APP_DIR="$PWD/HDFView.app/Contents/app"
 
           # Run single smoke test with timeout
           # NOTE: -XstartOnFirstThread is REQUIRED for SWT on macOS
-          timeout 120s java -XstartOnFirstThread \
+          # Use gtimeout from GNU coreutils (macOS doesn't have timeout by default)
+          gtimeout 120s java -XstartOnFirstThread \
             -cp "$CLASSPATH" \
             -Djava.library.path="$APP_DIR" \
             -Dhdfview.workdir="$APP_DIR/samples" \
