@@ -108,10 +108,10 @@ jobs:
           New-Item -ItemType Directory -Force -Path "test-libs" | Out-Null
 
           # Download JUnit Platform Console Standalone (includes all JUnit 5 runtime)
-          Write-Host "Downloading JUnit Platform Console Standalone 5.10.0..."
+          Write-Host "Downloading JUnit Platform Console Standalone 1.10.0..."
           Invoke-WebRequest `
-            -Uri "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/5.10.0/junit-platform-console-standalone-5.10.0.jar" `
-            -OutFile "test-libs\junit-platform-console-standalone-5.10.0.jar"
+            -Uri "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar" `
+            -OutFile "test-libs\junit-platform-console-standalone-1.10.0.jar"
 
           # Download Hamcrest (required by SWTBot)
           Write-Host "Downloading Hamcrest 2.2..."
@@ -126,6 +126,18 @@ jobs:
 
           Write-Host "Test dependencies ready:"
           Get-ChildItem test-libs
+
+          # Verify JARs are valid ZIP files
+          Write-Host "Verifying downloaded JARs..."
+          try {
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [System.IO.Compression.ZipFile]::OpenRead("test-libs\junit-platform-console-standalone-1.10.0.jar").Dispose()
+            [System.IO.Compression.ZipFile]::OpenRead("test-libs\hamcrest-2.2.jar").Dispose()
+            Write-Host "✓ All JARs verified successfully"
+          } catch {
+            Write-Host "✗ JAR verification failed: $_"
+            exit 1
+          }
 
       - name: Compile test classes
         shell: pwsh

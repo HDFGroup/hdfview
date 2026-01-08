@@ -98,12 +98,43 @@ jobs:
           # Set library path
           echo "LD_LIBRARY_PATH=$PWD/HDFView/lib/app:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
+      - name: Download test dependencies
+        run: |
+          echo "Downloading test framework dependencies..."
+          mkdir -p test-libs
+
+          # Download JUnit Platform Console Standalone (includes all JUnit 5 runtime)
+          echo "Downloading JUnit Platform Console Standalone 1.10.0..."
+          curl -f -L -o test-libs/junit-platform-console-standalone-1.10.0.jar \
+            "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar"
+
+          # Download Hamcrest (required by SWTBot)
+          echo "Downloading Hamcrest 2.2..."
+          curl -f -L -o test-libs/hamcrest-2.2.jar \
+            "https://repo1.maven.org/maven2/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar"
+
+          # Copy SWTBot JARs from repository (already checked out)
+          echo "Copying SWTBot JARs from repository..."
+          cp repository/lib/org.eclipse.swtbot.swt.finder.jar test-libs/
+          cp repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar test-libs/
+
+          echo "Test dependencies ready:"
+          ls -lh test-libs/
+
+          # Verify JARs are valid ZIP files
+          echo "Verifying downloaded JARs..."
+          unzip -t test-libs/junit-platform-console-standalone-1.10.0.jar > /dev/null
+          unzip -t test-libs/hamcrest-2.2.jar > /dev/null
+          echo "✓ All JARs verified successfully"
+
       - name: Compile test classes
         run: |
           echo "Compiling test classes..."
 
-          # Create classpath from app-image JARs
-          CLASSPATH=$(find HDFView/lib/app -name "*.jar" -type f | tr '\n' ':')
+          # Create classpath from app-image JARs and test libs
+          APP_JARS=$(find HDFView/lib/app -name "*.jar" -type f | tr '\n' ':')
+          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':')
+          CLASSPATH="${APP_JARS}${TEST_JARS}"
 
           # Compile the single test we need
           mkdir -p test-classes
@@ -131,9 +162,10 @@ jobs:
 
           echo "Running smoke test: TestHDFViewMenu#verifyOpenButtonEnabled"
 
-          # Build classpath
-          CLASSPATH=$(find HDFView/lib/app -name "*.jar" -type f | tr '\n' ':')
-          CLASSPATH="test-classes:$CLASSPATH"
+          # Build classpath: test-classes + app JARs + test libs
+          APP_JARS=$(find HDFView/lib/app -name "*.jar" -type f | tr '\n' ':')
+          TEST_JARS=$(find test-libs -name "*.jar" -type f | tr '\n' ':')
+          CLASSPATH="test-classes:${APP_JARS}${TEST_JARS}"
 
           # Run single smoke test with timeout
           timeout 120s java \

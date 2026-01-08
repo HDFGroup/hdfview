@@ -103,13 +103,13 @@ jobs:
           mkdir -p test-libs
 
           # Download JUnit Platform Console Standalone (includes all JUnit 5 runtime)
-          echo "Downloading JUnit Platform Console Standalone 5.10.0..."
-          curl -L -o test-libs/junit-platform-console-standalone-5.10.0.jar \
-            "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/5.10.0/junit-platform-console-standalone-5.10.0.jar"
+          echo "Downloading JUnit Platform Console Standalone 1.10.0..."
+          curl -f -L -o test-libs/junit-platform-console-standalone-1.10.0.jar \
+            "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar"
 
           # Download Hamcrest (required by SWTBot)
           echo "Downloading Hamcrest 2.2..."
-          curl -L -o test-libs/hamcrest-2.2.jar \
+          curl -f -L -o test-libs/hamcrest-2.2.jar \
             "https://repo1.maven.org/maven2/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar"
 
           # Copy SWTBot JARs from repository (already checked out)
@@ -119,6 +119,12 @@ jobs:
 
           echo "Test dependencies ready:"
           ls -lh test-libs/
+
+          # Verify JARs are valid ZIP files
+          echo "Verifying downloaded JARs..."
+          unzip -t test-libs/junit-platform-console-standalone-1.10.0.jar > /dev/null
+          unzip -t test-libs/hamcrest-2.2.jar > /dev/null
+          echo "✓ All JARs verified successfully"
 
       - name: Compile test classes
         run: |
