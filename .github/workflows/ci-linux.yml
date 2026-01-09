@@ -67,7 +67,7 @@ jobs:
         HDF4_VERSION="4.3.1"
         echo "Downloading HDF4 ${HDF4_VERSION} release..."
 
-        PATTERN="hdf4.${HDF4_VERSION}-ubuntu-2404_gcc.tar.gz"
+        PATTERN="hdf${HDF4_VERSION}-ubuntu-2404_gcc.tar.gz"
         echo "Using pattern $PATTERN"
         gh release download hdf${HDF4_VERSION} \
           --repo HDFGroup/hdf4 \
