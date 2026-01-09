@@ -65,11 +65,11 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        HDF4_VERSION="4.3.1"
-        Write-Host "Downloading HDF4 ${HDF4_VERSION} release..."
-        PATTERN="hdf4.${HDF4_VERSION}-win-vs2022_cl.zip"
+        $HDF4_VERSION = "4.3.1"
+        Write-Host "Downloading HDF4 $HDF4_VERSION release..."
+        $PATTERN = "hdf4.$HDF4_VERSION-win-vs2022_cl.zip"
         Write-Host "Using pattern: $PATTERN"
-        gh release download hdf${HDF4_VERSION} `
+        gh release download hdf$HDF4_VERSION `
           --repo HDFGroup/hdf4 `
           --pattern "$PATTERN" `
           --clobber
@@ -189,10 +189,11 @@ jobs:
         }
 
         # Install jarhdf
+        $HDF4_VERSION = "4.3.1"
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
           mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
-            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=4.3.1" `
+            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=$HDF4_VERSION" `
             "-Dpackaging=jar" "-DgeneratePom=true"
           Write-Host "Installed: $($jarhdf.Name)"
         }
