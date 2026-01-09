@@ -66,7 +66,7 @@ jobs:
       run: |
         HDF4_VERSION="4.3.1"
         echo "Downloading HDF4 ${HDF4_VERSION} release..."
-        PATTERN="hdf4.${HDF4_VERSION}-macos14_clang.tar.gz"
+        PATTERN="hdf${HDF4_VERSION}-macos14_clang.tar.gz"
         echo "Using pattern: $PATTERN"
         gh release download hdf${HDF4_VERSION} \
           --repo HDFGroup/hdf4 \
@@ -95,23 +95,11 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
         echo "Downloading HDF5 2.0.0 release..."
-        # Retry logic for transient failures
-        for i in 1 2 3; do
-          echo "Download attempt $i of 3..."
-          if gh release download hdf5-2.0.0 \
-            --repo HDFGroup/hdf5 \
-            --pattern "hdf5-2.0.0-macos14_clang.tar.gz" \
-            --clobber; then
-            break
-          fi
-          if [ $i -lt 3 ]; then
-            echo "Download failed, retrying in 5 seconds..."
-            sleep 5
-          else
-            echo "All download attempts failed"
-            exit 1
-          fi
-        done
+
+        gh release download 2.0.0 \
+          --repo HDFGroup/hdf5 \
+          --pattern "hdf5-2.0.0-macos14_clang.tar.gz" \
+          --clobber
 
         # Extract outer tar.gz (creates hdf5/ directory)
         tar -zxf hdf5-*-macos14_clang.tar.gz

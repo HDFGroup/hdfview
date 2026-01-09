@@ -67,7 +67,7 @@ jobs:
       run: |
         $HDF4_VERSION = "4.3.1"
         Write-Host "Downloading HDF4 $HDF4_VERSION release..."
-        $PATTERN = "hdf4.$HDF4_VERSION-win-vs2022_cl.zip"
+        $PATTERN = "hdf$HDF4_VERSION-win-vs2022_cl.zip"
         Write-Host "Using pattern: $PATTERN"
         gh release download hdf$HDF4_VERSION `
           --repo HDFGroup/hdf4 `
@@ -76,23 +76,12 @@ jobs:
 
         Write-Host "Extracting HDF4..."
         7z x -y *-win-vs2022_cl.zip
-        # Rename hdf4-* directory to hdf4 if needed
-        $hdf4Dir = Get-ChildItem -Directory -Filter "hdf4*" | Select-Object -First 1
-        if ($hdf4Dir.Name -ne "hdf4") {
-            Rename-Item $hdf4Dir.FullName "hdf4"
-        }
         Set-Location hdf4
         7z x -y HDF-*-win64.zip
 
-        # Windows structure: hdf4/HDF-4.3.1-win64/lib, hdf4/HDF-4.3.1-win64/bin
-        # Find the extracted HDF-*-win64 directory
-        $HDF4DIR = Get-ChildItem -Path . -Filter "HDF-*-win64" -Directory | Select-Object -First 1
-        if (-not $HDF4DIR) {
-          Write-Error "HDF-*-win64 directory not found!"
-          Get-ChildItem -Directory | ForEach-Object { Write-Host $_.Name }
-          exit 1
-        }
-        $HDF4LIB_PATH = $HDF4DIR.FullName
+        # Windows structure: hdf4/HDF-<version>-win64/lib, hdf4/HDF-<version>-win64/bin
+        $HDF4DIR = "HDF-$HDF4_VERSION-win64"
+        $HDF4LIB_PATH = "$HDF4DIR.FullName"
         echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $env:GITHUB_ENV
         Write-Host "HDF4 installed to: $HDF4LIB_PATH"
       env:
@@ -103,7 +92,7 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Downloading HDF5 2.0.0 release..."
-        gh release download hdf5-2.0.0 `
+        gh release download 2.0.0 `
           --repo HDFGroup/hdf5 `
           --pattern "hdf5-2.0.0-win-vs2022_cl.zip" `
           --clobber
