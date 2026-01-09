@@ -25,6 +25,13 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Remove pre-installed Java
+        run: |
+          echo "Removing pre-installed Java to test bundled JRE..."
+          sudo rm -rf /usr/lib/jvm
+          echo "Java removed. Verifying:"
+          java -version 2>&1 || echo "✓ Java not found (expected)"
+
       - name: Download app binary from release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -108,6 +115,13 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      - name: Remove pre-installed Java
+        run: |
+          echo "Removing pre-installed Java to test bundled JRE..."
+          sudo rm -rf /usr/lib/jvm
+          echo "Java removed. Verifying:"
+          java -version 2>&1 || echo "✓ Java not found (expected)"
+
       - name: Download DEB installer
         env:
           GH_TOKEN: ${{ github.token }}
@@ -206,6 +220,13 @@ jobs:
         run: |
           echo "Installing required packages in Fedora container..."
           dnf install -y wget xorg-x11-server-Xvfb gtk3 procps-ng findutils
+
+      - name: Remove pre-installed Java
+        run: |
+          echo "Removing pre-installed Java to test bundled JRE..."
+          rm -rf /usr/lib/jvm 2>/dev/null || echo "No Java found at /usr/lib/jvm"
+          echo "Java removed. Verifying:"
+          java -version 2>&1 || echo "✓ Java not found (expected)"
 
       - name: Download RPM installer
         env:

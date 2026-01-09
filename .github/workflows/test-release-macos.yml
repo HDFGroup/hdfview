@@ -37,6 +37,13 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Remove pre-installed Java
+        run: |
+          echo "Removing pre-installed Java to test bundled JRE..."
+          sudo rm -rf /Library/Java/JavaVirtualMachines
+          echo "Java removed. Verifying:"
+          java -version 2>&1 || echo "✓ Java not found (expected)"
+
       - name: Download app binary from release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -119,6 +126,13 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      - name: Remove pre-installed Java
+        run: |
+          echo "Removing pre-installed Java to test bundled JRE..."
+          sudo rm -rf /Library/Java/JavaVirtualMachines
+          echo "Java removed. Verifying:"
+          java -version 2>&1 || echo "✓ Java not found (expected)"
+
       - name: Download DMG installer
         env:
           GH_TOKEN: ${{ github.token }}

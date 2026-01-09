@@ -25,6 +25,35 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Remove pre-installed Java
+        shell: pwsh
+        run: |
+          Write-Host "Removing pre-installed Java to test bundled JRE..."
+
+          # Remove common Java installation directories
+          $javaPaths = @(
+            "C:\hostedtoolcache\Java",
+            "C:\Program Files\Java",
+            "C:\Program Files (x86)\Java",
+            "C:\Program Files\Eclipse Adoptium",
+            "C:\Program Files\Microsoft"
+          )
+
+          foreach ($path in $javaPaths) {
+            if (Test-Path $path) {
+              Write-Host "Removing: $path"
+              Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue
+            }
+          }
+
+          Write-Host "Java removed. Verifying:"
+          try {
+            java -version 2>&1
+            Write-Host "Warning: Java still accessible"
+          } catch {
+            Write-Host "✓ Java not found (expected)"
+          }
+
       - name: Download app binary from release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -100,6 +129,35 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      - name: Remove pre-installed Java
+        shell: pwsh
+        run: |
+          Write-Host "Removing pre-installed Java to test bundled JRE..."
+
+          # Remove common Java installation directories
+          $javaPaths = @(
+            "C:\hostedtoolcache\Java",
+            "C:\Program Files\Java",
+            "C:\Program Files (x86)\Java",
+            "C:\Program Files\Eclipse Adoptium",
+            "C:\Program Files\Microsoft"
+          )
+
+          foreach ($path in $javaPaths) {
+            if (Test-Path $path) {
+              Write-Host "Removing: $path"
+              Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue
+            }
+          }
+
+          Write-Host "Java removed. Verifying:"
+          try {
+            java -version 2>&1
+            Write-Host "Warning: Java still accessible"
+          } catch {
+            Write-Host "✓ Java not found (expected)"
+          }
+
       - name: Download MSI installer
         env:
           GH_TOKEN: ${{ github.token }}
