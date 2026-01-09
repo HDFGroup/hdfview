@@ -234,9 +234,13 @@ jobs:
         run: |
           echo "Downloading RPM installer from release: ${{ inputs.release_tag }}"
 
-          # Install gh CLI in container
-          dnf install -y 'dnf-command(config-manager)'
-          dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+          # Install gh CLI in container (manual repo file creation for DNF 5 compatibility)
+          echo '[gh-cli]' > /etc/yum.repos.d/gh-cli.repo
+          echo 'name=GitHub CLI' >> /etc/yum.repos.d/gh-cli.repo
+          echo 'baseurl=https://cli.github.com/packages/rpm' >> /etc/yum.repos.d/gh-cli.repo
+          echo 'enabled=1' >> /etc/yum.repos.d/gh-cli.repo
+          echo 'gpgcheck=1' >> /etc/yum.repos.d/gh-cli.repo
+          echo 'gpgkey=https://cli.github.com/packages/rpm/gh-cli.gpg' >> /etc/yum.repos.d/gh-cli.repo
           dnf install -y gh
 
           gh release download ${{ inputs.release_tag }} \
