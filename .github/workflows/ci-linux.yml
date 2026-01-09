@@ -101,26 +101,15 @@ jobs:
       run: |
         HDF5_VERSION="2.0.0"
         echo "Downloading HDF5 ${HDF5_VERSION} release..."
-        # Retry logic for transient failures
-        for i in 1 2 3; do
-          echo "Download attempt $i of 3..."
-          if gh release download hdf5-${HDF5_VERSION} \
-            --repo HDFGroup/hdf5 \
-            --pattern "hdf5-${HDF5_VERSION}-ubuntu-2404_gcc.tar.gz" \
-            --clobber; then
-            break
-          fi
-          if [ $i -lt 3 ]; then
-            echo "Download failed, retrying in 5 seconds..."
-            sleep 5
-          else
-            echo "All download attempts failed"
-            exit 1
-          fi
-        done
 
+        PATTERN="hdf5-${HDF5_VERSION}-ubuntu-2404_gcc.tar.gz"
+        gh release download ${HDF5_VERSION} \
+          --repo HDFGroup/hdf5 \
+          --pattern "$PATTERN" \
+          --clobber
+  
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf hdf5-${HDF5_VERSION}-ubuntu-2404_gcc.tar.gz
+        tar -zxvf $PATTERN
         [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
