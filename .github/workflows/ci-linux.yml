@@ -64,11 +64,18 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        echo "Downloading HDF4 4.3.1 release..."
-        gh release download hdf4.3.1 \
+        HDF4_VERSION="4.3.1"
+        echo "Downloading HDF4 ${HDF4_VERSION} release..."
+
+        PATTERN="hdf4.${HDF4_VERSION}-ubuntu-2404_gcc.tar.gz"
+        echo "Using pattern $PATTERN"
+        gh release download hdf${HDF4_VERSION} \
           --repo HDFGroup/hdf4 \
-          --pattern "hdf4.3.1-ubuntu-2404_gcc.tar.gz" \
+          --pattern "$PATTERN" \
           --clobber
+
+        echo "After gh download"
+        ls
 
         # Extract outer tar.gz (creates hdf4/ directory)
         tar -zxf *-ubuntu-2404_gcc.tar.gz
@@ -76,6 +83,8 @@ jobs:
 
         # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
+        echo "Before extracting inner tar.gz"
+        ls
         tar -zxf HDF-*-Linux.tar.gz --strip-components 1
 
         # Set HDF4 library path
@@ -165,11 +174,12 @@ jobs:
           echo "Installed: $JAR_FILE"
         fi
 
-        # Install jarhdf (version 4.3.1 for HDF4)
+        # Install jarhdf (HDF4)
+        HDF4_VERSION="4.3.1"
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=${HDF4_VERSION} \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE"
         fi
