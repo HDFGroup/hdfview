@@ -65,10 +65,13 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF4 4.3.1 release..."
-        gh release download hdf4.3.1 `
+        HDF4_VERSION="4.3.1"
+        Write-Host "Downloading HDF4 ${HDF4_VERSION} release..."
+        PATTERN="hdf4.${HDF4_VERSION}-win-vs2022_cl.zip"
+        Write-Host "Using pattern: $PATTERN"
+        gh release download hdf${HDF4_VERSION} `
           --repo HDFGroup/hdf4 `
-          --pattern "hdf4.3.1-win-vs2022_cl.zip" `
+          --pattern "$PATTERN" `
           --clobber
 
         Write-Host "Extracting HDF4..."
