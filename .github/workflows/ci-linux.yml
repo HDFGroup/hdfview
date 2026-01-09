@@ -64,10 +64,10 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        echo "Downloading HDF4 from GitHub snapshot release..."
-        gh release download snapshot \
+        echo "Downloading HDF4 4.3.1 release..."
+        gh release download hdf4.3.1 \
           --repo HDFGroup/hdf4 \
-          --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz" \
+          --pattern "hdf4.3.1-ubuntu-2404_gcc.tar.gz" \
           --clobber
 
         # Extract outer tar.gz (creates hdf4/ directory)
@@ -75,7 +75,7 @@ jobs:
         [ -d hdf4 ] || mv hdf4-* hdf4
 
         # Extract inner tar.gz into hdf4/ directory
-        cd hdf4
+        cd "${{ github.workspace }}/hdf4"
         tar -zxf HDF-*-Linux.tar.gz --strip-components 1
 
         # Set HDF4 library path
@@ -91,13 +91,13 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        echo "Downloading HDF5 from GitHub snapshot release..."
+        echo "Downloading HDF5 2.0.0 release..."
         # Retry logic for transient failures
         for i in 1 2 3; do
           echo "Download attempt $i of 3..."
-          if gh release download snapshot \
+          if gh release download hdf5-2.0.0 \
             --repo HDFGroup/hdf5 \
-            --pattern "hdf5-develop-*-ubuntu-2404_gcc.tar.gz" \
+            --pattern "hdf5-2.0.0-ubuntu-2404_gcc.tar.gz" \
             --clobber; then
             break
           fi
@@ -115,7 +115,7 @@ jobs:
         [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
-        cd hdf5
+        cd "${{ github.workspace }}/hdf5"
         tar -zxf HDF5-*-Linux.tar.gz --strip-components 1
 
         # Set HDF5 library path

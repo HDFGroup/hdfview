@@ -65,10 +65,10 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF4 from GitHub snapshot release..."
-        gh release download snapshot `
+        Write-Host "Downloading HDF4 4.3.1 release..."
+        gh release download hdf4.3.1 `
           --repo HDFGroup/hdf4 `
-          --pattern "hdf4-master-*-win-vs2022_cl.zip" `
+          --pattern "hdf4.3.1-win-vs2022_cl.zip" `
           --clobber
 
         Write-Host "Extracting HDF4..."
@@ -99,10 +99,10 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        Write-Host "Downloading HDF5 from GitHub snapshot release..."
-        gh release download snapshot `
+        Write-Host "Downloading HDF5 2.0.0 release..."
+        gh release download hdf5-2.0.0 `
           --repo HDFGroup/hdf5 `
-          --pattern "hdf5-develop-*-win-vs2022_cl.zip" `
+          --pattern "hdf5-2.0.0-win-vs2022_cl.zip" `
           --clobber
 
         Write-Host "Extracting HDF5..."
