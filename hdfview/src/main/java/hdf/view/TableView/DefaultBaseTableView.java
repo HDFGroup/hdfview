@@ -515,7 +515,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         cellValueField = new Text(cellValueFieldScroller, SWT.MULTI | SWT.BORDER | SWT.WRAP);
         cellValueField.setEditable(false);
-        cellValueField.setBackground(new Color(display, 255, 255, 240));
+        cellValueField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
         cellValueField.setEnabled(false);
         cellValueField.setFont(curFont);
 

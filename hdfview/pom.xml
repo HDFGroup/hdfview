@@ -580,6 +580,8 @@
                   <arguments combine.children="append">
                     <argument>--icon</argument>
                     <argument>${project.basedir}/../package_files/macosx/HDFView.icns</argument>
+                    <argument>--resource-dir</argument>
+                    <argument>${project.basedir}/../package_files/macosx</argument>
                     <argument>--mac-entitlements</argument>
                     <argument>${project.basedir}/../lib/macosx/distribution.entitlements</argument>
                     <argument>--java-options</argument>
