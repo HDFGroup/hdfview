@@ -16,6 +16,9 @@ package hdf.view;
 
 import java.lang.reflect.Array;
 
+import hdf.view.ThemeChangeListener;
+import hdf.view.ThemeManager;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -45,10 +48,12 @@ import org.eclipse.swt.widgets.Shell;
  * ChartView displays a histogram/line chart of selected row/column of table data or image data. There are two
  * types of chart, histogram and line plot.
  *
+ * Implements ThemeChangeListener for dynamic theme updates without requiring application restart.
+ *
  * @author Jordan T. Henderson
  * @version 2.4 2/27/2016
  */
-public class Chart extends Dialog {
+public class Chart extends Dialog implements ThemeChangeListener {
     private Shell shell;
 
     private Font curFont;
@@ -56,6 +61,9 @@ public class Chart extends Dialog {
     private String windowTitle;
 
     private Color barColor;
+
+    /** True if barColor is a custom color that needs to be disposed */
+    private boolean barColorIsCustom;
 
     /** histogram style chart. */
     public static final int HISTOGRAM = 0;
@@ -152,7 +160,10 @@ public class Chart extends Dialog {
 
         if (style == HISTOGRAM) {
             isInteger = true;
-            barColor  = new Color(Display.getDefault(), new RGB(0, 0, 255));
+            // Optimization: Reference theme color directly instead of creating a copy
+            // This saves a GDI handle since the color is managed by ThemeManager
+            barColor          = getThemeManager().getColors().histogramBarColor;
+            barColorIsCustom  = false;
         }
         else {
             isInteger = false;
@@ -198,6 +209,45 @@ public class Chart extends Dialog {
 
         if ((ymax < 0.0001) || (ymax > 100000))
             format = new java.text.DecimalFormat("###.####E0#");
+
+        // Register as theme change listener for dynamic updates
+        getThemeManager().addThemeChangeListener(this);
+    }
+
+    /**
+     * Get the ThemeManager instance. This method acts as a seam for unit testing,
+     * allowing tests to override and inject a mock ThemeManager without modifying
+     * the global singleton.
+     *
+     * @return the ThemeManager instance
+     */
+    protected ThemeManager getThemeManager() {
+        return ThemeManager.getInstance();
+    }
+
+    /**
+     * Handle theme changes by updating colors and redrawing the chart.
+     * This enables dynamic theme switching without requiring an application restart.
+     *
+     * @param oldTheme the previous theme
+     * @param newTheme the new theme
+     * @param colors the new color scheme
+     */
+    @Override
+    public void onThemeChanged(ThemeManager.Theme oldTheme, ThemeManager.Theme newTheme,
+                              ThemeManager.ColorScheme colors) {
+        // Only dispose and update if using theme color, not custom color
+        if (chartStyle == HISTOGRAM && !barColorIsCustom) {
+            // No need to dispose - theme colors are managed by ThemeManager
+            // Simply reference the new theme color
+            barColor = colors.histogramBarColor;
+        }
+
+        // Update chart canvas background if it exists
+        if (chartP != null && !chartP.isDisposed()) {
+            chartP.setBackground(colors.chartBackground);
+            chartP.redraw(); // Force repaint with new colors
+        }
     }
 
     /** Show the Chart dialog. */
@@ -216,15 +266,20 @@ public class Chart extends Dialog {
         shell.addDisposeListener(new DisposeListener() {
             public void widgetDisposed(DisposeEvent e)
             {
+                // Unregister theme listener to prevent memory leaks
+                getThemeManager().removeThemeChangeListener(Chart.this);
+
                 if (curFont != null)
                     curFont.dispose();
-                if (barColor != null)
+                // Only dispose barColor if it's a custom color we created
+                // Theme colors are managed by ThemeManager
+                if (barColor != null && barColorIsCustom)
                     barColor.dispose();
             }
         });
 
         chartP = new ChartCanvas(shell, SWT.DOUBLE_BUFFERED | SWT.BORDER);
-        chartP.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        chartP.setBackground(getThemeManager().getColors().chartBackground);
         chartP.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         // Add close button
@@ -277,8 +332,13 @@ public class Chart extends Dialog {
                 RGB newColor = dialog.open();
 
                 if (newColor != null) {
-                    barColor.dispose();
+                    // Dispose old custom color if it exists
+                    if (barColorIsCustom && barColor != null) {
+                        barColor.dispose();
+                    }
+                    // Create new custom color
                     barColor = new Color(Display.getDefault(), newColor);
+                    barColorIsCustom = true;
                     chartP.redraw();
                 }
             }
@@ -466,10 +526,11 @@ public class Chart extends Dialog {
                         double xD        = (xmin / (xmax - xmin)) * plotWidth;
 
                         // draw lines for selected spreadsheet columns
+                        Color[] themeLineColors = getThemeManager().getColors().chartLineColors;
                         for (int i = 0; i < numberOfLines; i++) {
                             // Display each line with a unique color for clarity
                             if ((lineColors != null) && (lineColors.length >= numberOfLines))
-                                g.setForeground(Display.getCurrent().getSystemColor(lineColors[i]));
+                                g.setForeground(themeLineColors[i % themeLineColors.length]);
 
                             // set up the line data for drawing one line a time
                             if (hasXdata)
@@ -502,7 +563,7 @@ public class Chart extends Dialog {
 
                         // draw a box on the legend
                         if ((lineLabels != null) && (lineLabels.length >= numberOfLines)) {
-                            g.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
+                            g.setForeground(getThemeManager().getColors().chartForeground);
                             g.drawRectangle(canvasBounds.width - legendWidth - GAP, GAP, legendWidth,
                                             legendHeight);
                         }

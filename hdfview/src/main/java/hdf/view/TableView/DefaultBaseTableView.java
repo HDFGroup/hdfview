@@ -56,6 +56,8 @@ import hdf.view.DefaultFileFilter;
 import hdf.view.HDFView;
 import hdf.view.TableView.DataDisplayConverterFactory.HDFDisplayConverter;
 import hdf.view.TableView.DataProviderFactory.HDFDataProvider;
+import hdf.view.ThemeChangeListener;
+import hdf.view.ThemeManager;
 import hdf.view.Tools;
 import hdf.view.TreeView.TreeView;
 import hdf.view.ViewProperties;
@@ -154,7 +156,7 @@ import org.eclipse.swt.widgets.ToolItem;
  * @author jhenderson
  * @version 1.0 4/13/2018
  */
-public abstract class DefaultBaseTableView implements TableView {
+public abstract class DefaultBaseTableView implements TableView, ThemeChangeListener {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultBaseTableView.class);
 
@@ -330,6 +332,15 @@ public abstract class DefaultBaseTableView implements TableView {
 
                 if (curFont != null)
                     curFont.dispose();
+
+                // Unregister theme listener
+                try {
+                    getThemeManager().removeThemeChangeListener(DefaultBaseTableView.this);
+                    log.debug("Unregistered theme listener for table view");
+                }
+                catch (Exception ex) {
+                    log.warn("Failed to unregister theme listener", ex);
+                }
 
                 viewer.removeDataView(DefaultBaseTableView.this);
             }
@@ -515,7 +526,7 @@ public abstract class DefaultBaseTableView implements TableView {
 
         cellValueField = new Text(cellValueFieldScroller, SWT.MULTI | SWT.BORDER | SWT.WRAP);
         cellValueField.setEditable(false);
-        cellValueField.setBackground(new Color(display, 255, 255, 240));
+        cellValueField.setBackground(getThemeManager().getColors().infoBackground);
         cellValueField.setEnabled(false);
         cellValueField.setFont(curFont);
 
@@ -664,6 +675,63 @@ public abstract class DefaultBaseTableView implements TableView {
         int width  = 700 + (ViewProperties.getFontSize() - 12) * 15;
         int height = 500 + (ViewProperties.getFontSize() - 12) * 10;
         shell.setSize(width, height);
+
+        // Register for theme change notifications
+        try {
+            getThemeManager().addThemeChangeListener(this);
+            log.debug("Registered theme listener for table view");
+        }
+        catch (Exception ex) {
+            log.warn("Failed to register theme listener", ex);
+        }
+    }
+
+    /**
+     * Get the ThemeManager instance. This method acts as a seam for unit testing,
+     * allowing tests to override and inject a mock ThemeManager without modifying
+     * the global singleton.
+     *
+     * @return the ThemeManager instance
+     */
+    protected ThemeManager getThemeManager() {
+        return ThemeManager.getInstance();
+    }
+
+    /**
+     * Handle theme changes by updating UI components with new colors.
+     * This allows the table view to respond dynamically to theme changes
+     * without requiring an application restart.
+     *
+     * @param oldTheme the previous theme
+     * @param newTheme the new theme
+     * @param colors the new color scheme
+     */
+    @Override
+    public void onThemeChanged(ThemeManager.Theme oldTheme, ThemeManager.Theme newTheme,
+                               ThemeManager.ColorScheme colors) {
+        log.info("Table view responding to theme change: {} -> {}", oldTheme, newTheme);
+
+        // Update UI on the SWT UI thread
+        if (display != null && !display.isDisposed()) {
+            display.asyncExec(() -> {
+                try {
+                    // Update cell value field background color
+                    if (cellValueField != null && !cellValueField.isDisposed()) {
+                        cellValueField.setBackground(colors.infoBackground);
+                        log.debug("Updated cellValueField background color for new theme");
+                    }
+
+                    // Force redraw
+                    if (shell != null && !shell.isDisposed()) {
+                        shell.layout(true, true);
+                        log.debug("Table view layout updated for theme change");
+                    }
+                }
+                catch (Exception ex) {
+                    log.error("Error updating table view theme", ex);
+                }
+            });
+        }
     }
 
     /**

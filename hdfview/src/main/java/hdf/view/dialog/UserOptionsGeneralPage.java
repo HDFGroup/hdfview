@@ -17,6 +17,7 @@ package hdf.view.dialog;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 
+import hdf.view.ThemeManager;
 import hdf.view.Tools;
 import hdf.view.ViewProperties;
 
@@ -53,6 +54,7 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
 
     private Combo fontSizeChoice;
     private Combo fontTypeChoice;
+    private Combo themeChoice;
     private Combo delimiterChoice;
     private Combo imageOriginChoice;
     private Combo indexBaseChoice;
@@ -152,6 +154,48 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         }
         catch (Exception ex) {
             isFontChanged = false;
+        }
+
+        // set theme preference
+        try {
+            if (themeChoice != null) {
+                int themeIndex = themeChoice.getSelectionIndex();
+                ThemeManager.Theme[] themes = ThemeManager.Theme.values();
+
+                if (themeIndex >= 0 && themeIndex < themes.length) {
+                    ThemeManager.Theme newTheme = themes[themeIndex];
+                    String currentTheme = ViewProperties.getThemePreference();
+
+                    if (!newTheme.name().equalsIgnoreCase(currentTheme)) {
+                        log.trace("performOk: theme changed to {}", newTheme);
+
+                        // Apply theme change immediately via ThemeManager
+                        try {
+                            ThemeManager.getInstance().setTheme(newTheme);
+
+                            // Show success message
+                            Tools.showInformation(getShell(), "Theme Changed",
+                                "Theme changed to " + newTheme.getDisplayName() + ".\n\n" +
+                                "Chart and Table views will update automatically.\n" +
+                                "New windows and dialogs will use the new theme immediately.\n\n" +
+                                "Other existing windows may require restart to update.\n" +
+                                "Tip: Use File > Exit to restart HDFView if needed.");
+                        }
+                        catch (Exception ex) {
+                            log.error("Failed to apply theme change dynamically", ex);
+
+                            // Fallback: save preference and request restart
+                            ViewProperties.setThemePreference(newTheme.name());
+                            Tools.showInformation(getShell(), "Theme Changed",
+                                "Theme preference changed to " + newTheme.getDisplayName() +
+                                ".\n\nPlease restart HDFView for the change to take effect.");
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex) {
+            log.debug("performOk: ", ex);
         }
 
         // set file access
@@ -305,6 +349,26 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
             catch (Exception ex2) {
                 fontTypeChoice.select(0);
             }
+        }
+
+        String themePreference = ViewProperties.getThemePreference();
+        log.trace("performOk: load General options theme={}", themePreference);
+        try {
+            ThemeManager.Theme theme = ThemeManager.Theme.fromString(themePreference);
+            ThemeManager.Theme[] themes = ThemeManager.Theme.values();
+
+            // Find the index of the current theme in the enum values
+            int themeIndex = 0;
+            for (int i = 0; i < themes.length; i++) {
+                if (themes[i] == theme) {
+                    themeIndex = i;
+                    break;
+                }
+            }
+            themeChoice.select(themeIndex);
+        }
+        catch (Exception ex) {
+            themeChoice.select(0);
         }
 
         checkAutoContrast.setSelection(ViewProperties.isAutoContrast());
@@ -522,6 +586,22 @@ public class UserOptionsGeneralPage extends UserOptionsDefaultPage {
         fontTypeChoice.setFont(curFont);
         fontTypeChoice.setItems(fontNames);
         fontTypeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+        label = new Label(textFontGroup, SWT.RIGHT);
+        label.setFont(curFont);
+        label.setText("Theme: ");
+
+        // Dynamically populate theme choices from enum
+        ThemeManager.Theme[] themes = ThemeManager.Theme.values();
+        String[] themeNames = new String[themes.length];
+        for (int i = 0; i < themes.length; i++) {
+            themeNames[i] = themes[i].getDisplayName();
+        }
+        themeChoice = new Combo(textFontGroup, SWT.SINGLE | SWT.READ_ONLY);
+        themeChoice.setFont(curFont);
+        themeChoice.setItems(themeNames);
+        themeChoice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        themeChoice.setToolTipText("Select application theme (applies to new windows immediately)");
 
         org.eclipse.swt.widgets.Group imageGroup = new org.eclipse.swt.widgets.Group(composite, SWT.NONE);
         imageGroup.setLayout(new GridLayout(6, false));

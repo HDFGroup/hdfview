@@ -182,6 +182,9 @@ public class ViewProperties extends PreferenceStore {
     /** the font type. */
     private static String fontType = "Serif";
 
+    /** the theme preference (AUTO, LIGHT, or DARK). */
+    private static String themePreference = "AUTO";
+
     /** the full path of H4toH5 converter. */
     private static String h4toh5 = "";
 
@@ -1576,6 +1579,10 @@ public class ViewProperties extends PreferenceStore {
         if (!isDefault("font.type"))
             setFontType(propVal.trim());
 
+        propVal = getString("theme.preference");
+        if (!isDefault("theme.preference"))
+            setThemePreference(propVal.trim());
+
         setMaxMembers(getInt("max.members"));
 
         // load the most recent file list from the property file
@@ -1684,6 +1691,9 @@ public class ViewProperties extends PreferenceStore {
 
         if (fontType != null)
             setValue("font.type", fontType);
+
+        if (themePreference != null)
+            setValue("theme.preference", themePreference);
 
         setValue("max.members", maxMembers);
 
@@ -1930,6 +1940,25 @@ public class ViewProperties extends PreferenceStore {
     {
         if (ftype != null) {
             fontType = ftype.trim();
+        }
+    }
+
+    /**
+     * Get the theme preference (AUTO, LIGHT, or DARK).
+     *
+     * @return the theme preference
+     */
+    public static String getThemePreference() { return themePreference; }
+
+    /**
+     * Set the theme preference.
+     *
+     * @param theme the theme preference (AUTO, LIGHT, or DARK)
+     */
+    public static void setThemePreference(String theme)
+    {
+        if (theme != null) {
+            themePreference = theme.trim().toUpperCase();
         }
     }
 
