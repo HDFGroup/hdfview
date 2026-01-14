@@ -170,8 +170,8 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        # Get latest HDF4 release tag dynamically
-        RELEASE_TAG=$(gh release list --repo HDFGroup/hdf4 --limit 10 | grep -v "snapshot" | head -1 | awk '{print $1}')
+        # Get latest non-snapshot release tag using JSON output for reliable parsing
+        RELEASE_TAG=$(gh release list --repo HDFGroup/hdf4 --limit 10 --json tagName,isPrerelease -q '.[] | select(.isPrerelease == false) | .tagName' | head -1)
         HDF4_VERSION="${RELEASE_TAG#hdf}"
         echo "Using HDF4 release: ${RELEASE_TAG} (version: ${HDF4_VERSION})"
 

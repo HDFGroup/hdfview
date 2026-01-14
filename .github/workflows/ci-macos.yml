@@ -91,7 +91,8 @@ jobs:
           HDF4_VERSION="${{ inputs.hdf4_version }}"
           RELEASE_TAG="hdf${HDF4_VERSION}"
         else
-          RELEASE_TAG=$(gh release list --repo HDFGroup/hdf4 --limit 10 | grep -v "snapshot" | head -1 | awk '{print $1}')
+          # Get latest non-snapshot release tag using JSON output for reliable parsing
+          RELEASE_TAG=$(gh release list --repo HDFGroup/hdf4 --limit 10 --json tagName,isPrerelease -q '.[] | select(.isPrerelease == false) | .tagName' | head -1)
           HDF4_VERSION="${RELEASE_TAG#hdf}"
         fi
         echo "Using HDF4 release: ${RELEASE_TAG} (version: ${HDF4_VERSION})"
