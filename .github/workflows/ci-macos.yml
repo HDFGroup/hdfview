@@ -95,21 +95,36 @@ jobs:
           --pattern "$PATTERN" \
           --clobber
 
+        echo "Downloaded files:"
+        ls -la
+
         # Extract outer tar.gz (creates hdf4/ directory)
         tar -zxf *-macos14_clang.tar.gz
         [ -d hdf4 ] || mv hdf4-* hdf4
 
         # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
-        tar -zxf HDF-*-Darwin.tar.gz --strip-components 1
+        echo "Contents of hdf4 directory:"
+        ls -la
+
+        # Find inner archive (name may vary: HDF-4.3.1-Darwin.tar.gz or similar)
+        INNER_ARCHIVE=$(ls HDF-*-Darwin.tar.gz 2>/dev/null | head -1)
+        if [ -z "$INNER_ARCHIVE" ]; then
+          echo "ERROR: No HDF-*-Darwin.tar.gz found. Contents:"
+          ls -la
+          exit 1
+        fi
+        echo "Extracting inner archive: $INNER_ARCHIVE"
+        tar -zxf "$INNER_ARCHIVE" --strip-components 1
 
         # Set HDF4 library path
         HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+        FILE_NAME_HDF=$(ls "$HDF4DIR" | head -1)
+        HDF4LIB_PATH="${HDF4DIR}${FILE_NAME_HDF}"
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
 
-        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
-        ls -la "$HDF4DIR$FILE_NAME_HDF"
+        echo "HDF4 installed to: $HDF4LIB_PATH"
+        ls -la "$HDF4LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -124,21 +139,36 @@ jobs:
           --pattern "hdf5-${HDF5_VERSION}-macos14_clang.tar.gz" \
           --clobber
 
+        echo "Downloaded files:"
+        ls -la
+
         # Extract outer tar.gz (creates hdf5/ directory)
         tar -zxf hdf5-*-macos14_clang.tar.gz
         [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
-        tar -zxf HDF5-*-Darwin.tar.gz --strip-components 1
+        echo "Contents of hdf5 directory:"
+        ls -la
+
+        # Find inner archive (name may vary)
+        INNER_ARCHIVE=$(ls HDF5-*-Darwin.tar.gz 2>/dev/null | head -1)
+        if [ -z "$INNER_ARCHIVE" ]; then
+          echo "ERROR: No HDF5-*-Darwin.tar.gz found. Contents:"
+          ls -la
+          exit 1
+        fi
+        echo "Extracting inner archive: $INNER_ARCHIVE"
+        tar -zxf "$INNER_ARCHIVE" --strip-components 1
 
         # Set HDF5 library path
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+        FILE_NAME_HDF5=$(ls "$HDF5DIR" | head -1)
+        HDF5LIB_PATH="${HDF5DIR}${FILE_NAME_HDF5}"
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
 
-        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
-        ls -la "$HDF5DIR$FILE_NAME_HDF5"
+        echo "HDF5 installed to: $HDF5LIB_PATH"
+        ls -la "$HDF5LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
