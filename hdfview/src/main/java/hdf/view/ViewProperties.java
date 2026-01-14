@@ -214,8 +214,6 @@ public class ViewProperties extends PreferenceStore {
     /** the timer refreshrate in msec. */
     private static int timerRefresh = 10000;
 
-    private static boolean isMac = System.getProperty("os.name").toLowerCase().contains("mac");
-
     /**
      * flag to indicate if auto contrast is used in image processing. Do not use
      * autocontrast by default (2.6 change).
@@ -1885,6 +1883,19 @@ public class ViewProperties extends PreferenceStore {
      * @param trefresh the timer refresh
      */
     public static void setTimerRefresh(int trefresh) { timerRefresh = trefresh; }
+
+    /**
+     * Check if the application is running on macOS.
+     * Uses case-insensitive substring matching for robust detection across different
+     * JRE implementations and OS version naming variations (Mac OS X, macOS, etc.).
+     *
+     * @return true if running on macOS, false otherwise
+     */
+    public static boolean isMacOS()
+    {
+        String osName = System.getProperty("os.name");
+        return osName != null && osName.toLowerCase().contains("mac");
+    }
 
     /**
      * Get the font size.

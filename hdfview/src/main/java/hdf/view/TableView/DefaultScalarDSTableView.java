@@ -114,7 +114,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         super(theView, dataPropertiesMap);
 
         if (!shell.isDisposed()) {
-            if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+            if (ViewProperties.isMacOS()) {
                 shell.setImages(ViewProperties.getHdfIcons());
             }
             else {
