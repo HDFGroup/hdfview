@@ -186,42 +186,6 @@ jobs:
             mvn install:install-file -Dfile="$JAR_FILE" -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" -Dpackaging=jar -DgeneratePom=true
             echo "Installed: $JAR_FILE as version $HDF4_VERSION"
 
-        - name: Install SWT JAR to Local Maven Repository
-          run: |
-            echo "Installing macOS ${{ matrix.arch }} SWT JAR to local Maven repository..."
-
-            # Download platform-specific SWT JAR from Maven Central
-            SWT_VERSION=3.126.0
-            SWT_ARTIFACT_ID=${{ matrix.swt_artifact_id }}
-            MAVEN_CENTRAL_URL="https://repo1.maven.org/maven2/org/eclipse/platform/${SWT_ARTIFACT_ID}/${SWT_VERSION}/${SWT_ARTIFACT_ID}-${SWT_VERSION}.jar"
-
-            echo "Downloading ${SWT_ARTIFACT_ID} from Maven Central..."
-            curl -L -o /tmp/swt-${{ matrix.arch }}.jar "$MAVEN_CENTRAL_URL"
-
-            if [ ! -f /tmp/swt-${{ matrix.arch }}.jar ]; then
-              echo "Error: Failed to download SWT JAR from Maven Central"
-              exit 1
-            fi
-
-            # Verify it's the correct platform (should contain .jnilib for macOS)
-            if jar tf /tmp/swt-${{ matrix.arch }}.jar | grep -q "\.jnilib$"; then
-              echo "✓ Verified macOS native libraries in SWT JAR"
-            else
-              echo "✗ Error: Downloaded JAR does not contain macOS native libraries (.jnilib)"
-              jar tf /tmp/swt-${{ matrix.arch }}.jar | grep -E "\.(jnilib|dylib|so)$" || true
-              exit 1
-            fi
-
-            # Install to local Maven repository
-            mvn install:install-file -Dfile=/tmp/swt-${{ matrix.arch }}.jar \
-              -DgroupId=org.eclipse.platform \
-              -DartifactId=${SWT_ARTIFACT_ID} \
-              -Dversion=${SWT_VERSION} \
-              -Dpackaging=jar \
-              -DgeneratePom=true
-
-            echo "✓ macOS ${{ matrix.arch }} SWT JAR installed successfully"
-
         - name: Install SWTBot JARs to Local Maven Repository
           run: |
             echo "Installing SWTBot JARs to local Maven repository..."
@@ -280,13 +244,19 @@ jobs:
 
         - name: Create App Image + Install with Maven Profile
           run: |
-            echo "Creating ${{ matrix.arch }} app-image using Maven jpackage profile..."
+            # Conditionally add signing profile if on canonical repo with certs
+            if [[ "${{ github.repository }}" == "HDFGroup/hdfview" && -n "${{ env.APPLE_CERTS_BASE64 }}" ]]; then
+              SIGN_PROFILE=",jpackage-mac-sign"
+              SIGN_STATUS="signed"
+            else
+              SIGN_PROFILE=""
+              SIGN_STATUS="unsigned"
+            fi
 
-            # use base app-image profile + mac specific options
-            # TODO - May only need to use mvn verify here.
-            # The install step populates ~/.m2/repository, which probably is not need for app-image
-            # and may not be needed for the DMG creation
-            mvn install -Pjpackage-app-image,jpackage-mac-base -pl object,hdfview \
+            echo "Creating ${{ matrix.arch }} app-image using Maven jpackage profile ($SIGN_STATUS)..."
+
+            # use base app-image profile + mac specific options + optional signing
+            mvn install -Pjpackage-app-image,jpackage-mac-base${SIGN_PROFILE} -pl object,hdfview \
               -Dmaven.test.skip=true \
               -Djacoco.skip=true \
               -Dpmd.skip=true \
@@ -294,7 +264,7 @@ jobs:
               -B
 
             if [ -d hdfview/target/dist/HDFView.app ]; then
-              echo "✓ ${{ matrix.arch }} app-image created successfully"
+              echo "✓ ${{ matrix.arch }} app-image created successfully ($SIGN_STATUS)"
               echo "App size: $(du -sh hdfview/target/dist/HDFView.app | cut -f1)"
             else
               echo "✗ app-image creation failed"
@@ -320,7 +290,16 @@ jobs:
 
         - name: Create and Sign DMG Installer
           run: |
-            echo "Creating DMG installer for ${{ matrix.arch }}..."
+            # Determine if we should sign the DMG
+            if [[ "${{ github.repository }}" == "HDFGroup/hdfview" && -n "${{ env.APPLE_CERTS_BASE64 }}" ]]; then
+              SHOULD_SIGN=true
+              SIGN_STATUS="signed"
+            else
+              SHOULD_SIGN=false
+              SIGN_STATUS="unsigned"
+            fi
+
+            echo "Creating DMG installer for ${{ matrix.arch }} ($SIGN_STATUS)..."
 
             # Use Maven jpackage-installer-mac profile (creates HDFView-{VERSION}.dmg)
             mvn package -Pjpackage-installer-mac -pl hdfview -DskipTests -B
@@ -333,11 +312,17 @@ jobs:
             echo "✓ DMG renamed to: $STANDARD_DMG_NAME"
             ls -lh *.dmg
 
-            # Produced installer must be signed separately from the app-image
-            codesign --force --sign "The HDF Group ($SIGNER)" \
-              --options runtime \
-              --timestamp \
-              "$STANDARD_DMG_NAME"
+            # Conditionally sign the DMG (only on canonical repo with certs)
+            if [ "$SHOULD_SIGN" = true ]; then
+              echo "Signing DMG..."
+              codesign --force --sign "The HDF Group ($SIGNER)" \
+                --options runtime \
+                --timestamp \
+                "$STANDARD_DMG_NAME"
+              echo "✓ DMG signed successfully"
+            else
+              echo "Skipping DMG signing (not on canonical repo or certs unavailable)"
+            fi
 
         - name: Notarize DMG Installer
           if: github.repository == 'HDFGroup/hdfview' && env.APPLE_CERTS_BASE64 != ''
@@ -393,4 +378,5 @@ jobs:
             name: dmg-macos-${{ matrix.arch }}-installer
             path: hdfview/target/dist/*.dmg
             retention-days: 30
+            if-no-files-found: error
     

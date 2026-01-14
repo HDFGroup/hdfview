@@ -236,44 +236,6 @@ jobs:
           # This avoids the verify phase which would trigger PMD
           mvn generate-sources -pl repository -B
 
-      - name: Install SWT JAR to Local Maven Repository
-        shell: pwsh
-        run: |
-          Write-Host "Installing Windows SWT JAR to local Maven repository..."
-
-          # Download platform-specific SWT JAR from Maven Central
-          $SWT_VERSION = "3.126.0"
-          $SWT_ARTIFACT_ID = "org.eclipse.swt.win32.win32.x86_64"
-          $MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2/org/eclipse/platform/$SWT_ARTIFACT_ID/$SWT_VERSION/$SWT_ARTIFACT_ID-$SWT_VERSION.jar"
-
-          Write-Host "Downloading $SWT_ARTIFACT_ID from Maven Central..."
-          Invoke-WebRequest -Uri $MAVEN_CENTRAL_URL -OutFile "$env:TEMP\swt-windows.jar"
-
-          if (-not (Test-Path "$env:TEMP\swt-windows.jar")) {
-              Write-Error "Failed to download SWT JAR from Maven Central"
-              exit 1
-          }
-
-          # Verify it's the correct platform (should contain .dll for Windows)
-          $jarContents = jar tf "$env:TEMP\swt-windows.jar"
-          if ($jarContents -match "\.dll$") {
-              Write-Host "✓ Verified Windows native libraries in SWT JAR"
-          } else {
-              Write-Error "Downloaded JAR does not contain Windows native libraries (.dll)"
-              jar tf "$env:TEMP\swt-windows.jar" | Select-String -Pattern "\.(jnilib|dylib|so|dll)$"
-              exit 1
-          }
-
-          # Install to local Maven repository
-          mvn install:install-file "-Dfile=$env:TEMP\swt-windows.jar" `
-            "-DgroupId=org.eclipse.platform" `
-            "-DartifactId=$SWT_ARTIFACT_ID" `
-            "-Dversion=$SWT_VERSION" `
-            "-Dpackaging=jar" `
-            "-DgeneratePom=true"
-
-          Write-Host "✓ Windows SWT JAR installed successfully"
-
       - name: Install SWTBot JARs to Local Maven Repository
         shell: pwsh
         run: |
