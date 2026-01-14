@@ -100,15 +100,15 @@ jobs:
           HDF4_VERSION="${RELEASE_TAG#hdf}"
         fi
         echo "Using HDF4 release: ${RELEASE_TAG} (version: ${HDF4_VERSION})"
-
         PATTERN="${RELEASE_TAG}-macos14_clang.tar.gz"
+
         gh release download "${RELEASE_TAG}" \
           --repo HDFGroup/hdf4 \
           --pattern "$PATTERN" \
           --clobber
 
         # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxf *-macos14_clang.tar.gz
+        tar -zxf $PATTERN
         [ -d hdf4 ] || mv hdf4-* hdf4
 
         # Extract inner tar.gz into hdf4/ directory
@@ -128,15 +128,16 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
         HDF5_VERSION="${{ inputs.hdf5_version }}"
+        PATTERN="hdf5-${HDF5_VERSION}-macos14_clang.tar.gz"
         echo "Downloading HDF5 ${HDF5_VERSION} release..."
 
         gh release download ${HDF5_VERSION} \
           --repo HDFGroup/hdf5 \
-          --pattern "hdf5-${HDF5_VERSION}-macos14_clang.tar.gz" \
+          --pattern "$PATTERN" \
           --clobber
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxf hdf5-${HDF5_VERSION}-macos14_clang.tar.gz
+        tar -zxf $PATTERN
         [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory

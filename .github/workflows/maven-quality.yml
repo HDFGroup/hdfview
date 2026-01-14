@@ -104,63 +104,53 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
         HDF4_VERSION="${{ env.HDF4_VERSION }}"
+        PATTERN="*-ubuntu-*_gcc.tar.gz"
         echo "Downloading HDF4 ${HDF4_VERSION} release..."
 
-        PATTERN="hdf${HDF4_VERSION}-ubuntu-2404_gcc.tar.gz"
-        echo "Using pattern $PATTERN"
         gh release download hdf${HDF4_VERSION} \
           --repo HDFGroup/hdf4 \
           --pattern "$PATTERN" \
           --clobber
 
-        echo "After gh download"
-        ls
-
         # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf *-ubuntu-2404_gcc.tar.gz
+        tar -zxf $PATTERN
         [ -d hdf4 ] || mv hdf4-* hdf4
 
         # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
-        echo "Before extracting inner tar.gz"
-        ls
-        tar -zxvf HDF-${HDF4_VERSION}-Linux.tar.gz --strip-components 1
+        tar -zxf HDF-${HDF4_VERSION}-Linux.tar.gz --strip-components 1
 
         # Set HDF4 library path
         HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
         echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
-
         echo "HDF4 installed to: $HDF4LIB_PATH"
-        ls -la "$HDF4LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
-    - name: Download and Install HDF5 from GitHub (latest snapshot)
+    - name: Download and Install HDF5 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
         HDF5_VERSION="${{ env.HDF5_VERSION }}"
+        PATTERN="hdf5-${HDF5_VERSION}-ubuntu-*_gcc.tar.gz"
         echo "Downloading HDF5 ${HDF5_VERSION} release..."
 
-        PATTERN="hdf5-${HDF5_VERSION}-ubuntu-2404_gcc.tar.gz"
         gh release download ${HDF5_VERSION} \
           --repo HDFGroup/hdf5 \
           --pattern "$PATTERN" \
           --clobber
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf $PATTERN
+        tar -zxf $PATTERN
         [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
-        tar -zxvf HDF5-${HDF5_VERSION}-Linux.tar.gz --strip-components 1
+        tar -zxf HDF5-${HDF5_VERSION}-Linux.tar.gz --strip-components 1
 
         # Set HDF5 library path
         HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
         echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
-
         echo "HDF5 installed to: $HDF5LIB_PATH"
-        ls -la "$HDF5LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 

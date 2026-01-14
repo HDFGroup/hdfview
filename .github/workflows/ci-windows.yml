@@ -110,7 +110,7 @@ jobs:
           --clobber
 
         Write-Host "Extracting HDF4..."
-        7z x -y *-win-vs2022_cl.zip
+        7z x -y $PATTERN
         Set-Location hdf4
         7z x -y HDF-*-win64.zip
 
@@ -127,14 +127,15 @@ jobs:
       shell: pwsh
       run: |
         $HDF5_VERSION = "${{ inputs.hdf5_version }}"
+        $PATTERN = "hdf5-$HDF5_VERSION-win-vs2022_cl.zip"
         Write-Host "Downloading HDF5 $HDF5_VERSION release..."
         gh release download $HDF5_VERSION `
           --repo HDFGroup/hdf5 `
-          --pattern "hdf5-$HDF5_VERSION-win-vs2022_cl.zip" `
+          --pattern "$PATTERN" `
           --clobber
 
         Write-Host "Extracting HDF5..."
-        7z x -y hdf5-*-win-vs2022_cl.zip
+        7z x -y $PATTERN
         Set-Location hdf5
         7z x -y HDF5-*-win64.zip
 
