@@ -4,10 +4,10 @@ on:
   workflow_call:
     inputs:
       hdf4_version:
-        description: 'HDF4 version to use'
+        description: 'HDF4 version to use (leave empty for latest release)'
         type: string
         required: false
-        default: '4.3.1'
+        default: ''
       hdf5_version:
         description: 'HDF5 version to use'
         type: string
@@ -16,10 +16,10 @@ on:
   workflow_dispatch:
     inputs:
       hdf4_version:
-        description: 'HDF4 version to use'
+        description: 'HDF4 version to use (leave empty for latest release)'
         type: string
         required: false
-        default: '4.3.1'
+        default: ''
       hdf5_version:
         description: 'HDF5 version to use'
         type: string
@@ -87,11 +87,20 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        $HDF4_VERSION = "${{ inputs.hdf4_version }}"
-        Write-Host "Downloading HDF4 $HDF4_VERSION release..."
-        $PATTERN = "hdf$HDF4_VERSION-win-vs2022_cl.zip"
-        Write-Host "Using pattern: $PATTERN"
-        gh release download hdf$HDF4_VERSION `
+        # Use provided version or get latest release dynamically
+        $INPUT_VERSION = "${{ inputs.hdf4_version }}"
+        if ($INPUT_VERSION) {
+          $HDF4_VERSION = $INPUT_VERSION
+          $RELEASE_TAG = "hdf$HDF4_VERSION"
+        } else {
+          $releases = gh release list --repo HDFGroup/hdf4 --limit 10 | Where-Object { $_ -notmatch "snapshot" } | Select-Object -First 1
+          $RELEASE_TAG = ($releases -split '\s+')[0]
+          $HDF4_VERSION = $RELEASE_TAG -replace '^hdf', ''
+        }
+        Write-Host "Using HDF4 release: $RELEASE_TAG (version: $HDF4_VERSION)"
+
+        $PATTERN = "$RELEASE_TAG-win-vs2022_cl.zip"
+        gh release download $RELEASE_TAG `
           --repo HDFGroup/hdf4 `
           --pattern "$PATTERN" `
           --clobber
@@ -102,7 +111,7 @@ jobs:
         7z x -y HDF-*-win64.zip
 
         # Windows structure: hdf4/HDF-<version>-win64/lib, hdf4/HDF-<version>-win64/bin
-        $HDF4DIR = Get-Item "HDF-$HDF4_VERSION-win64"
+        $HDF4DIR = Get-ChildItem -Path . -Filter "HDF-*-win64" -Directory | Select-Object -First 1
         $HDF4LIB_PATH = $HDF4DIR.FullName
         echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $env:GITHUB_ENV
         Write-Host "HDF4 installed to: $HDF4LIB_PATH"
@@ -186,24 +195,26 @@ jobs:
           Write-Host "No JARs found"
         }
 
-        # Install jarhdf5
-        $HDF5_VERSION = "${{ inputs.hdf5_version }}"
+        # Install jarhdf5 (extract version from filename)
         $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf5) {
+          $JAR_VERSION = $jarhdf5.Name -replace 'jarhdf5-(.+)\.jar', '$1'
+          Write-Host "Detected jarhdf5 version: $JAR_VERSION"
           mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
-            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=$HDF5_VERSION" `
+            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=$JAR_VERSION" `
             "-Dpackaging=jar" "-DgeneratePom=true"
-          Write-Host "Installed: $($jarhdf5.Name)"
+          Write-Host "Installed: $($jarhdf5.Name) as version $JAR_VERSION"
         }
 
-        # Install jarhdf
-        $HDF4_VERSION = "${{ inputs.hdf4_version }}"
+        # Install jarhdf (HDF4 - extract version from filename)
         $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($jarhdf) {
+          $JAR_VERSION = $jarhdf.Name -replace 'jarhdf-(.+)\.jar', '$1'
+          Write-Host "Detected jarhdf version: $JAR_VERSION"
           mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
-            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=$HDF4_VERSION" `
+            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=$JAR_VERSION" `
             "-Dpackaging=jar" "-DgeneratePom=true"
-          Write-Host "Installed: $($jarhdf.Name)"
+          Write-Host "Installed: $($jarhdf.Name) as version $JAR_VERSION"
         }
 
         # Install fits.jar

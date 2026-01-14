@@ -170,30 +170,28 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        HDF4_VERSION="4.3.1"
-        echo "Downloading HDF4 ${HDF4_VERSION} release..."
+        # Get latest HDF4 release tag dynamically
+        RELEASE_TAG=$(gh release list --repo HDFGroup/hdf4 --limit 10 | grep -v "snapshot" | head -1 | awk '{print $1}')
+        HDF4_VERSION="${RELEASE_TAG#hdf}"
+        echo "Using HDF4 release: ${RELEASE_TAG} (version: ${HDF4_VERSION})"
 
-        PATTERN="hdf${HDF4_VERSION}-ubuntu-2404_gcc.tar.gz"
-        echo "Using pattern $PATTERN"
-        gh release download hdf${HDF4_VERSION} \
+        gh release download "${RELEASE_TAG}" \
           --repo HDFGroup/hdf4 \
-          --pattern "$PATTERN" \
+          --pattern "*-ubuntu-*_gcc.tar.gz" \
           --clobber
 
         # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxvf *-ubuntu-2404_gcc.tar.gz
+        tar -zxf *-ubuntu-*_gcc.tar.gz
         [ -d hdf4 ] || mv hdf4-* hdf4
 
         # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
-        tar -zxvf HDF-${HDF4_VERSION}-Linux.tar.gz --strip-components 1
+        tar -zxf HDF-${HDF4_VERSION}-Linux.tar.gz --strip-components 1
 
         # Set HDF4 library path
         HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
         echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
-
         echo "HDF4 installed to: $HDF4LIB_PATH"
-        ls -la "$HDF4LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -203,14 +201,13 @@ jobs:
         HDF5_VERSION="2.0.0"
         echo "Downloading HDF5 ${HDF5_VERSION} release..."
 
-        PATTERN="hdf5-${HDF5_VERSION}-ubuntu-2404_gcc.tar.gz"
         gh release download ${HDF5_VERSION} \
           --repo HDFGroup/hdf5 \
-          --pattern "$PATTERN" \
+          --pattern "hdf5-${HDF5_VERSION}-*-ubuntu-*_gcc.tar.gz" \
           --clobber
-  
+
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf $PATTERN
+        tar -zxvf hdf5-${HDF5_VERSION}-*-ubuntu-*_gcc.tar.gz
         [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
@@ -220,9 +217,7 @@ jobs:
         # Set HDF5 library path
         HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
         echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
-
         echo "HDF5 installed to: $HDF5LIB_PATH"
-        ls -la "$HDF5LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -252,24 +247,28 @@ jobs:
 
         # List available JARs
         echo "JARs in repository/lib:"
-        ls -la repository/lib/*.jar 2>/dev/null || echo "No JARs found"
+        ls repository/lib/*.jar 2>/dev/null || echo "No JARs found"
 
-        # Install jarhdf5
-        if [ -f repository/lib/jarhdf5-*.jar ]; then
+        # Install jarhdf5 (extract version from filename)
+        if ls repository/lib/jarhdf5-*.jar 1>/dev/null 2>&1; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          JAR_VERSION=$(basename "$JAR_FILE" .jar | sed 's/jarhdf5-//')
+          echo "Detected jarhdf5 version: $JAR_VERSION"
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$JAR_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $JAR_VERSION"
         fi
 
-        # Install jarhdf
-        if [ -f repository/lib/jarhdf-*.jar ]; then
+        # Install jarhdf (HDF4 - extract version from filename)
+        if ls repository/lib/jarhdf-*.jar 1>/dev/null 2>&1; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          JAR_VERSION=$(basename "$JAR_FILE" .jar | sed 's/jarhdf-//')
+          echo "Detected jarhdf version: $JAR_VERSION"
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$JAR_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $JAR_VERSION"
         fi
 
         # Install fits
