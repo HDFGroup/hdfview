@@ -63,30 +63,25 @@ jobs:
     if: always()
 
     steps:
-    - name: Write Summary
-      run: |
-        echo "## CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
-        echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-        echo "| Linux    | ${{ needs.ci-linux.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Windows  | ${{ needs.ci-windows.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| macOS    | ${{ needs.ci-macos.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-
-        if [ "${{ needs.ci-linux.result }}" != "success" ] || \
-           [ "${{ needs.ci-windows.result }}" != "success" ] || \
-           [ "${{ needs.ci-macos.result }}" != "success" ]; then
-          echo "❌ One or more platforms failed" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "✅ All platforms passed" >> $GITHUB_STEP_SUMMARY
-        fi
-
     - name: Check Results
       run: |
+        # Print to both step output and GitHub Summary
+        {
+          echo "## CI Pipeline Results"
+          echo ""
+          echo "| Platform | Status |"
+          echo "|----------|--------|"
+          echo "| Linux    | ${{ needs.ci-linux.result }} |"
+          echo "| Windows  | ${{ needs.ci-windows.result }} |"
+          echo "| macOS    | ${{ needs.ci-macos.result }} |"
+          echo ""
+        } | tee -a $GITHUB_STEP_SUMMARY
+
         if [ "${{ needs.ci-linux.result }}" != "success" ] || \
            [ "${{ needs.ci-windows.result }}" != "success" ] || \
            [ "${{ needs.ci-macos.result }}" != "success" ]; then
-          echo "One or more platforms failed"
+          echo "❌ One or more platforms failed" | tee -a $GITHUB_STEP_SUMMARY
           exit 1
+        else
+          echo "✅ All platforms passed" | tee -a $GITHUB_STEP_SUMMARY
         fi
