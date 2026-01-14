@@ -69,7 +69,7 @@ public class ThemeManager {
      * Color scheme definition.
      *
      * IMPORTANT: ColorScheme creates custom Color objects that are OS resources.
-     * Always call dispose() when the ColorScheme is no longer needed to prevent
+     * Always call close() when the ColorScheme is no longer needed to prevent
      * resource leaks.
      *
      * Implements AutoCloseable to support try-with-resources and signal that
@@ -187,14 +187,14 @@ public class ThemeManager {
         }
 
         /**
-         * Dispose custom Color objects to prevent OS resource leaks.
+         * Close and dispose custom Color objects to prevent OS resource leaks.
          * System colors are managed by SWT and must NOT be disposed.
          *
          * This method is safe to call multiple times and satisfies the
          * AutoCloseable contract for standardized resource management.
          */
         @Override
-        public void dispose() {
+        public void close() {
             for (Color color : customColors) {
                 if (color != null && !color.isDisposed()) {
                     color.dispose();
@@ -330,12 +330,12 @@ public class ThemeManager {
 
     /**
      * Update color scheme based on current theme.
-     * Disposes the previous color scheme to prevent resource leaks.
+     * Closes the previous color scheme to prevent resource leaks.
      */
     private void updateColorScheme() {
-        // Dispose old color scheme to prevent resource leaks
+        // Close old color scheme to prevent resource leaks
         if (this.colorScheme != null) {
-            this.colorScheme.dispose();
+            this.colorScheme.close();
         }
 
         boolean isDark = isDarkMode();
@@ -367,9 +367,9 @@ public class ThemeManager {
     public void shutdown() {
         log.info("Shutting down ThemeManager");
 
-        // Dispose current color scheme
+        // Close current color scheme
         if (this.colorScheme != null) {
-            this.colorScheme.dispose();
+            this.colorScheme.close();
             this.colorScheme = null;
         }
 
