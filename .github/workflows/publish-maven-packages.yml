@@ -106,15 +106,15 @@ jobs:
 
           # Determine file pattern based on whether base name is provided
           if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
-            PATTERN="${{ inputs.hdf5_prefix }}${{ inputs.hdf5_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
+            PATTERN="${{ inputs.hdf5_prefix }}${{ inputs.hdf5_artifact_basename }}-ubuntu-*_gcc.tar.gz"
           else
-            PATTERN="*ubuntu-2404_gcc.tar.gz"
+            PATTERN="*ubuntu-*_gcc.tar.gz"
           fi
           echo "Using pattern: $PATTERN"
 
           mkdir -p /tmp/hdf5-download && cd /tmp/hdf5-download
-            gh release download "${{ inputs.hdf5_release_tag }}" --repo HDFGroup/hdf5 --pattern "$PATTERN"
-            tar -zxf hdf5-*-ubuntu-2404_gcc.tar.gz
+          gh release download "${{ inputs.hdf5_release_tag }}" --repo HDFGroup/hdf5 --pattern "$PATTERN"
+          tar -zxf hdf5-*-ubuntu-*_gcc.tar.gz
             cd hdf5
 
             # Extract inner tar.gz
@@ -157,15 +157,15 @@ jobs:
 
             # Determine file pattern based on whether base name is provided
             if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
-              PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
+              PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-*_gcc.tar.gz"
             else
-              PATTERN="*ubuntu-2404_gcc.tar.gz"
+              PATTERN="*ubuntu-*_gcc.tar.gz"
             fi
             echo "Using pattern: $PATTERN"
 
             mkdir -p /tmp/hdf4-download && cd /tmp/hdf4-download
             gh release download "${{ inputs.hdf4_release_tag }}" --repo HDFGroup/hdf4 --pattern "$PATTERN"
-            tar -zxf hdf4*-ubuntu-2404_gcc.tar.gz
+            tar -zxf hdf4*-ubuntu-*_gcc.tar.gz
             cd hdf4
 
             # Extract inner tar.gz

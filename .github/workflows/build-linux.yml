@@ -86,39 +86,31 @@ jobs:
 
             # Determine file pattern based on whether base name is provided
             if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
-            PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
+              PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-*_gcc.tar.gz"
             else
-            PATTERN="*-ubuntu-2404_gcc.tar.gz"
+              PATTERN="*-ubuntu-*_gcc.tar.gz"
             fi
             echo "Using pattern: $PATTERN"
 
             # Download HDF4 binary from HDF Group GitHub releases
             gh release download "${{ inputs.hdf4_release_tag }}" \
-            --repo HDFGroup/hdf4 \
-            --pattern "$PATTERN" \
-            --clobber
-
-            echo "After gh download"
-            ls
+              --repo HDFGroup/hdf4 \
+              --pattern "$PATTERN" \
+              --clobber
 
             # Extract outer tar.gz (creates hdf4/ directory)
-            tar -zxvf *-ubuntu-2404_gcc.tar.gz
+            tar -zxf *-ubuntu-*_gcc.tar.gz
             [ -d hdf4 ] || mv hdf4-* hdf4
 
             # Extract inner tar.gz into hdf4/ directory
             cd "${{ github.workspace }}/hdf4"
-            echo "Before extracting inner tar.gz"
-            ls
-
-            tar -zxvf HDF-*-Linux.tar.gz --strip-components 1
+            tar -zxf HDF-*-Linux.tar.gz --strip-components 1
 
             # Set HDF4 library path
             HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-            FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
+            FILE_NAME_HDF=$(ls "$HDF4DIR" | head -1)
             echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
-
             echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
-            ls -la "$HDF4DIR$FILE_NAME_HDF"
           env:
             GH_TOKEN: ${{ github.token }}
 
@@ -128,33 +120,31 @@ jobs:
 
             # Determine file pattern based on whether base name is provided
             if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
-            PATTERN="${{ inputs.hdf5_prefix }}${{ inputs.hdf5_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
+              PATTERN="${{ inputs.hdf5_prefix }}${{ inputs.hdf5_artifact_basename }}-ubuntu-*_gcc.tar.gz"
             else
-            PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
+              PATTERN="hdf5-*-ubuntu-*_gcc.tar.gz"
             fi
             echo "Using pattern: $PATTERN"
 
             # Download HDF5 binary from HDF Group GitHub releases
             gh release download "${{ inputs.hdf5_release_tag }}" \
-            --repo HDFGroup/hdf5 \
-            --pattern "$PATTERN" \
-            --clobber
+              --repo HDFGroup/hdf5 \
+              --pattern "$PATTERN" \
+              --clobber
 
             # Extract outer tar.gz (creates hdf5/ directory)
-            tar -zxvf hdf5-*-ubuntu-2404_gcc.tar.gz
+            tar -zxf hdf5-*-ubuntu-*_gcc.tar.gz
             [ -d hdf5 ] || mv hdf5-* hdf5
 
             # Extract inner tar.gz into hdf5/ directory
             cd "${{ github.workspace }}/hdf5"
-            tar -zxvf HDF5-*-Linux.tar.gz --strip-components 1
+            tar -zxf HDF5-*-Linux.tar.gz --strip-components 1
 
             # Set HDF5 library path
             HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-            FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
+            FILE_NAME_HDF5=$(ls "$HDF5DIR" | head -1)
             echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
-
             echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
-            ls -la "$HDF5DIR$FILE_NAME_HDF5"
           env:
             GH_TOKEN: ${{ github.token }}
 
@@ -321,7 +311,7 @@ jobs:
         - name: Upload Linux App Artifact
           uses: actions/upload-artifact@v4
           with:
-            name: tgz-ubuntu-2404-app-binary
+            name: tgz-linux-app-binary
             path: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Linux.tar.gz
             retention-days: 30
 
@@ -348,13 +338,13 @@ jobs:
         - name: Upload DEB Installer Artifact
           uses: actions/upload-artifact@v4
           with:
-            name: deb-ubuntu-2404-installer
+            name: deb-linux-installer
             path: "HDFView-*.deb"
             retention-days: 30
 
         - name: Upload RPM Installer Artifact
           uses: actions/upload-artifact@v4
           with:
-            name: rpm-ubuntu-2404-installer
+            name: rpm-linux-installer
             path: "HDFView-*.rpm"
             retention-days: 30

@@ -208,14 +208,15 @@ jobs:
           echo "HDF5_JAR_VERSION=$JAR_VERSION" >> $GITHUB_ENV
         fi
 
-        # Install jarhdf (HDF4)
-        HDF4_VERSION="${{ env.HDF4_VERSION }}"
-        if [ -f repository/lib/jarhdf-*.jar ]; then
+        # Install jarhdf (HDF4 - extract version from filename)
+        if ls repository/lib/jarhdf-*.jar 1>/dev/null 2>&1; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          JAR_VERSION=$(basename "$JAR_FILE" .jar | sed 's/jarhdf-//')
+          echo "Detected jarhdf version: $JAR_VERSION"
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=${HDF4_VERSION} \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$JAR_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $JAR_VERSION"
         fi
 
         # Install fits.jar

@@ -106,13 +106,13 @@ jobs:
       - name: Get DEB installer (Linux)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: deb-ubuntu-2404-installer
+              name: deb-linux-installer
               path: ${{ github.workspace }}
 
       - name: Get RPM installer (Linux)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: rpm-ubuntu-2404-installer
+              name: rpm-linux-installer
               path: ${{ github.workspace }}
 
       # Get files created by ant-app script
@@ -137,7 +137,7 @@ jobs:
       - name: Get published app binary (Linux)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-              name: tgz-ubuntu-2404-app-binary
+              name: tgz-linux-app-binary
               path: ${{ github.workspace }}
 
       # Get files created by tarball script
