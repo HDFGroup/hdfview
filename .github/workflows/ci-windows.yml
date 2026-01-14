@@ -95,6 +95,10 @@ jobs:
         } else {
           # Get latest non-snapshot release tag using JSON output for reliable parsing
           $RELEASE_TAG = (gh release list --repo HDFGroup/hdf4 --limit 10 --json tagName,isPrerelease -q '.[] | select(.isPrerelease == false) | .tagName' | Select-Object -First 1)
+          if ([string]::IsNullOrEmpty($RELEASE_TAG)) {
+            Write-Error "Error: Could not determine latest HDF4 release tag"
+            exit 1
+          }
           $HDF4_VERSION = $RELEASE_TAG -replace '^hdf', ''
         }
         Write-Host "Using HDF4 release: $RELEASE_TAG (version: $HDF4_VERSION)"
