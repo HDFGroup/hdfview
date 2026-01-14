@@ -77,74 +77,91 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        echo "Downloading HDF4 from GitHub releases..."
-        gh release download snapshot \
+        HDF4_VERSION="4.3.1"
+        echo "Downloading HDF4 ${HDF4_VERSION} from GitHub releases..."
+
+        PATTERN="hdf${HDF4_VERSION}-ubuntu-2404_gcc.tar.gz"
+        gh release download hdf${HDF4_VERSION} \
           --repo HDFGroup/hdf4 \
-          --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz"
+          --pattern "$PATTERN" \
+          --clobber
 
         echo "Extracting HDF4..."
-        tar -zxf hdf4-master-*-ubuntu-2404_gcc.tar.gz
-        cd hdf4
-        tar -zxf HDF-*-Linux.tar.gz --strip-components 1
+        tar -zxf *-ubuntu-2404_gcc.tar.gz
+        [ -d hdf4 ] || mv hdf4-* hdf4
 
-        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
-        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
+        cd "${{ github.workspace }}/hdf4"
+        tar -zxf HDF-${HDF4_VERSION}-Linux.tar.gz --strip-components 1
+
+        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
+        echo "HDF4 installed to: $HDF4LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
-    - name: Download and Install HDF5 from GitHub
+    - name: Download and Install HDF5 from GitHub (latest snapshot)
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        echo "Downloading HDF5 from GitHub releases..."
-        # Retry logic for transient failures
-        for i in 1 2 3; do
-          echo "Download attempt $i of 3..."
-          if gh release download snapshot \
-            --repo HDFGroup/hdf5 \
-            --pattern "hdf5-develop-*-ubuntu-2404_gcc.tar.gz"; then
-            break
-          fi
-          if [ $i -lt 3 ]; then
-            echo "Download failed, retrying in 5 seconds..."
-            sleep 5
-          else
-            echo "All download attempts failed"
-            exit 1
-          fi
-        done
+        echo "Downloading latest HDF5 snapshot from GitHub releases..."
+
+        # Download latest snapshot build
+        gh release download snapshot \
+          --repo HDFGroup/hdf5 \
+          --pattern "hdf5-*-ubuntu-2404_gcc.tar.gz" \
+          --clobber
 
         echo "Extracting HDF5..."
-        tar -zxf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
-        cd hdf5
+        # Extract outer archive (creates hdf5-* directory)
+        OUTER_ARCHIVE=$(ls hdf5-*-ubuntu-2404_gcc.tar.gz | head -1)
+        echo "Outer archive: $OUTER_ARCHIVE"
+        tar -zxf "$OUTER_ARCHIVE"
 
-        # Select first tarball if multiple exist (snapshot releases can have multiple versions)
-        HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
-        echo "Using tarball: $HDF5_TARBALL"
-        tar -zxf "$HDF5_TARBALL" --strip-components 1
+        # Find and rename the extracted directory
+        EXTRACTED_DIR=$(ls -d hdf5-* 2>/dev/null | grep -v ".tar.gz" | head -1)
+        [ -d hdf5 ] || mv "$EXTRACTED_DIR" hdf5
 
+        cd "${{ github.workspace }}/hdf5"
+        echo "Contents of hdf5 directory:"
+        ls -la
+
+        # Find and extract inner archive (name varies with snapshot version)
+        INNER_ARCHIVE=$(ls HDF5-*-Linux.tar.gz 2>/dev/null | head -1)
+        if [ -z "$INNER_ARCHIVE" ]; then
+          echo "ERROR: No HDF5-*-Linux.tar.gz found"
+          ls -la
+          exit 1
+        fi
+        echo "Inner archive: $INNER_ARCHIVE"
+        tar -zxf "$INNER_ARCHIVE" --strip-components 1
+
+        # Find the actual version directory dynamically
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
-        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
+        HDF5_VERSION=$(ls "$HDF5DIR" | head -1)
+        HDF5LIB_PATH="${HDF5DIR}${HDF5_VERSION}"
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
+        echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
+        echo "HDF5 installed to: $HDF5LIB_PATH (version: $HDF5_VERSION)"
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Set Environment Variables from Cache
       if: steps.cache-hdf.outputs.cache-hit == 'true'
       run: |
-        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+        # HDF4 uses fixed version
+        HDF4_VERSION="4.3.1"
+        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
 
+        # HDF5 snapshot version is detected dynamically
         HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+        HDF5_VERSION=$(ls "$HDF5DIR" | head -1)
+        HDF5LIB_PATH="${HDF5DIR}${HDF5_VERSION}"
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
+        echo "HDF5_VERSION=$HDF5_VERSION" >> $GITHUB_ENV
 
         echo "Using cached HDF libraries:"
-        echo "HDF4: $HDF4DIR$FILE_NAME_HDF"
-        echo "HDF5: $HDF5DIR$FILE_NAME_HDF5"
+        echo "HDF4: $HDF4LIB_PATH"
+        echo "HDF5: $HDF5LIB_PATH (version: $HDF5_VERSION)"
 
     - name: Install HDF JARs to Local Maven Repository
       run: |
@@ -159,13 +176,18 @@ jobs:
         echo "JARs in repository/lib:"
         ls -la repository/lib/*.jar 2>/dev/null || echo "No JARs found"
 
-        # Install jarhdf5
-        if [ -f repository/lib/jarhdf5-*.jar ]; then
+        # Install jarhdf5 (extract version from filename dynamically)
+        if ls repository/lib/jarhdf5-*.jar 1>/dev/null 2>&1; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          # Extract version from filename: jarhdf5-X.Y.Z.jar -> X.Y.Z
+          JAR_VERSION=$(basename "$JAR_FILE" .jar | sed 's/jarhdf5-//')
+          echo "Detected jarhdf5 version: $JAR_VERSION"
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$JAR_VERSION" \
             -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
+          echo "Installed: $JAR_FILE as version $JAR_VERSION"
+          # Also update the POM property to match
+          echo "HDF5_JAR_VERSION=$JAR_VERSION" >> $GITHUB_ENV
         fi
 
         # Install jarhdf (version 4.3.1 for HDF4)
@@ -256,17 +278,24 @@ jobs:
     - name: Build All Modules
       run: |
         echo "::group::Build and Install Dependencies"
+        # Use detected HDF5 JAR version (from snapshot) to override POM version
+        HDF5_VERSION_ARG=""
+        if [ -n "${{ env.HDF5_JAR_VERSION }}" ]; then
+          HDF5_VERSION_ARG="-Dhdf5.version=${{ env.HDF5_JAR_VERSION }}"
+          echo "Using HDF5 version: ${{ env.HDF5_JAR_VERSION }}"
+        fi
+
         # Install parent POM first (required for properties plugin and child module resolution)
-        mvn install -B -N -Ddependency-check.skip=true
+        mvn install -B -N -Ddependency-check.skip=true $HDF5_VERSION_ARG
 
         # Build repository module (needed by object) but don't install it
-        mvn compile -pl repository -B -Ddependency-check.skip=true
+        mvn compile -pl repository -B -Ddependency-check.skip=true $HDF5_VERSION_ARG
 
         # Install only object and hdfview modules
         # This avoids repository module's install-file executions
         # HDF JARs are already installed in the previous step from downloaded distributions
         # Skip OWASP security check (runs in separate maven-security.yml workflow)
-        mvn install -pl object,hdfview -DskipTests -Ddependency-check.skip=true -B
+        mvn install -pl object,hdfview -DskipTests -Ddependency-check.skip=true -B $HDF5_VERSION_ARG
         echo "::endgroup::"
 
     - name: Run Tests with Coverage
