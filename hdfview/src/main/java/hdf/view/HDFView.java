@@ -1133,7 +1133,7 @@ public class HDFView implements DataViewManager {
         }
         catch (Exception ex) {
             // Log the exception to aid debugging - font creation failures should be investigated
-	     log.warn("Failed to create font with type='{}' size={}: {}", ViewProperties.getFontType(),
+            log.warn("Failed to create font with type='{}' size={}: {}", ViewProperties.getFontType(),
                      ViewProperties.getFontSize(), ex.getMessage());
             log.debug("Font creation exception details", ex);
             font = null;
