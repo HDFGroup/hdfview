@@ -203,11 +203,11 @@ jobs:
 
         gh release download ${HDF5_VERSION} \
           --repo HDFGroup/hdf5 \
-          --pattern "hdf5-${HDF5_VERSION}-*-ubuntu-*_gcc.tar.gz" \
+          --pattern "hdf5-${HDF5_VERSION}-ubuntu-*_gcc.tar.gz" \
           --clobber
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxvf hdf5-${HDF5_VERSION}-*-ubuntu-*_gcc.tar.gz
+        tar -zxvf hdf5-${HDF5_VERSION}-ubuntu-*_gcc.tar.gz
         [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
