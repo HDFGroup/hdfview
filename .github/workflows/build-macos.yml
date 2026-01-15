@@ -62,10 +62,8 @@ jobs:
             include:
               - arch: x86_64
                 runner: macos-15-intel
-                swt_artifact_id: org.eclipse.swt.cocoa.macosx.x86_64
               - arch: arm64
                 runner: macos-15
-                swt_artifact_id: org.eclipse.swt.cocoa.macosx.aarch64
         env:
           KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
           SIGNER: ${{ vars.SIGNER }}
