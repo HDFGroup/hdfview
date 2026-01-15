@@ -53,7 +53,7 @@
                 <executions>
                     <execution>
                         <id>fits</id>
-                        <phase>verify</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -68,7 +68,7 @@
                     </execution>
                     <execution>
                         <id>netcdf</id>
-                        <phase>verify</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -83,7 +83,7 @@
                     </execution>
                     <execution>
                         <id>jarhdf5</id>
-                        <phase>verify</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -98,7 +98,7 @@
                     </execution>
                     <execution>
                         <id>jarhdf</id>
-                        <phase>verify</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -113,7 +113,7 @@
                     </execution>
                     <execution>
                         <id>eclipse-nebula-widgets-nattable-core</id>
-                        <phase>verify</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -129,7 +129,7 @@
                     </execution>
                     <execution>
                         <id>eclipse-swtbot</id>
-                        <phase>verify</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -145,7 +145,7 @@
                     </execution>
                     <execution>
                         <id>eclipse-swtbot.nebula.nattable.finder</id>
-                        <phase>verify</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -161,7 +161,7 @@
                     </execution>
                     <execution>
                         <id>eclipse-swtbot.swt.finder</id>
-                        <phase>verify</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
