@@ -1072,13 +1072,13 @@ public class HDFView implements DataViewManager {
                     // Hook up the "About HDFView" menu item
                     item.addListener(SWT.Selection, new Listener() {
                         @Override
-                        public void handleEvent(Event event) 
+                        public void handleEvent(Event event)
                         {
                             log.debug("macOS About menu triggered");
                             // Use asyncExec to ensure the menu is closed before opening the modal dialog
                             display.asyncExec(new Runnable() {
                                 @Override
-                                public void run() 
+                                public void run()
                                 {
                                     if (!shell.isDisposed()) {
                                         new AboutDialog(shell).open();
@@ -1092,13 +1092,13 @@ public class HDFView implements DataViewManager {
                     // Hook up the "Preferences..." menu item
                     item.addListener(SWT.Selection, new Listener() {
                         @Override
-                        public void handleEvent(Event event) 
+                        public void handleEvent(Event event)
                         {
                             log.debug("macOS Preferences menu triggered");
                             // Use asyncExec to ensure the menu is closed before opening the modal dialog
                             display.asyncExec(new Runnable() {
                                 @Override
-                                public void run() 
+                                public void run()
                                 {
                                     if (!shell.isDisposed()) {
                                         openUserOptionsDialog(shell);
@@ -1109,7 +1109,7 @@ public class HDFView implements DataViewManager {
                     });
                 }
             }
-        } 
+        }
         else {
             log.warn("Could not access system menu to attach macOS handlers");
         }
