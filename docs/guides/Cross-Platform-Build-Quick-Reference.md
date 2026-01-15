@@ -4,14 +4,11 @@
 
 Before following these steps to build HDFView from source, you will need to have the following installed on your machine:
 - JDK 21
-- Git
+- Git + gh
 - Maven
 
 ### Linux (Ubuntu)
 ```bash
-# Install dependencies if necessary
-apt install maven openjdk-21-jdk gh git
-
 # Download HDF libraries
 gh release download hdf4.3.1 --repo HDFGroup/hdf4 --pattern "hdf4.3.1-ubuntu-2404_gcc.tar.gz"
 gh release download 2.0.0 --repo HDFGroup/hdf5 --pattern "hdf5-2.0.0-ubuntu-2404_gcc.tar.gz"
@@ -46,12 +43,12 @@ gh release download 2.0.0 --repo HDFGroup/hdf5 --pattern "hdf5-2.0.0-win-vs2022_
 
 # Extract (flat structure)
 7z x hdf4.3.1-win-vs2022_cl.zip
-Set-Location hdf4
+cd hdf4
 7z x HDF-*-win64.zip
-
+cd ..
 7z x hdf5-2.0.0-win-vs2022_cl.zip
-Set-Location hdf5
-7z x HDF5-HDF5-*-win64.zip
+cd hdf5
+7z x HDF5-*-win64.zip
 
 # Modify build.properties to populate hdf5.lib.dir, hdf5.plugin.dir,
 # hdf.lib.dir, and platform.hdf.lib with paths to your local installations
@@ -66,7 +63,7 @@ mvn clean install -DskipTests -B
 mvn package -DskipTests
 
 # Run HDFView
-./run-hdfview.bat
+run-hdfview.bat
 ```
 
 ### macOS (Bash)
