@@ -69,8 +69,8 @@ run-hdfview.bat
 ### macOS (Bash)
 ```bash
 # Download HDF libraries
-gh release download hdf4.3.1 --repo HDFGroup/hdf4 --pattern "hdf4.3.1-ubuntu-2404_gcc.tar.gz"
-gh release download 2.0.0 --repo HDFGroup/hdf5 --pattern "hdf5-2.0.0-ubuntu-2404_gcc.tar.gz"
+gh release download hdf4.3.1 --repo HDFGroup/hdf4 --pattern "hdf4.3.1-macos14_clang.tar.gz"
+gh release download 2.0.0 --repo HDFGroup/hdf5 --pattern "hdf5-2.0.0-macos14_clang.tar.gz"
 
 # Extract (nested structure)
 tar -zxvf hdf4.3.1-macos14_clang.tar.gz
