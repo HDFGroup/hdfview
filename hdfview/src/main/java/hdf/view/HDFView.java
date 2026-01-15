@@ -1067,7 +1067,7 @@ public class HDFView implements DataViewManager {
 
             for (MenuItem item : items) {
                 int id = item.getID();
-    
+
                 if (id == SWT.ID_ABOUT) {
                     // Hook up the "About HDFView" menu item
                     item.addListener(SWT.Selection, new Listener() {
