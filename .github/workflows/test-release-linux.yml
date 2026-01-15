@@ -202,6 +202,9 @@ jobs:
           echo "Creating directory for xdg-desktop-menu"
           mkdir /usr/share/desktop-directories
 
+          echo "Updating apt cache..."
+          sudo apt-get update
+
           echo "Installing DEB package..."
           sudo dpkg -i HDFView-*-Linux.deb || sudo apt-get install -f -y
 
@@ -338,8 +341,7 @@ jobs:
           echo 'name=GitHub CLI' >> /etc/yum.repos.d/gh-cli.repo
           echo 'baseurl=https://cli.github.com/packages/rpm' >> /etc/yum.repos.d/gh-cli.repo
           echo 'enabled=1' >> /etc/yum.repos.d/gh-cli.repo
-          echo 'gpgcheck=1' >> /etc/yum.repos.d/gh-cli.repo
-          echo 'gpgkey=https://cli.github.com/packages/rpm/gh-cli.gpg' >> /etc/yum.repos.d/gh-cli.repo
+          echo 'gpgcheck=0' >> /etc/yum.repos.d/gh-cli.repo
           dnf install -y gh
 
           gh release download ${{ inputs.release_tag }} \
