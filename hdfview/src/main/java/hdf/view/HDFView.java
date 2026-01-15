@@ -1039,11 +1039,10 @@ public class HDFView implements DataViewManager {
 
         log.info("Menubar created");
     }
-
     /**
      * Setup macOS-specific application menu handlers.
      * On macOS, the system automatically creates menu items like "About HDFView" and "Preferences..."
-     * in the application menu (next to the Apple menu). These need to be explicitly hooked up.
+     * in the application menu. We need to attach listeners to the specific menu items.
      *
      * @param shell the main shell to attach menu handlers to
      */
@@ -1057,32 +1056,61 @@ public class HDFView implements DataViewManager {
 
         log.info("Setting up macOS application menu handlers");
 
-        Display display = shell.getDisplay();
+        final Display display = shell.getDisplay();
 
-        // Hook up the "About HDFView" menu item in the application menu
-        // Note: We capture shell in the closure to use the correct parent
-        display.addListener(SWT.ID_ABOUT, new Listener() {
-            @Override
-            public void handleEvent(Event event)
-            {
-                log.debug("macOS About menu triggered");
-                new AboutDialog(shell).open();
+        // Retrieve the system menu (the Application menu on macOS)
+        Menu systemMenu = display.getSystemMenu();
+        
+        if (systemMenu != null) {
+            MenuItem[] items = systemMenu.getItems();
+            
+            for (MenuItem item : items) {
+                int id = item.getID();
+                
+                if (id == SWT.ID_ABOUT) {
+                    // Hook up the "About HDFView" menu item
+                    item.addListener(SWT.Selection, new Listener() {
+                        @Override
+                        public void handleEvent(Event event) {
+                            log.debug("macOS About menu triggered");
+                            // Use asyncExec to ensure the menu is closed before opening the modal dialog
+                            display.asyncExec(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!shell.isDisposed()) {
+                                        new AboutDialog(shell).open();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+                else if (id == SWT.ID_PREFERENCES) {
+                    // Hook up the "Preferences..." menu item
+                    item.addListener(SWT.Selection, new Listener() {
+                        @Override
+                        public void handleEvent(Event event) {
+                            log.debug("macOS Preferences menu triggered");
+                            // Use asyncExec to ensure the menu is closed before opening the modal dialog
+                            display.asyncExec(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!shell.isDisposed()) {
+                                        openUserOptionsDialog(shell);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
             }
-        });
-
-        // Hook up the "Preferences..." menu item in the application menu
-        display.addListener(SWT.ID_PREFERENCES, new Listener() {
-            @Override
-            public void handleEvent(Event event)
-            {
-                log.debug("macOS Preferences menu triggered");
-                openUserOptionsDialog(shell);
-            }
-        });
+        } else {
+            log.warn("Could not access system menu to attach macOS handlers");
+        }
 
         log.info("macOS application menu handlers configured");
     }
-
+ 
     /**
      * Opens the User Options dialog. Extracted to a separate method for reuse
      * by both the Tools menu and the macOS Preferences menu item.
