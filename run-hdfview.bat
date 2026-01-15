@@ -145,12 +145,23 @@ echo.
 
 REM Check build status
 echo [INFO] Checking build status...
-if not exist "libs\hdfview-3.4-SNAPSHOT.jar" (
-    echo [ERROR] HDFView JAR not found: libs\hdfview-3.4-SNAPSHOT.jar
+set "HDFVIEW_JAR="
+for %%f in (libs\hdfview-*.jar) do (
+    set "jarname=%%~nxf"
+    echo !jarname! | findstr /i "sources javadoc" >nul
+    if errorlevel 1 (
+        set "HDFVIEW_JAR=%%f"
+        goto :jar_found
+    )
+)
+:jar_found
+if "!HDFVIEW_JAR!"=="" (
+    echo [ERROR] HDFView JAR not found: libs\hdfview-*.jar
     echo [ERROR] Build the project first: mvn clean package -DskipTests
     exit /b 1
 )
-echo [OK] HDFView JAR found
+for %%f in (!HDFVIEW_JAR!) do set "HDFVIEW_JAR_NAME=%%~nxf"
+echo [OK] HDFView JAR found: !HDFVIEW_JAR_NAME!
 echo.
 
 REM Check platform
@@ -210,7 +221,7 @@ goto :end
 
 :jar_exec
 echo [INFO] Launching HDFView via direct JAR execution...
-if not exist "libs\hdfview-3.4-SNAPSHOT.jar" (
+if "!HDFVIEW_JAR!"=="" (
     echo [ERROR] JAR file not found. Build the project first.
     exit /b 1
 )
@@ -222,7 +233,7 @@ if not exist "hdfview\target\lib" (
 )
 
 REM Build classpath, excluding slf4j-nop or slf4j-simple based on debug mode
-set CLASSPATH=libs\hdfview-3.4-SNAPSHOT.jar
+set CLASSPATH=!HDFVIEW_JAR!
 for %%j in (hdfview\target\lib\*.jar) do (
     set "jarname=%%~nxj"
     if "!SLF4J_IMPL!"=="simple" (
@@ -246,7 +257,7 @@ echo [OK] Environment validation complete. Ready to run HDFView!
 echo.
 echo To launch manually:
 echo Option 1 (Maven^): mvn exec:java -Dexec.mainClass="hdf.view.HDFView" -pl hdfview
-echo Option 2 (JAR^): java %JVM_ARGS% -cp "libs\hdfview-3.4-SNAPSHOT.jar;hdfview\target\lib\*" hdf.view.HDFView
+echo Option 2 (JAR^): java %JVM_ARGS% -cp "!HDFVIEW_JAR!;hdfview\target\lib\*" hdf.view.HDFView
 goto :end
 
 :end
