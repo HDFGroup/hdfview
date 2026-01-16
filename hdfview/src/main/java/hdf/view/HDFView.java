@@ -1119,7 +1119,7 @@ public class HDFView implements DataViewManager {
 
     /**
      * Opens the User Options dialog. Extracted to a separate method for reuse
-     * by both the Tools menu and the macOS Preferences menu item.
+     * by both the Tools menu and the macOS Preferences menu  item.
      *
      * @param parentShell the parent shell for the dialog
      */
