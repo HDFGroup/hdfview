@@ -212,6 +212,15 @@ JVM_ARGS=(
     "-Djava.library.path=$hdf5_lib_dir:$hdf_lib_dir"
 )
 
+# Add macOS-specific JVM arguments
+if [[ "$PLATFORM" == "Darwin" ]]; then
+    JVM_ARGS+=(
+        "-XstartOnFirstThread"
+        "-Xdock:name=HDFView"
+    )
+    print_status "Added macOS-specific JVM arguments (-XstartOnFirstThread, -Xdock:name)"
+fi
+
 # Parse command line arguments
 SLF4J_IMPL="nop"  # Default: no logging
 LAUNCH_MODE="jar"  # Default: direct JAR execution
