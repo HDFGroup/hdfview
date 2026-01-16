@@ -111,15 +111,23 @@ runs:
       run: |
         HDF5_VERSION="${{ inputs.hdf5-version }}"
 
-        # Build pattern for HDF5
-        if [[ "${{ inputs.os-pattern }}" == *"ubuntu"* ]]; then
-          PATTERN="hdf5-${HDF5_VERSION}-ubuntu-*_gcc.tar.gz"
-        elif [[ "${{ inputs.os-pattern }}" == *"macos"* ]]; then
-          PATTERN="hdf5-${HDF5_VERSION}-macos14_clang.tar.gz"
-        elif [[ "${{ inputs.os-pattern }}" == *"win"* ]]; then
-          PATTERN="hdf5-${HDF5_VERSION}-win-vs2022_cl.zip"
+        # Build pattern - trust the input pattern directly
+        # Handle wildcards or construct with version prefix
+        OS_PATTERN="${{ inputs.os-pattern }}"
+
+        # If pattern already contains hdf5- prefix or wildcards, use as-is
+        # Otherwise, construct as hdf5-${VERSION}-${pattern}
+        if [[ "$OS_PATTERN" == hdf5-* ]] || [[ "$OS_PATTERN" == *hdf5* ]]; then
+          # Pattern already has hdf5 prefix, use as-is (may need version substitution)
+          PATTERN="$OS_PATTERN"
+        elif [[ "$OS_PATTERN" == *"*"* ]]; then
+          # Pattern has wildcards but no hdf5 prefix - extract OS-specific part
+          # Remove leading wildcards/hyphens and construct HDF5 pattern
+          OS_SPECIFIC=$(echo "$OS_PATTERN" | sed 's/^[*-]*//')
+          PATTERN="hdf5-${HDF5_VERSION}-${OS_SPECIFIC}"
         else
-          PATTERN="hdf5-${HDF5_VERSION}-${{ inputs.os-pattern }}"
+          # Simple pattern without wildcards or prefix
+          PATTERN="hdf5-${HDF5_VERSION}-${OS_PATTERN}"
         fi
 
         echo "Downloading HDF5 ${HDF5_VERSION} with pattern: $PATTERN"
@@ -161,8 +169,24 @@ runs:
         HDF4_VERSION="${{ steps.resolve-hdf4.outputs.version }}"
         HDF5_VERSION="${{ inputs.hdf5-version }}"
 
-        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
-        HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
+        # Detect directory structure (differs between Linux/macOS and Windows)
+        # Linux/macOS: hdf4/HDF_Group/HDF/<version>/
+        # Windows: hdf4/HDF-<version>-win64/
+        if [ -d "${{ github.workspace }}/hdf4/HDF_Group" ]; then
+          # Linux/macOS structure
+          HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
+        else
+          # Windows structure - find HDF-*-win64 directory
+          HDF4LIB_PATH=$(find ${{ github.workspace }}/hdf4 -maxdepth 1 -type d -name "HDF-*-win64" | head -1)
+        fi
+
+        if [ -d "${{ github.workspace }}/hdf5/HDF_Group" ]; then
+          # Linux/macOS structure
+          HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
+        else
+          # Windows structure - find HDF5-*-win64 directory
+          HDF5LIB_PATH=$(find ${{ github.workspace }}/hdf5 -maxdepth 1 -type d -name "HDF5-*-win64" | head -1)
+        fi
 
         echo "hdf4-lib-path=$HDF4LIB_PATH" >> $GITHUB_OUTPUT
         echo "hdf5-lib-path=$HDF5LIB_PATH" >> $GITHUB_OUTPUT

@@ -83,189 +83,30 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-hdf-github-
 
-    - name: Download and Install HDF4 from GitHub
+    - name: Setup HDF Libraries
       if: steps.cache-hdf.outputs.cache-hit != 'true'
-      shell: pwsh
-      run: |
-        # Use provided version or get latest release dynamically
-        $INPUT_VERSION = "${{ inputs.hdf4_version }}"
-        if ($INPUT_VERSION) {
-          $HDF4_VERSION = $INPUT_VERSION
-          $RELEASE_TAG = "hdf$HDF4_VERSION"
-        } else {
-          # Get latest non-snapshot release tag using JSON output for reliable parsing
-          $RELEASE_TAG = (gh release list --repo HDFGroup/hdf4 --limit 10 --json tagName,isPrerelease -q '.[] | select(.isPrerelease == false) | .tagName' | Select-Object -First 1)
-          if ([string]::IsNullOrEmpty($RELEASE_TAG)) {
-            Write-Error "Error: Could not determine latest HDF4 release tag"
-            exit 1
-          }
-          $HDF4_VERSION = $RELEASE_TAG -replace '^hdf', ''
-        }
-        Write-Host "Using HDF4 release: $RELEASE_TAG (version: $HDF4_VERSION)"
-
-        $PATTERN = "$RELEASE_TAG-win-vs2022_cl.zip"
-        gh release download $RELEASE_TAG `
-          --repo HDFGroup/hdf4 `
-          --pattern "$PATTERN" `
-          --clobber
-
-        Write-Host "Extracting HDF4..."
-        7z x -y $PATTERN
-        Set-Location hdf4
-        7z x -y HDF-*-win64.zip
-
-        # Windows structure: hdf4/HDF-<version>-win64/lib, hdf4/HDF-<version>-win64/bin
-        $HDF4DIR = Get-ChildItem -Path . -Filter "HDF-*-win64" -Directory | Select-Object -First 1
-        $HDF4LIB_PATH = $HDF4DIR.FullName
-        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $env:GITHUB_ENV
-        Write-Host "HDF4 installed to: $HDF4LIB_PATH"
-      env:
-        GH_TOKEN: ${{ github.token }}
-
-    - name: Download and Install HDF5 from GitHub
-      if: steps.cache-hdf.outputs.cache-hit != 'true'
-      shell: pwsh
-      run: |
-        $HDF5_VERSION = "${{ inputs.hdf5_version }}"
-        $PATTERN = "hdf5-$HDF5_VERSION-win-vs2022_cl.zip"
-        Write-Host "Downloading HDF5 $HDF5_VERSION release..."
-        gh release download $HDF5_VERSION `
-          --repo HDFGroup/hdf5 `
-          --pattern "$PATTERN" `
-          --clobber
-
-        Write-Host "Extracting HDF5..."
-        7z x -y $PATTERN
-        Set-Location hdf5
-        7z x -y HDF5-*-win64.zip
-
-        # Windows structure: hdf5/HDF5-x.y.z-win64/lib, hdf5/HDF5-x.y.z-win64/bin
-        # Find the extracted HDF5-*-win64 directory
-        $HDF5DIR = Get-ChildItem -Path . -Filter "HDF5-*-win64" -Directory | Select-Object -First 1
-        if (-not $HDF5DIR) {
-          Write-Error "HDF5-*-win64 directory not found!"
-          Get-ChildItem -Directory | ForEach-Object { Write-Host $_.Name }
-          exit 1
-        }
-        $HDF5LIB_PATH = $HDF5DIR.FullName
-        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $env:GITHUB_ENV
-        Write-Host "HDF5 installed to: $HDF5LIB_PATH"
-      env:
-        GH_TOKEN: ${{ github.token }}
+      uses: ./.github/actions/setup-hdf-libraries
+      with:
+        hdf4-version: ${{ inputs.hdf4_version }}
+        hdf5-version: ${{ inputs.hdf5_version }}
+        os-pattern: 'win-vs2022_cl.zip'
+        archive-extension: 'zip'
+        inner-archive-os: 'win64'
 
     - name: Set Environment Variables from Cache
       if: steps.cache-hdf.outputs.cache-hit == 'true'
-      shell: pwsh
+      shell: bash
       run: |
-        Set-Location hdf4
-        $HDF4DIR = Get-ChildItem -Path . -Filter "HDF-*-win64" -Directory | Select-Object -First 1
-        $HDF4LIB_PATH = $HDF4DIR.FullName
-        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $env:GITHUB_ENV
+        # Windows structure - find HDF-*-win64 directories
+        HDF4LIB_PATH=$(find ${{ github.workspace }}/hdf4 -maxdepth 1 -type d -name "HDF-*-win64" | head -1)
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
 
-        Set-Location ../hdf5
-        $HDF5DIR = Get-ChildItem -Path . -Filter "HDF5-*-win64" -Directory | Select-Object -First 1
-        $HDF5LIB_PATH = $HDF5DIR.FullName
-        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $env:GITHUB_ENV
+        HDF5LIB_PATH=$(find ${{ github.workspace }}/hdf5 -maxdepth 1 -type d -name "HDF5-*-win64" | head -1)
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
 
-        Write-Host "Using cached HDF libraries:"
-        Write-Host "HDF4: $HDF4LIB_PATH"
-        Write-Host "HDF5: $HDF5LIB_PATH"
-
-    - name: Install HDF JARs to Local Maven Repository
-      shell: pwsh
-      run: |
-        Write-Host "Installing HDF JARs to local Maven repository..."
-
-        # Copy HDF JARs from downloaded distributions
-        New-Item -Path "repository\lib" -ItemType Directory -Force | Out-Null
-
-        # Copy JARs (they're in lib/ directory on Windows too)
-        if (Test-Path "$env:HDF4LIB_PATH\lib\*.jar") {
-          Copy-Item "$env:HDF4LIB_PATH\lib\*.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
-        } else {
-          Write-Host "No HDF4 JARs found"
-        }
-
-        if (Test-Path "$env:HDF5LIB_PATH\lib\*.jar") {
-          Copy-Item "$env:HDF5LIB_PATH\lib\*.jar" -Destination "repository\lib\" -ErrorAction SilentlyContinue
-        } else {
-          Write-Host "No HDF5 JARs found"
-        }
-
-        # List what we have
-        Write-Host "JARs in repository\lib:"
-        if (Test-Path "repository\lib\*.jar") {
-          Get-ChildItem "repository\lib\*.jar" | Format-Table Name, Length
-        } else {
-          Write-Host "No JARs found"
-        }
-
-        # Install jarhdf5 (extract version from filename)
-        $jarhdf5 = Get-ChildItem "repository\lib\jarhdf5-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($jarhdf5) {
-          $JAR_VERSION = $jarhdf5.Name -replace 'jarhdf5-(.+)\.jar', '$1'
-          Write-Host "Detected jarhdf5 version: $JAR_VERSION"
-          mvn install:install-file "-Dfile=$($jarhdf5.FullName)" `
-            "-DgroupId=jarhdf5" "-DartifactId=jarhdf5" "-Dversion=$JAR_VERSION" `
-            "-Dpackaging=jar" "-DgeneratePom=true"
-          Write-Host "Installed: $($jarhdf5.Name) as version $JAR_VERSION"
-        }
-
-        # Install jarhdf (HDF4 - extract version from filename)
-        $jarhdf = Get-ChildItem "repository\lib\jarhdf-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($jarhdf) {
-          $JAR_VERSION = $jarhdf.Name -replace 'jarhdf-(.+)\.jar', '$1'
-          Write-Host "Detected jarhdf version: $JAR_VERSION"
-          mvn install:install-file "-Dfile=$($jarhdf.FullName)" `
-            "-DgroupId=jarhdf" "-DartifactId=jarhdf" "-Dversion=$JAR_VERSION" `
-            "-Dpackaging=jar" "-DgeneratePom=true"
-          Write-Host "Installed: $($jarhdf.Name) as version $JAR_VERSION"
-        }
-
-        # Install fits.jar
-        $jarfits = Get-ChildItem "repository\lib\fits.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($jarfits) {
-          mvn install:install-file "-Dfile=$($jarfits.FullName)" `
-            "-DgroupId=fits" "-DartifactId=fits" "-Dversion=1.0.0" `
-            "-Dpackaging=jar" "-DgeneratePom=true"
-          Write-Host "Installed: $($jarfits.Name)"
-        }
-
-        # Install netcdf.jar
-        $jarnetcdf = Get-ChildItem "repository\lib\netcdf.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($jarnetcdf) {
-          mvn install:install-file "-Dfile=$($jarnetcdf.FullName)" `
-            "-DgroupId=netcdf" "-DartifactId=netcdf" "-Dversion=1.0.0" `
-            "-Dpackaging=jar" "-DgeneratePom=true"
-          Write-Host "Installed: $($jarnetcdf.Name)"
-        }
-
-        # Install slf4j-api if present
-        $slf4j = Get-ChildItem "repository\lib\slf4j-api-*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($slf4j) {
-          $version = $slf4j.Name -replace 'slf4j-api-([0-9.]+)\.jar', '$1'
-          mvn install:install-file "-Dfile=$($slf4j.FullName)" `
-            "-DgroupId=org.slf4j" "-DartifactId=slf4j-api" "-Dversion=$version" `
-            "-Dpackaging=jar" "-DgeneratePom=true"
-          Write-Host "Installed: $($slf4j.Name)"
-        }
-
-        # Install SWTBot JARs for UI testing
-        $finderjar = Get-ChildItem "repository\lib\org.eclipse.swtbot.swt.finder.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($finderjar) {
-          mvn install:install-file "-Dfile=$($finderjar.FullName)" `
-            "-DgroupId=org.eclipse.local" "-DartifactId=org.eclipse.swtbot.swt.finder" "-Dversion=4.2.1" `
-            "-Dpackaging=jar" "-DgeneratePom=true"
-          Write-Host "Installed: $($finderjar.Name)"
-        }
-
-        $nattablejar = Get-ChildItem "repository\lib\org.eclipse.swtbot.nebula.nattable.finder.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($nattablejar) {
-          mvn install:install-file "-Dfile=$($nattablejar.FullName)" `
-            "-DgroupId=org.eclipse.local" "-DartifactId=org.eclipse.swtbot.nebula.nattable.finder" "-Dversion=4.2.1" `
-            "-Dpackaging=jar" "-DgeneratePom=true"
-          Write-Host "Installed: $($nattablejar.Name)"
-        }
+        echo "Using cached HDF libraries:"
+        echo "HDF4: $HDF4LIB_PATH"
+        echo "HDF5: $HDF5LIB_PATH"
 
     - name: Set up build.properties
       shell: pwsh
