@@ -51,9 +51,10 @@ public class ViewProperties extends PreferenceStore {
     /** Cached OS detection - computed once at class load time. */
     private static final boolean IS_MAC_OS;
 
-    static {
+    static
+    {
         String osName = System.getProperty("os.name");
-        IS_MAC_OS = osName != null && osName.toLowerCase().contains("mac");
+        IS_MAC_OS     = osName != null && osName.toLowerCase().contains("mac");
     }
 
     /** the version of the HDFViewer. */
@@ -1900,10 +1901,7 @@ public class ViewProperties extends PreferenceStore {
      *
      * @return true if running on macOS, false otherwise
      */
-    public static boolean isMacOS()
-    {
-        return IS_MAC_OS;
-    }
+    public static boolean isMacOS() { return IS_MAC_OS; }
 
     /**
      * Get the font size.
