@@ -1,0 +1,252 @@
+name: Setup HDF Libraries
+description: Download, extract, and install HDF4/HDF5 libraries with Maven integration
+
+inputs:
+  hdf4-version:
+    description: 'HDF4 version to use (leave empty for latest release)'
+    required: false
+    default: ''
+  hdf5-version:
+    description: 'HDF5 version to use'
+    required: true
+    default: '2.0.0'
+  os-pattern:
+    description: 'OS-specific archive pattern (e.g., *-ubuntu-*_gcc.tar.gz, hdf-*-macos14_clang.tar.gz)'
+    required: true
+  archive-extension:
+    description: 'Archive extension (tar.gz or zip)'
+    required: false
+    default: 'tar.gz'
+  inner-archive-os:
+    description: 'Inner archive OS name (Linux or Darwin)'
+    required: false
+    default: 'Linux'
+
+outputs:
+  hdf4-lib-path:
+    description: 'Path to HDF4 libraries'
+    value: ${{ steps.set-paths.outputs.hdf4-lib-path }}
+  hdf5-lib-path:
+    description: 'Path to HDF5 libraries'
+    value: ${{ steps.set-paths.outputs.hdf5-lib-path }}
+  hdf4-version:
+    description: 'Resolved HDF4 version'
+    value: ${{ steps.resolve-hdf4.outputs.version }}
+  hdf5-version:
+    description: 'Resolved HDF5 version'
+    value: ${{ inputs.hdf5-version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve HDF4 Version
+      id: resolve-hdf4
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.hdf4-version }}" ]; then
+          HDF4_VERSION="${{ inputs.hdf4-version }}"
+          RELEASE_TAG="hdf${HDF4_VERSION}"
+        else
+          # Get latest non-snapshot release tag using JSON output for reliable parsing
+          RELEASE_TAG=$(gh release list --repo HDFGroup/hdf4 --limit 10 --json tagName,isPrerelease -q '.[] | select(.isPrerelease == false) | .tagName' | head -1)
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "Error: Could not determine latest HDF4 release tag"
+            exit 1
+          fi
+          HDF4_VERSION="${RELEASE_TAG#hdf}"
+        fi
+        echo "version=$HDF4_VERSION" >> $GITHUB_OUTPUT
+        echo "release-tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+        echo "Using HDF4 release: ${RELEASE_TAG} (version: ${HDF4_VERSION})"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Download and Extract HDF4
+      shell: bash
+      run: |
+        RELEASE_TAG="${{ steps.resolve-hdf4.outputs.release-tag }}"
+        HDF4_VERSION="${{ steps.resolve-hdf4.outputs.version }}"
+
+        # Build pattern - handle both wildcards and specific patterns
+        if [[ "${{ inputs.os-pattern }}" == *"*"* ]]; then
+          PATTERN="${{ inputs.os-pattern }}"
+        else
+          PATTERN="${RELEASE_TAG}-${{ inputs.os-pattern }}"
+        fi
+
+        echo "Downloading HDF4 ${HDF4_VERSION} with pattern: $PATTERN"
+        gh release download "${RELEASE_TAG}" \
+          --repo HDFGroup/hdf4 \
+          --pattern "$PATTERN" \
+          --clobber
+
+        # Select the downloaded file deterministically
+        if [[ "${{ inputs.archive-extension }}" == "tar.gz" ]]; then
+          ARCHIVE=$(ls *_gcc.tar.gz *_clang.tar.gz 2>/dev/null | sort -V | tail -1)
+        else
+          ARCHIVE=$(ls *.zip 2>/dev/null | sort -V | tail -1)
+        fi
+        echo "Selected archive: $ARCHIVE"
+
+        # Extract based on archive type
+        if [[ "${{ inputs.archive-extension }}" == "tar.gz" ]]; then
+          tar -zxf "$ARCHIVE"
+        else
+          7z x -y "$ARCHIVE"
+        fi
+        [ -d hdf4 ] || mv hdf4-* hdf4
+
+        # Extract inner archive
+        cd "${{ github.workspace }}/hdf4"
+        if [[ "${{ inputs.archive-extension }}" == "tar.gz" ]]; then
+          tar -zxf HDF-${HDF4_VERSION}-${{ inputs.inner-archive-os }}.tar.gz --strip-components 1
+        else
+          7z x -y HDF-*-win64.zip
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Download and Extract HDF5
+      shell: bash
+      run: |
+        HDF5_VERSION="${{ inputs.hdf5-version }}"
+
+        # Build pattern for HDF5
+        if [[ "${{ inputs.os-pattern }}" == *"ubuntu"* ]]; then
+          PATTERN="hdf5-${HDF5_VERSION}-ubuntu-*_gcc.tar.gz"
+        elif [[ "${{ inputs.os-pattern }}" == *"macos"* ]]; then
+          PATTERN="hdf5-${HDF5_VERSION}-macos14_clang.tar.gz"
+        elif [[ "${{ inputs.os-pattern }}" == *"win"* ]]; then
+          PATTERN="hdf5-${HDF5_VERSION}-win-vs2022_cl.zip"
+        else
+          PATTERN="hdf5-${HDF5_VERSION}-${{ inputs.os-pattern }}"
+        fi
+
+        echo "Downloading HDF5 ${HDF5_VERSION} with pattern: $PATTERN"
+        gh release download ${HDF5_VERSION} \
+          --repo HDFGroup/hdf5 \
+          --pattern "$PATTERN" \
+          --clobber
+
+        # Select the downloaded file deterministically
+        if [[ "${{ inputs.archive-extension }}" == "tar.gz" ]]; then
+          ARCHIVE=$(ls hdf5-${HDF5_VERSION}*.tar.gz 2>/dev/null | sort -V | tail -1)
+        else
+          ARCHIVE=$(ls hdf5-*.zip 2>/dev/null | sort -V | tail -1)
+        fi
+        echo "Selected archive: $ARCHIVE"
+
+        # Extract based on archive type
+        if [[ "${{ inputs.archive-extension }}" == "tar.gz" ]]; then
+          tar -zxf "$ARCHIVE"
+        else
+          7z x -y "$ARCHIVE"
+        fi
+        [ -d hdf5 ] || mv hdf5-* hdf5
+
+        # Extract inner archive
+        cd "${{ github.workspace }}/hdf5"
+        if [[ "${{ inputs.archive-extension }}" == "tar.gz" ]]; then
+          tar -zxf HDF5-${HDF5_VERSION}-${{ inputs.inner-archive-os }}.tar.gz --strip-components 1
+        else
+          7z x -y HDF5-*-win64.zip
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Set Library Paths
+      id: set-paths
+      shell: bash
+      run: |
+        HDF4_VERSION="${{ steps.resolve-hdf4.outputs.version }}"
+        HDF5_VERSION="${{ inputs.hdf5-version }}"
+
+        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
+        HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
+
+        echo "hdf4-lib-path=$HDF4LIB_PATH" >> $GITHUB_OUTPUT
+        echo "hdf5-lib-path=$HDF5LIB_PATH" >> $GITHUB_OUTPUT
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
+
+        echo "HDF4 installed to: $HDF4LIB_PATH"
+        echo "HDF5 installed to: $HDF5LIB_PATH"
+
+    - name: Install HDF JARs to Maven Repository
+      shell: bash
+      run: |
+        echo "Installing HDF JARs to local Maven repository..."
+
+        # Copy HDF JARs from downloaded distributions
+        mkdir -p repository/lib
+        cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs found"
+        cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs found"
+
+        # List what we have
+        echo "JARs in repository/lib:"
+        ls repository/lib/*.jar 2>/dev/null || echo "No JARs found"
+
+        # Install jarhdf5 (extract version from filename - handle optional classifiers)
+        if ls repository/lib/jarhdf5-*.jar 1>/dev/null 2>&1; then
+          JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
+          JAR_BASENAME=$(basename "$JAR_FILE" .jar)
+          JAR_VERSION=$(echo "$JAR_BASENAME" | sed -E 's/^jarhdf5-([0-9]+(\.[0-9]+)*).*/\1/')
+          echo "Detected jarhdf5 version: $JAR_VERSION"
+          mvn install:install-file -Dfile="$JAR_FILE" \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion="$JAR_VERSION" \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $JAR_VERSION"
+        fi
+
+        # Install jarhdf (HDF4 - extract version from filename - handle optional classifiers)
+        if ls repository/lib/jarhdf-*.jar 1>/dev/null 2>&1; then
+          JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
+          JAR_BASENAME=$(basename "$JAR_FILE" .jar)
+          JAR_VERSION=$(echo "$JAR_BASENAME" | sed -E 's/^jarhdf-([0-9]+(\.[0-9]+)*).*/\1/')
+          echo "Detected jarhdf version: $JAR_VERSION"
+          mvn install:install-file -Dfile="$JAR_FILE" \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$JAR_VERSION" \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE as version $JAR_VERSION"
+        fi
+
+        # Install fits.jar
+        if [ -f repository/lib/fits.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/fits.jar \
+            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: fits.jar"
+        fi
+
+        # Install netcdf.jar
+        if [ -f repository/lib/netcdf.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
+            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: netcdf.jar"
+        fi
+
+        # Install slf4j-api if present
+        if [ -f repository/lib/slf4j-api-*.jar ]; then
+          JAR_FILE=$(ls repository/lib/slf4j-api-*.jar | head -1)
+          VERSION=$(echo "$JAR_FILE" | grep -oP 'slf4j-api-\K[0-9.]+')
+          mvn install:install-file -Dfile="$JAR_FILE" \
+            -DgroupId=org.slf4j -DartifactId=slf4j-api -Dversion="$VERSION" \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: $JAR_FILE"
+        fi
+
+        # Install SWTBot JARs for UI testing
+        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.swt.finder.jar"
+        fi
+
+        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
+          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
+            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.nebula.nattable.finder -Dversion=4.2.1 \
+            -Dpackaging=jar -DgeneratePom=true
+          echo "Installed: org.eclipse.swtbot.nebula.nattable.finder.jar"
+        fi

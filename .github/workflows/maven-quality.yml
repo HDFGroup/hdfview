@@ -4,10 +4,10 @@ on:
   workflow_call:
     inputs:
       hdf4_version:
-        description: 'HDF4 version to use'
+        description: 'HDF4 version to use (leave empty for latest release)'
         type: string
         required: false
-        default: '4.3.1'
+        default: ''
       hdf5_version:
         description: 'HDF5 version to use'
         type: string
@@ -16,10 +16,10 @@ on:
   workflow_dispatch:
     inputs:
       hdf4_version:
-        description: 'HDF4 version to use'
+        description: 'HDF4 version to use (leave empty for latest release)'
         type: string
         required: false
-        default: '4.3.1'
+        default: ''
       hdf5_version:
         description: 'HDF5 version to use'
         type: string
@@ -39,10 +39,6 @@ permissions:
   security-events: write
 
 env:
-  # HDF library versions (centralized defaults, overridable via workflow inputs)
-  HDF4_VERSION: ${{ inputs.hdf4_version || '4.3.1' }}
-  HDF5_VERSION: ${{ inputs.hdf5_version || '2.0.0' }}
-
   # Note: java.awt.headless NOT set to true - SWT GUI tests need display (Xvfb)
   MAVEN_OPTS: >-
     -Xmx3g
@@ -100,155 +96,34 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-hdf-github-
 
-    - name: Download and Install HDF4 from GitHub
+    - name: Setup HDF Libraries
       if: steps.cache-hdf.outputs.cache-hit != 'true'
-      run: |
-        HDF4_VERSION="${{ env.HDF4_VERSION }}"
-        PATTERN="*-ubuntu-*_gcc.tar.gz"
-        echo "Downloading HDF4 ${HDF4_VERSION} release..."
-
-        gh release download hdf${HDF4_VERSION} \
-          --repo HDFGroup/hdf4 \
-          --pattern "$PATTERN" \
-          --clobber
-
-        # Extract outer tar.gz (creates hdf4/ directory)
-        tar -zxf $PATTERN
-        [ -d hdf4 ] || mv hdf4-* hdf4
-
-        # Extract inner tar.gz into hdf4/ directory
-        cd "${{ github.workspace }}/hdf4"
-        tar -zxf HDF-${HDF4_VERSION}-Linux.tar.gz --strip-components 1
-
-        # Set HDF4 library path
-        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
-        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
-        echo "HDF4 installed to: $HDF4LIB_PATH"
-      env:
-        GH_TOKEN: ${{ github.token }}
-
-    - name: Download and Install HDF5 from GitHub
-      if: steps.cache-hdf.outputs.cache-hit != 'true'
-      run: |
-        HDF5_VERSION="${{ env.HDF5_VERSION }}"
-        PATTERN="hdf5-${HDF5_VERSION}-ubuntu-*_gcc.tar.gz"
-        echo "Downloading HDF5 ${HDF5_VERSION} release..."
-
-        gh release download ${HDF5_VERSION} \
-          --repo HDFGroup/hdf5 \
-          --pattern "$PATTERN" \
-          --clobber
-
-        # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxf $PATTERN
-        [ -d hdf5 ] || mv hdf5-* hdf5
-
-        # Extract inner tar.gz into hdf5/ directory
-        cd "${{ github.workspace }}/hdf5"
-        tar -zxf HDF5-${HDF5_VERSION}-Linux.tar.gz --strip-components 1
-
-        # Set HDF5 library path
-        HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
-        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
-        echo "HDF5 installed to: $HDF5LIB_PATH"
-      env:
-        GH_TOKEN: ${{ github.token }}
+      uses: ./.github/actions/setup-hdf-libraries
+      with:
+        hdf4-version: ${{ inputs.hdf4_version }}
+        hdf5-version: ${{ inputs.hdf5_version }}
+        os-pattern: '*-ubuntu-*_gcc.tar.gz'
+        archive-extension: 'tar.gz'
+        inner-archive-os: 'Linux'
 
     - name: Set Environment Variables from Cache
       if: steps.cache-hdf.outputs.cache-hit == 'true'
       run: |
-        HDF4_VERSION="${{ env.HDF4_VERSION }}"
-        HDF5_VERSION="${{ env.HDF5_VERSION }}"
-
-        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
+        # Detect versions dynamically from cached directories
+        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
+        HDF4_VERSION=$(ls "$HDF4DIR" | head -1)
+        HDF4LIB_PATH="${HDF4DIR}${HDF4_VERSION}"
         echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
 
-        HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
+        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+        HDF5_VERSION=$(ls "$HDF5DIR" | head -1)
+        HDF5LIB_PATH="${HDF5DIR}${HDF5_VERSION}"
         echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
 
         echo "Using cached HDF libraries:"
-        echo "HDF4: $HDF4LIB_PATH"
-        echo "HDF5: $HDF5LIB_PATH"
+        echo "HDF4: $HDF4LIB_PATH (version: $HDF4_VERSION)"
+        echo "HDF5: $HDF5LIB_PATH (version: $HDF5_VERSION)"
 
-    - name: Install HDF JARs to Local Maven Repository
-      run: |
-        echo "Installing HDF JARs to local Maven repository..."
-
-        # Copy HDF JARs from downloaded distributions
-        mkdir -p repository/lib
-        cp ${{ env.HDF4LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF4 JARs found"
-        cp ${{ env.HDF5LIB_PATH }}/lib/*.jar repository/lib/ 2>/dev/null || echo "No HDF5 JARs found"
-
-        # List what we have
-        echo "JARs in repository/lib:"
-        ls -la repository/lib/*.jar 2>/dev/null || echo "No JARs found"
-
-        # Install jarhdf5
-        HDF5_VERSION="${{ env.HDF5_VERSION }}"
-        if [ -f repository/lib/jarhdf5-*.jar ]; then
-          JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
-          # Extract version from filename: jarhdf5-X.Y.Z.jar -> X.Y.Z
-          JAR_VERSION=$(basename "$JAR_FILE" .jar | sed 's/jarhdf5-//')
-          echo "Detected jarhdf5 version: $JAR_VERSION"
-          mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=${HDF5_VERSION} \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE as version $JAR_VERSION"
-          # Also update the POM property to match
-          echo "HDF5_JAR_VERSION=$JAR_VERSION" >> $GITHUB_ENV
-        fi
-
-        # Install jarhdf (HDF4 - extract version from filename)
-        if ls repository/lib/jarhdf-*.jar 1>/dev/null 2>&1; then
-          JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
-          JAR_VERSION=$(basename "$JAR_FILE" .jar | sed 's/jarhdf-//')
-          echo "Detected jarhdf version: $JAR_VERSION"
-          mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$JAR_VERSION" \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE as version $JAR_VERSION"
-        fi
-
-        # Install fits.jar
-        if [ -f repository/lib/fits.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/fits.jar \
-            -DgroupId=fits -DartifactId=fits -Dversion=1.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: fits.jar"
-        fi
-
-        # Install netcdf.jar
-        if [ -f repository/lib/netcdf.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/netcdf.jar \
-            -DgroupId=netcdf -DartifactId=netcdf -Dversion=1.0.0 \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: netcdf.jar"
-        fi
-
-        # Install slf4j-api if present
-        if [ -f repository/lib/slf4j-api-*.jar ]; then
-          JAR_FILE=$(ls repository/lib/slf4j-api-*.jar | head -1)
-          VERSION=$(echo "$JAR_FILE" | grep -oP 'slf4j-api-\K[0-9.]+')
-          mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=org.slf4j -DartifactId=slf4j-api -Dversion="$VERSION" \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: $JAR_FILE"
-        fi
-
-        # Install SWTBot JARs for UI testing
-        if [ -f repository/lib/org.eclipse.swtbot.swt.finder.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.swt.finder.jar \
-            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.swt.finder -Dversion=4.2.1 \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: org.eclipse.swtbot.swt.finder.jar"
-        fi
-
-        if [ -f repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar ]; then
-          mvn install:install-file -Dfile=repository/lib/org.eclipse.swtbot.nebula.nattable.finder.jar \
-            -DgroupId=org.eclipse.local -DartifactId=org.eclipse.swtbot.nebula.nattable.finder -Dversion=4.2.1 \
-            -Dpackaging=jar -DgeneratePom=true
-          echo "Installed: org.eclipse.swtbot.nebula.nattable.finder.jar"
-        fi
 
     - name: Set up Xvfb for Headless GUI Testing
       run: |
