@@ -67,11 +67,14 @@ runs:
         RELEASE_TAG="${{ steps.resolve-hdf4.outputs.release-tag }}"
         HDF4_VERSION="${{ steps.resolve-hdf4.outputs.version }}"
 
-        # Build pattern - handle both wildcards and specific patterns
-        if [[ "${{ inputs.os-pattern }}" == *"*"* ]]; then
-          PATTERN="${{ inputs.os-pattern }}"
+        # Build pattern - handle wildcards by extracting OS-specific part
+        OS_PATTERN="${{ inputs.os-pattern }}"
+        if [[ "$OS_PATTERN" == *"*"* ]]; then
+          # Extract OS-specific part (remove leading wildcards/hyphens) and prepend RELEASE_TAG
+          OS_SPECIFIC=$(echo "$OS_PATTERN" | sed 's/^[*-]*//')
+          PATTERN="${RELEASE_TAG}-${OS_SPECIFIC}"
         else
-          PATTERN="${RELEASE_TAG}-${{ inputs.os-pattern }}"
+          PATTERN="${RELEASE_TAG}-${OS_PATTERN}"
         fi
 
         echo "Downloading HDF4 ${HDF4_VERSION} with pattern: $PATTERN"
