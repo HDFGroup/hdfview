@@ -57,6 +57,12 @@ public class Chart extends Dialog {
 
     private Color barColor;
 
+    /**
+     * Tracks whether barColor was allocated by us and needs disposal.
+     * System colors should not be disposed.
+     */
+    private boolean isBarColorOwned = false;
+
     /** histogram style chart. */
     public static final int HISTOGRAM = 0;
 
@@ -152,8 +158,8 @@ public class Chart extends Dialog {
 
         if (style == HISTOGRAM) {
             isInteger = true;
-            barColor  = new Color(Display.getDefault(),
-                                  Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION).getRGB());
+            // Use system color directly - no need to create a duplicate
+            barColor  = Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION);
         }
         else {
             isInteger = false;
@@ -219,7 +225,8 @@ public class Chart extends Dialog {
             {
                 if (curFont != null)
                     curFont.dispose();
-                if (barColor != null)
+                // Only dispose barColor if we created it (not a system color)
+                if (isBarColorOwned && barColor != null)
                     barColor.dispose();
             }
         });
@@ -278,8 +285,11 @@ public class Chart extends Dialog {
                 RGB newColor = dialog.open();
 
                 if (newColor != null) {
-                    barColor.dispose();
-                    barColor = new Color(Display.getDefault(), newColor);
+                    // Dispose old color only if we created it
+                    if (isBarColorOwned && barColor != null)
+                        barColor.dispose();
+                    barColor        = new Color(Display.getDefault(), newColor);
+                    isBarColorOwned = true; // We now own this color and must dispose it
                     chartP.redraw();
                 }
             }
