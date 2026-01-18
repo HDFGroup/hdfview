@@ -166,12 +166,13 @@ fi
 
 # Check if project needs building
 print_status "Checking build status..."
-if [[ ! -d "hdfview/target" ]] || [[ ! -f "libs/hdfview-99.99.99-SNAPSHOT.jar" ]]; then
-    print_error "HDFView not built - missing hdfview/target or libs/hdfview-99.99.99-SNAPSHOT.jar"
+HDFVIEW_JAR=$(find libs -name "hdfview-*.jar" -not -name "*-sources.jar" -not -name "*-javadoc.jar" 2>/dev/null | head -n 1)
+if [[ ! -d "hdfview/target" ]] || [[ -z "$HDFVIEW_JAR" ]]; then
+    print_error "HDFView not built - missing hdfview/target or libs/hdfview-*.jar"
     print_error "Build the project first: mvn clean package -DskipTests"
     exit 1
 else
-    print_success "HDFView JAR found"
+    print_success "HDFView JAR found: $(basename "$HDFVIEW_JAR")"
 fi
 
 # Check SWT dependencies
@@ -210,6 +211,15 @@ JVM_ARGS=(
     "--enable-native-access=jarhdf"
     "-Djava.library.path=$hdf5_lib_dir:$hdf_lib_dir"
 )
+
+# Add macOS-specific JVM arguments
+if [[ "$PLATFORM" == "Darwin" ]]; then
+    JVM_ARGS+=(
+        "-XstartOnFirstThread"
+        "-Xdock:name=HDFView"
+    )
+    print_status "Added macOS-specific JVM arguments (-XstartOnFirstThread, -Xdock:name)"
+fi
 
 # Parse command line arguments
 SLF4J_IMPL="nop"  # Default: no logging
@@ -277,7 +287,7 @@ case $CHOICE in
         ;;
     2)
         print_status "Launching HDFView via direct JAR execution..."
-        if [[ ! -f "libs/hdfview-99.99.99-SNAPSHOT.jar" ]]; then
+        if [[ -z "$HDFVIEW_JAR" ]]; then
             print_error "JAR file not found. Build the project first."
             exit 1
         fi
@@ -289,7 +299,7 @@ case $CHOICE in
         fi
 
         # Build classpath, excluding slf4j-nop or slf4j-simple based on debug mode
-        CLASSPATH="libs/hdfview-99.99.99-SNAPSHOT.jar"
+        CLASSPATH="$HDFVIEW_JAR"
         for jar in hdfview/target/lib/*.jar; do
             jarname=$(basename "$jar")
             if [[ "$SLF4J_IMPL" == "simple" ]]; then
@@ -311,7 +321,7 @@ case $CHOICE in
         echo
         echo "To launch manually:"
         echo "Option 1 (Maven): mvn exec:java -Dexec.mainClass=\"hdf.view.HDFView\" -pl hdfview"
-        echo "Option 2 (JAR): java ${JVM_ARGS[*]} -cp \"libs/hdfview-99.99.99-SNAPSHOT.jar:hdfview/target/lib/*\" hdf.view.HDFView"
+        echo "Option 2 (JAR): java ${JVM_ARGS[*]} -cp \"$HDFVIEW_JAR:hdfview/target/lib/*\" hdf.view.HDFView"
         ;;
     *)
         print_error "Invalid choice. Exiting."

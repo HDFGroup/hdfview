@@ -31,7 +31,7 @@ mvn clean install
 
 ### Launcher Scripts
 
-Cross-platform launcher scripts are provided for easy local execution:
+Cross-platform launcher scripts are provided for easy local execution when HDFView is built from source:
 
 - **`run-hdfview.sh`** - Unix/Linux/macOS launcher
 - **`run-hdfview.bat`** - Windows launcher
@@ -260,75 +260,12 @@ The project consists of three main Maven modules:
   mvn test -Dgroups="integration"   # Run integration tests
   ```
 
-### Test Status
-
-- **Object module**: 15 test classes, 149 tests - all passing
-- **UI module**: 16 test classes with varying status
-  - Most tests pass when run locally with display
-  - Some tests are disabled due to upstream native library issues
-  - UI tests require a real display (X11, Wayland, Windows, macOS)
-- **CI**: Object tests run on all platforms (Linux, macOS, Windows)
-
 ### Platform-Specific Notes
 
 - SWT dependencies are platform-specific
 - Currently configured for Linux GTK (`gtk.linux.x86_64`)
 - Platform profiles exist but are commented out in `hdfview/pom.xml`
 - Cross-platform builds supported via CI/CD workflows
-
-## CI/CD and Quality Assurance
-
-### GitHub Actions Workflows
-
-The project uses automated GitHub Actions workflows for continuous integration and quality assurance:
-
-- **`maven-ci-orchestrator.yml`**: Primary CI orchestrator
-  - Triggers all platform-specific CI builds in parallel
-  - Runs on push, pull_request, and manual dispatch
-  - Calls: ci-linux.yml, ci-windows.yml, ci-macos.yml
-
-- **`ci-linux.yml`, `ci-windows.yml`, `ci-macos.yml`**: Platform CI builds
-  - Build, compile, and test object module
-  - Can be triggered independently via workflow_dispatch
-  - Cross-platform build verification
-
-- **`maven-quality.yml`**: Code quality analysis
-  - PMD static analysis (4000 violation threshold)
-  - Checkstyle code style enforcement
-  - Code coverage reporting (non-blocking)
-  - Runs daily at 2 AM UTC + on push/PR
-
-- **`maven-security.yml`**: Security and compliance
-  - OWASP dependency vulnerability scanning (CVSS 8.0+ threshold)
-  - GitHub CodeQL security analysis
-  - License compliance checking (prohibits GPL/AGPL)
-
-- **`maven-build.yml`**: Cross-platform binary builds and Maven package publishing
-  - 7 build jobs across 3 platforms:
-    - **Linux**: binary tar.gz, app-image, installers (DEB/RPM - planned)
-    - **Windows**: binary zip, app-image, MSI installer (signed)
-    - **macOS**: binary tar.gz, app-image + DMG installer (consolidated, signed)
-  - Downloads HDF4/HDF5 from GitHub releases
-  - Code signing for Windows (Microsoft Trusted Signing) and macOS (Developer ID + Notarization)
-  - Optional GitHub Packages publication (Maven registry)
-  - Called by release.yml for comprehensive releases
-
-### Quality Tools and Standards
-
-- **Code Coverage**: 60% line coverage, 50% branch coverage targets (JaCoCo)
-- **Static Analysis**: PMD v7.0+ with HDFView-specific rulesets
-- **Code Style**: Checkstyle v10.12+ (adapted Google Java Style)
-- **Security**: OWASP Dependency Check with CVE monitoring
-- **Quality Gates**: PMD and Checkstyle enforced, coverage reporting only
-
-### Quality Management Scripts
-
-Located in `scripts/`:
-- `validate-quality.sh` - Quick quality validation for pre-commit
-- `check-quality.sh` - Comprehensive quality analysis
-- `analyze-coverage.sh` - Coverage analysis with threshold checking
-- `security-analysis.sh` - Security and license compliance scanning
-- `collect-metrics.sh` - Unified quality metrics collection
 
 ## File Locations
 
@@ -338,53 +275,6 @@ Located in `scripts/`:
 - Test data: Sample HDF5 files in test resources
 - Quality configurations: `pmd-rules.xml`, `checkstyle-rules.xml`, `dependency-check-suppressions.xml`
 - Documentation: `docs/` directory for team documentation
-
-## Modernization Status
-
-### ✅ Phase 1: Maven Migration (COMPLETE)
-- Pure Maven build system operational
-- Ant build system removed
-- Multi-module structure with proper dependency management
-- SWT platform support for Linux x86_64
-- Native library integration configured
-
-### ✅ Phase 2A: JUnit 5 Migration (COMPLETE)
-- JUnit 5 v5.10.0 infrastructure integrated
-- Modern test foundation classes created
-- All test files migrated to JUnit 5
-- Tests compile and execute successfully
-
-### ✅ Phase 2B: CI/CD Pipeline (COMPLETE)
-- Multiple production GitHub Actions workflows operational
-- Automated build, test, quality, and security scanning
-- Release management with GitHub Packages
-- All platforms (Linux, macOS, Windows) supported
-
-### ✅ Phase 2C: Quality Analysis (COMPLETE)
-- Java 21 compatible static analysis tools integrated
-- Progressive quality gate enforcement configured
-- Code coverage, security scanning, and license compliance
-- Quality management scripts for local development
-
-### 📋 Phase 2D: UI Framework Research (DEFERRED)
-- Detailed research plan available for JavaFX evaluation
-- Focus on large dataset performance
-- Deferred to prioritize other modernization efforts
-
-### ✅ Phase 2E: jpackage Integration & Installer Signing (COMPLETE)
-- Migrated from Ant-based installer creation to Java 21's native jpackage
-- Native installers for all platforms: MSI (Windows), DMG (macOS), DEB/RPM (Linux)
-- Code signing implemented for Windows (Authenticode) and macOS (Developer ID + Notarization)
-- **macOS**: Single consolidated job - signs during app-image creation using `jpackage --mac-sign`
-  - Keychain setup matching ant.yml implementation
-  - Signs all binaries (dylibs, frameworks, executables) during jpackage execution
-  - Uses repository variables: SIGNER, KEYCHAIN_NAME, NOTARY_USER, NOTARY_KEY
-  - Manual jpackage input directory preparation for reliability
-  - Full notarization workflow: submit → wait → log errors → staple
-- **Windows**: Microsoft Trusted Signing with Azure Code Signing
-- Conditional signing (only on canonical repository with secrets)
-- Comprehensive documentation for signing process and secret configuration
-- See: `docs/Installer-Signing-Guide.md` and `.claude/dev-docs/jpackage-integration.md`
 
 ## Known Issues
 
@@ -400,22 +290,6 @@ Located in `scripts/`:
 - Object module tests run in CI on all platforms
 - Test status tracked in GitHub issues
 
-## Documentation
-
-Comprehensive project documentation is maintained in multiple locations:
-
-### User Documentation (`docs/`)
-- **Contributing Guide**: `CONTRIBUTING.md` - How to contribute to the project
-- **Testing Guide**: `docs/Testing-Guide.md` - Complete guide for running tests locally and in CI
-- **Build Instructions**: `docs/guides/Cross-Platform-Build-Quick-Reference.md` - How to build the project
-- **Users Guide**: `docs/UsersGuide/` - End-user documentation
-
-### Developer Guides (`docs/guides/`)
-- **CI/CD Pipeline Guide**: Complete CI/CD pipeline documentation
-- **CI/CD Troubleshooting**: Troubleshooting common CI/CD issues
-- **Cross-Platform Build Guide**: Quick reference for multi-platform builds
-- **Windows/macOS Build Troubleshooting**: Platform-specific build issues
-
 ## AI-Specific Notes
 
 When working with this codebase:
@@ -427,10 +301,3 @@ When working with this codebase:
 5. **Quality checks**: Run `./scripts/validate-quality.sh` before suggesting code is complete
 6. **Avoid over-engineering**: Keep changes minimal and focused on the specific requirement
 7. **Documentation**: Update relevant documentation when making significant changes
-
-## Getting Help
-
-- **Contributing Guide**: See `CONTRIBUTING.md` for comprehensive developer documentation
-- **GitHub Issues**: Search existing issues for known problems and solutions
-- **CI/CD Guides**: See `docs/guides/` for detailed workflow documentation
-- **Build Issues**: Check `docs/guides/Cross-Platform-Build-Quick-Reference.md` and platform-specific troubleshooting guides

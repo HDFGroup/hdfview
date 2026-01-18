@@ -101,15 +101,14 @@ jobs:
 
         # Extract inner tar.gz into hdf4/ directory
         cd "${{ github.workspace }}/hdf4"
-        tar -zxf HDF-*-Darwin.tar.gz --strip-components 1
+        tar -zxf HDF-${HDF4_VERSION}-Darwin.tar.gz --strip-components 1
 
         # Set HDF4 library path
-        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls ${{ github.workspace }}/hdf4/HDF_Group/HDF)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
 
-        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
-        ls -la "$HDF4DIR$FILE_NAME_HDF"
+        echo "HDF4 installed to: $HDF4LIB_PATH"
+        ls -la "$HDF4LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -125,37 +124,37 @@ jobs:
           --clobber
 
         # Extract outer tar.gz (creates hdf5/ directory)
-        tar -zxf hdf5-*-macos14_clang.tar.gz
+        tar -zxf hdf5-${HDF5_VERSION}-macos14_clang.tar.gz
         [ -d hdf5 ] || mv hdf5-* hdf5
 
         # Extract inner tar.gz into hdf5/ directory
         cd "${{ github.workspace }}/hdf5"
-        tar -zxf HDF5-*-Darwin.tar.gz --strip-components 1
+        tar -zxf HDF5-${HDF5_VERSION}-Darwin.tar.gz --strip-components 1
 
         # Set HDF5 library path
-        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+        HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
 
-        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
-        ls -la "$HDF5DIR$FILE_NAME_HDF5"
+        echo "HDF5 installed to: $HDF5LIB_PATH"
+        ls -la "$HDF5LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Set Environment Variables from Cache
       if: steps.cache-hdf.outputs.cache-hit == 'true'
       run: |
-        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+        HDF4_VERSION="${{ inputs.hdf4_version }}"
+        HDF5_VERSION="${{ inputs.hdf5_version }}"
 
-        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
+
+        HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
 
         echo "Using cached HDF libraries:"
-        echo "HDF4: $HDF4DIR$FILE_NAME_HDF"
-        echo "HDF5: $HDF5DIR$FILE_NAME_HDF5"
+        echo "HDF4: $HDF4LIB_PATH"
+        echo "HDF5: $HDF5LIB_PATH"
 
     - name: Install HDF JARs to Local Maven Repository
       run: |
