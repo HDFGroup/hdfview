@@ -109,7 +109,7 @@ jobs:
         run: |
           Write-Host "Downloading HDFView app binary from release: ${{ inputs.release_tag }}"
           gh release download ${{ inputs.release_tag }} `
-            --repo HDFGroup/hdfview `
+            --repo $env:GITHUB_REPOSITORY `
             --pattern "HDFView-*App-Windows.zip"
 
           Write-Host "Downloaded files:"
@@ -243,7 +243,7 @@ jobs:
         run: |
           Write-Host "Downloading MSI installer from release: ${{ inputs.release_tag }}"
           gh release download ${{ inputs.release_tag }} `
-            --repo HDFGroup/hdfview `
+            --repo $env:GITHUB_REPOSITORY `
             --pattern "HDFView-*-Windows.msi"
 
           Write-Host "Downloaded installer:"

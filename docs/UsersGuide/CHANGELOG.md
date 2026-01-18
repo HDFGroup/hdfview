@@ -76,6 +76,8 @@ Current test results and detailed platform information are available in the [Git
 
 # ⛔ Known Problems
 
+* **PATH pointing to other HDF4/5 installations**: If the environment path points to a directory including HDF4/5 installations, then these installations may be loaded by HDFView instead of the bundled HDF4/5 versions, causing the application to fail to launch with a "failed to launch JVM" error. This can be resolved by either removing those directories from the PATH, or removing the HDF4/5 installations from that directory.
+
 * **Large Dataset Handling**: HDFView currently cannot nicely handle large datasets when using the default display mode, as the data is loaded in its entirety. To view large datasets, it is recommended to right click on a data object and use the "Open As" menu item, where a subset of data to view can be selected.
 
 * **Large Number of Objects**: HDFView also cannot nicely handle large numbers of objects, because of a design issue that requires HDFView to visit all the objects in a file.

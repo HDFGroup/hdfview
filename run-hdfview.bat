@@ -145,12 +145,23 @@ echo.
 
 REM Check build status
 echo [INFO] Checking build status...
-if not exist "libs\hdfview-3.4-SNAPSHOT.jar" (
-    echo [ERROR] HDFView JAR not found: libs\hdfview-3.4-SNAPSHOT.jar
+set "HDFVIEW_JAR="
+for %%f in (libs\hdfview-*.jar) do (
+    set "jarname=%%~nxf"
+    echo !jarname! | findstr /i "sources javadoc" >nul
+    if errorlevel 1 (
+        set "HDFVIEW_JAR=%%f"
+        goto :jar_found
+    )
+)
+:jar_found
+if "!HDFVIEW_JAR!"=="" (
+    echo [ERROR] HDFView JAR not found: libs\hdfview-*.jar
     echo [ERROR] Build the project first: mvn clean package -DskipTests
     exit /b 1
 )
-echo [OK] HDFView JAR found
+for %%f in (!HDFVIEW_JAR!) do set "HDFVIEW_JAR_NAME=%%~nxf"
+echo [OK] HDFView JAR found: !HDFVIEW_JAR_NAME!
 echo.
 
 REM Check platform
@@ -175,9 +186,37 @@ set JVM_ARGS=%JVM_ARGS% --add-opens java.base/java.util=ALL-UNNAMED
 set JVM_ARGS=%JVM_ARGS% --enable-native-access=jarhdf5
 set JVM_ARGS=%JVM_ARGS% -Djava.library.path=!hdf5_lib_dir!;!hdf_lib_dir!
 
-REM SLF4J logging configuration
+REM Parse command line arguments
 set SLF4J_IMPL=nop
-if "%1"=="--debug" set SLF4J_IMPL=simple
+set LAUNCH_MODE=jar
+
+:parse_args
+if "%1"=="" goto :args_done
+if "%1"=="--debug" (
+    set SLF4J_IMPL=simple
+    shift
+    goto :parse_args
+)
+if "%1"=="--choose" (
+    set LAUNCH_MODE=choose
+    shift
+    goto :parse_args
+)
+if "%1"=="--maven" (
+    set LAUNCH_MODE=maven
+    shift
+    goto :parse_args
+)
+if "%1"=="--validate" (
+    set LAUNCH_MODE=validate
+    shift
+    goto :parse_args
+)
+shift
+goto :parse_args
+
+:args_done
+REM Check environment variable for debug
 if "%HDFVIEW_DEBUG%"=="1" set SLF4J_IMPL=simple
 
 if "!SLF4J_IMPL!"=="simple" (
@@ -188,18 +227,25 @@ if "!SLF4J_IMPL!"=="simple" (
 echo.
 
 REM Launch options
-echo Choose launch method:
-echo 1. Maven exec:java (recommended for development)
-echo 2. Direct JAR execution
-echo 3. Just validate environment (no launch)
-echo.
-set /p CHOICE="Enter choice [1-3]: "
+if "!LAUNCH_MODE!"=="choose" (
+    echo Choose launch method:
+    echo 1. Maven exec:java
+    echo 2. Direct JAR execution ^(recommended^)
+    echo 3. Just validate environment ^(no launch^)
+    echo.
+    set /p CHOICE="Enter choice [1-3]: "
 
-if "!CHOICE!"=="1" goto :maven_exec
-if "!CHOICE!"=="2" goto :jar_exec
-if "!CHOICE!"=="3" goto :validate
-echo [ERROR] Invalid choice. Exiting.
-exit /b 1
+    if "!CHOICE!"=="1" goto :maven_exec
+    if "!CHOICE!"=="2" goto :jar_exec
+    if "!CHOICE!"=="3" goto :validate
+    echo [ERROR] Invalid choice. Exiting.
+    exit /b 1
+)
+
+REM Map launch mode to target
+if "!LAUNCH_MODE!"=="maven" goto :maven_exec
+if "!LAUNCH_MODE!"=="jar" goto :jar_exec
+if "!LAUNCH_MODE!"=="validate" goto :validate
 
 :maven_exec
 echo [INFO] Launching HDFView via Maven...
@@ -210,7 +256,7 @@ goto :end
 
 :jar_exec
 echo [INFO] Launching HDFView via direct JAR execution...
-if not exist "libs\hdfview-3.4-SNAPSHOT.jar" (
+if "!HDFVIEW_JAR!"=="" (
     echo [ERROR] JAR file not found. Build the project first.
     exit /b 1
 )
@@ -222,7 +268,7 @@ if not exist "hdfview\target\lib" (
 )
 
 REM Build classpath, excluding slf4j-nop or slf4j-simple based on debug mode
-set CLASSPATH=libs\hdfview-3.4-SNAPSHOT.jar
+set CLASSPATH=!HDFVIEW_JAR!
 for %%j in (hdfview\target\lib\*.jar) do (
     set "jarname=%%~nxj"
     if "!SLF4J_IMPL!"=="simple" (
@@ -246,7 +292,7 @@ echo [OK] Environment validation complete. Ready to run HDFView!
 echo.
 echo To launch manually:
 echo Option 1 (Maven^): mvn exec:java -Dexec.mainClass="hdf.view.HDFView" -pl hdfview
-echo Option 2 (JAR^): java %JVM_ARGS% -cp "libs\hdfview-3.4-SNAPSHOT.jar;hdfview\target\lib\*" hdf.view.HDFView
+echo Option 2 (JAR^): java %JVM_ARGS% -cp "!HDFVIEW_JAR!;hdfview\target\lib\*" hdf.view.HDFView
 goto :end
 
 :end

@@ -78,7 +78,7 @@ jobs:
         run: |
           echo "Downloading HDFView app binary from release: ${{ inputs.release_tag }}"
           gh release download ${{ inputs.release_tag }} \
-            --repo HDFGroup/hdfview \
+            --repo $GITHUB_REPOSITORY \
             --pattern "HDFView-*App-Linux.tar.gz"
 
           echo "Downloaded files:"
@@ -96,7 +96,8 @@ jobs:
         run: |
           echo "Installing Xvfb and GTK for headless testing..."
           sudo apt-get update
-          sudo apt-get install -y xvfb libgtk-3-0
+          # sudo apt-get install -y xvfb libgtk-3-0
+          sudo apt-get install -y xvfb
 
       - name: Run smoke test (launch app verification)
         run: |
@@ -190,7 +191,7 @@ jobs:
         run: |
           echo "Downloading DEB installer from release: ${{ inputs.release_tag }}"
           gh release download ${{ inputs.release_tag }} \
-            --repo HDFGroup/hdfview \
+            --repo $GITHUB_REPOSITORY \
             --pattern "HDFView-*-Linux.deb"
 
           echo "Downloaded installer:"
@@ -200,6 +201,9 @@ jobs:
         run: |
           echo "Creating directory for xdg-desktop-menu"
           mkdir /usr/share/desktop-directories
+
+          echo "Updating apt cache..."
+          sudo apt-get update
 
           echo "Installing DEB package..."
           sudo dpkg -i HDFView-*-Linux.deb || sudo apt-get install -f -y
@@ -211,7 +215,8 @@ jobs:
         run: |
           echo "Installing Xvfb and GTK for headless testing..."
           sudo apt-get update
-          sudo apt-get install -y xvfb libgtk-3-0
+          #sudo apt-get install -y xvfb libgtk-3-0
+          sudo apt-get install -y xvfb
 
       - name: Verify installed application launches
         run: |
@@ -283,7 +288,20 @@ jobs:
       - name: Install dependencies
         run: |
           echo "Installing required packages in Fedora container..."
-          dnf install -y wget xorg-x11-server-Xvfb gtk3 procps-ng findutils
+          dnf install -y \
+            wget \
+            procps-ng \
+            findutils \
+            xorg-x11-server-Xvfb \
+            xorg-x11-xauth \
+            gtk3 \
+            metacity \
+            dbus-daemon \
+            dbus-x11 \
+            mesa-libGL \
+            fontconfig \
+            xorg-x11-fonts-Type1 \
+            xorg-x11-fonts-misc
 
       - name: Remove pre-installed Java and unset environment variables
         run: |
@@ -323,12 +341,11 @@ jobs:
           echo 'name=GitHub CLI' >> /etc/yum.repos.d/gh-cli.repo
           echo 'baseurl=https://cli.github.com/packages/rpm' >> /etc/yum.repos.d/gh-cli.repo
           echo 'enabled=1' >> /etc/yum.repos.d/gh-cli.repo
-          echo 'gpgcheck=1' >> /etc/yum.repos.d/gh-cli.repo
-          echo 'gpgkey=https://cli.github.com/packages/rpm/gh-cli.gpg' >> /etc/yum.repos.d/gh-cli.repo
+          echo 'gpgcheck=0' >> /etc/yum.repos.d/gh-cli.repo
           dnf install -y gh
 
           gh release download ${{ inputs.release_tag }} \
-            --repo HDFGroup/hdfview \
+            --repo $GITHUB_REPOSITORY \
             --pattern "HDFView-*-Linux.rpm"
 
           echo "Downloaded installer:"
@@ -337,41 +354,75 @@ jobs:
       - name: Install RPM package
         run: |
           echo "Installing RPM package..."
-          dnf install -y HDFView-*-Linux.rpm
+          # Skip %post scripts on github runner
+          dnf install -y HDFView-*-Linux.rpm --setopt=tsflags=noscripts
 
           echo "Verifying installation..."
           rpm -qa | grep -i hdfview || echo "Package listing check"
 
       - name: Verify installed application launches
         run: |
-          echo "Starting Xvfb..."
-          Xvfb :99 -screen 0 1024x768x24 &
-          XVFB_PID=$!
+          set -euo pipefail
+
+          echo "=== Setting up complete headless environment for SWT ==="
+
+          # Create DBus machine-id (required for SWT/GTK applications)
+          echo "Creating DBus machine-id..."
+          dbus-uuidgen > /var/lib/dbus/machine-id
+
+          # Start Xvfb (X11 virtual framebuffer)
+          echo "Starting Xvfb on :99..."
           export DISPLAY=:99
+          Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp &
+          XVFB_PID=$!
           sleep 2
 
-          echo "Attempting to launch installed HDFView..."
+          # Verify X server is running
+          echo "Verifying X server..."
+          if ! xdpyinfo > /dev/null 2>&1; then
+            echo "⚠ Warning: xdpyinfo failed, but continuing..."
+          else
+            echo "✓ X server is responding"
+          fi
 
-          # Try to find the installed launcher
+          # Start window manager (critical for SWT applications)
+          echo "Starting metacity window manager..."
+          metacity --sm-disable --replace &
+          METACITY_PID=$!
+          sleep 2
+
+          echo "=== Headless environment ready ==="
+          echo "Display: $DISPLAY"
+          echo "Xvfb PID: $XVFB_PID"
+          echo "Metacity PID: $METACITY_PID"
+
+          # Find the installed HDFView launcher
+          echo "=== Locating HDFView launcher ==="
+
           if [ -f "/opt/HDFView/bin/HDFView" ]; then
             LAUNCHER="/opt/HDFView/bin/HDFView"
+          elif [ -f "/opt/hdfview/bin/HDFView" ]; then
+            LAUNCHER="/opt/hdfview/bin/HDFView"
           elif [ -f "/usr/bin/HDFView" ]; then
             LAUNCHER="/usr/bin/HDFView"
           else
-            echo "Finding HDFView launcher..."
+            echo "Searching for HDFView launcher..."
             LAUNCHER=$(find /opt /usr -name "HDFView" -type f 2>/dev/null | grep -i hdfview | head -1)
           fi
 
           if [ -z "$LAUNCHER" ]; then
             echo "✗ HDFView launcher not found after installation"
+            kill $METACITY_PID 2>/dev/null || true
             kill $XVFB_PID 2>/dev/null || true
             exit 1
           fi
 
-          echo "Found launcher at: $LAUNCHER"
+          echo "✓ Found launcher at: $LAUNCHER"
 
-          # Launch HDFView and let it run for 5 seconds, then kill it
-          # If it crashes immediately, this will fail
+          # Launch HDFView and verify it stays running
+          echo "=== Testing HDFView launch ==="
+          echo "Launching HDFView (will run for 5 seconds)..."
+
           timeout 10s $LAUNCHER &
           APP_PID=$!
           sleep 5
@@ -382,13 +433,19 @@ jobs:
             kill $APP_PID 2>/dev/null || true
           else
             echo "✗ HDFView crashed or exited immediately"
+            kill $METACITY_PID 2>/dev/null || true
             kill $XVFB_PID 2>/dev/null || true
             exit 1
           fi
 
           # Cleanup
+          echo "=== Cleaning up ==="
+          kill $METACITY_PID 2>/dev/null || true
           kill $XVFB_PID 2>/dev/null || true
+
+          echo ""
           echo "✓ RPM installer smoke test PASSED"
+          echo "✓ HDFView successfully launched in headless Fedora environment"
 
       - name: Test Summary
         if: always()

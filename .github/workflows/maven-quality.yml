@@ -2,7 +2,29 @@ name: Maven Quality Gates
 
 on:
   workflow_call:
+    inputs:
+      hdf4_version:
+        description: 'HDF4 version to use'
+        type: string
+        required: false
+        default: '4.3.1'
+      hdf5_version:
+        description: 'HDF5 version to use'
+        type: string
+        required: false
+        default: '2.0.0'
   workflow_dispatch:
+    inputs:
+      hdf4_version:
+        description: 'HDF4 version to use'
+        type: string
+        required: false
+        default: '4.3.1'
+      hdf5_version:
+        description: 'HDF5 version to use'
+        type: string
+        required: false
+        default: '2.0.0'
   push:
   pull_request:
     branches: [ master ]
@@ -17,6 +39,10 @@ permissions:
   security-events: write
 
 env:
+  # HDF library versions (centralized defaults, overridable via workflow inputs)
+  HDF4_VERSION: ${{ inputs.hdf4_version || '4.3.1' }}
+  HDF5_VERSION: ${{ inputs.hdf5_version || '2.0.0' }}
+
   # Note: java.awt.headless NOT set to true - SWT GUI tests need display (Xvfb)
   MAVEN_OPTS: >-
     -Xmx3g
@@ -77,74 +103,82 @@ jobs:
     - name: Download and Install HDF4 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        echo "Downloading HDF4 from GitHub releases..."
-        gh release download snapshot \
+        HDF4_VERSION="${{ env.HDF4_VERSION }}"
+        echo "Downloading HDF4 ${HDF4_VERSION} release..."
+
+        PATTERN="hdf${HDF4_VERSION}-ubuntu-2404_gcc.tar.gz"
+        echo "Using pattern $PATTERN"
+        gh release download hdf${HDF4_VERSION} \
           --repo HDFGroup/hdf4 \
-          --pattern "hdf4-master-*-ubuntu-2404_gcc.tar.gz"
+          --pattern "$PATTERN" \
+          --clobber
 
-        echo "Extracting HDF4..."
-        tar -zxf hdf4-master-*-ubuntu-2404_gcc.tar.gz
-        cd hdf4
-        tar -zxf HDF-*-Linux.tar.gz --strip-components 1
+        echo "After gh download"
+        ls
 
-        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
-        echo "HDF4 installed to: $HDF4DIR$FILE_NAME_HDF"
+        # Extract outer tar.gz (creates hdf4/ directory)
+        tar -zxvf *-ubuntu-2404_gcc.tar.gz
+        [ -d hdf4 ] || mv hdf4-* hdf4
+
+        # Extract inner tar.gz into hdf4/ directory
+        cd "${{ github.workspace }}/hdf4"
+        echo "Before extracting inner tar.gz"
+        ls
+        tar -zxvf HDF-${HDF4_VERSION}-Linux.tar.gz --strip-components 1
+
+        # Set HDF4 library path
+        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
+
+        echo "HDF4 installed to: $HDF4LIB_PATH"
+        ls -la "$HDF4LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Download and Install HDF5 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        echo "Downloading HDF5 from GitHub releases..."
-        # Retry logic for transient failures
-        for i in 1 2 3; do
-          echo "Download attempt $i of 3..."
-          if gh release download snapshot \
-            --repo HDFGroup/hdf5 \
-            --pattern "hdf5-develop-*-ubuntu-2404_gcc.tar.gz"; then
-            break
-          fi
-          if [ $i -lt 3 ]; then
-            echo "Download failed, retrying in 5 seconds..."
-            sleep 5
-          else
-            echo "All download attempts failed"
-            exit 1
-          fi
-        done
+        HDF5_VERSION="${{ env.HDF5_VERSION }}"
+        echo "Downloading HDF5 ${HDF5_VERSION} release..."
 
-        echo "Extracting HDF5..."
-        tar -zxf hdf5-develop-*-ubuntu-2404_gcc.tar.gz
-        cd hdf5
+        PATTERN="hdf5-${HDF5_VERSION}-ubuntu-2404_gcc.tar.gz"
+        gh release download ${HDF5_VERSION} \
+          --repo HDFGroup/hdf5 \
+          --pattern "$PATTERN" \
+          --clobber
 
-        # Select first tarball if multiple exist (snapshot releases can have multiple versions)
-        HDF5_TARBALL=$(ls HDF5-*-Linux.tar.gz | head -1)
-        echo "Using tarball: $HDF5_TARBALL"
-        tar -zxf "$HDF5_TARBALL" --strip-components 1
+        # Extract outer tar.gz (creates hdf5/ directory)
+        tar -zxvf $PATTERN
+        [ -d hdf5 ] || mv hdf5-* hdf5
 
-        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
-        echo "HDF5 installed to: $HDF5DIR$FILE_NAME_HDF5"
+        # Extract inner tar.gz into hdf5/ directory
+        cd "${{ github.workspace }}/hdf5"
+        tar -zxvf HDF5-${HDF5_VERSION}-Linux.tar.gz --strip-components 1
+
+        # Set HDF5 library path
+        HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
+
+        echo "HDF5 installed to: $HDF5LIB_PATH"
+        ls -la "$HDF5LIB_PATH"
       env:
         GH_TOKEN: ${{ github.token }}
 
     - name: Set Environment Variables from Cache
       if: steps.cache-hdf.outputs.cache-hit == 'true'
       run: |
-        HDF4DIR=${{ github.workspace }}/hdf4/HDF_Group/HDF/
-        FILE_NAME_HDF=$(ls $HDF4DIR | head -1)
-        echo "HDF4LIB_PATH=$HDF4DIR$FILE_NAME_HDF" >> $GITHUB_ENV
+        HDF4_VERSION="${{ env.HDF4_VERSION }}"
+        HDF5_VERSION="${{ env.HDF5_VERSION }}"
 
-        HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
-        FILE_NAME_HDF5=$(ls $HDF5DIR | head -1)
-        echo "HDF5LIB_PATH=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_ENV
+        HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
+        echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
+
+        HDF5LIB_PATH=${{ github.workspace }}/hdf5/HDF_Group/HDF5/${HDF5_VERSION}
+        echo "HDF5LIB_PATH=$HDF5LIB_PATH" >> $GITHUB_ENV
 
         echo "Using cached HDF libraries:"
-        echo "HDF4: $HDF4DIR$FILE_NAME_HDF"
-        echo "HDF5: $HDF5DIR$FILE_NAME_HDF5"
+        echo "HDF4: $HDF4LIB_PATH"
+        echo "HDF5: $HDF5LIB_PATH"
 
     - name: Install HDF JARs to Local Maven Repository
       run: |
@@ -160,19 +194,21 @@ jobs:
         ls -la repository/lib/*.jar 2>/dev/null || echo "No JARs found"
 
         # Install jarhdf5
+        HDF5_VERSION="${{ env.HDF5_VERSION }}"
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=2.0.0 \
+            -DgroupId=jarhdf5 -DartifactId=jarhdf5 -Dversion=${HDF5_VERSION} \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE"
         fi
 
-        # Install jarhdf (version 4.3.1 for HDF4)
+        # Install jarhdf (HDF4)
+        HDF4_VERSION="${{ env.HDF4_VERSION }}"
         if [ -f repository/lib/jarhdf-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" \
-            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=4.3.1 \
+            -DgroupId=jarhdf -DartifactId=jarhdf -Dversion=${HDF4_VERSION} \
             -Dpackaging=jar -DgeneratePom=true
           echo "Installed: $JAR_FILE"
         fi
