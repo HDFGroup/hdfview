@@ -159,7 +159,7 @@ public class Chart extends Dialog {
         if (style == HISTOGRAM) {
             isInteger = true;
             // Use system color directly - no need to create a duplicate
-            barColor  = Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION);
+            barColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION);
         }
         else {
             isInteger = false;
