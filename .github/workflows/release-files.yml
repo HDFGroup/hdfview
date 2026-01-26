@@ -13,7 +13,7 @@ on:
         description: 'Environment to locate files'
         type: string
         required: true
-        default: snapshots
+        default: snapshot
       artifact_basename:
         description: "Base name for all build artifacts (e.g., hdfview-master-abc1234 or HDFView-3.4.0)"
         required: true
@@ -204,7 +204,7 @@ jobs:
 
       - name: PreRelease tag
         id: create_prerelease
-        if: ${{ (inputs.build_environment == 'snapshots') }}
+        if: ${{ (inputs.build_environment == 'snapshot') }}
         uses: softprops/action-gh-release@v2.2.2
         with:
           tag_name: "${{ inputs.release_version_tag }}"

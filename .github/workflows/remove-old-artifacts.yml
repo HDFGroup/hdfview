@@ -17,7 +17,7 @@ on:
         description: 'Environment to locate files'
         type: string
         required: true
-        default: snapshots
+        default: snapshot
       artifact_basename:
         description: "Base name for all build artifacts (e.g., hdfview-master-abc1234 or HDFView-3.4.0)"
         required: true
@@ -72,7 +72,7 @@ jobs:
 
       - name: PreRelease delete from tag
         id: delete_prerelease
-        if: ${{ (inputs.build_environment == 'snapshots') }}
+        if: ${{ (inputs.build_environment == 'snapshot') }}
         uses: mknejp/delete-release-assets@v1
         with:
           token: ${{ github.token }}

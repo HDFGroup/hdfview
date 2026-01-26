@@ -130,7 +130,7 @@ jobs:
     needs: determine-version
     uses: ./.github/workflows/tarball.yml
     with:
-      build_environment: release
+      build_environment: ${{ needs.determine-version.outputs.build_type }}
 
   call-workflow-maven-build:
     needs: [determine-version, get-base-names, call-workflow-tarball]
@@ -146,7 +146,7 @@ jobs:
       hdf5_artifact_basename: ${{ needs.determine-version.outputs.build_type == 'snapshot' && needs.get-base-names.outputs.hdf5_artifact_basename || needs.determine-version.outputs.hdf5_artifact_basename }}
       hdf5_version: ${{ needs.determine-version.outputs.hdf5_version }}
       hdf5_prefix: ${{ needs.determine-version.outputs.hdf5_prefix }}
-      build_environment: release
+      build_environment: ${{ needs.determine-version.outputs.build_type }}
       publish_to_maven_registry: ${{ needs.determine-version.outputs.build_type != 'snapshot' }}
 
   call-workflow-release:
@@ -159,7 +159,7 @@ jobs:
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       release_version_tag: v${{ needs.determine-version.outputs.hdfview_version_without_prefix }}
-      build_environment: release
+      build_environment: ${{ needs.determine-version.outputs.build_type }}
 
   # Test the released artifacts on all platforms
   test-release-linux:

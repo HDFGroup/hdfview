@@ -50,10 +50,10 @@ on:
         required: false
         default: ''
       build_environment:
-        description: 'Environment (snapshots or release)'
+        description: 'Environment (snapshot or release)'
         type: string
         required: false
-        default: 'snapshots'
+        default: 'snapshot'
       publish_to_maven_registry:
         description: 'Publish artifacts to GitHub Packages Maven registry'
         type: boolean
