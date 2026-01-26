@@ -76,25 +76,15 @@ jobs:
     - name: Construct HDF library release tags
       id: construct-hdf-tags
       run: |
-        if [[ "${{ steps.validate-input.outputs.BUILD_TYPE }}" == "release" ]]; then
-          # For release builds, construct tags from version numbers
-          HDF4_VER="${{ inputs.hdf4_version }}"
-          HDF5_VER="${{ inputs.hdf5_version }}"
-          HDF4_TAG="hdf$HDF4_VER"
-          HDF5_TAG="$HDF5_VER"
-          HDF4_BASENAME="$HDF4_TAG"
-          HDF5_BASENAME="$HDF5_TAG"
-          HDF5_PREFIX="hdf5-"
-        else
-          # For snapshot builds, use "snapshot" placeholders (versions will be parsed from downloaded artifacts)
-          HDF4_VER=""
-          HDF5_VER=""
-          HDF4_TAG="snapshot"
-          HDF5_TAG="snapshot"
-          HDF4_BASENAME="snapshot"
-          HDF5_BASENAME="snapshot"
-          HDF5_PREFIX=""
-        fi
+        # For release builds, construct tags from version numbers
+        HDF4_VER="${{ inputs.hdf4_version }}"
+        HDF5_VER="${{ inputs.hdf5_version }}"
+        HDF4_TAG="hdf$HDF4_VER"
+        HDF5_TAG="$HDF5_VER"
+        HDF4_BASENAME="$HDF4_TAG"
+        HDF5_BASENAME="$HDF5_TAG"
+        HDF5_PREFIX="hdf5-"
+
         echo "HDF4_RELEASE_TAG=$HDF4_TAG" >> $GITHUB_OUTPUT
         echo "HDF5_RELEASE_TAG=$HDF5_TAG" >> $GITHUB_OUTPUT
         echo "HDF4_ARTIFACT_BASENAME=$HDF4_BASENAME" >> $GITHUB_OUTPUT
@@ -102,6 +92,7 @@ jobs:
         echo "HDF4_VERSION=$HDF4_VER" >> $GITHUB_OUTPUT
         echo "HDF5_VERSION=$HDF5_VER" >> $GITHUB_OUTPUT
         echo "HDF5_PREFIX=$HDF5_PREFIX" >> $GITHUB_OUTPUT
+
         echo "HDF4 release tag: $HDF4_TAG"
         echo "HDF5 release tag: $HDF5_TAG"
         echo "HDF4 artifact basename: $HDF4_BASENAME"
