@@ -433,7 +433,6 @@
                   <arguments combine.children="append">
                     <argument>--icon</argument>
                     <argument>${project.basedir}/../package_files/hdfview.ico</argument>
-                    <argument>--win-console</argument>
                   </arguments>
                 </configuration>
               </execution>
