@@ -83,13 +83,8 @@ jobs:
         - name: Download and Install HDF4 from GitHub
           run: |
             echo "Downloading HDF4 from release tag: ${{ inputs.hdf4_release_tag }}"
-
-            # Determine file pattern based on whether base name is provided
-            if [ -n "${{ inputs.hdf4_artifact_basename }}" ]; then
             PATTERN="${{ inputs.hdf4_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
-            else
-            PATTERN="*-ubuntu-2404_gcc.tar.gz"
-            fi
+
             echo "Using pattern: $PATTERN"
 
             # Download HDF4 binary from HDF Group GitHub releases
@@ -126,12 +121,8 @@ jobs:
           run: |
             echo "Downloading HDF5 from release tag: ${{ inputs.hdf5_release_tag }}"
 
-            # Determine file pattern based on whether base name is provided
-            if [ -n "${{ inputs.hdf5_artifact_basename }}" ]; then
             PATTERN="${{ inputs.hdf5_prefix }}${{ inputs.hdf5_artifact_basename }}-ubuntu-2404_gcc.tar.gz"
-            else
-            PATTERN="hdf5-*-ubuntu-2404_gcc.tar.gz"
-            fi
+
             echo "Using pattern: $PATTERN"
 
             # Download HDF5 binary from HDF Group GitHub releases
