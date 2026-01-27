@@ -117,7 +117,7 @@ jobs:
       artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
-      release_version_tag: HDFView-99.99.99
+      release_version_tag: v99.99.99
       build_environment: snapshot
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
@@ -133,7 +133,7 @@ jobs:
     uses: ./.github/workflows/remove-old-artifacts.yml
     with:
       artifact_basename: ${{ needs.get-base-names.outputs.hdfview-name }}
-      release_version_tag: HDFView-99.99.99
+      release_version_tag: v99.99.99
       build_environment: snapshot
     if: ${{ needs.get-base-names.outputs.has-previous-build == 'true' && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) && (needs.get-base-names.outputs.hdfview-name != needs.call-workflow-tarball.outputs.artifact_basename) }}
 

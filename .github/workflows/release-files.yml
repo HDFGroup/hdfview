@@ -51,7 +51,7 @@ jobs:
           commit_sha: ${{ inputs.file_sha }}
           tag: "${{ inputs.release_version_tag }}"
           force_push_tag: false
-          tag_exists_error: false
+          tag_exists_error: ${{ inputs.build_environment != 'snapshot' }}
           message: "Latest snapshot"
 
       # Print result using the action output.
