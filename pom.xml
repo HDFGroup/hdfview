@@ -37,7 +37,9 @@
     <!-- HDFView version properties - loaded from VERSION file by properties-maven-plugin -->
     <!-- HDFVIEW_VERSION and HDFVIEW_TAG_PREFIX are read from VERSION file -->
     <!-- Default values match VERSION file for when properties plugin hasn't run yet -->
-    <HDFVIEW_VERSION>99.99.99</HDFVIEW_VERSION>
+    <!-- TODO: Various release workflows parse the updated value inconsistently -->
+    <!-- Handling of the parsed value should either be made consistent, or this value should be replaced -->
+    <HDFVIEW_VERSION>3.4.1</HDFVIEW_VERSION>
     <HDFVIEW_TAG_PREFIX>HDFView</HDFVIEW_TAG_PREFIX>
   </properties>
 
