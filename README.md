@@ -1,5 +1,3 @@
-HDFView version 3.4.0 currently under development
-
 ![HDF5 Logo](src/HDFView.png)
 
 ## Build Status

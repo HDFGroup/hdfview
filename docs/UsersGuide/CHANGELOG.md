@@ -1,4 +1,4 @@
-HDFView version 3.4.0
+HDFView version 99.99.99
 
 # 🔺 HDFView Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous HDFView release, platforms tested, and known problems in this release.
@@ -15,62 +15,27 @@ All notable changes to this project will be documented in this file. This docume
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
 * [Known Problems](#-known-problems)
 
-# 🔆 Executive Summary: HDFView Version 3.4.0
+# 🔆 Executive Summary: HDFView Version 99.99.99
 
 ## Enhanced Features:
-
-* **Float16 Datatype Support**: Added comprehensive support for operating with float16 datatypes
-* **Plugin Path Configuration**: New user option for editing the plugin path and managing plugins
-
-## Updated Foundation:
-
-> [!IMPORTANT]
->
-> - Built and tested with **HDF 4.3.X** and **HDF5 2.Y.Z**
-> - Built and tested with **OpenJDK 21**
-> - Uses Java modules for improved modularity
-> - Utilizes newest `jpackage` for distribution
 
 # 🚀 New Features & Improvements
 
 ## Major Enhancements
 
-* Build system converted to Maven
-
-* **[GH #117](https://github.com/HDFGroup/hdfview/issues/117)** - Add User Option for editing the plugin path and include plugins
-* **[GH #138](https://github.com/HDFGroup/hdfview/issues/138)** - Add Support for operating with float16 and complex datatypes
-
 # 🪲 Bug Fixes
 
 ## Major Bug Fixes
 
-* **HDFVIEW-284** - Fixed crashes on NETCDF-4 grids
-
-  The problem was that references in variable-length containers were handled like strings. Upon investigation, the problem found was that references in any container were handled like strings.
-
-  The table display code for vlen references also changed to account for the changes which fixed the hdf5 Java API. The fix required that variable-length types in the Java wrappers in the hdf5 library for read and write also be fixed.
-
-  Related work:
-  - **HDFView-221** - Add support for true Variable-length types in Java
-  - **HDFView-222** - Fixed the read/write support for variable-length in the Java wrappers. This fix involved handling the data object as a list of lists and using the datatype of the list.
-  - **HDFView-222** - Fixed the object library to handle the List of Lists concept
-  - **HDFView-223** - Updated the DataProviders, DataDisplayConverters and DataValidators to work with variable-length List of Lists
-
 ## Minor Bug Fixes
-
-* **[GH #171](https://github.com/HDFGroup/hdfview/issues/171)** - HDFView fails to find input files on command line when using relative paths
-
-* **[GH #387](https://github.com/HDFGroup/hdfview/issues/387)** (checkHDF5Filters shows 'NONE') Replace corrupted tfilters.h5 test data file with correct version.
-
-* **[GH #352](https://github.com/HDFGroup/hdfview/issues/352)** (isn't displaying attribute values correctly) Incorrectly using the array value as a character limit.
 
 # ☑️ Platforms Tested
 
-HDFView is tested on the following platforms:
+HDFView is built and tested with **HDF 4.3.X** and **HDF5 2.Y.Z** on the following platforms:
 
-* Linux (x86_64, aarch64)
+* Linux (Ubuntu 24, Fedora)
 * Windows
-* macOS
+* macOS (amd64, intel)
 
 Current test results and detailed platform information are available in the [GitHub repository](https://github.com/HDFGroup/hdfview).
 
