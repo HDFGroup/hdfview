@@ -8,7 +8,7 @@ on:
               type: string
               required: true
             build_type:
-              description: 'Build type: release or snapshot'
+              description: 'Build type: release, pre-release, or snapshot'
               type: string
               required: false
               default: 'snapshot'

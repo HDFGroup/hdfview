@@ -202,39 +202,16 @@ jobs:
         run: |
           cat ${{ github.workspace }}/CHANGELOG.md > description.txt
 
-      - name: PreRelease tag
-        id: create_prerelease
-        if: ${{ (inputs.build_environment == 'snapshot') }}
-        uses: softprops/action-gh-release@v2.2.2
-        with:
-          tag_name: "${{ inputs.release_version_tag }}"
-          prerelease: true
-          make_latest: false
-          body_path: description.txt
-          files: |
-              last-file.txt
-              UsersGuide.tar.gz
-              UsersGuide.zip
-              HDFView-*-Linux.deb
-              HDFView-*-Linux.rpm
-              HDFView-*-Windows.msi
-              HDFView-*-Darwin-*.dmg
-              HDFView-*App-Linux.tar.gz
-              HDFView-*App-Windows.zip
-              HDFView-*App-Darwin-*.tar.gz
-              ${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: Release tag
+      - name: Create GitHub Release
         id: create_release
-        if: ${{ (inputs.build_environment == 'release') }}
         uses: softprops/action-gh-release@v2.2.2
         with:
           tag_name: "${{ inputs.release_version_tag }}"
-          prerelease: false
-          make_latest: true
+          prerelease: ${{ inputs.build_environment != 'release' }}
+          make_latest: ${{ inputs.build_environment == 'release' }}
           body_path: description.txt
           files: |
+              ${{ inputs.build_environment == 'snapshot' && 'last-file.txt' || '' }}
               UsersGuide.tar.gz
               UsersGuide.zip
               HDFView-*-Linux.deb

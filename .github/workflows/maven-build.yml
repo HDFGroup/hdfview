@@ -10,7 +10,7 @@ on:
         type: string
         required: true
       build_type:
-        description: 'Build type: release or snapshot'
+        description: 'Build type: release, pre-release, or snapshot'
         type: string
         required: false
         default: 'snapshot'
@@ -50,7 +50,7 @@ on:
         required: false
         default: ''
       build_environment:
-        description: 'Environment (snapshot or release)'
+        description: 'Environment (snapshot, release, or pre-release)'
         type: string
         required: false
         default: 'snapshot'

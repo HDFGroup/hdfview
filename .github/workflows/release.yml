@@ -5,12 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       build_type:
-        description: 'Build type: release or snapshot'
+        description: 'Build type: release, pre-release, or snapshot'
         type: choice
         required: true
         default: snapshot
         options:
           - release
+          - pre-release
           - snapshot
       hdf4_version:
         description: 'HDF4 version number (e.g., 4.3.1) - ignored for snapshots'
@@ -47,8 +48,8 @@ jobs:
       env:
         TAG: ${{ inputs.build_type }}
       run: |
-          if [[ "$TAG" != "release" && "$TAG" != "snapshot" ]]; then
-            echo "Error: build_type must be either 'release' or 'snapshot', got: $TAG"
+          if [[ "$TAG" != "release" && "$TAG" != "pre-release" && "$TAG" != "snapshot" ]]; then
+            echo "Error: build_type must be either 'release', 'pre-release', or 'snapshot', got: $TAG"
             exit 1
           fi
           echo "BUILD_TYPE=$TAG" >> $GITHUB_OUTPUT
@@ -63,9 +64,21 @@ jobs:
         echo "hdfview_version_without_prefix=$EXTRACTED_HDFVIEW_VERSION" >> $GITHUB_OUTPUT
         echo "HDFView version (without prefix): $EXTRACTED_HDFVIEW_VERSION"
 
-        if [[ "${{ steps.validate-input.outputs.BUILD_TYPE }}" == "release" ]]; then
+        BUILD_TYPE="${{ steps.validate-input.outputs.BUILD_TYPE }}"
+
+        if [[ "$BUILD_TYPE" == "release" ]]; then
           # Extract VERSION (full tag) from VERSION file for release builds
           EXTRACTED_VERSION=$(grep "^VERSION=" VERSION | cut -d'=' -f2)
+        elif [[ "$BUILD_TYPE" == "pre-release" ]]; then
+          # For pre-release, construct vX.Y.Z-preN tag with auto-incrementing N
+          BASE_VERSION=$(grep "^VERSION=" VERSION | cut -d'=' -f2)
+          N=1
+          while git rev-parse "${BASE_VERSION}-pre${N}" >/dev/null 2>&1; do
+            echo "Tag ${BASE_VERSION}-pre${N} already exists, incrementing..."
+            ((N++))
+          done
+          EXTRACTED_VERSION="${BASE_VERSION}-pre${N}"
+          echo "Pre-release tag: $EXTRACTED_VERSION"
         else
           # Use "snapshot" for snapshot builds
           EXTRACTED_VERSION="snapshot"
