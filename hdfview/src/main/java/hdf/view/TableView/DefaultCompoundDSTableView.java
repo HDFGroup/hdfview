@@ -686,10 +686,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 HashMap<Integer, Integer> baseIndexMap;
                 HashMap<Integer, Integer> relCmpdStartIndexMap;
 
-                CompoundDataFormat dataFormat     = (CompoundDataFormat)dataObject;
-                Datatype cmpdType                 = dataObject.getDatatype();
-                Datatype[] selectedMemberTypes    = dataFormat.getSelectedMemberTypes();
-                List<Datatype> localSelectedTypes = Arrays.asList(selectedMemberTypes);
+                CompoundDataFormat dataFormat  = (CompoundDataFormat)dataObject;
+                Datatype cmpdType              = dataObject.getDatatype();
+                Datatype[] selectedMemberTypes = dataFormat.getSelectedMemberTypes();
+                List<Datatype> localSelectedTypes =
+                    DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
 
                 HashMap<Integer, Integer>[] maps = null;
                 try {

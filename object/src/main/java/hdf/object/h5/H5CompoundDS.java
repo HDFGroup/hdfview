@@ -1221,7 +1221,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
             try {
                 if (memberType.isVarStr()) {
                     log.trace(
-                        "readSingleCompoundMember(): H5DreadVL did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                        "readSingleCompoundMember(): H5Dread_VLStrings did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
                         dsetID, compTid,
                         (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
                         (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
@@ -1279,6 +1279,41 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                  * something usable.
                  */
                 memberData = convertByteMember(memberType, (byte[])memberData);
+            }
+            else if (memberType.isVarStr() && memberName.contains(CompoundDS.SEPARATOR)) {
+                /* When the leaf datatype is a variable-length string inside a nested compound,
+                   H5Dread_VLStrings returns strings wrapped in curly braces - one pair per
+                   nesting level.  Strip them so callers see the raw string value. */
+                int nestingDepth = 0;
+                for (int i = 0; i < memberName.length(); i++) {
+                    if (memberName.charAt(i) == CompoundDS.SEPARATOR.charAt(0))
+                        nestingDepth++;
+                }
+                int bracesToStrip = nestingDepth + 1;
+                log.trace(
+                    "readSingleCompoundMember(): stripping {} brace pairs from VLEN strings in nested compound",
+                    bracesToStrip);
+
+                if (memberData == null) {
+                    throw new Exception(
+                        "H5Dread_VLStrings returned null for nested compound VLEN string member: " +
+                        memberName);
+                }
+
+                Object[] strArray = (Object[])memberData;
+                for (int i = 0; i < strArray.length; i++) {
+                    if (strArray[i] instanceof String s && s.length() >= bracesToStrip * 2) {
+                        int leading = 0;
+                        while (leading < bracesToStrip && s.charAt(leading) == '{')
+                            leading++;
+                        int trailing = 0;
+                        while (trailing < bracesToStrip && s.charAt(s.length() - 1 - trailing) == '}')
+                            trailing++;
+                        if (leading > 0 || trailing > 0) {
+                            strArray[i] = s.substring(leading, s.length() - trailing);
+                        }
+                    }
+                }
             }
         }
 
