@@ -49,20 +49,20 @@ import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
-
 import javax.imageio.ImageIO;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import hdf.object.Datatype;
 import hdf.object.FileFormat;
 import hdf.object.Group;
 import hdf.object.ScalarDS;
 import hdf.view.ViewProperties.BITMASK_OP;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * The "Tools" class contains various tools for HDF files such as jpeg to HDF
@@ -2500,8 +2500,8 @@ public final class Tools {
     public static boolean applyBitmask(Object theData, BitSet theMask, ViewProperties.BITMASK_OP op)
     {
 
-        if (theData == null || !theData.getClass().isArray() ||
-            Array.getLength(theData) <= 0 || theMask == null)
+        if (theData == null || !theData.getClass().isArray() || Array.getLength(theData) <= 0 ||
+            theMask == null)
             return false;
 
         char nt      = '0';
