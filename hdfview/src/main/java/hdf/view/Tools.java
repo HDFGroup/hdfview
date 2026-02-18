@@ -2499,8 +2499,9 @@ public final class Tools {
      */
     public static boolean applyBitmask(Object theData, BitSet theMask, ViewProperties.BITMASK_OP op)
     {
-        if (theData == null || !(theData instanceof Array) ||
-            ((theData instanceof Array) && (Array.getLength(theData) <= 0)) || theMask == null)
+
+        if (theData == null || !theData.getClass().isArray() || Array.getLength(theData) <= 0 ||
+            theMask == null)
             return false;
 
         char nt      = '0';
