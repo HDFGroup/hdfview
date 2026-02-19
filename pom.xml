@@ -105,7 +105,7 @@
     <!-- Instructing the resources plugin to filter certain directories -->
     <resources>
       <resource>
-        <directory>.</directory>
+        <directory>src/main/resources</directory>
         <filtering>true</filtering>
       </resource>
     </resources>
