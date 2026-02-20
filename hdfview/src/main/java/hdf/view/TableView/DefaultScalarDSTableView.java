@@ -680,7 +680,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         selectionLayer                    = new SelectionLayer(dataLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
 
-        dataLayer.setDefaultColumnWidth(80);
+        dataLayer.setDefaultColumnWidth(getDefaultColumnWidth());
 
         // Create the Column Header layer
         columnHeaderDataProvider = new ScalarDSColumnHeaderDataProvider(dataObject);
@@ -690,8 +690,7 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
         // Create the Row Header layer
         rowHeaderDataProvider = new RowHeaderDataProvider(dataObject);
 
-        // Try to adapt row height to current font
-        int defaultRowHeight = curFont == null ? 20 : (2 * curFont.getFontData()[0].getHeight());
+        int defaultRowHeight = getDefaultRowHeight();
 
         DataLayer baseLayer           = new DataLayer(rowHeaderDataProvider, 40, defaultRowHeight);
         RowHeaderLayer rowHeaderLayer = new RowHeader(baseLayer, viewportLayer, selectionLayer);

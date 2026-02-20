@@ -47,10 +47,6 @@ public abstract class Dataset extends HObject implements DataFormat {
 
     private static final Logger log = LoggerFactory.getLogger(Dataset.class);
 
-    // SWT uses int pixel coordinates; dimension * pixelsPerCell overflows int, silently breaking display.
-    public static final long MAX_DISPLAY_ROWS = 80_000_000L; // ~89M at 24px row height
-    public static final long MAX_DISPLAY_COLS = 25_000_000L; // ~26M at 80px column width
-
     /**
      * The memory buffer that holds the raw data array of the dataset.
      */
@@ -664,19 +660,6 @@ public abstract class Dataset extends HObject implements DataFormat {
     {
         log.trace("getData(): isDataLoaded={}", isDataLoaded);
         if (!isDataLoaded) {
-            long displayRows = selectedDims[selectedIndex[0]];
-            long displayCols = (rank > 1) ? selectedDims[selectedIndex[1]] : 1;
-            if (displayRows > MAX_DISPLAY_ROWS) {
-                throw new Exception("Too many rows to display (" +
-                    displayRows + " rows, limit is " + MAX_DISPLAY_ROWS +
-                    "). Please select a smaller subset.");
-            }
-            if (displayCols > MAX_DISPLAY_COLS) {
-                throw new Exception("Too many columns to display (" +
-                    displayCols + " columns, limit is " + MAX_DISPLAY_COLS +
-                    "). Please select a smaller subset.");
-            }
-
             data = read(); // load the data
             if (data != null) {
                 originalBuf  = data;
