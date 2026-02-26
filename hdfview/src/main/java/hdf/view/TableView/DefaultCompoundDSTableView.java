@@ -159,7 +159,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         selectionLayer                    = new SelectionLayer(expandCollapseLayer);
         final ViewportLayer viewportLayer = new ViewportLayer(selectionLayer);
 
-        dataLayer.setDefaultColumnWidth(getDefaultColumnWidth());
+        dataLayer.setDefaultColumnWidth(80);
 
         // Create the Column Header layer
         columnHeaderDataProvider = new CompoundDSColumnHeaderDataProvider(dataObject);
@@ -176,7 +176,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         // Create the Row Header layer
         rowHeaderDataProvider = new RowHeaderDataProvider(dataObject);
 
-        int defaultRowHeight = getDefaultRowHeight();
+        // Try to adapt row height to current font
+        int defaultRowHeight = curFont == null ? 20 : (2 * curFont.getFontData()[0].getHeight());
 
         DataLayer baseLayer           = new DataLayer(rowHeaderDataProvider, 40, defaultRowHeight);
         RowHeaderLayer rowHeaderLayer = new RowHeader(baseLayer, viewportLayer, selectionLayer);

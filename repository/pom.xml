@@ -111,22 +111,7 @@
                             <generatePom>true</generatePom>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>eclipse-nebula-widgets-nattable-core</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>org.eclipse.local</groupId>
-                            <artifactId>org.eclipse.nebula.widgets.nattable.core</artifactId>
-                            <version>2.4.0</version>
-                            <packaging>jar</packaging>
-                            <file>
-                                ${basedir}/lib/org.eclipse.nebula.widgets.nattable.core.jar</file>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                    </execution>
+
                     <execution>
                         <id>eclipse-swtbot</id>
                         <phase>verify</phase>

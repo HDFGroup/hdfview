@@ -158,12 +158,6 @@ public abstract class DefaultBaseTableView implements TableView {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultBaseTableView.class);
 
-    /** Default row height in pixels when no font is available. */
-    protected static final int DEFAULT_ROW_HEIGHT = 20;
-
-    /** Default column width in pixels for NatTable data cells. */
-    protected static final int DEFAULT_COLUMN_WIDTH = 80;
-
     private final Display display = Display.getDefault();
     /** The reference to the display shell used. */
     protected final Shell shell;
@@ -282,26 +276,6 @@ public abstract class DefaultBaseTableView implements TableView {
     /** Label to indicate the current cell location. */
     protected Label cellLabel;
 
-    /**
-     * Returns the default row height in pixels for NatTable data cells.
-     * The default row height is determined by the current font size, if available.
-     *
-     * @return default row height in pixels
-     */
-    protected int getDefaultRowHeight()
-    {
-        return curFont == null ? DEFAULT_ROW_HEIGHT : (2 * curFont.getFontData()[0].getHeight());
-    }
-
-    /**
-     * Returns the default column width in pixels for NatTable data cells.
-     *
-     * @return default column width in pixels
-     */
-    protected int getDefaultColumnWidth()
-    {
-        return DEFAULT_COLUMN_WIDTH;
-    }
 
     /**
      * Constructs a base TableView with no additional data properties.
@@ -1167,20 +1141,17 @@ public abstract class DefaultBaseTableView implements TableView {
         if (theDataObject.getRank() > 2)
             theDataObject.getSelectedDims()[theDataObject.getSelectedIndex()[2]] = 1;
 
-        // SWT uses int pixel coordinates, 
-        // so throw an error if dimension * pixelsPerCell would overflow int
+        // NatTable uses 32-bit int for row/column indices
         long displayRows = theDataObject.getHeight();
         long displayCols = theDataObject.getWidth();
-        long maxRows = Integer.MAX_VALUE / (long)getDefaultRowHeight();
-        long maxCols = Integer.MAX_VALUE / (long)getDefaultColumnWidth();
-        if (displayRows > maxRows) {
+        if (displayRows > Integer.MAX_VALUE) {
             throw new Exception("Too many rows to display (" +
-                displayRows + " rows, limit is " + maxRows +
+                displayRows + ", limit is " + Integer.MAX_VALUE +
                 "). Please select a smaller subset.");
         }
-        if (displayCols > maxCols) {
+        if (displayCols > Integer.MAX_VALUE) {
             throw new Exception("Too many columns to display (" +
-                displayCols + " columns, limit is " + maxCols +
+                displayCols + ", limit is " + Integer.MAX_VALUE +
                 "). Please select a smaller subset.");
         }
 
