@@ -3,12 +3,6 @@ name: hdfview daily build
 # Triggers the workflow on a schedule or on demand
 on:
   workflow_dispatch:
-    inputs:
-      use_ignore:
-        description: 'Ignore has_changes check'
-        type: string
-        required: false
-        default: check
   schedule:
     - cron: "7 0 * * *"
 
@@ -17,14 +11,34 @@ permissions:
   packages: write
 
 jobs:
+  check-for-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check-new-commits.outputs.has-new-commits }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check for changed source
+      id: check-new-commits
+      uses: adriangl/check-new-commits-action@v1
+      with:
+        seconds: 86400 # One day in seconds
+
+    - run: echo "You have ${{ steps.check-new-commits.outputs.new-commits-number }} new commit(s) ✅!"
+      if: ${{ steps.check-new-commits.outputs.has-new-commits == 'true' }}
+
+    - run: echo "No new commits in the last 24 hours."
+      if: ${{ steps.check-new-commits.outputs.has-new-commits != 'true' }}
+
   get-base-names:
+    needs: check-for-changes
+    if: ${{ needs.check-for-changes.outputs.has_changes == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       hdf4-name: ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}
       hdf5-name: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
       hdfview-name: ${{ steps.gethdfviewbase.outputs.HDFVIEW_NAME_BASE }}
       has-previous-build: ${{ steps.check-last-file.outputs.EXISTS }}
-      run-ignore: ${{ steps.getinputs.outputs.INPUTS_IGNORE }}
 
     steps:
     - uses: actions/checkout@v4.1.7
@@ -81,18 +95,10 @@ jobs:
         echo "hdf4 base name is ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}."
         echo "hdf5 base name is ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}."
 
-    - name: Read inputs
-      id: getinputs
-      run: |
-        echo "INPUTS_IGNORE=${{ inputs.use_ignore }}" >> $GITHUB_OUTPUT
-
-    - run: echo "use_ignore is ${{ steps.getinputs.outputs.INPUTS_IGNORE }}."
-
   call-workflow-tarball:
     needs: get-base-names
     uses: ./.github/workflows/tarball.yml
     with:
-      use_ignore: ${{ needs.get-base-names.outputs.run-ignore }}
       build_environment: snapshot
 
   call-workflow-maven-build:
@@ -106,7 +112,6 @@ jobs:
       hdf5_release_tag: snapshot
       hdf5_artifact_basename: ${{ needs.get-base-names.outputs.hdf5-name }}
       build_environment: snapshot
-    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-release:
     needs: [get-base-names, call-workflow-tarball, call-workflow-maven-build]
@@ -119,13 +124,11 @@ jobs:
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
       release_version_tag: v99.99.99
       build_environment: snapshot
-    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) }}
 
   # Remove old snapshot artifacts from the GitHub release to prevent accumulation
   # Only runs if:
   #   1. There was a previous build (last-file.txt exists)
   #   2. The new build has a different base name (commit SHA changed)
-  #   3. The build succeeded or ignore flag is set
   call-workflow-remove:
     needs: [get-base-names, call-workflow-tarball, call-workflow-maven-build, call-workflow-release]
     permissions:
@@ -135,5 +138,5 @@ jobs:
       artifact_basename: ${{ needs.get-base-names.outputs.hdfview-name }}
       release_version_tag: v99.99.99
       build_environment: snapshot
-    if: ${{ needs.get-base-names.outputs.has-previous-build == 'true' && ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-base-names.outputs.run-ignore == 'ignore')) && (needs.get-base-names.outputs.hdfview-name != needs.call-workflow-tarball.outputs.artifact_basename) }}
+    if: ${{ needs.get-base-names.outputs.has-previous-build == 'true' && (needs.get-base-names.outputs.hdfview-name != needs.call-workflow-tarball.outputs.artifact_basename) }}
 
