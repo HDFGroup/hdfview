@@ -276,7 +276,6 @@ public abstract class DefaultBaseTableView implements TableView {
     /** Label to indicate the current cell location. */
     protected Label cellLabel;
 
-
     /**
      * Constructs a base TableView with no additional data properties.
      *
@@ -1145,23 +1144,21 @@ public abstract class DefaultBaseTableView implements TableView {
         long displayRows = theDataObject.getHeight();
         long displayCols = theDataObject.getWidth();
         if (displayRows > Integer.MAX_VALUE) {
-            throw new Exception("Too many rows to display (" +
-                displayRows + ", limit is " + Integer.MAX_VALUE +
-                "). Please select a smaller subset.");
+            throw new Exception("Too many rows to display (" + displayRows + ", limit is " +
+                                Integer.MAX_VALUE + "). Please select a smaller subset.");
         }
         if (displayCols > Integer.MAX_VALUE) {
-            throw new Exception("Too many columns to display (" +
-                displayCols + ", limit is " + Integer.MAX_VALUE +
-                "). Please select a smaller subset.");
+            throw new Exception("Too many columns to display (" + displayCols + ", limit is " +
+                                Integer.MAX_VALUE + "). Please select a smaller subset.");
         }
         if (displayRows > Integer.MAX_VALUE / 20) {
             log.warn("loadData(): row count {} approaches NatTable 32-bit limit; "
-                     + "display may not render correctly. Consider selecting a smaller subset.",
+                         + "display may not render correctly. Consider selecting a smaller subset.",
                      displayRows);
         }
         if (displayCols > Integer.MAX_VALUE / 80) {
             log.warn("loadData(): column count {} approaches NatTable 32-bit limit; "
-                     + "display may not render correctly. Consider selecting a smaller subset.",
+                         + "display may not render correctly. Consider selecting a smaller subset.",
                      displayCols);
         }
 
