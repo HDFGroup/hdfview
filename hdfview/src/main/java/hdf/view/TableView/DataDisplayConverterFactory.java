@@ -73,7 +73,15 @@ public class DataDisplayConverterFactory {
 
         dataFormatReference = dataObject;
 
-        HDFDisplayConverter converter = getDataDisplayConverter(dataObject.getDatatype());
+        Datatype dtype = dataObject.getDatatype();
+
+        // For VLEN(compound), use compound base type so CompoundDataDisplayConverter is created
+        if (dtype.isVLEN() && !dtype.isVarStr() && dtype.getDatatypeBase() != null &&
+            dtype.getDatatypeBase().isCompound()) {
+            dtype = dtype.getDatatypeBase();
+        }
+
+        HDFDisplayConverter converter = getDataDisplayConverter(dtype);
 
         return converter;
     }

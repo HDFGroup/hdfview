@@ -74,7 +74,17 @@ public class DataProviderFactory {
 
         dataFormatReference = dataObject;
 
-        HDFDataProvider dataProvider = getDataProvider(dataObject.getDatatype(), dataBuf, dataTransposed);
+        Datatype dtype = dataObject.getDatatype();
+
+        // For VLEN(compound), use the compound base type so CompoundDataProvider is created.
+        // The VLEN aspect is handled in the read path (H5DreadVL), and each member's data
+        // is a String[] of brace-enclosed values.
+        if (dtype.isVLEN() && !dtype.isVarStr() && dtype.getDatatypeBase() != null &&
+            dtype.getDatatypeBase().isCompound()) {
+            dtype = dtype.getDatatypeBase();
+        }
+
+        HDFDataProvider dataProvider = getDataProvider(dtype, dataBuf, dataTransposed);
 
         return dataProvider;
     }
