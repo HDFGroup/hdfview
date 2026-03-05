@@ -686,8 +686,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 HashMap<Integer, Integer> baseIndexMap;
                 HashMap<Integer, Integer> relCmpdStartIndexMap;
 
-                CompoundDataFormat dataFormat  = (CompoundDataFormat)dataObject;
-                Datatype cmpdType              = dataObject.getDatatype();
+                CompoundDataFormat dataFormat = (CompoundDataFormat)dataObject;
+                Datatype cmpdType             = dataObject.getDatatype();
 
                 // Resolve VLEN(compound) to compound base type
                 if (cmpdType.isVLEN() && !cmpdType.isVarStr() && cmpdType.getDatatypeBase() != null &&
