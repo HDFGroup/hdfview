@@ -16,6 +16,7 @@ package hdf.object.h5;
 
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -943,30 +944,15 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
         }
         else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
             /*
-             * TODO(HDFView) [2025-12]: Implement true variable-length type support for compound datasets.
-             * Currently returns "*UNSUPPORTED*" placeholder for non-string variable-length fields.
-             * Requires integration with HDF5 H5Tvlen_* APIs for proper memory management.
-             * Related: See H5CompoundAttr.java line 873, H5Datatype.java line 2774.
-             */
-            String[] errVal = new String[nSelPoints];
-            String errStr   = "*UNSUPPORTED*";
-
-            for (int j = 0; j < nSelPoints; j++)
-                errVal[j] = errStr;
-
-            /*
-             * Setup a fake data list.
+             * For VLEN of COMPOUND, peel off the VLEN wrapper and recurse with the compound
+             * base type. The actual VLEN reading is handled in readSingleCompoundMember(),
+             * which detects the VLEN wrapper via dsDatatype.isVLEN() and uses H5DreadVL.
              */
             Datatype baseType = cmpdType.getDatatypeBase();
-            while (baseType != null && !baseType.isCompound()) {
-                baseType = baseType.getDatatypeBase();
+            if (baseType != null && baseType.isCompound()) {
+                theData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, (H5Datatype)baseType, writeBuf,
+                                         globalMemberIndex);
             }
-
-            List<Object> fakeVlenData =
-                (List<Object>)H5Datatype.allocateArray((H5Datatype)baseType, nSelPoints);
-            fakeVlenData.add(errVal);
-
-            theData = fakeVlenData;
         }
         else if (cmpdType.isCompound()) {
             List<Object> memberDataList = null;
@@ -1216,6 +1202,43 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
             }
 
             /*
+             * If the dataset's top-level type is VLEN, compTid will be VLEN(compound{member}).
+             * Use H5DreadVL with a separate buffer and convert to string representation,
+             * since each row can have a different number of variable-length elements.
+             */
+            if (dsDatatype.isVLEN()) {
+                try {
+                    log.trace(
+                        "readSingleCompoundMember(): VLEN compound H5DreadVL did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                        dsetID, compTid,
+                        (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
+                        (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
+
+                    @SuppressWarnings("rawtypes")
+                    ArrayList[] vlBuf = new ArrayList[nSelPoints];
+                    for (int j = 0; j < nSelPoints; j++)
+                        vlBuf[j] = new ArrayList<>();
+
+                    H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, vlBuf);
+
+                    memberData = convertVlenMemberToStrings(vlBuf, nSelPoints, memberType);
+                }
+                catch (HDF5DataFiltersException exfltr) {
+                    log.debug("readSingleCompoundMember(): VLEN read failure: ", exfltr);
+                    throw new Exception("Filter not available exception: " + exfltr.getMessage(), exfltr);
+                }
+                catch (Exception ex) {
+                    log.debug("readSingleCompoundMember(): VLEN read failure: ", ex);
+                    throw new Exception("failed to read VLEN compound member: " + ex.getMessage(), ex);
+                }
+                finally {
+                    dsDatatype.close(compTid);
+                }
+
+                return memberData;
+            }
+
+            /*
              * Actually read the data for this member now that everything has been setup.
              */
             try {
@@ -1318,6 +1341,52 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
         }
 
         return memberData;
+    }
+
+    /*
+     * Converts VLEN data (ArrayList[]) returned by H5DreadVL into a String[] where each
+     * element is a brace-enclosed, comma-separated list of values for that row.
+     * E.g., for VLEN(compound{x:f64}) with row 0 having two records (1.0, 3.0),
+     * the result for row 0 would be "{1.0, 3.0}".
+     */
+    @SuppressWarnings("rawtypes")
+    private String[] convertVlenMemberToStrings(ArrayList[] vlBuf, int nSelPoints, H5Datatype memberType)
+    {
+        String[] result = new String[nSelPoints];
+        for (int j = 0; j < nSelPoints; j++) {
+            ArrayList vlElements = vlBuf[j];
+            StringBuilder sb     = new StringBuilder("{");
+
+            for (int k = 0; k < vlElements.size(); k++) {
+                if (k > 0)
+                    sb.append(", ");
+
+                Object elem = vlElements.get(k);
+                if (elem instanceof byte[]) {
+                    try {
+                        Object converted = convertByteMember(memberType, (byte[])elem);
+                        if (converted != null && converted.getClass().isArray() &&
+                            Array.getLength(converted) > 0) {
+                            sb.append(Array.get(converted, 0));
+                        }
+                        else {
+                            sb.append(converted);
+                        }
+                    }
+                    catch (Exception ex) {
+                        log.debug("convertVlenMemberToStrings(): byte conversion failure: ", ex);
+                        sb.append("*ERR*");
+                    }
+                }
+                else {
+                    sb.append(elem);
+                }
+            }
+
+            sb.append("}");
+            result[j] = sb.toString();
+        }
+        return result;
     }
 
     /*

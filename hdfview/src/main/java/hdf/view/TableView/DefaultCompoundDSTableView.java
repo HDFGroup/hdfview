@@ -686,8 +686,15 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 HashMap<Integer, Integer> baseIndexMap;
                 HashMap<Integer, Integer> relCmpdStartIndexMap;
 
-                CompoundDataFormat dataFormat  = (CompoundDataFormat)dataObject;
-                Datatype cmpdType              = dataObject.getDatatype();
+                CompoundDataFormat dataFormat = (CompoundDataFormat)dataObject;
+                Datatype cmpdType             = dataObject.getDatatype();
+
+                // Resolve VLEN(compound) to compound base type
+                if (cmpdType.isVLEN() && !cmpdType.isVarStr() && cmpdType.getDatatypeBase() != null &&
+                    cmpdType.getDatatypeBase().isCompound()) {
+                    cmpdType = cmpdType.getDatatypeBase();
+                }
+
                 Datatype[] selectedMemberTypes = dataFormat.getSelectedMemberTypes();
                 List<Datatype> localSelectedTypes =
                     DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
@@ -831,7 +838,14 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         {
             CompoundDataFormat dataFormat = (CompoundDataFormat)dataObject;
 
-            Datatype cmpdType            = dataObject.getDatatype();
+            Datatype cmpdType = dataObject.getDatatype();
+
+            // Resolve VLEN(compound) to the compound base type for display purposes
+            if (cmpdType.isVLEN() && !cmpdType.isVarStr() && cmpdType.getDatatypeBase() != null &&
+                cmpdType.getDatatypeBase().isCompound()) {
+                cmpdType = cmpdType.getDatatypeBase();
+            }
+
             List<Datatype> selectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
             final List<String> datasetMemberNames = Arrays.asList(dataFormat.getSelectedMemberNames());
 
@@ -931,15 +945,18 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                                            memberTypes);
             }
             else if (curDtype.isVLEN() && !curDtype.isVarStr()) {
-                log.debug("recursiveColumnHeaderSetup: curDtype={} size={}", curDtype,
-                          curDtype.getDatatypeSize());
                 /*
-                 * TODO(HDFView) [2025-12]: Implement column header setup for variable-length compound
-                 * members. Currently empty - no column headers generated for non-string variable-length
-                 * fields. Blocked by lack of true variable-length support in core library. Related:
-                 * H5CompoundDS.java:946, H5CompoundAttr.java:873, H5Datatype.java:2774 for vlen core support.
-                 * Cannot implement until variable-length data reading is functional.
+                 * For VLEN of COMPOUND, peel off the VLEN wrapper and recurse with the
+                 * compound base type. Each cell displays the variable-length values as a
+                 * brace-enclosed list, so no column multiplication is needed.
                  */
+                Datatype baseType = curDtype.getDatatypeBase();
+                if (baseType != null && baseType.isCompound()) {
+                    if (memberTypes.isEmpty()) {
+                        memberTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, baseType);
+                    }
+                    recursiveColumnHeaderSetup(outColNames, dataFormat, baseType, memberNames, memberTypes);
+                }
             }
             else if (curDtype.isCompound()) {
                 ListIterator<String> localIt = memberNames.listIterator();

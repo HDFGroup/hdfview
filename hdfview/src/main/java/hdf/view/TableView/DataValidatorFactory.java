@@ -69,9 +69,17 @@ public class DataValidatorFactory {
 
         dataFormatReference = dataObject;
 
+        Datatype dtype = dataObject.getDatatype();
+
+        // For VLEN(compound), use compound base type so CompoundDataValidator is created
+        if (dtype.isVLEN() && !dtype.isVarStr() && dtype.getDatatypeBase() != null &&
+            dtype.getDatatypeBase().isCompound()) {
+            dtype = dtype.getDatatypeBase();
+        }
+
         HDFDataValidator validator = null;
         try {
-            validator = getDataValidator(dataObject.getDatatype());
+            validator = getDataValidator(dtype);
         }
         catch (Exception ex) {
             log.debug("getDataValidator(DataFormat): failed to retrieve a DataValidator: ", ex);
