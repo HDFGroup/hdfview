@@ -1140,6 +1140,28 @@ public abstract class DefaultBaseTableView implements TableView {
         if (theDataObject.getRank() > 2)
             theDataObject.getSelectedDims()[theDataObject.getSelectedIndex()[2]] = 1;
 
+        // NatTable uses 32-bit int for row/column indices
+        long displayRows = theDataObject.getHeight();
+        long displayCols = theDataObject.getWidth();
+        if (displayRows > Integer.MAX_VALUE) {
+            throw new Exception("Too many rows to display (" + displayRows + ", limit is " +
+                                Integer.MAX_VALUE + "). Please select a smaller subset.");
+        }
+        if (displayCols > Integer.MAX_VALUE) {
+            throw new Exception("Too many columns to display (" + displayCols + ", limit is " +
+                                Integer.MAX_VALUE + "). Please select a smaller subset.");
+        }
+        if (displayRows > Integer.MAX_VALUE / 20) {
+            log.warn("loadData(): row count {} approaches NatTable 32-bit limit; "
+                         + "display may not render correctly. Consider selecting a smaller subset.",
+                     displayRows);
+        }
+        if (displayCols > Integer.MAX_VALUE / 80) {
+            log.warn("loadData(): column count {} approaches NatTable 32-bit limit; "
+                         + "display may not render correctly. Consider selecting a smaller subset.",
+                     displayCols);
+        }
+
         dataValue = null;
         try {
             log.trace("loadData(): call getData()");
