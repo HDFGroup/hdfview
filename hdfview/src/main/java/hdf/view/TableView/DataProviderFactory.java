@@ -807,8 +807,8 @@ public class DataProviderFactory {
                             break;
                         vlenStartIdx--;
                     }
-                    theValue =
-                        ((VlenDataProvider)base).getElementValue(colValue, rowIdx, columnIndex - vlenStartIdx);
+                    theValue = ((VlenDataProvider)base)
+                                   .getElementValue(colValue, rowIdx, columnIndex - vlenStartIdx);
                     if (theValue == null)
                         theValue = "";
                 }

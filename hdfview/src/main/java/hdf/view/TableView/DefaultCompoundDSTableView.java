@@ -1036,9 +1036,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                             // synthesize the inner-compound leaf names from the declared
                             // member-name list, using the header as prefix.
                             String baseName = curName.replaceAll(CompoundDS.SEPARATOR, "->");
-                            selMemberNames =
-                                buildInnerCompoundLeafNames(nestedArrayOfCompoundType, baseName);
-                            namesConsumed = 1;
+                            selMemberNames = buildInnerCompoundLeafNames(nestedArrayOfCompoundType, baseName);
+                            namesConsumed  = 1;
                         }
                         else {
                             // Array-of-compound: flat list has header + each inner leaf name.

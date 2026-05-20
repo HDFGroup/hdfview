@@ -101,8 +101,8 @@ public class DataFactoryUtils {
      * Identity-keyed so structurally identical Datatypes at different positions can
      * carry different widths.
      */
-    public static IdentityHashMap<Datatype, Integer>
-    computeVlenMaxLens(List<Datatype> selectedTypes, Object dataValue)
+    public static IdentityHashMap<Datatype, Integer> computeVlenMaxLens(List<Datatype> selectedTypes,
+                                                                        Object dataValue)
     {
         IdentityHashMap<Datatype, Integer> out = new IdentityHashMap<>();
         if (!(dataValue instanceof List) || selectedTypes == null)
@@ -167,8 +167,7 @@ public class DataFactoryUtils {
      * against that list would spuriously remove every non-compound member.
      */
     public static List<Datatype> filterNonSelectedMembers(CompoundDataFormat dataFormat,
-                                                          final Datatype compoundType,
-                                                          boolean isTopLevel)
+                                                          final Datatype compoundType, boolean isTopLevel)
     {
         List<Datatype> selectedTypes = new ArrayList<>(compoundType.getCompoundMemberTypes());
         if (!isTopLevel)
@@ -313,8 +312,8 @@ public class DataFactoryUtils {
                  * Therefore, we repeat our mapping for these types n times.
                  */
                 for (int j = 0; j < arrSize; j++) {
-                    buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens,
-                                             curMapIndex, curProviderIndex, depth + 1);
+                    buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens, curMapIndex,
+                                             curProviderIndex, depth + 1);
                 }
             }
             else if (curType.isCompound()) {
