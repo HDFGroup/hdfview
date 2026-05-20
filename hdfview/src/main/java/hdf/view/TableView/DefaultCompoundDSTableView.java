@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -831,6 +832,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         // actually label the columns.
         private final ArrayList<String> columnNames;
 
+        private final Map<Datatype, Integer> vlenMaxLens;
+
         private final int ncols;
         private final int groupSize;
 
@@ -848,6 +851,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             List<Datatype> selectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
             final List<String> datasetMemberNames = Arrays.asList(dataFormat.getSelectedMemberNames());
+
+            vlenMaxLens = DataFactoryUtils.computeVlenMaxLens(selectedTypes, dataValue);
 
             columnNames = new ArrayList<>(dataFormat.getSelectedMemberCount());
 
@@ -911,7 +916,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                  * architectural issue.
                  */
                 if (memberTypes.isEmpty()) {
-                    memberTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedCompoundType);
+                    memberTypes =
+                        DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedCompoundType, false);
                 }
 
                 /*
@@ -945,25 +951,56 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                                            memberTypes);
             }
             else if (curDtype.isVLEN() && !curDtype.isVarStr()) {
-                /*
-                 * For VLEN of COMPOUND, peel off the VLEN wrapper and recurse with the
-                 * compound base type. Each cell displays the variable-length values as a
-                 * brace-enclosed list, so no column multiplication is needed.
-                 */
+                // VLEN of X: expand to max_vlen columns with [i] suffix, mirroring the ARRAY branch.
+                int vlenLen       = DataFactoryUtils.getVlenExpansion(vlenMaxLens, curDtype);
                 Datatype baseType = curDtype.getDatatypeBase();
+
                 if (baseType != null && baseType.isCompound()) {
-                    if (memberTypes.isEmpty()) {
-                        memberTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, baseType);
+                    if (memberTypes.isEmpty())
+                        memberTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, baseType, false);
+
+                    StringBuilder sBuilder              = new StringBuilder();
+                    ArrayList<String> nestedMemberNames = new ArrayList<>(vlenLen * memberNames.size());
+                    for (int i = 0; i < vlenLen; i++) {
+                        for (int j = 0; j < memberNames.size(); j++) {
+                            sBuilder.setLength(0);
+                            sBuilder.append(memberNames.get(j).replaceAll(CompoundDS.SEPARATOR, "->"));
+                            sBuilder.append("[").append(i).append("]");
+                            nestedMemberNames.add(sBuilder.toString());
+                        }
                     }
-                    recursiveColumnHeaderSetup(outColNames, dataFormat, baseType, memberNames, memberTypes);
+
+                    recursiveColumnHeaderSetup(outColNames, dataFormat, baseType, nestedMemberNames,
+                                               memberTypes);
+                }
+                else {
+                    StringBuilder sBuilder = new StringBuilder();
+                    for (int j = 0; j < memberNames.size(); j++) {
+                        for (int i = 0; i < vlenLen; i++) {
+                            sBuilder.setLength(0);
+                            sBuilder.append(memberNames.get(j).replaceAll(CompoundDS.SEPARATOR, "->"));
+                            sBuilder.append("[").append(i).append("]");
+                            outColNames.add(sBuilder.toString());
+                        }
+                    }
                 }
             }
             else if (curDtype.isCompound()) {
+                /*
+                 * memberNames is the flat list of leaf names; memberTypes is the list of
+                 * top-level member types. Advance through memberTypes one slot at a time,
+                 * consuming countLeafNames(topType) flat names per slot.
+                 */
                 ListIterator<String> localIt = memberNames.listIterator();
+                int topIdx                   = 0;
+                int remainingLeavesInTop     = DataFactoryUtils.countLeafNames(memberTypes.get(0));
                 while (localIt.hasNext()) {
-                    int curIdx                         = localIt.nextIndex();
+                    if (remainingLeavesInTop <= 0 && topIdx + 1 < memberTypes.size()) {
+                        topIdx++;
+                        remainingLeavesInTop = DataFactoryUtils.countLeafNames(memberTypes.get(topIdx));
+                    }
                     String curName                     = localIt.next();
-                    Datatype curType                   = memberTypes.get(curIdx % memberTypes.size());
+                    Datatype curType                   = memberTypes.get(topIdx);
                     Datatype nestedArrayOfCompoundType = null;
                     boolean nestedArrayOfCompound      = false;
 
@@ -989,27 +1026,84 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                      * members n times, where n is the number of array or vlen elements.
                      */
                     if (nestedArrayOfCompound) {
-                        List<Datatype> selTypes =
-                            DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedArrayOfCompoundType);
-                        List<String> selMemberNames = new ArrayList<>(selTypes.size());
+                        List<Datatype> selTypes = DataFactoryUtils.filterNonSelectedMembers(
+                            dataFormat, nestedArrayOfCompoundType, false);
 
-                        int arrCmpdLen = calcArrayOfCompoundLen(selTypes);
-                        for (int i = 0; i < arrCmpdLen; i++) {
-                            selMemberNames.add(localIt.next());
+                        List<String> selMemberNames;
+                        int namesConsumed;
+                        if (curType.isVLEN()) {
+                            // Vlen wraps the flat name list at the header level only;
+                            // synthesize the inner-compound leaf names from the declared
+                            // member-name list, using the header as prefix.
+                            String baseName = curName.replaceAll(CompoundDS.SEPARATOR, "->");
+                            selMemberNames =
+                                buildInnerCompoundLeafNames(nestedArrayOfCompoundType, baseName);
+                            namesConsumed = 1;
+                        }
+                        else {
+                            // Array-of-compound: flat list has header + each inner leaf name.
+                            selMemberNames = new ArrayList<>(selTypes.size());
+                            int arrCmpdLen = calcArrayOfCompoundLen(selTypes);
+                            selMemberNames.add(curName);
+                            for (int i = 1; i < arrCmpdLen; i++)
+                                selMemberNames.add(localIt.next());
+                            namesConsumed = arrCmpdLen;
                         }
 
                         recursiveColumnHeaderSetup(outColNames, dataFormat, curType, selMemberNames,
                                                    selTypes);
+                        remainingLeavesInTop -= namesConsumed;
+                    }
+                    else if (curType.isVLEN() && !curType.isVarStr()) {
+                        int vlenLen     = DataFactoryUtils.getVlenExpansion(vlenMaxLens, curType);
+                        String baseName = curName.replaceAll(CompoundDS.SEPARATOR, "->");
+                        for (int i = 0; i < vlenLen; i++)
+                            outColNames.add(baseName + "[" + i + "]");
+                        remainingLeavesInTop--;
                     }
                     else {
                         // Copy the dataset member name reference, so changes to the column name
                         // don't affect the dataset's internal member names.
                         curName = new String(curName.replaceAll(CompoundDS.SEPARATOR, "->"));
-
                         outColNames.add(curName);
+                        remainingLeavesInTop--;
                     }
                 }
             }
+        }
+
+        /**
+         * Produce "prefix-&gt;leaf" names for each leaf of {@code innerCompound}.
+         * Used by the vlen-of-compound header path, whose flat name list contains
+         * only the wrapper header rather than per-leaf entries.
+         */
+        private List<String> buildInnerCompoundLeafNames(Datatype innerCompound, String prefix)
+        {
+            List<String> out = new ArrayList<>();
+            appendInnerCompoundLeafNames(innerCompound, prefix, out);
+            return out;
+        }
+
+        private void appendInnerCompoundLeafNames(Datatype t, String prefix, List<String> out)
+        {
+            if (t == null)
+                return;
+            if (t.isCompound()) {
+                List<String> names      = t.getCompoundMemberNames();
+                List<Datatype> children = t.getCompoundMemberTypes();
+                if (names == null || children == null)
+                    return;
+                for (int i = 0; i < names.size(); i++) {
+                    String childName = prefix + "->" + names.get(i);
+                    Datatype childT  = children.get(i);
+                    if (childT != null && childT.isCompound())
+                        appendInnerCompoundLeafNames(childT, childName, out);
+                    else
+                        out.add(childName);
+                }
+                return;
+            }
+            out.add(prefix);
         }
 
         private int calcArrayOfCompoundLen(List<Datatype> datatypes)
@@ -1157,10 +1251,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     }
                     else if (allColumnNames[i].matches(".*\\[[0-9]*\\]")) {
                         /*
-                         * Top-level ARRAY of COMPOUND types.
+                         * Top-level array/vlen of an atomic base. Each element is a single
+                         * column, so group them all under the member name rather than a
+                         * generic per-element "ARRAY[i]" group.
                          */
-                        columnHeaderBuilder.append("ARRAY");
-                        processArrayOfCompound(columnHeaderBuilder, allColumnNames[i]);
+                        String baseName = allColumnNames[i].replaceAll("\\[[0-9]*\\]$", "");
+                        columnHeaderBuilder.append(baseName);
 
                         columnGroupHeaderLayer.addColumnsIndexesToGroup(columnHeaderBuilder.toString(),
                                                                         colindex);

@@ -13,11 +13,14 @@
 
 package hdf.view.TableView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import hdf.object.CompoundDataFormat;
 import hdf.object.Datatype;
@@ -48,6 +51,96 @@ public class DataFactoryUtils {
     public static final int CMPD_START_IDX_MAP_INDEX = 1;
 
     /**
+     * Number of flat leaf names a Datatype contributes to the flat-name list
+     * produced by H5Datatype.extractCompoundInfo. The rules:
+     *   compound        - sum of children's counts (no header entry)
+     *   array(compound) - 1 header + sum of inner compound's children's counts
+     *   array(atomic)   - 1
+     *   vlen(any)       - 1 (header only; vlen recursion is disabled)
+     *   atomic, varstr  - 1
+     */
+    public static int countLeafNames(Datatype t)
+    {
+        if (t == null)
+            return 1;
+        if (t.isCompound()) {
+            int sum                 = 0;
+            List<Datatype> children = t.getCompoundMemberTypes();
+            if (children != null)
+                for (Datatype child : children)
+                    sum += countLeafNames(child);
+            return sum;
+        }
+        if (t.isArray()) {
+            Datatype base = t.getDatatypeBase();
+            if (base != null && base.isCompound()) {
+                int sum = 1;
+                for (Datatype child : base.getCompoundMemberTypes())
+                    sum += countLeafNames(child);
+                return sum;
+            }
+            return 1;
+        }
+        return 1;
+    }
+
+    /**
+     * Column-expansion width for a vlen member, looked up by Datatype identity.
+     * Returns 1 for non-vlen types, varstr, or types not present in the map.
+     */
+    public static int getVlenExpansion(Map<Datatype, Integer> vlenMaxLens, Datatype dtype)
+    {
+        if (dtype == null || !dtype.isVLEN() || dtype.isVarStr() || vlenMaxLens == null)
+            return 1;
+        Integer n = vlenMaxLens.get(dtype);
+        return (n == null || n.intValue() < 1) ? 1 : n.intValue();
+    }
+
+    /**
+     * Walk just-read compound data and return the max vlen length per vlen member.
+     * Identity-keyed so structurally identical Datatypes at different positions can
+     * carry different widths.
+     */
+    public static IdentityHashMap<Datatype, Integer>
+    computeVlenMaxLens(List<Datatype> selectedTypes, Object dataValue)
+    {
+        IdentityHashMap<Datatype, Integer> out = new IdentityHashMap<>();
+        if (!(dataValue instanceof List) || selectedTypes == null)
+            return out;
+
+        List<?> cols = (List<?>)dataValue;
+        for (int i = 0; i < selectedTypes.size() && i < cols.size(); i++) {
+            Datatype t = selectedTypes.get(i);
+            if (t == null || !t.isVLEN() || t.isVarStr())
+                continue;
+
+            Object col = cols.get(i);
+            int max    = 0;
+            if (col instanceof ArrayList[]) {
+                for (ArrayList<?> row : (ArrayList[])col) {
+                    if (row != null && row.size() > max)
+                        max = row.size();
+                }
+            }
+            else if (col != null && col.getClass().isArray()) {
+                int len = Array.getLength(col);
+                for (int j = 0; j < len; j++) {
+                    Object row = Array.get(col, j);
+                    if (row instanceof ArrayList<?> al && al.size() > max)
+                        max = al.size();
+                    else if (row != null && row.getClass().isArray()) {
+                        int sz = Array.getLength(row);
+                        if (sz > max)
+                            max = sz;
+                    }
+                }
+            }
+            out.put(t, Integer.valueOf(max));
+        }
+        return out;
+    }
+
+    /**
      * Given a CompoundDataFormat, as well as a compound datatype, removes the
      * non-selected datatypes from the List of datatypes inside the compound
      * datatype and returns that as a new List.
@@ -62,34 +155,36 @@ public class DataFactoryUtils {
     public static List<Datatype> filterNonSelectedMembers(CompoundDataFormat dataFormat,
                                                           final Datatype compoundType)
     {
+        return filterNonSelectedMembers(dataFormat, compoundType, true);
+    }
+
+    /**
+     * Variant of {@link #filterNonSelectedMembers(CompoundDataFormat, Datatype)} that
+     * skips the selected-member filter for inner (non-top-level) compounds.
+     *
+     * The dataset's flat selected-member list only enumerates top-level leaves; inner
+     * compound members can't be individually deselected. Filtering an inner compound
+     * against that list would spuriously remove every non-compound member.
+     */
+    public static List<Datatype> filterNonSelectedMembers(CompoundDataFormat dataFormat,
+                                                          final Datatype compoundType,
+                                                          boolean isTopLevel)
+    {
+        List<Datatype> selectedTypes = new ArrayList<>(compoundType.getCompoundMemberTypes());
+        if (!isTopLevel)
+            return selectedTypes;
+
         List<Datatype> allSelectedTypes = Arrays.asList(dataFormat.getSelectedMemberTypes());
         if (allSelectedTypes == null) {
             log.debug("filterNonSelectedMembers(): selected compound member datatype list is null");
             return null;
         }
 
-        /*
-         * Make sure to make a copy of the compound datatype's member list, as we will
-         * make modifications to the list when members aren't selected.
-         */
-        List<Datatype> selectedTypes = new ArrayList<>(compoundType.getCompoundMemberTypes());
-
-        /*
-         * Among the datatypes within this compound type, only keep the ones that are
-         * actually selected in the dataset.
-         */
         Iterator<Datatype> localIt = selectedTypes.iterator();
         while (localIt.hasNext()) {
             Datatype curType = localIt.next();
-
-            /*
-             * Since the passed in allSelectedMembers list is a flattened out datatype
-             * structure, we want to leave the nested compound Datatypes inside our local
-             * list of datatypes.
-             */
             if (curType.isCompound())
                 continue;
-
             if (!allSelectedTypes.contains(curType))
                 localIt.remove();
         }
@@ -114,14 +209,23 @@ public class DataFactoryUtils {
                                                              List<Datatype> localSelectedTypes)
         throws Exception
     {
+        Map<Datatype, Integer> vlenMaxLens;
+        try {
+            vlenMaxLens = computeVlenMaxLens(localSelectedTypes, dataFormat.getData());
+        }
+        catch (Exception ex) {
+            log.debug("buildIndexMaps(): vlen length scan failed, defaulting to 1 per vlen: ", ex);
+            vlenMaxLens = new IdentityHashMap<>();
+        }
+
         HashMap<Integer, Integer>[] maps  = new HashMap[2];
         maps[COL_TO_BASE_CLASS_MAP_INDEX] = new HashMap<>();
         maps[CMPD_START_IDX_MAP_INDEX]    = new HashMap<>();
 
         buildColIdxToProviderMap(maps[COL_TO_BASE_CLASS_MAP_INDEX], dataFormat, localSelectedTypes,
-                                 new int[] {0}, new int[] {0}, 0);
+                                 vlenMaxLens, new int[] {0}, new int[] {0}, 0);
         buildRelColIdxToStartIdxMap(maps[CMPD_START_IDX_MAP_INDEX], dataFormat, localSelectedTypes,
-                                    new int[] {0}, new int[] {0}, 0);
+                                    vlenMaxLens, new int[] {0}, new int[] {0}, 0);
 
         return maps;
     }
@@ -153,7 +257,8 @@ public class DataFactoryUtils {
      */
     private static void buildColIdxToProviderMap(HashMap<Integer, Integer> outMap,
                                                  CompoundDataFormat dataFormat,
-                                                 List<Datatype> localSelectedTypes, int[] curMapIndex,
+                                                 List<Datatype> localSelectedTypes,
+                                                 Map<Datatype, Integer> vlenMaxLens, int[] curMapIndex,
                                                  int[] curProviderIndex, int depth) throws Exception
     {
         for (int i = 0; i < localSelectedTypes.size(); i++) {
@@ -189,9 +294,18 @@ public class DataFactoryUtils {
                 }
                 log.trace("buildColIdxToStartIdxMap(): arrSize after base={}", arrSize);
             }
+            else if (curType.isVLEN() && !curType.isVarStr()) {
+                // Only a top-level vlen-of-compound expands into its inner compound's
+                // leaves; inner vlens contribute a single column.
+                arrSize       = getVlenExpansion(vlenMaxLens, curType);
+                Datatype base = curType.getDatatypeBase();
+                if (depth == 0 && base != null && base.isCompound())
+                    nestedCompoundType = base;
+            }
 
             if (nestedCompoundType != null) {
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, nestedCompoundType);
+                List<Datatype> cmpdSelectedTypes =
+                    filterNonSelectedMembers(dataFormat, nestedCompoundType, false);
 
                 /*
                  * For Array/Vlen of Compound types, we repeat the compound members n times,
@@ -199,15 +313,19 @@ public class DataFactoryUtils {
                  * Therefore, we repeat our mapping for these types n times.
                  */
                 for (int j = 0; j < arrSize; j++) {
-                    buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex,
-                                             curProviderIndex, depth + 1);
+                    buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens,
+                                             curMapIndex, curProviderIndex, depth + 1);
                 }
             }
             else if (curType.isCompound()) {
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType);
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType, false);
 
-                buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex, curProviderIndex,
-                                         depth + 1);
+                buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens, curMapIndex,
+                                         curProviderIndex, depth + 1);
+            }
+            else if (curType.isVLEN() && !curType.isVarStr()) {
+                for (int j = 0; j < arrSize; j++)
+                    outMap.put(curMapIndex[0]++, curProviderIndex[0]);
             }
             else
                 outMap.put(curMapIndex[0]++, curProviderIndex[0]);
@@ -261,7 +379,8 @@ public class DataFactoryUtils {
      */
     private static void buildRelColIdxToStartIdxMap(HashMap<Integer, Integer> outMap,
                                                     CompoundDataFormat dataFormat,
-                                                    List<Datatype> localSelectedTypes, int[] curMapIndex,
+                                                    List<Datatype> localSelectedTypes,
+                                                    Map<Datatype, Integer> vlenMaxLens, int[] curMapIndex,
                                                     int[] curStartIdx, int depth) throws Exception
     {
         for (int i = 0; i < localSelectedTypes.size(); i++) {
@@ -297,9 +416,16 @@ public class DataFactoryUtils {
                 }
                 log.trace("buildRelColIdxToStartIdxMap(): arrSize after base={}", arrSize);
             }
+            else if (curType.isVLEN() && !curType.isVarStr()) {
+                arrSize       = getVlenExpansion(vlenMaxLens, curType);
+                Datatype base = curType.getDatatypeBase();
+                if (depth == 0 && base != null && base.isCompound())
+                    nestedCompoundType = base;
+            }
 
             if (nestedCompoundType != null) {
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, nestedCompoundType);
+                List<Datatype> cmpdSelectedTypes =
+                    filterNonSelectedMembers(dataFormat, nestedCompoundType, false);
 
                 /*
                  * For Array/Vlen of Compound types, we repeat the compound members n times,
@@ -310,18 +436,28 @@ public class DataFactoryUtils {
                     if (depth == 0)
                         curStartIdx[0] = curMapIndex[0];
 
-                    buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex,
-                                                curStartIdx, depth + 1);
+                    buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens,
+                                                curMapIndex, curStartIdx, depth + 1);
                 }
             }
             else if (curType.isCompound()) {
                 if (depth == 0)
                     curStartIdx[0] = curMapIndex[0];
 
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType);
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType, false);
 
-                buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex, curStartIdx,
-                                            depth + 1);
+                buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens, curMapIndex,
+                                            curStartIdx, depth + 1);
+            }
+            else if (curType.isVLEN() && !curType.isVarStr()) {
+                for (int j = 0; j < arrSize; j++) {
+                    if (depth == 0) {
+                        outMap.put(curMapIndex[0], curMapIndex[0]);
+                        curMapIndex[0]++;
+                    }
+                    else
+                        outMap.put(curMapIndex[0]++, curStartIdx[0]);
+                }
             }
             else {
                 if (depth == 0) {

@@ -1262,6 +1262,17 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
 
                     H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
                                  (Object[])memberData);
+
+                    // H5DreadVL was called with a single-field compound transfer type, so
+                    // each row comes back wrapped in a one-element record. Unwrap to expose
+                    // the payload directly.
+                    if (memberType.isVLEN()) {
+                        Object[] rows = (Object[])memberData;
+                        for (int r = 0; r < rows.length; r++) {
+                            if (rows[r] instanceof java.util.ArrayList<?> rec && rec.size() == 1)
+                                rows[r] = rec.get(0);
+                        }
+                    }
                 }
                 else {
                     log.trace(

@@ -329,8 +329,11 @@ public class DataProviderFactory {
             try {
                 if (obj instanceof ArrayList)
                     theValue = ((ArrayList)obj).get(index);
-                else
+                else if (obj != null && obj.getClass().isArray())
                     theValue = Array.get(obj, index);
+                else
+                    // Scalar input: row dimension already resolved by the caller.
+                    theValue = obj;
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}): failure: ", index, ex);
@@ -620,7 +623,7 @@ public class DataProviderFactory {
             selectedMemberOrders              = compoundFormat.getSelectedMemberOrders();
 
             List<Datatype> localSelectedTypes =
-                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
+                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype, false);
 
             log.trace("setting up {} base HDFDataProviders", localSelectedTypes.size());
 
@@ -793,6 +796,21 @@ public class DataProviderFactory {
                     log.trace(
                         "CompoundDataProvider.getDataValue: theValue={}, rowIdx={}, adjustedColIndex={}",
                         theValue, rowIdx, adjustedColIndex);
+                }
+                else if (base instanceof VlenDataProvider) {
+                    // Walk back to the first column mapped to this vlen provider so the
+                    // offset within its column block is the cell's element index.
+                    int vlenStartIdx = columnIndex;
+                    while (vlenStartIdx > 0) {
+                        Integer prevProviderIdx = baseProviderIndexMap.get(vlenStartIdx - 1);
+                        if (prevProviderIdx == null || baseTypeProviders[prevProviderIdx] != base)
+                            break;
+                        vlenStartIdx--;
+                    }
+                    theValue =
+                        ((VlenDataProvider)base).getElementValue(colValue, rowIdx, columnIndex - vlenStartIdx);
+                    if (theValue == null)
+                        theValue = "";
                 }
                 else {
                     log.trace(
@@ -1357,6 +1375,8 @@ public class DataProviderFactory {
         private static final Logger log = LoggerFactory.getLogger(VlenDataProvider.class);
 
         private final HDFDataProvider baseTypeDataProvider;
+        private final Datatype baseType;
+        private final int numInnerLeaves;
 
         private final StringBuilder buffer;
 
@@ -1367,10 +1387,10 @@ public class DataProviderFactory {
         {
             super(dtype, dataBuf, dataTransposed);
 
-            Datatype baseType = dtype.getDatatypeBase();
-            baseTypeClass     = baseType.getDatatypeClass();
-
+            baseType             = dtype.getDatatypeBase();
+            baseTypeClass        = baseType.getDatatypeClass();
             baseTypeDataProvider = getDataProvider(baseType, dataBuf, dataTransposed);
+            numInnerLeaves       = DataFactoryUtils.countLeafNames(baseType);
 
             buffer = new StringBuilder();
         }
@@ -1558,6 +1578,39 @@ public class DataProviderFactory {
                 tempArray[i] = baseTypeDataProvider.getDataValue(vlElements.toArray(), i);
 
             return tempArray;
+        }
+
+        /**
+         * Return one cell value from the row's vlen, given the cell's offset within
+         * the vlen's column block. The block is laid out element-major:
+         * {@code [elem0_leaf0, elem0_leaf1, ..., elem1_leaf0, ...]}. Returns null
+         * when the offset falls past the row's actual vlen length.
+         */
+        Object getElementValue(Object objBuf, int rowIdx, int elementIndex)
+        {
+            try {
+                ArrayList vlElements = ((ArrayList[])objBuf)[rowIdx];
+
+                if (baseTypeDataProvider instanceof CompoundDataProvider && numInnerLeaves > 0) {
+                    int vlenElemIdx = elementIndex / numInnerLeaves;
+                    int leafIdx     = elementIndex % numInnerLeaves;
+                    if (vlenElemIdx < 0 || vlenElemIdx >= vlElements.size())
+                        return null;
+                    return baseTypeDataProvider.getDataValue(vlElements.get(vlenElemIdx), leafIdx, 0);
+                }
+
+                if (elementIndex < 0 || elementIndex >= vlElements.size())
+                    return null;
+
+                Object elem = vlElements.get(elementIndex);
+                if (elem instanceof byte[])
+                    return baseTypeDataProvider.getDataValue(elem, 0);
+                return elem;
+            }
+            catch (Exception ex) {
+                log.debug("getElementValue(rowIdx={}, elementIndex={}): failure: ", rowIdx, elementIndex, ex);
+                return DataFactoryUtils.errStr;
+            }
         }
 
         @Override

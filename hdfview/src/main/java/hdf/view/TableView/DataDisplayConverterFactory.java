@@ -237,7 +237,7 @@ public class DataDisplayConverterFactory {
             CompoundDataFormat compoundFormat = (CompoundDataFormat)dataFormatReference;
 
             List<Datatype> localSelectedTypes =
-                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
+                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype, false);
 
             log.trace("setting up {} base HDFDisplayConverters", localSelectedTypes.size());
 
@@ -610,7 +610,14 @@ public class DataDisplayConverterFactory {
             try {
                 Object obj;
                 Object convertedValue;
-                int arrLen = Array.getLength(value);
+
+                // Column-expanded vlen cells hand us a single scalar; defer to base converter.
+                if (!value.getClass().isArray() && !(value instanceof List)) {
+                    buffer.append(baseTypeConverter.canonicalToDisplayValue(value));
+                    return buffer;
+                }
+
+                int arrLen = (value instanceof List) ? ((List<?>)value).size() : Array.getLength(value);
 
                 log.trace("canonicalToDisplayValue({}): array length={}", value, arrLen);
 
@@ -621,7 +628,7 @@ public class DataDisplayConverterFactory {
                     if (i > 0)
                         buffer.append(", ");
 
-                    obj = Array.get(value, i);
+                    obj = (value instanceof List) ? ((List<?>)value).get(i) : Array.get(value, i);
 
                     convertedValue = baseTypeConverter.canonicalToDisplayValue(obj);
 
