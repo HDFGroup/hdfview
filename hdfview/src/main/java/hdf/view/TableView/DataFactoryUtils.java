@@ -468,4 +468,46 @@ public class DataFactoryUtils {
             }
         }
     }
+
+    /**
+     * Return true when the datatype tree contains a construct whose table-view
+     * write path is not symmetric with the (recently expanded) display path,
+     * so a single-cell edit cannot be reliably mapped back to storage.
+     */
+    public static boolean isUnsafeForWrite(Datatype dtype)
+    {
+        return isUnsafe(dtype, false);
+    }
+
+    private static boolean isUnsafe(Datatype dtype, boolean insideCompound)
+    {
+        if (dtype == null)
+            return false;
+
+        if (dtype.isVLEN() && !dtype.isVarStr())
+            return true;
+
+        if (dtype.isArray()) {
+            Datatype base = dtype.getDatatypeBase();
+            if (base != null && (base.isCompound() || base.isArray()
+                                 || (base.isVLEN() && !base.isVarStr())))
+                return true;
+            return insideCompound;
+        }
+
+        if (dtype.isCompound()) {
+            if (insideCompound)
+                return true;
+            List<Datatype> members = dtype.getCompoundMemberTypes();
+            if (members != null) {
+                for (Datatype m : members) {
+                    if (isUnsafe(m, true))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        return false;
+    }
 }

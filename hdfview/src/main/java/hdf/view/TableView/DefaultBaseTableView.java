@@ -105,6 +105,7 @@ import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
+import org.eclipse.nebula.widgets.nattable.ui.action.IKeyAction;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.CellEditorMouseEventMatcher;
@@ -119,6 +120,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -221,6 +223,14 @@ public abstract class DefaultBaseTableView implements TableView {
 
     /** status if file is read only. */
     protected boolean isReadOnly = false;
+
+    /**
+     * True when the dataset's datatype contains a construct whose write path
+     * is not yet symmetric with the display path (see
+     * {@link DataFactoryUtils#isUnsafeForWrite}). Editing is force-disabled
+     * and a notice is shown when the user attempts to edit.
+     */
+    protected boolean unsafeForWrite = false;
 
     /** status if the enums are to display converted. */
     protected boolean isEnumConverted = false;
@@ -410,6 +420,13 @@ public abstract class DefaultBaseTableView implements TableView {
                 if (!compression.endsWith("ENCODE_ENABLED"))
                     isReadOnly = true;
             }
+        }
+
+        if (!isReadOnly && DataFactoryUtils.isUnsafeForWrite(dataObject.getDatatype())) {
+            unsafeForWrite = true;
+            isReadOnly     = true;
+            log.info("dataObject({}) editing disabled: unsafe datatype for table-view write path",
+                     dataObject);
         }
 
         log.trace("dataObject({}) isReadOnly={}", dataObject, isReadOnly);
@@ -1276,6 +1293,33 @@ public abstract class DefaultBaseTableView implements TableView {
 
         dataProvider.setIsValueChanged(false);
         log.debug("updateValueInFile(): EXIT - value changed flag cleared");
+    }
+
+    /**
+     * Show the editing-disabled notice. Called when the user attempts to edit
+     * a cell in a dataset whose datatype has no symmetric write path (see
+     * {@link DataFactoryUtils#isUnsafeForWrite}). Throttled to one dialog per
+     * second so a held-down key or rapid clicks don't stack popups.
+     */
+    private long lastUnsafeWriteNoticeMs = 0;
+    protected final void showUnsafeWriteNotice()
+    {
+        if (!unsafeForWrite || shell == null || shell.isDisposed())
+            return;
+        long now = System.currentTimeMillis();
+        if (now - lastUnsafeWriteNoticeMs < 1000)
+            return;
+        lastUnsafeWriteNoticeMs = now;
+
+        Tools.showInformation(
+            shell, "Editing disabled",
+            "HDFView does not support editing datasets that contain any of the following:\n"
+                + "  - variable-length sequences (non-string)\n"
+                + "  - arrays of compound, array, or variable-length sequence\n"
+                + "  - arrays nested inside compound\n"
+                + "  - compounds nested inside compound\n\n"
+                + "Use a separate tool (h5py, the HDF5 C API, h5edit, etc.) to modify these "
+                + "datatypes.");
     }
 
     @Override
@@ -2546,6 +2590,36 @@ public abstract class DefaultBaseTableView implements TableView {
                                                                           new MouseEditAction());
                     }
                 });
+
+                // When the datatype's write path is not yet implemented, intercept
+                // edit attempts and show a dialog explaining what's blocked.
+                if (unsafeForWrite) {
+                    this.addConfiguration(new AbstractUiBindingConfiguration() {
+                        @Override
+                        public void configureUiBindings(UiBindingRegistry uiBindingRegistry)
+                        {
+                            uiBindingRegistry.registerFirstDoubleClickBinding(
+                                new MouseEventMatcher(SWT.NONE, GridRegion.BODY,
+                                                      MouseEventMatcher.LEFT_BUTTON),
+                                new IMouseAction() {
+                                    @Override
+                                    public void run(NatTable table, MouseEvent event)
+                                    {
+                                        showUnsafeWriteNotice();
+                                    }
+                                });
+                            uiBindingRegistry.registerFirstKeyBinding(new LetterOrDigitKeyEventMatcher(),
+                                                                      new IKeyAction() {
+                                                                          @Override
+                                                                          public void run(NatTable table,
+                                                                                          KeyEvent event)
+                                                                          {
+                                                                              showUnsafeWriteNotice();
+                                                                          }
+                                                                      });
+                        }
+                    });
+                }
             }
         }
     }

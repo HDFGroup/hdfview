@@ -27,24 +27,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import hdf.object.CompoundDS;
-import hdf.object.CompoundDataFormat;
-import hdf.object.DataFormat;
-import hdf.object.Datatype;
-import hdf.object.FileFormat;
-import hdf.object.HObject;
-import hdf.object.ScalarDS;
-import hdf.object.h5.H5Datatype;
-import hdf.view.DataView.DataViewManager;
-import hdf.view.HDFView;
-import hdf.view.Tools;
-import hdf.view.ViewProperties;
-
-import hdf.hdf5lib.HDF5Constants;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.EditableRule;
@@ -71,6 +53,22 @@ import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import hdf.hdf5lib.HDF5Constants;
+import hdf.object.CompoundDS;
+import hdf.object.CompoundDataFormat;
+import hdf.object.DataFormat;
+import hdf.object.Datatype;
+import hdf.object.FileFormat;
+import hdf.object.HObject;
+import hdf.object.ScalarDS;
+import hdf.object.h5.H5Datatype;
+import hdf.view.DataView.DataViewManager;
+import hdf.view.HDFView;
+import hdf.view.Tools;
+import hdf.view.ViewProperties;
 
 /**
  * A class to construct a CompoundDS TableView.
@@ -680,6 +678,15 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         public void handleLayerEvent(ILayerEvent e)
         {
             if (e instanceof CellSelectionEvent) {
+                // For datatypes where the display column count has been
+                // expanded (array-of-compound, vlen-of-compound, etc.) the
+                // listener below hits a null ptr because baseIndexMap was built from the
+                // unexpanded member count. Editing is already disabled for
+                // these via unsafeForWrite, and the listener's side effects
+                // (ref preview, etc.) don't apply, so just return.
+                if (unsafeForWrite)
+                    return;
+
                 CellSelectionEvent event = (CellSelectionEvent)e;
                 boolean valIsRegRef      = false;
                 boolean valIsObjRef      = false;
