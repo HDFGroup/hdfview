@@ -1311,15 +1311,15 @@ public abstract class DefaultBaseTableView implements TableView {
             return;
         lastUnsafeWriteNoticeMs = now;
 
-        Tools.showInformation(
-            shell, "Editing disabled",
-            "HDFView does not support editing datasets that contain any of the following:\n"
-                + "  - variable-length sequences (non-string)\n"
-                + "  - arrays of compound, array, or variable-length sequence\n"
-                + "  - arrays nested inside compound\n"
-                + "  - compounds nested inside compound\n\n"
-                + "Use a separate tool (h5py, the HDF5 C API, h5edit, etc.) to modify these "
-                + "datatypes.");
+        Tools.showInformation(shell, "Editing disabled",
+                              "HDFView does not support editing datasets that contain any of the following:\n"
+                                  + "  - variable-length sequences (non-string)\n"
+                                  + "  - arrays of compound, array, or variable-length sequence\n"
+                                  + "  - arrays nested inside compound\n"
+                                  + "  - compounds nested inside compound\n\n"
+                                  +
+                                  "Use a separate tool (h5py, the HDF5 C API, h5edit, etc.) to modify these "
+                                  + "datatypes.");
     }
 
     @Override
@@ -2608,15 +2608,14 @@ public abstract class DefaultBaseTableView implements TableView {
                                         showUnsafeWriteNotice();
                                     }
                                 });
-                            uiBindingRegistry.registerFirstKeyBinding(new LetterOrDigitKeyEventMatcher(),
-                                                                      new IKeyAction() {
-                                                                          @Override
-                                                                          public void run(NatTable table,
-                                                                                          KeyEvent event)
-                                                                          {
-                                                                              showUnsafeWriteNotice();
-                                                                          }
-                                                                      });
+                            uiBindingRegistry.registerFirstKeyBinding(
+                                new LetterOrDigitKeyEventMatcher(), new IKeyAction() {
+                                    @Override
+                                    public void run(NatTable table, KeyEvent event)
+                                    {
+                                        showUnsafeWriteNotice();
+                                    }
+                                });
                         }
                     });
                 }

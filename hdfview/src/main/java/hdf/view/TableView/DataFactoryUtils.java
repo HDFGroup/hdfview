@@ -474,10 +474,7 @@ public class DataFactoryUtils {
      * write path is not symmetric with the (recently expanded) display path,
      * so a single-cell edit cannot be reliably mapped back to storage.
      */
-    public static boolean isUnsafeForWrite(Datatype dtype)
-    {
-        return isUnsafe(dtype, false);
-    }
+    public static boolean isUnsafeForWrite(Datatype dtype) { return isUnsafe(dtype, false); }
 
     private static boolean isUnsafe(Datatype dtype, boolean insideCompound)
     {
@@ -489,8 +486,7 @@ public class DataFactoryUtils {
 
         if (dtype.isArray()) {
             Datatype base = dtype.getDatatypeBase();
-            if (base != null && (base.isCompound() || base.isArray()
-                                 || (base.isVLEN() && !base.isVarStr())))
+            if (base != null && (base.isCompound() || base.isArray() || (base.isVLEN() && !base.isVarStr())))
                 return true;
             return insideCompound;
         }
