@@ -1532,8 +1532,10 @@ public class ViewProperties extends PreferenceStore {
         setShowImageValue(getBoolean("image.showvalues"));
 
         propVal = getString("file.mode");
-        if (!isDefault("file.mode"))
+        if (!isDefault("file.mode")) {
             setReadOnly("r".equalsIgnoreCase(propVal));
+            setReadSWMR("rs".equalsIgnoreCase(propVal));
+        }
 
         setEarlyLib(getString("lib.lowversion"));
 
