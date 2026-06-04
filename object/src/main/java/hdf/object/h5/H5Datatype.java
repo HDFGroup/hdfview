@@ -2166,11 +2166,10 @@ public class H5Datatype extends Datatype {
         else if (dtype.isVLEN()) {
             log.trace("allocateArray(): isVLEN");
 
+            // Slots are left null: the JNI read routines (H5DreadVL/H5AreadVL)
+            // install a freshly allocated ArrayList into each slot. Callers must
+            // not pre-allocate the per-element lists.
             data = new ArrayList[numPoints];
-            for (int j = 0; j < numPoints; j++)
-                ((ArrayList[])data)[j] = new ArrayList<byte[]>();
-            // if (baseType != null)
-            // ((ArrayList<>)data).add(H5Datatype.allocateArray(baseType, numPoints));
         }
         else if (typeClass == CLASS_ARRAY) {
             log.trace("allocateArray(): class CLASS_ARRAY");

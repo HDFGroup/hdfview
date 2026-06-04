@@ -1214,10 +1214,10 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                         (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
                         (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
+                    // Slots are left null: H5DreadVL installs a freshly
+                    // allocated ArrayList into each slot.
                     @SuppressWarnings("rawtypes")
                     ArrayList[] vlBuf = new ArrayList[nSelPoints];
-                    for (int j = 0; j < nSelPoints; j++)
-                        vlBuf[j] = new ArrayList<>();
 
                     H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, vlBuf);
 
