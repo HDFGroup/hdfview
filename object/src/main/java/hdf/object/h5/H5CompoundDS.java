@@ -944,14 +944,41 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
         }
         else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
             /*
-             * For VLEN of COMPOUND, peel off the VLEN wrapper and recurse with the compound
-             * base type. The actual VLEN reading is handled in readSingleCompoundMember(),
-             * which detects the VLEN wrapper via dsDatatype.isVLEN() and uses H5DreadVL.
+             * Top-level VLEN-of-compound is displayed as a SINGLE column showing the whole
+             * sequence (e.g. [{1, 2}, {3, 4}]), consistent with how a vlen member of a
+             * compound is shown. Read the whole vlen in one H5DreadVL call; the JNI parses
+             * each compound element into nested Lists (e.g. [[1, 2], [3, 4]]), exactly the
+             * shape VlenDataProvider/VlenDataDisplayConverter render. The dataset enumerates
+             * a single member (see H5Datatype.extractCompoundInfo), so we return one column.
              */
-            Datatype baseType = cmpdType.getDatatypeBase();
-            if (baseType != null && baseType.isCompound()) {
-                theData = compoundTypeIO(ioType, did, spaceIDs, nSelPoints, (H5Datatype)baseType, writeBuf,
-                                         globalMemberIndex);
+            if (ioType == H5File.IO_TYPE.READ) {
+                long wholeTid = -1;
+                try {
+                    wholeTid = H5.H5Dget_type(did);
+                    @SuppressWarnings("rawtypes")
+                    ArrayList[] vlBuf = new ArrayList[nSelPoints];
+                    H5.H5DreadVL(did, wholeTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, vlBuf);
+                    globalMemberIndex[0]++;
+                    theData = vlBuf;
+                }
+                catch (HDF5DataFiltersException exfltr) {
+                    log.debug("compoundTypeIO(): top-level VLEN read failure: ", exfltr);
+                    throw new HDF5Exception("Filter not available exception: " + exfltr.getMessage());
+                }
+                catch (Exception ex) {
+                    log.debug("compoundTypeIO(): top-level VLEN read failure: ", ex);
+                    throw new HDF5Exception("failed to read VLEN-of-compound dataset: " + ex.getMessage());
+                }
+                finally {
+                    if (wholeTid >= 0) {
+                        try {
+                            H5.H5Tclose(wholeTid);
+                        }
+                        catch (Exception ex) {
+                            log.debug("compoundTypeIO(): H5Tclose(wholeTid {}) failure: ", wholeTid, ex);
+                        }
+                    }
+                }
             }
         }
         else if (cmpdType.isCompound()) {

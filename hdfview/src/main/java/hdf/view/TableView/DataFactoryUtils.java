@@ -13,14 +13,11 @@
 
 package hdf.view.TableView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import hdf.object.CompoundDataFormat;
 import hdf.object.Datatype;
@@ -82,62 +79,6 @@ public class DataFactoryUtils {
             return 1;
         }
         return 1;
-    }
-
-    /**
-     * Column-expansion width for a vlen member, looked up by Datatype identity.
-     * Returns 1 for non-vlen types, varstr, or types not present in the map.
-     */
-    public static int getVlenExpansion(Map<Datatype, Integer> vlenMaxLens, Datatype dtype)
-    {
-        if (dtype == null || !dtype.isVLEN() || dtype.isVarStr() || vlenMaxLens == null)
-            return 1;
-        Integer n = vlenMaxLens.get(dtype);
-        return (n == null || n.intValue() < 1) ? 1 : n.intValue();
-    }
-
-    /**
-     * Walk just-read compound data and return the max vlen length per vlen member.
-     * Identity-keyed so structurally identical Datatypes at different positions can
-     * carry different widths.
-     */
-    public static IdentityHashMap<Datatype, Integer> computeVlenMaxLens(List<Datatype> selectedTypes,
-                                                                        Object dataValue)
-    {
-        IdentityHashMap<Datatype, Integer> out = new IdentityHashMap<>();
-        if (!(dataValue instanceof List) || selectedTypes == null)
-            return out;
-
-        List<?> cols = (List<?>)dataValue;
-        for (int i = 0; i < selectedTypes.size() && i < cols.size(); i++) {
-            Datatype t = selectedTypes.get(i);
-            if (t == null || !t.isVLEN() || t.isVarStr())
-                continue;
-
-            Object col = cols.get(i);
-            int max    = 0;
-            if (col instanceof ArrayList[]) {
-                for (ArrayList<?> row : (ArrayList[])col) {
-                    if (row != null && row.size() > max)
-                        max = row.size();
-                }
-            }
-            else if (col != null && col.getClass().isArray()) {
-                int len = Array.getLength(col);
-                for (int j = 0; j < len; j++) {
-                    Object row = Array.get(col, j);
-                    if (row instanceof ArrayList<?> al && al.size() > max)
-                        max = al.size();
-                    else if (row != null && row.getClass().isArray()) {
-                        int sz = Array.getLength(row);
-                        if (sz > max)
-                            max = sz;
-                    }
-                }
-            }
-            out.put(t, Integer.valueOf(max));
-        }
-        return out;
     }
 
     /**
@@ -208,23 +149,14 @@ public class DataFactoryUtils {
                                                              List<Datatype> localSelectedTypes)
         throws Exception
     {
-        Map<Datatype, Integer> vlenMaxLens;
-        try {
-            vlenMaxLens = computeVlenMaxLens(localSelectedTypes, dataFormat.getData());
-        }
-        catch (Exception ex) {
-            log.debug("buildIndexMaps(): vlen length scan failed, defaulting to 1 per vlen: ", ex);
-            vlenMaxLens = new IdentityHashMap<>();
-        }
-
         HashMap<Integer, Integer>[] maps  = new HashMap[2];
         maps[COL_TO_BASE_CLASS_MAP_INDEX] = new HashMap<>();
         maps[CMPD_START_IDX_MAP_INDEX]    = new HashMap<>();
 
         buildColIdxToProviderMap(maps[COL_TO_BASE_CLASS_MAP_INDEX], dataFormat, localSelectedTypes,
-                                 vlenMaxLens, new int[] {0}, new int[] {0}, 0);
+                                 new int[] {0}, new int[] {0}, 0);
         buildRelColIdxToStartIdxMap(maps[CMPD_START_IDX_MAP_INDEX], dataFormat, localSelectedTypes,
-                                    vlenMaxLens, new int[] {0}, new int[] {0}, 0);
+                                    new int[] {0}, new int[] {0}, 0);
 
         return maps;
     }
@@ -256,8 +188,7 @@ public class DataFactoryUtils {
      */
     private static void buildColIdxToProviderMap(HashMap<Integer, Integer> outMap,
                                                  CompoundDataFormat dataFormat,
-                                                 List<Datatype> localSelectedTypes,
-                                                 Map<Datatype, Integer> vlenMaxLens, int[] curMapIndex,
+                                                 List<Datatype> localSelectedTypes, int[] curMapIndex,
                                                  int[] curProviderIndex, int depth) throws Exception
     {
         for (int i = 0; i < localSelectedTypes.size(); i++) {
@@ -293,33 +224,29 @@ public class DataFactoryUtils {
                 }
                 log.trace("buildColIdxToStartIdxMap(): arrSize after base={}", arrSize);
             }
-            else if (curType.isVLEN() && !curType.isVarStr()) {
-                // Only a top-level vlen-of-compound expands into its inner compound's
-                // leaves; inner vlens contribute a single column.
-                arrSize       = getVlenExpansion(vlenMaxLens, curType);
-                Datatype base = curType.getDatatypeBase();
-                if (depth == 0 && base != null && base.isCompound())
-                    nestedCompoundType = base;
-            }
+            // A vlen member is always a single column rendered by VlenDataProvider as the
+            // whole sequence (a brace-string, recursing for nested compounds). A top-level
+            // vlen-of-compound is already peeled to its inner compound at the dataset level,
+            // so any vlen reaching here is a member - never expanded into per-element columns.
 
             if (nestedCompoundType != null) {
                 List<Datatype> cmpdSelectedTypes =
                     filterNonSelectedMembers(dataFormat, nestedCompoundType, false);
 
                 /*
-                 * For Array/Vlen of Compound types, we repeat the compound members n times,
-                 * where n is the number of array elements of variable-length elements.
-                 * Therefore, we repeat our mapping for these types n times.
+                 * For Array of Compound types, we repeat the compound members n times,
+                 * where n is the number of array elements. For a top-level
+                 * vlen-of-compound, arrSize is 1 (one column per inner member).
                  */
                 for (int j = 0; j < arrSize; j++) {
-                    buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens, curMapIndex,
+                    buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex,
                                              curProviderIndex, depth + 1);
                 }
             }
             else if (curType.isCompound()) {
                 List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType, false);
 
-                buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens, curMapIndex,
+                buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex,
                                          curProviderIndex, depth + 1);
             }
             else if (curType.isVLEN() && !curType.isVarStr()) {
@@ -378,8 +305,7 @@ public class DataFactoryUtils {
      */
     private static void buildRelColIdxToStartIdxMap(HashMap<Integer, Integer> outMap,
                                                     CompoundDataFormat dataFormat,
-                                                    List<Datatype> localSelectedTypes,
-                                                    Map<Datatype, Integer> vlenMaxLens, int[] curMapIndex,
+                                                    List<Datatype> localSelectedTypes, int[] curMapIndex,
                                                     int[] curStartIdx, int depth) throws Exception
     {
         for (int i = 0; i < localSelectedTypes.size(); i++) {
@@ -415,12 +341,8 @@ public class DataFactoryUtils {
                 }
                 log.trace("buildRelColIdxToStartIdxMap(): arrSize after base={}", arrSize);
             }
-            else if (curType.isVLEN() && !curType.isVarStr()) {
-                arrSize       = getVlenExpansion(vlenMaxLens, curType);
-                Datatype base = curType.getDatatypeBase();
-                if (depth == 0 && base != null && base.isCompound())
-                    nestedCompoundType = base;
-            }
+            // Single column per vlen member (see buildColIdxToProviderMap). No per-element
+            // expansion; top-level vlen-of-compound is already peeled at the dataset level.
 
             if (nestedCompoundType != null) {
                 List<Datatype> cmpdSelectedTypes =
@@ -435,8 +357,8 @@ public class DataFactoryUtils {
                     if (depth == 0)
                         curStartIdx[0] = curMapIndex[0];
 
-                    buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens,
-                                                curMapIndex, curStartIdx, depth + 1);
+                    buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex,
+                                                curStartIdx, depth + 1);
                 }
             }
             else if (curType.isCompound()) {
@@ -445,7 +367,7 @@ public class DataFactoryUtils {
 
                 List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType, false);
 
-                buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, vlenMaxLens, curMapIndex,
+                buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex,
                                             curStartIdx, depth + 1);
             }
             else if (curType.isVLEN() && !curType.isVarStr()) {

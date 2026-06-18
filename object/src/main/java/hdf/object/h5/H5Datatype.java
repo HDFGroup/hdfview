@@ -2974,9 +2974,15 @@ public class H5Datatype extends Datatype {
             H5Datatype.extractCompoundInfo((H5Datatype)dtype.getDatatypeBase(), name, names, flatListTypes);
         }
         else if (dtype.isVLEN() && !dtype.isVarStr()) {
-            log.trace(
-                "extractCompoundInfo(): variable-length type - extracting compound info from base datatype");
-            H5Datatype.extractCompoundInfo((H5Datatype)dtype.getDatatypeBase(), name, names, flatListTypes);
+            /*
+             * A vlen (including vlen-of-compound) is a single leaf: it is displayed as one
+             * column showing the whole sequence as a string. Do NOT recurse into the base
+             * compound - that would enumerate the inner members as separate columns.
+             */
+            log.trace("extractCompoundInfo(): variable-length type - adding as a single leaf");
+            if (names != null)
+                names.add(name);
+            flatListTypes.add(dtype);
         }
         else if (dtype.isCompound()) {
             List<String> compoundMemberNames   = dtype.getCompoundMemberNames();

@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -841,8 +840,6 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
         // actually label the columns.
         private final ArrayList<String> columnNames;
 
-        private final Map<Datatype, Integer> vlenMaxLens;
-
         private final int ncols;
         private final int groupSize;
 
@@ -852,16 +849,14 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             Datatype cmpdType = dataObject.getDatatype();
 
-            // Resolve VLEN(compound) to the compound base type for display purposes
-            if (cmpdType.isVLEN() && !cmpdType.isVarStr() && cmpdType.getDatatypeBase() != null &&
-                cmpdType.getDatatypeBase().isCompound()) {
-                cmpdType = cmpdType.getDatatypeBase();
-            }
-
-            List<Datatype> selectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
+            // A top-level vlen-of-compound is a single column (the whole sequence). It is not
+            // a compound, so it has no members to filter - use it directly as the sole type.
+            List<Datatype> selectedTypes;
+            if (cmpdType.isVLEN() && !cmpdType.isVarStr())
+                selectedTypes = new ArrayList<>(java.util.Collections.singletonList(cmpdType));
+            else
+                selectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
             final List<String> datasetMemberNames = Arrays.asList(dataFormat.getSelectedMemberNames());
-
-            vlenMaxLens = DataFactoryUtils.computeVlenMaxLens(selectedTypes, dataValue);
 
             columnNames = new ArrayList<>(dataFormat.getSelectedMemberCount());
 
@@ -960,39 +955,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                                            memberTypes);
             }
             else if (curDtype.isVLEN() && !curDtype.isVarStr()) {
-                // VLEN of X: expand to max_vlen columns with [i] suffix, mirroring the ARRAY branch.
-                int vlenLen       = DataFactoryUtils.getVlenExpansion(vlenMaxLens, curDtype);
-                Datatype baseType = curDtype.getDatatypeBase();
-
-                if (baseType != null && baseType.isCompound()) {
-                    if (memberTypes.isEmpty())
-                        memberTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, baseType, false);
-
-                    StringBuilder sBuilder              = new StringBuilder();
-                    ArrayList<String> nestedMemberNames = new ArrayList<>(vlenLen * memberNames.size());
-                    for (int i = 0; i < vlenLen; i++) {
-                        for (int j = 0; j < memberNames.size(); j++) {
-                            sBuilder.setLength(0);
-                            sBuilder.append(memberNames.get(j).replaceAll(CompoundDS.SEPARATOR, "->"));
-                            sBuilder.append("[").append(i).append("]");
-                            nestedMemberNames.add(sBuilder.toString());
-                        }
-                    }
-
-                    recursiveColumnHeaderSetup(outColNames, dataFormat, baseType, nestedMemberNames,
-                                               memberTypes);
-                }
-                else {
-                    StringBuilder sBuilder = new StringBuilder();
-                    for (int j = 0; j < memberNames.size(); j++) {
-                        for (int i = 0; i < vlenLen; i++) {
-                            sBuilder.setLength(0);
-                            sBuilder.append(memberNames.get(j).replaceAll(CompoundDS.SEPARATOR, "->"));
-                            sBuilder.append("[").append(i).append("]");
-                            outColNames.add(sBuilder.toString());
-                        }
-                    }
-                }
+                // A top-level vlen (including vlen-of-compound) is a single column showing
+                // the whole sequence. Never recurse into a compound base - that would create
+                // one column per inner member.
+                for (int j = 0; j < memberNames.size(); j++)
+                    outColNames.add(memberNames.get(j).replaceAll(CompoundDS.SEPARATOR, "->"));
             }
             else if (curDtype.isCompound()) {
                 /*
@@ -1014,10 +981,11 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     boolean nestedArrayOfCompound      = false;
 
                     /*
-                     * Recursively detect any nested array/vlen of compound types and deal with them
-                     * by creating multiple copies of the member names.
+                     * Recursively detect any nested ARRAY of compound types and deal with them
+                     * by creating multiple copies of the member names. A vlen is NOT expanded -
+                     * it is a single column (handled below), so it is excluded here.
                      */
-                    if (curType.isArray() || curType.isVLEN()) {
+                    if (curType.isArray()) {
                         Datatype base = curType.getDatatypeBase();
                         while (base != null) {
                             if (base.isCompound()) {
@@ -1063,10 +1031,10 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                         remainingLeavesInTop -= namesConsumed;
                     }
                     else if (curType.isVLEN() && !curType.isVarStr()) {
-                        int vlenLen     = DataFactoryUtils.getVlenExpansion(vlenMaxLens, curType);
+                        // A vlen member is a single column showing the whole sequence as a
+                        // brace-string (VlenDataProvider recurses for nested compounds).
                         String baseName = curName.replaceAll(CompoundDS.SEPARATOR, "->");
-                        for (int i = 0; i < vlenLen; i++)
-                            outColNames.add(baseName + "[" + i + "]");
+                        outColNames.add(baseName);
                         remainingLeavesInTop--;
                     }
                     else {

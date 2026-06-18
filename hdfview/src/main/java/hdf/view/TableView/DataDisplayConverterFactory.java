@@ -73,15 +73,9 @@ public class DataDisplayConverterFactory {
 
         dataFormatReference = dataObject;
 
-        Datatype dtype = dataObject.getDatatype();
-
-        // For VLEN(compound), use compound base type so CompoundDataDisplayConverter is created
-        if (dtype.isVLEN() && !dtype.isVarStr() && dtype.getDatatypeBase() != null &&
-            dtype.getDatatypeBase().isCompound()) {
-            dtype = dtype.getDatatypeBase();
-        }
-
-        HDFDisplayConverter converter = getDataDisplayConverter(dtype);
+        // A top-level vlen-of-compound is a single column; dispatch on the dataset's own
+        // datatype so getDataDisplayConverter(VLEN) makes a VlenDataDisplayConverter.
+        HDFDisplayConverter converter = getDataDisplayConverter(dataObject.getDatatype());
 
         return converter;
     }
@@ -331,9 +325,15 @@ public class DataDisplayConverterFactory {
                         Object curObject = cmpdList.get(i);
                         if (curObject instanceof List)
                             buffer.append(memberTypeConverters[i].canonicalToDisplayValue(curObject));
-                        else {
+                        else if (curObject != null && curObject.getClass().isArray()) {
+                            // Array-of-compound: the member is a column-array indexed by row.
                             Object dataArrayValue = Array.get(curObject, cellRowIdx);
                             buffer.append(memberTypeConverters[i].canonicalToDisplayValue(dataArrayValue));
+                        }
+                        else {
+                            // A single compound element (e.g. one element of a vlen-of-compound):
+                            // the member is already a scalar value, not a per-row column.
+                            buffer.append(memberTypeConverters[i].canonicalToDisplayValue(curObject));
                         }
                     }
                     buffer.append("}");

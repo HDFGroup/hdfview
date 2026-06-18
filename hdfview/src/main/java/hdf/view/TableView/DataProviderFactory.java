@@ -74,17 +74,11 @@ public class DataProviderFactory {
 
         dataFormatReference = dataObject;
 
-        Datatype dtype = dataObject.getDatatype();
-
-        // For VLEN(compound), use the compound base type so CompoundDataProvider is created.
-        // The VLEN aspect is handled in the read path (H5DreadVL), and each member's data
-        // is a String[] of brace-enclosed values.
-        if (dtype.isVLEN() && !dtype.isVarStr() && dtype.getDatatypeBase() != null &&
-            dtype.getDatatypeBase().isCompound()) {
-            dtype = dtype.getDatatypeBase();
-        }
-
-        HDFDataProvider dataProvider = getDataProvider(dtype, dataBuf, dataTransposed);
+        // A top-level vlen-of-compound is a single column showing the whole sequence, so
+        // dispatch on the dataset's own datatype: getDataProvider(VLEN) makes a
+        // VlenDataProvider (read path supplies one bare ArrayList[] of nested-List elements).
+        HDFDataProvider dataProvider =
+            getDataProvider(dataObject.getDatatype(), dataBuf, dataTransposed);
 
         return dataProvider;
     }
@@ -798,19 +792,11 @@ public class DataProviderFactory {
                         theValue, rowIdx, adjustedColIndex);
                 }
                 else if (base instanceof VlenDataProvider) {
-                    // Walk back to the first column mapped to this vlen provider so the
-                    // offset within its column block is the cell's element index.
-                    int vlenStartIdx = columnIndex;
-                    while (vlenStartIdx > 0) {
-                        Integer prevProviderIdx = baseProviderIndexMap.get(vlenStartIdx - 1);
-                        if (prevProviderIdx == null || baseTypeProviders[prevProviderIdx] != base)
-                            break;
-                        vlenStartIdx--;
-                    }
-                    theValue = ((VlenDataProvider)base)
-                                   .getElementValue(colValue, rowIdx, columnIndex - vlenStartIdx);
-                    if (theValue == null)
-                        theValue = "";
+                    // A vlen member is a single column showing the whole sequence. Delegate
+                    // to the provider's full-sequence rendering (an array of per-element
+                    // values that the VlenDataDisplayConverter joins into a brace-string),
+                    // rather than fetching one element by column offset.
+                    theValue = base.getDataValue(colValue, fieldIdx, rowIdx);
                 }
                 else {
                     log.trace(
@@ -1496,20 +1482,16 @@ public class DataProviderFactory {
 
         private Object[] retrieveArrayOfCompoundElements(Object objBuf, int columnIndex, int rowIndex)
         {
-            long vlSize = Array.getLength(objBuf);
-            log.trace("retrieveArrayOfCompoundElements(): vlSize={}", vlSize);
-            long adjustedRowIdx =
-                (rowIndex * vlSize * colCount) +
-                (columnIndex / ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size());
-            long adjustedColIdx =
-                columnIndex % ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size();
-
             /*
-             * Since we flatten array of compound types, we only need to return a single
-             * value.
+             * A vlen-of-compound member is one column showing the whole sequence. The read
+             * path hands each row a list of compound elements already parsed into nested
+             * Lists (e.g. [[10, [11, 12]], [20, [21, 22]]]). Return the row's elements as an
+             * array; VlenDataDisplayConverter wraps them in [...] and the inner
+             * CompoundDataDisplayConverter renders each element as {...} (recursing for
+             * nested compounds).
              */
-            return new Object[] {
-                baseTypeDataProvider.getDataValue(objBuf, (int)adjustedColIdx, (int)adjustedRowIdx)};
+            ArrayList<?> vlElements = ((ArrayList[])objBuf)[rowIndex];
+            return vlElements.toArray();
         }
 
         private Object[] retrieveArrayOfArrayElements(Object objBuf, int columnIndex, int startRowIndex)
