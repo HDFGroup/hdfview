@@ -77,8 +77,7 @@ public class DataProviderFactory {
         // A top-level vlen-of-compound is a single column showing the whole sequence, so
         // dispatch on the dataset's own datatype: getDataProvider(VLEN) makes a
         // VlenDataProvider (read path supplies one bare ArrayList[] of nested-List elements).
-        HDFDataProvider dataProvider =
-            getDataProvider(dataObject.getDatatype(), dataBuf, dataTransposed);
+        HDFDataProvider dataProvider = getDataProvider(dataObject.getDatatype(), dataBuf, dataTransposed);
 
         return dataProvider;
     }
