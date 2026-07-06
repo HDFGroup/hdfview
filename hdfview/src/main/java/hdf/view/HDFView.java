@@ -292,7 +292,7 @@ public class HDFView implements DataViewManager {
         }
 
         if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5) != null)
-            ViewProperties.loadPluginPaths();
+            initPluginPaths();
 
         treeViews     = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
@@ -302,6 +302,47 @@ public class HDFView implements DataViewManager {
         helpViews     = ViewProperties.getHelpViewList();
 
         log.debug("Constructor exit");
+    }
+
+    /**
+     * Establishes the HDF5 filter plugin search paths for this HDFView session.
+     *
+     * The search list is the
+     * bundled install directory followed by whatever paths the HDF5 library already knows
+     * (its compiled-in defaults plus any HDF5_PLUGIN_PATH entries). Users can
+     * further adjust the list through the User Options dialog.
+     *
+     * The bundled directory must be added at runtime because a jpackage installation is
+     * relocatable: filter plugins ship at <root>/plugin (e.g.
+     * <install>/lib/app/plugin on Linux, where hdfview.root resolves to
+     * $APPDIR), but the HDF5 library only supports absolute, build-time plugin
+     * paths, so its defaults never point at the actual install location.
+     */
+    private void initPluginPaths()
+    {
+        // Start from the paths the HDF5 library already has registered.
+        ViewProperties.loadPluginPaths();
+
+        if (rootDir == null)
+            return;
+
+        File pluginDir = new File(rootDir, "plugin");
+        if (!pluginDir.isDirectory()) {
+            log.debug("No bundled plugin directory at {}", pluginDir.getAbsolutePath());
+            return;
+        }
+
+        String pluginPath = pluginDir.getAbsolutePath();
+        for (String existing : ViewProperties.getPluginPaths()) {
+            if (pluginPath.equals(existing)) {
+                log.debug("Bundled plugin path {} already present", pluginPath);
+                return;
+            }
+        }
+
+        // Prepend so the bundled filters take precedence over system defaults.
+        ViewProperties.prependPluginPath(pluginPath);
+        log.debug("Added bundled plugin path {}", pluginPath);
     }
 
     /**
