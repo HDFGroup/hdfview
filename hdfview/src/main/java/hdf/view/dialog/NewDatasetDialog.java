@@ -1014,7 +1014,10 @@ public class NewDatasetDialog extends NewDataObjectDialog {
                 chunked.
                 """;
 
-        HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
+        HelpDialog(Shell parent)
+        {
+            super(parent, SWT.APPLICATION_MODAL);
+        }
 
         public void open()
         {
@@ -1027,8 +1030,8 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             helpShell.setLayout(new GridLayout(1, true));
 
             // Render the help text with a native StyledText widget
-            StyledText helpText = new StyledText(
-                helpShell, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
+            StyledText helpText =
+                new StyledText(helpShell, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
             helpText.setFont(curFont);
             helpText.setText(HELP_INFORMATION);
             helpText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
