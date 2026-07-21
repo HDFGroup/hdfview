@@ -14,12 +14,8 @@
 
 package hdf.view.dialog;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -38,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -957,7 +953,71 @@ public class NewDatasetDialog extends NewDataObjectDialog {
     private class HelpDialog extends Dialog {
         private Shell helpShell;
 
-        HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
+        private static final String HELP_INFORMATION = """
+                How to Create a New Dataset
+
+                The following instructions explain how to create a new dataset.
+                This dialog allows the creation of a dataset (an HDF4 SDS or an
+                HDF5 dataset). The dataset can be a 1 to 32 dimension array of
+                numbers, characters, or strings.
+
+                To create a dataset, it is necessary to define its name, parent
+                group, datatype, and dataspace (i.e., the dimensions).
+                Optionally, the storage properties can be specified.
+
+                The dataset will be created and filled with zeros. Data can be
+                added with the hdfedit tool, or by a program.
+
+                1) Dataset name and path
+                The name of the new dataset must follow the HDF5 name rules
+                (similar to the Unix name rules). The name may contain almost
+                any characters, but it must not contain the path separator, '/'.
+
+                The dataset must be a member of some Group. The 'Parent group'
+                selection lists all the Groups in the file.
+
+                2) Datatype
+                The datatype specifies the type of the data elements of the
+                array. This Java-based tool supports the datatypes: integer,
+                float, character, string, reference, enum, variable-length
+                integer, variable-length float, and variable-length string.
+
+                The size specifies the size of a single data point in bits, such
+                as 32-bit integer or 64-bit float. The size of a float is either
+                32-bit or 64-bit.
+
+                For HDF5, there are three byte order choices: NATIVE, LITTLE
+                ENDIAN and BIG ENDIAN. "NATIVE" byte order means that the byte
+                order is determined by the machine. The byte order cannot be
+                specified for HDF4.
+
+                3) Dataspace
+                The dataspace specifies the number of dimensions (rank), current
+                dimension size and maximum dimension size. The dimension size is
+                separated by "x". For example, a 3D dataset might show the
+                dimensions as: 20 x 30 x 5.
+
+                The current size must be greater than zero, and the maximum size
+                must be at least as large as the current size. A maximum size of
+                zero means the maximum size will be set to the current size.
+                Setting the maximum size to -1 will make the dimension
+                "unlimited".
+
+                4) Storage layout and data compression
+                There are two options for storage layout: contiguous or chunked.
+                The default storage layout is contiguous. If chunked layout is
+                selected, the chunk size must be specified.
+
+                The dataset may be compressed with GZIP. The compression level
+                ranges from zero (no compression) to 9 (highest compression). In
+                HDF5, if compression is selected then the dataset must be
+                chunked.
+                """;
+
+        HelpDialog(Shell parent)
+        {
+            super(parent, SWT.APPLICATION_MODAL);
+        }
 
         public void open()
         {
@@ -969,129 +1029,40 @@ public class NewDatasetDialog extends NewDataObjectDialog {
             helpShell.setImages(ViewProperties.getHdfIcons());
             helpShell.setLayout(new GridLayout(1, true));
 
-            // Try to create a Browser on platforms that support it
-            try {
-                Browser browser = new Browser(helpShell, SWT.NONE);
-                browser.setFont(curFont);
-                browser.setBounds(0, 0, 500, 500);
-                browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            // Render the help text with a native StyledText widget
+            StyledText helpText =
+                new StyledText(helpShell, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
+            helpText.setFont(curFont);
+            helpText.setText(HELP_INFORMATION);
+            helpText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-                if (ClassLoader.getSystemResource("hdf/view/HDFView.class").toString().startsWith("jar")) {
-                    // Attempt to load HTML help file from jar
-                    try (InputStream in = getClass().getClassLoader().getResourceAsStream(
-                             "hdf/view/NewDatasetHelp.html")) {
-                        Scanner scan         = new Scanner(in);
-                        StringBuilder buffer = new StringBuilder();
-                        while (scan.hasNextLine()) {
-                            buffer.append(scan.nextLine());
-                        }
-
-                        browser.setText(buffer.toString());
-
-                        scan.close();
-                    }
-                    catch (Exception e) {
-                        StringBuilder buff = new StringBuilder();
-                        buff.append("<html>")
-                            .append("<body>")
-                            .append("ERROR: cannot load help information.")
-                            .append("</body>")
-                            .append("</html>");
-                        browser.setText(buff.toString(), true);
-                    }
+            Button okButton = new Button(helpShell, SWT.PUSH);
+            okButton.setFont(curFont);
+            okButton.setText("   &OK   ");
+            okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+            okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e)
+                {
+                    helpShell.dispose();
                 }
-                else {
-                    try {
-                        URL url         = null;
-                        URL url2        = null;
-                        URL url3        = null;
-                        String rootPath = ViewProperties.getViewRoot();
+            });
 
-                        try {
-                            url = new URL("file://" + rootPath + "/HDFView.jar");
-                        }
-                        catch (java.net.MalformedURLException mfu) {
-                            log.debug("help information:", mfu);
-                        }
+            helpShell.pack();
 
-                        try {
-                            url2 = new URL("file://" + rootPath + "/");
-                        }
-                        catch (java.net.MalformedURLException mfu) {
-                            log.debug("help information:", mfu);
-                        }
+            helpShell.setSize(new Point(500, 500));
 
-                        try {
-                            url3 = new URL("file://" + rootPath + "/src/");
-                        }
-                        catch (java.net.MalformedURLException mfu) {
-                            log.debug("help information:", mfu);
-                        }
+            Rectangle parentBounds = parent.getBounds();
+            Point shellSize        = helpShell.getSize();
+            helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                                  (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
-                        URL[] uu = {url, url2, url3};
-                        try (URLClassLoader cl = new URLClassLoader(uu)) {
-                            URL u = cl.findResource("hdf/view/NewDatasetHelp.html");
+            helpShell.open();
 
-                            browser.setUrl(u.toString());
-                        }
-                        catch (Exception ex) {
-                            log.trace("URLClassLoader failed:", ex);
-                        }
-                    }
-                    catch (Exception e) {
-                        StringBuilder buff = new StringBuilder();
-                        buff.append("<html>")
-                            .append("<body>")
-                            .append("ERROR: cannot load help information.")
-                            .append("</body>")
-                            .append("</html>");
-                        browser.setText(buff.toString(), true);
-                    }
-                }
-
-                Button okButton = new Button(helpShell, SWT.PUSH);
-                okButton.setFont(curFont);
-                okButton.setText("   &OK   ");
-                okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
-                okButton.addSelectionListener(new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e)
-                    {
-                        helpShell.dispose();
-                    }
-                });
-
-                helpShell.pack();
-
-                helpShell.setSize(new Point(500, 500));
-
-                Rectangle parentBounds = parent.getBounds();
-                Point shellSize        = helpShell.getSize();
-                helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                                      (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-
-                helpShell.open();
-
-                Display display = parent.getDisplay();
-                while (!helpShell.isDisposed()) {
-                    if (!display.readAndDispatch())
-                        display.sleep();
-                }
-            }
-            catch (Error er) {
-                // Try opening help link in external browser if platform
-                // doesn't support SWT browser
-                Tools.showError(shell, "Browser support",
-                                "Platform doesn't support Browser. Opening external link in web browser...");
-
-                // TODO(HDFView) [2025-12]: Implement fallback external browser launch when SWT Browser
-                // unavailable. Currently shows error message but doesn't actually open URL in system browser.
-                // Use java.awt.Desktop.browse(URI) or platform-specific command (xdg-open, open, start).
-                // Related: NewScalarAttributeDialog.java:475, NewStringAttributeDialog.java:760 have same
-                // issue.
-            }
-            catch (Exception ex) {
-                log.debug("Open New Dataset Help failure: ", ex);
+            Display display = parent.getDisplay();
+            while (!helpShell.isDisposed()) {
+                if (!display.readAndDispatch())
+                    display.sleep();
             }
         }
     }

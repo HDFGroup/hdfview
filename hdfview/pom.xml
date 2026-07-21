@@ -482,7 +482,7 @@
                     <argument>Science</argument>
                     <argument>--linux-shortcut</argument>
                     <argument>--linux-package-deps</argument>
-                    <argument>libgtk-3-0,libx11-6,libxext6,libxrandr2,libxrender1,libxtst6,libcairo2,libpango-1.0-0,libatk1.0-0,libwebkit2gtk-4.1-0,libasound2,libfreetype6,fontconfig</argument>
+                    <argument>libgtk-3-0,libx11-6,libxext6,libxrandr2,libxrender1,libxtst6,libcairo2,libpango-1.0-0,libatk1.0-0,libasound2,libfreetype6,fontconfig</argument>
                     <argument>--file-associations</argument>
                     <argument>${project.basedir}/../package_files/HDFViewHDF.properties</argument>
                     <argument>--file-associations</argument>
@@ -544,7 +544,7 @@
                     <argument>Science</argument>
                     <argument>--linux-shortcut</argument>
                     <argument>--linux-package-deps</argument>
-                    <argument>gtk3,libX11,libXext,libXrandr,libXrender,libXtst,cairo,pango,atk,webkit2gtk4.1,alsa-lib,freetype,fontconfig,libXi,libXinerama,libXcursor,mesa-libGL,mesa-libGLU</argument>
+                    <argument>gtk3,libX11,libXext,libXrandr,libXrender,libXtst,cairo,pango,atk,alsa-lib,freetype,fontconfig,libXi,libXinerama,libXcursor,mesa-libGL,mesa-libGLU</argument>
                     <argument>--file-associations</argument>
                     <argument>${project.basedir}/../package_files/HDFViewHDF.properties</argument>
                     <argument>--file-associations</argument>

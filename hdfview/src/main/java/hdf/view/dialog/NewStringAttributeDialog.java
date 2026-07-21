@@ -14,13 +14,9 @@
 
 package hdf.view.dialog;
 
-import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 import java.util.StringTokenizer;
 
 import hdf.object.Attribute;
@@ -36,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -630,6 +626,60 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
     private class HelpDialog extends Dialog {
         private Shell helpShell;
 
+        private static final String HELP_INFORMATION = """
+                How to Create a New Attribute
+
+                The following instructions explain how to create a new
+                attribute. This dialog allows the creation of attributes that
+                are numbers or strings, and 1D arrays of numbers.
+
+                To create an attribute, it is necessary to define the name,
+                type, and number of values or length of string. Then the
+                value(s) can be entered.
+
+                At each step, be sure to press <return> to make sure the value
+                is accepted by the dialog.
+
+                1) Attribute name
+                The name of the attribute is a string. HDF accepts almost any
+                characters in an attribute name.
+
+                2) Datatype
+                A list of predefined datatypes is given. These are the data
+                types that can be created with this tool; you can only select a
+                datatype from the list.
+
+                The size specifies the size of a single data point in bits.
+
+                3) Array length
+                The length field is used to specify the length of the array or
+                string. For numeric data, you can create an attribute with a
+                single value or a one-dimension array of length values.
+
+                For a string attribute, the length is the maximum length of the
+                string.
+
+                As a practical matter, attributes must be relatively small,
+                perhaps a few kilobytes.
+
+                4) Attribute value
+                The value field is used to enter the initial value of the
+                attribute. Be sure to press <return> after entering the
+                value(s).
+
+                Numeric data is interpreted according to the Datatype, using the
+                number formats supported by Java. If the attribute is an array,
+                values of the array must be separated by a comma, for example,
+                12, 3, 4, 5.
+
+                In the case of a string attribute, the entered text is stored as
+                the string.
+
+                Note that the dialog will accept more values than will fit. In
+                this case, the excess values will not be written to the file,
+                although they may remain visible in the dialog.
+                """;
+
         HelpDialog(Shell parent) { super(parent, SWT.APPLICATION_MODAL); }
 
         public void open()
@@ -642,128 +692,40 @@ public class NewStringAttributeDialog extends NewDataObjectDialog {
             helpShell.setImages(ViewProperties.getHdfIcons());
             helpShell.setLayout(new GridLayout(1, true));
 
-            // Try to create a Browser on platforms that support it
-            try {
-                Browser browser = new Browser(helpShell, SWT.NONE);
-                browser.setFont(curFont);
-                browser.setBounds(0, 0, 500, 500);
-                browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            // Render the help text with a native StyledText widget
+            StyledText helpText = new StyledText(
+                helpShell, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
+            helpText.setFont(curFont);
+            helpText.setText(HELP_INFORMATION);
+            helpText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-                if (ClassLoader.getSystemResource("hdf/view/HDFView.class").toString().startsWith("jar")) {
-                    // Attempt to load HTML help file from jar
-                    try (InputStream in =
-                             getClass().getClassLoader().getResourceAsStream("hdf/view/NewAttrHelp.html")) {
-                        Scanner scan         = new Scanner(in);
-                        StringBuilder buffer = new StringBuilder();
-                        while (scan.hasNextLine()) {
-                            buffer.append(scan.nextLine());
-                        }
-
-                        browser.setText(buffer.toString());
-
-                        scan.close();
-                    }
-                    catch (Exception e) {
-                        StringBuilder buff = new StringBuilder();
-                        buff.append("<html>")
-                            .append("<body>")
-                            .append("ERROR: cannot load help information.")
-                            .append("</body>")
-                            .append("</html>");
-                        browser.setText(buff.toString(), true);
-                    }
+            Button okButton = new Button(helpShell, SWT.PUSH);
+            okButton.setFont(curFont);
+            okButton.setText("   &OK   ");
+            okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+            okButton.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e)
+                {
+                    helpShell.dispose();
                 }
-                else {
-                    try {
-                        URL url         = null;
-                        URL url2        = null;
-                        URL url3        = null;
-                        String rootPath = ViewProperties.getViewRoot();
+            });
 
-                        try {
-                            url = new URL("file://" + rootPath + "/HDFView.jar");
-                        }
-                        catch (java.net.MalformedURLException mfu) {
-                            log.debug("help information:", mfu);
-                        }
+            helpShell.pack();
 
-                        try {
-                            url2 = new URL("file://" + rootPath + "/");
-                        }
-                        catch (java.net.MalformedURLException mfu) {
-                            log.debug("help information:", mfu);
-                        }
+            helpShell.setSize(new Point(500, 500));
 
-                        try {
-                            url3 = new URL("file://" + rootPath + "/src/");
-                        }
-                        catch (java.net.MalformedURLException mfu) {
-                            log.debug("help information:", mfu);
-                        }
+            Rectangle parentBounds = parent.getBounds();
+            Point shellSize        = helpShell.getSize();
+            helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
+                                  (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
 
-                        URL[] uu = {url, url2, url3};
-                        try (URLClassLoader cl = new URLClassLoader(uu)) {
-                            URL u = cl.findResource("hdf/view/NewAttrHelp.html");
+            helpShell.open();
 
-                            browser.setUrl(u.toString());
-                        }
-                        catch (Exception ex) {
-                            log.trace("URLClassLoader failed:", ex);
-                        }
-                    }
-                    catch (Exception e) {
-                        StringBuilder buff = new StringBuilder();
-                        buff.append("<html>")
-                            .append("<body>")
-                            .append("ERROR: cannot load help information.")
-                            .append("</body>")
-                            .append("</html>");
-                        browser.setText(buff.toString(), true);
-                    }
-                }
-
-                Button okButton = new Button(helpShell, SWT.PUSH);
-                okButton.setFont(curFont);
-                okButton.setText("   &OK   ");
-                okButton.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
-                okButton.addSelectionListener(new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e)
-                    {
-                        helpShell.dispose();
-                    }
-                });
-
-                helpShell.pack();
-
-                helpShell.setSize(new Point(500, 500));
-
-                Rectangle parentBounds = parent.getBounds();
-                Point shellSize        = helpShell.getSize();
-                helpShell.setLocation((parentBounds.x + (parentBounds.width / 2)) - (shellSize.x / 2),
-                                      (parentBounds.y + (parentBounds.height / 2)) - (shellSize.y / 2));
-
-                helpShell.open();
-
-                Display display = parent.getDisplay();
-                while (!helpShell.isDisposed()) {
-                    if (!display.readAndDispatch())
-                        display.sleep();
-                }
-            }
-            catch (Error er) {
-                // Try opening help link in external browser if platform
-                // doesn't support SWT browser
-                Tools.showError(shell, "Browser support",
-                                "Platform doesn't support Browser. Opening external link in web browser...");
-
-                // TODO(HDFView) [2025-12]: Implement fallback external browser launch when SWT Browser
-                // unavailable. Currently shows error message but doesn't actually open URL in system browser.
-                // Use java.awt.Desktop.browse(URI) or platform-specific command (xdg-open, open, start).
-                // Related: NewDatasetDialog.java:1087, NewScalarAttributeDialog.java:475 have same issue.
-            }
-            catch (Exception ex) {
-                log.debug("Open New Attribute Help failure: ", ex);
+            Display display = parent.getDisplay();
+            while (!helpShell.isDisposed()) {
+                if (!display.readAndDispatch())
+                    display.sleep();
             }
         }
     }
