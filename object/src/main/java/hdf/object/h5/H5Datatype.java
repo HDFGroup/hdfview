@@ -2166,11 +2166,10 @@ public class H5Datatype extends Datatype {
         else if (dtype.isVLEN()) {
             log.trace("allocateArray(): isVLEN");
 
+            // Slots are left null: the JNI read routines (H5DreadVL/H5AreadVL)
+            // install a freshly allocated ArrayList into each slot. Callers must
+            // not pre-allocate the per-element lists.
             data = new ArrayList[numPoints];
-            for (int j = 0; j < numPoints; j++)
-                ((ArrayList[])data)[j] = new ArrayList<byte[]>();
-            // if (baseType != null)
-            // ((ArrayList<>)data).add(H5Datatype.allocateArray(baseType, numPoints));
         }
         else if (typeClass == CLASS_ARRAY) {
             log.trace("allocateArray(): class CLASS_ARRAY");
@@ -2975,9 +2974,15 @@ public class H5Datatype extends Datatype {
             H5Datatype.extractCompoundInfo((H5Datatype)dtype.getDatatypeBase(), name, names, flatListTypes);
         }
         else if (dtype.isVLEN() && !dtype.isVarStr()) {
-            log.trace(
-                "extractCompoundInfo(): variable-length type - extracting compound info from base datatype");
-            H5Datatype.extractCompoundInfo((H5Datatype)dtype.getDatatypeBase(), name, names, flatListTypes);
+            /*
+             * A vlen (including vlen-of-compound) is a single leaf: it is displayed as one
+             * column showing the whole sequence as a string. Do NOT recurse into the base
+             * compound - that would enumerate the inner members as separate columns.
+             */
+            log.trace("extractCompoundInfo(): variable-length type - adding as a single leaf");
+            if (names != null)
+                names.add(name);
+            flatListTypes.add(dtype);
         }
         else if (dtype.isCompound()) {
             List<String> compoundMemberNames   = dtype.getCompoundMemberNames();

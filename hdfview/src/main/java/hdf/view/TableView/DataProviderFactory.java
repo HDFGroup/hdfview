@@ -74,17 +74,10 @@ public class DataProviderFactory {
 
         dataFormatReference = dataObject;
 
-        Datatype dtype = dataObject.getDatatype();
-
-        // For VLEN(compound), use the compound base type so CompoundDataProvider is created.
-        // The VLEN aspect is handled in the read path (H5DreadVL), and each member's data
-        // is a String[] of brace-enclosed values.
-        if (dtype.isVLEN() && !dtype.isVarStr() && dtype.getDatatypeBase() != null &&
-            dtype.getDatatypeBase().isCompound()) {
-            dtype = dtype.getDatatypeBase();
-        }
-
-        HDFDataProvider dataProvider = getDataProvider(dtype, dataBuf, dataTransposed);
+        // A top-level vlen-of-compound is a single column showing the whole sequence, so
+        // dispatch on the dataset's own datatype: getDataProvider(VLEN) makes a
+        // VlenDataProvider (read path supplies one bare ArrayList[] of nested-List elements).
+        HDFDataProvider dataProvider = getDataProvider(dataObject.getDatatype(), dataBuf, dataTransposed);
 
         return dataProvider;
     }
@@ -329,8 +322,11 @@ public class DataProviderFactory {
             try {
                 if (obj instanceof ArrayList)
                     theValue = ((ArrayList)obj).get(index);
-                else
+                else if (obj != null && obj.getClass().isArray())
                     theValue = Array.get(obj, index);
+                else
+                    // Scalar input: row dimension already resolved by the caller.
+                    theValue = obj;
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}): failure: ", index, ex);
@@ -620,7 +616,7 @@ public class DataProviderFactory {
             selectedMemberOrders              = compoundFormat.getSelectedMemberOrders();
 
             List<Datatype> localSelectedTypes =
-                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
+                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype, false);
 
             log.trace("setting up {} base HDFDataProviders", localSelectedTypes.size());
 
@@ -793,6 +789,13 @@ public class DataProviderFactory {
                     log.trace(
                         "CompoundDataProvider.getDataValue: theValue={}, rowIdx={}, adjustedColIndex={}",
                         theValue, rowIdx, adjustedColIndex);
+                }
+                else if (base instanceof VlenDataProvider) {
+                    // A vlen member is a single column showing the whole sequence. Delegate
+                    // to the provider's full-sequence rendering (an array of per-element
+                    // values that the VlenDataDisplayConverter joins into a brace-string),
+                    // rather than fetching one element by column offset.
+                    theValue = base.getDataValue(colValue, fieldIdx, rowIdx);
                 }
                 else {
                     log.trace(
@@ -1357,6 +1360,8 @@ public class DataProviderFactory {
         private static final Logger log = LoggerFactory.getLogger(VlenDataProvider.class);
 
         private final HDFDataProvider baseTypeDataProvider;
+        private final Datatype baseType;
+        private final int numInnerLeaves;
 
         private final StringBuilder buffer;
 
@@ -1367,10 +1372,10 @@ public class DataProviderFactory {
         {
             super(dtype, dataBuf, dataTransposed);
 
-            Datatype baseType = dtype.getDatatypeBase();
-            baseTypeClass     = baseType.getDatatypeClass();
-
+            baseType             = dtype.getDatatypeBase();
+            baseTypeClass        = baseType.getDatatypeClass();
             baseTypeDataProvider = getDataProvider(baseType, dataBuf, dataTransposed);
+            numInnerLeaves       = DataFactoryUtils.countLeafNames(baseType);
 
             buffer = new StringBuilder();
         }
@@ -1476,20 +1481,16 @@ public class DataProviderFactory {
 
         private Object[] retrieveArrayOfCompoundElements(Object objBuf, int columnIndex, int rowIndex)
         {
-            long vlSize = Array.getLength(objBuf);
-            log.trace("retrieveArrayOfCompoundElements(): vlSize={}", vlSize);
-            long adjustedRowIdx =
-                (rowIndex * vlSize * colCount) +
-                (columnIndex / ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size());
-            long adjustedColIdx =
-                columnIndex % ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size();
-
             /*
-             * Since we flatten array of compound types, we only need to return a single
-             * value.
+             * A vlen-of-compound member is one column showing the whole sequence. The read
+             * path hands each row a list of compound elements already parsed into nested
+             * Lists (e.g. [[10, [11, 12]], [20, [21, 22]]]). Return the row's elements as an
+             * array; VlenDataDisplayConverter wraps them in [...] and the inner
+             * CompoundDataDisplayConverter renders each element as {...} (recursing for
+             * nested compounds).
              */
-            return new Object[] {
-                baseTypeDataProvider.getDataValue(objBuf, (int)adjustedColIdx, (int)adjustedRowIdx)};
+            ArrayList<?> vlElements = ((ArrayList[])objBuf)[rowIndex];
+            return vlElements.toArray();
         }
 
         private Object[] retrieveArrayOfArrayElements(Object objBuf, int columnIndex, int startRowIndex)
@@ -1558,6 +1559,39 @@ public class DataProviderFactory {
                 tempArray[i] = baseTypeDataProvider.getDataValue(vlElements.toArray(), i);
 
             return tempArray;
+        }
+
+        /**
+         * Return one cell value from the row's vlen, given the cell's offset within
+         * the vlen's column block. The block is laid out element-major:
+         * {@code [elem0_leaf0, elem0_leaf1, ..., elem1_leaf0, ...]}. Returns null
+         * when the offset falls past the row's actual vlen length.
+         */
+        Object getElementValue(Object objBuf, int rowIdx, int elementIndex)
+        {
+            try {
+                ArrayList vlElements = ((ArrayList[])objBuf)[rowIdx];
+
+                if (baseTypeDataProvider instanceof CompoundDataProvider && numInnerLeaves > 0) {
+                    int vlenElemIdx = elementIndex / numInnerLeaves;
+                    int leafIdx     = elementIndex % numInnerLeaves;
+                    if (vlenElemIdx < 0 || vlenElemIdx >= vlElements.size())
+                        return null;
+                    return baseTypeDataProvider.getDataValue(vlElements.get(vlenElemIdx), leafIdx, 0);
+                }
+
+                if (elementIndex < 0 || elementIndex >= vlElements.size())
+                    return null;
+
+                Object elem = vlElements.get(elementIndex);
+                if (elem instanceof byte[])
+                    return baseTypeDataProvider.getDataValue(elem, 0);
+                return elem;
+            }
+            catch (Exception ex) {
+                log.debug("getElementValue(rowIdx={}, elementIndex={}): failure: ", rowIdx, elementIndex, ex);
+                return DataFactoryUtils.errStr;
+            }
         }
 
         @Override

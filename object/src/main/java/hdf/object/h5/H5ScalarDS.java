@@ -940,9 +940,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         }
                     }
                     else if (dsDatatype.isVLEN()) {
+                        // Slots are left null: H5DreadVL installs a freshly
+                        // allocated ArrayList into each slot.
                         theData = new ArrayList[(int)totalSelectedSpacePoints];
-                        for (int j = 0; j < (int)totalSelectedSpacePoints; j++)
-                            ((ArrayList[])theData)[j] = new ArrayList<byte[]>();
                     }
                     else if ((originalBuf == null) || dsDatatype.isEnum() || dsDatatype.isText() ||
                              dsDatatype.isRefObj() ||
@@ -974,7 +974,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                             tid = dsDatatype.createNative();
                             log.trace("scalarDatasetCommonIO(): native type created tid={}", tid);
 
-                            if (dsDatatype.isVarStr()) {
+                            if (dsDatatype.isVarStr() ||
+                                (dsDatatype.isArray() && dsDatatype.getDatatypeBase() != null &&
+                                 dsDatatype.getDatatypeBase().isVarStr())) {
                                 log.trace(
                                     "scalarDatasetCommonIO(): H5Dread_VLStrings did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
                                     did, tid,
@@ -1125,7 +1127,9 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                     try {
                         tid = dsDatatype.createNative();
 
-                        if (dsDatatype.isVarStr()) {
+                        if (dsDatatype.isVarStr() ||
+                            (dsDatatype.isArray() && dsDatatype.getDatatypeBase() != null &&
+                             dsDatatype.getDatatypeBase().isVarStr())) {
                             log.trace(
                                 "scalarDatasetCommonIO(): H5Dwrite_VLStrings did={} tid={} spaceIDs[0]={} spaceIDs[1]={}",
                                 did, tid,
