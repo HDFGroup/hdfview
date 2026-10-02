@@ -186,8 +186,8 @@ public class TestVlenArrayDatatypes {
         Object data = dataset.getData();
         assertNotNull(data, "Data read returned null");
 
-        // b_name is an ARRAY[4] of varstr and c_name a fixed-length string; both are
-        // collected, so assert on known values rather than a count.
+        // b_name is an ARRAY[4] of varstr and c_name a fixed-length string, and both
+        // are collected, so assert on known values rather than a count.
         List<String> strings = allStrings(data);
         assertFalse(strings.isEmpty(), "Expected string members to be read");
         assertTrue(strings.contains("A fight is a contract that takes two people to honor."),

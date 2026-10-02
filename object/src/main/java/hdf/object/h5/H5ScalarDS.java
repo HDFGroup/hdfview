@@ -940,7 +940,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         }
                     }
                     else if (dsDatatype.isVLEN()) {
-                        // Slots are left null; H5DreadVL allocates each list.
+                        // Slots are left null since the read allocates each list.
                         theData = new ArrayList[(int)totalSelectedSpacePoints];
                     }
                     else if ((originalBuf == null) || dsDatatype.isEnum() || dsDatatype.isText() ||

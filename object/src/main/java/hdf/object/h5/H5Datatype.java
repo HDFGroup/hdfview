@@ -2197,18 +2197,18 @@ public class H5Datatype extends Datatype {
         else if (dtype.isVLEN()) {
             log.trace("allocateArray(): isVLEN");
 
-            // Slots are left null; the read routines allocate each list.
+            // Slots are left null since the read routines allocate each list.
             data = new ArrayList[numPoints];
         }
         else if (typeClass == CLASS_ARRAY) {
             log.trace("allocateArray(): class CLASS_ARRAY");
 
             /*
-             * Per the JNI buffer data model (see "Buffer data model" in H5.java), an
+             * Per the JNI buffer data model, an
              * array containing variable-length data is read as one slot per selected
              * point, each holding an ArrayList of the array's elements. The read
              * routines allocate those lists, so the slots are left null, and the
-             * container must be Object[] rather than a narrowly-typed array.
+             * container must be the generic Object[].
              */
             if (containsVlenData(dtype)) {
                 log.trace("allocateArray(): CLASS_ARRAY contains variable-length data");
@@ -3019,7 +3019,8 @@ public class H5Datatype extends Datatype {
             /*
              * A vlen (including vlen-of-compound) is a single leaf: it is displayed as one
              * column showing the whole sequence as a string. Do NOT recurse into the base
-             * compound - that would enumerate the inner members as separate columns.
+             * compound, since that would enumerate the inner members as separate
+             * columns.
              */
             log.trace("extractCompoundInfo(): variable-length type - adding as a single leaf");
             if (names != null)

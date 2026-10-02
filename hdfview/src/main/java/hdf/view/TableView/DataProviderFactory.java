@@ -979,9 +979,6 @@ public class DataProviderFactory {
                 isValueChanged = true;
                 log.trace("CompoundDataProvider.setDataValue: SUCCESS");
             }
-            catch (UnsupportedOperationException uoe) {
-                throw uoe;
-            }
             catch (Exception ex) {
                 log.debug("CompoundDataProvider.setDataValue({}, {})=({}): cell value update failure: ",
                           rowIndex, columnIndex, newValue, ex);
@@ -1049,9 +1046,6 @@ public class DataProviderFactory {
                 isValueChanged = true;
                 log.trace("=== COMPOUND setDataValue(bufObject) SUCCESS ===");
             }
-            catch (UnsupportedOperationException uoe) {
-                throw uoe;
-            }
             catch (Exception ex) {
                 log.trace("setDataValue({}, {}, {})=({}): cell value update failure: ", rowIndex, columnIndex,
                           bufObject, newValue, ex);
@@ -1101,7 +1095,9 @@ public class DataProviderFactory {
 
             baseTypeDataProvider = getDataProvider(baseType, dataBuf, dataTransposed);
 
-            if (baseType.isVarStr())
+            isVarStrBase = baseType.isVarStr();
+
+            if (isVarStrBase)
                 arraySize = dtype.getArrayDims()[0];
             else if (baseType.isBitField() || baseType.isOpaque())
                 arraySize = dtype.getDatatypeSize();
@@ -1117,8 +1113,6 @@ public class DataProviderFactory {
                 nCols = (int)arraySize * ((CompoundDataProvider)baseTypeDataProvider).nCols;
             else
                 nCols = super.getColumnCount();
-
-            isVarStrBase = baseType.isVarStr();
         }
 
         /**
@@ -1138,7 +1132,12 @@ public class DataProviderFactory {
             for (int i = 0; i < values.length; i++) {
                 Object element = elements.get(i);
 
-                // Opaque, reference and bitfield elements arrive as raw bytes.
+                /*
+                 * The JNI hands opaque and reference values over as byte[], which the base
+                 * provider knows how to format. Elements at this level are normally Strings
+                 * or Lists, since an array of opaque or reference holds no variable-length
+                 * data and so never reaches this path; the check is defensive.
+                 */
                 if (element instanceof byte[])
                     values[i] = baseTypeDataProvider.getDataValue(element, 0);
                 else
@@ -1308,6 +1307,14 @@ public class DataProviderFactory {
         @Override
         public boolean isCellEditable(int columnIndex, int rowIndex)
         {
+            /*
+             * A point held as a List is an array containing variable-length data, edited by
+             * updateObjectModelElements(). That splits the cell text on ",[]" into a flat run
+             * of tokens and stores each token as a String. Only an array of variable-length
+             * strings can be rebuilt that way: when the elements are themselves sequences
+             * or compounds, the tokenizer discards the brackets marking where each element
+             * ends, and the tokens are not converted to the element type.
+             */
             int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
             if (dataBuf instanceof Object[] slots && bufIndex >= 0 && bufIndex < slots.length &&
                 slots[bufIndex] instanceof List)
@@ -1328,9 +1335,6 @@ public class DataProviderFactory {
 
                 updateArrayElements(dataBuf, newValue, columnIndex, bufIndex);
             }
-            catch (UnsupportedOperationException uoe) {
-                throw uoe;
-            }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {}, {}): cell value update failure: ", rowIndex, columnIndex,
                           newValue, ex);
@@ -1348,9 +1352,6 @@ public class DataProviderFactory {
                 long bufIndex = rowIndex * arraySize;
 
                 updateArrayElements(bufObject, newValue, columnIndex, (int)bufIndex);
-            }
-            catch (UnsupportedOperationException uoe) {
-                throw uoe;
             }
             catch (Exception ex) {
                 log.debug("setDataValue({}, {}, {}, {}): cell value update failure: ", rowIndex, columnIndex,
@@ -1377,7 +1378,7 @@ public class DataProviderFactory {
             if (!(slots[pointIndex] instanceof List<?> elements))
                 return false;
 
-            // The bracketed cell text is only unambiguous when the elements are scalars.
+            // The flat tokenizing below can only rebuild string elements; see isCellEditable().
             if (!isVarStrBase)
                 throw new UnsupportedOperationException(
                     "editing an array of variable-length data is only supported for strings");
@@ -1607,9 +1608,9 @@ public class DataProviderFactory {
              * A vlen-of-compound member is one column showing the whole sequence. The read
              * path hands each row a list of compound elements already parsed into nested
              * Lists (e.g. [[10, [11, 12]], [20, [21, 22]]]). Return the row's elements as an
-             * array; VlenDataDisplayConverter wraps them in [...] and the inner
-             * CompoundDataDisplayConverter renders each element as {...} (recursing for
-             * nested compounds).
+             * array, which VlenDataDisplayConverter wraps in [...] and the inner
+             * CompoundDataDisplayConverter renders each element of as {...}, recursing
+             * for nested compounds.
              */
             ArrayList<?> vlElements = ((ArrayList[])objBuf)[rowIndex];
             return vlElements.toArray();
@@ -1693,18 +1694,18 @@ public class DataProviderFactory {
         @Override
         public boolean isCellEditable(int columnIndex, int rowIndex)
         {
-            return !(baseTypeDataProvider instanceof CompoundDataProvider);
+            // A vlen-of-compound cell is the whole sequence, which no per-member write
+            // can be derived from.
+            if (baseTypeDataProvider instanceof CompoundDataProvider)
+                return false;
+
+            // A sequence is only as editable as what it holds, e.g. a vlen of vlen of compound.
+            return baseTypeDataProvider.isCellEditable(columnIndex, rowIndex);
         }
 
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue)
         {
-            // A vlen-of-compound cell is the whole sequence, which no per-member write
-            // can be derived from.
-            if (baseTypeDataProvider instanceof CompoundDataProvider)
-                throw new UnsupportedOperationException(
-                    "editing a variable-length sequence of compound values is not supported");
-
             try {
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
 
@@ -1724,12 +1725,6 @@ public class DataProviderFactory {
         @Override
         public void setDataValue(int columnIndex, int rowIndex, Object bufObject, Object newValue)
         {
-            // A vlen-of-compound cell is the whole sequence, which no per-member write
-            // can be derived from.
-            if (baseTypeDataProvider instanceof CompoundDataProvider)
-                throw new UnsupportedOperationException(
-                    "editing a variable-length sequence of compound values is not supported");
-
             try {
                 long vlSize = Array.getLength(bufObject);
                 log.trace("setDataValue(): vlSize={} for [c{}, r{}]", vlSize, columnIndex, rowIndex);

@@ -946,8 +946,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
         else if (cmpdType.isVLEN() && !cmpdType.isVarStr()) {
             /*
              * A top-level VLEN-of-compound is one column holding the whole sequence, so
-             * transfer it in a single call; the JNI parses each compound element into a
-             * nested List. The dataset enumerates a single member, hence one column.
+             * transfer it in a single call. The JNI parses each compound element into a
+             * nested List.
              */
             if (ioType != H5File.IO_TYPE.READ)
                 throw new UnsupportedOperationException(
@@ -1174,7 +1174,6 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                         catch (Exception ex) {
                             log.debug("compoundTypeIO(): failed to write member[{}]: ", i, ex);
                             globalMemberIndex[0]++;
-                            // The member was not persisted; do not report success.
                             throw new Exception("failed to write compound member '" + memberName +
                                                     "': " + ex.getMessage(),
                                                 ex);
@@ -1185,8 +1184,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
             catch (Exception ex) {
                 log.debug("compoundTypeIO(): failure: ", ex);
                 memberDataList = null;
-                // A failed write leaves data unpersisted and must be reported; a
-                // failed read yields a null compound.
+                // A failed write leaves data unpersisted and must be reported
                 if (ioType == H5File.IO_TYPE.WRITE)
                     throw ex;
             }
@@ -1249,7 +1247,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                         (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
                         (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                    // Slots are left null; H5DreadVL allocates each list.
+                    // Slots are left null since the read allocates each list.
                     @SuppressWarnings("rawtypes")
                     ArrayList[] vlBuf = new ArrayList[nSelPoints];
 
@@ -1298,7 +1296,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
 
                     /*
                      * The single-field compound transfer type wraps each row in a
-                     * one-element record holding the member's value; unwrap it.
+                     * one-element record holding the member's value, so unwrap it here.
                      */
                     Object[] rows = (Object[])memberData;
                     for (int r = 0; r < rows.length; r++) {

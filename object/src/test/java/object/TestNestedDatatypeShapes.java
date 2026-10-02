@@ -22,22 +22,15 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Read tests for nested datatype shapes not covered by the shared UI test files.
+ * Read tests for nested datatype shapes.
  *
- * Fixtures are built at test time rather than committed as binaries, so adding a
- * shape costs a few lines here. They are written with raw H5Dwrite/H5DwriteVL calls
- * against the JNI's buffer data model; that path does not reach
- * H5Datatype.allocateArray(), so the setup is independent of what is being read.
+ * Fixtures are built at test time, written with raw H5Dwrite/H5DwriteVL calls
+ * against the JNI's buffer data model.
  */
 @Tag("unit")
 @DisplayName("Nested Datatype Shape Read Tests")
 public class TestNestedDatatypeShapes {
 
-    /*
-     * Written under target/ rather than a JUnit temporary directory: HDF5 can still
-     * hold a file open when the temporary directory is torn down, which Windows
-     * refuses to delete and JUnit then reports as a failure.
-     */
     private static Path workDir;
 
     private static final int WIDE_POINTS   = 50;
@@ -87,7 +80,7 @@ public class TestNestedDatatypeShapes {
         assertEquals(openIDsAtStart, H5.getOpenIDCount(), "HDF5 identifiers leaked by this test class");
     }
 
-    /** Variable-length string type; the caller closes it. */
+    /** Variable-length string type, which the caller closes. */
     private static long varStrType() throws Exception
     {
         long tid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
@@ -95,7 +88,7 @@ public class TestNestedDatatypeShapes {
         return tid;
     }
 
-    /** Compound {p:int, q:int}; the caller closes it. */
+    /** Compound {p:int, q:int}, which the caller closes. */
     private static long pqCompoundType() throws Exception
     {
         long tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
@@ -252,7 +245,7 @@ public class TestNestedDatatypeShapes {
         }
     }
 
-    /** VLEN of a one-character fixed-length string - a string stored as a sequence. */
+    /** VLEN of a one-character fixed-length string, as a string stored as a sequence. */
     private static void writeVlenOfFixedString(long fid) throws Exception
     {
         long st  = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
@@ -267,7 +260,7 @@ public class TestNestedDatatypeShapes {
         }
     }
 
-    /** ARRAY[3] of fixed-length string - no variable-length data anywhere. */
+    /** ARRAY[3] of fixed-length string, so no variable-length data anywhere. */
     private static void writeArrayOfFixedString(long fid) throws Exception
     {
         long st = H5.H5Tcopy(HDF5Constants.H5T_C_S1);

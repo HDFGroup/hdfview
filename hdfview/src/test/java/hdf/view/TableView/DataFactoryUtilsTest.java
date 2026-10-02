@@ -36,8 +36,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Tests for DataFactoryUtils leaf counting and member filtering against a compound
- * of {int, vlen-of-int, vlen-of-compound}: an inner compound reached by recursion
- * keeps all of its members, and a vlen counts as one leaf whatever it wraps.
+ * of {int, vlen-of-int, vlen-of-compound}
  */
 public class DataFactoryUtilsTest {
 
@@ -134,8 +133,7 @@ public class DataFactoryUtilsTest {
     @Test
     void countLeafNames_vlenOfCompoundIsOne()
     {
-        // A vlen member is always a single column, regardless of what it wraps -
-        // it must NOT be flattened into its base compound's leaf count.
+        // A vlen member is always a single column, regardless of what it wraps
         Datatype nested = memberType("nested");
         assertTrue(nested.isVLEN());
         assertTrue(nested.getDatatypeBase().isCompound());
@@ -153,8 +151,8 @@ public class DataFactoryUtilsTest {
     @Test
     void countLeafNames_topLevelCompoundCountsTopLevelMembersOnly()
     {
-        // id(1) + tags:VLEN(1) + nested:VLEN(1) = 3 - NOT the fully-flattened leaf
-        // count (which would incorrectly be 1 + 1 + 2 = 4).
+        // id(1) + tags:VLEN(1) + nested:VLEN(1) = 3, not the fully-flattened leaf
+        // count
         assertEquals(3, DataFactoryUtils.countLeafNames(testDataset.getDatatype()));
     }
 
@@ -162,10 +160,8 @@ public class DataFactoryUtilsTest {
     void countLeafNames_agreesWithExtractCompoundInfoFlatNameList()
     {
         // countLeafNames exists to mirror the flat leaf-name list that
-        // H5Datatype.extractCompoundInfo produces; recursiveColumnHeaderSetup walks that
-        // list using these counts to decide which top-level member each name belongs to.
-        // If the two ever disagree, column headers silently misalign - so assert the
-        // relationship itself rather than a hardcoded number.
+        // H5Datatype.extractCompoundInfo produces, which recursiveColumnHeaderSetup
+        // walks using these counts to decide which top-level member each name belongs to.
         assertEquals(testDataset.getSelectedMemberNames().length,
                      DataFactoryUtils.countLeafNames(testDataset.getDatatype()));
     }
@@ -173,7 +169,7 @@ public class DataFactoryUtilsTest {
     @Test
     void filterNonSelectedMembers_innerCompoundKeepsAllMembers()
     {
-        // The dataset's selected-member list names only id/tags/nested, never p/q, so
+        // The dataset's selected-member list names only id/tags/nested, so
         // the isTopLevel=false path must skip the filter entirely.
         Datatype innerCompound = memberType("nested").getDatatypeBase();
 
@@ -207,7 +203,7 @@ public class DataFactoryUtilsTest {
             assertSame(idType, filtered.get(0));
         }
         finally {
-            // testDataset is shared across test methods - leave selection as init() set it.
+            // testDataset is shared across test methods, so leave selection as init() set it.
             testDataset.setAllMemberSelection(true);
         }
     }
