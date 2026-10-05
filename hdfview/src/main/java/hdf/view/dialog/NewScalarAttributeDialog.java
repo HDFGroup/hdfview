@@ -323,7 +323,7 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
             else
                 attr = (Attribute) new H5ScalarAttr(parentObj, attrName, datatype, dims);
             Object value = H5Datatype.allocateArray(datatype, (int)lsize);
-            // allocateArray leaves variable-length string slots null; start the new
+            // allocateArray leaves variable-length string slots null, so start the new
             // attribute with empty strings instead.
             if (datatype.isVarStr())
                 Arrays.fill((Object[])value, "");

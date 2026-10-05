@@ -64,6 +64,7 @@ public class TestNestedDatatypeShapes {
             writeCompoundWithReference(fid);
             writeVarStr(fid);
             writeArrayOfVlenIntAttribute(fid);
+            writeCompoundOfNestedVlen(fid);
         }
         finally {
             H5.H5Fclose(fid);
@@ -431,6 +432,29 @@ public class TestNestedDatatypeShapes {
         }
     }
 
+    /** COMPOUND{id:int, inner:COMPOUND{v:VLEN of int}}. */
+    private static void writeCompoundOfNestedVlen(long fid) throws Exception
+    {
+        long vt    = H5.H5Tvlen_create(HDF5Constants.H5T_NATIVE_INT);
+        long inner = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, H5.H5Tget_size(vt));
+        long outer = -1;
+        try {
+            H5.H5Tinsert(inner, "v", 0, vt);
+            long innerOffset = H5.H5Tget_size(HDF5Constants.H5T_NATIVE_INT);
+            outer            = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, innerOffset + H5.H5Tget_size(inner));
+            H5.H5Tinsert(outer, "id", 0, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tinsert(outer, "inner", innerOffset, inner);
+            Object[] buf = {list(1, list(list(10, 11))), list(2, list(list(20)))};
+            writeDataset(fid, "compound_of_nested_vlen", outer, 2, buf, true);
+        }
+        finally {
+            if (outer >= 0)
+                H5.H5Tclose(outer);
+            H5.H5Tclose(inner);
+            H5.H5Tclose(vt);
+        }
+    }
+
     // ---- tests ----------------------------------------------------------------
 
     @Test
@@ -676,5 +700,16 @@ public class TestNestedDatatypeShapes {
         finally {
             check.close();
         }
+    }
+
+    @Test
+    @DisplayName("Compound with a VLEN member inside a nested compound")
+    public void testCompoundOfNestedVlen() throws Exception
+    {
+        /*
+         * The member is read through a nested single-field compound type, so the JNI wraps
+         * each row once per level of nesting; all of those wrappers must come off.
+         */
+        assertEquals("[[1, 2], [[[10, 11], [20]]]]", render(open("compound_of_nested_vlen").getData()));
     }
 }

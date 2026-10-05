@@ -1293,13 +1293,21 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
 
                     /*
                      * The single-field compound transfer type wraps each row in a
-                     * one-element record holding the member's value, so unwrap it here.
+                     * one-element record holding the member's value. A member of a nested
+                     * compound is read through one such record per level of nesting
+                     * (see createCompoundFieldType), so unwrap once per level.
                      */
+                    int levels = 1 + (memberName.length() - memberName.replace(CompoundDS.SEPARATOR, "").length()) /
+                                         CompoundDS.SEPARATOR.length();
                     Object[] rows = (Object[])memberData;
                     for (int r = 0; r < rows.length; r++) {
-                        if (rows[r] instanceof java.util.ArrayList<?> rec && rec.size() == 1 &&
-                            rec.get(0) instanceof java.util.List<?>)
-                            rows[r] = rec.get(0);
+                        for (int l = 0; l < levels; l++) {
+                            if (rows[r] instanceof java.util.ArrayList<?> rec && rec.size() == 1 &&
+                                rec.get(0) instanceof java.util.List<?>)
+                                rows[r] = rec.get(0);
+                            else
+                                break;
+                        }
                     }
                 }
                 else {

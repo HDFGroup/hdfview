@@ -850,6 +850,8 @@ public class DataProviderFactory {
                         colValue, columnIndex - relCmpdStartIndexMap.get(columnIndex), rowIndex);
                 else if (base instanceof ArrayDataProvider)
                     theValue = base.getDataValue(colValue, columnIndex, rowIndex);
+                else if (base instanceof VlenDataProvider)
+                    theValue = base.getDataValue(colValue, columnIndex, rowIndex);
                 else
                     theValue = base.getDataValue(colValue, rowIndex);
             }
