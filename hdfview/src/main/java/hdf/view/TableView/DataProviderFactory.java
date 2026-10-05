@@ -1612,14 +1612,14 @@ public class DataProviderFactory {
              * CompoundDataDisplayConverter renders each element of as {...}, recursing
              * for nested compounds.
              */
-            ArrayList<?> vlElements = ((ArrayList[])objBuf)[rowIndex];
+            ArrayList<?> vlElements = (ArrayList)((Object[])objBuf)[rowIndex];
             return vlElements.toArray();
         }
 
         private Object[] retrieveArrayOfArrayElements(Object objBuf, int columnIndex, int startRowIndex)
         {
             log.trace("retrieveArrayOfArrayElements(): objBuf={}", objBuf);
-            ArrayList<byte[]> vlElements = ((ArrayList[])objBuf)[startRowIndex];
+            ArrayList<byte[]> vlElements = (ArrayList)((Object[])objBuf)[startRowIndex];
             log.trace("retrieveArrayOfArrayElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
             log.trace("retrieveArrayOfArrayElements(): vlSize={} length={}", vlSize, vlElements.size());
@@ -1646,7 +1646,7 @@ public class DataProviderFactory {
         private Object[] retrieveArrayOfComplexElements(Object objBuf, int columnIndex, int startRowIndex)
         {
             log.trace("retrieveArrayOfComplexElements(): objBuf={}", objBuf);
-            ArrayList<byte[]> vlElements = ((ArrayList[])objBuf)[startRowIndex];
+            ArrayList<byte[]> vlElements = (ArrayList)((Object[])objBuf)[startRowIndex];
             log.trace("retrieveArrayOfComplexElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
             log.trace("retrieveArrayOfComplexElements(): vlSize={} length={}", vlSize, vlElements.size());
@@ -1673,7 +1673,7 @@ public class DataProviderFactory {
 
         private Object[] retrieveArrayOfAtomicElements(Object objBuf, int rowStartIdx)
         {
-            ArrayList vlElements = ((ArrayList[])objBuf)[rowStartIdx];
+            ArrayList vlElements = (ArrayList)((Object[])objBuf)[rowStartIdx];
             long vlSize          = vlElements.size();
             log.trace("retrieveArrayOfAtomicElements(): vlSize={}", vlSize);
             Object[] tempArray = new Object[(int)vlSize];
@@ -1771,7 +1771,7 @@ public class DataProviderFactory {
 
         private void updateArrayOfArrayElements(Object newValue, Object curBuf, int columnIndex, int rowIndex)
         {
-            ArrayList vlElements = ((ArrayList[])curBuf)[rowIndex];
+            ArrayList vlElements = (ArrayList)((Object[])curBuf)[rowIndex];
             log.trace("updateArrayOfArrayElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
             log.trace("updateArrayOfArrayElements(): vlSize={}", vlSize);
@@ -1810,12 +1810,12 @@ public class DataProviderFactory {
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
             vlElements                      = new ArrayList<>(Arrays.asList(abuffer));
-            ((ArrayList[])curBuf)[rowIndex] = vlElements;
+            ((Object[])curBuf)[rowIndex] = vlElements;
         }
 
         private void updateArrayOfAtomicElements(Object newValue, Object curBuf, int rowStartIdx)
         {
-            ArrayList vlElements = ((ArrayList[])curBuf)[rowStartIdx];
+            ArrayList vlElements = (ArrayList)((Object[])curBuf)[rowStartIdx];
             long vlSize          = vlElements.size();
             log.trace("updateArrayOfAtomicElements(): vlSize={}", vlSize);
 
@@ -1857,7 +1857,7 @@ public class DataProviderFactory {
             log.trace("updateArrayOfAtomicElements(): abuffer cname={} of data cname={}", bname, cname);
             vlElements = new ArrayList<>(Arrays.asList(abuffer));
             log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
-            ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
+            ((Object[])curBuf)[rowStartIdx] = vlElements;
         }
     }
 
@@ -1927,7 +1927,7 @@ public class DataProviderFactory {
 
         private void updateStringBytes(Object curBuf, Object newValue, int bufStartIndex)
         {
-            if (curBuf instanceof String[]) {
+            if (curBuf instanceof Object[]) {
                 Array.set(curBuf, bufStartIndex, newValue);
             }
             else if (curBuf instanceof byte[]) {
@@ -2485,7 +2485,7 @@ public class DataProviderFactory {
 
         private void updateArrayOfAtomicElements(Object newValue, Object curBuf, int rowStartIdx)
         {
-            ArrayList vlElements = ((ArrayList[])curBuf)[rowStartIdx];
+            ArrayList vlElements = (ArrayList)((Object[])curBuf)[rowStartIdx];
 
             StringTokenizer st = new StringTokenizer((String)newValue, "+i");
             int newcnt         = st.countTokens();
@@ -2499,7 +2499,7 @@ public class DataProviderFactory {
             log.trace("updateArrayOfAtomicElements(): buffer cname={} of data cname={}", bname, cname);
             vlElements = new ArrayList<>(Arrays.asList(abuffer));
             log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
-            ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
+            ((Object[])curBuf)[rowStartIdx] = vlElements;
         }
     }
 }

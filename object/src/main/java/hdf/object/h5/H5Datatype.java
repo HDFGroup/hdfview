@@ -2062,12 +2062,16 @@ public class H5Datatype extends Datatype {
 
         log.trace("allocateArray(): tclass={} : tsize={}", typeClass, typeSize);
 
-        if (dtype.isVarStr()) {
-            log.trace("allocateArray(): is_variable_str={}", dtype.isVarStr());
-
-            data = new String[numPoints];
-            for (int i = 0; i < numPoints; i++)
-                ((String[])data)[i] = "";
+        /*
+         * Variable-length data follows the JNI buffer data model (see "Buffer data model" in
+         * H5.java): one slot per selected point, which the read routines fill with a String
+         * (variable-length string) or a nested ArrayList (vlen, or an array containing
+         * variable-length data). The slots are left null. A compound keeps its per-member
+         * List below, since compound members are read one at a time.
+         */
+        if (containsVlenData(dtype) && typeClass != CLASS_COMPOUND) {
+            log.trace("allocateArray(): contains variable-length data");
+            data = new Object[numPoints];
         }
         else if (typeClass == CLASS_INTEGER) {
             log.trace("allocateArray(): class CLASS_INTEGER");
@@ -2194,45 +2198,26 @@ public class H5Datatype extends Datatype {
 
             data = new byte[(int)(numPoints * typeSize)];
         }
-        else if (dtype.isVLEN()) {
-            log.trace("allocateArray(): isVLEN");
-
-            // Slots are left null since the read routines allocate each list.
-            data = new ArrayList[numPoints];
-        }
         else if (typeClass == CLASS_ARRAY) {
             log.trace("allocateArray(): class CLASS_ARRAY");
 
-            /*
-             * Per the JNI buffer data model, an
-             * array containing variable-length data is read as one slot per selected
-             * point, each holding an ArrayList of the array's elements. The read
-             * routines allocate those lists, so the slots are left null, and the
-             * container must be the generic Object[].
-             */
-            if (containsVlenData(dtype)) {
-                log.trace("allocateArray(): CLASS_ARRAY contains variable-length data");
-                data = new Object[numPoints];
+            try {
+                log.trace("allocateArray(): ArrayRank={}", dtype.getArrayDims().length);
+
+                // Use the base datatype to define the array
+                long[] arrayDims = dtype.getArrayDims();
+                int asize        = numPoints;
+                for (int j = 0; j < arrayDims.length; j++) {
+                    log.trace("allocateArray(): Array dims[{}]={}", j, arrayDims[j]);
+
+                    asize *= arrayDims[j];
+                }
+
+                if (baseType != null)
+                    data = H5Datatype.allocateArray(baseType, asize);
             }
-            else {
-                try {
-                    log.trace("allocateArray(): ArrayRank={}", dtype.getArrayDims().length);
-
-                    // Use the base datatype to define the array
-                    long[] arrayDims = dtype.getArrayDims();
-                    int asize        = numPoints;
-                    for (int j = 0; j < arrayDims.length; j++) {
-                        log.trace("allocateArray(): Array dims[{}]={}", j, arrayDims[j]);
-
-                        asize *= arrayDims[j];
-                    }
-
-                    if (baseType != null)
-                        data = H5Datatype.allocateArray(baseType, asize);
-                }
-                catch (Exception ex) {
-                    log.debug("allocateArray(): CLASS_ARRAY class failure: ", ex);
-                }
+            catch (Exception ex) {
+                log.debug("allocateArray(): CLASS_ARRAY class failure: ", ex);
             }
         }
         else if (typeClass == CLASS_COMPLEX) {

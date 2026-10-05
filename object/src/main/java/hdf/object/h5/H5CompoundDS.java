@@ -956,8 +956,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
             long wholeTid = -1;
             try {
                 wholeTid = H5.H5Dget_type(did);
-                @SuppressWarnings("rawtypes")
-                ArrayList[] vlBuf = new ArrayList[nSelPoints];
+                Object[] vlBuf = (Object[])H5Datatype.allocateArray(cmpdType, nSelPoints);
                 H5.H5DreadVL(did, wholeTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, vlBuf);
                 globalMemberIndex[0]++;
                 theData = vlBuf;
@@ -1247,9 +1246,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                         (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
                         (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                    // Slots are left null since the read allocates each list.
-                    @SuppressWarnings("rawtypes")
-                    ArrayList[] vlBuf = new ArrayList[nSelPoints];
+                    Object[] vlBuf = (Object[])H5Datatype.allocateArray(dsDatatype, nSelPoints);
 
                     H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, vlBuf);
 
@@ -1386,17 +1383,17 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
     }
 
     /*
-     * Converts VLEN data (ArrayList[]) returned by H5DreadVL into a String[] where each
+     * Converts VLEN data (one List per point) returned by H5DreadVL into a String[] where each
      * element is a brace-enclosed, comma-separated list of values for that row.
      * E.g., for VLEN(compound{x:f64}) with row 0 having two records (1.0, 3.0),
      * the result for row 0 would be "{1.0, 3.0}".
      */
     @SuppressWarnings("rawtypes")
-    private String[] convertVlenMemberToStrings(ArrayList[] vlBuf, int nSelPoints, H5Datatype memberType)
+    private String[] convertVlenMemberToStrings(Object[] vlBuf, int nSelPoints, H5Datatype memberType)
     {
         String[] result = new String[nSelPoints];
         for (int j = 0; j < nSelPoints; j++) {
-            ArrayList vlElements = vlBuf[j];
+            List<?> vlElements = (List<?>)vlBuf[j];
             StringBuilder sb     = new StringBuilder("{");
 
             for (int k = 0; k < vlElements.size(); k++) {
@@ -1486,7 +1483,8 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                     tmpData = convertToUnsignedC(theData, null);
                 }
             }
-            else if (memberType.isString() && (Array.get(theData, 0) instanceof String)) {
+            else if (memberType.isString() && !memberType.isVarStr() &&
+                     (Array.get(theData, 0) instanceof String)) {
                 log.trace("writeSingleCompoundMember(): converting string array to byte array");
                 tmpData = stringToByte((String[])theData, (int)memberType.getDatatypeSize());
             }
@@ -1525,12 +1523,12 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
         try {
             if (memberType.isVarStr()) {
                 log.trace(
-                    "writeSingleCompoundMember(): H5Dwrite_string did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
+                    "writeSingleCompoundMember(): H5Dwrite_VLStrings did={} compTid={} spaceIDs[0]={} spaceIDs[1]={}",
                     dsetID, compTid, (spaceIDs[0] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[0],
                     (spaceIDs[1] == HDF5Constants.H5P_DEFAULT) ? "H5P_DEFAULT" : spaceIDs[1]);
 
-                H5.H5Dwrite_string(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
-                                   (String[])tmpData);
+                H5.H5Dwrite_VLStrings(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
+                                      (Object[])tmpData);
             }
             else {
                 log.trace(

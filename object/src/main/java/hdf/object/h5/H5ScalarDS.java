@@ -930,7 +930,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                         "scalarDatasetCommonIO():read ioType isNamed={} isEnum={} isText={} isRefObj={}",
                         dsDatatype.isNamed(), dsDatatype.isEnum(), dsDatatype.isText(),
                         dsDatatype.isRefObj());
-                    if (dsDatatype.isVarStr()) {
+                    if (H5Datatype.containsVlenData(dsDatatype)) {
                         try {
                             theData = H5Datatype.allocateArray(dsDatatype, (int)totalSelectedSpacePoints);
                         }
@@ -938,10 +938,6 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
                             log.debug("scalarDatasetCommonIO(): Out of memory");
                             throw new HDF5Exception("Out Of Memory");
                         }
-                    }
-                    else if (dsDatatype.isVLEN()) {
-                        // Slots are left null since the read allocates each list.
-                        theData = new ArrayList[(int)totalSelectedSpacePoints];
                     }
                     else if ((originalBuf == null) || dsDatatype.isEnum() || dsDatatype.isText() ||
                              dsDatatype.isRefObj() ||

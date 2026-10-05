@@ -1180,19 +1180,22 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
             log.trace("attributeCommonIO():read ioType dtSize={} lsize={}", dtSize, lsize);
 
             try {
-                if (dsDatatype.isVarStr()) {
-                    String[] strs = new String[(int)lsize];
-                    for (int j = 0; j < lsize; j++)
-                        strs[j] = "";
+                if (H5Datatype.containsVlenData(dsDatatype) && !dsDatatype.isCompound()) {
+                    theData = H5Datatype.allocateArray(dsDatatype, (int)lsize);
                     try {
-                        log.trace("attributeCommonIO():read ioType H5Aread_VLStrings");
-                        H5.H5Aread_VLStrings(attrID, tid, strs);
+                        if (dsDatatype.isVarStr()) {
+                            log.trace("attributeCommonIO():read ioType H5Aread_VLStrings");
+                            H5.H5Aread_VLStrings(attrID, tid, (Object[])theData);
+                        }
+                        else {
+                            log.trace("attributeCommonIO():read ioType H5AreadVL");
+                            H5.H5AreadVL(attrID, tid, (Object[])theData);
+                        }
                     }
                     catch (Exception ex) {
-                        log.debug("attributeCommonIO():read ioType H5Aread_VLStrings failure: ", ex);
+                        log.debug("attributeCommonIO():read ioType variable-length failure: ", ex);
                         ex.printStackTrace();
                     }
-                    theData = strs;
                 }
                 else if (dsDatatype.isCompound()) {
                     String[] strs = new String[(int)lsize];
@@ -1206,20 +1209,6 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
                         ex.printStackTrace();
                     }
                     theData = strs;
-                }
-                else if (dsDatatype.isVLEN()) {
-                    log.trace("attributeCommonIO():read ioType:VLEN-REF H5Aread isArray()={}",
-                              dsDatatype.isArray());
-                    // Slots are left null since the read allocates each list.
-                    theData = new ArrayList[(int)lsize];
-
-                    try {
-                        H5.H5AreadVL(attrID, tid, (Object[])theData);
-                    }
-                    catch (Exception ex) {
-                        log.debug("attributeCommonIO():read ioType:VLEN-REF H5Aread failure: ", ex);
-                        ex.printStackTrace();
-                    }
                 }
                 else {
                     Object attrData = null;
@@ -1351,8 +1340,7 @@ public class H5ScalarAttr extends ScalarDS implements H5Attribute {
 
                     H5.H5Awrite_VLStrings(attrID, tid, (Object[])tmpData);
                 }
-                else if (dsDatatype.isVLEN() ||
-                         (dsDatatype.isArray() && dsDatatype.getDatatypeBase().isVLEN())) {
+                else if (H5Datatype.containsVlenData(dsDatatype)) {
                     log.trace("attributeCommonIO(): H5AwriteVL aid={} tid={}", attrID, tid);
 
                     H5.H5AwriteVL(attrID, tid, (Object[])tmpData);

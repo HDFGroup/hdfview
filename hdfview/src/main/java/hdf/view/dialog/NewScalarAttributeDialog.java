@@ -14,6 +14,7 @@
 
 package hdf.view.dialog;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -322,6 +323,10 @@ public class NewScalarAttributeDialog extends NewDataObjectDialog {
             else
                 attr = (Attribute) new H5ScalarAttr(parentObj, attrName, datatype, dims);
             Object value = H5Datatype.allocateArray(datatype, (int)lsize);
+            // allocateArray leaves variable-length string slots null; start the new
+            // attribute with empty strings instead.
+            if (datatype.isVarStr())
+                Arrays.fill((Object[])value, "");
             attr.setAttributeData(value);
 
             log.trace("writeMetadata() via write()");

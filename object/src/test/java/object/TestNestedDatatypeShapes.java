@@ -62,6 +62,8 @@ public class TestNestedDatatypeShapes {
             writeArrayOfFixedString(fid);
             writeWideVlenOfCompound(fid);
             writeCompoundWithReference(fid);
+            writeVarStr(fid);
+            writeArrayOfVlenIntAttribute(fid);
         }
         finally {
             H5.H5Fclose(fid);
@@ -374,6 +376,61 @@ public class TestNestedDatatypeShapes {
         return String.valueOf(data);
     }
 
+    /** Variable-length string. */
+    private static void writeVarStr(long fid) throws Exception
+    {
+        long tid = varStrType();
+        long sid = H5.H5Screate_simple(1, new long[] {2}, null);
+        long did = H5.H5Dcreate(fid, "varstr", tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                HDF5Constants.H5P_DEFAULT);
+        try {
+            H5.H5Dwrite_VLStrings(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                                  HDF5Constants.H5P_DEFAULT, new Object[] {"x,y", "z"});
+        }
+        finally {
+            H5.H5Dclose(did);
+            H5.H5Sclose(sid);
+            H5.H5Tclose(tid);
+        }
+    }
+
+    /** ARRAY[2] of VLEN of int, as an attribute on the root group. */
+    private static void writeArrayOfVlenIntAttribute(long fid) throws Exception
+    {
+        long vt  = H5.H5Tvlen_create(HDF5Constants.H5T_NATIVE_INT);
+        long tid = H5.H5Tarray_create(vt, 1, new long[] {2});
+        long sid = H5.H5Screate_simple(1, new long[] {2}, null);
+        long aid = H5.H5Acreate(fid, "array_of_vlen_int_attr", tid, sid, HDF5Constants.H5P_DEFAULT,
+                                HDF5Constants.H5P_DEFAULT);
+        try {
+            Object[] buf = {list(list(1, 2), list(3)), list(list(4), list(5, 6))};
+            H5.H5AwriteVL(aid, tid, buf);
+        }
+        finally {
+            H5.H5Aclose(aid);
+            H5.H5Sclose(sid);
+            H5.H5Tclose(tid);
+            H5.H5Tclose(vt);
+        }
+    }
+
+    /** COMPOUND{id:int, name:variable-length string}. */
+    private static void writeCompoundWithVarStr(long fid) throws Exception
+    {
+        long vs  = varStrType();
+        long tid = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8 + H5.H5Tget_size(vs));
+        try {
+            H5.H5Tinsert(tid, "id", 0, HDF5Constants.H5T_NATIVE_INT);
+            H5.H5Tinsert(tid, "name", 8, vs);
+            Object[] buf = {list(1, "first"), list(2, "second")};
+            writeDataset(fid, "compound_with_varstr", tid, 2, buf, true);
+        }
+        finally {
+            H5.H5Tclose(tid);
+            H5.H5Tclose(vs);
+        }
+    }
+
     // ---- tests ----------------------------------------------------------------
 
     @Test
@@ -537,6 +594,84 @@ public class TestNestedDatatypeShapes {
             Dataset dataset = (Dataset)check.get("/vlen_of_compound");
             dataset.init();
             assertEquals("[[[10, 11], [20, 21]], [[30, 31]]]", render(dataset.getData()));
+        }
+        finally {
+            check.close();
+        }
+    }
+
+    @Test
+    @DisplayName("Variable-length data is read into one slot per point")
+    public void testVariableLengthBufferShape() throws Exception
+    {
+        /*
+         * Every type containing variable-length data shares one buffer shape, the JNI's:
+         * an Object[] with one slot per point, holding a String or a nested List.
+         */
+        String[][] cases = {{"varstr", "String"}, {"vlen_of_varstr", "List"}, {"array_of_vlen_int", "List"}};
+        for (String[] c : cases) {
+            Object data = open(c[0]).getData();
+            assertEquals(Object[].class, data.getClass(), c[0] + " buffer class");
+            assertEquals(2, ((Object[])data).length, c[0] + " slot count");
+            Object slot = ((Object[])data)[0];
+            if (c[1].equals("String"))
+                assertInstanceOf(String.class, slot, c[0] + " slot type");
+            else
+                assertInstanceOf(List.class, slot, c[0] + " slot type");
+        }
+        assertEquals("[x,y, z]", render(open("varstr").getData()));
+    }
+
+    @Test
+    @DisplayName("Attribute holding an array of VLEN of int")
+    public void testArrayOfVlenIntAttribute() throws Exception
+    {
+        hdf.object.Group root = (hdf.object.Group)testFile.get("/");
+        hdf.object.Attribute attr = null;
+        for (Object a : ((hdf.object.MetaDataContainer)root).getMetadata())
+            if (((hdf.object.Attribute)a).getAttributeName().equals("array_of_vlen_int_attr"))
+                attr = (hdf.object.Attribute)a;
+        assertNotNull(attr, "Attribute not found");
+
+        assertEquals("[[[1, 2], [3]], [[4], [5, 6]]]", render(attr.getAttributeData()));
+    }
+
+    @Test
+    @DisplayName("Write a variable-length string compound member")
+    public void testCompoundVarStrMemberWriteRoundTrip() throws Exception
+    {
+        Path target = workDir.resolve("compound_varstr_rw.h5");
+        long fid    = H5.H5Fcreate(target.toString(), HDF5Constants.H5F_ACC_TRUNC,
+                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        try {
+            writeCompoundWithVarStr(fid);
+        }
+        finally {
+            H5.H5Fclose(fid);
+        }
+
+        H5File rw = (H5File)(new H5File()).createInstance(target.toString(), FileFormat.WRITE);
+        rw.open();
+        try {
+            Dataset dataset = (Dataset)rw.get("/compound_with_varstr");
+            dataset.init();
+            @SuppressWarnings("unchecked")
+            List<Object> members = (List<Object>)dataset.getData();
+            Object[] names       = (Object[])members.get(1);
+            assertEquals("first", names[0]);
+            names[0] = "changed";
+            dataset.write(members);
+        }
+        finally {
+            rw.close();
+        }
+
+        H5File check = (H5File)(new H5File()).createInstance(target.toString(), FileFormat.READ);
+        check.open();
+        try {
+            Dataset dataset = (Dataset)check.get("/compound_with_varstr");
+            dataset.init();
+            assertEquals("[[1, 2], [changed, second]]", render(dataset.getData()));
         }
         finally {
             check.close();
