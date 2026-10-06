@@ -325,6 +325,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                  * limitation.
                  */
                 // return !(isReadOnly || isDisplayTypeChar || showAsBin || showAsHex);
+                if (!dataProvider.isCellEditable(columnIndex, rowIndex))
+                    return false;
+
                 return !isReadOnly;
             }
         };
@@ -689,15 +692,14 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 CompoundDataFormat dataFormat = (CompoundDataFormat)dataObject;
                 Datatype cmpdType             = dataObject.getDatatype();
 
-                // Resolve VLEN(compound) to compound base type
-                if (cmpdType.isVLEN() && !cmpdType.isVarStr() && cmpdType.getDatatypeBase() != null &&
-                    cmpdType.getDatatypeBase().isCompound()) {
-                    cmpdType = cmpdType.getDatatypeBase();
-                }
-
+                // A top-level vlen is one column and has no members to filter, as in
+                // CompoundDSColumnHeaderDataProvider.
                 Datatype[] selectedMemberTypes = dataFormat.getSelectedMemberTypes();
-                List<Datatype> localSelectedTypes =
-                    DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
+                List<Datatype> localSelectedTypes;
+                if (cmpdType.isVLEN() && !cmpdType.isVarStr())
+                    localSelectedTypes = new ArrayList<>(java.util.Collections.singletonList(cmpdType));
+                else
+                    localSelectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
 
                 HashMap<Integer, Integer>[] maps = null;
                 try {
@@ -705,6 +707,10 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 }
                 catch (Exception ex) {
                     log.debug("CompoundDSCellSelectionListener: buildIndexMaps", ex);
+                }
+                if (maps == null) {
+                    log.debug("CompoundDSCellSelectionListener: index maps unavailable");
+                    return;
                 }
                 baseIndexMap         = maps[DataFactoryUtils.COL_TO_BASE_CLASS_MAP_INDEX];
                 relCmpdStartIndexMap = maps[DataFactoryUtils.CMPD_START_IDX_MAP_INDEX];
@@ -745,12 +751,7 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                 log.trace("CompoundDSCellSelectionListener: CellSelected fieldIndex={}:{}", rowIdx,
                           fieldIndex);
 
-                int bIndex      = baseIndexMap.get(fieldIndex - 1);
-                Object colValue = ((List<?>)dataValue).get(bIndex);
-                if (colValue == null)
-                    log.debug("CompoundDSCellSelectionListener: CellSelected colValue is null for Idx={}",
-                              bIndex);
-
+                int bIndex            = baseIndexMap.get(fieldIndex - 1);
                 Datatype selectedType = selectedMemberTypes[bIndex];
 
                 if (selectedType.isRef()) {
@@ -840,13 +841,12 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
             Datatype cmpdType = dataObject.getDatatype();
 
-            // Resolve VLEN(compound) to the compound base type for display purposes
-            if (cmpdType.isVLEN() && !cmpdType.isVarStr() && cmpdType.getDatatypeBase() != null &&
-                cmpdType.getDatatypeBase().isCompound()) {
-                cmpdType = cmpdType.getDatatypeBase();
-            }
-
-            List<Datatype> selectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
+            // A top-level vlen is one column and has no members to filter.
+            List<Datatype> selectedTypes;
+            if (cmpdType.isVLEN() && !cmpdType.isVarStr())
+                selectedTypes = new ArrayList<>(java.util.Collections.singletonList(cmpdType));
+            else
+                selectedTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, cmpdType);
             final List<String> datasetMemberNames = Arrays.asList(dataFormat.getSelectedMemberNames());
 
             columnNames = new ArrayList<>(dataFormat.getSelectedMemberCount());
@@ -911,7 +911,8 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                  * architectural issue.
                  */
                 if (memberTypes.isEmpty()) {
-                    memberTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedCompoundType);
+                    memberTypes =
+                        DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedCompoundType, false);
                 }
 
                 /*
@@ -945,33 +946,33 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                                            memberTypes);
             }
             else if (curDtype.isVLEN() && !curDtype.isVarStr()) {
-                /*
-                 * For VLEN of COMPOUND, peel off the VLEN wrapper and recurse with the
-                 * compound base type. Each cell displays the variable-length values as a
-                 * brace-enclosed list, so no column multiplication is needed.
-                 */
-                Datatype baseType = curDtype.getDatatypeBase();
-                if (baseType != null && baseType.isCompound()) {
-                    if (memberTypes.isEmpty()) {
-                        memberTypes = DataFactoryUtils.filterNonSelectedMembers(dataFormat, baseType);
-                    }
-                    recursiveColumnHeaderSetup(outColNames, dataFormat, baseType, memberNames, memberTypes);
-                }
+                // A top-level vlen is one column holding the whole sequence.
+                for (int j = 0; j < memberNames.size(); j++)
+                    outColNames.add(memberNames.get(j).replaceAll(CompoundDS.SEPARATOR, "->"));
             }
             else if (curDtype.isCompound()) {
+                /*
+                 * memberNames is flat leaf names and memberTypes top-level member
+                 * types, so each type consumes countLeafNames() of the names.
+                 */
                 ListIterator<String> localIt = memberNames.listIterator();
+                int topIdx                   = 0;
+                int remainingLeavesInTop     = DataFactoryUtils.countLeafNames(memberTypes.get(0));
                 while (localIt.hasNext()) {
-                    int curIdx                         = localIt.nextIndex();
+                    if (remainingLeavesInTop <= 0 && topIdx + 1 < memberTypes.size()) {
+                        topIdx++;
+                        remainingLeavesInTop = DataFactoryUtils.countLeafNames(memberTypes.get(topIdx));
+                    }
                     String curName                     = localIt.next();
-                    Datatype curType                   = memberTypes.get(curIdx % memberTypes.size());
+                    Datatype curType                   = memberTypes.get(topIdx);
                     Datatype nestedArrayOfCompoundType = null;
                     boolean nestedArrayOfCompound      = false;
 
                     /*
-                     * Recursively detect any nested array/vlen of compound types and deal with them
-                     * by creating multiple copies of the member names.
+                     * A nested ARRAY of compound repeats the member names once per
+                     * element. A vlen is one column and is handled below.
                      */
-                    if (curType.isArray() || curType.isVLEN()) {
+                    if (curType.isArray()) {
                         Datatype base = curType.getDatatypeBase();
                         while (base != null) {
                             if (base.isCompound()) {
@@ -985,28 +986,36 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                     }
 
                     /*
-                     * For ARRAY of COMPOUND and VLEN of COMPOUND types, we repeat the compound
-                     * members n times, where n is the number of array or vlen elements.
+                     * For ARRAY of COMPOUND types, we repeat the compound members n times,
+                     * where n is the number of array elements. The flat name list holds the
+                     * header followed by each inner leaf name.
                      */
                     if (nestedArrayOfCompound) {
-                        List<Datatype> selTypes =
-                            DataFactoryUtils.filterNonSelectedMembers(dataFormat, nestedArrayOfCompoundType);
-                        List<String> selMemberNames = new ArrayList<>(selTypes.size());
+                        List<Datatype> selTypes = DataFactoryUtils.filterNonSelectedMembers(
+                            dataFormat, nestedArrayOfCompoundType, false);
 
-                        int arrCmpdLen = calcArrayOfCompoundLen(selTypes);
-                        for (int i = 0; i < arrCmpdLen; i++) {
+                        List<String> selMemberNames = new ArrayList<>(selTypes.size());
+                        int arrCmpdLen              = calcArrayOfCompoundLen(selTypes);
+                        selMemberNames.add(curName);
+                        for (int i = 1; i < arrCmpdLen; i++)
                             selMemberNames.add(localIt.next());
-                        }
 
                         recursiveColumnHeaderSetup(outColNames, dataFormat, curType, selMemberNames,
                                                    selTypes);
+                        remainingLeavesInTop -= arrCmpdLen;
+                    }
+                    else if (curType.isVLEN() && !curType.isVarStr()) {
+                        // A vlen member is one column holding the whole sequence.
+                        String baseName = curName.replaceAll(CompoundDS.SEPARATOR, "->");
+                        outColNames.add(baseName);
+                        remainingLeavesInTop--;
                     }
                     else {
                         // Copy the dataset member name reference, so changes to the column name
                         // don't affect the dataset's internal member names.
                         curName = new String(curName.replaceAll(CompoundDS.SEPARATOR, "->"));
-
                         outColNames.add(curName);
+                        remainingLeavesInTop--;
                     }
                 }
             }
@@ -1156,11 +1165,9 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
                                 colindex);
                     }
                     else if (allColumnNames[i].matches(".*\\[[0-9]*\\]")) {
-                        /*
-                         * Top-level ARRAY of COMPOUND types.
-                         */
-                        columnHeaderBuilder.append("ARRAY");
-                        processArrayOfCompound(columnHeaderBuilder, allColumnNames[i]);
+                        // Group every element under the member name.
+                        String baseName = allColumnNames[i].replaceAll("\\[[0-9]*\\]$", "");
+                        columnHeaderBuilder.append(baseName);
 
                         columnGroupHeaderLayer.addColumnsIndexesToGroup(columnHeaderBuilder.toString(),
                                                                         colindex);

@@ -73,15 +73,7 @@ public class DataDisplayConverterFactory {
 
         dataFormatReference = dataObject;
 
-        Datatype dtype = dataObject.getDatatype();
-
-        // For VLEN(compound), use compound base type so CompoundDataDisplayConverter is created
-        if (dtype.isVLEN() && !dtype.isVarStr() && dtype.getDatatypeBase() != null &&
-            dtype.getDatatypeBase().isCompound()) {
-            dtype = dtype.getDatatypeBase();
-        }
-
-        HDFDisplayConverter converter = getDataDisplayConverter(dtype);
+        HDFDisplayConverter converter = getDataDisplayConverter(dataObject.getDatatype());
 
         return converter;
     }
@@ -237,7 +229,7 @@ public class DataDisplayConverterFactory {
             CompoundDataFormat compoundFormat = (CompoundDataFormat)dataFormatReference;
 
             List<Datatype> localSelectedTypes =
-                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
+                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype, false);
 
             log.trace("setting up {} base HDFDisplayConverters", localSelectedTypes.size());
 
@@ -331,9 +323,14 @@ public class DataDisplayConverterFactory {
                         Object curObject = cmpdList.get(i);
                         if (curObject instanceof List)
                             buffer.append(memberTypeConverters[i].canonicalToDisplayValue(curObject));
-                        else {
+                        else if (curObject != null && curObject.getClass().isArray()) {
+                            // Array-of-compound: the member is indexed by row.
                             Object dataArrayValue = Array.get(curObject, cellRowIdx);
                             buffer.append(memberTypeConverters[i].canonicalToDisplayValue(dataArrayValue));
+                        }
+                        else {
+                            // A single compound element: the member is already the value.
+                            buffer.append(memberTypeConverters[i].canonicalToDisplayValue(curObject));
                         }
                     }
                     buffer.append("}");
@@ -469,7 +466,9 @@ public class DataDisplayConverterFactory {
             try {
                 Object obj;
                 Object convertedValue;
-                int arrLen = Array.getLength(value);
+
+                // An array's elements may arrive as a List, nested arrays included.
+                int arrLen = (value instanceof List) ? ((List<?>)value).size() : Array.getLength(value);
 
                 log.trace("canonicalToDisplayValue({}): array length={}", value, arrLen);
 
@@ -480,7 +479,7 @@ public class DataDisplayConverterFactory {
                     if (i > 0)
                         buffer.append(", ");
 
-                    obj = Array.get(value, i);
+                    obj = (value instanceof List) ? ((List<?>)value).get(i) : Array.get(value, i);
 
                     convertedValue = baseTypeConverter.canonicalToDisplayValue(obj);
 
@@ -610,7 +609,14 @@ public class DataDisplayConverterFactory {
             try {
                 Object obj;
                 Object convertedValue;
-                int arrLen = Array.getLength(value);
+
+                // A scalar cell defers to the base converter.
+                if (!value.getClass().isArray() && !(value instanceof List)) {
+                    buffer.append(baseTypeConverter.canonicalToDisplayValue(value));
+                    return buffer;
+                }
+
+                int arrLen = (value instanceof List) ? ((List<?>)value).size() : Array.getLength(value);
 
                 log.trace("canonicalToDisplayValue({}): array length={}", value, arrLen);
 
@@ -621,7 +627,7 @@ public class DataDisplayConverterFactory {
                     if (i > 0)
                         buffer.append(", ");
 
-                    obj = Array.get(value, i);
+                    obj = (value instanceof List) ? ((List<?>)value).get(i) : Array.get(value, i);
 
                     convertedValue = baseTypeConverter.canonicalToDisplayValue(obj);
 

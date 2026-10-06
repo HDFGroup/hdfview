@@ -1975,6 +1975,37 @@ public class H5Datatype extends Datatype {
     }
 
     /**
+     * Returns true when this datatype contains a variable-length sequence or
+     * variable-length string at any depth. Mirrors h5str_detect_vlen() in the JNI,
+     * which decides there whether an I/O call uses the variable-length object model.
+     *
+     * @param dtype the datatype to inspect
+     *
+     * @return true if the type contains variable-length data
+     */
+    public static boolean containsVlenData(final Datatype dtype)
+    {
+        if (dtype == null)
+            return false;
+
+        if (dtype.isVarStr() || dtype.getDatatypeClass() == CLASS_VLEN)
+            return true;
+
+        if (dtype.isCompound()) {
+            List<Datatype> members = dtype.getCompoundMemberTypes();
+            if (members != null) {
+                for (Datatype member : members) {
+                    if (containsVlenData(member))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        return containsVlenData(dtype.getDatatypeBase());
+    }
+
+    /**
      * Allocates a one-dimensional array of byte, short, int, long, float, double, or String to store data in
      * memory.
      *
@@ -2031,12 +2062,16 @@ public class H5Datatype extends Datatype {
 
         log.trace("allocateArray(): tclass={} : tsize={}", typeClass, typeSize);
 
-        if (dtype.isVarStr()) {
-            log.trace("allocateArray(): is_variable_str={}", dtype.isVarStr());
-
-            data = new String[numPoints];
-            for (int i = 0; i < numPoints; i++)
-                ((String[])data)[i] = "";
+        /*
+         * Variable-length data follows the JNI buffer data model (see "Buffer data model" in
+         * H5.java): one slot per selected point, which the read routines fill with a String
+         * (variable-length string) or a nested ArrayList (vlen, or an array containing
+         * variable-length data). The slots are left null. A compound keeps its per-member
+         * List below, since compound members are read one at a time.
+         */
+        if (containsVlenData(dtype) && typeClass != CLASS_COMPOUND) {
+            log.trace("allocateArray(): contains variable-length data");
+            data = new Object[numPoints];
         }
         else if (typeClass == CLASS_INTEGER) {
             log.trace("allocateArray(): class CLASS_INTEGER");
@@ -2162,15 +2197,6 @@ public class H5Datatype extends Datatype {
             log.trace("allocateArray(): class CLASS_STRING || CLASS_REFERENCE");
 
             data = new byte[(int)(numPoints * typeSize)];
-        }
-        else if (dtype.isVLEN()) {
-            log.trace("allocateArray(): isVLEN");
-
-            data = new ArrayList[numPoints];
-            for (int j = 0; j < numPoints; j++)
-                ((ArrayList[])data)[j] = new ArrayList<byte[]>();
-            // if (baseType != null)
-            // ((ArrayList<>)data).add(H5Datatype.allocateArray(baseType, numPoints));
         }
         else if (typeClass == CLASS_ARRAY) {
             log.trace("allocateArray(): class CLASS_ARRAY");
@@ -2975,9 +3001,16 @@ public class H5Datatype extends Datatype {
             H5Datatype.extractCompoundInfo((H5Datatype)dtype.getDatatypeBase(), name, names, flatListTypes);
         }
         else if (dtype.isVLEN() && !dtype.isVarStr()) {
-            log.trace(
-                "extractCompoundInfo(): variable-length type - extracting compound info from base datatype");
-            H5Datatype.extractCompoundInfo((H5Datatype)dtype.getDatatypeBase(), name, names, flatListTypes);
+            /*
+             * A vlen (including vlen-of-compound) is a single leaf: it is displayed as one
+             * column showing the whole sequence as a string. Do NOT recurse into the base
+             * compound, since that would enumerate the inner members as separate
+             * columns.
+             */
+            log.trace("extractCompoundInfo(): variable-length type - adding as a single leaf");
+            if (names != null)
+                names.add(name);
+            flatListTypes.add(dtype);
         }
         else if (dtype.isCompound()) {
             List<String> compoundMemberNames   = dtype.getCompoundMemberNames();

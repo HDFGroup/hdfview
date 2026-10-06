@@ -244,7 +244,7 @@ public class DataValidatorFactory {
             CompoundDataFormat compoundFormat = (CompoundDataFormat)dataFormatReference;
 
             List<Datatype> localSelectedTypes =
-                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
+                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype, false);
 
             log.trace("setting up {} base HDFDataValidators", localSelectedTypes.size());
 

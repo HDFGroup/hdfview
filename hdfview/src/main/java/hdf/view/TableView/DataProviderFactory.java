@@ -74,17 +74,7 @@ public class DataProviderFactory {
 
         dataFormatReference = dataObject;
 
-        Datatype dtype = dataObject.getDatatype();
-
-        // For VLEN(compound), use the compound base type so CompoundDataProvider is created.
-        // The VLEN aspect is handled in the read path (H5DreadVL), and each member's data
-        // is a String[] of brace-enclosed values.
-        if (dtype.isVLEN() && !dtype.isVarStr() && dtype.getDatatypeBase() != null &&
-            dtype.getDatatypeBase().isCompound()) {
-            dtype = dtype.getDatatypeBase();
-        }
-
-        HDFDataProvider dataProvider = getDataProvider(dtype, dataBuf, dataTransposed);
+        HDFDataProvider dataProvider = getDataProvider(dataObject.getDatatype(), dataBuf, dataTransposed);
 
         return dataProvider;
     }
@@ -329,8 +319,11 @@ public class DataProviderFactory {
             try {
                 if (obj instanceof ArrayList)
                     theValue = ((ArrayList)obj).get(index);
-                else
+                else if (obj != null && obj.getClass().isArray())
                     theValue = Array.get(obj, index);
+                else
+                    // The caller already resolved the row dimension.
+                    theValue = obj;
             }
             catch (Exception ex) {
                 log.debug("getDataValue({}): failure: ", index, ex);
@@ -341,6 +334,20 @@ public class DataProviderFactory {
 
             return theValue;
         }
+
+        /**
+         * Whether this cell can be written back. A provider that cannot map a displayed
+         * cell to storage returns false, so the table declines to open an editor rather
+         * than rejecting the value after the user has typed it.
+         *
+         * @param columnIndex
+         *        the column
+         * @param rowIndex
+         *        the row
+         *
+         * @return true when the cell can be edited
+         */
+        public boolean isCellEditable(int columnIndex, int rowIndex) { return true; }
 
         /**
          * update the data value of a compound type.
@@ -620,7 +627,7 @@ public class DataProviderFactory {
             selectedMemberOrders              = compoundFormat.getSelectedMemberOrders();
 
             List<Datatype> localSelectedTypes =
-                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype);
+                DataFactoryUtils.filterNonSelectedMembers(compoundFormat, dtype, false);
 
             log.trace("setting up {} base HDFDataProviders", localSelectedTypes.size());
 
@@ -794,6 +801,10 @@ public class DataProviderFactory {
                         "CompoundDataProvider.getDataValue: theValue={}, rowIdx={}, adjustedColIndex={}",
                         theValue, rowIdx, adjustedColIndex);
                 }
+                else if (base instanceof VlenDataProvider) {
+                    // A vlen member is one column holding the whole sequence.
+                    theValue = base.getDataValue(colValue, fieldIdx, rowIdx);
+                }
                 else {
                     log.trace(
                         "CompoundDataProvider.getDataValue: Non-container: Calling base.getDataValue(colValue, {})",
@@ -839,6 +850,8 @@ public class DataProviderFactory {
                         colValue, columnIndex - relCmpdStartIndexMap.get(columnIndex), rowIndex);
                 else if (base instanceof ArrayDataProvider)
                     theValue = base.getDataValue(colValue, columnIndex, rowIndex);
+                else if (base instanceof VlenDataProvider)
+                    theValue = base.getDataValue(colValue, columnIndex, rowIndex);
                 else
                     theValue = base.getDataValue(colValue, rowIndex);
             }
@@ -856,6 +869,19 @@ public class DataProviderFactory {
         {
             throw new UnsupportedOperationException(
                 "getDataValue(Object, int) should not be called for CompoundDataProviders");
+        }
+
+        @Override
+        public boolean isCellEditable(int columnIndex, int rowIndex)
+        {
+            try {
+                int fieldIdx = columnIndex % getColumnCount();
+                return baseTypeProviders[baseProviderIndexMap.get(fieldIdx)].isCellEditable(fieldIdx,
+                                                                                            rowIndex);
+            }
+            catch (Exception ex) {
+                return true;
+            }
         }
 
         @Override
@@ -1059,6 +1085,9 @@ public class DataProviderFactory {
 
         private final int nCols;
 
+        /** Whether the array's base type is a variable-length string. */
+        private final boolean isVarStrBase;
+
         ArrayDataProvider(final Datatype dtype, final Object dataBuf, final boolean dataTransposed)
             throws Exception
         {
@@ -1068,7 +1097,9 @@ public class DataProviderFactory {
 
             baseTypeDataProvider = getDataProvider(baseType, dataBuf, dataTransposed);
 
-            if (baseType.isVarStr())
+            isVarStrBase = baseType.isVarStr();
+
+            if (isVarStrBase)
                 arraySize = dtype.getArrayDims()[0];
             else if (baseType.isBitField() || baseType.isOpaque())
                 arraySize = dtype.getDatatypeSize();
@@ -1086,12 +1117,48 @@ public class DataProviderFactory {
                 nCols = super.getColumnCount();
         }
 
+        /**
+         * Return this array's elements for one selected point, or null when the buffer is
+         * a flat run of base-type values rather than a List per point.
+         */
+        private Object[] retrieveObjectModelElements(Object objBuf, int pointIndex)
+        {
+            if (!(objBuf instanceof Object[] slots))
+                return null;
+            if (pointIndex < 0 || pointIndex >= slots.length)
+                return null;
+            if (!(slots[pointIndex] instanceof List<?> elements))
+                return null;
+
+            Object[] values = new Object[elements.size()];
+            for (int i = 0; i < values.length; i++) {
+                Object element = elements.get(i);
+
+                /*
+                 * The JNI hands opaque and reference values over as byte[], which the base
+                 * provider knows how to format. Elements at this level are normally Strings
+                 * or Lists, since an array of opaque or reference holds no variable-length
+                 * data and so never reaches this path; the check is defensive.
+                 */
+                if (element instanceof byte[])
+                    values[i] = baseTypeDataProvider.getDataValue(element, 0);
+                else
+                    values[i] = element;
+            }
+
+            return values;
+        }
+
         @Override
         public Object getDataValue(int columnIndex, int rowIndex)
         {
             log.trace("getDataValue(rowIndex={}, columnIndex={}): start", rowIndex, columnIndex);
             try {
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
+
+                Object[] objModelElements = retrieveObjectModelElements(dataBuf, bufIndex);
+                if (objModelElements != null)
+                    return theValue = objModelElements;
 
                 bufIndex *= arraySize;
 
@@ -1142,6 +1209,10 @@ public class DataProviderFactory {
         {
             log.trace("getDataValue(obj={} rowIndex={}, columnIndex={}): start", obj, rowIndex, columnIndex);
             try {
+                Object[] objModelElements = retrieveObjectModelElements(obj, rowIndex);
+                if (objModelElements != null)
+                    return theValue = objModelElements;
+
                 long index = rowIndex * arraySize;
 
                 if (baseTypeDataProvider instanceof CompoundDataProvider) {
@@ -1236,10 +1307,31 @@ public class DataProviderFactory {
         }
 
         @Override
+        public boolean isCellEditable(int columnIndex, int rowIndex)
+        {
+            /*
+             * A point held as a List is an array containing variable-length data, edited by
+             * updateObjectModelElements(). That splits the cell text on ",[]" into a flat run
+             * of tokens and stores each token as a String. Only an array of variable-length
+             * strings can be rebuilt that way: when the elements are themselves sequences
+             * or compounds, the tokenizer discards the brackets marking where each element
+             * ends, and the tokens are not converted to the element type.
+             */
+            int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
+            if (dataBuf instanceof Object[] slots && bufIndex >= 0 && bufIndex < slots.length &&
+                slots[bufIndex] instanceof List)
+                return isVarStrBase;
+            return true;
+        }
+
+        @Override
         public void setDataValue(int columnIndex, int rowIndex, Object newValue)
         {
             try {
                 int bufIndex = physicalLocationToBufIndex(rowIndex, columnIndex);
+
+                if (updateObjectModelElements(dataBuf, newValue, bufIndex))
+                    return;
 
                 bufIndex *= arraySize;
 
@@ -1256,6 +1348,9 @@ public class DataProviderFactory {
         public void setDataValue(int columnIndex, int rowIndex, Object bufObject, Object newValue)
         {
             try {
+                if (updateObjectModelElements(bufObject, newValue, rowIndex))
+                    return;
+
                 long bufIndex = rowIndex * arraySize;
 
                 updateArrayElements(bufObject, newValue, columnIndex, (int)bufIndex);
@@ -1272,6 +1367,42 @@ public class DataProviderFactory {
         {
             throw new UnsupportedOperationException(
                 "setDataValue(int, Object, Object) should not be called for ArrayDataProviders");
+        }
+
+        /**
+         * Write one cell back into the List held in this point's slot, returning false if
+         * the buffer is not in that layout.
+         */
+        private boolean updateObjectModelElements(Object curBuf, Object newValue, int pointIndex)
+        {
+            if (!(curBuf instanceof Object[] slots) || pointIndex < 0 || pointIndex >= slots.length)
+                return false;
+            if (!(slots[pointIndex] instanceof List<?> elements))
+                return false;
+
+            // The flat tokenizing below can only rebuild string elements; see isCellEditable().
+            if (!isVarStrBase)
+                throw new UnsupportedOperationException(
+                    "editing an array of variable-length data is only supported for strings");
+
+            StringTokenizer st = new StringTokenizer((String)newValue, ",[]");
+            if (st.countTokens() < arraySize) {
+                log.trace("updateObjectModelElements(): number of data points ({}) < array size {}",
+                          st.countTokens(), arraySize);
+                return true;
+            }
+
+            @SuppressWarnings("unchecked")
+            List<Object> target = (List<Object>)elements;
+            int count = (int)Math.min(arraySize, target.size());
+            for (int i = 0; i < count; i++) {
+                String token = st.nextToken().trim();
+                if (!token.equals(target.get(i))) {
+                    target.set(i, token);
+                    isValueChanged = true;
+                }
+            }
+            return true;
         }
 
         private void updateArrayElements(Object curBuf, Object newValue, int columnIndex, int bufStartIndex)
@@ -1367,9 +1498,8 @@ public class DataProviderFactory {
         {
             super(dtype, dataBuf, dataTransposed);
 
-            Datatype baseType = dtype.getDatatypeBase();
-            baseTypeClass     = baseType.getDatatypeClass();
-
+            Datatype baseType    = dtype.getDatatypeBase();
+            baseTypeClass        = baseType.getDatatypeClass();
             baseTypeDataProvider = getDataProvider(baseType, dataBuf, dataTransposed);
 
             buffer = new StringBuilder();
@@ -1476,26 +1606,22 @@ public class DataProviderFactory {
 
         private Object[] retrieveArrayOfCompoundElements(Object objBuf, int columnIndex, int rowIndex)
         {
-            long vlSize = Array.getLength(objBuf);
-            log.trace("retrieveArrayOfCompoundElements(): vlSize={}", vlSize);
-            long adjustedRowIdx =
-                (rowIndex * vlSize * colCount) +
-                (columnIndex / ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size());
-            long adjustedColIdx =
-                columnIndex % ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size();
-
             /*
-             * Since we flatten array of compound types, we only need to return a single
-             * value.
+             * A vlen-of-compound member is one column showing the whole sequence. The read
+             * path hands each row a list of compound elements already parsed into nested
+             * Lists (e.g. [[10, [11, 12]], [20, [21, 22]]]). Return the row's elements as an
+             * array, which VlenDataDisplayConverter wraps in [...] and the inner
+             * CompoundDataDisplayConverter renders each element of as {...}, recursing
+             * for nested compounds.
              */
-            return new Object[] {
-                baseTypeDataProvider.getDataValue(objBuf, (int)adjustedColIdx, (int)adjustedRowIdx)};
+            ArrayList<?> vlElements = (ArrayList)((Object[])objBuf)[rowIndex];
+            return vlElements.toArray();
         }
 
         private Object[] retrieveArrayOfArrayElements(Object objBuf, int columnIndex, int startRowIndex)
         {
             log.trace("retrieveArrayOfArrayElements(): objBuf={}", objBuf);
-            ArrayList<byte[]> vlElements = ((ArrayList[])objBuf)[startRowIndex];
+            ArrayList<byte[]> vlElements = (ArrayList)((Object[])objBuf)[startRowIndex];
             log.trace("retrieveArrayOfArrayElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
             log.trace("retrieveArrayOfArrayElements(): vlSize={} length={}", vlSize, vlElements.size());
@@ -1522,7 +1648,7 @@ public class DataProviderFactory {
         private Object[] retrieveArrayOfComplexElements(Object objBuf, int columnIndex, int startRowIndex)
         {
             log.trace("retrieveArrayOfComplexElements(): objBuf={}", objBuf);
-            ArrayList<byte[]> vlElements = ((ArrayList[])objBuf)[startRowIndex];
+            ArrayList<byte[]> vlElements = (ArrayList)((Object[])objBuf)[startRowIndex];
             log.trace("retrieveArrayOfComplexElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
             log.trace("retrieveArrayOfComplexElements(): vlSize={} length={}", vlSize, vlElements.size());
@@ -1549,7 +1675,7 @@ public class DataProviderFactory {
 
         private Object[] retrieveArrayOfAtomicElements(Object objBuf, int rowStartIdx)
         {
-            ArrayList vlElements = ((ArrayList[])objBuf)[rowStartIdx];
+            ArrayList vlElements = (ArrayList)((Object[])objBuf)[rowStartIdx];
             long vlSize          = vlElements.size();
             log.trace("retrieveArrayOfAtomicElements(): vlSize={}", vlSize);
             Object[] tempArray = new Object[(int)vlSize];
@@ -1565,6 +1691,18 @@ public class DataProviderFactory {
         {
             throw new UnsupportedOperationException(
                 "getDataValue(Object, int) should not be called for VlenDataProviders");
+        }
+
+        @Override
+        public boolean isCellEditable(int columnIndex, int rowIndex)
+        {
+            // A vlen-of-compound cell is the whole sequence, which no per-member write
+            // can be derived from.
+            if (baseTypeDataProvider instanceof CompoundDataProvider)
+                return false;
+
+            // A sequence is only as editable as what it holds, e.g. a vlen of vlen of compound.
+            return baseTypeDataProvider.isCellEditable(columnIndex, rowIndex);
         }
 
         @Override
@@ -1629,24 +1767,13 @@ public class DataProviderFactory {
         private void updateArrayOfCompoundElements(Object newValue, Object curBuf, int columnIndex,
                                                    int rowIndex)
         {
-            long vlSize = Array.getLength(curBuf);
-            log.trace("updateArrayOfCompoundElements(): vlSize={}", vlSize);
-            long adjustedRowIdx =
-                (rowIndex * vlSize * colCount) +
-                (columnIndex / ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size());
-            long adjustedColIdx =
-                columnIndex % ((CompoundDataProvider)baseTypeDataProvider).baseProviderIndexMap.size();
-
-            /*
-             * Since we flatten array of compound types, we only need to update a single value.
-             */
-            baseTypeDataProvider.setDataValue((int)adjustedColIdx, (int)adjustedRowIdx, curBuf, newValue);
-            isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
+            throw new UnsupportedOperationException(
+                "editing a variable-length sequence of compound values is not supported");
         }
 
         private void updateArrayOfArrayElements(Object newValue, Object curBuf, int columnIndex, int rowIndex)
         {
-            ArrayList vlElements = ((ArrayList[])curBuf)[rowIndex];
+            ArrayList vlElements = (ArrayList)((Object[])curBuf)[rowIndex];
             log.trace("updateArrayOfArrayElements(): vlElements={}", vlElements);
             long vlSize = vlElements.size();
             log.trace("updateArrayOfArrayElements(): vlSize={}", vlSize);
@@ -1685,12 +1812,12 @@ public class DataProviderFactory {
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
             vlElements                      = new ArrayList<>(Arrays.asList(abuffer));
-            ((ArrayList[])curBuf)[rowIndex] = vlElements;
+            ((Object[])curBuf)[rowIndex] = vlElements;
         }
 
         private void updateArrayOfAtomicElements(Object newValue, Object curBuf, int rowStartIdx)
         {
-            ArrayList vlElements = ((ArrayList[])curBuf)[rowStartIdx];
+            ArrayList vlElements = (ArrayList)((Object[])curBuf)[rowStartIdx];
             long vlSize          = vlElements.size();
             log.trace("updateArrayOfAtomicElements(): vlSize={}", vlSize);
 
@@ -1732,7 +1859,7 @@ public class DataProviderFactory {
             log.trace("updateArrayOfAtomicElements(): abuffer cname={} of data cname={}", bname, cname);
             vlElements = new ArrayList<>(Arrays.asList(abuffer));
             log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
-            ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
+            ((Object[])curBuf)[rowStartIdx] = vlElements;
         }
     }
 
@@ -1802,7 +1929,7 @@ public class DataProviderFactory {
 
         private void updateStringBytes(Object curBuf, Object newValue, int bufStartIndex)
         {
-            if (curBuf instanceof String[]) {
+            if (curBuf instanceof Object[]) {
                 Array.set(curBuf, bufStartIndex, newValue);
             }
             else if (curBuf instanceof byte[]) {
@@ -2360,7 +2487,7 @@ public class DataProviderFactory {
 
         private void updateArrayOfAtomicElements(Object newValue, Object curBuf, int rowStartIdx)
         {
-            ArrayList vlElements = ((ArrayList[])curBuf)[rowStartIdx];
+            ArrayList vlElements = (ArrayList)((Object[])curBuf)[rowStartIdx];
 
             StringTokenizer st = new StringTokenizer((String)newValue, "+i");
             int newcnt         = st.countTokens();
@@ -2374,7 +2501,7 @@ public class DataProviderFactory {
             log.trace("updateArrayOfAtomicElements(): buffer cname={} of data cname={}", bname, cname);
             vlElements = new ArrayList<>(Arrays.asList(abuffer));
             log.trace("updateArrayOfAtomicElements(): new vlSize={}", vlElements.size());
-            ((ArrayList[])curBuf)[rowStartIdx] = vlElements;
+            ((Object[])curBuf)[rowStartIdx] = vlElements;
         }
     }
 }

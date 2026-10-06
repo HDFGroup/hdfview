@@ -850,6 +850,9 @@ public class DefaultScalarDSTableView extends DefaultBaseTableView implements Ta
                  * (0b00000000-0b11111111). Related: DefaultCompoundDSTableView.java line 320 has same
                  * limitation.
                  */
+                if (!dataProvider.isCellEditable(columnIndex, rowIndex))
+                    return false;
+
                 return !(isReadOnly || isDisplayTypeChar || showAsBin || showAsHex);
             }
         };

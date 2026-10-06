@@ -48,6 +48,36 @@ public class DataFactoryUtils {
     public static final int CMPD_START_IDX_MAP_INDEX = 1;
 
     /**
+     * Number of flat leaf names a Datatype contributes to the list produced by
+     * H5Datatype.extractCompoundInfo: a compound sums its children, an
+     * array-of-compound adds a header entry, anything else counts once.
+     */
+    public static int countLeafNames(Datatype t)
+    {
+        if (t == null)
+            return 1;
+        if (t.isCompound()) {
+            int sum                 = 0;
+            List<Datatype> children = t.getCompoundMemberTypes();
+            if (children != null)
+                for (Datatype child : children)
+                    sum += countLeafNames(child);
+            return sum;
+        }
+        if (t.isArray()) {
+            Datatype base = t.getDatatypeBase();
+            if (base != null && base.isCompound()) {
+                int sum = 1;
+                for (Datatype child : base.getCompoundMemberTypes())
+                    sum += countLeafNames(child);
+                return sum;
+            }
+            return 1;
+        }
+        return 1;
+    }
+
+    /**
      * Given a CompoundDataFormat, as well as a compound datatype, removes the
      * non-selected datatypes from the List of datatypes inside the compound
      * datatype and returns that as a new List.
@@ -62,34 +92,31 @@ public class DataFactoryUtils {
     public static List<Datatype> filterNonSelectedMembers(CompoundDataFormat dataFormat,
                                                           final Datatype compoundType)
     {
+        return filterNonSelectedMembers(dataFormat, compoundType, true);
+    }
+
+    /**
+     * As above, but an inner compound keeps every member: the dataset's selected-member
+     * list enumerates only top-level leaves, so filtering against it would drop them all.
+     */
+    public static List<Datatype> filterNonSelectedMembers(CompoundDataFormat dataFormat,
+                                                          final Datatype compoundType, boolean isTopLevel)
+    {
+        List<Datatype> selectedTypes = new ArrayList<>(compoundType.getCompoundMemberTypes());
+        if (!isTopLevel)
+            return selectedTypes;
+
         List<Datatype> allSelectedTypes = Arrays.asList(dataFormat.getSelectedMemberTypes());
         if (allSelectedTypes == null) {
             log.debug("filterNonSelectedMembers(): selected compound member datatype list is null");
             return null;
         }
 
-        /*
-         * Make sure to make a copy of the compound datatype's member list, as we will
-         * make modifications to the list when members aren't selected.
-         */
-        List<Datatype> selectedTypes = new ArrayList<>(compoundType.getCompoundMemberTypes());
-
-        /*
-         * Among the datatypes within this compound type, only keep the ones that are
-         * actually selected in the dataset.
-         */
         Iterator<Datatype> localIt = selectedTypes.iterator();
         while (localIt.hasNext()) {
             Datatype curType = localIt.next();
-
-            /*
-             * Since the passed in allSelectedMembers list is a flattened out datatype
-             * structure, we want to leave the nested compound Datatypes inside our local
-             * list of datatypes.
-             */
             if (curType.isCompound())
                 continue;
-
             if (!allSelectedTypes.contains(curType))
                 localIt.remove();
         }
@@ -191,12 +218,12 @@ public class DataFactoryUtils {
             }
 
             if (nestedCompoundType != null) {
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, nestedCompoundType);
+                List<Datatype> cmpdSelectedTypes =
+                    filterNonSelectedMembers(dataFormat, nestedCompoundType, false);
 
                 /*
-                 * For Array/Vlen of Compound types, we repeat the compound members n times,
-                 * where n is the number of array elements of variable-length elements.
-                 * Therefore, we repeat our mapping for these types n times.
+                 * For Array of Compound types, repeat the compound members once per
+                 * array element.
                  */
                 for (int j = 0; j < arrSize; j++) {
                     buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex,
@@ -204,10 +231,14 @@ public class DataFactoryUtils {
                 }
             }
             else if (curType.isCompound()) {
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType);
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType, false);
 
                 buildColIdxToProviderMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex, curProviderIndex,
                                          depth + 1);
+            }
+            else if (curType.isVLEN() && !curType.isVarStr()) {
+                // A vlen is one column: it holds the whole sequence.
+                outMap.put(curMapIndex[0]++, curProviderIndex[0]);
             }
             else
                 outMap.put(curMapIndex[0]++, curProviderIndex[0]);
@@ -299,7 +330,8 @@ public class DataFactoryUtils {
             }
 
             if (nestedCompoundType != null) {
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, nestedCompoundType);
+                List<Datatype> cmpdSelectedTypes =
+                    filterNonSelectedMembers(dataFormat, nestedCompoundType, false);
 
                 /*
                  * For Array/Vlen of Compound types, we repeat the compound members n times,
@@ -318,10 +350,19 @@ public class DataFactoryUtils {
                 if (depth == 0)
                     curStartIdx[0] = curMapIndex[0];
 
-                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType);
+                List<Datatype> cmpdSelectedTypes = filterNonSelectedMembers(dataFormat, curType, false);
 
                 buildRelColIdxToStartIdxMap(outMap, dataFormat, cmpdSelectedTypes, curMapIndex, curStartIdx,
                                             depth + 1);
+            }
+            else if (curType.isVLEN() && !curType.isVarStr()) {
+                // A vlen is one column: it holds the whole sequence.
+                if (depth == 0) {
+                    outMap.put(curMapIndex[0], curMapIndex[0]);
+                    curMapIndex[0]++;
+                }
+                else
+                    outMap.put(curMapIndex[0]++, curStartIdx[0]);
             }
             else {
                 if (depth == 0) {
