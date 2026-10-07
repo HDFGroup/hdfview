@@ -23,18 +23,18 @@ import java.util.Arrays;
 import hdf.object.FileFormat;
 import hdf.object.h5.H5CompoundDS;
 import hdf.object.h5.H5File;
+import hdf.view.TableView.DataDisplayConverterFactory.HDFDisplayConverter;
+import hdf.view.TableView.DataProviderFactory.HDFDataProvider;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
-import hdf.view.TableView.DataDisplayConverterFactory.HDFDisplayConverter;
-import hdf.view.TableView.DataProviderFactory.HDFDataProvider;
-
-import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 
 /**
  * Cell text for a compound whose variable-length member sits inside a nested compound,

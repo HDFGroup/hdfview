@@ -955,7 +955,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
 
             long wholeTid = -1;
             try {
-                wholeTid = H5.H5Dget_type(did);
+                wholeTid       = H5.H5Dget_type(did);
                 Object[] vlBuf = (Object[])H5Datatype.allocateArray(cmpdType, nSelPoints);
                 H5.H5DreadVL(did, wholeTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, vlBuf);
                 globalMemberIndex[0]++;
@@ -1297,8 +1297,9 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                      * compound is read through one such record per level of nesting
                      * (see createCompoundFieldType), so unwrap once per level.
                      */
-                    int levels = 1 + (memberName.length() - memberName.replace(CompoundDS.SEPARATOR, "").length()) /
-                                         CompoundDS.SEPARATOR.length();
+                    int levels =
+                        1 + (memberName.length() - memberName.replace(CompoundDS.SEPARATOR, "").length()) /
+                                CompoundDS.SEPARATOR.length();
                     Object[] rows = (Object[])memberData;
                     for (int r = 0; r < rows.length; r++) {
                         for (int l = 0; l < levels; l++) {
@@ -1402,7 +1403,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
         String[] result = new String[nSelPoints];
         for (int j = 0; j < nSelPoints; j++) {
             List<?> vlElements = (List<?>)vlBuf[j];
-            StringBuilder sb     = new StringBuilder("{");
+            StringBuilder sb   = new StringBuilder("{");
 
             for (int k = 0; k < vlElements.size(); k++) {
                 if (k > 0)
