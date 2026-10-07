@@ -609,16 +609,18 @@ jobs:
             Write-Host "Copying HDF5 plugins..."
             $pluginDir = "$JPACKAGE_INPUT\plugin"
             New-Item -ItemType Directory -Path $pluginDir -Force | Out-Null
-            if (Test-Path "$env:HDF5_PLUGIN_PATH") {
-              $plugins = Get-ChildItem "$env:HDF5_PLUGIN_PATH\*.dll" -ErrorAction SilentlyContinue
+            # Same location as hdf5.plugin.dir in build.properties
+            $hdf5PluginSrc = "$env:HDF5LIB_PATH\lib\plugin"
+            if (Test-Path $hdf5PluginSrc) {
+              $plugins = Get-ChildItem "$hdf5PluginSrc\*.dll" -ErrorAction SilentlyContinue
               if ($plugins) {
-                Copy-Item "$env:HDF5_PLUGIN_PATH\*.dll" $pluginDir\ -ErrorAction Stop
+                Copy-Item "$hdf5PluginSrc\*.dll" $pluginDir\ -ErrorAction Stop
                 Write-Host "  ✓ Copied $($plugins.Count) plugin DLLs"
               } else {
-                Write-Host "  ⓘ No plugins found"
+                Write-Host "  ⓘ No plugins found in $hdf5PluginSrc"
               }
             } else {
-              Write-Host "  ⓘ HDF5_PLUGIN_PATH not set, skipping plugins"
+              Write-Host "  ⓘ $hdf5PluginSrc not found, skipping plugins"
             }
   
             # Copy samples

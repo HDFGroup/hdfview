@@ -328,7 +328,7 @@ jobs:
           echo "Package size: $(du -sh hdfview/target/dist/HDFView.app | cut -f1)"
           echo "Native libraries: $(find hdfview/target/dist/HDFView.app/Contents -name "*.dylib" | wc -l) .dylib files"
           echo "JAR files: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" | wc -l) JARs"
-          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
+          echo "HDF5 plugins: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.so hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) plugins"
         else
           echo "✗ jpackage app-image creation failed"
           exit 1
@@ -403,5 +403,5 @@ jobs:
           echo "- **Size**: $(du -sh hdfview/target/dist/HDFView.app 2>/dev/null | cut -f1)" >> $GITHUB_STEP_SUMMARY
           echo "- **Native Libraries**: $(find hdfview/target/dist/HDFView.app/Contents -name "*.dylib" 2>/dev/null | wc -l) .dylib files" >> $GITHUB_STEP_SUMMARY
           echo "- **JAR Files**: $(find hdfview/target/dist/HDFView.app/Contents -name "*.jar" 2>/dev/null | wc -l) JARs" >> $GITHUB_STEP_SUMMARY
-          echo "- **HDF5 Plugins**: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) compression plugins" >> $GITHUB_STEP_SUMMARY
+          echo "- **HDF5 Plugins**: $(ls -1 hdfview/target/dist/HDFView.app/Contents/app/plugin/*.so hdfview/target/dist/HDFView.app/Contents/app/plugin/*.dylib 2>/dev/null | wc -l) compression plugins" >> $GITHUB_STEP_SUMMARY
         fi

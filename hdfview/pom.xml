@@ -203,7 +203,8 @@
         <env>mac</env>
         <!-- Native library extensions for jpackage -->
         <native.lib.extension>*.dylib</native.lib.extension>
-        <native.plugin.extension>*.dylib</native.plugin.extension>
+        <!-- hdf5_plugins builds most filters as CMake modules, which take .so on macOS -->
+        <native.plugin.extension>*.so,*.dylib</native.plugin.extension>
       </properties>
       <dependencies>
         <dependency>
@@ -354,11 +355,17 @@
                     <!-- Copy HDF5 plugins -->
                     <echo message="Copying HDF5 plugins from ${hdf5.plugin.dir}..."/>
                     <mkdir dir="${jpackage.input}/plugin"/>
+                    <!-- native.plugin.extension may list several comma-separated patterns -->
                     <copy todir="${jpackage.input}/plugin" failonerror="false">
-                      <fileset dir="${hdf5.plugin.dir}" erroronmissingdir="false">
-                        <include name="${native.plugin.extension}"/>
-                      </fileset>
+                      <fileset dir="${hdf5.plugin.dir}" erroronmissingdir="false"
+                               includes="${native.plugin.extension}"/>
                     </copy>
+                    <!-- Ant copy drops the execute bit; jpackage only signs executables -->
+                    <!-- and .dylib files on macOS, so restore it for the .so plugins. -->
+                    <!-- No-op on Windows. -->
+                    <chmod perm="755">
+                      <fileset dir="${jpackage.input}/plugin" includes="${native.plugin.extension}"/>
+                    </chmod>
 
                     <!-- Copy sample files if they exist -->
                     <echo message="Copying sample files..."/>
