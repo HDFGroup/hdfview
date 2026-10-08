@@ -371,11 +371,6 @@
                       <fileset dir="${jpackage.input}/plugin" includes="*.so"/>
                       <mapper type="glob" from="*.so" to="*.dylib"/>
                     </move>
-                    <!-- Ant copy drops the execute bit; restore it on the plugins. -->
-                    <!-- No-op on Windows. -->
-                    <chmod perm="755">
-                      <fileset dir="${jpackage.input}/plugin" includes="${native.plugin.extension}"/>
-                    </chmod>
 
                     <!-- Copy sample files if they exist -->
                     <echo message="Copying sample files..."/>
