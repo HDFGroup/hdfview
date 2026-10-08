@@ -900,6 +900,18 @@
                     <systemPropertyVariables>
                         <hdfview.workdir>${project.build.testOutputDirectory}/uitest</hdfview.workdir>
                     </systemPropertyVariables>
+                    <!--
+                        One JVM per test class. Each UI test class starts its own HDFView window,
+                        so a class that hangs or crashes the VM would otherwise take every remaining
+                        class down with as well and leave no surefire XML behind.
+                    -->
+                    <reuseForks>false</reuseForks>
+                    <!--
+                        Per-class cap for hangs the JUnit timeouts can't interrupt. Must exceed the
+                        sum of a class's JUnit timeouts (worst case TestHDFViewIntConversions, 56m),
+                        or a killed fork loses that class's results.
+                    -->
+                    <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
                 </configuration>
             </plugin>
 

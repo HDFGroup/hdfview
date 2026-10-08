@@ -45,7 +45,7 @@ jobs:
   build-and-test:
     name: Build and Test (Linux)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 130
 
     strategy:
       fail-fast: false
@@ -252,7 +252,9 @@ jobs:
         hdf.lib.dir=${{ env.HDF4LIB_PATH }}/lib
 
         # Platform Configuration
-        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib
+        # Both library directories. This value becomes -Djava.library.path for the test
+        # forks, which replaces the JVM's default.
+        platform.hdf.lib=${{ env.HDF5LIB_PATH }}/lib:${{ env.HDF4LIB_PATH }}/lib
 
         # CI-specific settings
         ci.build=true
@@ -282,10 +284,14 @@ jobs:
 
     - name: Set up Xvfb for Headless GUI Testing
       run: |
-        echo "Installing Xvfb and GTK dependencies for headless SWT testing..."
+        echo "Installing Xvfb, GTK and a window manager for headless SWT testing..."
         sudo apt-get update
-        sudo apt-get install -y xvfb libgtk-3-0 libgtk-3-dev x11-xserver-utils
-        echo "Xvfb and GTK installed successfully"
+        # metacity: SWTBot resolves widgets against Display.getActiveShell(), and on a bare X
+        # server with no window manager nothing ever becomes active, so every lookup that waits
+        # on shell activation would time out. x11-utils supplies xdpyinfo and xprop for the
+        # readiness checks below.
+        sudo apt-get install -y xvfb libgtk-3-0 libgtk-3-dev x11-xserver-utils x11-utils metacity
+        echo "Xvfb, GTK and metacity installed successfully"
 
     - name: Run Tests
       run: |
@@ -300,9 +306,8 @@ jobs:
         # Skip repository install (tries to install files that don't exist in CI)
         mvn install -B -pl object,hdfview -DskipTests -Ddependency-check.skip=true
 
-        # Run object tests only (all 149 tests passing)
-        # HDFView UI tests disabled in CI - require real display, not Xvfb
-        # UI tests should be run locally before merging
+        # Object module tests. These are blocking - they have passed on all three
+        # OSes for a long time and a regression here is a real failure.
         mvn test -B -pl object -Dmaven.test.failure.ignore=false
         echo "::endgroup::"
 
@@ -323,13 +328,95 @@ jobs:
         echo "Target artifacts:"
         find target -name "*.jar" -type f 2>/dev/null | head -5 || echo "No target JARs found"
 
+    - name: Run UI Tests
+      # TBD: This step will not be able to fail the job until
+      # the underlying bugs that CI is detecting are fixed.
+      # Once that is done, remove continue-on-error.
+      continue-on-error: true
+      # Must stay above the surefire fork timeout and below the job timeout.
+      timeout-minutes: 90
+      run: |
+        echo "::group::Run UI Tests (SWTBot under Xvfb)"
+        # Started by hand rather than through xvfb-run because the window manager has to join
+        # the same display, which xvfb-run's single-command wrapper does not allow.
+        Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp &
+        export DISPLAY=:99
+
+        for i in $(seq 1 30); do
+          xdpyinfo -display :99 >/dev/null 2>&1 && break
+          sleep 1
+        done
+        xdpyinfo -display :99 >/dev/null 2>&1 || { echo "Xvfb never accepted connections"; exit 1; }
+        echo "Xvfb is up on :99"
+
+        # Without a window manager no shell ever becomes active, and the waits on shell
+        # activation in closeFile() and openDataObject() time out and fail the test.
+        # Start metacity and wait for it to own the display before running the tests.
+        metacity --sm-disable --display=:99 &
+        for i in $(seq 1 20); do
+          xprop -display :99 -root _NET_SUPPORTING_WM_CHECK 2>/dev/null | grep -q "window id" && break
+          sleep 1
+        done
+        if xprop -display :99 -root _NET_SUPPORTING_WM_CHECK 2>/dev/null | grep -q "window id"; then
+          echo "metacity is managing :99"
+        else
+          echo "WARNING: no window manager on :99 - shell activation waits will time out"
+        fi
+
+        mvn test -B -pl hdfview
+        echo "::endgroup::"
+
+    - name: UI Test Summary
+      if: always()
+      continue-on-error: true
+      run: |
+        # Surface the counts in the job log even when the step above was cut short, so a
+        # run is never just a red X with no numbers attached.
+        python3 - <<'EOF' >> $GITHUB_STEP_SUMMARY
+        import glob, os, xml.etree.ElementTree as ET
+        files = glob.glob("hdfview/target/surefire-reports/*.xml")
+        print("## UI tests\n")
+        if not files:
+            print("No surefire XML was written - the suite did not get far enough to report.")
+        else:
+            tot = fail = err = skip = 0
+            rows = []
+            bad = []
+            for f in sorted(files):
+                # A fork killed by a timeout can leave a half-written XML behind. Report that
+                # file as unreadable rather than letting ParseError abort the whole summary
+                # halfway through the table, which looks like the suite simply stopped.
+                try:
+                    r = ET.parse(f).getroot()
+                except Exception as exc:
+                    bad.append((os.path.basename(f), type(exc).__name__))
+                    continue
+                t = int(r.get("tests", 0)); fl = int(r.get("failures", 0))
+                e = int(r.get("errors", 0)); s = int(r.get("skipped", 0))
+                tot += t; fail += fl; err += e; skip += s
+                rows.append((r.get("name", f), t, fl, e, s))
+            print(f"**{tot} tests, {fail} failures, {err} errors, {skip} skipped** "
+                  f"across {len(rows)} classes\n")
+            print("| Class | Tests | Failures | Errors | Skipped |")
+            print("| --- | --- | --- | --- | --- |")
+            for n, t, fl, e, s in rows:
+                print(f"| {n} | {t} | {fl} | {e} | {s} |")
+            for n, why in bad:
+                print(f"| {n} | unreadable ({why}) | | | |")
+        EOF
+        cat $GITHUB_STEP_SUMMARY
+
+    # Scoped to the object module on purpose. This action publishes a check run, and a check
+    # is not covered by the step's continue-on-error - so globbing '**' would put the
+    # UI failures into a failing check on every PR. The UI tier reports through the
+    # summary step above and the uploaded surefire artifacts below.
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: success() || failure()
       continue-on-error: true
       with:
         name: Maven Test Results (Linux)
-        path: '**/target/surefire-reports/*.xml'
+        path: 'object/target/surefire-reports/*.xml'
         reporter: java-junit
         fail-on-error: false
 

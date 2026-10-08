@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
@@ -39,7 +41,9 @@ public class TestTreeViewFilters extends AbstractWindowTest {
                                                 {"170", "171", "172", "173", "174", "175", "176", "177", "178", "179"},
                                                 {"180", "181", "182", "183", "184", "185", "186", "187", "188", "189"},
                                                 {"190", "191", "192", "193", "194", "195", "196", "197", "198", "199"}};
+    // Walks every cell of a large dataset: ~318s locally, slower on CI runners.
     @Test
+    @Timeout(value = 12, unit = TimeUnit.MINUTES)
     public void openHDF5Filters()
     {
         SWTBotShell tableShell = null;
