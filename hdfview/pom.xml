@@ -276,7 +276,7 @@
                 <configuration>
                   <!-- Publishes jpackage.app.content for the jpackage invocation below. -->
                   <exportAntProperties>true</exportAntProperties>
-                  <target>
+                  <target xmlns:if="ant:if">
                     <echo message="Preparing jpackage input directory..."/>
 
                     <!-- Create staging directory -->
@@ -360,8 +360,18 @@
                       <fileset dir="${hdf5.plugin.dir}" erroronmissingdir="false"
                                includes="${native.plugin.extension}"/>
                     </copy>
-                    <!-- Ant copy drops the execute bit; jpackage only signs executables -->
-                    <!-- and .dylib files on macOS, so restore it for the .so plugins. -->
+                    <!-- On macOS, give the .so plugin modules the .dylib extension so they -->
+                    <!-- sit alongside the HDF libraries under the platform's usual name. -->
+                    <!-- The HDF5 plugin loader accepts both extensions, and dlopen does -->
+                    <!-- not care about the name of a Mach-O bundle. -->
+                    <condition property="plugin.rename.to.dylib">
+                      <os family="mac"/>
+                    </condition>
+                    <move todir="${jpackage.input}/plugin" if:set="plugin.rename.to.dylib">
+                      <fileset dir="${jpackage.input}/plugin" includes="*.so"/>
+                      <mapper type="glob" from="*.so" to="*.dylib"/>
+                    </move>
+                    <!-- Ant copy drops the execute bit; restore it on the plugins. -->
                     <!-- No-op on Windows. -->
                     <chmod perm="755">
                       <fileset dir="${jpackage.input}/plugin" includes="${native.plugin.extension}"/>
