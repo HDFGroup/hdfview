@@ -584,8 +584,8 @@ public class TestNestedDatatypeShapes {
          * open for the whole class: Windows will not copy a file another handle holds.
          */
         Path target = workDir.resolve("refused.h5");
-        long fid    = H5.H5Fcreate(target.toString(), HDF5Constants.H5F_ACC_TRUNC,
-                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        long fid    = H5.H5Fcreate(target.toString(), HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT);
         try {
             writeVlenOfCompound(fid);
         }
@@ -650,7 +650,7 @@ public class TestNestedDatatypeShapes {
     @DisplayName("Attribute holding an array of VLEN of int")
     public void testArrayOfVlenIntAttribute() throws Exception
     {
-        hdf.object.Group root = (hdf.object.Group)testFile.get("/");
+        hdf.object.Group root     = (hdf.object.Group)testFile.get("/");
         hdf.object.Attribute attr = null;
         for (Object a : ((hdf.object.MetaDataContainer)root).getMetadata())
             if (((hdf.object.Attribute)a).getAttributeName().equals("array_of_vlen_int_attr"))
@@ -665,8 +665,8 @@ public class TestNestedDatatypeShapes {
     public void testCompoundVarStrMemberWriteRoundTrip() throws Exception
     {
         Path target = workDir.resolve("compound_varstr_rw.h5");
-        long fid    = H5.H5Fcreate(target.toString(), HDF5Constants.H5F_ACC_TRUNC,
-                                   HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        long fid    = H5.H5Fcreate(target.toString(), HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT);
         try {
             writeCompoundWithVarStr(fid);
         }

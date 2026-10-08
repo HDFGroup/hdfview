@@ -1394,7 +1394,7 @@ public class DataProviderFactory {
 
             @SuppressWarnings("unchecked")
             List<Object> target = (List<Object>)elements;
-            int count = (int)Math.min(arraySize, target.size());
+            int count           = (int)Math.min(arraySize, target.size());
             for (int i = 0; i < count; i++) {
                 String token = st.nextToken().trim();
                 if (!token.equals(target.get(i))) {
@@ -1811,7 +1811,7 @@ public class DataProviderFactory {
                 baseTypeDataProvider.setDataValue(columnIndex, i, abuffer, st.nextToken().trim());
                 isValueChanged = isValueChanged || baseTypeDataProvider.getIsValueChanged();
             }
-            vlElements                      = new ArrayList<>(Arrays.asList(abuffer));
+            vlElements                   = new ArrayList<>(Arrays.asList(abuffer));
             ((Object[])curBuf)[rowIndex] = vlElements;
         }
 
