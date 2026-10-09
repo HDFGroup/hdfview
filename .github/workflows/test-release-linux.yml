@@ -14,10 +14,10 @@ on:
         required: false
         default: '4.4.0'
       hdf5_version:
-        description: 'HDF5 version used in release'
+        description: 'HDF5 version used in release (informational only)'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
   workflow_call:
     inputs:
       release_tag:
@@ -30,10 +30,10 @@ on:
         required: false
         default: '4.4.0'
       hdf5_version:
-        description: 'HDF5 version used in release'
+        description: 'HDF5 version used in release (informational only)'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
 
 permissions:
   contents: read
@@ -148,7 +148,7 @@ jobs:
           echo "## App Binary Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **HDF4 Version**: ${{ inputs.hdf4_version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **HDF5 Version**: ${{ inputs.hdf5_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **HDF5 Version**: ${{ inputs.hdf5_version || 'unspecified' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Test**: Launch verification (5 second stability check)" >> $GITHUB_STEP_SUMMARY
           echo "- **Display**: Xvfb :99" >> $GITHUB_STEP_SUMMARY
 
@@ -272,7 +272,7 @@ jobs:
           echo "## DEB Installer Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **HDF4 Version**: ${{ inputs.hdf4_version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **HDF5 Version**: ${{ inputs.hdf5_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **HDF5 Version**: ${{ inputs.hdf5_version || 'unspecified' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Test**: Launch verification (5 second stability check)" >> $GITHUB_STEP_SUMMARY
           echo "- **Display**: Xvfb :99" >> $GITHUB_STEP_SUMMARY
 
@@ -453,7 +453,7 @@ jobs:
           echo "## RPM Installer Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Tag**: ${{ inputs.release_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **HDF4 Version**: ${{ inputs.hdf4_version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **HDF5 Version**: ${{ inputs.hdf5_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **HDF5 Version**: ${{ inputs.hdf5_version || 'unspecified' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Test**: Launch verification (5 second stability check)" >> $GITHUB_STEP_SUMMARY
           echo "- **Display**: Xvfb :99 (in Fedora container)" >> $GITHUB_STEP_SUMMARY
           echo "- **Container**: fedora:latest" >> $GITHUB_STEP_SUMMARY

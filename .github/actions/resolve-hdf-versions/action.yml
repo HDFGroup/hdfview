@@ -1,0 +1,40 @@
+name: Resolve HDF library versions
+description: >-
+  Resolve the HDF5 version to build against. The hdf5.version property in the
+  root pom.xml is the single source of truth; a non-empty input overrides it.
+  The resolved version is exported as HDF5_VERSION and as an output.
+  Requires the repository to be checked out.
+
+inputs:
+  hdf5_version:
+    description: 'HDF5 version override (empty = hdf5.version from pom.xml)'
+    required: false
+    default: ''
+
+outputs:
+  hdf5_version:
+    description: 'Resolved HDF5 version'
+    value: ${{ steps.resolve.outputs.hdf5_version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve versions
+      id: resolve
+      shell: bash
+      env:
+        HDF5_OVERRIDE: ${{ inputs.hdf5_version }}
+      run: |
+        pom_property() {
+          sed -n "s:.*<$1>\(.*\)</$1>.*:\1:p" pom.xml | head -1
+        }
+
+        HDF5_VERSION="${HDF5_OVERRIDE:-$(pom_property hdf5.version)}"
+        if [ -z "$HDF5_VERSION" ]; then
+          echo "::error::Could not read hdf5.version from pom.xml"
+          exit 1
+        fi
+
+        echo "HDF5 version: $HDF5_VERSION"
+        echo "hdf5_version=$HDF5_VERSION" >> "$GITHUB_OUTPUT"
+        echo "HDF5_VERSION=$HDF5_VERSION" >> "$GITHUB_ENV"

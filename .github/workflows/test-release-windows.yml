@@ -14,10 +14,10 @@ on:
         required: false
         default: '4.4.0'
       hdf5_version:
-        description: 'HDF5 version used in release'
+        description: 'HDF5 version used in release (informational only)'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
   workflow_call:
     inputs:
       release_tag:
@@ -30,10 +30,10 @@ on:
         required: false
         default: '4.4.0'
       hdf5_version:
-        description: 'HDF5 version used in release'
+        description: 'HDF5 version used in release (informational only)'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
 
 permissions:
   contents: read
@@ -168,7 +168,7 @@ jobs:
           ## App Binary Test Summary
           - **Release Tag**: ${{ inputs.release_tag }}
           - **HDF4 Version**: ${{ inputs.hdf4_version }}
-          - **HDF5 Version**: ${{ inputs.hdf5_version }}
+          - **HDF5 Version**: ${{ inputs.hdf5_version || 'unspecified' }}
           - **Test**: Launch verification (5 second stability check)
           - **Display**: Native Windows GUI display
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
@@ -353,7 +353,7 @@ jobs:
           ## MSI Installer Test Summary
           - **Release Tag**: ${{ inputs.release_tag }}
           - **HDF4 Version**: ${{ inputs.hdf4_version }}
-          - **HDF5 Version**: ${{ inputs.hdf5_version }}
+          - **HDF5 Version**: ${{ inputs.hdf5_version || 'unspecified' }}
           - **Test**: Launch verification (5 second stability check)
           - **Display**: Native Windows GUI display
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append

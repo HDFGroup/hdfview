@@ -19,10 +19,10 @@ on:
         required: false
         default: '4.4.0'
       hdf5_version:
-        description: 'HDF5 version number (e.g., 2.0.0) - ignored for snapshots'
+        description: 'HDF5 version number (e.g., 2.0.0) - default: hdf5.version in pom.xml'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
 
 permissions:
   contents: read
@@ -95,12 +95,18 @@ jobs:
         echo "release_tag_name=$RELEASE_TAG" >> $GITHUB_OUTPUT
         echo "Release tag name: $RELEASE_TAG"
 
+    - name: Resolve HDF library versions
+      id: hdf-versions
+      uses: ./.github/actions/resolve-hdf-versions
+      with:
+        hdf5_version: ${{ inputs.hdf5_version }}
+
     - name: Construct HDF library release tags
       id: construct-hdf-tags
       run: |
         # For release builds, construct tags from version numbers
         HDF4_VER="${{ inputs.hdf4_version }}"
-        HDF5_VER="${{ inputs.hdf5_version }}"
+        HDF5_VER="${{ steps.hdf-versions.outputs.hdf5_version }}"
         HDF4_TAG="hdf$HDF4_VER"
         HDF5_TAG="$HDF5_VER"
         HDF4_BASENAME="$HDF4_TAG"

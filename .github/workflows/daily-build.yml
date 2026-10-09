@@ -36,12 +36,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       hdf4-name: ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}
-      hdf5-name: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
+      hdf5-version: ${{ steps.hdf-versions.outputs.hdf5_version }}
       hdfview-name: ${{ steps.gethdfviewbase.outputs.HDFVIEW_NAME_BASE }}
       has-previous-build: ${{ steps.check-last-file.outputs.EXISTS }}
 
     steps:
     - uses: actions/checkout@v4.1.7
+
+    # HDF5 comes from the release matching hdf5.version in pom.xml, not the
+    # HDF5 develop snapshot, so the downloaded jar matches what Maven expects
+    - name: Resolve HDF library versions
+      id: hdf-versions
+      uses: ./.github/actions/resolve-hdf-versions
 
     - name: Get hdfview release base name
       uses: dsaltares/fetch-gh-release-asset@master
@@ -80,20 +86,9 @@ jobs:
       id: gethdf4base
       run: echo "HDF4_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
 
-    - name: Get hdf5 release base name
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf5'
-        version: 'tags/snapshot'
-        file: 'last-file.txt'
-
-    - name: Read base-name file
-      id: gethdf5base
-      run: echo "HDF5_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
-
     - run: |
         echo "hdf4 base name is ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}."
-        echo "hdf5 base name is ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}."
+        echo "hdf5 version is ${{ steps.hdf-versions.outputs.hdf5_version }}."
 
   call-workflow-tarball:
     needs: get-base-names
@@ -109,8 +104,10 @@ jobs:
       artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
       hdf4_release_tag: snapshot
       hdf4_artifact_basename: ${{ needs.get-base-names.outputs.hdf4-name }}
-      hdf5_release_tag: snapshot
-      hdf5_artifact_basename: ${{ needs.get-base-names.outputs.hdf5-name }}
+      hdf5_release_tag: ${{ needs.get-base-names.outputs.hdf5-version }}
+      hdf5_artifact_basename: ${{ needs.get-base-names.outputs.hdf5-version }}
+      hdf5_version: ${{ needs.get-base-names.outputs.hdf5-version }}
+      hdf5_prefix: 'hdf5-'
       build_environment: snapshot
 
   call-workflow-release:

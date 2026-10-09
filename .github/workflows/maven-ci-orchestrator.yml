@@ -9,10 +9,10 @@ on:
         required: false
         default: '4.4.0'
       hdf5_version:
-        description: 'HDF5 version to use'
+        description: 'HDF5 version to use (default: hdf5.version in pom.xml)'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
   push:
   pull_request:
     branches: [ master ]
@@ -28,7 +28,7 @@ jobs:
     uses: ./.github/workflows/ci-linux.yml
     with:
       hdf4_version: ${{ inputs.hdf4_version || '4.4.0' }}
-      hdf5_version: ${{ inputs.hdf5_version || '2.2.0' }}
+      hdf5_version: ${{ inputs.hdf5_version }}
     permissions:
       contents: read
       checks: write
@@ -39,7 +39,7 @@ jobs:
     uses: ./.github/workflows/ci-windows.yml
     with:
       hdf4_version: ${{ inputs.hdf4_version || '4.4.0' }}
-      hdf5_version: ${{ inputs.hdf5_version || '2.2.0' }}
+      hdf5_version: ${{ inputs.hdf5_version }}
     permissions:
       contents: read
       checks: write
@@ -50,7 +50,7 @@ jobs:
     uses: ./.github/workflows/ci-macos.yml
     with:
       hdf4_version: ${{ inputs.hdf4_version || '4.4.0' }}
-      hdf5_version: ${{ inputs.hdf5_version || '2.2.0' }}
+      hdf5_version: ${{ inputs.hdf5_version }}
     permissions:
       contents: read
       checks: write

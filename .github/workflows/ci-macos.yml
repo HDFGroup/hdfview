@@ -9,10 +9,10 @@ on:
         required: false
         default: '4.4.0'
       hdf5_version:
-        description: 'HDF5 version to use'
+        description: 'HDF5 version to use (default: hdf5.version in pom.xml)'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
   workflow_dispatch:
     inputs:
       hdf4_version:
@@ -21,10 +21,10 @@ on:
         required: false
         default: '4.4.0'
       hdf5_version:
-        description: 'HDF5 version to use'
+        description: 'HDF5 version to use (default: hdf5.version in pom.xml)'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
 
 permissions:
   contents: read
@@ -55,6 +55,11 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
+    - name: Resolve HDF library versions
+      uses: ./.github/actions/resolve-hdf-versions
+      with:
+        hdf5_version: ${{ inputs.hdf5_version }}
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
@@ -115,7 +120,7 @@ jobs:
     - name: Download and Install HDF5 from GitHub
       if: steps.cache-hdf.outputs.cache-hit != 'true'
       run: |
-        HDF5_VERSION="${{ inputs.hdf5_version }}"
+        HDF5_VERSION="${{ env.HDF5_VERSION }}"
         echo "Downloading HDF5 ${HDF5_VERSION} release..."
 
         gh release download ${HDF5_VERSION} \
@@ -144,7 +149,7 @@ jobs:
       if: steps.cache-hdf.outputs.cache-hit == 'true'
       run: |
         HDF4_VERSION="${{ inputs.hdf4_version }}"
-        HDF5_VERSION="${{ inputs.hdf5_version }}"
+        HDF5_VERSION="${{ env.HDF5_VERSION }}"
 
         HDF4LIB_PATH=${{ github.workspace }}/hdf4/HDF_Group/HDF/${HDF4_VERSION}
         echo "HDF4LIB_PATH=$HDF4LIB_PATH" >> $GITHUB_ENV
@@ -170,7 +175,7 @@ jobs:
         ls -la repository/lib/*.jar 2>/dev/null || echo "No JARs found"
 
         # Install jarhdf5
-        HDF5_VERSION="${{ inputs.hdf5_version }}"
+        HDF5_VERSION="${{ env.HDF5_VERSION }}"
         if [ -f repository/lib/jarhdf5-*.jar ]; then
           JAR_FILE=$(ls repository/lib/jarhdf5-*.jar | head -1)
           mvn install:install-file -Dfile="$JAR_FILE" \
