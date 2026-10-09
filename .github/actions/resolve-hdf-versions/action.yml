@@ -1,0 +1,60 @@
+name: Resolve HDF library versions
+description: >-
+  Resolve the HDF4 and HDF5 versions to build against. The hdf.version and
+  hdf5.version properties in the root pom.xml are the single source of truth.
+  A non-empty input will override the property.
+
+  The resolved versions are exported as HDF4_VERSION and HDF5_VERSION and as outputs.
+  Requires the repository to be checked out in the same job.
+
+inputs:
+  hdf4_version:
+    description: 'HDF4 version override'
+    required: false
+    default: ''
+  hdf5_version:
+    description: 'HDF5 version override'
+    required: false
+    default: ''
+
+outputs:
+  hdf4_version:
+    description: 'Resolved HDF4 version'
+    value: ${{ steps.resolve.outputs.hdf4_version }}
+  hdf5_version:
+    description: 'Resolved HDF5 version'
+    value: ${{ steps.resolve.outputs.hdf5_version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve HDF4/5 versions
+      id: resolve
+      shell: bash
+      env:
+        HDF4_OVERRIDE: ${{ inputs.hdf4_version }}
+        HDF5_OVERRIDE: ${{ inputs.hdf5_version }}
+      run: |
+        # Get the value of the named property in pom.xml (e.g. hdf5.version -> 2.2.0)
+        pom_property() {
+          sed -n "s:.*<$1>\(.*\)</$1>.*:\1:p" pom.xml | head -1
+        }
+
+        HDF4_VERSION="${HDF4_OVERRIDE:-$(pom_property hdf.version)}"
+        if [ -z "$HDF4_VERSION" ]; then
+          echo "::error::Could not read hdf.version from pom.xml"
+          exit 1
+        fi
+
+        HDF5_VERSION="${HDF5_OVERRIDE:-$(pom_property hdf5.version)}"
+        if [ -z "$HDF5_VERSION" ]; then
+          echo "::error::Could not read hdf5.version from pom.xml"
+          exit 1
+        fi
+
+        echo "HDF4 version: $HDF4_VERSION"
+        echo "HDF5 version: $HDF5_VERSION"
+        echo "hdf4_version=$HDF4_VERSION" >> "$GITHUB_OUTPUT"
+        echo "hdf5_version=$HDF5_VERSION" >> "$GITHUB_OUTPUT"
+        echo "HDF4_VERSION=$HDF4_VERSION" >> "$GITHUB_ENV"
+        echo "HDF5_VERSION=$HDF5_VERSION" >> "$GITHUB_ENV"
