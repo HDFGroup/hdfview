@@ -191,71 +191,86 @@ public abstract class FileFormat extends File {
      */
     protected boolean isReadOnly = false;
 
-    // By default, HDF4 and HDF5 file formats are added to the supported formats list.
-    static
+    /**
+     * The file formats that are registered on demand, as pairs of the key that identifies
+     * the format and the name of the class that implements it.
+     *
+     * These are registered by the first call to any of the methods that consult the list
+     * of supported formats, rather than by a static initializer.
+     */
+    private static final String[][] DEFAULT_FILE_FORMATS = {{FILE_TYPE_HDF4, "hdf.object.h4.H4File"},
+                                                            {FILE_TYPE_HDF5, "hdf.object.h5.H5File"},
+                                                            {FILE_TYPE_NC3, "hdf.object.nc2.NC2File"},
+                                                            {"FITS", "hdf.object.fits.FitsFile"}};
+
+    /**
+     * Flag indicating that registration of the default file formats has begun. Note that
+     * it does not indicate that registration has finished; see
+     * {@link #registerDefaultFileFormats()}.
+     */
+    private static boolean defaultFormatsRegistered = false;
+
+    /**
+     * Registers the default file formats, if that has not already been attempted.
+     *
+     * Registration is attempted once per JVM. Formats that fail to register are not
+     * retried.
+     *
+     * The lock is what keeps other threads from reading a partly registered list, so this
+     * method must stay synchronized on every call. Guarding the lock with a volatile read
+     * of defaultFormatsRegistered, as double checked locking would, would break it, since the flag is
+     * set before the formats are registered , and a second thread would
+     * take the flag for a finished list and look up a format that is not in it yet.
+     */
+    private static synchronized void registerDefaultFileFormats()
     {
-        // add HDF4 to default modules
-        if (FileFormat.getFileFormat(FILE_TYPE_HDF4) == null) {
-            try {
-                @SuppressWarnings("rawtypes")
-                Class fileclass       = Class.forName("hdf.object.h4.H4File");
-                FileFormat fileformat = (FileFormat)fileclass.newInstance();
-                if (fileformat != null) {
-                    FileFormat.addFileFormat(FILE_TYPE_HDF4, fileformat);
-                    log.debug("FILE_TYPE_HDF4 file format added");
-                }
-            }
-            catch (Exception err) {
-                log.debug("FILE_TYPE_HDF4 instance failure: ", err);
+        if (defaultFormatsRegistered)
+            return;
+
+        /*
+         * Set before registering rather than after. Instantiating a format runs subclass
+         * code that may call back into the accessors that call this method, and such a
+         * call must not start registration a second time. A monitor is reentrant, so the
+         * lock alone does not stop that.
+         */
+        defaultFormatsRegistered = true;
+
+        for (String[] defaultFormat : DEFAULT_FILE_FORMATS)
+            registerDefaultFileFormat(defaultFormat[0], defaultFormat[1]);
+    }
+
+    /**
+     * Registers a single default file format, ignoring one that cannot be loaded.
+     *
+     * A format whose implementing class or native library is missing is skipped, so that
+     * it does not keep the remaining formats from being registered.
+     *
+     * @param key
+     *            A string that identifies the FileFormat.
+     * @param className
+     *            The name of the class that implements the FileFormat.
+     */
+    private static void registerDefaultFileFormat(String key, String className)
+    {
+        if (FileList.containsKey(key))
+            return;
+
+        try {
+            Class<?> fileclass    = Class.forName(className);
+            FileFormat fileformat = (FileFormat)fileclass.getDeclaredConstructor().newInstance();
+            if (fileformat != null) {
+                FileList.put(key, fileformat);
+                log.debug("{} file format added", key);
             }
         }
-
-        // add HDF5 to default modules
-        if (FileFormat.getFileFormat(FILE_TYPE_HDF5) == null) {
-            try {
-                @SuppressWarnings("rawtypes")
-                Class fileclass       = Class.forName("hdf.object.h5.H5File");
-                FileFormat fileformat = (FileFormat)fileclass.newInstance();
-                if (fileformat != null) {
-                    FileFormat.addFileFormat(FILE_TYPE_HDF5, fileformat);
-                    log.debug("FILE_TYPE_HDF5 file format added");
-                }
-            }
-            catch (Exception err) {
-                log.debug("FILE_TYPE_HDF5 instance failure: ", err);
-            }
+        catch (LinkageError err) {
+            // A format whose class or native library will not link is a broken installation
+            // rather than a routine absence, so it is reported above debug level.
+            log.warn("{} file format unavailable, its class or library could not be linked: {}", key,
+                     err.toString());
         }
-
-        // add NetCDF to default modules
-        if (FileFormat.getFileFormat(FILE_TYPE_NC3) == null) {
-            try {
-                @SuppressWarnings("rawtypes")
-                Class fileclass       = Class.forName("hdf.object.nc2.NC2File");
-                FileFormat fileformat = (FileFormat)fileclass.newInstance();
-                if (fileformat != null) {
-                    FileFormat.addFileFormat(FILE_TYPE_NC3, fileformat);
-                    log.debug("NetCDF3 file format added");
-                }
-            }
-            catch (Exception err) {
-                log.debug("NetCDF3 instance failure: ", err);
-            }
-        }
-
-        // add FITS to default modules
-        if (FileFormat.getFileFormat("FITS") == null) {
-            try {
-                @SuppressWarnings("rawtypes")
-                Class fileclass       = Class.forName("hdf.object.fits.FitsFile");
-                FileFormat fileformat = (FileFormat)fileclass.newInstance();
-                if (fileformat != null) {
-                    FileFormat.addFileFormat("FITS", fileformat);
-                    log.debug("Fits file format added");
-                }
-            }
-            catch (Exception err) {
-                log.debug("FITS instance failure: ", err);
-            }
+        catch (Exception err) {
+            log.debug("{} instance failure: ", key, err);
         }
     }
 
@@ -338,6 +353,8 @@ public abstract class FileFormat extends File {
         if ((fileformat == null) || (key == null))
             return;
 
+        registerDefaultFileFormats();
+
         key = key.trim();
 
         if (!FileList.containsKey(key))
@@ -364,7 +381,11 @@ public abstract class FileFormat extends File {
      * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
-    public static final FileFormat getFileFormat(String key) { return FileList.get(key); }
+    public static final FileFormat getFileFormat(String key)
+    {
+        registerDefaultFileFormats();
+        return FileList.get(key);
+    }
 
     /**
      * Returns an Enumeration of keys for all supported formats.
@@ -381,6 +402,7 @@ public abstract class FileFormat extends File {
     @SuppressWarnings("rawtypes")
     public static final Enumeration getFileFormatKeys()
     {
+        registerDefaultFileFormats();
         return ((Hashtable)FileList).keys();
     }
 
@@ -402,6 +424,8 @@ public abstract class FileFormat extends File {
     @SuppressWarnings("rawtypes")
     public static final FileFormat[] getFileFormats()
     {
+        registerDefaultFileFormats();
+
         int n = FileList.size();
         if (n <= 0)
             return null;
@@ -435,7 +459,11 @@ public abstract class FileFormat extends File {
      * @see #getFileFormatKeys()
      * @see #getFileFormats()
      */
-    public static final FileFormat removeFileFormat(String key) { return FileList.remove(key); }
+    public static final FileFormat removeFileFormat(String key)
+    {
+        registerDefaultFileFormats();
+        return FileList.remove(key);
+    }
 
     /**
      * Adds file extension(s) to the list of file extensions for supported file
@@ -532,6 +560,8 @@ public abstract class FileFormat extends File {
 
         if (!(new File(filename)).exists())
             throw new IllegalArgumentException("File " + filename + " does not exist.");
+
+        registerDefaultFileFormats();
 
         FileFormat fileFormat  = null;
         FileFormat knownFormat = null;
