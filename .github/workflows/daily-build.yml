@@ -35,7 +35,7 @@ jobs:
     if: ${{ needs.check-for-changes.outputs.has_changes == 'true' }}
     runs-on: ubuntu-latest
     outputs:
-      hdf4-name: ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}
+      hdf4-version: ${{ steps.hdf-versions.outputs.hdf4_version }}
       hdf5-version: ${{ steps.hdf-versions.outputs.hdf5_version }}
       hdfview-name: ${{ steps.gethdfviewbase.outputs.HDFVIEW_NAME_BASE }}
       has-previous-build: ${{ steps.check-last-file.outputs.EXISTS }}
@@ -43,8 +43,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.7
 
-    # HDF5 comes from the release matching hdf5.version in pom.xml, not the
-    # HDF5 develop snapshot, so the downloaded jar matches what Maven expects
+    # HDF4/HDF5 come from the releases matching pom.xml, not the HDF4/HDF5
+    # develop snapshots, so the downloaded jars match what Maven expects
     - name: Resolve HDF library versions
       id: hdf-versions
       uses: ./.github/actions/resolve-hdf-versions
@@ -75,19 +75,8 @@ jobs:
     - run: echo "hdfview base name is ${{ steps.gethdfviewbase.outputs.HDFVIEW_NAME_BASE }}."
       if: steps.check-last-file.outputs.EXISTS == 'true'
 
-    - name: Get hdf4 release base name
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: 'HDFGroup/hdf4'
-        version: 'tags/snapshot'
-        file: 'last-file.txt'
-
-    - name: Read base-name file
-      id: gethdf4base
-      run: echo "HDF4_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
-
     - run: |
-        echo "hdf4 base name is ${{ steps.gethdf4base.outputs.HDF4_NAME_BASE }}."
+        echo "hdf4 version is ${{ steps.hdf-versions.outputs.hdf4_version }}."
         echo "hdf5 version is ${{ steps.hdf-versions.outputs.hdf5_version }}."
 
   call-workflow-tarball:
@@ -102,8 +91,9 @@ jobs:
     secrets: inherit
     with:
       artifact_basename: ${{ needs.call-workflow-tarball.outputs.artifact_basename }}
-      hdf4_release_tag: snapshot
-      hdf4_artifact_basename: ${{ needs.get-base-names.outputs.hdf4-name }}
+      hdf4_release_tag: hdf${{ needs.get-base-names.outputs.hdf4-version }}
+      hdf4_artifact_basename: hdf${{ needs.get-base-names.outputs.hdf4-version }}
+      hdf4_version: ${{ needs.get-base-names.outputs.hdf4-version }}
       hdf5_release_tag: ${{ needs.get-base-names.outputs.hdf5-version }}
       hdf5_artifact_basename: ${{ needs.get-base-names.outputs.hdf5-version }}
       hdf5_version: ${{ needs.get-base-names.outputs.hdf5-version }}

@@ -9,10 +9,10 @@ on:
         required: true
         default: 'snapshot'
       hdf4_version:
-        description: 'HDF4 version used in release'
+        description: 'HDF4 version used in release (informational only)'
         type: string
         required: false
-        default: '4.4.0'
+        default: ''
       hdf5_version:
         description: 'HDF5 version used in release (informational only)'
         type: string
@@ -25,10 +25,10 @@ on:
         type: string
         required: true
       hdf4_version:
-        description: 'HDF4 version used in release'
+        description: 'HDF4 version used in release (informational only)'
         type: string
         required: false
-        default: '4.4.0'
+        default: ''
       hdf5_version:
         description: 'HDF5 version used in release (informational only)'
         type: string
@@ -167,7 +167,7 @@ jobs:
           @"
           ## App Binary Test Summary
           - **Release Tag**: ${{ inputs.release_tag }}
-          - **HDF4 Version**: ${{ inputs.hdf4_version }}
+          - **HDF4 Version**: ${{ inputs.hdf4_version || 'unspecified' }}
           - **HDF5 Version**: ${{ inputs.hdf5_version || 'unspecified' }}
           - **Test**: Launch verification (5 second stability check)
           - **Display**: Native Windows GUI display
@@ -352,7 +352,7 @@ jobs:
           @"
           ## MSI Installer Test Summary
           - **Release Tag**: ${{ inputs.release_tag }}
-          - **HDF4 Version**: ${{ inputs.hdf4_version }}
+          - **HDF4 Version**: ${{ inputs.hdf4_version || 'unspecified' }}
           - **HDF5 Version**: ${{ inputs.hdf5_version || 'unspecified' }}
           - **Test**: Launch verification (5 second stability check)
           - **Display**: Native Windows GUI display
