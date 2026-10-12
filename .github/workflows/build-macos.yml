@@ -383,9 +383,12 @@ jobs:
           run: |
             echo "Stapling notarization ticket to DMG..."
             cd hdfview/target/dist
-
-            xcrun stapler staple "$STANDARD_DMG_NAME"
-            xcrun stapler validate "$STANDARD_DMG_NAME"
+            
+            for i in 1 2 3 4 5; do
+              xcrun stapler staple "$STANDARD_DMG_NAME" && break
+              [ $i -eq 5 ] && exit 1
+              echo "Staple/validate attempt $i failed; retrying in 30s..."; sleep 30
+            done
 
             echo "✓ Notarization ticket stapled successfully"
 
