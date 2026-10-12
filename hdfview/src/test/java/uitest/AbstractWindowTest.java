@@ -29,6 +29,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import hdf.HDFVersions;
 import hdf.view.HDFView;
@@ -89,6 +91,15 @@ public abstract class AbstractWindowTest {
 
     private static final CyclicBarrier swtBarrier = new CyclicBarrier(2);
 
+    /*
+     * How long a test waits for the main window to come up. Shorter than the 2 minute JUnit
+     * default so a failed launch reports its own message rather than a generic timeout.
+     */
+    private static final int APP_STARTUP_TIMEOUT_SECONDS = 60;
+
+    /* Why the UI thread died, if it did, so that waiters can report the real cause. */
+    private static volatile Throwable appStartupFailure = null;
+
     private static int TEST_DELAY = 10;
 
     private static int open_files = 0;
@@ -102,11 +113,11 @@ public abstract class AbstractWindowTest {
     private static final String objectShellTitleRegex = ".*at.*\\[.*in.*\\]";
 
     @BeforeEach
-    public final void setupSWTBot(TestInfo testInfo) throws InterruptedException, BrokenBarrierException
+    public final void setupSWTBot(TestInfo testInfo) throws InterruptedException
     {
         this.testInfo = testInfo;
         // synchronize with the thread opening the shell
-        swtBarrier.await();
+        awaitAppWindow();
         bot = new SWTBot();
 
         SWTBotPreferences.PLAYBACK_DELAY = TEST_DELAY;
@@ -119,9 +130,33 @@ public abstract class AbstractWindowTest {
         });
     }
 
+    /**
+     * Waits for the UI thread to open this test's HDFView window. Fails the test if the
+     * window doesn't open within APP_STARTUP_TIMEOUT_SECONDS, or if the UI thread dies first.
+     */
+    private static void awaitAppWindow() throws InterruptedException
+    {
+        try {
+            swtBarrier.await(APP_STARTUP_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        }
+        catch (TimeoutException e) {
+            fail("HDFView main window did not open within " + APP_STARTUP_TIMEOUT_SECONDS + " seconds",
+                 appStartupFailure);
+        }
+        catch (BrokenBarrierException e) {
+            fail("HDFView UI thread died before the main window opened", appStartupFailure);
+        }
+    }
+
     @AfterEach
     public void closeShell() throws InterruptedException
     {
+        // Nothing to tear down if the window never opened. Bail out before touching Display,
+        // since Display.getDefault() creates a display when none exists, and on a machine with no
+        // usable X server that call will block forever inside the native gdk_threads_enter().
+        if (shell == null || shell.isDisposed())
+            return;
+
         // close the shell
         Display.getDefault().syncExec(new Runnable() {
             @Override
@@ -199,17 +234,26 @@ public abstract class AbstractWindowTest {
                             window.runMainWindow();
                         }
                     }
-                    catch (Exception e) {
-                        e.printStackTrace();
+                    catch (Throwable t) {
+                        // Record the real cause and break the barrier so that any test parked
+                        // in awaitAppWindow() fails immediately with this stack trace, rather
+                        // than waiting out the startup timeout for a window that will never
+                        // arrive. Throwable, not Exception: a linkage or native-library error
+                        // during SWT startup is exactly the case that used to hang CI.
+                        appStartupFailure = t;
+                        t.printStackTrace();
+                        swtBarrier.reset();
                     }
 
-                    Display.getDefault().syncExec(new Runnable() {
-                        @Override
-                        public void run()
-                        {
-                            shell.getDisplay().dispose();
-                        }
-                    });
+                    if (shell != null) {
+                        Display.getDefault().syncExec(new Runnable() {
+                            @Override
+                            public void run()
+                            {
+                                shell.getDisplay().dispose();
+                            }
+                        });
+                    }
                 }
             });
             uiThread.setDaemon(true);
