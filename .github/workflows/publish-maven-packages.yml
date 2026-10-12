@@ -63,6 +63,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Resolve HDF library versions
+        uses: ./.github/actions/resolve-hdf-versions
+        with:
+          hdf4_version: ${{ inputs.hdf4_version }}
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -143,9 +148,9 @@ jobs:
             JAR_PATH="/usr/share/java/jarhdf.jar"
             # System jarhdf.jar typically doesn't have version in filename, check actual file
             if jar -tf "$JAR_PATH" | grep -q "MANIFEST.MF"; then
-              HDF4_VERSION=$(unzip -p "$JAR_PATH" META-INF/MANIFEST.MF | grep "Implementation-Version" | cut -d' ' -f2 | tr -d '\r' || echo "4.4.0")
+              HDF4_VERSION=$(unzip -p "$JAR_PATH" META-INF/MANIFEST.MF | grep "Implementation-Version" | cut -d' ' -f2 | tr -d '\r' || echo "${{ env.HDF4_VERSION }}")
             else
-              HDF4_VERSION="4.4.0"
+              HDF4_VERSION="${{ env.HDF4_VERSION }}"
             fi
             mvn install:install-file -Dfile="$JAR_PATH" \
               -DgroupId=jarhdf -DartifactId=jarhdf -Dversion="$HDF4_VERSION" \

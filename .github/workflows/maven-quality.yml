@@ -4,27 +4,27 @@ on:
   workflow_call:
     inputs:
       hdf4_version:
-        description: 'HDF4 version to use'
+        description: 'HDF4 version to use (default: hdf.version in pom.xml)'
         type: string
         required: false
-        default: '4.4.0'
+        default: ''
       hdf5_version:
-        description: 'HDF5 version to use'
+        description: 'HDF5 version to use (default: hdf5.version in pom.xml)'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
   workflow_dispatch:
     inputs:
       hdf4_version:
-        description: 'HDF4 version to use'
+        description: 'HDF4 version to use (default: hdf.version in pom.xml)'
         type: string
         required: false
-        default: '4.4.0'
+        default: ''
       hdf5_version:
-        description: 'HDF5 version to use'
+        description: 'HDF5 version to use (default: hdf5.version in pom.xml)'
         type: string
         required: false
-        default: '2.2.0'
+        default: ''
   push:
   pull_request:
     branches: [ master ]
@@ -39,10 +39,6 @@ permissions:
   security-events: write
 
 env:
-  # HDF library versions (centralized defaults, overridable via workflow inputs)
-  HDF4_VERSION: ${{ inputs.hdf4_version || '4.4.0' }}
-  HDF5_VERSION: ${{ inputs.hdf5_version || '2.2.0' }}
-
   # Note: java.awt.headless NOT set to true - SWT GUI tests need display (Xvfb)
   MAVEN_OPTS: >-
     -Xmx3g
@@ -60,6 +56,12 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0  # Full history for better analysis
+
+    - name: Resolve HDF library versions
+      uses: ./.github/actions/resolve-hdf-versions
+      with:
+        hdf4_version: ${{ inputs.hdf4_version }}
+        hdf5_version: ${{ inputs.hdf5_version }}
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
