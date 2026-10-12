@@ -68,7 +68,7 @@ jobs:
           KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
           SIGNER: ${{ vars.SIGNER }}
           NOTARY_USER: ${{ vars.NOTARY_USER }}
-          NOTARY_KEY: ${{ vars.NOTARY_KEY }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
           APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
           APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
           KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
