@@ -339,8 +339,9 @@ jobs:
       # the underlying bugs that CI is detecting are fixed.
       # Once that is done, remove continue-on-error.
       continue-on-error: true
-      # Must stay above the surefire fork timeout and below the job timeout.
-      timeout-minutes: 90
+      # Deliberately below the surefire fork timeout so a hung UI test fails fast
+      # instead of burning ~90 minutes. Classes after the hang do not run.
+      timeout-minutes: 15
       run: |
         echo "::group::Run UI Tests (SWTBot under Xvfb)"
         # Started by hand rather than through xvfb-run because the window manager has to join
