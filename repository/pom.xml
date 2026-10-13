@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.hdfgroup.hdfview</groupId>
         <artifactId>hdfview-bom</artifactId>
-        <version>99.99.99</version>
+        <version>3.5.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>

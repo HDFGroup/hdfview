@@ -1,4 +1,4 @@
-HDFView version 99.99.99
+HDFView version 3.5.0
 
 # 🔺 HDFView Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous HDFView release, platforms tested, and known problems in this release.
@@ -9,13 +9,13 @@ All notable changes to this project will be documented in this file. This docume
 * [Getting help, questions, or comments](https://github.com/HDFGroup/hdfview/issues)
 
 ## 📖 Contents
-* [Executive Summary](#-executive-summary-hdfview-version-999999)
+* [Executive Summary](#-executive-summary-hdfview-version-350)
 * [New Features & Improvements](#-new-features--improvements)
 * [Bug Fixes](#-bug-fixes)
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
 * [Known Problems](#-known-problems)
 
-# 🔆 Executive Summary: HDFView Version 99.99.99
+# 🔆 Executive Summary: HDFView Version 3.5.0
 
 ## Enhanced Features:
 
@@ -37,7 +37,7 @@ All notable changes to this project will be documented in this file. This docume
 
 # ☑️ Platforms Tested
 
-HDFView is built and tested with **HDF 4.3.X** and **HDF5 2.Y.Z** on the following platforms:
+HDFView is built and tested with **HDF 4.4.0** and **HDF5 2.2.0** on the following platforms:
 
 * Linux (Ubuntu 24, Fedora)
 * Windows

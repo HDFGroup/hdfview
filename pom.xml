@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.hdfgroup.hdfview</groupId>
   <artifactId>hdfview-bom</artifactId>
-  <version>99.99.99</version>
+  <version>3.5.0</version>
   <packaging>pom</packaging>
   <modules>
 <!-- The repository module must be first in order to ensure
@@ -38,7 +38,7 @@
     <!-- HDFView version properties - loaded from VERSION file by properties-maven-plugin -->
     <!-- HDFVIEW_VERSION and HDFVIEW_TAG_PREFIX are read from VERSION file -->
     <!-- Default values match VERSION file for when properties plugin hasn't run yet -->
-    <HDFVIEW_VERSION>99.99.99</HDFVIEW_VERSION>
+    <HDFVIEW_VERSION>3.5.0</HDFVIEW_VERSION>
     <HDFVIEW_TAG_PREFIX>HDFView</HDFVIEW_TAG_PREFIX>
   </properties>
 
