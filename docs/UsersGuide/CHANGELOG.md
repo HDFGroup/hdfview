@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file. This docume
 * [Getting help, questions, or comments](https://github.com/HDFGroup/hdfview/issues)
 
 ## 📖 Contents
-* [Executive Summary](#-executive-summary-hdfview-version-430)
+* [Executive Summary](#-executive-summary-hdfview-version-999999)
 * [New Features & Improvements](#-new-features--improvements)
 * [Bug Fixes](#-bug-fixes)
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
@@ -41,7 +41,7 @@ HDFView is built and tested with **HDF 4.3.X** and **HDF5 2.Y.Z** on the followi
 
 * Linux (Ubuntu 24, Fedora)
 * Windows
-* macOS (amd64, intel)
+* macOS (arm64, x86_64)
 
 Current test results and detailed platform information are available in the [GitHub repository](https://github.com/HDFGroup/hdfview).
 
