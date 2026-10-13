@@ -19,13 +19,28 @@ All notable changes to this project will be documented in this file. This docume
 
 ## Enhanced Features:
 
+* **Nested and variable-length compound types**: Variable-length sequences of compounds, and compounds with variable-length or nested compound members, can now be opened and displayed.
+* **Bundled filter plugins**: The HDF5 filter plugins shipped with HDFView are now found automatically on every platform.
+
 # 🚀 New Features & Improvements
 
 ## Major Enhancements
 
+* **[GH #472](https://github.com/HDFGroup/hdfview/issues/472)** - Variable-length sequences of compound types can now be read. Each sequence is displayed in a single cell, e.g. `[{1, 2}, {3, 4}]`.
+
+* **[GH #477](https://github.com/HDFGroup/hdfview/issues/477)** - The bundled filter plugin directory is now on the HDF5 plugin search path by default, so datasets written with those filters open without editing the plugin path in User Options. Windows and macOS installers now include the plugin files as well.
+
+* HDFView is now built against HDF 4.4.0 and HDF5 2.2.0, up from HDF 4.3.1 and HDF5 2.0.0.
+
 # 🪲 Bug Fixes
 
 ## Major Bug Fixes
+
+* **[GH #165](https://github.com/HDFGroup/hdfview/issues/165), [GH #470](https://github.com/HDFGroup/hdfview/issues/470), [GH #491](https://github.com/HDFGroup/hdfview/issues/491)** - Compound datasets and attributes with variable-length or nested compound members could show error values, drop columns, fail to open, or crash HDFView. They now display correctly, with nested values shown in a single cell.
+
+* **[GH #475](https://github.com/HDFGroup/hdfview/issues/475)** - Files were always opened read-only in SWMR mode, regardless of the SWMR setting in User Options.
+
+* **Linux RPM now installs on RHEL 9**: The RPM required `webkit2gtk4.1`, which RHEL 9 does not provide. HDFView no longer depends on WebKit.
 
 * **Windows: other HDF4/HDF5 installations no longer prevent HDFView from starting**: HDFView ships its own copies of the HDF4 and HDF5 libraries, but Windows could load a different installation in their place if one was on `PATH`. Windows DLLs carry no version in their name, so any `hdf5.dll` on `PATH` would satisfy the reference regardless of which version it was, and HDFView usually failed to start, reporting "failed to launch JVM".
 
@@ -34,6 +49,8 @@ All notable changes to this project will be documented in this file. This docume
   Consequently, `PATH` can no longer be used to make an installed HDFView load a *different* HDF4/HDF5 build. This applies to the packaged application only, as running HDFView from a source build is unchanged, and still uses the libraries named in `build.properties`.
 
 ## Minor Bug Fixes
+
+* **[GH #465](https://github.com/HDFGroup/hdfview/issues/465)** - The "Apply Bitmask" and "Show Value of Selected Bits" options had no effect on displayed data.
 
 # ☑️ Platforms Tested
 
