@@ -100,7 +100,7 @@ public abstract class AbstractWindowTest {
     /* Why the UI thread died, if it did, so that waiters can report the real cause. */
     private static volatile Throwable appStartupFailure = null;
 
-    private static int TEST_DELAY = 10;
+    private static int TEST_DELAY = 1;
 
     private static int open_files = 0;
 
