@@ -20,11 +20,12 @@ import java.io.File;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import org.eclipse.swtbot.nebula.nattable.finder.widgets.SWTBotNatTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import uitest.AbstractWindowTest.DataRetrieverFactory.TableDataRetriever;
 
@@ -67,13 +68,13 @@ public class TestCompoundArrayMemberDisplay extends AbstractWindowTest {
             did = H5.H5Dcreate(fid, DATASET_NAME, outer, sid, HDF5Constants.H5P_DEFAULT,
                                HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
-            java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocate(2 * 5 * 4)
-                                          .order(java.nio.ByteOrder.nativeOrder());
+            java.nio.ByteBuffer buf =
+                java.nio.ByteBuffer.allocate(2 * 5 * 4).order(java.nio.ByteOrder.nativeOrder());
             buf.putInt(1).putInt(10).putInt(11).putInt(12).putInt(13);
             buf.putInt(2).putInt(20).putInt(21).putInt(22).putInt(23);
 
-            H5.H5Dwrite(did, outer, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, buf.array());
+            H5.H5Dwrite(did, outer, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT,
+                        buf.array());
         }
         finally {
             if (did >= 0)
