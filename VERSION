@@ -3,8 +3,7 @@
 #
 # Version scheme:
 #   - master branch:    99.99.99
-#   - release branch:   MAJOR.MINOR.99
-#   - release:          MAJOR.MINOR.RELEASE
+#   - release branch:   MAJOR.MINOR.RELEASE (see docs/Version-Management.md)
 #
 # Usage:
 #   - Maven build system reads this file to set project.version
