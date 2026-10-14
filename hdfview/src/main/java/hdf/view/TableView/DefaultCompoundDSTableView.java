@@ -996,13 +996,15 @@ public class DefaultCompoundDSTableView extends DefaultBaseTableView implements 
 
                         List<String> selMemberNames = new ArrayList<>(selTypes.size());
                         int arrCmpdLen              = calcArrayOfCompoundLen(selTypes);
-                        selMemberNames.add(curName);
-                        for (int i = 1; i < arrCmpdLen; i++)
+                        for (int i = 0; i < arrCmpdLen; i++)
                             selMemberNames.add(localIt.next());
 
                         recursiveColumnHeaderSetup(outColNames, dataFormat, curType, selMemberNames,
                                                    selTypes);
-                        remainingLeavesInTop -= arrCmpdLen;
+
+                        // curName is this member's header, taken above, and the loop took one
+                        // name per inner leaf, which is what countLeafNames counts for it.
+                        remainingLeavesInTop -= arrCmpdLen + 1;
                     }
                     else if (curType.isVLEN() && !curType.isVarStr()) {
                         // A vlen member is one column holding the whole sequence.
