@@ -468,9 +468,8 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
     }
 
-    // Walks every cell of a large dataset: ~186s locally, slower on CI runners.
     @Test
-    @Timeout(value = 12, unit = TimeUnit.MINUTES)
+    @Timeout(value = 6, unit = TimeUnit.MINUTES)
     public void checkHDF5GroupDS32()
     {
         String[][] expectedData = {
@@ -776,9 +775,8 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
     }
 
-    // Walks every cell of a large dataset: ~186s locally, slower on CI runners.
     @Test
-    @Timeout(value = 12, unit = TimeUnit.MINUTES)
+    @Timeout(value = 6, unit = TimeUnit.MINUTES)
     public void checkHDF5GroupDU32()
     {
         String[][] expectedData = {
@@ -1081,9 +1079,8 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
     }
 
-    // Walks every cell of a large dataset: ~372s locally, slower on CI runners.
     @Test
-    @Timeout(value = 12, unit = TimeUnit.MINUTES)
+    @Timeout(value = 6, unit = TimeUnit.MINUTES)
     public void checkHDF5GroupDS64()
     {
         String[][] expectedData    = {{"-1",
@@ -2394,9 +2391,8 @@ public class TestHDFViewIntConversions extends AbstractWindowTest {
         }
     }
 
-    // Walks every cell of a large dataset: ~372s locally, slower on CI runners.
     @Test
-    @Timeout(value = 12, unit = TimeUnit.MINUTES)
+    @Timeout(value = 6, unit = TimeUnit.MINUTES)
     public void checkHDF5GroupDU64()
     {
         String[][] expectedData = {
