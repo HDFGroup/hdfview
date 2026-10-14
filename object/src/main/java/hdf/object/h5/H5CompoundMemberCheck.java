@@ -194,10 +194,11 @@ class H5CompoundMemberCheck {
         long[] dims = new long[H5.H5Tget_array_ndims(tid)];
         H5.H5Tget_array_dims(tid, dims);
 
-        int count = 1;
+        long count = 1;
         for (long dim : dims)
             count *= dim;
-        return count;
+
+        return Math.clamp(count, 0, Integer.MAX_VALUE);
     }
 
     /* Replace every value of one record, at the length the datatype asks for. */
