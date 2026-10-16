@@ -16,7 +16,6 @@ import hdf.hdf5lib.HDF5Constants;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -515,11 +514,54 @@ public class TestNestedDatatypeShapes {
     }
 
     @Test
-    @Disabled // depends on the JNI reading fixed-length strings past their element
-    @DisplayName("VLEN of fixed-length string")
+    @DisplayName("VLEN of fixed-length string - HDFView#504 detection")
     public void testVlenOfFixedString() throws Exception
     {
-        assertEquals("[[a, b, c, d], [x, y]]", render(open("vlen_of_fixed_string").getData()));
+        /*
+         * Each element fills its one byte field, so there is no room for the terminator the
+         * library looks for and the read runs on into whatever follows. Those elements should be
+         * marked rather than shown with the trailing data.
+         *
+         * Which elements overrun is not fully deterministic. An element whose next byte happens to
+         * be zero reads back correctly, and for the last element of a sequence, that depends
+         * on what the read buffer holds after it. As such, this asserts the shape rather than a
+         * specific rendering. Every element should either hold its own single character or
+         * the marker.
+         *
+         * Once the underlying issue is resolved in the JNI this test should
+         * assert data correctness again.
+         *
+         * See HDFGroup/hdfview issue 504.
+         */
+        final String marker = "*ERR:HDFView#504*";
+
+        Object data = open("vlen_of_fixed_string").getData();
+        assertInstanceOf(Object[].class, data, "Expected one entry per selected point");
+
+        Object[] points = (Object[])data;
+        assertEquals(2, points.length, "Expected both sequences");
+
+        int[] expectedCounts = {4, 2};
+        int marked           = 0;
+
+        for (int p = 0; p < points.length; p++) {
+            assertInstanceOf(List.class, points[p], "Expected sequence " + p);
+            List<?> sequence = (List<?>)points[p];
+            assertEquals(expectedCounts[p], sequence.size(),
+                         "Sequence " + p + " should keep its element count");
+
+            for (Object element : sequence) {
+                String value = (String)element;
+                if (marker.equals(value)) {
+                    marked++;
+                    continue;
+                }
+                assertEquals(1, value.length(),
+                             "An unmarked element holds only its own character, was: " + value);
+            }
+        }
+
+        assertTrue(marked > 0, "The overrun should have been detected and marked");
     }
 
     @Test
