@@ -147,6 +147,13 @@ class H5FixedStringCheck {
         if (!(values.get(index) instanceof String str))
             return 0;
 
+        /*
+         * A marker another check already left here is longer than a narrow field, so leave it
+         * alone rather than relabel the problem it names.
+         */
+        if (str.startsWith("*ERR:HDFView#"))
+            return 0;
+
         int valueSize = str.getBytes(StandardCharsets.ISO_8859_1).length;
         if (valueSize <= fieldSize)
             return 0;
