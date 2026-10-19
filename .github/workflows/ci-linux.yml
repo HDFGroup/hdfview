@@ -45,7 +45,7 @@ jobs:
   build-and-test:
     name: Build and Test (Linux)
     runs-on: ubuntu-latest
-    timeout-minutes: 130
+    timeout-minutes: 40
 
     strategy:
       fail-fast: false
@@ -339,8 +339,7 @@ jobs:
       # the underlying bugs that CI is detecting are fixed.
       # Once that is done, remove continue-on-error.
       continue-on-error: true
-      # Must stay above the surefire fork timeout and below the job timeout.
-      timeout-minutes: 90
+      timeout-minutes: 30
       run: |
         echo "::group::Run UI Tests (SWTBot under Xvfb)"
         # Started by hand rather than through xvfb-run because the window manager has to join
