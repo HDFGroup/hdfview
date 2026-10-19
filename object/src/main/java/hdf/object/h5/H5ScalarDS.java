@@ -999,6 +999,7 @@ public class H5ScalarDS extends ScalarDS implements MetaDataContainer {
 
                                 H5.H5DreadVL(did, tid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
                                              (Object[])theData);
+                                H5FixedStringCheck.markOverrunStrings(tid, (Object[])theData, getFullName());
                                 H5CompoundMemberCheck.markShortRecords(tid, (Object[])theData, getFullName());
                             }
                             else {

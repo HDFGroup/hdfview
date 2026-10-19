@@ -958,6 +958,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                 wholeTid       = H5.H5Dget_type(did);
                 Object[] vlBuf = (Object[])H5Datatype.allocateArray(cmpdType, nSelPoints);
                 H5.H5DreadVL(did, wholeTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, vlBuf);
+                H5FixedStringCheck.markOverrunStrings(wholeTid, vlBuf, getFullName());
                 H5CompoundMemberCheck.markShortRecords(wholeTid, vlBuf, getFullName());
                 globalMemberIndex[0]++;
                 theData = vlBuf;
@@ -1250,6 +1251,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
                     Object[] vlBuf = (Object[])H5Datatype.allocateArray(dsDatatype, nSelPoints);
 
                     H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT, vlBuf);
+                    H5FixedStringCheck.markOverrunStrings(compTid, vlBuf, getFullName());
                     H5CompoundMemberCheck.markShortRecords(compTid, vlBuf, getFullName());
 
                     memberData = convertVlenMemberToStrings(vlBuf, nSelPoints, memberType);
@@ -1292,6 +1294,7 @@ public class H5CompoundDS extends CompoundDS implements MetaDataContainer {
 
                     H5.H5DreadVL(dsetID, compTid, spaceIDs[0], spaceIDs[1], HDF5Constants.H5P_DEFAULT,
                                  (Object[])memberData);
+                    H5FixedStringCheck.markOverrunStrings(compTid, (Object[])memberData, getFullName());
                     H5CompoundMemberCheck.markShortRecords(compTid, (Object[])memberData, getFullName());
 
                     /*

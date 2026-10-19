@@ -50,6 +50,10 @@ class H5CompoundMemberCheck {
      * Mark every record of a buffer returned by H5DreadVL whose value count disagrees with
      * the datatype it was read with.
      *
+     * Call this after H5FixedStringCheck.markOverrunStrings, because a record refilled here
+     * carries markers longer than a short fixed-length field, which that check would then
+     * mark again under its own issue.
+     *
      * @param tid
      *            the datatype the read was made with
      * @param buf
