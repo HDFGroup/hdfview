@@ -102,18 +102,6 @@ jobs:
               name: dmg-macos-arm64-installer
               path: ${{ github.workspace }}
 
-      - name: Get DEB installer (Linux)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-              name: deb-ubuntu-2404-installer
-              path: ${{ github.workspace }}
-
-      - name: Get RPM installer (Linux)
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-              name: rpm-ubuntu-2404-installer
-              path: ${{ github.workspace }}
-
       # Get files created by ant-app script
       - name: Get published app binary (Windows)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -162,8 +150,6 @@ jobs:
           ls -lh HDFView-*-Windows.msi || echo "Windows MSI not found!"
           ls -lh HDFView-*-Darwin-x86_64.dmg || echo "x86_64 DMG not found!"
           ls -lh HDFView-*-Darwin-arm64.dmg || echo "arm64 DMG not found!"
-          ls -lh HDFView-*-Linux.deb || echo "Linux DEB not found!"
-          ls -lh HDFView-*-Linux.rpm || echo "Linux RPM not found!"
 
       - name: Create sha256 sums for files
         run: |
@@ -171,9 +157,7 @@ jobs:
           VERSION="${{ steps.get-artifact-info.outputs.VERSION }}"
 
           # Installers
-          sha256sum HDFView-${VERSION}-Linux.deb >${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-${VERSION}-Linux.rpm >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
-          sha256sum HDFView-${VERSION}-Windows.msi >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
+          sha256sum HDFView-${VERSION}-Windows.msi >${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           sha256sum HDFView-${VERSION}-Darwin-x86_64.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
           sha256sum HDFView-${VERSION}-Darwin-arm64.dmg >>${{ steps.get-artifact-info.outputs.ARTIFACT_BASENAME }}.sha256sums.txt
 
@@ -213,8 +197,6 @@ jobs:
               ${{ inputs.build_environment == 'snapshot' && 'last-file.txt' || '' }}
               UsersGuide.tar.gz
               UsersGuide.zip
-              HDFView-*-Linux.deb
-              HDFView-*-Linux.rpm
               HDFView-*-Windows.msi
               HDFView-*-Darwin-*.dmg
               HDFView-*App-Linux.tar.gz

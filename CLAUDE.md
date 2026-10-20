@@ -161,12 +161,10 @@ HDFView uses Java 21's native jpackage tool to create platform-specific installe
 **Supported Formats:**
 - **Windows**: MSI installer with Authenticode signing
 - **macOS**: DMG disk image with code signing and notarization
-- **Linux**: DEB and RPM packages
+- **Linux**: App tarball only
 
 **jpackage Profiles:**
 - `jpackage-app-image` - Creates application bundle (default for CI)
-- `jpackage-installer-deb` - Creates DEB package
-- `jpackage-installer-rpm` - Creates RPM package
 - `jpackage-installer-mac` - Adds macOS-specific options for DMG
 - `jpackage-installer-windows` - Adds Windows-specific options for MSI
 
@@ -176,12 +174,6 @@ HDFView uses Java 21's native jpackage tool to create platform-specific installe
 mvn verify -Pjpackage-app-image -pl object,hdfview -DskipTests
 
 # Create platform installer (requires app-image first)
-# Linux: DEB
-mvn package -Pjpackage-installer-deb -Djpackage.type=deb -pl hdfview
-
-# Linux: RPM
-mvn package -Pjpackage-installer-rpm -Djpackage.type=rpm -pl hdfview
-
 # macOS: DMG (unsigned)
 mvn package -Pjpackage-installer-mac -Djpackage.type=dmg -pl hdfview
 
