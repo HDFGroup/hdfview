@@ -325,37 +325,3 @@ jobs:
             name: tgz-ubuntu-2404-app-binary
             path: HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}App-Linux.tar.gz
             retention-days: 30
-
-        - name: Create DEB Installer
-          run: |
-            echo "Creating DEB installer..."
-            mvn exec:exec@jpackage -pl hdfview -Pjpackage-installer-deb -B
-
-            # Rename to standard format: HDFView-{VERSION}-Linux.deb
-            DEB_FILE=$(ls hdfview/target/dist/*.deb)
-            mv "$DEB_FILE" "HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Linux.deb"
-            ls -lh HDFView-*.deb
-
-        - name: Create RPM Installer
-          run: |
-            echo "Creating RPM installer..."
-            mvn exec:exec@jpackage -pl hdfview -Pjpackage-installer-rpm -B
-
-            # Rename to standard format: HDFView-{VERSION}-Linux.rpm
-            RPM_FILE=$(ls hdfview/target/dist/*.rpm)
-            mv "$RPM_FILE" "HDFView-${{ steps.get-version.outputs.HDFVIEW_VERSION }}-Linux.rpm"
-            ls -lh HDFView-*.rpm
-
-        - name: Upload DEB Installer Artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: deb-ubuntu-2404-installer
-            path: "HDFView-*.deb"
-            retention-days: 30
-
-        - name: Upload RPM Installer Artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: rpm-ubuntu-2404-installer
-            path: "HDFView-*.rpm"
-            retention-days: 30
