@@ -40,8 +40,6 @@ All notable changes to this project will be documented in this file. This docume
 
 * **[GH #475](https://github.com/HDFGroup/hdfview/issues/475)** - Files were always opened read-only in SWMR mode, regardless of the SWMR setting in User Options.
 
-* **Linux RPM now installs on RHEL 9**: The RPM required `webkit2gtk4.1`, which RHEL 9 does not provide. HDFView no longer depends on WebKit.
-
 * **Windows: other HDF4/HDF5 installations no longer prevent HDFView from starting**: HDFView ships its own copies of the HDF4 and HDF5 libraries, but Windows could load a different installation in their place if one was on `PATH`. Windows DLLs carry no version in their name, so any `hdf5.dll` on `PATH` would satisfy the reference regardless of which version it was, and HDFView usually failed to start, reporting "failed to launch JVM".
 
   The bundled DLLs are now installed next to `HDFView.exe`, whose directory Windows searches ahead of both the system folder and `PATH`, so the bundled copies are used regardless of what else is installed on the machine.
