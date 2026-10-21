@@ -183,7 +183,7 @@ public class ViewProperties extends PreferenceStore {
     private static String rootDir = System.getProperty("user.dir");
 
     /** user's guide. */
-    private static String usersGuide = "/share/doc/UsersGuide/index.html";
+    private static String usersGuide = "/doc/index.html";
 
     /** the font size. */
     private static int fontSize = 12;
@@ -330,7 +330,7 @@ public class ViewProperties extends PreferenceStore {
 
         setUsersGuide(rootDir + usersGuide);
 
-        setDefault("users.guide", viewRoot + "/UsersGuide/index.html");
+        setDefault("users.guide", viewRoot + "/doc/index.html");
         setDefault("image.contrast", false);
         setDefault("image.showvalues", false);
         setDefault("file.mode", "r");
