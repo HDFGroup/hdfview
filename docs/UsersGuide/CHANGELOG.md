@@ -35,6 +35,8 @@ All notable changes to this project will be documented in this file. This docume
 
 ## Minor Bug Fixes
 
+* **Help > User's Guide did nothing**: The menu item failed silently whenever the User's Guide location was a file path rather than a URL, which is the default. The menu item and the toolbar Help button now behave the same way. The default location now points at the User's Guide bundled with HDFView, the online User's Guide is used only when no local copy is found, and the online link has been corrected. A missing User's Guide file no longer overwrites the location set in the user options.
+
 # ☑️ Platforms Tested
 
 HDFView is built and tested with **HDF 4.3.X** and **HDF5 2.Y.Z** on the following platforms:
