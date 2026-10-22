@@ -1166,13 +1166,21 @@ public class HDFView implements DataViewManager {
         String ugPath = ViewProperties.getUsersGuide();
         log.trace("showUsersGuide: ugPath={}", ugPath);
 
-        // Fall back without saving, so a missing file doesn't overwrite the user's setting
+        // Fall back without saving, so a missing file doesn't overwrite the user's setting.
+        // Prefer the bundled guide (installed app, then source tree) over the online one,
+        // which may not match this version.
         if (ugPath == null || (!ugPath.contains("://") && !(new File(ugPath).exists()))) {
             String sep = File.separator;
-            ugPath     = rootDir + sep + "UsersGuide" + sep + "index.html";
+            ugPath     = HDFVIEW_USERSGUIDE_URL;
 
-            if (!(new File(ugPath).exists()))
-                ugPath = HDFVIEW_USERSGUIDE_URL;
+            for (String local : new String[] {rootDir + sep + "doc" + sep + "index.html",
+                                              rootDir + sep + "docs" + sep + "UsersGuide" + sep +
+                                                  "index.html"}) {
+                if (new File(local).exists()) {
+                    ugPath = local;
+                    break;
+                }
+            }
         }
 
         try {
