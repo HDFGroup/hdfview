@@ -1166,10 +1166,13 @@ public class HDFView implements DataViewManager {
         String ugPath = ViewProperties.getUsersGuide();
         log.trace("showUsersGuide: ugPath={}", ugPath);
 
+        // A URL has a scheme of two or more characters, which excludes Windows drive letters
+        boolean isUrl = ugPath != null && ugPath.matches("^[A-Za-z][A-Za-z0-9+.-]+:.*");
+
         // Fall back without saving, so a missing file doesn't overwrite the user's setting.
         // Prefer the bundled guide (installed app, then source tree) over the online one,
         // which may not match this version.
-        if (ugPath == null || (!ugPath.contains("://") && !(new File(ugPath).exists()))) {
+        if (ugPath == null || (!isUrl && !new File(ugPath).exists())) {
             String sep = File.separator;
             ugPath     = HDFVIEW_USERSGUIDE_URL;
 
@@ -1184,8 +1187,9 @@ public class HDFView implements DataViewManager {
         }
 
         try {
-            if (!org.eclipse.swt.program.Program.launch(ugPath))
+            if (!org.eclipse.swt.program.Program.launch(ugPath)) {
                 Tools.showError(shell, "Help", "Unable to open User's Guide: " + ugPath);
+            }
         }
         catch (Exception ex) {
             Tools.showError(shell, "Help", ex.getMessage());
