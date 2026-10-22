@@ -1173,9 +1173,9 @@ public class HDFView implements DataViewManager {
             String sep = File.separator;
             ugPath     = HDFVIEW_USERSGUIDE_URL;
 
-            for (String local : new String[] {rootDir + sep + "doc" + sep + "index.html",
-                                              rootDir + sep + "docs" + sep + "UsersGuide" + sep +
-                                                  "index.html"}) {
+            for (String local :
+                 new String[] {rootDir + sep + "doc" + sep + "index.html",
+                               rootDir + sep + "docs" + sep + "UsersGuide" + sep + "index.html"}) {
                 if (new File(local).exists()) {
                     ugPath = local;
                     break;
