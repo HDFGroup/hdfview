@@ -18,7 +18,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -987,19 +986,7 @@ public class HDFView implements DataViewManager {
             @Override
             public void widgetSelected(SelectionEvent e)
             {
-                String usersGuideURL = ViewProperties.getUsersGuide();
-                log.trace("usersGuideURL: {}", usersGuideURL);
-                URL urlObject;
-                try {
-                    if (usersGuideURL != null)
-                        urlObject = new URI(usersGuideURL).toURL();
-                    else
-                        urlObject = new URI(HDFVIEW_USERSGUIDE_URL).toURL();
-                    org.eclipse.swt.program.Program.launch(urlObject.toString());
-                }
-                catch (Exception ex) {
-                    log.debug("Could not instantiate Browser: {}", ex);
-                }
+                showUsersGuide(shell);
             }
         });
 
@@ -1174,6 +1161,32 @@ public class HDFView implements DataViewManager {
         updateFont(font);
     }
 
+    private void showUsersGuide(final Shell shell)
+    {
+        String ugPath = ViewProperties.getUsersGuide();
+        log.trace("showUsersGuide: ugPath={}", ugPath);
+
+        if (ugPath == null || !(ugPath.startsWith("http://") || ugPath.startsWith("https://"))) {
+            if (ugPath == null || !(new File(ugPath).exists())) {
+                String sep = File.separator;
+                ugPath     = rootDir + sep + "UsersGuide" + sep + "index.html";
+
+                if (!(new File(ugPath).exists()))
+                    ugPath = HDFVIEW_USERSGUIDE_URL;
+
+                ViewProperties.setUsersGuide(ugPath);
+            }
+        }
+
+        try {
+            if (!org.eclipse.swt.program.Program.launch(ugPath))
+                Tools.showError(shell, "Help", "Unable to open User's Guide: " + ugPath);
+        }
+        catch (Exception ex) {
+            Tools.showError(shell, "Help", ex.getMessage());
+        }
+    }
+
     private void createToolbar(final Shell shell)
     {
         toolBar = new ToolBar(shell, SWT.HORIZONTAL | SWT.RIGHT);
@@ -1213,29 +1226,7 @@ public class HDFView implements DataViewManager {
             @Override
             public void widgetSelected(SelectionEvent e)
             {
-                String ugPath = ViewProperties.getUsersGuide();
-
-                if (ugPath == null || !ugPath.startsWith("http://")) {
-                    String sep   = File.separator;
-                    File tmpFile = new File(ugPath);
-
-                    if (!(tmpFile.exists())) {
-                        ugPath  = rootDir + sep + "UsersGuide" + sep + "index.html";
-                        tmpFile = new File(ugPath);
-
-                        if (!(tmpFile.exists()))
-                            ugPath = HDFVIEW_USERSGUIDE_URL;
-
-                        ViewProperties.setUsersGuide(ugPath);
-                    }
-                }
-
-                try {
-                    org.eclipse.swt.program.Program.launch(ugPath);
-                }
-                catch (Exception ex) {
-                    Tools.showError(shell, "Help", ex.getMessage());
-                }
+                showUsersGuide(shell);
             }
         });
 
