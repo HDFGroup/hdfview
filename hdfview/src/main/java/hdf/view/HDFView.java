@@ -1166,16 +1166,13 @@ public class HDFView implements DataViewManager {
         String ugPath = ViewProperties.getUsersGuide();
         log.trace("showUsersGuide: ugPath={}", ugPath);
 
-        if (ugPath == null || !(ugPath.startsWith("http://") || ugPath.startsWith("https://"))) {
-            if (ugPath == null || !(new File(ugPath).exists())) {
-                String sep = File.separator;
-                ugPath     = rootDir + sep + "UsersGuide" + sep + "index.html";
+        // Fall back without saving, so a missing file doesn't overwrite the user's setting
+        if (ugPath == null || (!ugPath.contains("://") && !(new File(ugPath).exists()))) {
+            String sep = File.separator;
+            ugPath     = rootDir + sep + "UsersGuide" + sep + "index.html";
 
-                if (!(new File(ugPath).exists()))
-                    ugPath = HDFVIEW_USERSGUIDE_URL;
-
-                ViewProperties.setUsersGuide(ugPath);
-            }
+            if (!(new File(ugPath).exists()))
+                ugPath = HDFVIEW_USERSGUIDE_URL;
         }
 
         try {
