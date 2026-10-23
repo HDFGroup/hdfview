@@ -1,14 +1,13 @@
 # HDFView Version Configuration
-# This is the single source of truth for HDFView version information
 #
 # Version scheme:
 #   - master branch:    99.99.99
 #   - release branch:   MAJOR.MINOR.RELEASE (see docs/Version-Management.md)
 #
 # Usage:
-#   - Maven build system reads this file to set project.version
-#   - GitHub workflows read this file to construct release tags
-#   - Runtime version display loads from filtered versions.properties
+#   - GitHub workflows read this file to name build artifacts and releases
+#   - Maven does not read this file; the build uses project.version from the
+#     POMs, which must match HDFVIEW_VERSION (checked in CI)
 
 # HDFView version number (MAJOR.MINOR.RELEASE format)
 HDFVIEW_VERSION=99.99.99

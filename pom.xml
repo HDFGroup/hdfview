@@ -34,12 +34,6 @@
     <!-- OWASP dependency check disabled by default (requires NVD API key) -->
     <!-- Enable with: -Dsecurity.scan.skip=false -->
     <security.scan.skip>true</security.scan.skip>
-
-    <!-- HDFView version properties - loaded from VERSION file by properties-maven-plugin -->
-    <!-- HDFVIEW_VERSION and HDFVIEW_TAG_PREFIX are read from VERSION file -->
-    <!-- Default values match VERSION file for when properties plugin hasn't run yet -->
-    <HDFVIEW_VERSION>99.99.99</HDFVIEW_VERSION>
-    <HDFVIEW_TAG_PREFIX>HDFView</HDFVIEW_TAG_PREFIX>
   </properties>
 
   <dependencyManagement>
@@ -433,21 +427,7 @@
           <artifactId>properties-maven-plugin</artifactId>
           <version>${properties.plugin.version}</version>
           <executions>
-            <!-- Read VERSION file first to get HDFView version -->
-            <execution>
-              <id>read-version-file</id>
-              <phase>initialize</phase>
-              <goals>
-                <goal>read-project-properties</goal>
-              </goals>
-              <configuration>
-                <files>
-                  <file>${session.executionRootDirectory}/VERSION</file>
-                </files>
-              </configuration>
-              <inherited>false</inherited>
-            </execution>
-            <!-- Read user build.properties second -->
+            <!-- Read user build.properties -->
             <execution>
               <id>read-build-properties</id>
               <phase>initialize</phase>
