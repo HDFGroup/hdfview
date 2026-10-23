@@ -23,6 +23,15 @@ permissions:
   pull-requests: write
 
 jobs:
+  version-consistency:
+    name: Version consistency
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check VERSION matches pom.xml
+      uses: ./.github/actions/check-version-consistency
+
   ci-linux:
     name: CI - Linux
     uses: ./.github/workflows/ci-linux.yml

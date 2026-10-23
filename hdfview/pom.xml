@@ -256,8 +256,7 @@
       <properties>
         <jpackage.type>app-image</jpackage.type>
         <!-- jpackage requires numeric version (no -SNAPSHOT suffix) -->
-        <!-- Version loaded from VERSION file via properties-maven-plugin -->
-        <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
+        <jpackage.app.version>${project.version}</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -567,8 +566,7 @@
       <id>jpackage-installer-mac</id>
       <properties>
         <jpackage.type>dmg</jpackage.type>
-        <!-- Version loaded from VERSION file via properties-maven-plugin -->
-        <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
+        <jpackage.app.version>${project.version}</jpackage.app.version>
         <!-- Package name - can be overridden for architecture-specific builds -->
         <jpackage.mac.package.name>HDFView-${project.version}</jpackage.mac.package.name>
       </properties>
@@ -628,8 +626,7 @@
       <id>jpackage-installer-windows</id>
       <properties>
         <jpackage.type>msi</jpackage.type>
-        <!-- Version loaded from VERSION file via properties-maven-plugin -->
-        <jpackage.app.version>${HDFVIEW_VERSION}</jpackage.app.version>
+        <jpackage.app.version>${project.version}</jpackage.app.version>
       </properties>
       <build>
         <plugins>
@@ -696,26 +693,6 @@
           <!-- specify UTF-8, ISO-8859-1 or any other file encoding -->
           <encoding>UTF-8</encoding>
         </configuration>
-      </plugin>
-      <!-- Properties Plugin to read VERSION file for HDFVIEW_VERSION property -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>read-version-file</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>read-project-properties</goal>
-            </goals>
-            <configuration>
-              <files>
-                <file>${session.executionRootDirectory}/VERSION</file>
-              </files>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <!-- maven-antrun-plugin removed - Maven compiler plugin handles classpath automatically -->
       <plugin>

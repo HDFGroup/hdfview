@@ -1,0 +1,28 @@
+name: Check HDFView version consistency
+description: >-
+  Fail if HDFVIEW_VERSION in the VERSION file does not match the project
+  version in the root pom.xml.
+
+  Requires the repository to be checked out in the same job.
+
+runs:
+  using: composite
+  steps:
+    - name: Check VERSION matches pom.xml
+      shell: bash
+      run: |
+        FILE_VERSION=$(grep "^HDFVIEW_VERSION=" VERSION | cut -d'=' -f2)
+        POM_VERSION=$(python3 -c "import xml.etree.ElementTree as ET; print(ET.parse('pom.xml').find('{http://maven.apache.org/POM/4.0.0}version').text)")
+
+        echo "VERSION file: $FILE_VERSION"
+        echo "pom.xml:      $POM_VERSION"
+
+        if [ -z "$FILE_VERSION" ] || [ -z "$POM_VERSION" ]; then
+          echo "::error::Could not read the HDFView version from VERSION or pom.xml"
+          exit 1
+        fi
+
+        if [ "$FILE_VERSION" != "$POM_VERSION" ]; then
+          echo "::error::HDFVIEW_VERSION in VERSION ($FILE_VERSION) does not match the project version in pom.xml ($POM_VERSION). See docs/Version-Management.md."
+          exit 1
+        fi
