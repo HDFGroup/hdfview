@@ -6,8 +6,8 @@
 #
 # Usage:
 #   - GitHub workflows read this file to name build artifacts and releases
-#   - Maven does not read this file; the build uses project.version from the
-#     POMs, which must match HDFVIEW_VERSION (checked in CI)
+#   - Maven does not read this file. The build uses project.version from the
+#     POMs, which must match HDFVIEW_VERSION
 
 # HDFView version number (MAJOR.MINOR.RELEASE format)
 HDFVIEW_VERSION=99.99.99

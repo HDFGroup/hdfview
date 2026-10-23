@@ -60,6 +60,9 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Check VERSION matches pom.xml
+      uses: ./.github/actions/check-version-consistency
+
     - name: Construct tag name from VERSION file
       id: construct-tag
       run: |

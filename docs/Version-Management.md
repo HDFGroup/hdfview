@@ -22,7 +22,7 @@ Update the module version in each POM:
 - **object/pom.xml**: parent `<version>`
 - **hdfview/pom.xml**: parent `<version>` and the `object` dependency `<version>`
 
-The project version is the version the application reports: it is passed to jpackage as `--app-version` and shown in the HDFView title bar. It must match `HDFVIEW_VERSION` in `VERSION`, which names the artifacts that contain it. The `check-version-consistency` action fails the CI pipeline and the release workflow when they differ.
+The project version is the version that the application reports. This version is passed to jpackage as `--app-version` and shown in the HDFView title bar. It must match `HDFVIEW_VERSION` in `VERSION`.
 
 ## 3. CHANGELOG
 
