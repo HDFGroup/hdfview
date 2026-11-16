@@ -102,8 +102,8 @@ public class TestTableViewExport extends AbstractWindowTest {
                 H5.H5DwriteVL(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
                               HDF5Constants.H5P_DEFAULT, (Object[])buf);
             else
-                H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5P_DEFAULT, buf);
+                H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT,
+                            buf);
         }
         finally {
             if (did >= 0)
@@ -173,7 +173,8 @@ public class TestTableViewExport extends AbstractWindowTest {
                 @Override
                 public boolean test() throws Exception
                 {
-                    return exportFile.exists() && Files.readAllLines(exportFile.toPath()).size() >= expectedLines.length;
+                    return exportFile.exists() &&
+                        Files.readAllLines(exportFile.toPath()).size() >= expectedLines.length;
                 }
 
                 @Override
