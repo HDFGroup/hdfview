@@ -92,6 +92,7 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.IUniqueIndexLayer;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderLayerConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultColumnHeaderStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.config.DefaultRowHeaderLayerConfiguration;
@@ -1497,11 +1498,12 @@ public abstract class DefaultBaseTableView implements TableView {
         int r1 = r0 + nr; // finish row
         int c1 = c0 + nc; // finishing column
 
+        HDFDisplayConverter converter = getPlainTextConverter();
         try {
             for (int i = r0; i < r1; i++) {
-                sb.append(selectionLayer.getDataValueByPosition(c0, i).toString());
+                sb.append(getCellText(converter, c0, i));
                 for (int j = c0 + 1; j < c1; j++)
-                    sb.append("\t").append(selectionLayer.getDataValueByPosition(j, i).toString());
+                    sb.append("\t").append(getCellText(converter, j, i));
                 sb.append("\n");
             }
         }
@@ -1672,11 +1674,12 @@ public abstract class DefaultBaseTableView implements TableView {
         int cols = selectionLayer.getPreferredColumnCount();
         int rows = selectionLayer.getPreferredRowCount();
 
+        HDFDisplayConverter converter = getPlainTextConverter();
         for (int i = 0; i < rows; i++) {
-            out.print(selectionLayer.getDataValueByPosition(0, i));
+            out.print(getCellText(converter, 0, i));
             for (int j = 1; j < cols; j++) {
                 out.print(delimiter);
-                out.print(selectionLayer.getDataValueByPosition(j, i));
+                out.print(getCellText(converter, j, i));
             }
             out.println();
         }
@@ -1685,6 +1688,47 @@ public abstract class DefaultBaseTableView implements TableView {
         out.close();
 
         viewer.showStatus("Data saved to: " + fname);
+    }
+
+    /**
+     * A display converter with the default display settings (no hex, binary, number format or
+     * enum names). This is used so that copied and exported numbers stay in the form that Import
+     * can read back.
+     *
+     * @return the converter, or null if none is available for this data
+     */
+    private HDFDisplayConverter getPlainTextConverter()
+    {
+        try {
+            return DataDisplayConverterFactory.getDataDisplayConverter(dataObject);
+        }
+        catch (Exception ex) {
+            log.debug("getPlainTextConverter(): no display converter: ", ex);
+            return null;
+        }
+    }
+
+    /**
+     * Retrieve the text from a cell, as formatted by the given converter.
+     *
+     * @param converter the converter from getPlainTextConverter(), or null
+     * @param col       the column position in the selection layer
+     * @param row       the row position in the selection layer
+     *
+     * @return the cell text, or an empty string if the position is outside the table
+     */
+    private String getCellText(HDFDisplayConverter converter, int col, int row)
+    {
+        ILayerCell cell = selectionLayer.getCellByPosition(col, row);
+        if (cell == null)
+            return "";
+
+        Object value = cell.getDataValue();
+        if (converter == null)
+            return String.valueOf(value);
+
+        // The cell-aware overload is needed because compound converters choose a member by column.
+        return String.valueOf(converter.canonicalToDisplayValue(cell, dataTable.getConfigRegistry(), value));
     }
 
     // Save data as text (from TextView).
